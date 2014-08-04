@@ -1,7 +1,15 @@
 import os, time
 from selenium import webdriver
 
-driver = webdriver.Firefox()
+# start firefox driver
+profile = webdriver.FirefoxProfile()
+profile.set_preference("browser.download.folderList",2)
+profile.set_preference("browser.download.manager.showWhenStarting",False)
+profile.set_preference("browser.download.dir", os.getcwd())
+profile.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/octet-stream")
+driver = webdriver.Firefox(firefox_profile=profile)
+
+# open GISAID 
 driver.get('http://platform.gisaid.org/epi3/')
 assert 'GISAID' in driver.title
 
@@ -56,11 +64,5 @@ checkbox.click()
 # download
 # attempt to prevent download dialog (not working)
 time.sleep(10)
-profile = webdriver.FirefoxProfile()
-profile.set_preference('browser.download.folderList', 2) # custom location
-profile.set_preference('browser.download.manager.showWhenStarting', False)
-profile.set_preference('browser.download.dir', '/tmp')
-profile.set_preference('browser.helperApps.neverAsk.saveToDisk', 'text/fasta')
 button = driver.find_element_by_xpath("//div[@id='ce_n7h14c_9y']//button")
 button.click()
-
