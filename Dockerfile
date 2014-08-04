@@ -16,4 +16,4 @@ RUN git clone https://github.com/blab/augur.git /augur
 RUN cd /augur
 WORKDIR /augur
 
-CMD ["./bin/run.sh"]
+ENTRYPOINT ["./bin/run.sh"]
