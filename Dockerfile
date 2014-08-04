@@ -15,5 +15,3 @@ RUN apt-get -y install -q xfonts-100dpi xfonts-75dpi xfonts-scalable xfonts-cyri
 RUN git clone https://github.com/blab/augur.git /augur
 RUN cd /augur
 WORKDIR /augur
-
-ENTRYPOINT ["./bin/run.sh"]
