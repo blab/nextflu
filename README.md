@@ -28,7 +28,7 @@ Before starting Python scripts, you'll need to run:
 	export DISPLAY=:99
 	Xvfb :99 -shmem -screen 0 1366x768x16 &
 	x11vnc -display :99 -N -forever &
-	rethinkdb
+	rethinkdb --bind all &
 
 ## Data download
 
