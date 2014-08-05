@@ -134,7 +134,7 @@ def add_gisaid(start_year, end_year):
 		
 def main():
 
-#	download_gisaid(2010, 2020)
+	download_gisaid(2010, 2020)
 	add_gisaid(2010, 2020)
 		
 	
