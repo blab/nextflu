@@ -12,7 +12,7 @@ It is intended to be run in an always-on fashion, recomputing predictions daily 
 
 ## Build
 
-To run locally, you'll need Firefox, [RethinkDB](http://www.rethinkdb.com/), Python and pip.  With them installed, additional dependencies can be installed with:
+To run locally, you'll need Firefox, Python and pip.  With them installed, additional dependencies can be installed with:
 
 	pip install -r requirements.txt
 	
@@ -25,10 +25,14 @@ where `user` and `pass` are set appropriately.
 
 Before starting Python scripts, you'll need to run:
 
-	export DISPLAY=:99
-	Xvfb :99 -shmem -screen 0 1366x768x16 &
-	x11vnc -display :99 -N -forever &
-	rethinkdb --bind all &
+	supervisord -c supervisord.conf
+
+## Run
+
+Python scripts are run in the following order
+
+	python augur/ingest.py
+	python augur/filter.py
 
 ## Data download
 

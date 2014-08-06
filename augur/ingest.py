@@ -1,18 +1,17 @@
-import os, time
+# loads sequences from GISAID
+# outputs to v_ingest.json
+
+import os, time, json
 from selenium import webdriver
 from Bio import SeqIO
-import rethinkdb as r
-from rethinkdb.errors import RqlRuntimeError, RqlDriverError
 
-RDB_HOST =  os.environ.get('RDB_HOST') or 'localhost'
-RDB_PORT = os.environ.get('RDB_PORT') or 28015
-RDB_DB = 'augur'
+GISAID_FASTA = 'gisaid_epiflu_sequence.fasta'
 
 def download_gisaid(start_year, end_year):
 
 	# start fresh
 	try:
-		os.remove('gisaid_epiflu_sequence.fasta')
+		os.remove(GISAID_FASTA)
 	except OSError:
 		pass # okay
 
@@ -85,58 +84,97 @@ def download_gisaid(start_year, end_year):
 	button.click()
 	
 	# wait for download to complete
-	time.sleep(60)		
-	if os.path.isfile('gisaid_epiflu_sequence.fasta'):
-		file_size = os.stat('gisaid_epiflu_sequence.fasta').st_size
-		time.sleep(10)	
-		while (file_size < os.stat('gisaid_epiflu_sequence.fasta').st_size):
-			file_size = os.stat('gisaid_epiflu_sequence.fasta').st_size
-			time.sleep(10)	
-
-def add_gisaid(start_year, end_year):
+	if not os.path.isfile(GISAID_FASTA):
+		time.sleep(30)
+	if not os.path.isfile(GISAID_FASTA):
+		time.sleep(30)
+	if not os.path.isfile(GISAID_FASTA):
+		time.sleep(30)
+	if not os.path.isfile(GISAID_FASTA):
+		time.sleep(30)			
+	if os.path.isfile(GISAID_FASTA):						
+		while (os.stat(GISAID_FASTA).st_size == 0):
+			time.sleep(5)
 	
-	# Each thread or multiprocessing PID should be given its own connection object.	
-	try:
-		connection = r.connect(host=RDB_HOST, port=RDB_PORT, db=RDB_DB)
-	except RqlDriverError:
-		abort(503, "No database connection could be established.")
+	# close driver
+	driver.quit()
 	
+def parse_gisaid():	
+	viruses = []
 	try:
-		handle = open('gisaid_epiflu_sequence.fasta', "rU")
+		handle = open(GISAID_FASTA, 'r')
 	except IOError:
-		print "gisaid_epiflu_sequence.fasta not found"
-
-	for record in SeqIO.parse(handle, "fasta"):
-
-		# parse fasta
-		words = record.description.replace(">","").replace(" ","").split('|')
-		strain = words[0]
-		accession = words[1]
-		date = words[5]
-		seq = str(record.seq).upper()
-		entry = {
-			"id": accession,
-			"db": "gisaid",
-			"strain": strain,		
-			"date": date,
-			"seq": seq				
-		}
-
-		# push to db
-		r.table('seq').insert(entry).run(connection)
-			
-	handle.close()	
-	
+		print GISAID_FASTA + " not found"
+	else:
+		for record in SeqIO.parse(handle, "fasta"):
+			words = record.description.replace(">","").replace(" ","").split('|')
+			strain = words[0]
+			accession = words[1]
+			passage = words[3]
+			date = words[5]
+			nt = str(record.seq).upper()
+			v = {
+				"strain": strain,	
+				"date": date,	
+				"accession": accession,
+				"db": "gisaid",
+				"nt": nt				
+			}
+			if passage != "":
+				v['passage'] = passage
+			viruses.append(v)
+		handle.close()	
+		
+	# start fresh
 	try:
-		connection.close()
-	except RqlDriverError:
-		abort(503, "Database connection broken.")					
+		os.remove(GISAID_FASTA)
+	except OSError:
+		pass # okay		
+		
+	return viruses
+	
+def download_and_parse_gisaid(start_year, end_year):
+
+	download_gisaid(start_year, end_year)	# leaves GISAID_FASTA in dir
+	return parse_gisaid()
 		
 def main():
 
-	download_gisaid(2010, 2020)
-	add_gisaid(2010, 2020)
-		
+	print "--- Virus ingest ---"
+
+	prior_length = 0
+	try:
+		handle = open('v_ingest.json', 'r')  
+	except IOError:
+		pass
+	else:	
+  		viruses = json.load(handle)
+  		prior_length = len(viruses)
+  		handle.close()
+
+	viruses = []
 	
+	print "Downloading 1990 to 2008 viruses"	
+	viruses.extend(download_and_parse_gisaid(1990, 2008))
+	
+	print "Downloading 2009 to 2013 viruses"	
+	viruses.extend(download_and_parse_gisaid(2009, 2013))
+	
+	print "Downloading 2014+ viruses"	
+	viruses.extend(download_and_parse_gisaid(2014, 2020))		
+	current_length = len(viruses)
+	
+	if (current_length > prior_length):
+		print "Writing new v_ingest.json with " + str(current_length) + " viruses"
+		try:
+			handle = open('v_ingest.json', 'w') 
+		except IOError:
+			pass
+		else:				
+  			json.dump(viruses, handle, indent=2)
+  			handle.close()
+  	else:
+  		print "Keeping old v_ingest.json with " + str(prior_length) + " viruses"
+  		
 if __name__ == "__main__":
     main()
