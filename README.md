@@ -34,7 +34,13 @@ Python scripts are run in the following order
 	python augur/ingest.py
 	python augur/filter.py
 
-## Data download
+## Process
+
+### Ingest
 
 Using [Selenium](https://github.com/SeleniumHQ/selenium) and Python bindings to automate web crawling. [GISAID](http://platform.gisaid.org/epi3/) requires login access.  User credentials are stored in the ENV as `GISAID_USER` and `GISAID_PASS`.
+
+### Filter
+
+Keeps viruses with full HA1 sequences, fully specified dates, cell passage and only one sequence per strain name.
 
