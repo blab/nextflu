@@ -12,7 +12,7 @@ It is intended to be run in an always-on fashion, recomputing predictions daily 
 
 ## Build
 
-To run locally, you'll need Firefox, Python and pip.  With them installed, additional dependencies can be installed with:
+To run locally, you'll need Firefox, Python, pip and [muscle](http://www.drive5.com/muscle/).  With them installed, additional dependencies can be installed with:
 
 	pip install -r requirements.txt
 	

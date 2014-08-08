@@ -28,5 +28,8 @@ WORKDIR /augur
 # python modules
 RUN pip install -r requirements.txt
 
+# muscle
+RUN apt-get install -y muscle
+
 # default command
 CMD ["supervisord -c supervisord.conf"]
