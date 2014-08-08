@@ -1,4 +1,4 @@
-# after ingesting sequence data, run this to remove extra sequences, leaving only
+# filter viruses after ingest, criteria based on metadata
 #  - viruses longer than 987 bases
 #  - viruses with exact dates
 #  - viruses that are not egg-passaged
@@ -63,7 +63,7 @@ def main():
 
 	# filter short sequences
 	viruses = filter_length(viruses)
-	print str(len(viruses)) + " with full HA1"
+	print str(len(viruses)) + " without truncation"
 	
 	# filter imprecise dates
 	viruses = filter_date(viruses)

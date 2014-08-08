@@ -33,6 +33,8 @@ Python scripts are run in the following order
 
 	python augur/ingest.py
 	python augur/filter.py
+	python augur/align.py	
+	python augur/clean.py		
 
 ## Process
 
