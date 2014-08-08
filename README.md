@@ -12,7 +12,7 @@ It is intended to be run in an always-on fashion, recomputing predictions daily 
 
 ## Build
 
-To run locally, you'll need Firefox, Python, pip and [muscle](http://www.drive5.com/muscle/).  With them installed, additional dependencies can be installed with:
+To run locally, you'll need Firefox, Python, pip, [muscle](http://www.drive5.com/muscle/) and [RAxML](http://sco.h-its.org/exelixis/web/software/raxml/).  With them installed, additional dependencies can be installed with:
 
 	pip install -r requirements.txt
 	
@@ -34,7 +34,8 @@ Python scripts are run in the following order
 	python augur/ingest.py
 	python augur/filter.py
 	python augur/align.py	
-	python augur/clean.py		
+	python augur/clean.py
+	python augur/tree.py			
 
 ## Process
 
@@ -45,4 +46,8 @@ Using [Selenium](https://github.com/SeleniumHQ/selenium) and Python bindings to 
 ### Filter
 
 Keeps viruses with full HA1 sequences, fully specified dates, cell passage and only one sequence per strain name.
+
+### Align
+
+Align sequences with [muscle](http://www.drive5.com/muscle/) and strip to just the 987 bases of HA1.  This should take ~1.5 hours for ~15k sequences.
 

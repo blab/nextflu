@@ -31,5 +31,8 @@ RUN pip install -r requirements.txt
 # muscle
 RUN apt-get install -y muscle
 
+# raxml
+#RUN git clone https://github.com/stamatak/standard-RAxML.git /raxml
+
 # default command
 CMD ["supervisord -c supervisord.conf"]

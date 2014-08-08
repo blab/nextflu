@@ -1,23 +1,22 @@
 # clean sequences after alignment, criteria based on sequences
+# make inline with canonical ordering (no extra gaps)
 
-import os, re, json, datetime
+import os, re, json, datetime, time
 from scipy import stats
 import numpy
+from share import *
 
-OUTGROUP = 'A/Beijing/32/1992'
-
-def read_viruses():
-	try:
-		handle = open('v_align.json', 'r')  
-	except IOError:
-		pass
-	else:	
-  		viruses = json.load(handle)
-  		handle.close()
-	return viruses
+def mask_from_outgroup(viruses):
+	outgroup_seq = next(v for v in viruses if v['strain'] == OUTGROUP)['seq']
+	for v in viruses:
+		filtered = ""
+		for (a, b) in zip(list(v['seq']), list(outgroup_seq)):
+			if b != '-':
+				filtered += str(a)
+		v['seq'] = filtered
 	
 def clean_gaps(viruses):
-	return [v for v in viruses if not '-' in v['nt']]
+	return [v for v in viruses if not '-' in v['seq']]
 
 def date_from_virus(virus):
 	return datetime.datetime.strptime(virus['date'], '%Y-%m-%d').date()
@@ -34,8 +33,8 @@ def distance(seq_a, seq_b):
 	return dist
 
 def distances_from_outgroup(viruses):
-	outgroup_seq = filter(lambda v: v['strain'] == OUTGROUP, viruses)[0]['nt']
-	return map(lambda v: distance(outgroup_seq, v['nt']), viruses)
+	outgroup_seq = filter(lambda v: v['strain'] == OUTGROUP, viruses)[0]['seq']
+	return map(lambda v: distance(outgroup_seq, v['seq']), viruses)
 
 def clean_distances(viruses):
 	times = times_from_outgroup(viruses)
@@ -52,22 +51,15 @@ def clean_distances(viruses):
 			new_viruses.append(v)
 	return new_viruses			
 		
-	
-def write_viruses(viruses):
-	try:
-		handle = open('v_clean.json', 'w') 
-	except IOError:
-		pass
-	else:				
-		json.dump(viruses, handle, indent=2)
-		handle.close()			
-
 def main():
 
-	print "--- Virus clean ---"
+	print "--- Clean at " + time.strftime("%H:%M:%S") + " ---"
 	
-	viruses = read_viruses()
+	viruses = read_viruses('virus_align.json')
 	print str(len(viruses)) + " initial viruses"
+	
+	# mask extraneous columns
+	mask_from_outgroup(viruses)
 	
 	# clean gapped sequences
 	viruses = clean_gaps(viruses)
@@ -77,7 +69,7 @@ def main():
 	viruses = clean_distances(viruses)
 	print str(len(viruses)) + " with clock"	
 	
-	write_viruses(viruses)	
+	write_viruses(viruses, 'virus_clean.json')	
 
 if __name__ == "__main__":
     main()

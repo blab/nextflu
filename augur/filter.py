@@ -3,37 +3,32 @@
 #  - viruses with exact dates
 #  - viruses that are not egg-passaged
 #  - a single sequence per virus strain, taken as first sequence in list
-# outputs to v_filter.json
+# outputs to virus_filter.json
 
-import os, re, json
+import os, re, json, time
+from share import *
 
-def read_viruses():
-	try:
-		handle = open('v_ingest.json', 'r')  
-	except IOError:
-		pass
-	else:	
-  		viruses = json.load(handle)
-  		handle.close()
-	return viruses
+def fix_strain_names(viruses):
+	for v in viruses:
+		v['strain'] = v['strain'].replace('\'','')
 
 def filter_length(viruses):
-	return filter(lambda v: len(v['nt']) >= 987, viruses)
+	return filter(lambda v: len(v['seq']) >= 987, viruses)
 
 def filter_date(viruses):
 	return filter(lambda v: re.match(r'\d\d\d\d-\d\d-\d\d', v['date']) != None, viruses)
 	
 def filter_passage(viruses):
-	round_one = filter(lambda v: re.match(r'E\d+', v.get('passage',''), re.I) == None, viruses)
-	return filter(lambda v: re.match(r'Egg', v.get('passage',''), re.I) == None, round_one)
+	round_one = filter(lambda v: re.match(r'^E\d+', v.get('passage',''), re.I) == None, viruses)
+	return filter(lambda v: re.match(r'^Egg', v.get('passage',''), re.I) == None, round_one)
 	
 def add_outgroup(viruses):
 	viruses.append({
 		'strain': 'A/Beijing/32/1992',
-		'db': 'ird',
+		'db': 'IRD',
 		'accession': 'U26830',
-		'date': '1990-01-01',
-		'nt': 'ATGAAGACTATCATTGCTTTGAGCTACATTTTATGTCTGGTTTTCGCTCAAAAACTTCCCGGAAATGACAACAGCACAGCAACGCTGTGCCTGGGACATCATGCAGTGCCAAACGGAACGCTAGTGAAAACAATCACGAATGATCAAATTGAAGTGACTAATGCTACTGAGCTGGTTCAGAGTTCCTCAACAGGTAGAATATGCGACAGTCCTCACCGAATCCTTGATGGAAAAAACTGCACACTGATAGATGCTCTATTGGGAGACCCTCATTGTGATGGCTTCCAAAATAAGGAATGGGACCTTTTTGTTGAACGCAGCAAAGCTTACAGCAACTGTTACCCTTATGATGTACCGGATTATGCCTCCCTTAGGTCACTAGTTGCCTCATCAGGCACCCTGGAGTTTATCAATGAAGACTTCAATTGGACTGGAGTCGCTCAGGATGGGGGAAGCTATGCTTGCAAAAGGGGATCTGTTAACAGTTTCTTTAGTAGATTGAATTGGTTGCACAAATCAGAATACAAATATCCAGCGCTGAACGTGACTATGCCAAACAATGGCAAATTTGACAAATTGTACATTTGGGGGGTTCACCACCCGAGCACGGACAGAGACCAAACCAGCCTATATGTTCGAGCATCAGGGAGAGTCACAGTCTCTACCAAAAGAAGCCAACAAACTGTAACCCCGAATATCGGGTCTAGACCCTGGGTAAGGGGTCAGTCCAGTAGAATAAGCATCTATTGGACAATAGTAAAACCGGGAGACATACTTTTGATTAATAGCACAGGGAATCTAATTGCTCCTCGGGGTTACTTCAAAATACGAAATGGGAAAAGCTCAATAATGAGGTCAGATGCACCCATTGGCACCTGCAGTTCTGAATGCATCACTCCAAATGGAAGCATTCCCAATGACAAACCTTTTCAAAATGTAAACAGGATCACATATGGGGCCTGCCCCAGATATGTTAAGCAAAACACT'
+		'date': '1992-01-01',
+		'seq': 'ATGAAGACTATCATTGCTTTGAGCTACATTTTATGTCTGGTTTTCGCTCAAAAACTTCCCGGAAATGACAACAGCACAGCAACGCTGTGCCTGGGACATCATGCAGTGCCAAACGGAACGCTAGTGAAAACAATCACGAATGATCAAATTGAAGTGACTAATGCTACTGAGCTGGTTCAGAGTTCCTCAACAGGTAGAATATGCGACAGTCCTCACCGAATCCTTGATGGAAAAAACTGCACACTGATAGATGCTCTATTGGGAGACCCTCATTGTGATGGCTTCCAAAATAAGGAATGGGACCTTTTTGTTGAACGCAGCAAAGCTTACAGCAACTGTTACCCTTATGATGTACCGGATTATGCCTCCCTTAGGTCACTAGTTGCCTCATCAGGCACCCTGGAGTTTATCAATGAAGACTTCAATTGGACTGGAGTCGCTCAGGATGGGGGAAGCTATGCTTGCAAAAGGGGATCTGTTAACAGTTTCTTTAGTAGATTGAATTGGTTGCACAAATCAGAATACAAATATCCAGCGCTGAACGTGACTATGCCAAACAATGGCAAATTTGACAAATTGTACATTTGGGGGGTTCACCACCCGAGCACGGACAGAGACCAAACCAGCCTATATGTTCGAGCATCAGGGAGAGTCACAGTCTCTACCAAAAGAAGCCAACAAACTGTAACCCCGAATATCGGGTCTAGACCCTGGGTAAGGGGTCAGTCCAGTAGAATAAGCATCTATTGGACAATAGTAAAACCGGGAGACATACTTTTGATTAATAGCACAGGGAATCTAATTGCTCCTCGGGGTTACTTCAAAATACGAAATGGGAAAAGCTCAATAATGAGGTCAGATGCACCCATTGGCACCTGCAGTTCTGAATGCATCACTCCAAATGGAAGCATTCCCAATGACAAACCTTTTCAAAATGTAAACAGGATCACATATGGGGCCTGCCCCAGATATGTTAAGCAAAACACT'
 	})
 
 def filter_unique(viruses):
@@ -44,22 +39,16 @@ def filter_unique(viruses):
 			strains.add(v['strain'])
 			filtered_viruses.append(v)
 	return filtered_viruses
-	
-def write_viruses(viruses):
-	try:
-		handle = open('v_filter.json', 'w') 
-	except IOError:
-		pass
-	else:				
-		json.dump(viruses, handle, indent=2)
-		handle.close()		
-
+		
 def main():
 
-	print "--- Virus filter ---"
+	print "--- Filter at " + time.strftime("%H:%M:%S") + " ---"
 
-	viruses = read_viruses()
+	viruses = read_viruses('virus_ingest.json')
 	print str(len(viruses)) + " initial viruses"
+	
+	# fix strain names
+	fix_strain_names(viruses)
 
 	# filter short sequences
 	viruses = filter_length(viruses)
@@ -81,7 +70,7 @@ def main():
 	add_outgroup(viruses)
 	print str(len(viruses)) + " with outgroup"
 	
-	write_viruses(viruses)
+	write_viruses(viruses, 'virus_filter.json')
 
 if __name__ == "__main__":
     main()

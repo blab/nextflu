@@ -1,9 +1,10 @@
 # loads sequences from GISAID
-# outputs to v_ingest.json
+# outputs to virus_ingest.json
 
 import os, time, json
 from selenium import webdriver
 from Bio import SeqIO
+from share import *
 
 GISAID_FASTA = 'gisaid_epiflu_sequence.fasta'
 
@@ -13,7 +14,7 @@ def download_gisaid(start_year, end_year):
 	try:
 		os.remove(GISAID_FASTA)
 	except OSError:
-		pass # okay
+		pass 
 
 	# start firefox driver
 	profile = webdriver.FirefoxProfile()
@@ -112,13 +113,13 @@ def parse_gisaid():
 			accession = words[1]
 			passage = words[3]
 			date = words[5]
-			nt = str(record.seq).upper()
+			seq = str(record.seq).upper()
 			v = {
 				"strain": strain,	
 				"date": date,	
 				"accession": accession,
-				"db": "gisaid",
-				"nt": nt				
+				"db": "GISAID",
+				"seq": seq				
 			}
 			if passage != "":
 				v['passage'] = passage
@@ -129,7 +130,7 @@ def parse_gisaid():
 	try:
 		os.remove(GISAID_FASTA)
 	except OSError:
-		pass # okay		
+		pass 
 		
 	return viruses
 	
@@ -140,22 +141,16 @@ def download_and_parse_gisaid(start_year, end_year):
 		
 def main():
 
-	print "--- Virus ingest ---"
+	print "--- Ingest at " + time.strftime("%H:%M:%S") + " ---"
 
 	prior_length = 0
-	try:
-		handle = open('v_ingest.json', 'r')  
-	except IOError:
-		pass
-	else:	
-  		viruses = json.load(handle)
-  		prior_length = len(viruses)
-  		handle.close()
+	if os.path.isfile('virus_ingest.json'):
+  		prior_length = len(read_viruses('virus_ingest.json'))
 
 	viruses = []
 	
-	print "Downloading 1990 to 2008 viruses"	
-	viruses.extend(download_and_parse_gisaid(1990, 2008))
+	print "Downloading 1995 to 2008 viruses"	
+	viruses.extend(download_and_parse_gisaid(1995, 2008))
 	
 	print "Downloading 2009 to 2013 viruses"	
 	viruses.extend(download_and_parse_gisaid(2009, 2013))
@@ -165,16 +160,10 @@ def main():
 	current_length = len(viruses)
 	
 	if (current_length > prior_length):
-		print "Writing new v_ingest.json with " + str(current_length) + " viruses"
-		try:
-			handle = open('v_ingest.json', 'w') 
-		except IOError:
-			pass
-		else:				
-  			json.dump(viruses, handle, indent=2)
-  			handle.close()
+		print "Writing new virus_ingest.json with " + str(current_length) + " viruses"
+		write_viruses(viruses, 'virus_ingest.json')
   	else:
-  		print "Keeping old v_ingest.json with " + str(prior_length) + " viruses"
+  		print "Keeping old virus_ingest.json with " + str(prior_length) + " viruses"
   		
 if __name__ == "__main__":
     main()

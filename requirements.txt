@@ -2,3 +2,4 @@ selenium==2.42.1
 biopython==1.63
 scipy==0.14.0
 numpy==1.8.1
+seqmagick==0.5.0
