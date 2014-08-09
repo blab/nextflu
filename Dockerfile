@@ -19,6 +19,7 @@ ENV DISPLAY :99
 
 # python
 RUN apt-get install -y python python-dev python-pip python-virtualenv
+RUN apt-get install -y python-numpy python-scipy
 
 # augur
 RUN git clone https://github.com/blab/augur.git /augur
