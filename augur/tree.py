@@ -6,8 +6,6 @@ import os, re, json, time, seqmagick
 from ete2 import Tree
 from share import *
 
-RAXML = 'raxmlHPC-PTHREADS-AVX'
-
 def to_json(node):
 	node.name = node.name.replace("'", '')
 	json = { 
@@ -86,7 +84,7 @@ def main():
 	viruses = read_json('virus_clean.json')
 	write_fasta(viruses, 'temp.fasta')
 	os.system("seqmagick convert temp.fasta temp.phyx")
-	os.system(RAXML + " -T 6 -s temp.phyx -n out -c 25 -f d -m GTRCAT -p 344312987")
+	os.system("raxml -T 6 -s temp.phyx -n out -c 25 -f d -m GTRCAT -p 344312987")
 	os.rename('RAxML_bestTree.out', 'tree.newick')
 
 	ete_tree = Tree("tree.newick", format=5)

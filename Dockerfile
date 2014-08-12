@@ -21,19 +21,24 @@ ENV DISPLAY :99
 RUN apt-get install -y python python-dev python-pip python-virtualenv
 RUN apt-get install -y python-numpy python-scipy
 
-# augur
-RUN git clone https://github.com/blab/augur.git /augur
-RUN cd /augur
-WORKDIR /augur
-
-# python modules
-RUN pip install -r requirements.txt
-
 # muscle
 RUN apt-get install -y muscle
 
 # raxml
-#RUN git clone https://github.com/stamatak/standard-RAxML.git /raxml
+RUN apt-get install -y raxml
+RUN mv /usr/bin/raxmlHPC /usr/bin/raxml
+
+# python modules
+RUN pip install selenium==2.42.1
+RUN pip install biopython==1.63
+RUN pip install seqmagick==0.5.0
+RUN pip install ete2==2.2.1072
+
+# augur
+RUN git clone https://github.com/blab/augur.git /augur
+RUN cd /augur
+#COPY virus_ingest.json /augur/virus_ingest.json
+WORKDIR /augur
 
 # default command
 CMD ["supervisord -c supervisord.conf"]
