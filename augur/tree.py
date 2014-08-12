@@ -9,13 +9,15 @@ from share import *
 RAXML = 'raxmlHPC-PTHREADS-AVX'
 
 def to_json(node):
-	node.name = node.name.replace("'", '').replace('NoName','')
+	node.name = node.name.replace("'", '')
 	json = { 
-		"name": node.name, 
-		"branch": str(node.dist),
-		"layout": str(node.layout),
-		"distance": str(node.distance),		
+		"clade": node.clade, 
+		"branch": round(node.dist, 5),
+		"layout": round(node.layout, 5),
+		"distance": round(node.distance, 5),		
 	}
+	if node.name != 'NoName':
+		json['name'] = node.name
 	if node.children:
 		json["children"] = []
 		for ch in node.children:
@@ -91,11 +93,14 @@ def main():
 	reroot(ete_tree)
 	ete_tree.ladderize(direction=1)	
 	
+	clade = 0
 	layout = 0
 	for node in ete_tree.traverse("postorder"):
+		node.add_feature("clade", clade)
+		clade += 1			
 		if node.is_leaf():
-			layout += 1
 			node.add_feature("layout", layout)
+			layout += 1			
 					
 	for node in ete_tree.traverse("postorder"):
 		node.add_feature("layout", get_layout(node))
