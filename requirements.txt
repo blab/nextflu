@@ -3,3 +3,4 @@ biopython==1.63
 seqmagick==0.5.0
 numpy==1.8.1
 scipy==0.14.0
+ete2==2.2.1072

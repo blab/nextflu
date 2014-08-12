@@ -5,26 +5,23 @@ from Bio import SeqIO
 
 OUTGROUP = 'A/Beijing/32/1992'
 
-# viruses always have
-# strain, seq, date
-
-def read_viruses(file_name):
+def read_json(file_name):
 	try:
 		handle = open(file_name, 'r')  
 	except IOError:
 		pass
 	else:	
-  		viruses = json.load(handle)
+  		data = json.load(handle)
   		handle.close()
-	return viruses
+	return data
 	
-def write_viruses(viruses, file_name):
+def write_json(data, file_name):
 	try:
 		handle = open(file_name, 'w') 
 	except IOError:
 		pass
 	else:				
-		json.dump(viruses, handle, indent=2)
+		json.dump(data, handle, indent=2)
 		handle.close()
 		
 # fasta only has

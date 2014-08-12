@@ -5,7 +5,7 @@
 #  - a single sequence per virus strain, taken as first sequence in list
 # outputs to virus_filter.json
 
-import os, re, json, time
+import os, re, json, time, datetime
 from share import *
 
 def fix_strain_names(viruses):
@@ -39,12 +39,24 @@ def filter_unique(viruses):
 			strains.add(v['strain'])
 			filtered_viruses.append(v)
 	return filtered_viruses
+	
+def streamline(viruses):
+	filtered_viruses = []
+	for y in range(1995,2014):
+		count = 0
+		for v in viruses:
+			if y == datetime.datetime.strptime(v['date'], '%Y-%m-%d').date().year:
+				filtered_viruses.append(v)
+				count += 1
+				if count == 5:
+					break
+	return filtered_viruses
 		
 def main():
 
 	print "--- Filter at " + time.strftime("%H:%M:%S") + " ---"
 
-	viruses = read_viruses('virus_ingest.json')
+	viruses = read_json('virus_ingest.json')
 	print str(len(viruses)) + " initial viruses"
 	
 	# fix strain names
@@ -66,11 +78,15 @@ def main():
 	viruses = filter_unique(viruses)
 	print str(len(viruses)) + " with unique strain names"
 	
+	# reduce to manageable volume
+	viruses = streamline(viruses)
+	print str(len(viruses)) + " after streamlining"	
+	
 	# add outgroup
 	add_outgroup(viruses)
 	print str(len(viruses)) + " with outgroup"
 	
-	write_viruses(viruses, 'virus_filter.json')
+	write_json(viruses, 'virus_filter.json')
 
 if __name__ == "__main__":
     main()

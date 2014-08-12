@@ -21,12 +21,12 @@ def main():
 
 	print "--- Align at " + time.strftime("%H:%M:%S") + " ---"
 
-	viruses = read_viruses('virus_filter.json')
+	viruses = read_json('virus_filter.json')
 	write_fasta(viruses, 'temp_in.fasta')
 	os.system("muscle -in temp_in.fasta -out temp_out.fasta -diags -maxiters 2")
 	alignment = read_fasta('temp_out.fasta')
 	update_viruses(alignment, viruses)
-	write_viruses(viruses, 'virus_align.json')
+	write_json(viruses, 'virus_align.json')
 	cleanup()
   		
 if __name__ == "__main__":

@@ -55,7 +55,7 @@ def main():
 
 	print "--- Clean at " + time.strftime("%H:%M:%S") + " ---"
 	
-	viruses = read_viruses('virus_align.json')
+	viruses = read_json('virus_align.json')
 	print str(len(viruses)) + " initial viruses"
 	
 	# mask extraneous columns
@@ -69,7 +69,7 @@ def main():
 	viruses = clean_distances(viruses)
 	print str(len(viruses)) + " with clock"	
 	
-	write_viruses(viruses, 'virus_clean.json')	
+	write_json(viruses, 'virus_clean.json')	
 
 if __name__ == "__main__":
     main()
