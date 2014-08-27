@@ -4,7 +4,7 @@
 import os, time, json
 from selenium import webdriver
 from Bio import SeqIO
-from share import *
+from io_util import *
 
 GISAID_FASTA = 'gisaid_epiflu_sequence.fasta'
 

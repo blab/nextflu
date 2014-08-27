@@ -1,7 +1,7 @@
 # take filtered sequences and align using muscle
 
-import os, json, time
-from share import *
+import os, time
+from io_util import *
 				
 def update_viruses(alignment, viruses):
 	for v in viruses:

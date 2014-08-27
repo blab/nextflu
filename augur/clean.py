@@ -1,10 +1,12 @@
 # clean sequences after alignment, criteria based on sequences
 # make inline with canonical ordering (no extra gaps)
 
-import os, re, json, datetime, time
+import os, datetime, time
 from scipy import stats
 import numpy
-from share import *
+from io_util import *
+
+OUTGROUP = 'A/Beijing/32/1992'
 
 def mask_from_outgroup(viruses):
 	outgroup_seq = next(v for v in viruses if v['strain'] == OUTGROUP)['seq']

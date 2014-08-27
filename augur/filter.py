@@ -5,8 +5,8 @@
 #  - a single sequence per virus strain, taken as first sequence in list
 # outputs to virus_filter.json
 
-import os, re, json, time, datetime
-from share import *
+import os, re, time, datetime
+from io_util import *
 
 def fix_strain_names(viruses):
 	for v in viruses:

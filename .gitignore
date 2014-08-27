@@ -9,6 +9,7 @@ environment.sh
 *.exe
 *.o
 *.so
+*.pyc
 
 # LaTeX intermediaries #
 ########################
