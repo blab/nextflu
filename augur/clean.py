@@ -49,7 +49,7 @@ def clean_distances(viruses):
 	print "  residuals sd: " + str(r_sd)	
 	new_viruses = []
 	for (v,r) in zip(viruses,residuals):		# filter viruses more than 5 sds up or down
-		if r > -5 * r_sd and r < 5 * r_sd:
+		if (r > -5 * r_sd and r < 5 * r_sd) or v['strain'] == OUTGROUP:
 			new_viruses.append(v)
 	return new_viruses			
 		

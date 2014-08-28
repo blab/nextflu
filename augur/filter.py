@@ -42,7 +42,7 @@ def filter_unique(viruses):
 	
 def streamline(viruses):
 	filtered_viruses = []
-	for y in range(2010,2014):
+	for y in range(2010,2015):
 		count = 0
 		for v in viruses:
 			if y == datetime.datetime.strptime(v['date'], '%Y-%m-%d').date().year:

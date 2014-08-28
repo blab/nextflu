@@ -45,14 +45,10 @@ def get_distance(node):
 
 def reroot(tree):
 	"""Reroot tree to outgroup"""
-#	outgroup_node = tree.find_node_with_taxon_label(OUTGROUP)	
-	outgroup = None
-	for node in tree:
-		if node.name == OUTGROUP:
-			outgroup = node
-			break
-	if outgroup:
-		tree.set_outgroup(outgroup)
+	outgroup_node = tree.find_node_with_taxon_label(OUTGROUP)	
+	if outgroup_node:
+		tree.to_outgroup_position(outgroup_node, update_splits=False)
+		tree.prune_subtree(outgroup_node)
 		
 def collapse(tree):
 	"""Collapse short edges to polytomies"""
@@ -137,8 +133,9 @@ def main():
 		file.write(newick)
 		
 	tree = dendropy.Tree.get_from_path("tree.newick", "newick")	
+	reroot(tree)
+	collapse(tree)	
 	tree.ladderize(ascending=False)
-	collapse(tree)
 	add_node_attributes(tree)
 	add_virus_attributes(viruses, tree)
 
