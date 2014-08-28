@@ -1,10 +1,14 @@
 # estimates clade frequencies using SMC
 
+import yappi
 import time
 from io_util import *
 from tree_util import *
 from date_util import *
 import numpy as np
+
+from multiprocessing import Pool
+from multiprocessing.dummy import Pool as ThreadPool 
 
 def observations_for_clade(node, dates):
 	"""Takes a node and a list of dates and returns an observation list"""
@@ -48,21 +52,33 @@ class Particle:
 
 	def simulate(self, t, dt, sigma):
 		"""Simulate forward t years with timesteps dt"""
-		steps = t / dt
-		array = np.linspace(0, t, num=steps)
-		for step in array:
-			self.simulate_step(step, sigma)
-
+		"""Implements Euler-Maruyama method"""
+		steps = int(np.ceil(t / dt))	
+		if steps > 0:		
+			dt = t / steps
+			sqrtdt_sigma = np.sqrt(dt) * sigma
+			for i in range(steps):
+				x0 = self.value
+				x1 = x0 + x0 * (1-x0) * sqrtdt_sigma * np.random.normal()
+				if x1 < self.min_value:
+					x1 = self.min_value
+				if x1 > self.max_value:
+					x1 = self.max_value
+				self.value = x1		
+	
 	def reweight(self, obs):
 		self.weight = obs_likelihood(obs, self.value) + 0.000000001
+		
+	def likelihood(self, obs):
+		return obs_likelihood(obs, self.value)
 
 class Filter:
 	"""An SMC particle filter, comprising n particles."""
 	"""Takes a list of dates and a list of (0,1) observations."""
 	"""Time in encoded in continuous units of years."""
 	particle_count = 100
-	timestep = 0.001
-	sigma = 1
+	timestep = 0.01
+	sigma = 5
 
 	def __init__(self, dates, observations):
 		self.num_dates = map(string_to_numerical_date, dates)
@@ -111,38 +127,75 @@ class Filter:
 		self.set_weights([1] * self.particle_count)
 
 	def update(self, t, obs):
-		start = time.clock()
 		self.simulate(t)
-		print "simulate: " + str(time.clock() - start)
-		start = time.clock()
 		self.reweight(obs)
-		print "reweight: " + str(time.clock() - start)
-		start = time.clock()
 		self.resample()
-		print "resample: " + str(time.clock() - start)
-
+		
 	def run(self):
-		times = [j-i for i, j in zip(self.num_dates[:-1], self.num_dates[1:])]
-		for (t, obs) in zip(times, self.observations[1:]):
-			self.update(t, obs)
+		steps = [j-i for i, j in zip(self.num_dates[:-1], self.num_dates[1:])]
+		for (s, obs) in zip(steps, self.observations[1:]):
+			self.update(s, obs)
 		final_step = self.end_num_date - self.num_dates[-1]
 		self.simulate(final_step)
 
 	def mean(self):
 		return np.mean(self.values())
+		
+	def likelihood(self, obs):
+		l = []
+		for p in self.particles:
+			l.append(p.likelihood(obs))
+		return np.mean(l)
+		
+	def run_with_likelihood(self):
+		steps = [j-i for i, j in zip(self.num_dates[:-1], self.num_dates[1:])]
+		ll = 0
+		for (s, obs) in zip(steps, self.observations[1:]):
+			self.update(s, obs)
+			ll += np.log(self.likelihood(obs))
+		final_step = self.end_num_date - self.num_dates[-1]
+		self.simulate(final_step)
+		return ll
+
+def estimate_likelihood():
+	tree = read_json('tree.json')
+	dates = get_dates(tree)
+	nodes = [n for n in all_descendants(tree)]
+	ll = 0
+	for node in nodes[1:100]:
+		observations = observations_for_clade(node, dates)
+		filter = Filter(dates, observations)
+		ll += filter.run_with_likelihood()
+		node['frequency'] = filter.mean()
+		print str(node['clade']) + ": " + str(node['frequency'])
+		
+	print "log likelihood: " + str(ll)
+
+def set_node_frequency(node, dates):
+	observations = observations_for_clade(node, dates)
+	filter = Filter(dates, observations)
+	filter.run()
+	node['frequency'] = round(filter.mean(), 5)
 
 def main():
 	print "--- Frequencies at " + time.strftime("%H:%M:%S") + " ---"
 
+#	estimate_likelihood()
+
 	tree = read_json('tree.json')
 	dates = get_dates(tree)
 
-	for node in all_descendants(tree):
-		observations = observations_for_clade(node, dates)
-		filter = Filter(dates, observations)
-		filter.run()
-		node['frequency'] = filter.mean()
+	nodes = [n for n in all_descendants(tree)]
+
+#	pool = ThreadPool(2) 
+	start = time.clock()
+#	map(lambda node: set_node_frequency(node, dates), nodes[20:25])
+	for node in nodes:
+		set_node_frequency(node, dates)
 		print str(node['clade']) + ": " + str(node['frequency'])
+	print "time: " + str(time.clock() - start)	
+	
+	write_json(tree, "tree_freq.json")		
 
 if __name__ == "__main__":
     main()
