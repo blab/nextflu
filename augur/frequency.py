@@ -78,7 +78,7 @@ class Filter:
 	"""Time in encoded in continuous units of years."""
 	particle_count = 100
 	timestep = 0.01
-	sigma = 5
+	sigma = 10
 
 	def __init__(self, dates, observations):
 		self.num_dates = map(string_to_numerical_date, dates)
