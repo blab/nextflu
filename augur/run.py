@@ -3,7 +3,7 @@ import ingest, filter, align, clean, tree, streamline, upload
 
 def pipeline():
 	"""Run full pipeline"""
-#	ingest.main()		# Ingest sequences
+	ingest.main()		# Ingest sequences
 	filter.main()		# Filter sequences
 	align.main()		# Align sequences
 	clean.main()		# Clean sequences	
