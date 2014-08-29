@@ -45,4 +45,4 @@ RUN git clone https://github.com/blab/augur.git /augur
 WORKDIR /augur
 
 # default command
-CMD ["supervisord -c supervisord.conf"]
+CMD supervisord -c supervisord.conf
