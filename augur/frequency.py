@@ -7,9 +7,6 @@ from tree_util import *
 from date_util import *
 import numpy as np
 
-from multiprocessing import Pool
-from multiprocessing.dummy import Pool as ThreadPool 
-
 def observations_for_clade(node, dates):
 	"""Takes a node and a list of dates and returns an observation list"""
 	node_dates = get_dates(node)
@@ -180,16 +177,12 @@ def set_node_frequency(node, dates):
 def main():
 	print "--- Frequencies at " + time.strftime("%H:%M:%S") + " ---"
 
-#	estimate_likelihood()
-
 	tree = read_json('tree.json')
 	dates = get_dates(tree)
 
 	nodes = [n for n in all_descendants(tree)]
 
-#	pool = ThreadPool(2) 
 	start = time.clock()
-#	map(lambda node: set_node_frequency(node, dates), nodes[20:25])
 	for node in nodes:
 		set_node_frequency(node, dates)
 		print str(node['clade']) + ": " + str(node['frequency'])
