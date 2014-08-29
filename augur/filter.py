@@ -11,7 +11,8 @@ from io_util import *
 def fix_strain_names(viruses):
 	for v in viruses:
 		v['strain'] = v['strain'].replace('\'','')
-
+		v['strain'] = v['strain'].replace('(H3N2)','')
+		
 def filter_length(viruses):
 	return filter(lambda v: len(v['seq']) >= 987, viruses)
 
@@ -35,21 +36,23 @@ def filter_unique(viruses):
 	filtered_viruses = []
 	strains = set()	
 	for v in viruses:
-		if not v['strain'] in strains:
-			strains.add(v['strain'])
+		if not v['strain'].lower() in strains:
+			strains.add(v['strain'].lower())
 			filtered_viruses.append(v)
 	return filtered_viruses
 	
 def streamline(viruses):
 	filtered_viruses = []
-	for y in range(2010,2015):
-		count = 0
-		for v in viruses:
-			if y == datetime.datetime.strptime(v['date'], '%Y-%m-%d').date().year:
-				filtered_viruses.append(v)
-				count += 1
-				if count == 200:
-					break
+	for y in range(2011,2015):
+		for m in range(1,13):
+			count = 0
+			for v in viruses:
+				date = datetime.datetime.strptime(v['date'], '%Y-%m-%d').date()
+				if y == date.year and m == date.month:
+					filtered_viruses.append(v)
+					count += 1
+					if count == 50:
+						break
 	return filtered_viruses
 		
 def main():

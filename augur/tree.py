@@ -14,10 +14,10 @@ def to_json(node):
 		json['clade'] = node.clade
 	if node.taxon:
 		json['strain'] = str(node.taxon).replace("'", '')
-	if hasattr(node, 'layout'):
-		json['layout'] = round(node.layout, 5)
-	if hasattr(node, 'distance'):
-		json['distance'] = round(node.distance, 5)	
+	if hasattr(node, 'yvalue'):
+		json['yvalue'] = round(node.yvalue, 5)
+	if hasattr(node, 'xvalue'):
+		json['xvalue'] = round(node.xvalue, 5)	
 	if hasattr(node, 'date'):
 		json['date'] = node.date
 	if hasattr(node, 'seq'):
@@ -28,17 +28,17 @@ def to_json(node):
 			json["children"].append(to_json(ch))
 	return json
 	
-def get_layout(node):
+def get_yvalue(node):
 	"""Return y location based on recursive mean of daughter locations"""	
-	if hasattr(node, 'layout'):
-		return node.layout	
+	if hasattr(node, 'yvalue'):
+		return node.yvalue	
 	if node.child_nodes():
 		mean = 0
 		for ch in node.child_nodes():
-			mean += get_layout(ch)
+			mean += get_yvalue(ch)
 		return mean / float(len(node.child_nodes()))
 		
-def get_distance(node):
+def get_xvalue(node):
 	"""Return x location based on total distance from root"""
 	root = node.get_tree_root()
 	return node.get_distance(root)
@@ -55,21 +55,36 @@ def collapse(tree):
 	for e in tree.postorder_edge_iter():
 		if e.length < 0.00001 and e.is_internal():
 			e.collapse()
+			
+def ladderize(tree):
+	"""Sorts child nodes in terms of the length of subtending branches each child node has"""
+	node_desc_counts = {}
+	for node in tree.postorder_node_iter():
+		if len(node._child_nodes) == 0:
+			node_desc_counts[node] = node.edge_length
+		else:
+			total = 0
+			for child in node._child_nodes:
+				total += node_desc_counts[child]
+				total += child.edge_length
+	#		total += len(node._child_nodes)
+			node_desc_counts[node] = total
+			node._child_nodes.sort(key=lambda n: node_desc_counts[n], reverse=True)			
 
 def add_node_attributes(tree):
-	"""Add clade, distance and layout attributes to all nodes in tree"""
+	"""Add clade, xvalue and yvalue attributes to all nodes in tree"""
 	clade = 0
-	layout = 0
+	yvalue = 0
 	for node in tree.postorder_node_iter():
 		node.clade = clade
 		clade += 1
 		if node.is_leaf():
-			node.layout = layout
-			layout += 1
+			node.yvalue = yvalue
+			yvalue += 1
 
 	for node in tree.postorder_node_iter():
-		node.layout = get_layout(node)
-		node.distance = node.distance_from_root()
+		node.yvalue = get_yvalue(node)
+		node.xvalue = node.distance_from_root()
 
 def add_virus_attributes(viruses, tree):
 	"""Add date and seq attributes to all tips in tree"""
@@ -135,7 +150,7 @@ def main():
 	tree = dendropy.Tree.get_from_path("tree.newick", "newick")	
 	reroot(tree)
 	collapse(tree)	
-	tree.ladderize(ascending=False)
+	ladderize(tree)
 	add_node_attributes(tree)
 	add_virus_attributes(viruses, tree)
 

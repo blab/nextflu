@@ -76,9 +76,9 @@ class Filter:
 	"""An SMC particle filter, comprising n particles."""
 	"""Takes a list of dates and a list of (0,1) observations."""
 	"""Time in encoded in continuous units of years."""
-	particle_count = 100
+	particle_count = 200
 	timestep = 0.01
-	sigma = 10
+	sigma = 5
 
 	def __init__(self, dates, observations):
 		self.num_dates = map(string_to_numerical_date, dates)
