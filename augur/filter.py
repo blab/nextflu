@@ -51,7 +51,7 @@ def streamline(viruses):
 				if y == date.year and m == date.month:
 					filtered_viruses.append(v)
 					count += 1
-					if count == 50:
+					if count == 1:
 						break
 	return filtered_viruses
 		

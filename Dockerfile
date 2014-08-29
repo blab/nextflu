@@ -34,6 +34,7 @@ RUN pip install biopython==1.63
 RUN pip install seqmagick==0.5.0
 RUN pip install ete2==2.2.1072
 RUN pip install DendroPy==3.12.0
+RUN pip install schedule==0.3.0
 
 # s3 website
 RUN apt-get install -y ruby
@@ -41,8 +42,6 @@ RUN gem install s3_website
 
 # augur
 RUN git clone https://github.com/blab/augur.git /augur
-RUN cd /augur
-COPY tree.json /augur/tree.json
 WORKDIR /augur
 
 # default command

@@ -40,3 +40,4 @@ environment.sh
 Icon?
 ehthumbs.db
 Thumbs.db
+.elasticbeanstalk/
