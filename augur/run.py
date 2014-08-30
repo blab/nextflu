@@ -14,6 +14,7 @@ def pipeline():
 def main():
 	"""Run every day"""
 
+	pipeline()
 	schedule.every().minute.do(pipeline)
 	while True:
 		schedule.run_pending()
