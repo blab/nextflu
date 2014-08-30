@@ -8,10 +8,6 @@ RUN apt-get install -y wget
 # git
 RUN apt-get install -y git
 
-# supervisor
-RUN apt-get install -y supervisor
-RUN mkdir -p /var/log/supervisor
-
 # headless firefox
 RUN apt-get install -y firefox xvfb x11vnc
 RUN apt-get install -y -q xfonts-100dpi xfonts-75dpi xfonts-scalable xfonts-cyrillic
@@ -37,12 +33,19 @@ RUN pip install DendroPy==3.12.0
 RUN pip install schedule==0.3.0
 
 # s3 website
+RUN apt-get install -y ntp
 RUN apt-get install -y ruby
 RUN gem install s3_website
+
+# java (required for s3 website)
+RUN apt-get update -y
+RUN apt-get install -y openjdk-7-jre
+RUN rm -rf /var/lib/apt/lists/*
 
 # augur
 RUN git clone https://github.com/blab/augur.git /augur
 WORKDIR /augur
 
 # default command
-CMD supervisord -c supervisord.conf
+CMD ["/augur/docker_run.sh"]
+
