@@ -14,6 +14,7 @@ def pipeline():
 def main():
 	"""Run every day"""
 
+	time.sleep(10)
 	pipeline()
 	schedule.every().day.do(pipeline)
 	while True:
