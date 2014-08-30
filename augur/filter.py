@@ -8,6 +8,9 @@
 import os, re, time, datetime
 from io_util import *
 
+YEARS_BACK = 3
+VIRUSES_PER_MONTH = 100
+
 def fix_strain_names(viruses):
 	for v in viruses:
 		v['strain'] = v['strain'].replace('\'','')
@@ -43,18 +46,30 @@ def filter_unique(viruses):
 	
 def streamline(viruses):
 	filtered_viruses = []
-	for y in range(2011,2015):
+	first_year = datetime.datetime.today().year - YEARS_BACK
+	first_month = datetime.datetime.today().month
+	print "Filtering between " + str(first_month) + "/" + str(first_year) + " and today"
+	print "Selecting " + str(VIRUSES_PER_MONTH) + " viruses per month"
+	y = first_year
+	for m in range(first_month,13):
+		filtered_viruses.extend(select_viruses(viruses, y, m))	
+	for y in range(first_year+1,datetime.datetime.today().year+1):
 		for m in range(1,13):
-			count = 0
-			for v in viruses:
-				date = datetime.datetime.strptime(v['date'], '%Y-%m-%d').date()
-				if y == date.year and m == date.month:
-					filtered_viruses.append(v)
-					count += 1
-					if count == 1:
-						break
+			filtered_viruses.extend(select_viruses(viruses, y, m))
 	return filtered_viruses
-		
+	
+def select_viruses(viruses, y, m):
+	count = 0
+	filtered = []
+	for v in viruses:
+		date = datetime.datetime.strptime(v['date'], '%Y-%m-%d').date()
+		if y == date.year and m == date.month:
+			filtered.append(v)
+			count += 1
+			if count == VIRUSES_PER_MONTH:
+				break
+	return filtered
+
 def main():
 
 	print "--- Filter at " + time.strftime("%H:%M:%S") + " ---"

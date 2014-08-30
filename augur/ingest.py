@@ -87,7 +87,7 @@ def download_gisaid(start_year, end_year):
 	checkbox.click()
 
 	# download
-	print "Print download"
+	print "Download"
 	time.sleep(10)
 	button = driver.find_element_by_xpath("//div[@id='ce_n7h14c_9y']//button")
 	button.click()
