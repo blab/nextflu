@@ -46,6 +46,8 @@ RUN rm -rf /var/lib/apt/lists/*
 RUN git clone https://github.com/blab/augur.git /augur
 WORKDIR /augur
 
+EXPOSE 80
+
 # default command
 CMD ["/augur/docker_run.sh"]
 
