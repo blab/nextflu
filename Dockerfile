@@ -30,19 +30,11 @@ RUN mv /usr/bin/raxmlHPC /usr/bin/raxml
 RUN pip install selenium==2.42.1
 RUN pip install biopython==1.63
 RUN pip install seqmagick==0.5.0
-RUN pip install ete2==2.2.1072
 RUN pip install DendroPy==3.12.0
 RUN pip install schedule==0.3.0
 
-# s3 website
-RUN apt-get install -y ntp
-RUN apt-get install -y ruby
-RUN gem install s3_website
-
-# java (required for s3 website and logstash)
-RUN apt-get update -y
-RUN apt-get install -y openjdk-7-jre
-RUN rm -rf /var/lib/apt/lists/*
+# s3cmd
+RUN apt-get install -y s3cmd
 
 # supervisor
 RUN pip install supervisor==3.1.1
@@ -52,8 +44,6 @@ RUN pip install supervisor-stdout==0.1.1
 # augur
 RUN git clone https://github.com/blab/augur.git /augur
 WORKDIR /augur
-
-EXPOSE 80
 
 # default command
 CMD supervisord -c supervisord.conf
