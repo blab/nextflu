@@ -17,6 +17,7 @@ def download_gisaid(start_year, end_year):
 		pass 
 
 	# start firefox driver
+	print "Start webdriver"
 	profile = webdriver.FirefoxProfile()
 	profile.set_preference("browser.download.folderList",2)
 	profile.set_preference("browser.download.manager.showWhenStarting",False)
@@ -25,10 +26,12 @@ def download_gisaid(start_year, end_year):
 	driver = webdriver.Firefox(firefox_profile=profile)
 
 	# open GISAID 
+	print "Open GISAID"	
 	driver.get('http://platform.gisaid.org/epi3/')
 	assert 'GISAID' in driver.title
 
 	# login
+	print "Login"		
 	username = driver.find_element_by_name('login')
 	username.send_keys(os.environ['GISAID_USER'])
 	password = driver.find_element_by_name('password')
@@ -36,10 +39,12 @@ def download_gisaid(start_year, end_year):
 	driver.execute_script("return doLogin();")
 
 	# navigate to EpiFlu
+	print "Navigate to EpiFlu"			
 	time.sleep(10)
 	driver.execute_script("return sys.call('c_n7h14c_4l','Go',new Object({'page':'epi3'}));")
 
 	# fill in form and submit
+	print "Fill in form and submit"
 	time.sleep(10)
 	type = driver.find_element_by_id('ce_n7h14c_82_select')
 	type.send_keys("A")
@@ -63,6 +68,7 @@ def download_gisaid(start_year, end_year):
 	button.click()
 
 	# select sequences
+	print "Select sequences"
 	time.sleep(10)
 	checkbox = driver.find_element_by_xpath("//span[@class='yui-dt-label']/input[@type='checkbox']")
 	checkbox.click()
@@ -71,6 +77,7 @@ def download_gisaid(start_year, end_year):
 	button.click()
 
 	# set download options
+	print "Set download options"
 	time.sleep(10)
 	driver.switch_to_frame(driver.find_element_by_tag_name("iframe"))
 	checkbox = driver.find_element_by_xpath("//input[@name='ce_n7h14c_9k_name' and @value='dna']")
@@ -80,6 +87,7 @@ def download_gisaid(start_year, end_year):
 	checkbox.click()
 
 	# download
+	print "Print download"
 	time.sleep(10)
 	button = driver.find_element_by_xpath("//div[@id='ce_n7h14c_9y']//button")
 	button.click()

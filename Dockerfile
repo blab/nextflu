@@ -1,4 +1,4 @@
-FROM ubuntu:14.04
+FROM phusion/baseimage:0.9.13
 MAINTAINER Trevor Bedford <trevor@bedford.io>
 RUN apt-get -y update
 
@@ -9,7 +9,9 @@ RUN apt-get install -y wget
 RUN apt-get install -y git
 
 # headless firefox
-RUN apt-get install -y firefox xvfb x11vnc
+RUN apt-get install -y firefox
+RUN apt-get install -y xvfb
+RUN apt-get install -y x11vnc
 RUN apt-get install -y -q xfonts-100dpi xfonts-75dpi xfonts-scalable xfonts-cyrillic
 ENV DISPLAY :99
 
@@ -37,10 +39,15 @@ RUN apt-get install -y ntp
 RUN apt-get install -y ruby
 RUN gem install s3_website
 
-# java (required for s3 website)
+# java (required for s3 website and logstash)
 RUN apt-get update -y
 RUN apt-get install -y openjdk-7-jre
 RUN rm -rf /var/lib/apt/lists/*
+
+# supervisor
+RUN pip install supervisor==3.1.1
+RUN mkdir -p /var/log/supervisor
+RUN pip install supervisor-stdout==0.1.1
 
 # augur
 RUN git clone https://github.com/blab/augur.git /augur
@@ -49,5 +56,5 @@ WORKDIR /augur
 EXPOSE 80
 
 # default command
-CMD ["/augur/docker_run.sh"]
+CMD supervisord -c supervisord.conf
 
