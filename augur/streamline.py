@@ -13,9 +13,9 @@ def main():
 		node.pop("seq", None)
 		node.pop("clade", None)
 	
-	if not os.path.exists("site"):
-		os.makedirs("site")	
-	write_json(tree, "site/tree.json")		
+	if not os.path.exists("data"):
+		os.makedirs("data")	
+	write_json(tree, "data/tree.json")		
 
 if __name__ == "__main__":
     main()

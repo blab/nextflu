@@ -1,6 +1,5 @@
 # estimates clade frequencies using SMC
 
-import yappi
 import time
 from io_util import *
 from tree_util import *

@@ -39,6 +39,40 @@ You will need a GISAID account and an Amazon S3 account.  Assumes environment va
 * `S3_SECRET`: Amazon S3 secret
 * `S3_BUCKET`: Amazon S3 bucket
 
+## Run on Amazon EC2
+
+Install EC2 command line tools:
+
+	brew install ec2-api-tools
+	
+Set up environment variables, see: 
+
+	brew info ec2-api-tools
+
+Set up key pair:
+
+	ec2-add-keypair ec2-keypair > ~/.ec2-keypair.pem
+	chmod 600 ~/.ec2-keypair.pem
+
+Open up ports:
+
+	ec2-authorize default -p 22
+	ec2-authorize default -p 80
+	
+Start instance:	
+	
+	ec2-run-instances -k ec2-keypair -f environment.sh -t t2.micro -z us-east-1a ami-76817c1e	
+	ec2-run-instances -k ec2-keypair -f environment.sh -t t2.micro -z us-east-1a ami-864d84ee
+	
+SSH in:
+
+	ssh -i ~/.ec2-keypair.pem ec2-user@ec2-xxx.amazonaws.com
+	ssh -i ~/.ec2-keypair.pem ubuntu@ec2-xxx.amazonaws.com
+
+Terminate instance:
+
+	ec2-terminate-instances i-xxx
+
 ## Process
 
 ### Ingest
