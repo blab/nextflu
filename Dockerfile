@@ -39,10 +39,10 @@ RUN apt-get install -y s3cmd
 # supervisor
 RUN pip install supervisor==3.1.1
 RUN mkdir -p /var/log/supervisor
-RUN pip install supervisor-stdout==0.1.1
 
 # augur
 RUN git clone https://github.com/blab/augur.git /augur
+RUN mkdir -p /augur/logs
 WORKDIR /augur
 
 # default command

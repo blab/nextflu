@@ -19,7 +19,7 @@ To run locally, you'll need Firefox, Python, pip, [muscle](http://www.drive5.com
 Alternatively, you can run across platforms using [Docker](https://www.docker.com/) and the supplied [Dockerfile](Dockerfile)
 
 	docker pull trvrb/augur
-	docker run -ti -e "GISAID_USER=$GISAID_USER" -e "GISAID_PASS=$GISAID_PASS" -e "S3_KEY=$S3_KEY" -e "S3_SECRET=$S3_SECRET" -e "S3_BUCKET=$S3_BUCKET" --privileged trvrb/augur /bin/bash
+	docker run -ti -e "GISAID_USER=$GISAID_USER" -e "GISAID_PASS=$GISAID_PASS" -e "S3_KEY=$S3_KEY" -e "S3_SECRET=$S3_SECRET" -e "S3_BUCKET=$S3_BUCKET" --privileged trvrb/augur
 
 Before starting Python scripts, you'll need to run:
 
@@ -61,8 +61,8 @@ Open up ports:
 	
 Start instance:	
 	
-	ec2-run-instances -k ec2-keypair -f environment.sh -t t2.micro -z us-east-1a ami-76817c1e	
-	ec2-run-instances -k ec2-keypair -f environment.sh -t t2.micro -z us-east-1a ami-864d84ee
+	ec2-run-instances -k ec2-keypair -f ec2-startup.sh -t t2.micro -z us-east-1a ami-864d84ee	# ubuntu
+	ec2-run-instances -k ec2-keypair -f ec2-startup.sh -t t2.micro -z us-east-1a ami-c477d3ac	# ubuntu + augur
 	
 SSH in:
 
