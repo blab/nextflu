@@ -68,6 +68,10 @@ SSH in:
 
 	ssh -i ~/.ec2-keypair.pem ec2-user@ec2-xxx.amazonaws.com
 	ssh -i ~/.ec2-keypair.pem ubuntu@ec2-xxx.amazonaws.com
+	
+Start augur:
+
+	sudo docker run -d -e "GISAID_USER=$GISAID_USER" -e "GISAID_PASS=$GISAID_PASS" -e "S3_KEY=$S3_KEY" -e "S3_SECRET=$S3_SECRET" -e "S3_BUCKET=$S3_BUCKET" --privileged trvrb/augur
 
 Terminate instance:
 
