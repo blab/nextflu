@@ -12,7 +12,7 @@ def log():
 		handle.close()	
 
 	os.system("s3cmd mb s3://" + os.environ['S3_BUCKET'])	
-	os.system("s3cmd sync --acl-public logs/ s3://" + os.environ['S3_BUCKET'] + "/logs/")	
+	os.system("s3cmd sync --acl-public logs/ s3://" + os.environ['S3_BUCKET'])	
 
 def main():
 	"""Upload logs to Amazon S3"""
