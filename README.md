@@ -62,11 +62,10 @@ Open up ports:
 Start instance:	
 	
 	ec2-run-instances -k ec2-keypair -f ec2-startup.sh -t t2.micro -z us-east-1a ami-864d84ee	# ubuntu
-	ec2-run-instances -k ec2-keypair -f ec2-startup.sh -t t2.micro -z us-east-1a ami-c477d3ac	# ubuntu + augur
+	ec2-run-instances -k ec2-keypair -f ec2-startup.sh -t t2.micro -z us-east-1a ami-9846e2f0	# ubuntu + augur
 	
 SSH in:
 
-	ssh -i ~/.ec2-keypair.pem ec2-user@ec2-xxx.amazonaws.com
 	ssh -i ~/.ec2-keypair.pem ubuntu@ec2-xxx.amazonaws.com
 	
 Start augur:
