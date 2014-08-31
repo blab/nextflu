@@ -14,7 +14,7 @@ def main():
 		handle.close()	
 
 	os.system("s3cmd mb s3://" + os.environ['S3_BUCKET'])	
-	os.system("s3cmd sync data/ s3://" + os.environ['S3_BUCKET'])	
+	os.system("s3cmd sync --acl-public data/ s3://" + os.environ['S3_BUCKET'])	
 	
 if __name__ == "__main__":
     main()
