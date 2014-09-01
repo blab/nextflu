@@ -1,31 +1,23 @@
 ## Augur
 
-Augur is Python package to forecast flu evolution.  It will
+Augur is Python package to track (and eventually forecast) flu evolution.  It currently
 
-* import public sequence data
-* build a phylogenetic tree from this data
-* estimate clade fitnesses
-* estimate clade frequencies
-* project frequencies foreword
+* imports public sequence data
+* subsamples, cleans and aligns sequences
+* builds a phylogenetic tree from this data
 
-It is intended to be run in an always-on fashion, recomputing predictions daily and pushing predictions to a (static) website.
+The program is live on Amazon EC2 with results pushed to Amazon S3.  The latest JSON-formatted flu tree is available as [`tree_streamline.json`](https://s3.amazonaws.com/augur-data/data/tree_streamline.json).  This tree is visualized at [blab.github.io/auspice/](http://blab.github.io/auspice/).
 
-## Build and run
+## Run
 
-You can run across platforms using [Docker](https://www.docker.com/) and the supplied [Dockerfile](Dockerfile)
+You can run across platforms using [Docker](https://www.docker.com/).  An image is up on the Docker hub repository as [trvrb/augur](https://registry.hub.docker.com/u/trvrb/augur/).  With this public image, you can immediately run augur with
 
 	docker pull trvrb/augur
 	docker run -ti -e "GISAID_USER=$GISAID_USER" -e "GISAID_PASS=$GISAID_PASS" -e "S3_KEY=$S3_KEY" -e "S3_SECRET=$S3_SECRET" -e "S3_BUCKET=$S3_BUCKET" --privileged trvrb/augur
 	
 This starts up [Supervisor](http://supervisord.org/) to keep augur running and other helper programs, which can be seen in the [`supervisord.conf`](supervisord.conf) control file.
 
-To run locally, you'll need Firefox, Python, pip, [mafft](http://mafft.cbrc.jp/alignment/software/), [FastTree](http://meta.microbesonline.org/fasttree/) and some other things as well.  A complete listing can be seen in the [Dockerfile](Dockerfile).
-	
-The build pipeline is initiated with [`run.py`](augur/run.py), generating sequence and tree files.
-	
-## Environment
-
-You will need a GISAID account and an Amazon S3 account.  Assumes environment variables:
+To run augur, you will need a GISAID account (to pull sequences) and an Amazon S3 account (to push results).  Account information is stored as environment variables:
 
 * `GISAID_USER`: GISAID user name
 * `GISAID_PASS`: GISAID password
@@ -33,57 +25,47 @@ You will need a GISAID account and an Amazon S3 account.  Assumes environment va
 * `S3_SECRET`: Amazon S3 secret
 * `S3_BUCKET`: Amazon S3 bucket
 
-## Run on Amazon EC2
+## Develop
 
-Install EC2 command line tools:
+Full dependency information can be seen in the [`Dockerfile`](Dockerfile).  To run locally, pull the docker image with
 
-	brew install ec2-api-tools
+	docker pull trvrb/augur
 	
-Set up environment variables, see: 
+And start up a bash session with
 
-	brew info ec2-api-tools
-
-Set up key pair:
-
-	ec2-add-keypair ec2-keypair > ~/.ec2-keypair.pem
-	chmod 600 ~/.ec2-keypair.pem
-
-Open up ports:
-
-	ec2-authorize default -p 22
-	ec2-authorize default -p 80
+	docker run -ti -e "GISAID_USER=$GISAID_USER" -e "GISAID_PASS=$GISAID_PASS" trvrb/augur /bin/bash
 	
-Start instance:	
+From here, the [build pipeline](augur/run.py) can be run with
+
+	python augur/run.py
 	
-	ec2-run-instances -k ec2-keypair -f ec2-startup.sh -t t2.micro -z us-east-1a ami-864d84ee	# ubuntu
-	ec2-run-instances -k ec2-keypair -f ec2-startup.sh -t t2.micro -z us-east-1a ami-e6ab0c8e	# ubuntu + augur
-	
-SSH in:
+## Process notes
 
-	ssh -i ~/.ec2-keypair.pem ubuntu@ec2-xxx.amazonaws.com
-	
-Start augur:
+### Virus ingest, alignment and filtering
 
-	sudo docker run -d -e "GISAID_USER=$GISAID_USER" -e "GISAID_PASS=$GISAID_PASS" -e "S3_KEY=$S3_KEY" -e "S3_SECRET=$S3_SECRET" -e "S3_BUCKET=$S3_BUCKET" --privileged trvrb/augur
+#### [Ingest](augur/virus_ingest.py)
 
-Terminate instance:
+Using [Selenium](https://github.com/SeleniumHQ/selenium) and Python bindings to automate downloads from [GISAID](http://platform.gisaid.org/epi3/).  GISAID requires login access.  User credentials are stored in the ENV as `GISAID_USER` and `GISAID_PASS`.
 
-	ec2-terminate-instances i-xxx
+#### [Filter](augur/virus_filter.py)
 
-## Process
+Keeps viruses with full HA1 sequences, fully specified dates, cell passage and only one sequence per strain name.  Subsamples to 100 sequences per month for the last 3 before present.
 
-### Ingest
-
-Using [Selenium](https://github.com/SeleniumHQ/selenium) and Python bindings to automate web crawling. [GISAID](http://platform.gisaid.org/epi3/) requires login access.  User credentials are stored in the ENV as `GISAID_USER` and `GISAID_PASS`.
-
-### Filter
-
-Keeps viruses with full HA1 sequences, fully specified dates, cell passage and only one sequence per strain name.
-
-### Align
+#### [Align](augur/virus_align.py)
 
 Align sequences with [mafft](http://mafft.cbrc.jp/alignment/software/).  Testing showed a much lower memory footprint than [muscle](http://www.drive5.com/muscle/).
 
-## Tree building
+#### [Clean](augur/virus_clean.py)
 
-Using [FastTree](http://meta.microbesonline.org/fasttree/) after really attempting [RAxML](http://sco.h-its.org/exelixis/web/software/raxml/).  Time spans just don't work.  Running FastTree with double precision to distinguish single substitution branches from zero substitution branches.
+Keep only sequences that have the full 987 bases of HA1 in the alignment.
+
+### Tree processing
+
+#### [Infer](augur/tree_infer.py)
+
+Using [FastTree](http://meta.microbesonline.org/fasttree/) to get a starting tree.  FastTree will build a tree for ~5000 sequences in a few minutes.  Then using [RAxML](http://sco.h-its.org/exelixis/web/software/raxml/) to refine this initial tree.  A full RAxML run on a tree with ~5000 sequences could take days or weeks, so instead RAxML is run for a fixed 1 hour and the best tree found during this search is kept.  This will always improve on FastTree.
+
+#### [Clean](augur/tree_clean.py)
+
+Reroot the tree based on the Beijing/32/1992 outgroup strain, collapse nodes with zero-length branches and ladderize the tree.
+
