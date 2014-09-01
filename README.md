@@ -88,7 +88,7 @@ Keeps viruses with full HA1 sequences, fully specified dates, cell passage and o
 
 ### Align
 
-Align sequences with [muscle](http://www.drive5.com/muscle/) and strip to just the 987 bases of HA1.  This should take ~1.5 hours for ~15k sequences.
+Align sequences with [mafft](http://mafft.cbrc.jp/alignment/software/).  Testing showed a much lower memory footprint than [muscle](http://www.drive5.com/muscle/).
 
 ## Frequencies
 

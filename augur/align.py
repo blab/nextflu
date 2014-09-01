@@ -23,8 +23,8 @@ def main():
 
 	viruses = read_json('data/virus_filter.json')
 	write_fasta(viruses, 'temp_in.fasta')
-#	os.system("muscle -verbose -quiet -loga logs/augur_out.log -in temp_in.fasta -out temp_out.fasta -diags -maxiters 2")
-	os.system("muscle -in temp_in.fasta -out temp_out.fasta -diags -maxiters 2")
+#	os.system("muscle -in temp_in.fasta -out temp_out.fasta -diags -maxiters 2")
+	os.system("mafft temp_in.fasta > temp_out.fasta")
 	alignment = read_fasta('temp_out.fasta')
 	update_viruses(alignment, viruses)
 	write_json(viruses, 'data/virus_align.json')

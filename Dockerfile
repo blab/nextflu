@@ -19,8 +19,8 @@ ENV DISPLAY :99
 RUN apt-get install -y python python-dev python-pip python-virtualenv
 RUN apt-get install -y python-numpy python-scipy
 
-# muscle
-RUN apt-get install -y muscle
+# mafft
+RUN apt-get install -y mafft
 
 # raxml
 RUN apt-get install -y raxml

@@ -32,7 +32,7 @@ def read_fasta(file_name):
 		for record in SeqIO.parse(handle, "fasta"):
 			v = {
 				"strain": record.description,
-				"seq": str(record.seq)
+				"seq": str(record.seq).upper()
 			}
 			alignment.append(v)
 		handle.close()
