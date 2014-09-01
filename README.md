@@ -10,25 +10,19 @@ Augur is Python package to forecast flu evolution.  It will
 
 It is intended to be run in an always-on fashion, recomputing predictions daily and pushing predictions to a (static) website.
 
-## Build
+## Build and run
 
-To run locally, you'll need Firefox, Python, pip, [muscle](http://www.drive5.com/muscle/), [RAxML](http://sco.h-its.org/exelixis/web/software/raxml/), ruby and [s3_website](https://github.com/laurilehmijoki/s3_website).  With them installed, additional dependencies can be installed with:
-
-	pip install -r requirements.txt
-	
-Alternatively, you can run across platforms using [Docker](https://www.docker.com/) and the supplied [Dockerfile](Dockerfile)
+You can run across platforms using [Docker](https://www.docker.com/) and the supplied [Dockerfile](Dockerfile)
 
 	docker pull trvrb/augur
 	docker run -ti -e "GISAID_USER=$GISAID_USER" -e "GISAID_PASS=$GISAID_PASS" -e "S3_KEY=$S3_KEY" -e "S3_SECRET=$S3_SECRET" -e "S3_BUCKET=$S3_BUCKET" --privileged trvrb/augur
-
-Before starting Python scripts, you'll need to run:
-
-	supervisord -c supervisord.conf
 	
-## Run
+This starts up [Supervisor](http://supervisord.org/) to keep augur running and other helper programs, which can be seen in the [`supervisord.conf`](supervisord.conf) control file.
 
-Python scripts are run in the following [`run.py`](augur/run.py).  This generates sequence and tree files, most notably `site/tree.json`.  This file is uploaded to Amazon S3 by running [`upload.py`](augur/upload.py).
-
+To run locally, you'll need Firefox, Python, pip, [mafft](http://mafft.cbrc.jp/alignment/software/), [FastTree](http://meta.microbesonline.org/fasttree/) and some other things as well.  A complete listing can be seen in the [Dockerfile](Dockerfile).
+	
+The build pipeline is initiated with [`run.py`](augur/run.py), generating sequence and tree files.
+	
 ## Environment
 
 You will need a GISAID account and an Amazon S3 account.  Assumes environment variables:
@@ -90,6 +84,6 @@ Keeps viruses with full HA1 sequences, fully specified dates, cell passage and o
 
 Align sequences with [mafft](http://mafft.cbrc.jp/alignment/software/).  Testing showed a much lower memory footprint than [muscle](http://www.drive5.com/muscle/).
 
-## Frequencies
+## Tree building
 
-Estimate clade frequencies using SMC particle filtering.
+Using [FastTree](http://meta.microbesonline.org/fasttree/) after really attempting [RAxML](http://sco.h-its.org/exelixis/web/software/raxml/).  Time spans just don't work.  Running FastTree with double precision to distinguish single substitution branches from zero substitution branches.

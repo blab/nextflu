@@ -2,7 +2,7 @@
 # raxml will complain about identical sequences, but still includes them all in the resulting tree
 # writes out newick.tree file
 
-import os, re, time, seqmagick
+import os, re, time
 import dendropy
 from io_util import *
 
@@ -53,7 +53,7 @@ def reroot(tree):
 def collapse(tree):
 	"""Collapse short edges to polytomies"""
 	for e in tree.postorder_edge_iter():
-		if e.length < 0.00001 and e.is_internal():
+		if e.length < 0.0001 and e.is_internal():
 			e.collapse()
 			
 def ladderize(tree):
@@ -67,7 +67,6 @@ def ladderize(tree):
 			for child in node._child_nodes:
 				total += node_desc_counts[child]
 				total += child.edge_length
-	#		total += len(node._child_nodes)
 			node_desc_counts[node] = total
 			node._child_nodes.sort(key=lambda n: node_desc_counts[n], reverse=True)			
 
@@ -99,55 +98,21 @@ def add_virus_attributes(viruses, tree):
 			node.date = strain_to_date[strain]
 		if strain_to_seq.has_key(strain):
 			node.seq = strain_to_seq[strain]
-
-def cleanup():
-	try:
-		os.remove('temp.fasta')
-	except OSError:
-		pass
-	try:
-		os.remove('temp.phyx')
-	except OSError:
-		pass
-	try:
-		os.remove('temp.phyx.reduced')
-	except OSError:
-		pass		
-	try:
-		os.remove('RAxML_info.out')
-	except OSError:
-		pass	
-	try:
-		os.remove('RAxML_log.out')
-	except OSError:
-		pass		
-	try:
-		os.remove('RAxML_parsimonyTree.out')
-	except OSError:
-		pass
-	try:
-		os.remove('RAxML_result.out')
-	except OSError:
-		pass
 									
 def main():
 
 	print "--- Tree at " + time.strftime("%H:%M:%S") + " ---"
-	
-	cleanup()	
-	
+		
 	viruses = read_json('data/virus_clean.json')
 	write_fasta(viruses, 'temp.fasta')
-	os.system("seqmagick convert temp.fasta temp.phyx")
-	os.system("raxml -T 6 -s temp.phyx -n out -c 25 -f d -m GTRCAT -p 344312987")
-	os.rename('RAxML_bestTree.out', 'tree.newick')
-	with open('tree.newick', 'r') as file:
+	os.system("FastTree -gtr -nt -gamma -nosupport -spr 4 -mlacc 2 -slownni temp.fasta > data/tree.newick")
+
+	with open('data/tree.newick', 'r') as file:
 		newick = file.read().replace('\n', '')	
 		newick = re.sub(r'(A/[^\:]+)', r"'\1'", newick)
-	with open('tree.newick', 'w') as file:
-		file.write(newick)
-		
-	tree = dendropy.Tree.get_from_path("tree.newick", "newick")	
+	with open('temp.newick', 'w') as file:
+		file.write(newick)	
+	tree = dendropy.Tree.get_from_path("temp.newick", "newick")	
 	reroot(tree)
 	collapse(tree)	
 	ladderize(tree)
@@ -155,8 +120,6 @@ def main():
 	add_virus_attributes(viruses, tree)
 
 	write_json(to_json(tree.seed_node), "data/tree.json")
-
-	cleanup()
 	
 if __name__ == "__main__":
     main()

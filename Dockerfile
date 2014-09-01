@@ -22,14 +22,14 @@ RUN apt-get install -y python-numpy python-scipy
 # mafft
 RUN apt-get install -y mafft
 
-# raxml
-RUN apt-get install -y raxml
-RUN mv /usr/bin/raxmlHPC /usr/bin/raxml
+# fasttree
+RUN mkdir -p /fasttree/
+RUN curl -o /fasttree/FastTree.c https://s3.amazonaws.com/augur-data/fasttree/FastTree.c
+RUN gcc -DUSE_DOUBLE -O3 -finline-functions -funroll-loops -Wall -o /usr/bin/FastTree /fasttree/FastTree.c -lm
 
 # python modules
 RUN pip install selenium==2.42.1
 RUN pip install biopython==1.63
-RUN pip install seqmagick==0.5.0
 RUN pip install DendroPy==3.12.0
 RUN pip install schedule==0.3.0
 
