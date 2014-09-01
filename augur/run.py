@@ -1,14 +1,16 @@
 import schedule, time, os
-import ingest, filter, align, clean, tree, streamline, upload
+import virus_ingest, virus_filter, virus_align, virus_clean
+import tree_infer, tree_clean, tree_streamline
 
 def pipeline():
 	"""Run full pipeline"""
-	ingest.main()		# Ingest sequences
-	filter.main()		# Filter sequences
-	align.main()		# Align sequences
-	clean.main()		# Clean sequences	
-	tree.main()			# Make tree
-	streamline.main()	# Streamline tree
+	virus_ingest.main()			# Ingest sequences
+	virus_filter.main()			# Filter sequences
+	virus_align.main()			# Align sequences
+	virus_clean.main()			# Clean sequences	
+	tree_infer.main()			# Make tree
+	tree_clean.main()			# Clean tree	
+	tree_streamline.main()		# Streamline tree
 
 def main():
 	"""Run every day"""

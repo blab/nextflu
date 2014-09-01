@@ -1,6 +1,5 @@
-# create phylogeny from alignment
-# raxml will complain about identical sequences, but still includes them all in the resulting tree
-# writes out newick.tree file
+# clean, reroot, ladderize newick tree
+# output to tree.json
 
 import os, re, time
 import dendropy
@@ -52,9 +51,16 @@ def reroot(tree):
 		
 def collapse(tree):
 	"""Collapse short edges to polytomies"""
-	for e in tree.postorder_edge_iter():
-		if e.length < 0.0001 and e.is_internal():
-			e.collapse()
+	for edge in tree.postorder_edge_iter():
+		if edge.length < 0.00001 and edge.is_internal():
+			edge.collapse()
+			
+def reduce(tree):
+	"""Remove outlier tips"""
+	for node in tree.postorder_node_iter():
+		if node.edge_length > 0.04 and node.is_leaf():
+			parent = node.parent_node
+			parent.remove_child(node)
 			
 def ladderize(tree):
 	"""Sorts child nodes in terms of the length of subtending branches each child node has"""
@@ -64,9 +70,10 @@ def ladderize(tree):
 			node_desc_counts[node] = node.edge_length
 		else:
 			total = 0
+			if node.edge_length > 0:
+				total += node.edge_length			
 			for child in node._child_nodes:
 				total += node_desc_counts[child]
-				total += child.edge_length
 			node_desc_counts[node] = total
 			node._child_nodes.sort(key=lambda n: node_desc_counts[n], reverse=True)			
 
@@ -99,21 +106,22 @@ def add_virus_attributes(viruses, tree):
 		if strain_to_seq.has_key(strain):
 			node.seq = strain_to_seq[strain]
 									
+def delimit_newick(infile_name, outfile_name):
+	with open(infile_name, 'r') as file:
+		newick = file.read().replace('\n', '')	
+		newick = re.sub(r'(A/[^\:^,]+)', r"'\1'", newick)
+	with open(outfile_name, 'w') as file:
+		file.write(newick)	
+									
 def main():
 
-	print "--- Tree at " + time.strftime("%H:%M:%S") + " ---"
+	print "--- Tree clean at " + time.strftime("%H:%M:%S") + " ---"
 		
 	viruses = read_json('data/virus_clean.json')
-	write_fasta(viruses, 'temp.fasta')
-	os.system("FastTree -gtr -nt -gamma -nosupport -spr 4 -mlacc 2 -slownni temp.fasta > data/tree.newick")
-
-	with open('data/tree.newick', 'r') as file:
-		newick = file.read().replace('\n', '')	
-		newick = re.sub(r'(A/[^\:]+)', r"'\1'", newick)
-	with open('temp.newick', 'w') as file:
-		file.write(newick)	
+	delimit_newick("data/tree.newick", "temp.newick")
 	tree = dendropy.Tree.get_from_path("temp.newick", "newick")	
 	reroot(tree)
+	reduce(tree)
 	collapse(tree)	
 	ladderize(tree)
 	add_node_attributes(tree)
