@@ -33,6 +33,7 @@ RUN mv /usr/bin/raxmlHPC /usr/bin/raxml
 RUN pip install selenium==2.42.1
 RUN pip install biopython==1.63
 RUN pip install DendroPy==3.12.0
+RUN pip install seqmagick==0.5.0
 RUN pip install schedule==0.3.0
 
 # s3cmd
