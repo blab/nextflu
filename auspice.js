@@ -149,7 +149,7 @@ function rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, int
 		
 }
 
-d3.json("https://s3.amazonaws.com/trvrb-augur/tree.json", function(error, root) {
+d3.json("https://s3.amazonaws.com/augur-data/data/tree_streamline.json", function(error, root) {
 	var nodes = tree.nodes(root),
 		links = tree.links(nodes);
 	
