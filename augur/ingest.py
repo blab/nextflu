@@ -152,8 +152,8 @@ def main():
 	print "--- Ingest at " + time.strftime("%H:%M:%S") + " ---"
 
 	prior_length = 0
-	if os.path.isfile('virus_ingest.json'):
-  		prior_length = len(read_json('virus_ingest.json'))
+	if os.path.isfile('data/virus_ingest.json'):
+  		prior_length = len(read_json('data/virus_ingest.json'))
 
 	viruses = []
 	
@@ -169,7 +169,7 @@ def main():
 	
 	if (current_length > prior_length):
 		print "Writing new virus_ingest.json with " + str(current_length) + " viruses"
-		write_json(viruses, 'virus_ingest.json')
+		write_json(viruses, 'data/virus_ingest.json')
   	else:
   		print "Keeping old virus_ingest.json with " + str(prior_length) + " viruses"
   		

@@ -136,7 +136,7 @@ def main():
 	
 	cleanup()	
 	
-	viruses = read_json('virus_clean.json')
+	viruses = read_json('data/virus_clean.json')
 	write_fasta(viruses, 'temp.fasta')
 	os.system("seqmagick convert temp.fasta temp.phyx")
 	os.system("raxml -T 6 -s temp.phyx -n out -c 25 -f d -m GTRCAT -p 344312987")
@@ -154,7 +154,7 @@ def main():
 	add_node_attributes(tree)
 	add_virus_attributes(viruses, tree)
 
-	write_json(to_json(tree.seed_node), "tree.json")
+	write_json(to_json(tree.seed_node), "data/tree.json")
 
 	cleanup()
 	

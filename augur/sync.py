@@ -1,6 +1,6 @@
 import os, schedule, time
 
-def log():
+def config():
 	try:
 		handle = open(os.path.expanduser("~") + "/.s3cfg", 'w')
 	except IOError:
@@ -11,13 +11,20 @@ def log():
 		handle.write("secret_key = " + os.environ['S3_SECRET'] + "\n")		
 		handle.close()	
 
+def log():
 	os.system("s3cmd mb s3://" + os.environ['S3_BUCKET'])	
-	os.system("s3cmd sync --acl-public logs/ s3://" + os.environ['S3_BUCKET'])	
+	os.system("s3cmd sync --acl-public log/ s3://" + os.environ['S3_BUCKET'] + "/log/")	
+
+def data():
+	os.system("s3cmd mb s3://" + os.environ['S3_BUCKET'])	
+	os.system("s3cmd sync --acl-public data/ s3://" + os.environ['S3_BUCKET'] + "/data/")	
 
 def main():
-	"""Upload logs to Amazon S3"""
+	"""Sync data and logs with Amazon S3"""
 	
+	config()
 	schedule.every().minute.do(log)
+	schedule.every().minute.do(data)	
 	while True:
 		schedule.run_pending()
 		time.sleep(1)		

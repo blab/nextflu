@@ -154,7 +154,7 @@ class Filter:
 		return ll
 
 def estimate_likelihood():
-	tree = read_json('tree.json')
+	tree = read_json('data/tree.json')
 	dates = get_dates(tree)
 	nodes = [n for n in all_descendants(tree)]
 	ll = 0
@@ -176,7 +176,7 @@ def set_node_frequency(node, dates):
 def main():
 	print "--- Frequencies at " + time.strftime("%H:%M:%S") + " ---"
 
-	tree = read_json('tree.json')
+	tree = read_json('data/tree.json')
 	dates = get_dates(tree)
 
 	nodes = [n for n in all_descendants(tree)]
@@ -187,7 +187,7 @@ def main():
 		print str(node['clade']) + ": " + str(node['frequency'])
 	print "time: " + str(time.clock() - start)	
 	
-	write_json(tree, "tree_freq.json")		
+	write_json(tree, "data/tree_freq.json")		
 
 if __name__ == "__main__":
     main()

@@ -1,4 +1,4 @@
-import schedule, time
+import schedule, time, os
 import ingest, filter, align, clean, tree, streamline, upload
 
 def pipeline():
@@ -9,10 +9,15 @@ def pipeline():
 	clean.main()		# Clean sequences	
 	tree.main()			# Make tree
 	streamline.main()	# Streamline tree
-	upload.main()		# Upload tree
 
 def main():
 	"""Run every day"""
+
+	if not os.path.exists("log"):
+		os.makedirs("log")
+    
+	if not os.path.exists("data"):
+		os.makedirs("data")    
 
 	time.sleep(10)
 	pipeline()

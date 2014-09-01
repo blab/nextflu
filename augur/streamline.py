@@ -7,15 +7,13 @@ from tree_util import *
 def main():
 	print "--- Streamline at " + time.strftime("%H:%M:%S") + " ---"
 
-	tree = read_json('tree.json')
+	tree = read_json('data/tree.json')
 
 	for node in all_descendants(tree):
 		node.pop("seq", None)
 		node.pop("clade", None)
 	
-	if not os.path.exists("data"):
-		os.makedirs("data")	
-	write_json(tree, "data/tree.json")		
+	write_json(tree, "data/tree_streamline.json")		
 
 if __name__ == "__main__":
     main()

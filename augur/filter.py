@@ -9,7 +9,7 @@ import os, re, time, datetime
 from io_util import *
 
 YEARS_BACK = 3
-VIRUSES_PER_MONTH = 100
+VIRUSES_PER_MONTH = 2
 
 def fix_strain_names(viruses):
 	for v in viruses:
@@ -74,7 +74,7 @@ def main():
 
 	print "--- Filter at " + time.strftime("%H:%M:%S") + " ---"
 
-	viruses = read_json('virus_ingest.json')
+	viruses = read_json('data/virus_ingest.json')
 	print str(len(viruses)) + " initial viruses"
 	
 	# fix strain names
@@ -104,7 +104,7 @@ def main():
 	add_outgroup(viruses)
 	print str(len(viruses)) + " with outgroup"
 	
-	write_json(viruses, 'virus_filter.json')
+	write_json(viruses, 'data/virus_filter.json')
 
 if __name__ == "__main__":
     main()
