@@ -15,9 +15,9 @@ You can run across platforms using [Docker](https://www.docker.com/).  An image 
 	docker pull trvrb/augur
 	docker run -ti -e "GISAID_USER=$GISAID_USER" -e "GISAID_PASS=$GISAID_PASS" -e "S3_KEY=$S3_KEY" -e "S3_SECRET=$S3_SECRET" -e "S3_BUCKET=$S3_BUCKET" --privileged trvrb/augur
 	
-This starts up [Supervisor](http://supervisord.org/) to keep augur running and other helper programs, which can be seen in the [`supervisord.conf`](supervisord.conf) control file.
+This starts up [Supervisor](http://supervisord.org/) to keep augur and helper programs running.  This uses [`supervisord.conf`](supervisord.conf) as a control file.
 
-To run augur, you will need a GISAID account (to pull sequences) and an Amazon S3 account (to push results).  Account information is stored as environment variables:
+To run augur, you will need a GISAID account (to pull sequences) and an Amazon S3 account (to push results).  Account information is stored in environment variables:
 
 * `GISAID_USER`: GISAID user name
 * `GISAID_PASS`: GISAID password
@@ -39,17 +39,17 @@ From here, the [build pipeline](augur/run.py) can be run with
 
 	python augur/run.py
 	
-## Process notes
+## Pipeline notes
 
 ### Virus ingest, alignment and filtering
 
 #### [Ingest](augur/virus_ingest.py)
 
-Using [Selenium](https://github.com/SeleniumHQ/selenium) and Python bindings to automate downloads from [GISAID](http://platform.gisaid.org/epi3/).  GISAID requires login access.  User credentials are stored in the ENV as `GISAID_USER` and `GISAID_PASS`.
+Using [Selenium](https://github.com/SeleniumHQ/selenium) to automate downloads from [GISAID](http://platform.gisaid.org/epi3/).  GISAID requires login access.  User credentials are stored in the ENV as `GISAID_USER` and `GISAID_PASS`.
 
 #### [Filter](augur/virus_filter.py)
 
-Keeps viruses with full HA1 sequences, fully specified dates, cell passage and only one sequence per strain name.  Subsamples to 100 sequences per month for the last 3 before present.
+Keeps viruses with full HA1 sequences, fully specified dates, cell passage and only one sequence per strain name.  Subsamples to 100 sequences per month for the last 3 years before present.
 
 #### [Align](augur/virus_align.py)
 
@@ -67,5 +67,4 @@ Using [FastTree](http://meta.microbesonline.org/fasttree/) to get a starting tre
 
 #### [Clean](augur/tree_clean.py)
 
-Reroot the tree based on the Beijing/32/1992 outgroup strain, collapse nodes with zero-length branches and ladderize the tree.
-
+Reroot the tree based on outgroup strain, collapse nodes with zero-length branches and ladderize the tree.
