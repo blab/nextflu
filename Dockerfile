@@ -25,9 +25,13 @@ RUN apt-get install -y mafft
 # fasttree
 RUN apt-get install -y fasttree
 
-# raxml
-RUN apt-get install -y raxml
-RUN mv /usr/bin/raxmlHPC /usr/bin/raxml
+# avx raxml
+RUN mkdir -p /raxml
+RUN curl -o /raxml/v8.1.1 https://codeload.github.com/stamatak/standard-RAxML/tar.gz/v8.1.1
+RUN tar xvzf /raxml/v8.1.1 -C /raxml/
+WORKDIR /raxml/standard-RAxML-8.1.1/
+RUN make -f Makefile.AVX.PTHREADS.gcc
+RUN mv raxmlHPC-PTHREADS-AVX /usr/bin/raxml
 
 # python modules
 RUN pip install selenium==2.42.1
@@ -46,7 +50,7 @@ RUN pip install supervisor==3.1.1
 RUN apt-get install -y dstat
 
 # augur
-RUN git clone https://github.com/blab/augur.git /augur
+RUN git clone https://github.com/blab/augur.git /augur # fdafas
 RUN mkdir -p /augur/log
 WORKDIR /augur
 

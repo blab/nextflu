@@ -40,15 +40,20 @@ def main():
 
 	print "RAxML tree optimization with time limit " + str(RAXML_LIMIT) + " hours"
 	os.system("seqmagick convert temp.fasta temp.phyx")
-	process = subprocess.Popen("raxml -f d -T 6 -j -s temp.phyx -n topology -c 25 -m GTRCAT -p 344312987 -t initial_tree.newick", shell=True)
+	# using exec to be able to kill process
+	process = subprocess.Popen("exec raxml -f d -T 6 -j -s temp.phyx -n topology -c 25 -m GTRCAT -p 344312987 -t initial_tree.newick", shell=True)
 	time.sleep(int(RAXML_LIMIT*3600))
-	process.terminate()
+	process.kill()
 	
-	last_tree_file = [file for file in glob.glob("RAxML_checkpoint*")][-1]	
-	os.rename(last_tree_file, 'final_tree.newick')
+	checkpoint_files = [file for file in glob.glob("RAxML_checkpoint*")]
+	if len(checkpoint_files) > 0:
+		last_tree_file = checkpoint_files[-1]	
+		os.rename(last_tree_file, 'final_tree.newick')
+	else:
+		os.rename("initial_tree.newick", 'final_tree.newick')
 		
 	print "RAxML branch length optimization"
-	os.system("raxml -f e -T 6 -j -s temp.phyx -n branches -c 25 -m GTRGAMMA -p 344312987 -t final_tree.newick")
+	os.system("raxml -f e -T 6 -s temp.phyx -n branches -c 25 -m GTRGAMMA -p 344312987 -t final_tree.newick")
 	os.rename('RAxML_result.branches', 'data/tree.newick')
 	cleanup()	
 
