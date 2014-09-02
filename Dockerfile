@@ -50,7 +50,7 @@ RUN pip install supervisor==3.1.1
 RUN apt-get install -y dstat
 
 # augur
-RUN git clone https://github.com/blab/augur.git /augur # fdafas
+RUN git clone https://github.com/blab/augur.git /augur
 RUN mkdir -p /augur/log
 WORKDIR /augur
 

@@ -91,6 +91,22 @@ def add_node_attributes(tree):
 	for node in tree.postorder_node_iter():
 		node.yvalue = get_yvalue(node)
 		node.xvalue = node.distance_from_root()
+		
+def layout(tree):
+	"""Set yvalue of tips by post-order traversal"""
+	yvalue = 0	
+	distance_matrix = dendropy.treecalc.PatristicDistanceMatrix(tree)
+	tips = [node for node in tree.leaf_iter()]
+	tips[0].yvalue = yvalue
+	for (a,b) in zip(tips[:-1], tips[1:]):
+		d = distance_matrix(a.taxon, b.taxon)
+	#	print str(a.taxon) + " to " + str(b.taxon) + ": " + str(d)
+		if b.is_leaf():
+			yvalue += d
+			b.yvalue = yvalue
+			
+	for node in tree.postorder_node_iter():
+		node.yvalue = get_yvalue(node)		
 
 def add_virus_attributes(viruses, tree):
 	"""Add date and seq attributes to all tips in tree"""
@@ -125,6 +141,7 @@ def main():
 	collapse(tree)	
 	ladderize(tree)
 	add_node_attributes(tree)
+#	layout(tree)
 	add_virus_attributes(viruses, tree)
 
 	write_json(to_json(tree.seed_node), "data/tree.json")

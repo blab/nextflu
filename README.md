@@ -57,7 +57,7 @@ Align sequences with [mafft](http://mafft.cbrc.jp/alignment/software/).  Testing
 
 #### [Clean](augur/virus_clean.py)
 
-Keep only sequences that have the full 987 bases of HA1 in the alignment.
+Keep only sequences that have the full 1701 bases of HA in the alignment.
 
 ### Tree processing
 

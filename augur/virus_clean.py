@@ -65,7 +65,7 @@ def main():
 	
 	# clean gapped sequences
 	viruses = clean_gaps(viruses)
-	print str(len(viruses)) + " with complete HA1"
+	print str(len(viruses)) + " with complete HA"
 	
 	# clean sequences by distance	
 	viruses = clean_distances(viruses)
