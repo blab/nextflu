@@ -26,12 +26,13 @@ RUN apt-get install -y mafft
 RUN apt-get install -y fasttree
 
 # avx raxml
+# pthreads hangs quietly
 RUN mkdir -p /raxml
 RUN curl -o /raxml/v8.1.1 https://codeload.github.com/stamatak/standard-RAxML/tar.gz/v8.1.1
 RUN tar xvzf /raxml/v8.1.1 -C /raxml/
 WORKDIR /raxml/standard-RAxML-8.1.1/
-RUN make -f Makefile.AVX.PTHREADS.gcc
-RUN mv raxmlHPC-PTHREADS-AVX /usr/bin/raxml
+RUN make -f Makefile.AVX.gcc CPPFLAGS=-D_DEBUG_UPDATE
+RUN mv raxmlHPC-AVX /usr/bin/raxml
 
 # python modules
 RUN pip install selenium==2.42.1
