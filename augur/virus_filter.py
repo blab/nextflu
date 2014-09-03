@@ -13,8 +13,7 @@ VIRUSES_PER_MONTH = 100
 
 def fix_strain_names(viruses):
 	for v in viruses:
-		v['strain'] = v['strain'].replace('\'','')
-		v['strain'] = v['strain'].replace('(H3N2)','')
+		v['strain'] = v['strain'].replace('\'','').replace('\(','').replace('\(','').replace('H3N2','')	
 		
 def filter_length(viruses):
 	return filter(lambda v: len(v['seq']) >= 1701, viruses)

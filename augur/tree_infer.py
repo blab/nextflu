@@ -2,7 +2,7 @@
 # raxml will complain about identical sequences, but still includes them all in the resulting tree
 # writes out newick.tree file
 
-import os, re, time, glob
+import os, re, time, glob, shutil
 import subprocess
 import dendropy
 from io_util import *
@@ -43,14 +43,14 @@ def main():
 	# using exec to be able to kill process
 	process = subprocess.Popen("exec raxml -f d -T 6 -j -s temp.phyx -n topology -c 25 -m GTRCAT -p 344312987 -t initial_tree.newick", shell=True)
 	time.sleep(int(RAXML_LIMIT*3600))
-	process.kill()
+	process.terminate()
 	
 	checkpoint_files = [file for file in glob.glob("RAxML_checkpoint*")]
 	if len(checkpoint_files) > 0:
 		last_tree_file = checkpoint_files[-1]	
-		os.rename(last_tree_file, 'final_tree.newick')
+		shutil.copy(last_tree_file, 'final_tree.newick')
 	else:
-		os.rename("initial_tree.newick", 'final_tree.newick')
+		shutil.copy("initial_tree.newick", 'final_tree.newick')
 		
 	print "RAxML branch length optimization"
 	os.system("raxml -f e -T 6 -s temp.phyx -n branches -c 25 -m GTRGAMMA -p 344312987 -t final_tree.newick")

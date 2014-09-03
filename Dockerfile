@@ -25,18 +25,13 @@ RUN apt-get install -y mafft
 # fasttree
 RUN apt-get install -y fasttree
 
-# avx raxml
-# pthreads hangs quietly
-RUN mkdir -p /raxml
-RUN curl -o /raxml/v8.1.1 https://codeload.github.com/stamatak/standard-RAxML/tar.gz/v8.1.1
-RUN tar xvzf /raxml/v8.1.1 -C /raxml/
-WORKDIR /raxml/standard-RAxML-8.1.1/
-RUN make -f Makefile.AVX.gcc CPPFLAGS=-D_DEBUG_UPDATE
-RUN mv raxmlHPC-AVX /usr/bin/raxml
+# raxml
+RUN apt-get install -y raxml
+RUN cp /usr/bin/raxmlHPC /usr/bin/raxml
 
 # python modules
 RUN pip install selenium==2.42.1
-RUN pip install biopython==1.63
+RUN pip install biopython==1.64
 RUN pip install DendroPy==3.12.0
 RUN pip install seqmagick==0.5.0
 RUN pip install schedule==0.3.0
@@ -44,17 +39,9 @@ RUN pip install schedule==0.3.0
 # s3cmd
 RUN apt-get install -y s3cmd
 
-# supervisor
-RUN pip install supervisor==3.1.1
-
-# dstat
-RUN apt-get install -y dstat
-
 # augur
 RUN git clone https://github.com/blab/augur.git /augur
-RUN mkdir -p /augur/log
 WORKDIR /augur
 
 # default command
-CMD supervisord -c supervisord.conf
-
+CMD python -u augur/run.py --headless --clock

@@ -1,32 +1,24 @@
-import schedule, time, os
-import virus_ingest, virus_filter, virus_align, virus_clean
-import tree_infer, tree_clean, tree_streamline
-
-def pipeline():
-	"""Run full pipeline"""
-	virus_ingest.main()			# Ingest sequences
-	virus_filter.main()			# Filter sequences
-	virus_align.main()			# Align sequences
-	virus_clean.main()			# Clean sequences	
-	tree_infer.main()			# Make tree
-	tree_clean.main()			# Clean tree	
-	tree_streamline.main()		# Streamline tree
+import time, os, threading, argparse
+import ingest, process, sync
 
 def main():
-	"""Run every day"""
-
-	if not os.path.exists("log"):
-		os.makedirs("log")
+	"""Ingest, process, sync"""
     
 	if not os.path.exists("data"):
-		os.makedirs("data")    
-
-	time.sleep(10)
-	pipeline()
-	schedule.every().day.do(pipeline)
-	while True:
-		schedule.run_pending()
-		time.sleep(1)	
+		os.makedirs("data")
+		
+	parser = argparse.ArgumentParser(description='Ingest virus sequences')
+	parser.add_argument('--headless', action='store_true', help='Run firefox in headless state (requires xvfb and x11vnc)', required=False)
+	parser.add_argument('--clock', action='store_true', help='Run ntpdate to fix date', required=False)
+	args = vars(parser.parse_args())
+	headless = args['headless']
+	clock = args['clock']	
+	
+#	sync_thread = threading.Thread(target=sync.main, args=[[clock]])
+#	sync_thread.daemon = True 
+#	sync_thread.start()
+	ingest.main([headless])
+	process.main()
 
 if __name__ == "__main__":
     main()

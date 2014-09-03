@@ -1,4 +1,4 @@
-import os, schedule, time
+import os, schedule, time, sys
 
 def config():
 	try:
@@ -11,23 +11,34 @@ def config():
 		handle.write("secret_key = " + os.environ['S3_SECRET'] + "\n")		
 		handle.close()	
 
-def log():
-	os.system("s3cmd mb s3://" + os.environ['S3_BUCKET'])	
-	os.system("s3cmd sync --acl-public log/ s3://" + os.environ['S3_BUCKET'] + "/log/")	
-
 def data():
+	print "Syncing data with S3"
 	os.system("s3cmd mb s3://" + os.environ['S3_BUCKET'])	
 	os.system("s3cmd sync --acl-public data/ s3://" + os.environ['S3_BUCKET'] + "/data/")	
 
-def main():
-	"""Sync data and logs with Amazon S3"""
+def str2bool(obj):
+	if isinstance(obj, basestring):
+		return obj.lower() in ("yes", "true", "t", "1")
+	if isinstance(obj, bool):
+		return obj
+	else:
+		return False
+
+def main(argv):
+	"""Sync data with Amazon S3"""
+	
+	clock = False
+	if len(argv) > 0:
+		clock = str2bool(argv[0])
+	if clock:
+		print "Setting clock with ntpdate"
+		os.system("ntpdate ntp.ubuntu.com")
 	
 	config()
-	schedule.every().minute.do(log)
 	schedule.every().minute.do(data)	
 	while True:
 		schedule.run_pending()
 		time.sleep(1)		
 	
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
