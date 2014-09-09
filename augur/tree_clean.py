@@ -134,7 +134,7 @@ def main():
 	print "--- Tree clean at " + time.strftime("%H:%M:%S") + " ---"
 		
 	viruses = read_json('data/virus_clean.json')
-	delimit_newick("data/tree.newick", "temp.newick")
+	delimit_newick("data/tree_infer.newick", "temp.newick")
 	tree = dendropy.Tree.get_from_path("temp.newick", "newick")	
 	reroot(tree)
 	reduce(tree)
@@ -144,7 +144,7 @@ def main():
 #	layout(tree)
 	add_virus_attributes(viruses, tree)
 
-	write_json(to_json(tree.seed_node), "data/tree.json")
+	write_json(to_json(tree.seed_node), "data/tree_clean.json")
 	
 if __name__ == "__main__":
     main()

@@ -72,7 +72,7 @@ class Filter:
 	"""An SMC particle filter, comprising n particles."""
 	"""Takes a list of dates and a list of (0,1) observations."""
 	"""Time in encoded in continuous units of years."""
-	particle_count = 200
+	particle_count = 300
 	timestep = 0.01
 	sigma = 5
 
@@ -176,7 +176,7 @@ def set_node_frequency(node, dates):
 def main():
 	print "--- Frequencies at " + time.strftime("%H:%M:%S") + " ---"
 
-	tree = read_json('data/tree.json')
+	tree = read_json('data/tree_clean.json')
 	dates = get_dates(tree)
 
 	nodes = [n for n in all_descendants(tree)]

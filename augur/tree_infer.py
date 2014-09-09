@@ -54,7 +54,7 @@ def main():
 		
 	print "RAxML branch length optimization"
 	os.system("raxml -f e -T 6 -s temp.phyx -n branches -c 25 -m GTRGAMMA -p 344312987 -t final_tree.newick")
-	os.rename('RAxML_result.branches', 'data/tree.newick')
+	os.rename('RAxML_result.branches', 'data/tree_infer.newick')
 	cleanup()	
 
 if __name__ == "__main__":

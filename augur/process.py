@@ -1,6 +1,6 @@
 import time, os
-import virus_ingest, virus_filter, virus_align, virus_clean
-import tree_infer, tree_clean, tree_streamline
+import virus_filter, virus_align, virus_clean
+import tree_infer, tree_clean, tree_frequency, tree_auspice
 
 def main():
 	"""Run full pipeline"""
@@ -12,7 +12,8 @@ def main():
 	virus_clean.main()			# Clean sequences	
 	tree_infer.main()			# Make tree
 	tree_clean.main()			# Clean tree	
-	tree_streamline.main()		# Streamline tree
+	tree_frequency.main()		# Add clade frequencies
+	tree_auspice.main()			# Streamline tree for auspice
 
 if __name__ == "__main__":
     main()

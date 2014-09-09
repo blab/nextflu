@@ -14,9 +14,9 @@ def main():
 	headless = args['headless']
 	clock = args['clock']	
 	
-#	sync_thread = threading.Thread(target=sync.main, args=[[clock]])
-#	sync_thread.daemon = True 
-#	sync_thread.start()
+	sync_thread = threading.Thread(target=sync.main, args=[[clock]])
+	sync_thread.daemon = True 
+	sync_thread.start()
 	ingest.main([headless])
 	process.main()
 

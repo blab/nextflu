@@ -10,10 +10,10 @@ def config():
 		handle.write("access_key = " + os.environ['S3_KEY'] + "\n")
 		handle.write("secret_key = " + os.environ['S3_SECRET'] + "\n")		
 		handle.close()	
+	os.system("s3cmd mb s3://" + os.environ['S3_BUCKET'])			
 
 def data():
 	print "Syncing data with S3"
-	os.system("s3cmd mb s3://" + os.environ['S3_BUCKET'])	
 	os.system("s3cmd sync --acl-public data/ s3://" + os.environ['S3_BUCKET'] + "/data/")	
 
 def str2bool(obj):
@@ -35,6 +35,7 @@ def main(argv):
 		os.system("ntpdate ntp.ubuntu.com")
 	
 	config()
+	data()
 	schedule.every().minute.do(data)	
 	while True:
 		schedule.run_pending()
