@@ -7,7 +7,8 @@ import subprocess
 import dendropy
 from io_util import *
 							
-RAXML_LIMIT = 1.0 # in hours			
+OUTGROUP = 'A/Beijing/32/1992'							
+RAXML_LIMIT = 0.05 # in hours			
 							
 def cleanup():
 	for file in glob.glob("RAxML_*"):
@@ -48,13 +49,19 @@ def main():
 	checkpoint_files = [file for file in glob.glob("RAxML_checkpoint*")]
 	if len(checkpoint_files) > 0:
 		last_tree_file = checkpoint_files[-1]	
-		shutil.copy(last_tree_file, 'final_tree.newick')
+		shutil.copy(last_tree_file, 'raxml_tree.newick')
 	else:
-		shutil.copy("initial_tree.newick", 'final_tree.newick')
-		
-	print "RAxML branch length optimization"
-	os.system("raxml -f e -T 6 -s temp.phyx -n branches -c 25 -m GTRGAMMA -p 344312987 -t final_tree.newick")
-	os.rename('RAxML_result.branches', 'data/tree_infer.newick')
+		shutil.copy("initial_tree.newick", 'raxml_tree.newick')
+
+	print "RAxML branch length optimization and rooting"
+	os.system("raxml -f e -T 6 -s temp.phyx -n branches -c 25 -m GTRGAMMA -p 344312987 -t raxml_tree.newick -o " + OUTGROUP)
+	os.rename('RAxML_result.branches', 'data/tree_branches.newick')
+
+	print "RAxML ancestral state inference"
+	os.system("raxml -f A -T 6 -s temp.phyx -n states -c 25 -m GTRGAMMA -p 344312987 -t data/tree_branches.newick")
+	os.rename('RAxML_nodeLabelledRootedTree.states', 'data/tree_states.newick')
+	os.rename('RAxML_marginalAncestralStates.states', 'data/states.txt')
+
 	cleanup()	
 
 if __name__ == "__main__":

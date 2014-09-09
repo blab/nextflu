@@ -7,7 +7,7 @@ from tree_util import *
 def main():
 	print "--- Streamline at " + time.strftime("%H:%M:%S") + " ---"
 
-	tree = read_json('data/tree_freq.json')
+	tree = read_json('data/tree_clean.json')
 
 	for node in all_descendants(tree):
 		node.pop("seq", None)

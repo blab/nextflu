@@ -7,6 +7,27 @@ from io_util import *
 
 OUTGROUP = 'A/Beijing/32/1992'
 
+def delimit_newick(infile_name):
+	with open(infile_name, 'r') as file:
+		newick = file.read().replace('\n', '')	
+		newick = re.sub(r'(A/[^\:^,^)]+)', r"'\1'", newick)
+	return newick
+		
+def crossref_import(branches_tree_file, states_tree_file, states_file):
+	"""RAxML won't return a single NEWICK tree with both ancestral states and branch lengths"""
+	"""This opens the necessary RAxL output files and outputs a single Dendropy tree"""
+	label_to_seq = {}
+	with open(states_file) as file:
+		for line in file:
+			(label, seq) = line.split()
+			label_to_seq[label] = seq
+	branches_tree = dendropy.Tree.get_from_string(delimit_newick(branches_tree_file), "newick", as_rooted=True)
+	states_tree = dendropy.Tree.get_from_string(delimit_newick(states_tree_file), "newick", as_rooted=True)	
+	for (bn, sn) in zip(branches_tree.postorder_node_iter(), states_tree.postorder_node_iter()):
+		if sn.label:
+			bn.seq = label_to_seq[sn.label]
+	return branches_tree
+
 def to_json(node):
 	json = {}
 	if hasattr(node, 'clade'):
@@ -42,11 +63,11 @@ def get_xvalue(node):
 	root = node.get_tree_root()
 	return node.get_distance(root)
 
-def reroot(tree):
+def remove_outgroup(tree):
 	"""Reroot tree to outgroup"""
 	outgroup_node = tree.find_node_with_taxon_label(OUTGROUP)	
 	if outgroup_node:
-		tree.to_outgroup_position(outgroup_node, update_splits=False)
+#		tree.to_outgroup_position(outgroup_node, update_splits=False)
 		tree.prune_subtree(outgroup_node)
 		
 def collapse(tree):
@@ -121,27 +142,22 @@ def add_virus_attributes(viruses, tree):
 			node.date = strain_to_date[strain]
 		if strain_to_seq.has_key(strain):
 			node.seq = strain_to_seq[strain]
-									
-def delimit_newick(infile_name, outfile_name):
-	with open(infile_name, 'r') as file:
-		newick = file.read().replace('\n', '')	
-		newick = re.sub(r'(A/[^\:^,]+)', r"'\1'", newick)
-	with open(outfile_name, 'w') as file:
-		file.write(newick)	
-									
+																		
 def main():
 
 	print "--- Tree clean at " + time.strftime("%H:%M:%S") + " ---"
 		
 	viruses = read_json('data/virus_clean.json')
-	delimit_newick("data/tree_infer.newick", "temp.newick")
-	tree = dendropy.Tree.get_from_path("temp.newick", "newick")	
-	reroot(tree)
+	tree = crossref_import('data/tree_branches.newick', 'data/tree_states.newick', 'data/states.txt')
+	print "Remove outgroup"
+	remove_outgroup(tree)
+	print "Remove outlier branches"	
 	reduce(tree)
+	print "Collapse internal nodes"		
 	collapse(tree)	
+	print "Ladderize tree"	
 	ladderize(tree)
 	add_node_attributes(tree)
-#	layout(tree)
 	add_virus_attributes(viruses, tree)
 
 	write_json(to_json(tree.seed_node), "data/tree_clean.json")
