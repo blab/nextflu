@@ -1,7 +1,7 @@
 # clean sequences after alignment, criteria based on sequences
 # make inline with canonical ordering (no extra gaps)
 
-import os, datetime, time
+import os, datetime, time, re
 from scipy import stats
 import numpy
 from io_util import *
@@ -51,7 +51,22 @@ def clean_distances(viruses):
 	for (v,r) in zip(viruses,residuals):		# filter viruses more than 5 sds up or down
 		if (r > -5 * r_sd and r < 5 * r_sd) or v['strain'] == OUTGROUP:
 			new_viruses.append(v)
-	return new_viruses			
+	return new_viruses
+	
+def clean_outbreaks(viruses):
+	"""Remove duplicate strains, where the geographic location, date of sampling and sequence are identical"""
+	hash_to_count = {}
+	new_viruses = []
+	for v in viruses:
+		geo = re.search(r'A/([^/]+)/', v['strain']).group(1)
+		if geo:
+			hash = geo + "_" + v['date'] + "_" + v['seq']
+			if hash in hash_to_count:
+				hash_to_count[hash] += 1
+			else:
+				hash_to_count[hash] = 1
+				new_viruses.append(v)
+	return new_viruses
 		
 def main():
 
@@ -70,6 +85,10 @@ def main():
 	# clean sequences by distance	
 	viruses = clean_distances(viruses)
 	print str(len(viruses)) + " with clock"	
+	
+	# clean sequences by outbreak	
+	viruses = clean_outbreaks(viruses)
+	print str(len(viruses)) + " with outbreak sequences removed"		
 	
 	write_json(viruses, 'data/virus_clean.json')	
 
