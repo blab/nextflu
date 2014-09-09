@@ -149,7 +149,7 @@ function rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, int
 		
 }
 
-d3.json("https://s3.amazonaws.com/augur-data/data/tree_streamline.json", function(error, root) {
+d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error, root) {
 	var nodes = tree.nodes(root),
 		links = tree.links(nodes);
 	
@@ -204,11 +204,11 @@ d3.json("https://s3.amazonaws.com/augur-data/data/tree_streamline.json", functio
 		.data(links)
 		.enter().append("line")
 		.attr("class", "link")
-		.attr("x1", function(d) { return d.source.y; })
-	    .attr("y1", function(d) { return d.source.x; })
-	    .attr("x2", function(d) { return d.target.y; })
-	    .attr("y2", function(d) { return d.target.x; }); */
-	    	    	    
+		.attr("x1", function(d) { return d.source.x; })
+	    .attr("y1", function(d) { return d.source.y; })
+	    .attr("x2", function(d) { return d.target.x; })
+	    .attr("y2", function(d) { return d.target.y; }); 
+  */	    	    
 	var link = svg.selectAll(".link")
 		.data(links)
 		.enter().append("polyline")
@@ -230,7 +230,8 @@ d3.json("https://s3.amazonaws.com/augur-data/data/tree_streamline.json", functio
       			lMin = minimumAttribute(d.target, "yvalue", d.target.yvalue),
       			lMax = maximumAttribute(d.target, "yvalue", d.target.yvalue);
       		rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, internals)
-      	});   	    
+      	});   	  
+      	
 	    
 	var tipCircles = svg.selectAll(".tip")
 		.data(tips)
