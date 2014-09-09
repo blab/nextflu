@@ -8,7 +8,7 @@ import dendropy
 from io_util import *
 							
 OUTGROUP = 'A/Beijing/32/1992'							
-RAXML_LIMIT = 0.05 # in hours			
+RAXML_LIMIT = 1.0 # in hours			
 							
 def cleanup():
 	for file in glob.glob("RAxML_*"):
