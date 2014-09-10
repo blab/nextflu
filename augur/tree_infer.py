@@ -27,7 +27,7 @@ def delimit_newick(infile_name, outfile_name):
 def main():
 
 	print "--- Tree infer at " + time.strftime("%H:%M:%S") + " ---"
-		
+
 	cleanup()
 	viruses = read_json('data/virus_clean.json')
 	write_fasta(viruses, 'temp.fasta')
@@ -42,11 +42,17 @@ def main():
 	print "RAxML tree optimization with time limit " + str(RAXML_LIMIT) + " hours"
 	os.system("seqmagick convert temp.fasta temp.phyx")
 	# using exec to be able to kill process
+	end_time = time.time() + int(RAXML_LIMIT*3600)		
 	process = subprocess.Popen("exec raxml -f d -T 6 -j -s temp.phyx -n topology -c 25 -m GTRCAT -p 344312987 -t initial_tree.newick", shell=True)
-	time.sleep(int(RAXML_LIMIT*3600))
+	while (time.time() < end_time):
+		if os.path.isfile('raxml_result.topology'):
+			break
+		time.sleep(30)
 	process.terminate()
-	
+
 	checkpoint_files = [file for file in glob.glob("RAxML_checkpoint*")]
+	if os.path.isfile('raxml_result.topology'):
+		checkpoint_files.append('raxml_result.topology')
 	if len(checkpoint_files) > 0:
 		last_tree_file = checkpoint_files[-1]	
 		shutil.copy(last_tree_file, 'raxml_tree.newick')
