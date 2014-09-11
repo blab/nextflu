@@ -73,7 +73,7 @@ var width = 800,
 var tree = d3.layout.tree()
 	.size([height, width]);
 
-var svg = d3.select("svg")
+var treeplot = d3.select("#treeplot")
 	.attr("width", width)
 	.attr("height", height);
 		
@@ -101,7 +101,7 @@ var tooltip = d3.tip()
 		return string;
 	});
 	
-svg.call(tooltip);		
+treeplot.call(tooltip);		
 
 function rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, internals) {
 
@@ -114,12 +114,12 @@ function rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, int
 		d.y = yScale(d.yvalue);			 
 	});	
 		
-	svg.selectAll(".tip").data(tips)
+	treeplot.selectAll(".tip").data(tips)
     	.transition().duration(speed)
     	.attr("cx", function(d) { return d.x; })
     	.attr("cy", function(d) { return d.y; }); 
     	
-	svg.selectAll(".internal").data(internals)
+	treeplot.selectAll(".internal").data(internals)
     	.transition().duration(speed)
 		.attr("x", function(d) { 
 			if (typeof d.frequency != "undefined") {		
@@ -138,7 +138,7 @@ function rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, int
 			}			
 		});  
 	    
-	svg.selectAll(".link").data(links)
+	treeplot.selectAll(".link").data(links)
     	.transition().duration(speed)
 		.attr("points", function(d) {
 			var mod = 5*Math.sqrt(d.target.frequency)+0.5;
@@ -150,6 +150,7 @@ function rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, int
 }
 
 d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error, root) {
+//d3.json("auspice.json", function(error, root) {
 	var nodes = tree.nodes(root),
 		links = tree.links(nodes);
 	
@@ -187,20 +188,21 @@ d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error,
 		.range([10, height-10]);	
 						
 	var dateScale = d3.time.scale()
-		.domain([d3.min(dateValues), d3.max(dateValues)])
-		.range([0, 1]);
+		.domain([d3.min(dateValues), new Date()])
+		.range([-100, 100])
+		.clamp([true]);
 		
 	var yearScale = d3.scale.ordinal()
 		.domain([2014, "undefined", 2011, 2012, 2013])
 		.range(["#ff7f0e", "#1f77b4", "#7f7f7f", "#7f7f7f", "#7f7f7f"]);
-						
+							
 	nodes.forEach(function (d) {
 		d.x = xScale(d.xvalue);
 		d.y = yScale(d.yvalue);			 
 	});
 
 	// straight links
-/*	var link = svg.selectAll(".link")
+/*	var link = treeplot.selectAll(".link")
 		.data(links)
 		.enter().append("line")
 		.attr("class", "link")
@@ -209,7 +211,7 @@ d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error,
 	    .attr("x2", function(d) { return d.target.x; })
 	    .attr("y2", function(d) { return d.target.y; }); 
   */	    	    
-	var link = svg.selectAll(".link")
+	var link = treeplot.selectAll(".link")
 		.data(links)
 		.enter().append("polyline")
 		.attr("class", "link")
@@ -233,7 +235,7 @@ d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error,
       	});   	  
       	
 	    
-	var tipCircles = svg.selectAll(".tip")
+	var tipCircles = treeplot.selectAll(".tip")
 		.data(tips)
 		.enter()
 		.append("circle")
@@ -265,57 +267,40 @@ d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error,
 		})					
 		.on('mouseover', tooltip.show)
       	.on('mouseout', tooltip.hide);
-      	
-/*	var internalRects = svg.selectAll(".internal")
-		.data(internals)
+      	      	
+	var drag = d3.behavior.drag()
+		.origin(function(d) { return d; })
+		.on("drag", dragged);    	
+	
+	function dragged(d) {
+		
+		d.date = dateScale.invert(d3.event.x);
+		d.x = dateScale(d.date);
+		d3.select(this)
+			.text(function(d){ 
+    			return format(d.date) 
+    		});
+	}
+	
+    var date = new Date()  		
+	var counterData = {}
+	counterData['date'] = date	
+	counterData['x'] = dateScale(date)
+			    	
+	var format = d3.time.format("%Y %b %-d");
+	var counterText = treeplot.selectAll(".counter-text")
+		.data([counterData])
 		.enter()
-		.append("rect")		
-		.attr("class", "internal")
-		.attr("width", function(d) { 
-			if (typeof d.frequency != "undefined") {
-				return 10*Math.sqrt(d.frequency) + 1;
-			}
-			else {
-				return 2;
-			}
-		})
-		.attr("height", function(d) { 
-			if (typeof d.frequency != "undefined") {
-				return 10*Math.sqrt(d.frequency) + 1;
-			}
-			else {
-				return 2;
-			}			
-		})		
-		.attr("x", function(d) { 
-			if (typeof d.frequency != "undefined") {		
-				return d.x - 5*Math.sqrt(d.frequency) - 0.5;
-			}
-			else {
-				return d.x - 1;
-			}			
-		})
-		.attr("y", function(d) { 
-			if (typeof d.frequency != "undefined") {		
-				return d.y - 5*Math.sqrt(d.frequency) - 0.5;
-			}
-			else {
-				return d.y - 1;
-			}			
-		})			
-		.style("fill", function(d) { 
-			return d3.rgb("#CCC");
-		})		
-		.on('mouseover', tooltip.show)
-      	.on('mouseout', tooltip.hide)
-      	.on('click', function(d) { 
-      		var dMin = minimumAttribute(d, "xvalue", d.xvalue),
-      			dMax = maximumAttribute(d, "xvalue", d.xvalue),
-      			lMin = minimumAttribute(d, "yvalue", d.yvalue),
-      			lMax = maximumAttribute(d, "yvalue", d.yvalue);
-      		rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, internals)
-      	}); */  	
-      	
+		.append("text")			
+		.attr("class", "counter-text") 
+    	.attr("transform", "translate(80,30)")
+    	.style("text-anchor", "middle")
+    	.style("alignment-baseline", "middle")
+    	.text(function(d){ 
+    		return format(d.date) 
+    	})
+    	.call(drag);     
+    	  	
 	d3.select("#reset")
         .on("click", function(d) {
 			var dMin = d3.min(xValues),
