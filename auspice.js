@@ -316,7 +316,7 @@ d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error,
       	      	
 	var drag = d3.behavior.drag()
 		.origin(function(d) { return d; })
-		.on("drag", dragged);    	
+		.on("drag", dragged);
 	
 	function dragged(d) {
 		
@@ -368,6 +368,7 @@ d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error,
     	.text(function(d){ 
     		return format(d.date) 
     	})
+    	.style("cursor", "col-resize")
     	.call(drag);     
     	  	
 	d3.select("#reset")
