@@ -218,9 +218,13 @@ d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error,
 		.domain([2014, "undefined", 2011, 2012, 2013])
 		.range(["#ff7f0e", "#1f77b4", "#7f7f7f", "#7f7f7f", "#7f7f7f"]);
 		
-	var recencyScale = d3.scale.threshold()
+	var recencyColorScale = d3.scale.threshold()
 		.domain([0.00, 0.33, 0.66, 1.0])
-		.range(["#aaa", "#E04328", "#E78C36", "#CFB642", "#799CB3"]);	// red, orange, yellow, blue		
+		.range(["#aaa", "#E04328", "#E78C36", "#CFB642", "#799CB3"]);	// red, orange, yellow, blue
+		
+	var recencySizeScale = d3.scale.threshold()
+		.domain([0.00, 0.33, 0.66, 1.0])
+		.range([0, 3.25, 2.5, 1.75, 1]);				
 		
 	var freqScale = d3.scale.sqrt()
 		.domain([0, 1])
@@ -272,19 +276,24 @@ d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error,
 		.attr("class", "tip")
 		.attr("cx", function(d) {return d.x})
 		.attr("cy", function(d) {return d.y})
-		.attr("r", 2)		
+		.attr("r", function(d) { 
+			var date = new Date(d.date);		
+			var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
+			var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
+			return recencySizeScale(diffYears);
+		})			
 		.style("fill", function(d) { 
 			var date = new Date(d.date);		
 			var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
-			var diffDays = (globalDate.getTime() - date.getTime()) / oneYear;
-			var col = recencyScale(diffDays);
+			var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
+			var col = recencyColorScale(diffYears);
 			return d3.rgb(col).brighter([0.7]).toString();	
 		})	
 		.style("stroke", function(d) { 
 			var date = new Date(d.date);		
 			var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
-			var diffDays = (globalDate.getTime() - date.getTime()) / oneYear;
-			var col = recencyScale(diffDays);
+			var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
+			var col = recencyColorScale(diffYears);
 			return d3.rgb(col).toString();	
 		})					
 		.on('mouseover', tooltip.show)
@@ -305,18 +314,24 @@ d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error,
     		});
 		globalDate = d.date;
 		d3.selectAll(".tip")
+			.attr("r", function(d) { 
+				var date = new Date(d.date);		
+				var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
+				var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
+				return recencySizeScale(diffYears);
+			})			
 			.style("fill", function(d) { 
 				var date = new Date(d.date);		
 				var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
-				var diffDays = (globalDate.getTime() - date.getTime()) / oneYear;
-				var col = recencyScale(diffDays);
+				var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
+				var col = recencyColorScale(diffYears);
 				return d3.rgb(col).brighter([0.7]).toString();	
 			})	    		
 			.style("stroke", function(d) { 
 				var date = new Date(d.date);		
 				var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
-				var diffDays = (globalDate.getTime() - date.getTime()) / oneYear;
-				var col = recencyScale(diffDays);
+				var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
+				var col = recencyColorScale(diffYears);
 				return d3.rgb(col).toString();	
 			}); 		
 		
