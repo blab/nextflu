@@ -28,6 +28,17 @@ function gatherInternals(node, internals) {
 	return internals;
 }
 
+function setDates(internals) {
+	internals.forEach(function (node) {
+		tips = gatherTips(node, []);
+		dates = []
+		tips.forEach(function (tip) {
+			dates.push(tip.date);
+		})
+		node.date = d3.min(dates);
+	})
+}
+
 function setFrequencies(node) {
 	if (typeof node.frequency == "undefined") {
 		node.frequency = 0.01;
@@ -180,6 +191,7 @@ d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error,
 	var tips = gatherTips(rootNode, []);
 	var internals = gatherInternals(rootNode, []);
 	setFrequencies(rootNode);
+	setDates(internals);
 		
 	var	xValues = nodes.map(function(d) {
   		return +d.xvalue;
@@ -209,8 +221,11 @@ d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error,
 		.domain([d3.min(yValues), d3.max(yValues)])
 		.range([10, height-10]);	
 						
+	var earliestDate = new Date(d3.min(dateValues));
+	earliestDate.setDate(earliestDate.getDate() + 120);						
+						
 	var dateScale = d3.time.scale()
-		.domain([new Date(d3.min(dateValues) + 30), new Date()])
+		.domain([earliestDate, globalDate])
 		.range([-100, 100])
 		.clamp([true]);
 		
@@ -224,7 +239,11 @@ d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error,
 		
 	var recencySizeScale = d3.scale.threshold()
 		.domain([0.00, 0.33, 0.66, 1.0])
-		.range([0, 3.25, 2.5, 1.75, 1]);				
+		.range([0, 3.25, 2.5, 1.75, 1]);	
+		
+	var recencySizeScaleLinks = d3.scale.threshold()
+		.domain([0.0])
+		.range([0, 2]);						
 		
 	var freqScale = d3.scale.sqrt()
 		.domain([0, 1])
@@ -245,6 +264,7 @@ d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error,
 	    .attr("x2", function(d) { return d.target.x; })
 	    .attr("y2", function(d) { return d.target.y; }); 
   */	    	    
+    
 	var link = treeplot.selectAll(".link")
 		.data(links)
 		.enter().append("polyline")
@@ -255,9 +275,7 @@ d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error,
 			+ (d.source.x-mod).toString() + "," + d.target.y.toString() + " "
 			+ (d.target.x).toString() + "," + d.target.y.toString()
 		})
-	    .style("stroke-width", function(d) {
-			return freqScale(d.target.frequency);		    	
-	    })
+		.style("stroke-width", 2)
 		.on('mouseover', tooltip.show)
       	.on('mouseout', tooltip.hide)	    
      	.on('click', function(d) { 
@@ -266,15 +284,15 @@ d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error,
       			lMin = minimumAttribute(d.target, "yvalue", d.target.yvalue),
       			lMax = maximumAttribute(d.target, "yvalue", d.target.yvalue);
       		rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, internals)
-      	});   	  
+      	}); 
       	
 	tips.forEach(function (d) {
 		var date = new Date(d.date);		
 		var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
 		var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;		
 		d.diff = diffYears; 
-	});	
-	    
+	});	       	  	  
+      		    
 	var tipCircles = treeplot.selectAll(".tip")
 		.data(tips)
 		.enter()
@@ -309,7 +327,7 @@ d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error,
     			return format(d.date) 
     		});
 		globalDate = d.date;
-		tips.forEach(function (d) {
+		nodes.forEach(function (d) {
 			var date = new Date(d.date);		
 			var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
 			var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;		
@@ -326,7 +344,11 @@ d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error,
 			.style("stroke", function(d) { 
 				var col = recencyColorScale(d.diff);
 				return d3.rgb(col).toString();	
-			}); 		
+			}); 	
+		d3.selectAll(".link")
+	    	.style("stroke-width", function(d) {
+				return recencySizeScaleLinks(d.target.diff);		    	
+	    	});			
 		
 	}
 		
