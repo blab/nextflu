@@ -8,7 +8,12 @@ def year_difference(start_date, end_date):
 	start_ord = start_date.toordinal()
 	end_ord = end_date.toordinal()
 	return (end_ord - start_ord) / 365.25
-
+	
+def year_delta(start_date, years):
+	days = round(years * 365.25)
+	delta = datetime.timedelta(days=days)
+	return start_date + delta
+	
 def numerical_date(date):
 	"""Takes a calendar date and a numerical dates in terms of years"""
 	start_date = datetime.date(year=date.year, month=1, day=1)

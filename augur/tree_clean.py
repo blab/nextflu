@@ -69,7 +69,7 @@ def remove_outgroup(tree):
 	if outgroup_node:
 #		tree.to_outgroup_position(outgroup_node, update_splits=False)
 		tree.prune_subtree(outgroup_node)
-		
+				
 def collapse(tree):
 	"""Collapse short edges to polytomies"""
 	for edge in tree.postorder_edge_iter():
@@ -149,10 +149,10 @@ def main():
 		
 	viruses = read_json('data/virus_clean.json')
 	tree = crossref_import('data/tree_branches.newick', 'data/tree_states.newick', 'data/states.txt')
-	print "Remove outgroup"
-	remove_outgroup(tree)
 	print "Remove outlier branches"	
 	reduce(tree)
+	print "Remove outgroup"
+	remove_outgroup(tree)
 	print "Collapse internal nodes"		
 	collapse(tree)	
 	print "Ladderize tree"	

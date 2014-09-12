@@ -12,7 +12,7 @@ def main():
 	virus_clean.main()			# Clean sequences	
 	tree_infer.main()			# Make tree
 	tree_clean.main()			# Clean tree	
-	tree_frequency.main()		# Add clade frequencies
+#	tree_frequency.main()		# Add clade frequencies
 	tree_auspice.main()			# Streamline tree for auspice
 
 if __name__ == "__main__":
