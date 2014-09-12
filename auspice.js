@@ -39,6 +39,25 @@ function setDates(internals) {
 	})
 }
 
+function getVaccines(tips) {
+	vaccineChoice = {};
+	vaccineChoice['A/Fujian/411/2002'] = "2004-02-21";
+	vaccineChoice['A/California/7/2004'] = "2005-02-21";	
+	vaccineChoice['A/Wisconsin/67/2005'] = "2006-02-21";		
+	vaccineChoice['A/Brisbane/10/2007'] = "2008-02-21";
+	vaccineChoice['A/Perth/16/2009'] = "2010-02-21";
+	vaccineChoice['A/Victoria/361/2011'] = "2012-02-21";
+	vaccineStrains = Object.keys(vaccineChoice);
+	vaccines = [];
+	tips.forEach(function (tip) {
+		if (vaccineStrains.indexOf(tip.strain) != -1) {
+			tip.date = vaccineChoice[tip.strain];
+			vaccines.push(tip);
+		}
+	})
+	return vaccines;
+}
+
 function setFrequencies(node) {
 	if (typeof node.frequency == "undefined") {
 		node.frequency = 0.01;
@@ -136,7 +155,7 @@ var tooltip = d3.tip()
 	
 treeplot.call(tooltip);		
 
-function rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, internals) {
+function rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, internals, vaccines) {
 
 	var speed = 1500;
 	xScale.domain([dMin,dMax]);
@@ -151,6 +170,11 @@ function rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, int
     	.transition().duration(speed)
     	.attr("cx", function(d) { return d.x; })
     	.attr("cy", function(d) { return d.y; }); 
+    	
+	treeplot.selectAll(".vaccine").data(vaccines)
+    	.transition().duration(speed)
+    	.attr("cx", function(d) { return d.x; })
+    	.attr("cy", function(d) { return d.y; });     	
     	
 	treeplot.selectAll(".internal").data(internals)
     	.transition().duration(speed)
@@ -192,6 +216,7 @@ d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error,
 	var internals = gatherInternals(rootNode, []);
 	setFrequencies(rootNode);
 	setDates(internals);
+	var vaccines = getVaccines(tips);	
 		
 	var	xValues = nodes.map(function(d) {
   		return +d.xvalue;
@@ -238,13 +263,17 @@ d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error,
 		.range(["#aaa", "#E04328", "#E78C36", "#CFB642", "#799CB3"]);	// red, orange, yellow, blue
 		
 	var recencySizeScale = d3.scale.threshold()
-		.domain([0.00, 0.33, 0.66, 1.0])
+		.domain([0.0, 0.33, 0.66, 1.0])
 		.range([0, 3.25, 2.5, 1.75, 1]);	
 		
-	var recencySizeScaleLinks = d3.scale.threshold()
+	var recencyVaccineSizeScale = d3.scale.threshold()
 		.domain([0.0])
-		.range([0, 2]);						
+		.range([0, 8]);
 		
+	var recencyLinksSizeScale = d3.scale.threshold()
+		.domain([0.0])
+		.range([0, 2]);					
+				
 	var freqScale = d3.scale.sqrt()
 		.domain([0, 1])
 		.range([1, 10]);
@@ -275,15 +304,14 @@ d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error,
 			+ (d.source.x-mod).toString() + "," + d.target.y.toString() + " "
 			+ (d.target.x).toString() + "," + d.target.y.toString()
 		})
-		.style("stroke-width", 2)
-		.on('mouseover', tooltip.show)
-      	.on('mouseout', tooltip.hide)	    
+		.style("stroke-width", 2)   
+    	.style("cursor", "pointer")		 
      	.on('click', function(d) { 
       		var dMin = minimumAttribute(d.target, "xvalue", d.target.xvalue),
       			dMax = maximumAttribute(d.target, "xvalue", d.target.xvalue),
       			lMin = minimumAttribute(d.target, "yvalue", d.target.yvalue),
       			lMax = maximumAttribute(d.target, "yvalue", d.target.yvalue);
-      		rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, internals)
+      		rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, internals, vaccines);
       	}); 
       	
 	tips.forEach(function (d) {
@@ -300,7 +328,7 @@ d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error,
 		.attr("class", "tip")
 		.attr("cx", function(d) {return d.x})
 		.attr("cy", function(d) {return d.y})
-		.attr("r", function(d) { 
+		.attr("r", function(d) {
 			return recencySizeScale(d.diff);
 		})			
 		.style("fill", function(d) { 
@@ -313,6 +341,22 @@ d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error,
 		})					
 		.on('mouseover', tooltip.show)
       	.on('mouseout', tooltip.hide);
+      	   
+	var vaccineCircles = treeplot.selectAll(".vaccine")
+		.data(vaccines)
+		.enter()
+		.append("circle")
+		.attr("class", "vaccine")
+		.attr("cx", function(d) {return d.x})
+		.attr("cy", function(d) {return d.y})	
+		.attr("r", function(d) {
+			return recencyVaccineSizeScale(d.diff);
+		})	
+		.style("fill", d3.rgb("#97BE60").brighter([0.45]).toString())	
+		.style("stroke", "#97BE60")
+		.on('mouseover', tooltip.show)
+      	.on('mouseout', tooltip.hide);					
+		     	   
       	      	
 	var drag = d3.behavior.drag()
 		.origin(function(d) { return d; })
@@ -340,9 +384,9 @@ d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error,
 			d.diff = diffYears; 
 		});			
 		d3.selectAll(".tip")
-			.attr("r", function(d) { 
+			.attr("r", function(d) {
 				return recencySizeScale(d.diff);
-			})			
+			})		
 			.style("fill", function(d) { 
 				var col = recencyColorScale(d.diff);
 				return d3.rgb(col).brighter([0.7]).toString();	
@@ -350,10 +394,14 @@ d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error,
 			.style("stroke", function(d) { 
 				var col = recencyColorScale(d.diff);
 				return d3.rgb(col).toString();	
-			}); 	
+			}); 
+		d3.selectAll(".vaccine")
+			.attr("r", function(d) {
+				return recencyVaccineSizeScale(d.diff);
+			});	
 		d3.selectAll(".link")
 	    	.style("stroke-width", function(d) {
-				return recencySizeScaleLinks(d.target.diff);		    	
+				return recencyLinksSizeScale(d.target.diff);		    	
 	    	});			
 		
 	}
@@ -383,7 +431,7 @@ d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error,
       			dMax = d3.max(xValues),
       			lMin = d3.min(yValues),
       			lMax = d3.max(yValues);        	
-            rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, internals);
+            rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, internals, vaccines);
 		})  
 		
 });
