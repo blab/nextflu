@@ -1,6 +1,17 @@
 import dendropy, datetime
 import numpy as np
 
+def date_to_day(date):
+	if isinstance(date, datetime.date):
+		return date.toordinal()
+	elif isinstance(date,basestring):
+		return datetime.datetime.strptime(date, '%Y-%m-%d').toordinal()
+	elif isinstance(date, int):
+		return date
+	else:
+		print "unknown date format", date
+		return np.nan
+
 def from_json(json):
 	'''
 	read a json dictionary and make a dendropy tree from it. 
@@ -24,7 +35,7 @@ def from_sub_json(json, node):
 				from_sub_json(sub_json, child_node)
 				node.add_child(child_node, edge_length = child_node.xvalue - node.xvalue)
 		elif attr=='date':
-			node.date = datetime.datetime.strptime(val, '%Y-%m-%d').date().toordinal()/365.0
+			node.date = date_to_day(val)
 		else:
 			try:
 				node.__setattr__(attr, float(val))
@@ -35,7 +46,7 @@ def from_sub_json(json, node):
 	else:
 		node.taxon = False
 
-def get_average_T2(tree, dt):
+def get_average_T2(tree, dt=365):
 	'''
 	calculates the average pairwise distance between nodes from a time interval dt
 	repeats this for a bunch of dt intervals, returns the average
@@ -44,15 +55,16 @@ def get_average_T2(tree, dt):
 	'''
 
 	leaves = tree.leaf_nodes()
-	leaves.sort(key=lambda x:x.date, reverse = True)
-	upper_cutoff = leaves[0].date
+	leaves.sort(key=lambda x: date_to_day(x.date), reverse = True)	  
+	upper_cutoff = date_to_day(leaves[0].date)
+	print len(leaves), upper_cutoff
 	ndt = 4
 	T2 = 0
 	ntrees = 0
 	for ii in xrange(ndt):
 		leaf_set = set([leaf for leaf in leaves 
-				if leaf.date<upper_cutoff-ii*dt 
-				and leaf.date>=upper_cutoff-(ii+1)*dt])
+				if date_to_day(leaf.date)<upper_cutoff-ii*dt 
+				and date_to_day(leaf.date)>=upper_cutoff-(ii+1)*dt])
 		if len(leaf_set)>10:
 			tmp_T2= avg_T2_of_leaf_set(tree, leaf_set) 
 			T2 += tmp_T2
@@ -116,9 +128,9 @@ def calc_LBI(tree, tau):
 
 def test():
 	from io_util import read_json 
-	tree = from_json(read_json('tree.json'))
+	tree = from_json(read_json('data/tree.json'))
 	print "calculate local branching index"
-	T2 = get_average_T2(tree, 1)
+	T2 = get_average_T2(tree, 365)
 	tau =  T2*2**-4
 	print "avg pairwise distance:", T2
 	print "memory time scale:", tau

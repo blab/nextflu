@@ -48,3 +48,8 @@ Thumbs.db
 
 # autosave #
 *~
+
+# derived files and data
+data/*
+
+
