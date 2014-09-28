@@ -24,8 +24,7 @@ def from_sub_json(json, node):
 				from_sub_json(sub_json, child_node)
 				node.add_child(child_node, edge_length = child_node.xvalue - node.xvalue)
 		elif attr=='date':
-			y,m,d = map(int, val.split('-')) 
-			node.date = datetime.date(year=y, month=m, day=d).toordinal()/365.0
+			node.date = datetime.datetime.strptime(val, '%Y-%m-%d').date().toordinal()/365.0
 		else:
 			try:
 				node.__setattr__(attr, float(val))
