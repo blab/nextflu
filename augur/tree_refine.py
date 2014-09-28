@@ -6,6 +6,7 @@ import dendropy
 from io_util import *
 from seq_util import *
 from date_util import *
+from tree_LBI import *
 
 OUTGROUP = 'A/Beijing/32/1992'
 
@@ -43,11 +44,13 @@ def to_json(node):
 	if hasattr(node, 'distance_ep'):
 		json['distance_ep'] = node.distance_ep
 	if hasattr(node, 'distance_ne'):
-		json['distance_ne'] = node.distance_ne				
+		json['distance_ne'] = node.distance_ne
 	if hasattr(node, 'date'):
 		json['date'] = node.date
 	if hasattr(node, 'seq'):
 		json['seq'] = node.seq
+	if hasattr(node, 'LBI'):
+		json['LBI'] = round(node.LBI,5)
 	if node.child_nodes():
 		json["children"] = []
 		for ch in node.child_nodes():
@@ -118,7 +121,7 @@ def layout(tree):
 			b.yvalue = yvalue
 			
 	for node in tree.postorder_node_iter():
-		node.yvalue = get_yvalue(node)	
+		node.yvalue = get_yvalue(node)
 
 def add_virus_attributes(viruses, tree):
 	"""Add date and seq attributes to all tips in tree"""
@@ -126,7 +129,8 @@ def add_virus_attributes(viruses, tree):
 	strain_to_seq = {}
 	for v in viruses:
 		strain_to_date[v['strain']] = v['date']
-		strain_to_seq[v['strain']] = v['seq']	
+		strain_to_seq[v['strain']] = v['seq']
+
 	for node in tree.postorder_node_iter():
 		strain = str(node.taxon).replace("'", '')
 		if strain_to_date.has_key(strain):
@@ -156,8 +160,16 @@ def add_node_attributes(tree):
 			node.mut_ne = mut_ne
 	for node in tree.postorder_node_iter():
 		node.trunk_count = 0
-		node.trunk = False			
+		node.trunk = False
 			
+def add_LBI(tree):
+	print "calculate local branching index"
+	T2 = get_average_T2(tree, 1)
+	tau =  T2*2**-4
+	print "avg pairwise distance:", T2
+	print "memory time scale:", tau
+	calc_LBI(tree, tau = tau)
+
 def define_trunk(tree):
 	"""Trace current lineages backward to define trunk"""
 	
@@ -198,14 +210,16 @@ def compute_distances(tree):
 				parent = parent.parent_node
 			node.distance_ep = distance_ep
 			node.distance_ne = distance_ne	
-				
-															
+
 def main():
 
 	print "--- Tree refine at " + time.strftime("%H:%M:%S") + " ---"
 		
 	viruses = read_json('data/virus_clean.json')
+	
 	tree = crossref_import('data/raxml_branches.newick', 'data/raxml_states.newick', 'data/raxml_states.txt')
+	print "Remove outlier branches" 
+	reduce(tree)
 	print "Remove outgroup"
 	remove_outgroup(tree)
 	print "Remove outlier branches"	
@@ -221,8 +235,10 @@ def main():
 	define_trunk(tree)
 	print "Compute distances"
 	compute_distances(tree)	
+	print "Add lineage branching index"
+	add_LBI(tree)
 
 	write_json(to_json(tree.seed_node), "data/tree_refine.json")
-	
+
 if __name__ == "__main__":
-    main()
+	main()
