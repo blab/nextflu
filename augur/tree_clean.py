@@ -149,10 +149,10 @@ def main():
 		
 	viruses = read_json('data/virus_clean.json')
 	tree = crossref_import('data/tree_branches.newick', 'data/tree_states.newick', 'data/states.txt')
-	print "Remove outlier branches"	
-	reduce(tree)
 	print "Remove outgroup"
 	remove_outgroup(tree)
+	print "Remove outlier branches"	
+	reduce(tree)
 	print "Collapse internal nodes"		
 	collapse(tree)	
 	print "Ladderize tree"	
