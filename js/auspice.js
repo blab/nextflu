@@ -47,6 +47,7 @@ function getVaccines(tips) {
 	vaccineChoice['A/Brisbane/10/2007'] = "2008-02-21";
 	vaccineChoice['A/Perth/16/2009'] = "2010-02-21";
 	vaccineChoice['A/Victoria/361/2011'] = "2012-02-21";
+	vaccineChoice['A/Texas/50/2012'] = "2014-02-21";	
 	vaccineStrains = Object.keys(vaccineChoice);
 	vaccines = [];
 	tips.forEach(function (tip) {
@@ -135,18 +136,18 @@ var tooltip = d3.tip()
 	.offset([0, 10])
 	.html(function(d) {
 		string = ""
-		if (typeof d.frequency != "undefined") {
-			if (d.frequency > 0.01) {
-				string = d.frequency;
-			}
-		}
-		if (typeof d.target != "undefined") {
-			if (typeof d.target.frequency != "undefined") {
-				if (d.target.frequency > 0.01) {
-					string = d.target.frequency;
-				}
-			}	
-		}	
+//		if (typeof d.frequency != "undefined") {
+//			if (d.frequency > 0.01) {
+//				string = d.frequency;
+//			}
+//		}
+//		if (typeof d.target != "undefined") {
+//			if (typeof d.target.frequency != "undefined") {
+//				if (d.target.frequency > 0.01) {
+//					string = d.target.frequency;
+//				}
+//			}	
+//		}	
 		if (typeof d.strain != "undefined") {
 			string = d.strain;
 		}		
@@ -169,7 +170,7 @@ function rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, int
 	treeplot.selectAll(".tip").data(tips)
     	.transition().duration(speed)
     	.attr("cx", function(d) { return d.x; })
-    	.attr("cy", function(d) { return d.y; }); 
+    	.attr("cy", function(d) { return d.y; });
     	
 	treeplot.selectAll(".vaccine").data(vaccines)
     	.transition().duration(speed)
@@ -326,8 +327,9 @@ d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error,
 		.enter()
 		.append("circle")
 		.attr("class", "tip")
-		.attr("cx", function(d) {return d.x})
-		.attr("cy", function(d) {return d.y})
+		.attr("id", function(d) { return (d.strain).replace(/\//g, ""); })
+		.attr("cx", function(d) { return d.x; })
+		.attr("cy", function(d) { return d.y; })
 		.attr("r", function(d) {
 			return recencySizeScale(d.diff);
 		})			
@@ -433,5 +435,28 @@ d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error,
       			lMax = d3.max(yValues);        	
             rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, internals, vaccines);
 		})  
+		
+	function onSelect(tip) {
+		d3.select("#"+(tip.strain).replace(/\//g, ""))
+	//		.transition()
+	//		.attr("r", function(d) {
+	//			return 10;
+	//		});
+			.call(function(d) {
+				console.log(tip);
+				console.log(d);
+				tooltip.show(tip, d[0][0]);
+			});
+	//		.on('mouseout', tooltip.show);
+	}		
+		
+	var mc = autocomplete(document.getElementById('search'))
+		.keys(tips)
+		.dataField("strain")
+		.placeHolder("Search strains")
+		.width(800)
+		.height(500)
+		.onSelected(onSelect)
+		.render();	
 		
 });

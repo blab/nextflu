@@ -2,8 +2,8 @@
 <html lang="en">
 
 	<head>					
-		<script src="http://d3js.org/d3.v3.min.js"></script>
-		<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>		
+		<script src="js/d3.min.js"></script>
+		<link rel="stylesheet" href="autocomplete.css"/>
 		<style>
 
 		.node circle {
@@ -46,12 +46,22 @@
 	</head>
 
 	<body>
+	
 		 <div style="width:800px; margin:0 auto;">
- 			<svg id="treeplot"></svg>
+	 
+ 			<svg id="treeplot"></svg> 
 			<p>	
-			<button id="reset">reset</button>
+			 <div style="width:200px;" class="container">
+				<div id="search" type="search"></div>
+			</div>
+			<button id="reset" style="float:right;">reset</button>
+					
+			
     	</div>
-		<script src="auspice.js"></script>
+
+		<script src="js/d3.tip.js"></script>	
+		<script src="js/autocomplete.js"></script>	
+		<script src="js/auspice.js"></script>				
 	</body>
 
 </html>
