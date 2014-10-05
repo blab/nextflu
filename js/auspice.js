@@ -341,7 +341,9 @@ d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error,
 			var col = recencyColorScale(d.diff);
 			return d3.rgb(col).toString();	
 		})					
-		.on('mouseover', tooltip.show)
+		.on('mouseover', function(d) {
+			tooltip.show(d, this);
+		})		
       	.on('mouseout', tooltip.hide);
       	   
 	var vaccineCircles = treeplot.selectAll(".vaccine")
@@ -356,7 +358,9 @@ d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error,
 		})	
 		.style("fill", d3.rgb("#97BE60").brighter([0.45]).toString())	
 		.style("stroke", "#97BE60")
-		.on('mouseover', tooltip.show)
+		.on('mouseover', function(d) {
+			tooltip.show(d, this);
+		})	
       	.on('mouseout', tooltip.hide);					
 		     	   
       	      	
@@ -438,16 +442,9 @@ d3.json("https://s3.amazonaws.com/augur-data/data/auspice.json", function(error,
 		
 	function onSelect(tip) {
 		d3.select("#"+(tip.strain).replace(/\//g, ""))
-	//		.transition()
-	//		.attr("r", function(d) {
-	//			return 10;
-	//		});
 			.call(function(d) {
-				console.log(tip);
-				console.log(d);
 				tooltip.show(tip, d[0][0]);
 			});
-	//		.on('mouseout', tooltip.show);
 	}		
 		
 	var mc = autocomplete(document.getElementById('search'))
