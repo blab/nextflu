@@ -48,6 +48,7 @@ function getVaccines(tips) {
 	vaccineChoice['A/Perth/16/2009'] = "2010-02-21";
 	vaccineChoice['A/Victoria/361/2011'] = "2012-02-21";
 	vaccineChoice['A/Texas/50/2012'] = "2014-02-21";	
+	vaccineChoice['A/Switzerland/9715293/2013'] = "2014-09-25";
 	vaccineStrains = Object.keys(vaccineChoice);
 	vaccines = [];
 	tips.forEach(function (tip) {
