@@ -192,6 +192,28 @@ def calc_LBI(tree, tau, window = None):
             node.LBI += child.up_polarizer
     #done
 
+def calc_delta_LBI(tree, tau, cutoff1, cutoff2=None, log_delta = False):
+    '''
+    function that calculates the LBI for nodes up to cutoff1 and cutoff2
+    and then takes the difference betweem the two values. 
+    parameters:
+    tree      --  dendropy tree
+    cutoff1   --  the earlier cutoff as a datetime object
+    cutoff2   --  the later cutoff. optional, by default 01/01/2050
+    '''
+    calc_LBI(tree, tau = tau, window = [datetime.datetime(1900,1,1).toordinal(),cutoff1.toordinal()])
+    for node in tree.postorder_node_iter():
+        node.delta_LBI = -node.LBI
+    if cutoff2 is None:
+        cutoff2 =  datetime.datetime(2050,1,1)
+    calc_LBI(tree, tau = tau, window = [datetime.datetime(1900,1,1).toordinal(),cutoff2.toordinal()])
+    for node in tree.postorder_node_iter():
+        if log_delta:
+            node.delta_LBI = -(node.LBI)/(node.delta_LBI+1e-10)
+        else:
+            node.delta_LBI += node.LBI
+
+
 def add_dates_to_internal(tree):
     for node in tree.postorder_node_iter():
         if len(node.child_nodes()):
@@ -223,15 +245,10 @@ def test():
     tree = from_json(read_json('data/20141228_tree_auspice.json'))
     print "calculate local branching index"
     T2 = get_average_T2(tree, 365)
-    tau =  T2*2**-3
+    tau =  T2*2**-4
     print "avg pairwise distance:", T2
     print "memory time scale:", tau
-    calc_LBI(tree, tau = tau, window = [datetime.datetime(1900,1,1).toordinal(), datetime.datetime(2014,1,1).toordinal()])
-    for node in tree.postorder_node_iter():
-        node.delta_LBI = -node.LBI
-    calc_LBI(tree, tau = tau, window = [datetime.datetime(1900,1,1).toordinal(), datetime.datetime(2015,1,1).toordinal()])
-    for node in tree.postorder_node_iter():
-        node.delta_LBI += node.LBI
+    calc_delta_LBI(tree, tau, datetime.datetime(2014,1,1))
     bioTree = to_Biopython(tree)
     color_BioTree_by_attribute(bioTree, 'date')
     return bioTree
