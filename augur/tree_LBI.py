@@ -4,8 +4,25 @@ import numpy as np
 
 
 def color_BioTree_by_attribute(T,attribute, vmin=None, vmax = None, missing_val='min', transform = lambda x:x, cmap=None):
-    vals = [transform(t.__getattribute__(attribute)) for t in T.get_terminals()+T.get_nonterminals() if attribute in t.__dict__]
-    if vmin is None:
+    '''
+    simple function that assigns a color to each node in a biopython tree
+    the color can be determined by any attribute of the nodes. missing attributes will be
+    determined from the children, all children are assumed to have the attribute
+    in addition, the attribute can be transformed for example by taking the log
+    parameters:
+    T               -- BioPython tree
+    attribute       -- name of the attribute that is to be used to color the tree. 
+    vmin            -- lower offset that is subtracted
+    vmax            -- values are scaled as (val-vmin)/(vmax-vmin)
+    missing val     -- if the attribute does not exist is a particular node, 
+                       the min, max, or mean of the children is used
+    transform       -- function mapping float to float, e.g. log
+    cmap            -- colormap to be used
+    '''
+    # make a list of tranformed data
+    vals = [transform(t.__getattribute__(attribute)) for t in 
+            T.get_terminals()+T.get_nonterminals() if attribute in t.__dict__]
+    if vmin is None:  # if vmin or vmax is not provided, use min or max of data
         vmin = min(vals)
         print "Set vmin to",vmin
     if vmax is None:
@@ -15,6 +32,7 @@ def color_BioTree_by_attribute(T,attribute, vmin=None, vmax = None, missing_val=
         from matplotlib.cm import jet
         cmap=jet
 
+    # assign function used to determine missing values from children
     if missing_val=='min':
         missing_val_func = min
     elif missing_val=='mean':
@@ -24,11 +42,13 @@ def color_BioTree_by_attribute(T,attribute, vmin=None, vmax = None, missing_val=
     else:
         missing_val_func = min
 
+    # loop over all nodes, catch missing values and assign
     for node in T.get_nonterminals(order='postorder'):
         if attribute not in node.__dict__:
             node.__setattr__(attribute, missing_val_func([c.__getattribute__(attribute) for c in node.clades]))
             print "node", node,"has no",attribute,"Setting to min:", node.__getattribute__(attribute)
 
+    # map value to color for each node
     for node in T.get_terminals()+T.get_nonterminals():
         node.color = map(int, np.array(cmap((transform(node.__getattribute__(attribute))-vmin)/(vmax-vmin))[:-1])*255)
 
@@ -130,15 +150,26 @@ def calc_LBI(tree, tau, window = None):
     tau  -- the memory time scale of tree length along branches of the tree
     '''
     import numpy as np
+    # traverse the tree in postorder (children first) to mark alive nodes
+    if window is None:
+        for node in tree.postorder_node_iter():
+            node.alive=True
+    else:
+        for node in tree.postorder_node_iter():
+            if len(node.child_nodes())==0 and (node.date>=window[0] and node.date<window[1]):
+                node.alive=True
+            else:
+                node.alive = any([c.alive for c in node.child_nodes()])
+
     # traverse the tree in postorder (children first) to calculate msg to parents
     for node in tree.postorder_node_iter():
         node.down_polarizer = 0
         node.up_polarizer = 0
-        for child in node.child_nodes():
-            node.up_polarizer += child.up_polarizer
-        bl =  node.edge_length/tau
-        if window is None or len(node.child_nodes()) \
-           or (node.date>=window[0] and node.date<window[1]):
+        if node.alive:
+            for child in node.child_nodes():
+                if child.alive:
+                    node.up_polarizer += child.up_polarizer
+            bl =  node.edge_length/tau
             node.up_polarizer *= np.exp(-bl)
             node.up_polarizer += tau*(1-np.exp(-bl))
 
@@ -192,7 +223,7 @@ def test():
     tree = from_json(read_json('data/20141228_tree_auspice.json'))
     print "calculate local branching index"
     T2 = get_average_T2(tree, 365)
-    tau =  T2*2**-4
+    tau =  T2*2**-3
     print "avg pairwise distance:", T2
     print "memory time scale:", tau
     calc_LBI(tree, tau = tau, window = [datetime.datetime(1900,1,1).toordinal(), datetime.datetime(2014,1,1).toordinal()])
