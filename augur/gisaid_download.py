@@ -1,7 +1,7 @@
 # loads sequences from GISAID
 # outputs to virus_ingest.json
 
-import os, time, json
+import os, time, json, sys
 from selenium import webdriver
 from Bio import SeqIO
 from io_util import *
@@ -10,12 +10,15 @@ GISAID_FASTA = 'gisaid_epiflu_sequence.fasta'
 
 def download_gisaid(start_year, end_year):
 
+	# variable name
+	VAR = "ncszee"
+
 	# start fresh
 	try:
 		os.remove(GISAID_FASTA)
 	except OSError:
 		pass 
-
+		
 	# start firefox driver
 	print "Start webdriver"
 	profile = webdriver.FirefoxProfile()
@@ -41,27 +44,27 @@ def download_gisaid(start_year, end_year):
 	# navigate to EpiFlu
 	print "Navigate to EpiFlu"			
 	time.sleep(10)
-	driver.execute_script("return sys.call('c_n7h14c_4l','Go',new Object({'page':'epi3'}));")
+	driver.execute_script("return sys.call('c_" + VAR + "_4l','Go',new Object({'page':'epi3'}));")
 
 	# fill in form and submit
 	print "Fill in form and submit"
 	time.sleep(10)
-	type = driver.find_element_by_id('ce_n7h14c_82_select')
+	type = driver.find_element_by_id('ce_nbp4cn_7x_select')
 	type.send_keys("A")
 	time.sleep(10)
-	ha = driver.find_element_by_id('ce_n7h14c_83_select')
+	ha = driver.find_element_by_id('ce_nbp4cn_7y_select')
 	ha.send_keys("3")
 	time.sleep(10)
-	na = driver.find_element_by_id('ce_n7h14c_84_select')
+	na = driver.find_element_by_id('ce_nbp4cn_7z_select')
 	na.send_keys("2")
 	time.sleep(10)
-	species = driver.find_element_by_id('ce_n7h14c_86_select')
+	species = driver.find_element_by_id('ce_nbp4cn_81_select')
 	species.send_keys("H")
 	time.sleep(10)
-	start_date = driver.find_element_by_id('ce_n7h14c_8a_input')
+	start_date = driver.find_element_by_id('ce_nbp4cn_85_input')
 	start_date.send_keys(str(start_year)+"-01-01")
 	time.sleep(10)
-	end_date = driver.find_element_by_id('ce_n7h14c_8b_input')
+	end_date = driver.find_element_by_id('ce_nbp4cn_86_input')
 	end_date.send_keys(str(end_year)+"-12-31")
 	time.sleep(10)	
 	button = driver.find_element_by_xpath("//button[@accesskey='g']")
@@ -73,23 +76,23 @@ def download_gisaid(start_year, end_year):
 	checkbox = driver.find_element_by_xpath("//span[@class='yui-dt-label']/input[@type='checkbox']")
 	checkbox.click()
 	time.sleep(30)
-	button = driver.find_element_by_xpath("//div[@id='ce_n7h14c_9f']//button")
+	button = driver.find_element_by_xpath("//div[@id='ce_nbp4cn_9a']//button")
 	button.click()
 
 	# set download options
 	print "Set download options"
 	time.sleep(10)
 	driver.switch_to_frame(driver.find_element_by_tag_name("iframe"))
-	checkbox = driver.find_element_by_xpath("//input[@name='ce_n7h14c_9k_name' and @value='dna']")
+	checkbox = driver.find_element_by_xpath("//input[@name='ce_nbp4cn_9f_name' and @value='dna']")
 	checkbox.click()
 	time.sleep(10)
-	checkbox = driver.find_element_by_xpath("//input[@name='ce_n7h14c_9m_name' and @value='HA']")
+	checkbox = driver.find_element_by_xpath("//input[@name='ce_nbp4cn_9h_name' and @value='HA']")
 	checkbox.click()
 
 	# download
 	print "Download"
 	time.sleep(10)
-	button = driver.find_element_by_xpath("//div[@id='ce_n7h14c_9y']//button")
+	button = driver.find_element_by_xpath("//div[@id='ce_nbp4cn_9t']//button")
 	button.click()
 	
 	# wait for download to complete
@@ -108,12 +111,12 @@ def download_gisaid(start_year, end_year):
 	# close driver
 	driver.quit()
 	
-def parse_gisaid():	
+def parse_gisaid(fasta):	
 	viruses = []
 	try:
-		handle = open(GISAID_FASTA, 'r')
+		handle = open(fasta, 'r')
 	except IOError:
-		print GISAID_FASTA + " not found"
+		print fasta + " not found"
 	else:
 		for record in SeqIO.parse(handle, "fasta"):
 			words = record.description.replace(">","").replace(" ","").split('|')
@@ -133,45 +136,27 @@ def parse_gisaid():
 				v['passage'] = passage
 			viruses.append(v)
 		handle.close()	
-		
-	# start fresh
-	try:
-		os.remove(GISAID_FASTA)
-	except OSError:
-		pass 
-		
+				
 	return viruses
 	
 def download_and_parse_gisaid(start_year, end_year):
 
 	download_gisaid(start_year, end_year)	# leaves GISAID_FASTA in dir
-	return parse_gisaid()
+	return parse_gisaid(GISAID_FASTA)
 		
-def main():
+def main(argv):
 
 	print "--- Ingest at " + time.strftime("%H:%M:%S") + " ---"
 
-	prior_length = 0
-	if os.path.isfile('data/virus_ingest.json'):
-  		prior_length = len(read_json('data/virus_ingest.json'))
-
 	viruses = []
-	
-	print "Downloading 1995 to 2008 viruses"	
-	viruses.extend(download_and_parse_gisaid(1995, 2008))
-	
-	print "Downloading 2009 to 2013 viruses"	
-	viruses.extend(download_and_parse_gisaid(2009, 2013))
-	
-	print "Downloading 2014+ viruses"	
-	viruses.extend(download_and_parse_gisaid(2014, 2020))		
-	current_length = len(viruses)
-	
-	if (current_length > prior_length):
-		print "Writing new virus_ingest.json with " + str(current_length) + " viruses"
-		write_json(viruses, 'data/virus_ingest.json')
-  	else:
-  		print "Keeping old virus_ingest.json with " + str(prior_length) + " viruses"
+
+	if len(argv) > 0:
+		viruses.extend(parse_gisaid(argv[0]))
+	else:
+		viruses.extend(download_and_parse_gisaid(2008, 2020))
+
+	print "Writing new virus_ingest.json with " + str(len(viruses)) + " viruses"
+	write_json(viruses, 'data/virus_ingest.json')
   		
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])

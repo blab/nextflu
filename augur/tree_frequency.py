@@ -6,6 +6,9 @@ from tree_util import *
 from date_util import *
 import numpy as np
 
+START_DATE = "2011-01-01"
+DAY_STEP = 10
+
 def observations_for_clade(node, dates):
 	"""Takes a node and a list of dates and returns an observation list"""
 	node_dates = get_dates(node)
@@ -72,7 +75,7 @@ class Filter:
 	"""An SMC particle filter, comprising n particles."""
 	"""Takes a list of dates and a list of (0,1) observations."""
 	"""Time in encoded in continuous units of years."""
-	particle_count = 300
+	particle_count = 500
 	timestep = 0.01
 	sigma = 5
 
@@ -82,6 +85,7 @@ class Filter:
 		self.end_num_date = numerical_date(datetime.date.today())
 		first_obs = self.observations[0]
 		self.particles = [Particle(first_obs) for i in range(Filter.particle_count)]
+		self.means = []
 
 	def __str__(self):
 		string = "[\n"
@@ -129,8 +133,9 @@ class Filter:
 		
 	def run(self):
 		steps = [j-i for i, j in zip(self.num_dates[:-1], self.num_dates[1:])]
-		for (s, obs) in zip(steps, self.observations[1:]):
+		for (s, obs, t) in zip(steps, self.observations[1:], self.num_dates[1:]):
 			self.update(s, obs)
+			self.means.append(self.mean())
 		final_step = self.end_num_date - self.num_dates[-1]
 		self.simulate(final_step)
 
@@ -172,6 +177,14 @@ def set_node_frequency(node, dates):
 	filter = Filter(dates, observations)
 	filter.run()
 	node['frequency'] = round(filter.mean(), 5)
+	means = []
+	for (d, m) in zip(dates, filter.means):
+		timepoint = {}
+		timepoint['date'] = d
+		timepoint['frequency'] = round(m, 5)
+		means.append(timepoint)
+	means = means[1:-1:10]
+	node['frequencies'] = means
 
 def main():
 	print "--- Frequencies at " + time.strftime("%H:%M:%S") + " ---"
@@ -185,6 +198,7 @@ def main():
 	for node in nodes:
 		set_node_frequency(node, dates)
 		print str(node['clade']) + ": " + str(node['frequency'])
+		print str(node['clade']) + ": " + str(node['frequencies'])
 	print "time: " + str(time.clock() - start)	
 	
 	write_json(tree, "data/tree_freq.json")		
