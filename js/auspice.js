@@ -152,6 +152,10 @@ var tooltip = d3.tip()
 		if (typeof d.strain != "undefined") {
 			string = d.strain;
 		}		
+		if (typeof d.date != "undefined") {
+			string += " "
+			string += d.date;
+		}				
 		return string;
 	});
 	
