@@ -40,7 +40,7 @@ RUN pip install schedule==0.3.0
 RUN apt-get install -y s3cmd
 
 # augur
-RUN git clone https://github.com/blab/augur.git /augur
+RUN git clone https://github.com/blab/augur.git /augur # fadsofjdlkaj
 WORKDIR /augur
 
 # default command
