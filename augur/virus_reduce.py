@@ -4,7 +4,7 @@
 import os, re, time, datetime
 from io_util import *
 
-YEARS_BACK = 4
+YEARS_BACK = 10
 	
 def add_outgroup(viruses):
 	viruses.insert(0, {
@@ -31,7 +31,7 @@ def main():
 
 	print "--- Reduce at " + time.strftime("%H:%M:%S") + " ---"
 
-	viruses = read_json('data/virus_epitope.json')
+	viruses = read_json('data/virus_nonepitope.json')
 	print str(len(viruses)) + " initial viruses"
 										
 	# reduce to manageable volume

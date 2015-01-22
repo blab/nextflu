@@ -35,11 +35,13 @@ def to_json(node):
 	if node.taxon:
 		json['strain'] = str(node.taxon).replace("'", '')
 	if hasattr(node, 'xvalue'):
-		json['xvalue'] = round(node.xvalue, 5)		
+		json['xvalue'] = round(node.xvalue, 5)
 	if hasattr(node, 'yvalue'):
-		json['yvalue'] = round(node.yvalue, 5)	
-	if hasattr(node, 'fitness_ep'):
-		json['fitness_ep'] = round(node.fitness_ep, 5)		
+		json['yvalue'] = round(node.yvalue, 5)
+	if hasattr(node, 'distance_ep'):
+		json['distance_ep'] = round(node.distance_ep, 5)
+	if hasattr(node, 'distance_ne'):
+		json['distance_ne'] = round(node.distance_ne, 5)			
 	if hasattr(node, 'date'):
 		json['date'] = node.date
 	if hasattr(node, 'seq'):
@@ -135,25 +137,29 @@ def add_virus_attributes(viruses, tree):
 	"""Add date and seq attributes to all tips in tree"""
 	strain_to_date = {}
 	strain_to_seq = {}
-	strain_to_fitness_ep = {}
+	strain_to_distance_ep = {}
+	strain_to_distance_ne = {}	
 	for v in viruses:
 		strain_to_date[v['strain']] = v['date']
 		strain_to_seq[v['strain']] = v['seq']
-		strain_to_fitness_ep[v['strain']] = v['fitness_ep']
+		strain_to_distance_ep[v['strain']] = v['distance_ep']
+		strain_to_distance_ne[v['strain']] = v['distance_ne']		
 	for node in tree.postorder_node_iter():
 		strain = str(node.taxon).replace("'", '')
 		if strain_to_date.has_key(strain):
 			node.date = strain_to_date[strain]
 		if strain_to_seq.has_key(strain):
 			node.seq = strain_to_seq[strain]
-		if strain_to_fitness_ep.has_key(strain):
-			node.fitness_ep = strain_to_fitness_ep[strain]			
+		if strain_to_distance_ep.has_key(strain):
+			node.distance_ep = strain_to_distance_ep[strain]
+		if strain_to_distance_ne.has_key(strain):
+			node.distance_ne = strain_to_distance_ne[strain]				
 																		
 def main():
 
 	print "--- Tree clean at " + time.strftime("%H:%M:%S") + " ---"
 		
-	viruses = read_json('data/virus_epitope.json')
+	viruses = read_json('data/virus_nonepitope.json')
 	tree = crossref_import('data/tree_branches.newick', 'data/tree_states.newick', 'data/states.txt')
 	print "Remove outgroup"
 	remove_outgroup(tree)

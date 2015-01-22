@@ -9,7 +9,7 @@ import os, re, time, datetime
 from io_util import *
 
 YEARS_BACK = 10
-VIRUSES_PER_MONTH = 50
+VIRUSES_PER_MONTH = 10
 
 def fix_strain_names(viruses):
 	for v in viruses:
