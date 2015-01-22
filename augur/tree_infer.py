@@ -29,7 +29,7 @@ def main():
 	print "--- Tree infer at " + time.strftime("%H:%M:%S") + " ---"
 
 	cleanup()
-	viruses = read_json('data/virus_clean.json')
+	viruses = read_json('data/virus_reduce.json')
 	write_fasta(viruses, 'temp.fasta')
 
 	print "Building initial tree with FastTree"

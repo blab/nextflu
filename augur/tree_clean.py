@@ -34,10 +34,12 @@ def to_json(node):
 		json['clade'] = node.clade
 	if node.taxon:
 		json['strain'] = str(node.taxon).replace("'", '')
-	if hasattr(node, 'yvalue'):
-		json['yvalue'] = round(node.yvalue, 5)
 	if hasattr(node, 'xvalue'):
-		json['xvalue'] = round(node.xvalue, 5)	
+		json['xvalue'] = round(node.xvalue, 5)		
+	if hasattr(node, 'yvalue'):
+		json['yvalue'] = round(node.yvalue, 5)	
+	if hasattr(node, 'fitness_ep'):
+		json['fitness_ep'] = round(node.fitness_ep, 5)		
 	if hasattr(node, 'date'):
 		json['date'] = node.date
 	if hasattr(node, 'seq'):
@@ -133,21 +135,25 @@ def add_virus_attributes(viruses, tree):
 	"""Add date and seq attributes to all tips in tree"""
 	strain_to_date = {}
 	strain_to_seq = {}
+	strain_to_fitness_ep = {}
 	for v in viruses:
 		strain_to_date[v['strain']] = v['date']
 		strain_to_seq[v['strain']] = v['seq']
+		strain_to_fitness_ep[v['strain']] = v['fitness_ep']
 	for node in tree.postorder_node_iter():
 		strain = str(node.taxon).replace("'", '')
 		if strain_to_date.has_key(strain):
 			node.date = strain_to_date[strain]
 		if strain_to_seq.has_key(strain):
 			node.seq = strain_to_seq[strain]
+		if strain_to_fitness_ep.has_key(strain):
+			node.fitness_ep = strain_to_fitness_ep[strain]			
 																		
 def main():
 
 	print "--- Tree clean at " + time.strftime("%H:%M:%S") + " ---"
 		
-	viruses = read_json('data/virus_clean.json')
+	viruses = read_json('data/virus_epitope.json')
 	tree = crossref_import('data/tree_branches.newick', 'data/tree_states.newick', 'data/states.txt')
 	print "Remove outgroup"
 	remove_outgroup(tree)

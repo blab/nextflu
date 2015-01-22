@@ -35,22 +35,16 @@ def population_distance(virus, population, scaling):
 def main():
 	print "--- Epitope fitness at " + time.strftime("%H:%M:%S") + " ---"
 
-	tree = read_json('data/tree_clean.json')
-	nodes = [n for n in all_descendants(tree)]
-	
-	tips = []
-	for node in nodes:
-		if 'strain' in node: 
-			tips.append(node)		
-			
-	append_epitope_sites(tips)
+	viruses = read_json('data/virus_clean.json')
+				
+	append_epitope_sites(viruses)
 
-	for tip in tips:
-		distance = population_distance(tip, tips, IMMUNITY_SCALING)
-		tip['fitness_ep'] = round(distance, 5)
+	for virus in viruses:
+		distance = population_distance(virus, viruses, IMMUNITY_SCALING)
+		virus['fitness_ep'] = distance
 		
-	remove_epitope_sites(tips)	
-	write_json(tree, "data/tree_epitope.json")	
+	remove_epitope_sites(viruses)	
+	write_json(viruses, "data/virus_epitope.json")	
 	
 if __name__ == "__main__":
     main()
