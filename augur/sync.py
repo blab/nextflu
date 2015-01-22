@@ -14,7 +14,7 @@ def config():
 
 def data():
 	print "Syncing data with S3"
-	os.system("s3cmd sync --acl-public data/ s3://" + os.environ['S3_BUCKET'] + "/data/")	
+	os.system("s3cmd sync --acl-public auspice/ s3://" + os.environ['S3_BUCKET'] + "/auspice/")	
 
 def str2bool(obj):
 	if isinstance(obj, basestring):

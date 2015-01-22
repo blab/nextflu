@@ -13,7 +13,7 @@ def main():
 		node.pop("seq", None)
 		node.pop("clade", None)
 	
-	write_json(tree, "data/auspice.json")		
+	write_json(tree, "auspice/tree.json")		
 
 if __name__ == "__main__":
     main()
