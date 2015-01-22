@@ -19,6 +19,9 @@ def mask_from_outgroup(viruses):
 	
 def clean_gaps(viruses):
 	return [v for v in viruses if not '-' in v['seq']]
+	
+def clean_ambiguous(viruses):
+	return filter(lambda v: re.search(r'[^A^T^G^C]', v['seq']) == None, viruses)	
 
 def date_from_virus(virus):
 	return datetime.datetime.strptime(virus['date'], '%Y-%m-%d').date()
@@ -99,6 +102,10 @@ def main():
 	# clean gapped sequences
 	viruses = clean_gaps(viruses)
 	print str(len(viruses)) + " with complete HA"
+	
+	# clean ambiguous sequences	
+	viruses = clean_ambiguous(viruses)
+	print str(len(viruses)) + " without ambiguity"		
 	
 	# clean sequences by distance	
 	viruses = clean_distances(viruses)
