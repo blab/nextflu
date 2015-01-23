@@ -8,8 +8,8 @@
 import os, re, time, datetime
 from io_util import *
 
-YEARS_BACK = 15
-VIRUSES_PER_MONTH = 10
+YEARS_BACK = 10
+VIRUSES_PER_MONTH = 20
 
 def fix_strain_names(viruses):
 	for v in viruses:

@@ -8,7 +8,7 @@ def main():
 	print "--- Streamline at " + time.strftime("%H:%M:%S") + " ---"	
     
     # Streamline tree for auspice
-	tree = read_json('data/tree_clean.json')
+	tree = read_json('data/tree_refine.json')
 	for node in all_descendants(tree):
 		node.pop("seq", None)
 		node.pop("clade", None)

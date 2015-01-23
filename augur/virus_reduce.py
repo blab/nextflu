@@ -4,7 +4,7 @@
 import os, re, time, datetime
 from io_util import *
 
-YEARS_BACK = 15
+YEARS_BACK = 10
 	
 def add_outgroup(viruses):
 	viruses.insert(0, {

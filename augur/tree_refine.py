@@ -5,6 +5,7 @@ import os, re, time
 import dendropy
 from io_util import *
 from seq_util import *
+from date_util import *
 
 OUTGROUP = 'A/Beijing/32/1992'
 
@@ -47,6 +48,8 @@ def to_json(node):
 		json['mut_ep'] = node.mut_ep
 	if hasattr(node, 'mut_ne'):
 		json['mut_ne'] = node.mut_ne				
+	if hasattr(node, 'trunk'):
+		json['trunk'] = node.trunk
 	if hasattr(node, 'date'):
 		json['date'] = node.date
 	if hasattr(node, 'seq'):
@@ -107,27 +110,6 @@ def ladderize(tree):
 			node_desc_counts[node] = total
 			node._child_nodes.sort(key=lambda n: node_desc_counts[n], reverse=True)			
 
-def add_node_attributes(tree):
-	"""Add clade, xvalue and yvalue attributes to all nodes in tree"""
-	clade = 0
-	yvalue = 0
-	for node in tree.postorder_node_iter():
-		node.clade = clade
-		clade += 1
-		if node.is_leaf():
-			node.yvalue = yvalue
-			yvalue += 1
-	for node in tree.postorder_node_iter():
-		node.yvalue = get_yvalue(node)
-		node.xvalue = node.distance_from_root()
-	for node in tree.postorder_node_iter():
-		parent = node.parent_node
-		if parent != None:
-			mut_ep = epitope_distance(node.seq, parent.seq)
-			node.mut_ep = mut_ep
-			mut_ne = nonepitope_distance(node.seq, parent.seq)
-			node.mut_ne = mut_ne
-			
 def layout(tree):
 	"""Set yvalue of tips by post-order traversal"""
 	yvalue = 0	
@@ -142,7 +124,7 @@ def layout(tree):
 			b.yvalue = yvalue
 			
 	for node in tree.postorder_node_iter():
-		node.yvalue = get_yvalue(node)		
+		node.yvalue = get_yvalue(node)	
 
 def add_virus_attributes(viruses, tree):
 	"""Add date and seq attributes to all tips in tree"""
@@ -164,11 +146,63 @@ def add_virus_attributes(viruses, tree):
 		if strain_to_distance_ep.has_key(strain):
 			node.distance_ep = strain_to_distance_ep[strain]
 		if strain_to_distance_ne.has_key(strain):
-			node.distance_ne = strain_to_distance_ne[strain]				
-																		
+			node.distance_ne = strain_to_distance_ne[strain]	
+
+def add_node_attributes(tree):
+	"""Add clade, xvalue and yvalue attributes to all nodes in tree"""
+	clade = 0
+	yvalue = 0
+	for node in tree.postorder_node_iter():
+		node.clade = clade
+		clade += 1
+		if node.is_leaf():
+			node.yvalue = yvalue
+			yvalue += 1
+	for node in tree.postorder_node_iter():
+		node.yvalue = get_yvalue(node)
+		node.xvalue = node.distance_from_root()
+	for node in tree.postorder_node_iter():
+		parent = node.parent_node
+		if parent != None:
+			mut_ep = epitope_distance(node.seq, parent.seq)
+			node.mut_ep = mut_ep
+			mut_ne = nonepitope_distance(node.seq, parent.seq)
+			node.mut_ne = mut_ne
+	for node in tree.postorder_node_iter():
+		node.trunk_count = 0
+		node.trunk = False			
+			
+def define_trunk(tree):
+	"""Trace current lineages backward to define trunk"""
+	
+	# Find most recent tip
+	dates = []
+	for node in tree.postorder_node_iter():
+		if node.is_leaf():
+			dates.append(node.date)
+	most_recent_date = string_to_date(sorted(dates)[-1])
+	
+	# Mark ancestry of recent tips
+	number_recent = 0
+	for node in tree.postorder_node_iter():
+		if node.is_leaf():
+			diff = year_difference(string_to_date(node.date), most_recent_date)
+			if (diff < 1):
+				number_recent += 1
+				parent = node.parent_node
+				while (parent != None):
+					parent.trunk_count += 1
+					parent = parent.parent_node
+					
+	# Mark trunk nodes
+	for node in tree.postorder_node_iter():
+		if node.trunk_count == number_recent:
+			node.trunk = True;
+				
+															
 def main():
 
-	print "--- Tree clean at " + time.strftime("%H:%M:%S") + " ---"
+	print "--- Tree refine at " + time.strftime("%H:%M:%S") + " ---"
 		
 	viruses = read_json('data/virus_nonepitope.json')
 	tree = crossref_import('data/tree_branches.newick', 'data/tree_states.newick', 'data/states.txt')
@@ -183,8 +217,10 @@ def main():
 	print "Append node attributes"
 	add_virus_attributes(viruses, tree)	
 	add_node_attributes(tree)
+	print "Define trunk"
+	define_trunk(tree)
 
-	write_json(to_json(tree.seed_node), "data/tree_clean.json")
+	write_json(to_json(tree.seed_node), "data/tree_refine.json")
 	
 if __name__ == "__main__":
     main()
