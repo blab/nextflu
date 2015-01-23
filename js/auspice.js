@@ -85,16 +85,13 @@ function setDistances(node) {
 	}
 }
 
-function setTrunkInfo(node) {
-	if (typeof node.trunk_count == "undefined") {
-		node.trunk_count = 0;
-	}
+function setTrunk(node) {
 	if (typeof node.trunk == "undefined") {
 		node.trunk = false;
 	}	
 	if (typeof node.children != "undefined") {
 		for (var i=0, c=node.children.length; i<c; i++) {
-			setTrunkInfo(node.children[i]);
+			setTrunk(node.children[i]);
 		}
 	}
 }
@@ -262,7 +259,7 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 	var internals = gatherInternals(rootNode, []);
 	setFrequencies(rootNode);
 	setDates(internals);
-	setTrunkInfo(rootNode);
+	setTrunk(rootNode);
 	var vaccines = getVaccines(tips);	
 		
 	var	xValues = nodes.map(function(d) {
@@ -332,31 +329,19 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 	var distanceNeColorScale = d3.scale.threshold()
 		.domain([3.0, 5.0, 7.0])
 		.range(["#E04328", "#E78C36", "#CFB642", "#799CB3"]);	// red, orange, yellow, blue	
+		
+	nodes.forEach(function (d) {
+		d.x = xScale(d.xvalue);
+		d.y = yScale(d.yvalue);		
+	});  		
 								
-    var liveNodeCount = 0;
 	tips.forEach(function (d) {
 		var date = new Date(d.date);		
 		var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
 		var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;		
 		d.diff = diffYears;
-		if (d.diff < 1) {
-			liveNodeCount += 1;
-			p = d.parent;
-			while (p != null) {
-				p.trunk_count += 1;
-				p = p.parent
-			}
-		}
 	});
-	
-	nodes.forEach(function (d) {
-		d.x = xScale(d.xvalue);
-		d.y = yScale(d.yvalue);		
-		if (d.trunk_count == liveNodeCount) {
-			d.trunk = true;
-		}
-	});    	    
-    
+	    
 	var link = treeplot.selectAll(".link")
 		.data(links)
 		.enter().append("polyline")
