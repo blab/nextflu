@@ -85,17 +85,6 @@ function setDistances(node) {
 	}
 }
 
-function setTrunk(node) {
-	if (typeof node.trunk == "undefined") {
-		node.trunk = false;
-	}	
-	if (typeof node.children != "undefined") {
-		for (var i=0, c=node.children.length; i<c; i++) {
-			setTrunk(node.children[i]);
-		}
-	}
-}
-
 /*
 function setFrequencies(node, date) {
 	if (typeof node.frequencies != "undefined") {
@@ -259,7 +248,6 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 	var internals = gatherInternals(rootNode, []);
 	setFrequencies(rootNode);
 	setDates(internals);
-	setTrunk(rootNode);
 	var vaccines = getVaccines(tips);	
 		
 	var	xValues = nodes.map(function(d) {
@@ -305,10 +293,10 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 	var recencyColorScale = d3.scale.threshold()
 		.domain([0.00, 0.33, 0.66, 1.0])
 		.range(["#aaa", "#E04328", "#E78C36", "#CFB642", "#799CB3"]);	// red, orange, yellow, blue
-		
+				
 	var recencySizeScale = d3.scale.threshold()
-		.domain([0.0, 0.33, 0.66, 1.0])
-		.range([0, 5, 4, 3, 1]);	
+		.domain([0.0, 1.0])
+		.range([0, 4, 0]);			
 		
 	var recencyVaccineSizeScale = d3.scale.threshold()
 		.domain([0.0])
@@ -323,25 +311,43 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 		.range([1, 10]);
 
 	var distanceEpColorScale = d3.scale.threshold()
-		.domain([5.0, 7.0, 9.0])
+		.domain([-2.0, 0.0, 2.0])
 		.range(["#799CB3", "#CFB642", "#E78C36", "#E04328"]);	// blue, yellow, orange, red 
 		
 	var distanceNeColorScale = d3.scale.threshold()
-		.domain([3.0, 5.0, 7.0])
+		.domain([-2.0, 0.0, 2.0])
 		.range(["#E04328", "#E78C36", "#CFB642", "#799CB3"]);	// red, orange, yellow, blue	
 		
+//	var distanceColorScale = d3.scale.threshold()
+//		.domain([-2.0, 0.0, 2.0])
+//		.range(["#799CB3", "#CFB642", "#E78C36", "#E04328"]);	// blue, yellow, orange, red
+		
+	var distanceColorScale = d3.scale.threshold()
+		.domain([-2.33, -1.66, -1.0, -0.33, 0.33, 1.00, 1.66, 2.33])
+		.range(["#4C90C0", "#5DA8A3", "#75B681", "#92BC63", "#B2BD4D", "#CEB541", "#E1A03A", "#E67C32", "#E04929"]);
+
 	nodes.forEach(function (d) {
 		d.x = xScale(d.xvalue);
 		d.y = yScale(d.yvalue);		
 	});  		
-								
+			
+	var mean_distance_ep = 0;
+	var mean_distance_ne = 0;
+	var recent_tip_count = 0;								
 	tips.forEach(function (d) {
 		var date = new Date(d.date);		
 		var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
 		var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;		
 		d.diff = diffYears;
+		if (d.diff < 1) {
+			mean_distance_ep += d.distance_ep;
+			mean_distance_ne += d.distance_ne;
+			recent_tip_count += 1;
+		}
 	});
-	    
+	mean_distance_ep = mean_distance_ep / recent_tip_count;
+	mean_distance_ne = mean_distance_ne / recent_tip_count;	
+		    
 	var link = treeplot.selectAll(".link")
 		.data(links)
 		.enter().append("polyline")
@@ -355,9 +361,6 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 		.style("stroke-width", 2)
 		.style("stroke", function(d) { 
 			var hex = "#ccc"
-			if (d.target.trunk) {
-				hex = "#999"
-			}
 			return hex;	
 		})		
     	.style("cursor", "pointer")		
@@ -381,11 +384,11 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 			return recencySizeScale(d.diff);
 		})			
 		.style("fill", function(d) { 
-			var col = distanceNeColorScale(d.distance_ne);
+			var col = distanceColorScale(d.distance_ep - mean_distance_ep);
 			return d3.rgb(col).brighter([0.7]).toString();	
 		})	
 		.style("stroke", function(d) { 
-			var col = distanceNeColorScale(d.distance_ne);
+			var col = distanceColorScale(d.distance_ep - mean_distance_ep);
 			return d3.rgb(col).toString();	
 		})					
 		.on('mouseover', function(d) {
@@ -403,8 +406,8 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 		.attr("r", function(d) {
 			return recencyVaccineSizeScale(d.diff);
 		})	
-		.style("fill", d3.rgb("#97BE60").brighter([0.45]).toString())	
-		.style("stroke", "#97BE60")
+		.style("fill", d3.rgb("#A160AB").brighter([0.45]).toString())	
+		.style("stroke", "#A160AB")
 		.on('mouseover', function(d) {
 			tooltip.show(d, this);
 		})	
@@ -430,33 +433,39 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
     			return format(d.date) 
     		});
 		globalDate = d.date;
-		nodes.forEach(function (d) {
+		var mean_distance_ep = 0;
+		var mean_distance_ne = 0;
+		var recent_tip_count = 0;			
+		tips.forEach(function (d) {
 			var date = new Date(d.date);		
 			var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
 			var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;		
-			d.diff = diffYears; 
-		});			
+			d.diff = diffYears;
+			if (d.diff < 1) {
+				mean_distance_ep += d.distance_ep;
+				mean_distance_ne += d.distance_ne;
+				recent_tip_count += 1;
+			}			
+		});
+		mean_distance_ep = mean_distance_ep / recent_tip_count;
+		mean_distance_ne = mean_distance_ne / recent_tip_count;
 		d3.selectAll(".tip")
 			.attr("r", function(d) {
 				return recencySizeScale(d.diff);
 			})		
 			.style("fill", function(d) { 
-				var col = recencyColorScale(d.diff);
+				var col = distanceColorScale(d.distance_ep - mean_distance_ep);
 				return d3.rgb(col).brighter([0.7]).toString();	
 			})	    		
 			.style("stroke", function(d) { 
-				var col = recencyColorScale(d.diff);
+				var col = distanceColorScale(d.distance_ep - mean_distance_ep);
 				return d3.rgb(col).toString();	
 			}); 
 		d3.selectAll(".vaccine")
 			.attr("r", function(d) {
 				return recencyVaccineSizeScale(d.diff);
 			});	
-		d3.selectAll(".link")
-	    	.style("stroke-width", function(d) {
-				return recencyLinksSizeScale(d.target.diff);		    	
-	    	});			
-		
+				
 	}
 		
 	var counterData = {}
