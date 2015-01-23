@@ -8,7 +8,7 @@
 import os, re, time, datetime
 from io_util import *
 
-YEARS_BACK = 10
+YEARS_BACK = 15
 VIRUSES_PER_MONTH = 10
 
 def fix_strain_names(viruses):
@@ -16,7 +16,7 @@ def fix_strain_names(viruses):
 		v['strain'] = v['strain'].replace('\'','').replace('(','').replace(')','').replace('H3N2','')	
 		
 def filter_length(viruses):
-	return filter(lambda v: len(v['seq']) >= 900, viruses)
+	return filter(lambda v: len(v['seq']) >= 987, viruses)
 	
 def filter_date(viruses):
 	return filter(lambda v: re.match(r'\d\d\d\d-\d\d-\d\d', v['date']) != None, viruses)
