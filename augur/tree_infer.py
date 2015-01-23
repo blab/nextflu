@@ -15,7 +15,31 @@ def cleanup():
 		try:
 			os.remove(file)
 		except OSError:
-			pass    	
+			pass
+	try:
+		os.remove("temp.fasta")
+	except OSError:
+		pass   
+	try:
+		os.remove("temp.newick")
+	except OSError:
+		pass
+	try:
+		os.remove("temp.phyx")
+	except OSError:
+		pass 
+	try:
+		os.remove("temp.phyx.reduced")
+	except OSError:
+		pass
+	try:
+		os.remove("raxml_tree.newick")
+	except OSError:
+		pass 	
+	try:
+		os.remove("initial_tree.newick")
+	except OSError:
+		pass 						   							
 		
 def delimit_newick(infile_name, outfile_name):
 	with open(infile_name, 'r') as file:
