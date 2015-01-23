@@ -11,8 +11,8 @@ def main():
 	virus_filter.main()			# Filter sequences
 	virus_align.main()			# Align sequences
 	virus_clean.main()			# Clean sequences
-	fitness_epitope.main()		# Calculate epitope fitness
-	fitness_nonepitope.main()	# Calculate non-epitope fitness	
+#	fitness_epitope.main()		# Calculate epitope fitness
+#	fitness_nonepitope.main()	# Calculate non-epitope fitness	
 	virus_reduce.main()			# Reduce sequences	
 	tree_infer.main()			# Make tree
 	tree_clean.main()			# Clean tree	
