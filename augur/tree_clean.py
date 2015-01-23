@@ -4,6 +4,7 @@
 import os, re, time
 import dendropy
 from io_util import *
+from seq_util import *
 
 OUTGROUP = 'A/Beijing/32/1992'
 
@@ -41,7 +42,11 @@ def to_json(node):
 	if hasattr(node, 'distance_ep'):
 		json['distance_ep'] = round(node.distance_ep, 5)
 	if hasattr(node, 'distance_ne'):
-		json['distance_ne'] = round(node.distance_ne, 5)			
+		json['distance_ne'] = round(node.distance_ne, 5)
+	if hasattr(node, 'mut_ep'):
+		json['mut_ep'] = node.mut_ep
+	if hasattr(node, 'mut_ne'):
+		json['mut_ne'] = node.mut_ne				
 	if hasattr(node, 'date'):
 		json['date'] = node.date
 	if hasattr(node, 'seq'):
@@ -112,11 +117,17 @@ def add_node_attributes(tree):
 		if node.is_leaf():
 			node.yvalue = yvalue
 			yvalue += 1
-
 	for node in tree.postorder_node_iter():
 		node.yvalue = get_yvalue(node)
 		node.xvalue = node.distance_from_root()
-		
+	for node in tree.postorder_node_iter():
+		parent = node.parent_node
+		if parent != None:
+			mut_ep = epitope_distance(node.seq, parent.seq)
+			node.mut_ep = mut_ep
+			mut_ne = nonepitope_distance(node.seq, parent.seq)
+			node.mut_ne = mut_ne
+			
 def layout(tree):
 	"""Set yvalue of tips by post-order traversal"""
 	yvalue = 0	
@@ -169,8 +180,9 @@ def main():
 	collapse(tree)	
 	print "Ladderize tree"	
 	ladderize(tree)
+	print "Append node attributes"
+	add_virus_attributes(viruses, tree)	
 	add_node_attributes(tree)
-	add_virus_attributes(viruses, tree)
 
 	write_json(to_json(tree.seed_node), "data/tree_clean.json")
 	

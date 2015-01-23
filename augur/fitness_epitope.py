@@ -10,7 +10,7 @@ from itertools import izip
 
 def append_epitope_sites(viruses):
 	for virus in viruses:
-		sites_ep = epitope_sites(translate(virus['seq']))
+		sites_ep = epitope_sites(virus['seq'])
 		virus['sites_ep'] = sites_ep
 		
 def remove_epitope_sites(viruses):

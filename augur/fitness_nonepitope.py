@@ -11,7 +11,7 @@ from collections import defaultdict
 
 def append_nonepitope_sites(viruses):
 	for virus in viruses:
-		sites_ne = nonepitope_sites(translate(virus['seq']))
+		sites_ne = nonepitope_sites(virus['seq'])
 		virus['sites_ne'] = sites_ne
 		
 def remove_nonepitope_sites(viruses):
