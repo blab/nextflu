@@ -41,13 +41,13 @@ function setDates(internals) {
 
 function getVaccines(tips) {
 	vaccineChoice = {};
-	vaccineChoice['A/Fujian/411/2002'] = "2004-02-21";
+	vaccineChoice['A/Fujian/411/2002'] = "2003-09-25";
 	vaccineChoice['A/California/7/2004'] = "2005-02-21";	
 	vaccineChoice['A/Wisconsin/67/2005'] = "2006-02-21";		
-	vaccineChoice['A/Brisbane/10/2007'] = "2008-02-21";
-	vaccineChoice['A/Perth/16/2009'] = "2010-02-21";
+	vaccineChoice['A/Brisbane/10/2007'] = "2007-09-25";
+	vaccineChoice['A/Perth/16/2009'] = "2009-09-25";
 	vaccineChoice['A/Victoria/361/2011'] = "2012-02-21";
-	vaccineChoice['A/Texas/50/2012'] = "2014-02-21";	
+	vaccineChoice['A/Texas/50/2012'] = "2013-09-25";	
 	vaccineChoice['A/Switzerland/9715293/2013'] = "2014-09-25";
 	vaccineStrains = Object.keys(vaccineChoice);
 	vaccines = [];
@@ -67,6 +67,34 @@ function setFrequencies(node) {
 	if (typeof node.children != "undefined") {
 		for (var i=0, c=node.children.length; i<c; i++) {
 			setFrequencies(node.children[i]);
+		}
+	}
+}
+
+function setDistances(node) {
+	if (typeof node.distance_ep == "undefined") {
+		node.distance_ep = 0.0;
+	}
+	if (typeof node.distance_ne == "undefined") {
+		node.distance_ne = 0.0;
+	}	
+	if (typeof node.children != "undefined") {
+		for (var i=0, c=node.children.length; i<c; i++) {
+			setDistances(node.children[i]);
+		}
+	}
+}
+
+function setTrunkInfo(node) {
+	if (typeof node.trunk_count == "undefined") {
+		node.trunk_count = 0;
+	}
+	if (typeof node.trunk == "undefined") {
+		node.trunk = false;
+	}	
+	if (typeof node.children != "undefined") {
+		for (var i=0, c=node.children.length; i<c; i++) {
+			setTrunkInfo(node.children[i]);
 		}
 	}
 }
@@ -150,12 +178,21 @@ var tooltip = d3.tip()
 //			}	
 //		}	
 		if (typeof d.strain != "undefined") {
-			string = d.strain;
-		}		
+			string += "Strain: "
+			string += d.strain;
+		}
 		if (typeof d.date != "undefined") {
-			string += " "
+			string += "<br>Date: "
 			string += d.date;
-		}				
+		}
+		if (typeof d.distance_ep != "undefined") {
+			string += "<br>Epitope distance: "
+			string += d.distance_ep;
+		}
+		if (typeof d.distance_ne != "undefined") {
+			string += "<br>Non-epitope distance: "
+			string += d.distance_ne;
+		}			
 		return string;
 	});
 	
@@ -225,6 +262,7 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 	var internals = gatherInternals(rootNode, []);
 	setFrequencies(rootNode);
 	setDates(internals);
+	setTrunkInfo(rootNode);
 	var vaccines = getVaccines(tips);	
 		
 	var	xValues = nodes.map(function(d) {
@@ -273,7 +311,7 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 		
 	var recencySizeScale = d3.scale.threshold()
 		.domain([0.0, 0.33, 0.66, 1.0])
-		.range([0, 3.25, 2.5, 1.75, 1]);	
+		.range([0, 5, 4, 3, 1]);	
 		
 	var recencyVaccineSizeScale = d3.scale.threshold()
 		.domain([0.0])
@@ -286,22 +324,38 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 	var freqScale = d3.scale.sqrt()
 		.domain([0, 1])
 		.range([1, 10]);
-							
+
+	var distanceEpColorScale = d3.scale.threshold()
+		.domain([5.0, 7.0, 9.0])
+		.range(["#799CB3", "#CFB642", "#E78C36", "#E04328"]);	// blue, yellow, orange, red 
+		
+	var distanceNeColorScale = d3.scale.threshold()
+		.domain([3.0, 5.0, 7.0])
+		.range(["#E04328", "#E78C36", "#CFB642", "#799CB3"]);	// red, orange, yellow, blue	
+								
+    var liveNodeCount = 0;
+	tips.forEach(function (d) {
+		var date = new Date(d.date);		
+		var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
+		var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;		
+		d.diff = diffYears;
+		if (d.diff < 1) {
+			liveNodeCount += 1;
+			p = d.parent;
+			while (p != null) {
+				p.trunk_count += 1;
+				p = p.parent
+			}
+		}
+	});
+	
 	nodes.forEach(function (d) {
 		d.x = xScale(d.xvalue);
-		d.y = yScale(d.yvalue);			 
-	});
-
-	// straight links
-/*	var link = treeplot.selectAll(".link")
-		.data(links)
-		.enter().append("line")
-		.attr("class", "link")
-		.attr("x1", function(d) { return d.source.x; })
-	    .attr("y1", function(d) { return d.source.y; })
-	    .attr("x2", function(d) { return d.target.x; })
-	    .attr("y2", function(d) { return d.target.y; }); 
-  */	    	    
+		d.y = yScale(d.yvalue);		
+		if (d.trunk_count == liveNodeCount) {
+			d.trunk = true;
+		}
+	});    	    
     
 	var link = treeplot.selectAll(".link")
 		.data(links)
@@ -313,8 +367,15 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 			+ (d.source.x-mod).toString() + "," + d.target.y.toString() + " "
 			+ (d.target.x).toString() + "," + d.target.y.toString()
 		})
-		.style("stroke-width", 2)   
-    	.style("cursor", "pointer")		 
+		.style("stroke-width", 2)
+		.style("stroke", function(d) { 
+			var hex = "#ccc"
+			if (d.target.trunk) {
+				hex = "#999"
+			}
+			return hex;	
+		})		
+    	.style("cursor", "pointer")		
      	.on('click', function(d) { 
       		var dMin = minimumAttribute(d.target, "xvalue", d.target.xvalue),
       			dMax = maximumAttribute(d.target, "xvalue", d.target.xvalue),
@@ -322,14 +383,7 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
       			lMax = maximumAttribute(d.target, "yvalue", d.target.yvalue);
       		rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, internals, vaccines);
       	}); 
-      	
-	tips.forEach(function (d) {
-		var date = new Date(d.date);		
-		var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
-		var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;		
-		d.diff = diffYears; 
-	});	       	  	  
-      		    
+            		    
 	var tipCircles = treeplot.selectAll(".tip")
 		.data(tips)
 		.enter()
@@ -342,11 +396,11 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 			return recencySizeScale(d.diff);
 		})			
 		.style("fill", function(d) { 
-			var col = recencyColorScale(d.diff);
+			var col = distanceNeColorScale(d.distance_ne);
 			return d3.rgb(col).brighter([0.7]).toString();	
 		})	
 		.style("stroke", function(d) { 
-			var col = recencyColorScale(d.diff);
+			var col = distanceNeColorScale(d.distance_ne);
 			return d3.rgb(col).toString();	
 		})					
 		.on('mouseover', function(d) {
