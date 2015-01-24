@@ -5,7 +5,7 @@
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>Next Flu</title>			
+		<title>nextflu.org</title>			
 		<script src="js/d3.min.js"></script>
 		<link rel="stylesheet" href="css/autocomplete.css"/>
 		<link href="css/bootstrap.min.css" rel="stylesheet">		
@@ -14,16 +14,27 @@
 
 	<body>
 	
-		<div class="container">	
+		<div class="container">
+		
+			<div class="row">
+				<div class="col-md-12">
+					<div class="bigtitle logobox">
+						nextflu.org
+					</div>
+				</div>		
+			</div>			
 	
 			<div class="row">
-				<div class="col-md-2">
+				<div class="col-md-1">
+					<div class="io-box">
+						<svg id="counter"></svg>
+					</div>
 					<div id="search" class="io-box"></div>
 					<div class="io-box">
 						<button id="reset" class="btn btn-default">reset</button>
 					</div>				
   				</div>			
-  				<div class="col-md-9">
+  				<div class="col-md-10">
   					<div class="plot-container">
 						<svg id="treeplot"></svg>
 					</div> 
@@ -31,7 +42,7 @@
 				<div class="col-md-1">
   				</div>		  				
   			</div>
-  						
+  			  						
     	</div>
 
 		<script src="js/d3.tip.js"></script>	

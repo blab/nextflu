@@ -448,17 +448,28 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 	counterData['x'] = dateScale(globalDate)
 			    	
 	var format = d3.time.format("%Y %b %-d");
-	var counterText = treeplot.selectAll(".counter-text")
+	
+	d3.select("#counter")
+		.attr("width", 200)
+		.attr("height", 100);
+	
+	var counterText = d3.select("#counter").selectAll(".counter-text")
 		.data([counterData])
 		.enter()
 		.append("text")			
 		.attr("class", "counter-text") 
-    	.attr("transform", "translate(100,40)")
-    	.style("text-anchor", "middle")
+    	.attr("transform", "translate(0,50)")
+    	.style("text-anchor", "left")
     	.style("alignment-baseline", "middle")
     	.text(function(d){ 
     		return format(d.date) 
     	})
+    	.on("mouseover", function() {
+    		d3.select(this).style("fill", "#799CB3");
+    	})
+    	.on("mouseout", function() {
+    		d3.select(this).style("fill", "#CCCCCC");
+    	})    	
     	.style("cursor", "col-resize")
     	.call(drag);     
     	  	

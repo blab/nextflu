@@ -28,6 +28,7 @@
 	font: 32px "Helvetica Neue", Helvetica, Arial, sans-serif;
 	font-weight: 700;
 	fill: #ccc;
+	height: 100px;
 }
 
 body {
@@ -47,4 +48,223 @@ body {
 	border-style: solid;
 	border-width: 1px;
 	border-color: gray;
+}
+
+/* general */
+
+.container {
+  padding-left: 25px;
+  padding-right: 25px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-weight: 300;
+	/* Museo */	
+}
+
+.center {
+     float: none;
+     margin-left: auto;
+     margin-right: auto;
+}
+
+.text-center {
+     text-align: center;
+}
+
+/* logo */
+
+.logo {
+	width: 60px;
+	height: 60px;
+	padding: 5px;
+}
+
+.biglogo {
+	width: 180px;
+	height: 180px;
+	padding: 5px;
+}
+
+.logobox {
+	height: 100px;
+	display: table-cell; 
+	vertical-align: middle;
+}
+
+/* navbar */
+.navbar-brand { 
+	font-size: 30px; 
+	font-weight: 100;
+	/* Museo */	
+}
+.navbar-nav { 
+	font-size: 30px; 
+	font-weight: 100;
+	/* Museo */	
+}
+.navbar-text {
+	font-size: 15px;
+	font-weight: 300;	
+	/* Museo */		
+}
+
+/* headings */
+
+.bigtitle {
+	font-size: 60px; 
+	line-height: 65px;	
+	font-weight: 100;
+	/* Museo */	
+}
+
+.title {
+	font-size: 45px; 
+	line-height: 50px;	
+	font-weight: 100;
+	/* Museo */	
+}
+
+.bighead {
+	font-size: 32px;
+	font-weight: 300;
+	line-height:36px;
+	/* Museo */	
+}
+
+.head {
+	font-size: 26px;
+	font-weight: 300;
+	line-height:30px;
+	/* Museo */	
+}
+
+.smallhead {
+	font-size: 19px;
+	font-weight: 300;
+	line-height: 23px;
+	/* Museo */	
+}
+
+.note {
+	font-size: 15px;
+	font-weight: 300;
+	line-height: 18px;
+	/* Museo */	
+}
+
+.smallnote {
+	font-size: 13px;
+	font-weight: 300;
+	line-height: 16px;
+	/* Museo */	
+}
+
+.text-gray {
+	color: @gray-light;
+}
+
+.text-dark-gray {
+	color: @gray;
+}
+
+/* other */
+
+body {
+	font-weight: 300;
+}
+
+p {
+	font-weight: 300;
+}
+
+.hugespacer {
+	height: 50px;
+}
+
+.bigspacer {
+	height: 20px;
+}
+
+.spacer {
+	height: 10px;
+}
+
+.smallspacer {
+	height: 5px;
+}
+
+a.off { 
+	color: inherit; 
+}
+
+code.has-jax {
+	background: inherit; 
+	color: inherit;
+}
+
+pre {
+    overflow-x: auto;
+}
+
+pre code {
+    overflow-wrap: normal;
+    white-space: pre;
+}
+
+table {
+	.table;
+	.table-striped;
+}
+
+img {
+	.img-responsive;
+}
+
+img.offset {
+	float: right; 
+	margin: 12px 0px 10px 15px;
+}
+
+blockquote {
+	.text-gray;
+	p {
+    font-size: (@font-size-base * 1.00);
+    }
+}
+
+.breadcrumb {
+	padding: 0px 0px;
+	background-color: @body-bg;
+	> li {
+		&+li:before {  
+			padding: 0px;
+		}
+		&+li:after {  
+			padding: 0px;
+		}		
+	}
+}
+
+.pad-right {
+	padding-right: 10px;
+}
+
+.pad-left {
+	padding-left: 10px;
+}
+
+#footer {
+	height: 80px;
+}
+
+.footernav {
+	.note;
+	.text-dark-gray;
+	text-align: center;
 }
