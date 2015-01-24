@@ -148,21 +148,9 @@ var treeplot = d3.select("#treeplot")
 var tooltip = d3.tip()
 	.direction('e')
 	.attr('class', 'd3-tip')
-	.offset([0, 10])
+	.offset([0, 12])
 	.html(function(d) {
 		string = ""
-//		if (typeof d.frequency != "undefined") {
-//			if (d.frequency > 0.01) {
-//				string = d.frequency;
-//			}
-//		}
-//		if (typeof d.target != "undefined") {
-//			if (typeof d.target.frequency != "undefined") {
-//				if (d.target.frequency > 0.01) {
-//					string = d.target.frequency;
-//				}
-//			}	
-//		}	
 		if (typeof d.strain != "undefined") {
 			string += "Strain: "
 			string += d.strain;
@@ -258,6 +246,10 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
   		return +d.yvalue;
   	}); 
   	
+	tips.map(function(d) {
+		d.distance = d.distance_ep;
+	});   	
+  	
   	var dateValues = nodes.filter(function(d) {
 		return typeof d.date === 'string';
   		}).map(function(d) {
@@ -309,8 +301,7 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 		d.y = yScale(d.yvalue);		
 	});  		
 			
-	var mean_distance_ep = 0;
-	var mean_distance_ne = 0;
+	var mean_distance = 0;
 	var recent_tip_count = 0;								
 	tips.forEach(function (d) {
 		var date = new Date(d.date);		
@@ -318,14 +309,15 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 		var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;		
 		d.diff = diffYears;
 		if (d.diff < 1) {
-			mean_distance_ep += d.distance_ep;
-			mean_distance_ne += d.distance_ne;
+			mean_distance += d.distance;
 			recent_tip_count += 1;
 		}
 	});
-	mean_distance_ep = mean_distance_ep / recent_tip_count;
-	mean_distance_ne = mean_distance_ne / recent_tip_count;	
-		    
+	mean_distance = mean_distance / recent_tip_count;
+	tips.forEach(function (d) {
+		d.adj_distance = d.distance - mean_distance;
+	});	
+			    
 	var link = treeplot.selectAll(".link")
 		.data(links)
 		.enter().append("polyline")
@@ -359,11 +351,11 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 			return recencySizeScale(d.diff);
 		})			
 		.style("fill", function(d) {
-			var col = distanceColorScale(d.distance_ep - mean_distance_ep);
+			var col = distanceColorScale(d.adj_distance);
 			return d3.rgb(col).brighter([0.7]).toString();	
 		})	
 		.style("stroke", function(d) { 
-			var col = distanceColorScale(d.distance_ep - mean_distance_ep);
+			var col = distanceColorScale(d.adj_distance);
 			return d3.rgb(col).toString();
 		})					
 		.on('mouseover', function(d) {
@@ -480,7 +472,17 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
       			lMin = d3.min(yValues),
       			lMax = d3.max(yValues);        	
             rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, internals, vaccines);
-		})  
+		})
+		
+	d3.select("#coloring")
+        .on("change", function(d) {
+			var val = d3.select(this).node().value; 
+
+			tips.map(function(d) {
+  				d.coloring = d.distance_ep;
+  			});  
+	
+		})					
 		
 	function onSelect(tip) {
 		d3.select("#"+(tip.strain).replace(/\//g, ""))
@@ -492,7 +494,7 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 	var mc = autocomplete(document.getElementById('search'))
 		.keys(tips)
 		.dataField("strain")
-		.placeHolder("Search strains")
+		.placeHolder("search strains...")
 		.width(800)
 		.height(500)
 		.onSelected(onSelect)
