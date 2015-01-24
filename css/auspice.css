@@ -37,11 +37,14 @@ body {
 
 .plot-container {
 	width:800px;
-	margin:0 auto;
+	position:absolute;
+	left: 50%;
+	margin-left: -400px;	
 }
 
-.io-box {
+.io-container {
 	width: 200px;
+	position:absolute;	
 }
 
 .bordered {

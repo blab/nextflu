@@ -393,7 +393,7 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 		.origin(function(d) { return d; })
 		.on("drag", dragged)
 		.on("dragstart", function() {
-			 d3.select(this).style("fill", "#799CB3");
+			 d3.select(this).style("fill", "#5DA8A3");
 		})
 		.on("dragend", function() {
 			 d3.select(this).style("fill", "#CCC");
@@ -451,21 +451,21 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 	
 	d3.select("#counter")
 		.attr("width", 200)
-		.attr("height", 100);
+		.attr("height", 50);
 	
 	var counterText = d3.select("#counter").selectAll(".counter-text")
 		.data([counterData])
 		.enter()
 		.append("text")			
 		.attr("class", "counter-text") 
-    	.attr("transform", "translate(0,50)")
-    	.style("text-anchor", "left")
+    	.attr("transform", "translate(100,30)")
+    	.style("text-anchor", "middle")
     	.style("alignment-baseline", "middle")
     	.text(function(d){ 
     		return format(d.date) 
     	})
     	.on("mouseover", function() {
-    		d3.select(this).style("fill", "#799CB3");
+    		d3.select(this).style("fill", "#5DA8A3");
     	})
     	.on("mouseout", function() {
     		d3.select(this).style("fill", "#CCCCCC");
