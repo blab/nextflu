@@ -1,7 +1,7 @@
 import time, os
-import virus_filter, virus_align, virus_clean, virus_reduce
-import fitness_epitope, fitness_nonepitope
-import tree_infer, tree_clean
+import virus_filter, virus_align, virus_clean
+#import fitness_epitope, fitness_nonepitope
+import tree_infer, tree_refine
 
 def main():
 	"""Run full pipeline"""
@@ -13,9 +13,8 @@ def main():
 	virus_clean.main()			# Clean sequences
 #	fitness_epitope.main()		# Calculate epitope fitness
 #	fitness_nonepitope.main()	# Calculate non-epitope fitness	
-	virus_reduce.main()			# Reduce sequences	
 	tree_infer.main()			# Make tree
-	tree_clean.main()			# Clean tree	
+	tree_refine.main()			# Clean tree	
 
 if __name__ == "__main__":
     main()

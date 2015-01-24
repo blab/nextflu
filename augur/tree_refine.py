@@ -204,8 +204,8 @@ def main():
 
 	print "--- Tree refine at " + time.strftime("%H:%M:%S") + " ---"
 		
-	viruses = read_json('data/virus_reduce.json')
-	tree = crossref_import('data/tree_branches.newick', 'data/tree_states.newick', 'data/states.txt')
+	viruses = read_json('data/virus_clean.json')
+	tree = crossref_import('data/raxml_branches.newick', 'data/raxml_states.newick', 'data/raxml_states.txt')
 	print "Remove outgroup"
 	remove_outgroup(tree)
 	print "Remove outlier branches"	

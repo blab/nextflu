@@ -21,8 +21,9 @@ def clean_gaps(viruses):
 	return [v for v in viruses if not '-' in v['seq']]
 	
 def clean_ambiguous(viruses):
-	return filter(lambda v: re.search(r'[^A^T^G^C]', v['seq']) == None, viruses)	
-
+	for virus in viruses:
+		virus['seq'] = re.sub(r'[BDEFHIJKLMNOPQRSUVWXYZ]', '-', virus['seq'])
+	
 def date_from_virus(virus):
 	return datetime.datetime.strptime(virus['date'], '%Y-%m-%d').date()
 	
@@ -96,17 +97,14 @@ def main():
 	viruses = read_json('data/virus_align.json')
 	print str(len(viruses)) + " initial viruses"
 	
-	# mask extraneous columns
+	# mask extraneous columns and ambiguous bases
 	mask_from_outgroup(viruses)
+	clean_ambiguous(viruses)
 	
 	# clean gapped sequences
 	viruses = clean_gaps(viruses)
 	print str(len(viruses)) + " with complete HA"
-	
-	# clean ambiguous sequences	
-	viruses = clean_ambiguous(viruses)
-	print str(len(viruses)) + " without ambiguity"		
-	
+		
 	# clean sequences by distance	
 	viruses = clean_distances(viruses)
 	print str(len(viruses)) + " with clock"	

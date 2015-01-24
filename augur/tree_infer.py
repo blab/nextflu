@@ -53,7 +53,7 @@ def main():
 	print "--- Tree infer at " + time.strftime("%H:%M:%S") + " ---"
 
 	cleanup()
-	viruses = read_json('data/virus_reduce.json')
+	viruses = read_json('data/virus_clean.json')
 	write_fasta(viruses, 'temp.fasta')
 
 	print "Building initial tree with FastTree"
@@ -71,7 +71,7 @@ def main():
 	while (time.time() < end_time):
 		if os.path.isfile('raxml_result.topology'):
 			break
-		time.sleep(30)
+		time.sleep(10)
 	process.terminate()
 
 	checkpoint_files = [file for file in glob.glob("RAxML_checkpoint*")]
@@ -85,12 +85,12 @@ def main():
 
 	print "RAxML branch length optimization and rooting"
 	os.system("raxml -f e -T 6 -s temp.phyx -n branches -c 25 -m GTRGAMMA -p 344312987 -t raxml_tree.newick -o " + OUTGROUP)
-	os.rename('RAxML_result.branches', 'data/tree_branches.newick')
+	os.rename('RAxML_result.branches', 'data/raxml_branches.newick')
 
 	print "RAxML ancestral state inference"
-	os.system("raxml -f A -T 6 -s temp.phyx -n states -c 25 -m GTRGAMMA -p 344312987 -t data/tree_branches.newick")
-	os.rename('RAxML_nodeLabelledRootedTree.states', 'data/tree_states.newick')
-	os.rename('RAxML_marginalAncestralStates.states', 'data/states.txt')
+	os.system("raxml -f A -T 6 -s temp.phyx -n states -c 25 -m GTRGAMMA -p 344312987 -t data/raxml_branches.newick")
+	os.rename('RAxML_nodeLabelledRootedTree.states', 'data/raxml_states.newick')
+	os.rename('RAxML_marginalAncestralStates.states', 'data/raxml_states.txt')
 
 	cleanup()	
 
