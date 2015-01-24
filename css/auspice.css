@@ -1,0 +1,50 @@
+.node circle {
+	fill: #fff;
+	stroke: steelblue;
+	stroke-width: 1.5px;
+}
+
+.node {
+	font: 10px sans-serif;
+}
+
+.link {
+	fill: none;
+	stroke: #ccc;
+	stroke-width: 1.5px;
+}				
+
+.d3-tip {
+	font: 14px "Helvetica Neue", Helvetica, Arial, sans-serif;
+	line-height: 1;
+	font-weight: bold;
+	padding: 7px;
+	background: rgba(0, 0, 0, 0.55);
+	color: #fff;
+	border-radius: 14px;
+}
+
+.counter-text {
+	font: 32px "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-weight: 700;
+	fill: #ccc;
+}
+
+body {
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.plot-container {
+	width:800px;
+	margin:0 auto;
+}
+
+.io-box {
+	width: 200px;
+}
+
+.bordered {
+	border-style: solid;
+	border-width: 1px;
+	border-color: gray;
+}

@@ -264,12 +264,6 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
   		return new Date(d.date);
   	}); 	
   	
-  	var yearValues = nodes.filter(function(d) {
-		return typeof d.date === 'string';
-  		}).map(function(d) {
-  		return (new Date(d.date)).getFullYear();
-  	}); 	  	
-
 	var xScale = d3.scale.linear()
 		.domain([d3.min(xValues), d3.max(xValues)])
 		.range([10, width-10]);
@@ -285,11 +279,7 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 		.domain([earliestDate, globalDate])
 		.range([-100, 100])
 		.clamp([true]);
-		
-	var yearScale = d3.scale.ordinal()
-		.domain([2014, "undefined", 2011, 2012, 2013])
-		.range(["#ff7f0e", "#1f77b4", "#7f7f7f", "#7f7f7f", "#7f7f7f"]);
-		
+				
 	var recencyColorScale = d3.scale.threshold()
 		.domain([0.00, 0.33, 0.66, 1.0])
 		.range(["#aaa", "#E04328", "#E78C36", "#CFB642", "#799CB3"]);	// red, orange, yellow, blue
@@ -309,18 +299,6 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 	var freqScale = d3.scale.sqrt()
 		.domain([0, 1])
 		.range([1, 10]);
-
-	var distanceEpColorScale = d3.scale.threshold()
-		.domain([-2.0, 0.0, 2.0])
-		.range(["#799CB3", "#CFB642", "#E78C36", "#E04328"]);	// blue, yellow, orange, red 
-		
-	var distanceNeColorScale = d3.scale.threshold()
-		.domain([-2.0, 0.0, 2.0])
-		.range(["#E04328", "#E78C36", "#CFB642", "#799CB3"]);	// red, orange, yellow, blue	
-		
-//	var distanceColorScale = d3.scale.threshold()
-//		.domain([-2.0, 0.0, 2.0])
-//		.range(["#799CB3", "#CFB642", "#E78C36", "#E04328"]);	// blue, yellow, orange, red
 		
 	var distanceColorScale = d3.scale.threshold()
 		.domain([-2.33, -1.66, -1.0, -0.33, 0.33, 1.00, 1.66, 2.33])
@@ -359,10 +337,7 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 			+ (d.target.x).toString() + "," + d.target.y.toString()
 		})
 		.style("stroke-width", 2)
-		.style("stroke", function(d) { 
-			var hex = "#ccc"
-			return hex;	
-		})		
+		.style("stroke", "#ccc")		
     	.style("cursor", "pointer")		
      	.on('click', function(d) { 
       		var dMin = minimumAttribute(d.target, "xvalue", d.target.xvalue),
@@ -383,13 +358,13 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 		.attr("r", function(d) {
 			return recencySizeScale(d.diff);
 		})			
-		.style("fill", function(d) { 
+		.style("fill", function(d) {
 			var col = distanceColorScale(d.distance_ep - mean_distance_ep);
 			return d3.rgb(col).brighter([0.7]).toString();	
 		})	
 		.style("stroke", function(d) { 
 			var col = distanceColorScale(d.distance_ep - mean_distance_ep);
-			return d3.rgb(col).toString();	
+			return d3.rgb(col).toString();
 		})					
 		.on('mouseover', function(d) {
 			tooltip.show(d, this);

@@ -46,12 +46,10 @@ function autocomplete(parent) {
     _selection=d3.select(parent);
 
     function component() {
-        _selection.each(function (data) {
-
-            // Select the svg element, if it exists.
-            var container = d3.select(this).select("#bp-ac").data([data]);
-            var enter = container.enter()
-                    .append("div")
+    
+            var container = d3.select(parent);
+            
+            var enter = container.append("div")
                     .attr("id","bp-ac")
                     .attr("class","bp-ac")
                     .append("div")
@@ -64,6 +62,7 @@ function autocomplete(parent) {
                 .attr("height", __height);
 
             var input = enter.append("input")
+            			.attr("type","search")
                         .attr("class", "form-control")
                         .attr("placeholder",_placeHolder)
                         .attr("type","text")
@@ -186,7 +185,6 @@ function autocomplete(parent) {
                 dropDown.style("display","block");
             }
 
-        });
     }
 
 
