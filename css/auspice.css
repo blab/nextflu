@@ -26,7 +26,7 @@
 
 .counter-text {
 	font: 32px "Helvetica Neue", Helvetica, Arial, sans-serif;
-	font-weight: 700;
+	font-weight: 500;
 	fill: #ccc;
 	height: 100px;
 }
@@ -122,7 +122,7 @@ h6 {
 .bigtitle {
 	font-size: 60px; 
 	line-height: 65px;	
-	font-weight: 100;
+	font-weight: 500;
 	/* Museo */	
 }
 

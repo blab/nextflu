@@ -458,8 +458,8 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 		.enter()
 		.append("text")			
 		.attr("class", "counter-text") 
-    	.attr("transform", "translate(100,30)")
-    	.style("text-anchor", "middle")
+    	.attr("transform", "translate(0,30)")
+    	.style("text-anchor", "left")
     	.style("alignment-baseline", "middle")
     	.text(function(d){ 
     		return format(d.date) 

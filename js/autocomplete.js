@@ -49,18 +49,13 @@ function autocomplete(parent) {
     
             var container = d3.select(parent);
             
+            container.attr("width", __width)
+                .attr("height", __height);            
+            
             var enter = container.append("div")
                     .attr("id","bp-ac")
                     .attr("class","bp-ac")
-                    .append("div")
-                    .attr("class","padded-row")
-                    .attr("class","padded-row")
-                    .append("div")
-                    .attr("style","bp-autocomplete-holder");
-
-            container.attr("width", __width)
-                .attr("height", __height);
-
+                
             var input = enter.append("input")
             			.attr("type","search")
                         .attr("class", "form-control")
