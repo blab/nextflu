@@ -44,3 +44,12 @@ environment.sh
 Icon?
 ehthumbs.db
 Thumbs.db
+
+
+# autosave #
+*~
+
+# derived files and data
+data/*
+
+

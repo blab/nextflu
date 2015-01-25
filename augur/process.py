@@ -15,6 +15,7 @@ def main():
 #	fitness_nonepitope.main()	# Calculate non-epitope fitness	
 	tree_infer.main()			# Make tree
 	tree_refine.main()			# Clean tree	
+	tree_LBI.main()				# Calculate LBI across tree		
 
 if __name__ == "__main__":
     main()

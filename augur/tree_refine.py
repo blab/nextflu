@@ -6,6 +6,8 @@ import dendropy
 from io_util import *
 from seq_util import *
 from date_util import *
+from tree_LBI import *
+from tree_util import *
 
 OUTGROUP = 'A/Beijing/32/1992'
 
@@ -29,30 +31,6 @@ def crossref_import(branches_tree_file, states_tree_file, states_file):
 		if sn.label:
 			bn.seq = label_to_seq[sn.label]
 	return branches_tree
-
-def to_json(node):
-	json = {}
-	if hasattr(node, 'clade'):
-		json['clade'] = node.clade
-	if node.taxon:
-		json['strain'] = str(node.taxon).replace("'", '')
-	if hasattr(node, 'xvalue'):
-		json['xvalue'] = round(node.xvalue, 5)
-	if hasattr(node, 'yvalue'):
-		json['yvalue'] = round(node.yvalue, 5)
-	if hasattr(node, 'distance_ep'):
-		json['distance_ep'] = node.distance_ep
-	if hasattr(node, 'distance_ne'):
-		json['distance_ne'] = node.distance_ne				
-	if hasattr(node, 'date'):
-		json['date'] = node.date
-	if hasattr(node, 'seq'):
-		json['seq'] = node.seq
-	if node.child_nodes():
-		json["children"] = []
-		for ch in node.child_nodes():
-			json["children"].append(to_json(ch))
-	return json
 	
 def get_yvalue(node):
 	"""Return y location based on recursive mean of daughter locations"""	
@@ -118,7 +96,7 @@ def layout(tree):
 			b.yvalue = yvalue
 			
 	for node in tree.postorder_node_iter():
-		node.yvalue = get_yvalue(node)	
+		node.yvalue = get_yvalue(node)
 
 def add_virus_attributes(viruses, tree):
 	"""Add date and seq attributes to all tips in tree"""
@@ -126,7 +104,8 @@ def add_virus_attributes(viruses, tree):
 	strain_to_seq = {}
 	for v in viruses:
 		strain_to_date[v['strain']] = v['date']
-		strain_to_seq[v['strain']] = v['seq']	
+		strain_to_seq[v['strain']] = v['seq']
+
 	for node in tree.postorder_node_iter():
 		strain = str(node.taxon).replace("'", '')
 		if strain_to_date.has_key(strain):
@@ -156,7 +135,7 @@ def add_node_attributes(tree):
 			node.mut_ne = mut_ne
 	for node in tree.postorder_node_iter():
 		node.trunk_count = 0
-		node.trunk = False			
+		node.trunk = False
 			
 def define_trunk(tree):
 	"""Trace current lineages backward to define trunk"""
@@ -198,17 +177,17 @@ def compute_distances(tree):
 				parent = parent.parent_node
 			node.distance_ep = distance_ep
 			node.distance_ne = distance_ne	
-				
-															
+
 def main():
 
 	print "--- Tree refine at " + time.strftime("%H:%M:%S") + " ---"
 		
 	viruses = read_json('data/virus_clean.json')
+	
 	tree = crossref_import('data/raxml_branches.newick', 'data/raxml_states.newick', 'data/raxml_states.txt')
 	print "Remove outgroup"
-	remove_outgroup(tree)
-	print "Remove outlier branches"	
+	remove_outgroup(tree)	
+	print "Remove outlier branches" 
 	reduce(tree)
 	print "Collapse internal nodes"		
 	collapse(tree)	
@@ -222,7 +201,7 @@ def main():
 	print "Compute distances"
 	compute_distances(tree)	
 
-	write_json(to_json(tree.seed_node), "data/tree_refine.json")
-	
+	write_json(dendropy_to_json(tree.seed_node), "data/tree_refine.json")
+
 if __name__ == "__main__":
-    main()
+	main()
