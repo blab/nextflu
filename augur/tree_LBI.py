@@ -1,7 +1,10 @@
-import dendropy, datetime
+import dendropy, datetime, time
 import numpy as np
-
-
+from io_util import read_json
+from io_util import write_json
+from date_util import date_to_day
+from tree_util import json_to_dendropy
+from tree_util import dendropy_to_json
 
 def color_BioTree_by_attribute(T,attribute, vmin=None, vmax = None, missing_val='min', transform = lambda x:x, cmap=None):
     '''
@@ -51,53 +54,6 @@ def color_BioTree_by_attribute(T,attribute, vmin=None, vmax = None, missing_val=
     # map value to color for each node
     for node in T.get_terminals()+T.get_nonterminals():
         node.color = map(int, np.array(cmap((transform(node.__getattribute__(attribute))-vmin)/(vmax-vmin))[:-1])*255)
-
-
-
-def date_to_day(date):
-    if isinstance(date, datetime.date):
-        return date.toordinal()
-    elif isinstance(date,basestring):
-        return datetime.datetime.strptime(date, '%Y-%m-%d').toordinal()
-    elif isinstance(date, int):
-        return date
-    else:
-        print "unknown date format", date
-        return np.nan
-
-def from_json(json):
-    '''
-    read a json dictionary and make a dendropy tree from it. 
-    '''
-    tree = dendropy.Tree()
-    tree.get_from_string(';', 'newick')
-    root = tree.leaf_nodes()[0]
-    from_sub_json(json, root)
-    root.edge_length=0.01
-    return tree
-
-def from_sub_json(json, node):
-    '''
-    recursively calls itself for all children of node and 
-    builds up the tree. entries in json are added as node attributes
-    '''
-    for attr,val in json.iteritems():
-        if attr=='children':
-            for sub_json in val:
-                child_node = dendropy.Node()
-                from_sub_json(sub_json, child_node)
-                node.add_child(child_node, edge_length = child_node.xvalue - node.xvalue)
-        elif attr=='date':
-            node.date = date_to_day(val)
-        else:
-            try:
-                node.__setattr__(attr, float(val))
-            except:
-                node.__setattr__(attr, val)
-    if len(node.child_nodes())==0:
-        node.taxon= True
-    else:
-        node.taxon = False
 
 def get_average_T2(tree, dt=365):
     '''
@@ -241,8 +197,8 @@ def to_Biopython(tree):
     return bT
 
 def test():
-    from io_util import read_json 
-    tree = from_json(read_json('data/20141228_tree_auspice.json'))
+    from Bio import Phylo
+    tree = json_to_dendropy(read_json('auspice/tree.json'))
     print "calculate local branching index"
     T2 = get_average_T2(tree, 365)
     tau =  T2*2**-4
@@ -251,11 +207,22 @@ def test():
     calc_delta_LBI(tree, tau, datetime.datetime(2014,1,1))
     bioTree = to_Biopython(tree)
     color_BioTree_by_attribute(bioTree, 'date')
-    return bioTree
+    Phylo.draw(bioTree)    
+    
+def main():
 
+    print "--- Tree LBI at " + time.strftime("%H:%M:%S") + " ---"
+
+    tree = json_to_dendropy(read_json('data/tree_refine.json'))
+
+    print "calculate local branching index"
+    T2 = get_average_T2(tree, 365)
+    tau =  T2*2**-4
+    print "avg pairwise distance:", T2
+    print "memory time scale:", tau
+    calc_LBI(tree, tau = tau)
+  
+    write_json(dendropy_to_json(tree.seed_node), "data/tree_LBI.json")    
 
 if __name__=='__main__':
-    tree = test()
-    from Bio import Phylo
-    Phylo.draw(tree)
-
+    main()

@@ -7,6 +7,7 @@ from io_util import *
 from seq_util import *
 from date_util import *
 from tree_LBI import *
+from tree_util import *
 
 OUTGROUP = 'A/Beijing/32/1992'
 
@@ -30,32 +31,6 @@ def crossref_import(branches_tree_file, states_tree_file, states_file):
 		if sn.label:
 			bn.seq = label_to_seq[sn.label]
 	return branches_tree
-
-def to_json(node):
-	json = {}
-	if hasattr(node, 'clade'):
-		json['clade'] = node.clade
-	if node.taxon:
-		json['strain'] = str(node.taxon).replace("'", '')
-	if hasattr(node, 'xvalue'):
-		json['xvalue'] = round(node.xvalue, 5)
-	if hasattr(node, 'yvalue'):
-		json['yvalue'] = round(node.yvalue, 5)
-	if hasattr(node, 'distance_ep'):
-		json['distance_ep'] = node.distance_ep
-	if hasattr(node, 'distance_ne'):
-		json['distance_ne'] = node.distance_ne
-	if hasattr(node, 'date'):
-		json['date'] = node.date
-	if hasattr(node, 'seq'):
-		json['seq'] = node.seq
-	if hasattr(node, 'LBI'):
-		json['LBI'] = round(node.LBI,5)
-	if node.child_nodes():
-		json["children"] = []
-		for ch in node.child_nodes():
-			json["children"].append(to_json(ch))
-	return json
 	
 def get_yvalue(node):
 	"""Return y location based on recursive mean of daughter locations"""	
@@ -162,14 +137,6 @@ def add_node_attributes(tree):
 		node.trunk_count = 0
 		node.trunk = False
 			
-def add_LBI(tree):
-	print "calculate local branching index"
-	T2 = get_average_T2(tree, 365)
-	tau =  T2*2**-4
-	print "avg pairwise distance:", T2
-	print "memory time scale:", tau
-	calc_LBI(tree, tau = tau)
-
 def define_trunk(tree):
 	"""Trace current lineages backward to define trunk"""
 	
@@ -218,11 +185,9 @@ def main():
 	viruses = read_json('data/virus_clean.json')
 	
 	tree = crossref_import('data/raxml_branches.newick', 'data/raxml_states.newick', 'data/raxml_states.txt')
-	print "Remove outlier branches" 
-	reduce(tree)
 	print "Remove outgroup"
-	remove_outgroup(tree)
-	print "Remove outlier branches"	
+	remove_outgroup(tree)	
+	print "Remove outlier branches" 
 	reduce(tree)
 	print "Collapse internal nodes"		
 	collapse(tree)	
@@ -235,10 +200,8 @@ def main():
 	define_trunk(tree)
 	print "Compute distances"
 	compute_distances(tree)	
-	print "Add lineage branching index"
-	add_LBI(tree)
 
-	write_json(to_json(tree.seed_node), "data/tree_refine.json")
+	write_json(dendropy_to_json(tree.seed_node), "data/tree_refine.json")
 
 if __name__ == "__main__":
 	main()
