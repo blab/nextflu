@@ -76,10 +76,7 @@ def json_to_dendropy_sub(json, node):
             except:
                 node.__setattr__(attr, val)
     if len(node.child_nodes())==0:
-        node.taxon= True
-    else:
-        node.taxon = False
-		
+        node.taxon = json['strain']		
 			
 def main():
 
