@@ -245,11 +245,7 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 	var yValues = nodes.map(function(d) {
   		return +d.yvalue;
   	}); 
-  	
-	tips.map(function(d) {
-		d.distance = d.distance_ep;
-	});   	
-  	
+  	  	
   	var dateValues = nodes.filter(function(d) {
 		return typeof d.date === 'string';
   		}).map(function(d) {
@@ -301,23 +297,30 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 		d.y = yScale(d.yvalue);		
 	});  		
 			
-	var mean_distance = 0;
-	var recent_tip_count = 0;								
-	tips.forEach(function (d) {
-		var date = new Date(d.date);		
-		var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
-		var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;		
-		d.diff = diffYears;
-		if (d.diff < 1) {
-			mean_distance += d.distance;
-			recent_tip_count += 1;
-		}
+	tips.map(function(d) {
+		d.distance = d.distance_ep;
 	});
-	mean_distance = mean_distance / recent_tip_count;
-	tips.forEach(function (d) {
-		d.adj_distance = d.distance - mean_distance;
-	});	
-			    
+	distance_adjust();
+
+	function distance_adjust() {
+		var mean_distance = 0;
+		var recent_tip_count = 0;								
+		tips.forEach(function (d) {
+			var date = new Date(d.date);		
+			var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
+			var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;		
+			d.diff = diffYears;
+			if (d.diff < 1) {
+				mean_distance += d.distance;
+				recent_tip_count += 1;
+			}
+		});
+		mean_distance = mean_distance / recent_tip_count;
+		tips.forEach(function (d) {
+			d.adj_distance = d.distance - mean_distance;
+		});				
+	}
+				    
 	var link = treeplot.selectAll(".link")
 		.data(links)
 		.enter().append("polyline")
@@ -400,32 +403,17 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
     			return format(d.date) 
     		});
 		globalDate = d.date;
-		var mean_distance_ep = 0;
-		var mean_distance_ne = 0;
-		var recent_tip_count = 0;			
-		tips.forEach(function (d) {
-			var date = new Date(d.date);		
-			var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
-			var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;		
-			d.diff = diffYears;
-			if (d.diff < 1) {
-				mean_distance_ep += d.distance_ep;
-				mean_distance_ne += d.distance_ne;
-				recent_tip_count += 1;
-			}			
-		});
-		mean_distance_ep = mean_distance_ep / recent_tip_count;
-		mean_distance_ne = mean_distance_ne / recent_tip_count;
+		distance_adjust();
 		d3.selectAll(".tip")
 			.attr("r", function(d) {
 				return recencySizeScale(d.diff);
 			})		
 			.style("fill", function(d) { 
-				var col = distanceColorScale(d.distance_ep - mean_distance_ep);
+				var col = distanceColorScale(d.adj_distance);
 				return d3.rgb(col).brighter([0.7]).toString();	
 			})	    		
 			.style("stroke", function(d) { 
-				var col = distanceColorScale(d.distance_ep - mean_distance_ep);
+				var col = distanceColorScale(d.adj_distance);
 				return d3.rgb(col).toString();	
 			}); 
 		d3.selectAll(".vaccine")
@@ -477,11 +465,27 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 	d3.select("#coloring")
         .on("change", function(d) {
 			var val = d3.select(this).node().value; 
-
 			tips.map(function(d) {
-  				d.coloring = d.distance_ep;
+				if (val == "ep") {
+  					d.distance = d.distance_ep;
+  				}
+				if (val == "ne") {
+  					d.distance = d.distance_ne;
+  				}  				
   			});  
-	
+			distance_adjust();
+			d3.selectAll(".tip")
+				.attr("r", function(d) {
+					return recencySizeScale(d.diff);
+				})		
+				.style("fill", function(d) { 
+					var col = distanceColorScale(d.adj_distance);
+					return d3.rgb(col).brighter([0.7]).toString();	
+				})	    		
+				.style("stroke", function(d) { 
+					var col = distanceColorScale(d.adj_distance);
+					return d3.rgb(col).toString();	
+				}); 			
 		})					
 		
 	function onSelect(tip) {
