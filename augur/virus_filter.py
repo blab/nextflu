@@ -9,7 +9,7 @@ import os, re, time, datetime
 from io_util import *
 
 YEARS_BACK = 4
-VIRUSES_PER_MONTH = 1
+VIRUSES_PER_MONTH = 50
 
 def sort_length(viruses):
 	return sorted(viruses, key = lambda v: len(v['seq']), reverse = True)
@@ -142,6 +142,10 @@ def main():
 	# fix strain names
 	fix_strain_names(viruses)
 	
+	# add vaccine strains
+	add_vaccine_strains(viruses)
+	print str(len(viruses)) + " with vaccine strains"	
+	
 	# filter strain names
 	viruses = filter_strain_names(viruses)
 	print str(len(viruses)) + " with proper strain names"	
@@ -165,15 +169,7 @@ def main():
 	# reduce to manageable volume
 	viruses = streamline(viruses)
 	print str(len(viruses)) + " after streamlining"	
-	
-	# add vaccine strains
-	add_vaccine_strains(viruses)
-	print str(len(viruses)) + " with vaccine strains"	
-	
-	# filter to unique strains
-	viruses = filter_unique(viruses)
-	print str(len(viruses)) + " with unique strain names"		
-
+		
 	# add outgroup
 	add_outgroup(viruses)
 	print str(len(viruses)) + " with outgroup"	
