@@ -114,7 +114,7 @@ def add_virus_attributes(viruses, tree):
 			node.seq = strain_to_seq[strain]
 
 def add_node_attributes(tree):
-	"""Add clade, xvalue and yvalue attributes to all nodes in tree"""
+	"""Add clade, xvalue, yvalue, mutation and trunk attributes to all nodes in tree"""
 	clade = 0
 	yvalue = 0
 	for node in tree.postorder_node_iter():
@@ -126,13 +126,10 @@ def add_node_attributes(tree):
 	for node in tree.postorder_node_iter():
 		node.yvalue = get_yvalue(node)
 		node.xvalue = node.distance_from_root()
+	root = tree.seed_node	
 	for node in tree.postorder_node_iter():
-		parent = node.parent_node
-		if parent != None:
-			mut_ep = epitope_distance(node.seq, parent.seq)
-			node.mut_ep = mut_ep
-			mut_ne = nonepitope_distance(node.seq, parent.seq)
-			node.mut_ne = mut_ne
+		node.distance_ep = epitope_distance(node.seq, root.seq)
+		node.distance_ne = nonepitope_distance(node.seq, root.seq)
 	for node in tree.postorder_node_iter():
 		node.trunk_count = 0
 		node.trunk = False
@@ -198,8 +195,8 @@ def main():
 	add_node_attributes(tree)
 	print "Define trunk"
 	define_trunk(tree)
-	print "Compute distances"
-	compute_distances(tree)	
+#	print "Compute distances"
+#	compute_distances(tree)	
 
 	write_json(dendropy_to_json(tree.seed_node), "data/tree_refine.json")
 

@@ -1,7 +1,7 @@
 import time, os
 import virus_filter, virus_align, virus_clean
 #import fitness_epitope, fitness_nonepitope
-import tree_infer, tree_refine
+import tree_infer, tree_refine, tree_LBI
 
 def main():
 	"""Run full pipeline"""

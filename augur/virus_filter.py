@@ -8,7 +8,7 @@
 import os, re, time, datetime
 from io_util import *
 
-YEARS_BACK = 4
+YEARS_BACK = 3
 VIRUSES_PER_MONTH = 50
 
 def sort_length(viruses):
