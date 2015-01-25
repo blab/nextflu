@@ -81,6 +81,10 @@ h6 {
      text-align: center;
 }
 
+a {
+	color: #5DA8A3;
+}
+
 /* logo */
 
 .logo {
@@ -220,6 +224,7 @@ h6 {
 
 body {
 	font-weight: 300;
+	font-size: 16px;
 }
 
 p {
