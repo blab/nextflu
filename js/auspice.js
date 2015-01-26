@@ -289,8 +289,8 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 		.range([1, 10]);
 		
 	var distanceColorScale = d3.scale.threshold()
-		.domain([-1.75, -1.25, -0.75, -0.25, 0.25, 0.75, 1.25, 1.75])
-		.range(["#4C90C0", "#5DA8A3", "#75B681", "#92BC63", "#B2BD4D", "#CEB541", "#E1A03A", "#E67C32", "#E04929"]);
+		.domain([-1.8, -1.4, -1.0, -0.6, -0.2, 0.2, 0.6, 1.0, 1.4, 1.8])
+		.range(["#5097BA", "#5DA8A3", "#6EB389", "#83BA70", "#9ABE5C", "#B2BD4D", "#C8B944", "#D9AD3D", "#E49938", "#E67C32", "#E2562B"]);
 
 	nodes.forEach(function (d) {
 		d.x = xScale(d.xvalue);
