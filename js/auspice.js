@@ -657,12 +657,9 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 		
 });
 
-/*
-d3.json("https://s3.amazonaws.com/augur-data/auspice/meta.json", function(error, json) {
 
+d3.json("https://s3.amazonaws.com/augur-data/auspice/meta.json", function(error, json) {
 	if (error) return console.warn(error);
-	var updated = "Last updated: " + json['updated']
-	d3.select("#updated").text(updated);
-	
+	d3.select("#updated").text(json['updated']);
 });
-*/
+

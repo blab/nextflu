@@ -213,11 +213,11 @@ a {
 }
 
 .text-gray {
-	color: @gray-light;
+	color: #cccccc;
 }
 
 .text-dark-gray {
-	color: @gray;
+	color: #777777;
 }
 
 /* other */
