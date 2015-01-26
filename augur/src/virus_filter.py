@@ -158,11 +158,12 @@ def select_viruses(viruses, y, m):
 				break
 	return filtered
 
-def main():
+def main(in_fname=None):
 
 	print "--- Filter at " + time.strftime("%H:%M:%S") + " ---"
 
-	viruses = parse_gisaid('data/gisaid_epiflu_sequence.fasta')
+	if in_fname is None: in_fname = 'data/gisaid_epiflu_sequence.fasta'
+	viruses = parse_gisaid(in_fname)
 	print str(len(viruses)) + " initial viruses"
 
 	# sort by sequence length
@@ -202,8 +203,9 @@ def main():
 	# add outgroup
 	add_outgroup(viruses)
 	print str(len(viruses)) + " with outgroup"
-
-	write_json(viruses, 'data/virus_filter.json')
-
+	out_fname = 'data/virus_filter.json'
+	write_json(viruses, out_fname)
+	return out_fname
+	
 if __name__ == "__main__":
 	main()

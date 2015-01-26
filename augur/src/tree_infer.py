@@ -48,12 +48,13 @@ def delimit_newick(infile_name, outfile_name):
 	with open(outfile_name, 'w') as file:
 		file.write(newick)
 
-def main():
+def main(in_fname = None):
 
 	print "--- Tree infer at " + time.strftime("%H:%M:%S") + " ---"
 
 	cleanup()
-	viruses = read_json('data/virus_clean.json')
+	if in_fname is None: in_fname = 'data/virus_clean.json'
+	viruses = read_json(in_fname)
 	write_fasta(viruses, 'temp.fasta')
 
 	print "Building initial tree with FastTree"

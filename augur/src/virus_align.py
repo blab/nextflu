@@ -17,17 +17,19 @@ def cleanup():
 	except OSError:
 		pass
 
-def main():
+def main(in_fname = None):
 
 	print "--- Align at " + time.strftime("%H:%M:%S") + " ---"
-
-	viruses = read_json('data/virus_filter.json')
+	if in_fname is None: in_fname='data/virus_filter.json'
+	viruses = read_json(in_fname)
 	write_fasta(viruses, 'temp_in.fasta')
 	os.system("mafft --nofft temp_in.fasta > temp_out.fasta")
 	alignment = read_fasta('temp_out.fasta')
 	update_viruses(alignment, viruses)
-	write_json(viruses, 'data/virus_align.json')
+	out_fname = 'data/virus_align.json'
+	write_json(viruses, out_fname)
 	cleanup()
+	return out_fname
 
 if __name__ == "__main__":
 	main()

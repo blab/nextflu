@@ -90,11 +90,12 @@ def clean_reassortants(viruses):
 
 	return new_viruses_b
 
-def main():
+def main(in_fname=None):
 
 	print "--- Clean at " + time.strftime("%H:%M:%S") + " ---"
 
-	viruses = read_json('data/virus_align.json')
+	if in_fname is None: in_fname = 'data/virus_align.json'
+	viruses = read_json(in_fname)
 	print str(len(viruses)) + " initial viruses"
 
 	# mask extraneous columns and ambiguous bases
@@ -117,7 +118,9 @@ def main():
 	viruses = clean_reassortants(viruses)
 	print str(len(viruses)) + " with triple reassortants removed"
 
-	write_json(viruses, 'data/virus_clean.json')
+	out_fname = 'data/virus_clean.json'
+	write_json(viruses, out_fname)
+	return out_fname
 
 if __name__ == "__main__":
 	main()

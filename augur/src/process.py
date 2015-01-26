@@ -9,15 +9,15 @@ def main():
 	print "--- Start processing at " + time.strftime("%H:%M:%S") + " ---"
 
 #	virus_download.main()		# Download from GISAID
-	virus_filter.main()			# Filter sequences
-	virus_align.main()			# Align sequences
-	virus_clean.main()			# Clean sequences
-#	fitness_epitope.main()		# Calculate epitope fitness
-#	fitness_nonepitope.main()	# Calculate non-epitope fitness
-	tree_infer.main()			# Make tree
-	tree_refine.main()			# Clean tree
-	tree_LBI.main()				# Calculate LBI across tree
-	tree_streamline.main()		# Streamline tree for auspice
+	fname = 'data/gisaid_epiflu_sequence.fasta'
+	fname = virus_filter.main(fname)		# Filter sequences
+	fname = virus_align.main(fname)			# Align sequences
+	fname = virus_clean.main(fname)			# Clean sequences
+#	fname = fitness_epitope.main(fname)		# Calculate epitope fitness
+#	fname = fitness_nonepitope.main(fname)	# Calculate non-epitope fitness
+	tree_infer.main(fname)					# Make tree, creates raxml files
+	fname = tree_refine.main(fname)			# Clean tree, reads viruses in fname + raxml files
+	fname_tree, fname_meta = tree_streamline.main(fname)		# Streamline tree for auspice
 
 if __name__ == "__main__":
 	main()

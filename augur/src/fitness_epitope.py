@@ -50,10 +50,11 @@ def normalize(viruses):
 		virus['fitness_ep'] = (virus['distance_ep'] - mean) / sd
 		print virus['strain'] + ": " + str(virus['fitness_ep'])
 
-def main():
+def main(in_fname = None):
 	print "--- Epitope fitness at " + time.strftime("%H:%M:%S") + " ---"
 
-	viruses = read_json('data/virus_clean.json')
+	if in_fname is None: in_fname='data/virus_clean.json'
+	viruses = read_json(in_fname)
 
 	append_epitope_sites(viruses)
 	compute(viruses)
@@ -61,7 +62,9 @@ def main():
 	remove_epitope_sites(viruses)
 #	remove_epitope_distances(viruses)
 
-	write_json(viruses, "data/virus_epitope.json")
+	out_fname = "data/virus_epitope.json"
+	write_json(viruses, out_fname)
+	return out_fname
 
 if __name__ == "__main__":
 	main()

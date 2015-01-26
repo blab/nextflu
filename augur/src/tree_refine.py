@@ -162,11 +162,12 @@ def define_trunk(tree):
 		if node.trunk_count == number_recent:
 			node.trunk = True;
 
-def main():
+def main(in_fname=None):
 
 	print "--- Tree refine at " + time.strftime("%H:%M:%S") + " ---"
 
-	viruses = read_json('data/virus_clean.json')
+	if in_fname is None: in_fname='data/virus_clean.json'
+	viruses = read_json(in_fname)
 
 	tree = crossref_import('data/raxml_branches.newick', 'data/raxml_states.newick', 'data/raxml_states.txt')
 	print "Remove outgroup"
@@ -182,8 +183,9 @@ def main():
 	add_node_attributes(tree)
 	print "Define trunk"
 	define_trunk(tree)
-
-	write_json(dendropy_to_json(tree.seed_node), "data/tree_refine.json")
-
+	out_fname = "data/tree_refine.json"
+	write_json(dendropy_to_json(tree.seed_node), out_fname)
+	return out_fname
+	
 if __name__ == "__main__":
 	main()
