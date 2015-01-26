@@ -104,6 +104,102 @@ function setFrequencies(node, date) {
 }
 */
 
+function calcBranchLength(node){
+	if (typeof node.children != "undefined") {
+	for (var i=0, c=node.children.length; i<c; i++) {
+		calcBranchLength(node.children[i]);
+		node.children[i].branch_length = node.children[i].xvalue-node.xvalue;
+	}
+	}
+};
+
+function setNodeAlive(node){
+	if (typeof node.children != "undefined") {
+	for (var i=0, c=node.children.length; i<c; i++) {
+		setNodeAlive(node.children[i]);
+	}
+	}
+	node.alive = (node.dateval<dateCutoff)?true:false;
+};
+
+function calcUpPolarizers(node){
+	node.up_polarizer = 0;
+	if (node.alive){
+	if (typeof node.children != "undefined") {
+		for (var i=0; i<node.children.length; i++) {
+		calcUpPolarizers(node.children[i]);
+		node.up_polarizer += node.children[i].up_polarizer;
+		}
+	}
+		bl =  node.branch_length/LBItau;
+		node.up_polarizer *= Math.exp(-bl);
+		node.up_polarizer += LBItau*(1-Math.exp(-bl));
+	}
+};	  
+
+function calcDownPolarizers(node){
+	if (typeof node.children != "undefined") {
+	for (var i1=0; i1<node.children.length; i1++) {
+		if (node.children[i1].alive){
+		node.children[i1].down_polarizer = node.down_polarizer;
+		for (var i2=0; i2<node.children.length; i2++) {
+			if (i1!=i2){
+			node.children[i1].down_polarizer += node.children[i2].up_polarizer;
+			}
+		}
+		bl =  node.children[i1].branch_length/LBItau;
+		node.children[i1].down_polarizer *= Math.exp(-bl);
+		node.children[i1].down_polarizer += LBItau*(1-Math.exp(-bl));
+		calcDownPolarizers(node.children[i1]);
+		}else{node.children[i1].down_polarizer=0;}
+	}
+	}
+};
+
+function calcPolarizers(node){
+	calcUpPolarizers(node);
+	node.down_polarizer = 0;
+	calcDownPolarizers(node);	 
+};
+
+function calcLBI(node, allnodes){
+	console.log("Calculating LBI for date cutoff "+dateCutoff);
+	calcPolarizers(node);
+	allnodes.forEach(function (d) {
+	d.LBI=0;
+	if (d.alive){
+		d.LBI+=d.down_polarizer;
+		if (typeof d.children != "undefined") {
+		for (var i=0; i<d.children.length; i++) {
+			d.LBI += d.children[i].up_polarizer;
+		}
+		}
+	}
+	});
+};
+
+function calc_deltaLBI(node, allnodes, logdelta){
+	console.log("Calculating deltaLBI for date cutoff "+dateCutoff);
+	dateCutoff.setDate(dateCutoff.getDate()-deltaLBI_boundary_layer);
+	setNodeAlive(node);
+	calcLBI(node, allnodes);
+	allnodes.forEach(function (d){d.delta_LBI = -d.LBI;});
+	dateCutoff.setDate(dateCutoff.getDate()+deltaLBI_boundary_layer);
+	setNodeAlive(node);
+	calcLBI(node, allnodes);
+	allnodes.forEach(function (d){
+	if (logdelta) {d.delta_LBI = d.LBI/(-d.delta_LBI+1e-10);}
+	else {d.delta_LBI += d.LBI;}
+	});	   
+	maxLBI = d3.max(allnodes.map(function (d) {return d.LBI;}));
+	maxdeltaLBI = d3.max(allnodes.map(function (d) {return d.delta_LBI;}));
+	console.log("maximal LBI: "+maxLBI+", maximal deltaLBI: "+maxdeltaLBI);
+	allnodes.forEach(function (d){
+	d.delta_LBI /= maxdeltaLBI;
+	d.LBI /= maxLBI;
+	});	   
+};
+
 function minimumAttribute(node, attr, min) {
 	if (typeof node.children != "undefined") {
 		for (var i=0, c=node.children.length; i<c; i++) {
@@ -136,7 +232,11 @@ var width = 800,
 	height = 600;
 	
 var globalDate = new Date();
-var ymd_format = d3.time.format("%Y-%m-%d");		
+var dateCutoff = globalDate;
+var ymd_format = d3.time.format("%Y-%m-%d");
+
+var LBItau = 0.001,
+	deltaLBI_boundary_layer = 180;
 
 var tree = d3.layout.tree()
 	.size([height, width]);
@@ -170,7 +270,11 @@ var tooltip = d3.tip()
 		if (typeof d.distance_rb != "undefined") {
 			string += "<br>Receptor binding distance: "
 			string += d.distance_rb;
-		}					
+		}
+		if (typeof d.distance_rb != "undefined") {
+			string += "<br>Local branching index: "
+			string += d.LBI.toFixed(3);
+		}							
 		return string;
 	});
 	
@@ -238,8 +342,13 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 	var rootNode = nodes[0];
 	var tips = gatherTips(rootNode, []);
 	var internals = gatherInternals(rootNode, []);
+	calcBranchLength(rootNode);
+	rootNode.branch_length= 0.01;	
 	setFrequencies(rootNode);
 	setDates(internals);
+	nodes.forEach(function (d) {d.dateval = new Date(d.date)});
+	calc_deltaLBI(rootNode, nodes, false);	
+	
 	var vaccines = getVaccines(tips);	
 		
 	var	xValues = nodes.map(function(d) {
@@ -264,6 +373,11 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 		.domain([d3.min(yValues), d3.max(yValues)])
 		.range([10, height-10]);	
 						
+	nodes.forEach(function (d) {
+		d.x = xScale(d.xvalue);
+		d.y = yScale(d.yvalue);		
+	});  						
+						
 	var earliestDate = new Date(d3.min(dateValues));
 	earliestDate.setDate(earliestDate.getDate() + 120);						
 						
@@ -271,11 +385,7 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 		.domain([earliestDate, globalDate])
 		.range([-100, 100])
 		.clamp([true]);
-				
-	var recencyColorScale = d3.scale.threshold()
-		.domain([0.00, 0.33, 0.66, 1.0])
-		.range(["#aaa", "#E04328", "#E78C36", "#CFB642", "#799CB3"]);	// red, orange, yellow, blue
-				
+		
 	var recencySizeScale = d3.scale.threshold()
 		.domain([0.0, 1.0])
 		.range([0, 4, 0]);			
@@ -292,37 +402,60 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 		.domain([0, 1])
 		.range([1, 10]);
 		
-	var distanceColorScale = d3.scale.threshold()
-		.domain([-1.8, -1.4, -1.0, -0.6, -0.2, 0.2, 0.6, 1.0, 1.4, 1.8])
-		.range(["#5097BA", "#5DA8A3", "#6EB389", "#83BA70", "#9ABE5C", "#B2BD4D", "#C8B944", "#D9AD3D", "#E49938", "#E67C32", "#E2562B"]);
-
-	nodes.forEach(function (d) {
-		d.x = xScale(d.xvalue);
-		d.y = yScale(d.yvalue);		
-	});  		
+	var colors = ["#5097BA", "#5DA8A3", "#6EB389", "#83BA70", "#9ABE5C", "#B2BD4D", "#C8B944", "#D9AD3D", "#E49938", "#E67C32", "#E2562B"];
+	var colorBy = "ep";		
 			
-	tips.map(function(d) {
-		d.distance = d.distance_ep;
-	});
-	distance_adjust();
+	var epitopeColorScale = d3.scale.threshold()
+		.domain([-1.8, -1.4, -1.0, -0.6, -0.2, 0.2, 0.6, 1.0, 1.4, 1.8])
+		.range(colors);
+		
+	var nonepitopeColorScale = d3.scale.threshold()
+		.domain([-1.8, -1.4, -1.0, -0.6, -0.2, 0.2, 0.6, 1.0, 1.4, 1.8])
+		.range(colors);
+		
+	var receptorBindingColorScale = d3.scale.threshold()
+		.domain([-0.9, -0.7, -0.5, -0.3, -0.1, 0.1, 0.3, 0.5, 0.7, 0.9])
+		.range(colors);
+		
+	var lbiColorScale = d3.scale.threshold()
+		.domain([0, 0.02, 0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16, 0.18])
+		.range(colors);		
 
-	function distance_adjust() {
-		var mean_distance = 0;
-		var recent_tip_count = 0;								
-		tips.forEach(function (d) {
-			var date = new Date(d.date);		
-			var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
-			var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;		
-			d.diff = diffYears;
-			if (d.diff < 1) {
-				mean_distance += d.distance;
-				recent_tip_count += 1;
-			}
-		});
-		mean_distance = mean_distance / recent_tip_count;
-		tips.forEach(function (d) {
-			d.adj_distance = d.distance - mean_distance;
-		});				
+	var colorScale = epitopeColorScale;
+	tips.map(function(d) { d.coloring = d.distance_ep; });
+	adjust_coloring_by_date();
+
+	function adjust_coloring_by_date() {
+		if (colorBy == "ep" || colorBy == "ne" || colorBy == "rb") {
+			var mean = 0;
+			var recent_tip_count = 0;								
+			tips.forEach(function (d) {
+				var date = new Date(d.date);		
+				var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
+				var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;		
+				d.diff = diffYears;
+				if (d.diff < 1) {
+					mean += d.coloring;
+					recent_tip_count += 1;
+				}
+			});
+			mean = mean / recent_tip_count;
+			tips.forEach(function (d) {
+				d.adj_coloring = d.coloring - mean;
+			});
+		}
+		if (colorBy == "lbi") {
+			tips.forEach(function (d) {
+				var date = new Date(d.date);		
+				var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
+				var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;		
+				d.diff = diffYears;
+			});		
+			calc_deltaLBI(rootNode, nodes, false);
+			tips.forEach(function (d) {
+				d.adj_coloring = d.LBI;
+			});			
+		}
 	}
 				    
 	var link = treeplot.selectAll(".link")
@@ -358,11 +491,11 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 			return recencySizeScale(d.diff);
 		})			
 		.style("fill", function(d) {
-			var col = distanceColorScale(d.adj_distance);
+			var col = colorScale(d.adj_coloring);
 			return d3.rgb(col).brighter([0.7]).toString();	
 		})	
 		.style("stroke", function(d) { 
-			var col = distanceColorScale(d.adj_distance);
+			var col = colorScale(d.adj_coloring);
 			return d3.rgb(col).toString();
 		})					
 		.on('mouseover', function(d) {
@@ -407,17 +540,18 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
     			return format(d.date) 
     		});
 		globalDate = d.date;
-		distance_adjust();
+		dateCutoff = d.date;
+		adjust_coloring_by_date();
 		d3.selectAll(".tip")
 			.attr("r", function(d) {
 				return recencySizeScale(d.diff);
 			})		
 			.style("fill", function(d) { 
-				var col = distanceColorScale(d.adj_distance);
+				var col = colorScale(d.adj_coloring);
 				return d3.rgb(col).brighter([0.7]).toString();	
 			})	    		
 			.style("stroke", function(d) { 
-				var col = distanceColorScale(d.adj_distance);
+				var col = colorScale(d.adj_coloring);
 				return d3.rgb(col).toString();	
 			}); 
 		d3.selectAll(".vaccine")
@@ -468,31 +602,41 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 		
 	d3.select("#coloring")
         .on("change", function(d) {
-			var val = d3.select(this).node().value; 
-			tips.map(function(d) {
-				if (val == "ep") {
-  					d.distance = d.distance_ep;
-  				}
-				if (val == "ne") {
-  					d.distance = d.distance_ne;
-  				}  	
-				if (val == "rb") {
-  					d.distance = 3 * d.distance_rb;
-  				}  	  							
-  			});  
-			distance_adjust();
+        
+			colorBy = d3.select(this).node().value;
+			
+			if (colorBy == "ep") {
+				colorScale = epitopeColorScale;
+				tips.map(function(d) { d.coloring = d.distance_ep; });
+			}
+			if (colorBy == "ne") {
+				colorScale = nonepitopeColorScale;
+				tips.map(function(d) { d.coloring = d.distance_ne; });
+			}
+			if (colorBy == "rb") {
+				colorScale = receptorBindingColorScale;
+				tips.map(function(d) { d.coloring = d.distance_rb; });
+			}	
+			if (colorBy == "lbi") {
+				colorScale = lbiColorScale;
+				tips.map(function(d) { d.adj_coloring = d.LBI; });
+			}							
+				
+			adjust_coloring_by_date();
+			
 			d3.selectAll(".tip")
 				.attr("r", function(d) {
 					return recencySizeScale(d.diff);
 				})		
 				.style("fill", function(d) { 
-					var col = distanceColorScale(d.adj_distance);
+					var col = colorScale(d.adj_coloring);
 					return d3.rgb(col).brighter([0.7]).toString();	
 				})	    		
 				.style("stroke", function(d) { 
-					var col = distanceColorScale(d.adj_distance);
+					var col = colorScale(d.adj_coloring);
 					return d3.rgb(col).toString();	
-				}); 			
+				});
+								
 		})					
 		
 	function onSelect(tip) {
