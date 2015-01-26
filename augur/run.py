@@ -1,5 +1,5 @@
 import time, os, threading, argparse
-import ingest, process, streamline, sync
+import ingest, process, sync
 
 def main():
 	"""Ingest, process, sync"""
@@ -14,12 +14,9 @@ def main():
 	headless = args['headless']
 	clock = args['clock']
 
-	sync_thread = threading.Thread(target=sync.main, args=[[clock]])
-	sync_thread.daemon = True
-	sync_thread.start()
 	ingest.main([headless])
 	process.main()
-	streamline.main()
+	sync.main([clock])
 
 if __name__ == "__main__":
 	main()

@@ -11,6 +11,35 @@ from io_util import *
 YEARS_BACK = 3
 VIRUSES_PER_MONTH = 50
 
+def parse_gisaid(fasta):
+	"""Parse FASTA file from GISAID with default header formating"""
+	viruses = []
+	try:
+		handle = open(fasta, 'r')
+	except IOError:
+		print fasta + " not found"
+	else:
+		for record in SeqIO.parse(handle, "fasta"):
+			words = record.description.replace(">","").replace(" ","").split('|')
+			strain = words[0]
+			accession = words[1]
+			passage = words[3]
+			date = words[5]
+			seq = str(record.seq).upper()
+			v = {
+				"strain": strain,
+				"date": date,
+				"accession": accession,
+				"db": "GISAID",
+				"seq": seq
+			}
+			if passage != "":
+				v['passage'] = passage
+			viruses.append(v)
+		handle.close()
+
+	return viruses
+
 def sort_length(viruses):
 	return sorted(viruses, key = lambda v: len(v['seq']), reverse = True)
 
@@ -133,7 +162,7 @@ def main():
 
 	print "--- Filter at " + time.strftime("%H:%M:%S") + " ---"
 
-	viruses = read_json('data/virus_ingest.json')
+	viruses = parse_gisaid('data/gisaid_epiflu_sequence.fasta')
 	print str(len(viruses)) + " initial viruses"
 
 	# sort by sequence length

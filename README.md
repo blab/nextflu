@@ -5,8 +5,9 @@ Augur is Python package to track (and eventually forecast) flu evolution.  It cu
 * imports public sequence data
 * subsamples, cleans and aligns sequences
 * builds a phylogenetic tree from this data
+* Reports statistics about mutations and branching patterns of the tree
 
-The program is live on Amazon EC2 with results pushed to Amazon S3.  The latest JSON-formatted flu tree is available as [`tree_streamline.json`](https://s3.amazonaws.com/augur-data/data/tree_streamline.json).  This tree is visualized at [blab.github.io/auspice/](http://blab.github.io/auspice/).
+Results are pushed to Amazon S3.  The current JSON-formatted flu tree is available as [`tree.json`](https://s3.amazonaws.com/augur-data/auspice/tree.json).  This tree is visualized at [blab.github.io/auspice/](http://blab.github.io/auspice/).
 
 ## Run
 
@@ -41,11 +42,11 @@ From here, the [build pipeline](augur/run.py) can be run with
 	
 ## Pipeline notes
 
-### Virus ingest, alignment and filtering
+### Sequence download, cleaning and alignment
 
-#### [Ingest](augur/virus_ingest.py)
+#### Download
 
-Using [Selenium](https://github.com/SeleniumHQ/selenium) to automate downloads from [GISAID](http://platform.gisaid.org/epi3/).  GISAID requires login access.  User credentials are stored in the ENV as `GISAID_USER` and `GISAID_PASS`.
+Virus sequence data is manually downloaded from the [GISAID EpiFlu database](http://gisaid.org). Data from GISAID may not be disclosed outside the GISAID community. We mindful of this and no sequence data is has been released publicly as part of this project. We are providing processed phylogenies only. Save GISAID sequences as `data/gisaid_epiflu_sequence.fasta`.
 
 #### [Filter](augur/virus_filter.py)
 
@@ -63,8 +64,8 @@ Keep only sequences that have the full 1701 bases of HA in the alignment.
 
 #### [Infer](augur/tree_infer.py)
 
-Using [FastTree](http://meta.microbesonline.org/fasttree/) to get a starting tree.  FastTree will build a tree for ~5000 sequences in a few minutes.  Then using [RAxML](http://sco.h-its.org/exelixis/web/software/raxml/) to refine this initial tree.  A full RAxML run on a tree with ~5000 sequences could take days or weeks, so instead RAxML is run for a fixed 1 hour and the best tree found during this search is kept.  This will always improve on FastTree.
+Using [FastTree](http://meta.microbesonline.org/fasttree/) to get a starting tree.  FastTree will build a tree for ~5000 sequences in a few minutes.  Then using [RAxML](http://sco.h-its.org/exelixis/web/software/raxml/) to refine this initial tree.  A full RAxML run on a tree with ~5000 sequences could take days or weeks, so instead RAxML is run for a fixed 1 hour and the best tree found during this search is kept.  This will always improve on FastTree. RAxML is also used to reconstruct ancestral sequences.
 
-#### [Clean](augur/tree_clean.py)
+#### [Refine](augur/tree_refine.py)
 
-Reroot the tree based on outgroup strain, collapse nodes with zero-length branches and ladderize the tree.
+Reroot the tree based on outgroup strain, collapse nodes with zero-length branches, ladderize the tree and calculate amino acid distances.

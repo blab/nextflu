@@ -1,6 +1,6 @@
 import os, time, sys
 import subprocess
-import gisaid_download
+import virus_download
 from io_util import *
 
 def str2bool(obj):
@@ -27,7 +27,7 @@ def main(argv):
 		processes.append(subprocess.Popen("exec x11vnc -display :99 -N -forever", shell=True))
 		time.sleep(10)
 
-	gisaid_download.main()
+	virus_download.main()
 
 	for process in processes:
 		process.terminate()

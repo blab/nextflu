@@ -6,12 +6,10 @@ from selenium import webdriver
 from Bio import SeqIO
 from io_util import *
 
-GISAID_FASTA = 'gisaid_epiflu_sequence.fasta'
-
 def download_gisaid(start_year, end_year):
 
-	# variable name
 	VAR = "ncszee"
+	GISAID_FASTA = 'gisaid_epiflu_sequence.fasta'	
 
 	# start fresh
 	try:
@@ -110,53 +108,13 @@ def download_gisaid(start_year, end_year):
 
 	# close driver
 	driver.quit()
-
-def parse_gisaid(fasta):
-	viruses = []
-	try:
-		handle = open(fasta, 'r')
-	except IOError:
-		print fasta + " not found"
-	else:
-		for record in SeqIO.parse(handle, "fasta"):
-			words = record.description.replace(">","").replace(" ","").split('|')
-			strain = words[0]
-			accession = words[1]
-			passage = words[3]
-			date = words[5]
-			seq = str(record.seq).upper()
-			v = {
-				"strain": strain,
-				"date": date,
-				"accession": accession,
-				"db": "GISAID",
-				"seq": seq
-			}
-			if passage != "":
-				v['passage'] = passage
-			viruses.append(v)
-		handle.close()
-
-	return viruses
-
-def download_and_parse_gisaid(start_year, end_year):
-
-	download_gisaid(start_year, end_year)	# leaves GISAID_FASTA in dir
-	return parse_gisaid(GISAID_FASTA)
-
-def main(argv):
+	
+def main():
 
 	print "--- Ingest at " + time.strftime("%H:%M:%S") + " ---"
 
-	viruses = []
-
-	if len(argv) > 0:
-		viruses.extend(parse_gisaid(argv[0]))
-	else:
-		viruses.extend(download_and_parse_gisaid(2008, 2020))
-
-	print "Writing new virus_ingest.json with " + str(len(viruses)) + " viruses"
-	write_json(viruses, 'data/virus_ingest.json')
+	download_gisaid(2008, 2020)
+	os.rename('gisaid_epiflu_sequence.fasta', 'data/gisaid_epiflu_sequence.fasta')
 
 if __name__ == "__main__":
-	main(sys.argv[1:])
+	main()

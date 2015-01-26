@@ -13,13 +13,13 @@ def read_json(file_name):
 		handle.close()
 	return data
 
-def write_json(data, file_name):
+def write_json(data, file_name, indent=1):
 	try:
 		handle = open(file_name, 'w')
 	except IOError:
 		pass
 	else:
-		json.dump(data, handle, indent=2)
+		json.dump(data, handle, indent)
 		handle.close()
 
 def read_fasta(file_name):

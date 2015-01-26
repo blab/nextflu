@@ -1,9 +1,8 @@
 # For augur repo #
 environment.sh
-
-# Elastic Beanstalk #
-###################
-.elasticbeanstalk/
+ec2-startup.sh
+notes/
+data/
 
 # Compiled source #
 ###################
@@ -45,11 +44,9 @@ Icon?
 ehthumbs.db
 Thumbs.db
 
-
 # autosave #
 *~
 
-# derived files and data
-data/*
+
 
 

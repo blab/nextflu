@@ -32,12 +32,12 @@ def dendropy_to_json(node):
 		json['xvalue'] = round(node.xvalue, 5)
 	if hasattr(node, 'yvalue'):
 		json['yvalue'] = round(node.yvalue, 5)
-	if hasattr(node, 'distance_ep'):
-		json['distance_ep'] = node.distance_ep
-	if hasattr(node, 'distance_ne'):
-		json['distance_ne'] = node.distance_ne
-	if hasattr(node, 'distance_rb'):
-		json['distance_rb'] = node.distance_rb
+	if hasattr(node, 'ep'):
+		json['ep'] = node.ep
+	if hasattr(node, 'ne'):
+		json['ne'] = node.ne
+	if hasattr(node, 'rb'):
+		json['rb'] = node.rb
 	if hasattr(node, 'date'):
 		json['date'] = node.date
 	if hasattr(node, 'seq'):

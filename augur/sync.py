@@ -1,4 +1,8 @@
-import os, schedule, time, sys
+import os, schedule, time, sys, shutil
+
+def copy_files():
+	shutil.copyfile('data/tree_streamline.json', 'auspice/tree.json')
+	shutil.copyfile('data/meta.json', 'auspice/meta.json')
 
 def config():
 	try:
@@ -34,12 +38,9 @@ def main(argv):
 		print "Setting clock with ntpdate"
 		os.system("ntpdate ntp.ubuntu.com")
 
+	copy_files()
 	config()
 	data()
-	schedule.every().minute.do(data)
-	while True:
-		schedule.run_pending()
-		time.sleep(1)
 
 if __name__ == "__main__":
 	main(sys.argv[1:])
