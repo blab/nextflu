@@ -8,22 +8,15 @@ def main(in_fname=None):
 	print "--- Streamline at " + time.strftime("%H:%M:%S") + " ---"
 
 	# Streamline tree for auspice
-	print "Writing streamlined tree to tree_streamline.json"
+	print "Writing streamlined tree"
 	if in_fname is None: in_fname='data/tree_refine.json'
 	tree = read_json(in_fname)
 	for node in all_descendants(tree):
 		node.pop("seq", None)
 		node.pop("clade", None)
 
-	out_fname_tree = "data/tree_streamline.json"
+	out_fname_tree = "../auspice/data/tree.json"
 	write_json(tree, out_fname_tree, indent=0)
-
-	# Write out metadata
-	print "Writing out metadata to meta.json"
-	meta = {"updated": time.strftime("%d %b %Y")}
-	out_fname_meta = "data/meta.json"
-	write_json(meta, out_fname_meta)
-	return out_fname_tree, out_fname_meta
 
 if __name__ == "__main__":
 	main()

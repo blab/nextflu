@@ -306,8 +306,7 @@ function rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, int
 
 }
 
-d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error, root) {
-//d3.json("auspice.json", function(error, root) {
+d3.json("data/tree.json", function(error, root) {
 
 	if (error) return console.warn(error);
 
