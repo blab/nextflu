@@ -17,8 +17,8 @@ def download_gisaid(start_year, end_year):
 	try:
 		os.remove(GISAID_FASTA)
 	except OSError:
-		pass 
-		
+		pass
+
 	# start firefox driver
 	print "Start webdriver"
 	profile = webdriver.FirefoxProfile()
@@ -28,13 +28,13 @@ def download_gisaid(start_year, end_year):
 	profile.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/octet-stream")
 	driver = webdriver.Firefox(firefox_profile=profile)
 
-	# open GISAID 
-	print "Open GISAID"	
+	# open GISAID
+	print "Open GISAID"
 	driver.get('http://platform.gisaid.org/epi3/')
 	assert 'GISAID' in driver.title
 
 	# login
-	print "Login"		
+	print "Login"
 	username = driver.find_element_by_name('login')
 	username.send_keys(os.environ['GISAID_USER'])
 	password = driver.find_element_by_name('password')
@@ -42,7 +42,7 @@ def download_gisaid(start_year, end_year):
 	driver.execute_script("return doLogin();")
 
 	# navigate to EpiFlu
-	print "Navigate to EpiFlu"			
+	print "Navigate to EpiFlu"
 	time.sleep(10)
 	driver.execute_script("return sys.call('c_" + VAR + "_4l','Go',new Object({'page':'epi3'}));")
 
@@ -66,7 +66,7 @@ def download_gisaid(start_year, end_year):
 	time.sleep(10)
 	end_date = driver.find_element_by_id('ce_nbp4cn_86_input')
 	end_date.send_keys(str(end_year)+"-12-31")
-	time.sleep(10)	
+	time.sleep(10)
 	button = driver.find_element_by_xpath("//button[@accesskey='g']")
 	button.click()
 
@@ -94,7 +94,7 @@ def download_gisaid(start_year, end_year):
 	time.sleep(10)
 	button = driver.find_element_by_xpath("//div[@id='ce_nbp4cn_9t']//button")
 	button.click()
-	
+
 	# wait for download to complete
 	if not os.path.isfile(GISAID_FASTA):
 		time.sleep(30)
@@ -103,15 +103,15 @@ def download_gisaid(start_year, end_year):
 	if not os.path.isfile(GISAID_FASTA):
 		time.sleep(30)
 	if not os.path.isfile(GISAID_FASTA):
-		time.sleep(30)			
-	if os.path.isfile(GISAID_FASTA):						
+		time.sleep(30)
+	if os.path.isfile(GISAID_FASTA):
 		while (os.stat(GISAID_FASTA).st_size == 0):
 			time.sleep(5)
-	
+
 	# close driver
 	driver.quit()
-	
-def parse_gisaid(fasta):	
+
+def parse_gisaid(fasta):
 	viruses = []
 	try:
 		handle = open(fasta, 'r')
@@ -126,24 +126,24 @@ def parse_gisaid(fasta):
 			date = words[5]
 			seq = str(record.seq).upper()
 			v = {
-				"strain": strain,	
-				"date": date,	
+				"strain": strain,
+				"date": date,
 				"accession": accession,
 				"db": "GISAID",
-				"seq": seq				
+				"seq": seq
 			}
 			if passage != "":
 				v['passage'] = passage
 			viruses.append(v)
-		handle.close()	
-				
+		handle.close()
+
 	return viruses
-	
+
 def download_and_parse_gisaid(start_year, end_year):
 
 	download_gisaid(start_year, end_year)	# leaves GISAID_FASTA in dir
 	return parse_gisaid(GISAID_FASTA)
-		
+
 def main(argv):
 
 	print "--- Ingest at " + time.strftime("%H:%M:%S") + " ---"
@@ -157,6 +157,6 @@ def main(argv):
 
 	print "Writing new virus_ingest.json with " + str(len(viruses)) + " viruses"
 	write_json(viruses, 'data/virus_ingest.json')
-  		
+
 if __name__ == "__main__":
-    main(sys.argv[1:])
+	main(sys.argv[1:])

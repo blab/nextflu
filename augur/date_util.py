@@ -8,12 +8,12 @@ def year_difference(start_date, end_date):
 	start_ord = start_date.toordinal()
 	end_ord = end_date.toordinal()
 	return (end_ord - start_ord) / 365.25
-	
+
 def year_delta(start_date, years):
 	days = round(years * 365.25)
 	delta = datetime.timedelta(days=days)
 	return start_date + delta
-	
+
 def numerical_date(date):
 	"""Takes a calendar date and a numerical dates in terms of years"""
 	start_date = datetime.date(year=date.year, month=1, day=1)
@@ -24,17 +24,17 @@ def numerical_date(date):
 def string_to_numerical_date(string):
 	date = string_to_date(string)
 	return numerical_date(date)
-	
+
 def date_to_day(date):
-    if isinstance(date, datetime.date):
-        return date.toordinal()
-    elif isinstance(date,basestring):
-        return datetime.datetime.strptime(date, '%Y-%m-%d').toordinal()
-    elif isinstance(date, int):
-        return date
-    else:
-        print "unknown date format", date
-        return np.nan	
+	if isinstance(date, datetime.date):
+		return date.toordinal()
+	elif isinstance(date,basestring):
+		return datetime.datetime.strptime(date, '%Y-%m-%d').toordinal()
+	elif isinstance(date, int):
+		return date
+	else:
+		print "unknown date format", date
+		return np.nan
 
 def main():
 	date1 = string_to_date('2011-06-12')
@@ -44,4 +44,4 @@ def main():
 	print string_to_numerical_date('2014-02-01')
 
 if __name__ == "__main__":
-    main()
+	main()

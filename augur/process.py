@@ -5,17 +5,17 @@ import tree_infer, tree_refine, tree_LBI
 
 def main():
 	"""Run full pipeline"""
-	
-	print "--- Start processing at " + time.strftime("%H:%M:%S") + " ---"	
-    
+
+	print "--- Start processing at " + time.strftime("%H:%M:%S") + " ---"
+
 	virus_filter.main()			# Filter sequences
 	virus_align.main()			# Align sequences
 	virus_clean.main()			# Clean sequences
 #	fitness_epitope.main()		# Calculate epitope fitness
-#	fitness_nonepitope.main()	# Calculate non-epitope fitness	
+#	fitness_nonepitope.main()	# Calculate non-epitope fitness
 	tree_infer.main()			# Make tree
-	tree_refine.main()			# Clean tree	
-	tree_LBI.main()				# Calculate LBI across tree		
+	tree_refine.main()			# Clean tree
+	tree_LBI.main()				# Calculate LBI across tree
 
 if __name__ == "__main__":
-    main()
+	main()

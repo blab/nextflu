@@ -13,10 +13,10 @@ OUTGROUP = 'A/Beijing/32/1992'
 
 def delimit_newick(infile_name):
 	with open(infile_name, 'r') as file:
-		newick = file.read().replace('\n', '')	
+		newick = file.read().replace('\n', '')
 		newick = re.sub(r'(A/[^\:^,^)]+)', r"'\1'", newick)
 	return newick
-		
+
 def crossref_import(branches_tree_file, states_tree_file, states_file):
 	"""RAxML won't return a single NEWICK tree with both ancestral states and branch lengths"""
 	"""This opens the necessary RAxL output files and outputs a single Dendropy tree"""
@@ -26,22 +26,22 @@ def crossref_import(branches_tree_file, states_tree_file, states_file):
 			(label, seq) = line.split()
 			label_to_seq[label] = seq
 	branches_tree = dendropy.Tree.get_from_string(delimit_newick(branches_tree_file), "newick", as_rooted=True)
-	states_tree = dendropy.Tree.get_from_string(delimit_newick(states_tree_file), "newick", as_rooted=True)	
+	states_tree = dendropy.Tree.get_from_string(delimit_newick(states_tree_file), "newick", as_rooted=True)
 	for (bn, sn) in zip(branches_tree.postorder_node_iter(), states_tree.postorder_node_iter()):
 		if sn.label:
 			bn.seq = label_to_seq[sn.label]
 	return branches_tree
-	
+
 def get_yvalue(node):
-	"""Return y location based on recursive mean of daughter locations"""	
+	"""Return y location based on recursive mean of daughter locations"""
 	if hasattr(node, 'yvalue'):
-		return node.yvalue	
+		return node.yvalue
 	if node.child_nodes():
 		mean = 0
 		for ch in node.child_nodes():
 			mean += get_yvalue(ch)
 		return mean / float(len(node.child_nodes()))
-		
+
 def get_xvalue(node):
 	"""Return x location based on total distance from root"""
 	root = node.get_tree_root()
@@ -49,24 +49,24 @@ def get_xvalue(node):
 
 def remove_outgroup(tree):
 	"""Reroot tree to outgroup"""
-	outgroup_node = tree.find_node_with_taxon_label(OUTGROUP)	
+	outgroup_node = tree.find_node_with_taxon_label(OUTGROUP)
 	if outgroup_node:
 #		tree.to_outgroup_position(outgroup_node, update_splits=False)
 		tree.prune_subtree(outgroup_node)
-				
+
 def collapse(tree):
 	"""Collapse short edges to polytomies"""
 	for edge in tree.postorder_edge_iter():
 		if edge.length < 0.00001 and edge.is_internal():
 			edge.collapse()
-			
+
 def reduce(tree):
 	"""Remove outlier tips"""
 	for node in tree.postorder_node_iter():
 		if node.edge_length > 0.04 and node.is_leaf():
 			parent = node.parent_node
 			parent.remove_child(node)
-			
+
 def ladderize(tree):
 	"""Sorts child nodes in terms of the length of subtending branches each child node has"""
 	node_desc_counts = {}
@@ -76,15 +76,15 @@ def ladderize(tree):
 		else:
 			total = 0
 			if node.edge_length > 0:
-				total += node.edge_length			
+				total += node.edge_length
 			for child in node._child_nodes:
 				total += node_desc_counts[child]
 			node_desc_counts[node] = total
-			node._child_nodes.sort(key=lambda n: node_desc_counts[n], reverse=True)			
+			node._child_nodes.sort(key=lambda n: node_desc_counts[n], reverse=True)
 
 def layout(tree):
 	"""Set yvalue of tips by post-order traversal"""
-	yvalue = 0	
+	yvalue = 0
 	distance_matrix = dendropy.treecalc.PatristicDistanceMatrix(tree)
 	tips = [node for node in tree.leaf_iter()]
 	tips[0].yvalue = yvalue
@@ -94,7 +94,7 @@ def layout(tree):
 		if b.is_leaf():
 			yvalue += d
 			b.yvalue = yvalue
-			
+
 	for node in tree.postorder_node_iter():
 		node.yvalue = get_yvalue(node)
 
@@ -126,7 +126,7 @@ def add_node_attributes(tree):
 	for node in tree.postorder_node_iter():
 		node.yvalue = get_yvalue(node)
 		node.xvalue = node.distance_from_root()
-	root = tree.seed_node	
+	root = tree.seed_node
 	for node in tree.postorder_node_iter():
 		node.distance_ep = epitope_distance(node.seq, root.seq)
 		node.distance_ne = nonepitope_distance(node.seq, root.seq)
@@ -134,17 +134,17 @@ def add_node_attributes(tree):
 	for node in tree.postorder_node_iter():
 		node.trunk_count = 0
 		node.trunk = False
-			
+
 def define_trunk(tree):
 	"""Trace current lineages backward to define trunk"""
-	
+
 	# Find most recent tip
 	dates = []
 	for node in tree.postorder_node_iter():
 		if node.is_leaf():
 			dates.append(node.date)
 	most_recent_date = string_to_date(sorted(dates)[-1])
-	
+
 	# Mark ancestry of recent tips
 	number_recent = 0
 	for node in tree.postorder_node_iter():
@@ -156,29 +156,29 @@ def define_trunk(tree):
 				while (parent != None):
 					parent.trunk_count += 1
 					parent = parent.parent_node
-					
+
 	# Mark trunk nodes
 	for node in tree.postorder_node_iter():
 		if node.trunk_count == number_recent:
 			node.trunk = True;
-			
+
 def main():
 
 	print "--- Tree refine at " + time.strftime("%H:%M:%S") + " ---"
-		
+
 	viruses = read_json('data/virus_clean.json')
-	
+
 	tree = crossref_import('data/raxml_branches.newick', 'data/raxml_states.newick', 'data/raxml_states.txt')
 	print "Remove outgroup"
-	remove_outgroup(tree)	
-	print "Remove outlier branches" 
+	remove_outgroup(tree)
+	print "Remove outlier branches"
 	reduce(tree)
-	print "Collapse internal nodes"		
-	collapse(tree)	
-	print "Ladderize tree"	
+	print "Collapse internal nodes"
+	collapse(tree)
+	print "Ladderize tree"
 	ladderize(tree)
 	print "Append node attributes"
-	add_virus_attributes(viruses, tree)	
+	add_virus_attributes(viruses, tree)
 	add_node_attributes(tree)
 	print "Define trunk"
 	define_trunk(tree)

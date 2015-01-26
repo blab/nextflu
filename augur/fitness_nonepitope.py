@@ -13,21 +13,21 @@ def append_nonepitope_sites(viruses):
 	for virus in viruses:
 		sites_ne = nonepitope_sites(virus['seq'])
 		virus['sites_ne'] = sites_ne
-		
+
 def remove_nonepitope_sites(viruses):
 	for virus in viruses:
 		virus.pop("sites_ne", None)
-		
+
 def remove_nonepitope_distances(viruses):
 	for virus in viruses:
-		virus.pop("distance_ne", None)			
-		
+		virus.pop("distance_ne", None)
+
 def most_frequent(char_list):
 	d = defaultdict(int)
 	for i in char_list:
 		d[i] += 1
 	return sorted(d.iteritems(), key=lambda x: x[1], reverse=True)[0][0]
-		
+
 def consensus_nonepitope(viruses):
 	"""Return consensus non-epitope sequence"""
 	consensus = ""
@@ -36,13 +36,13 @@ def consensus_nonepitope(viruses):
 		column = [v['sites_ne'][i] for v in viruses]
 		consensus += most_frequent(column)
 	return consensus
-	
+
 def distance_to_consensus(virus, consensus_ne):
 	"""Return distance of virusA to virusB by comparing non-epitope sites"""
 	virus_ne = virus['sites_ne']
 	ne_distance = sum(a != b for a, b in izip(virus_ne, consensus_ne))
 	return ne_distance
-	
+
 def compute(viruses):
 	"""Append non-epitope distances to each virus"""
 	print "Computing epitope distances"
@@ -51,7 +51,7 @@ def compute(viruses):
 		distance = distance_to_consensus(virus, consensus)
 		virus['distance_ne'] = distance
 		print virus['strain'] + ": " + str(virus['distance_ne'])
-	
+
 def normalize(viruses):
 	"""Normalizing non-epitope distances to give non-epitope fitness"""
 	print "Normalizing non-epitope distances"
@@ -66,14 +66,14 @@ def main():
 	print "--- Non-epitope fitness at " + time.strftime("%H:%M:%S") + " ---"
 
 	viruses = read_json('data/virus_epitope.json')
-				
+
 	append_nonepitope_sites(viruses)
 	compute(viruses)
-#	normalize(viruses)		
+#	normalize(viruses)
 	remove_nonepitope_sites(viruses)
 #	remove_nonepitope_distances(viruses)
-	
-	write_json(viruses, "data/virus_nonepitope.json")	
-	
+
+	write_json(viruses, "data/virus_nonepitope.json")
+
 if __name__ == "__main__":
-    main()
+	main()

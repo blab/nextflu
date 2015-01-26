@@ -52,8 +52,8 @@ class Particle:
 	def simulate(self, t, dt, sigma):
 		"""Simulate forward t years with timesteps dt"""
 		"""Implements Euler-Maruyama method"""
-		steps = int(np.ceil(t / dt))	
-		if steps > 0:		
+		steps = int(np.ceil(t / dt))
+		if steps > 0:
 			dt = t / steps
 			sqrtdt_sigma = np.sqrt(dt) * sigma
 			for i in range(steps):
@@ -63,11 +63,11 @@ class Particle:
 					x1 = self.min_value
 				if x1 > self.max_value:
 					x1 = self.max_value
-				self.value = x1		
-	
+				self.value = x1
+
 	def reweight(self, obs):
 		self.weight = obs_likelihood(obs, self.value) + 0.000000001
-		
+
 	def likelihood(self, obs):
 		return obs_likelihood(obs, self.value)
 
@@ -130,7 +130,7 @@ class Filter:
 		self.simulate(t)
 		self.reweight(obs)
 		self.resample()
-		
+
 	def run(self):
 		steps = [j-i for i, j in zip(self.num_dates[:-1], self.num_dates[1:])]
 		for (s, obs, t) in zip(steps, self.observations[1:], self.num_dates[1:]):
@@ -141,13 +141,13 @@ class Filter:
 
 	def mean(self):
 		return np.mean(self.values())
-		
+
 	def likelihood(self, obs):
 		l = []
 		for p in self.particles:
 			l.append(p.likelihood(obs))
 		return np.mean(l)
-		
+
 	def run_with_likelihood(self):
 		steps = [j-i for i, j in zip(self.num_dates[:-1], self.num_dates[1:])]
 		ll = 0
@@ -169,7 +169,7 @@ def estimate_likelihood():
 		ll += filter.run_with_likelihood()
 		node['frequency'] = filter.mean()
 		print str(node['clade']) + ": " + str(node['frequency'])
-		
+
 	print "log likelihood: " + str(ll)
 
 def set_node_frequency(node, dates):
@@ -199,9 +199,9 @@ def main():
 		set_node_frequency(node, dates)
 		print str(node['clade']) + ": " + str(node['frequency'])
 		print str(node['clade']) + ": " + str(node['frequencies'])
-	print "time: " + str(time.clock() - start)	
-	
-	write_json(tree, "data/tree_freq.json")		
+	print "time: " + str(time.clock() - start)
+
+	write_json(tree, "data/tree_freq.json")
 
 if __name__ == "__main__":
-    main()
+	main()

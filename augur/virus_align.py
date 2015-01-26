@@ -2,11 +2,11 @@
 
 import os, time
 from io_util import *
-				
+
 def update_viruses(alignment, viruses):
 	for v in viruses:
-		v['seq'] = next(x for x in alignment if x['strain'] == v['strain'])['seq']			
-				
+		v['seq'] = next(x for x in alignment if x['strain'] == v['strain'])['seq']
+
 def cleanup():
 	try:
 		os.remove('temp_in.fasta')
@@ -15,7 +15,7 @@ def cleanup():
 	try:
 		os.remove('temp_out.fasta')
 	except OSError:
-		pass		
+		pass
 
 def main():
 
@@ -28,6 +28,6 @@ def main():
 	update_viruses(alignment, viruses)
 	write_json(viruses, 'data/virus_align.json')
 	cleanup()
-  		
+
 if __name__ == "__main__":
-    main()
+	main()

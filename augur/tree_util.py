@@ -21,7 +21,7 @@ def all_descendants(node):
 def get_dates(node):
 	"""Return ordered list of dates of descendants of a node"""
 	return sorted([n['date'] for n in tip_descendants(node)])
-	
+
 def dendropy_to_json(node):
 	json = {}
 	if hasattr(node, 'clade'):
@@ -37,7 +37,7 @@ def dendropy_to_json(node):
 	if hasattr(node, 'distance_ne'):
 		json['distance_ne'] = node.distance_ne
 	if hasattr(node, 'distance_rb'):
-		json['distance_rb'] = node.distance_rb		
+		json['distance_rb'] = node.distance_rb
 	if hasattr(node, 'date'):
 		json['date'] = node.date
 	if hasattr(node, 'seq'):
@@ -49,37 +49,37 @@ def dendropy_to_json(node):
 		for ch in node.child_nodes():
 			json["children"].append(dendropy_to_json(ch))
 	return json
-	
+
 def json_to_dendropy(json):
-    '''
-    read a json dictionary and make a dendropy tree from it. 
-    '''
-    tree = dendropy.Tree()
-    tree.get_from_string(';', 'newick')
-    root = tree.leaf_nodes()[0]
-    json_to_dendropy_sub(json, root)
-    root.edge_length=0.01
-    return tree
+	'''
+	read a json dictionary and make a dendropy tree from it.
+	'''
+	tree = dendropy.Tree()
+	tree.get_from_string(';', 'newick')
+	root = tree.leaf_nodes()[0]
+	json_to_dendropy_sub(json, root)
+	root.edge_length=0.01
+	return tree
 
 def json_to_dendropy_sub(json, node):
-    '''
-    recursively calls itself for all children of node and 
-    builds up the tree. entries in json are added as node attributes
-    '''
-    for attr,val in json.iteritems():
-        if attr=='children':
-            for sub_json in val:
-                child_node = dendropy.Node()
-                json_to_dendropy_sub(sub_json, child_node)
-                node.add_child(child_node, edge_length = child_node.xvalue - node.xvalue)
-        else:
-            try:
-                node.__setattr__(attr, float(val))
-            except:
-                node.__setattr__(attr, val)
-    if len(node.child_nodes())==0:
-        node.taxon = json['strain']		
-			
+	'''
+	recursively calls itself for all children of node and
+	builds up the tree. entries in json are added as node attributes
+	'''
+	for attr,val in json.iteritems():
+		if attr=='children':
+			for sub_json in val:
+				child_node = dendropy.Node()
+				json_to_dendropy_sub(sub_json, child_node)
+				node.add_child(child_node, edge_length = child_node.xvalue - node.xvalue)
+		else:
+			try:
+				node.__setattr__(attr, float(val))
+			except:
+				node.__setattr__(attr, val)
+	if len(node.child_nodes())==0:
+		node.taxon = json['strain']
+
 def main():
 
 	tree = read_json('tree.json')
@@ -96,6 +96,6 @@ def main():
 	for node in all_descendants(tree):
 		dates = get_dates(node)
 		print str(node['clade']) + ": " + str(len(dates))
-		
+
 if __name__ == "__main__":
-    main()
+	main()
