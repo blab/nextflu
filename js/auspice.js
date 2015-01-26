@@ -28,17 +28,6 @@ function gatherInternals(node, internals) {
 	return internals;
 }
 
-function setDates(internals) {
-	internals.forEach(function (node) {
-		tips = gatherTips(node, []);
-		dates = []
-		tips.forEach(function (tip) {
-			dates.push(tip.date);
-		})
-		node.date = d3.min(dates);
-	})
-}
-
 function getVaccines(tips) {
 	vaccineChoice = {};
 	vaccineChoice['A/Fujian/411/2002'] = "2003-09-25";
@@ -84,25 +73,6 @@ function setDistances(node) {
 		}
 	}
 }
-
-/*
-function setFrequencies(node, date) {
-	if (typeof node.frequencies != "undefined") {
-		var sdate = ymd_format(date);
-		var dates = [];
-		for (var i=0, c=node.frequencies.length; i<c; i++) {
-			dates.push(node.frequencies[i].date);
-		}
-		var index = d3.bisect(dates, sdate) - 1;
-		node.frequency = node.frequencies[index].frequency;
-	}
-	if (typeof node.children != "undefined") {
-		for (var i=0, c=node.children.length; i<c; i++) {
-			setFrequencies(node.children[i], date);
-		}
-	}
-}
-*/
 
 function calcBranchLength(node){
 	if (typeof node.children != "undefined") {
@@ -345,7 +315,6 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 	calcBranchLength(rootNode);
 	rootNode.branch_length= 0.01;
 	setFrequencies(rootNode);
-	setDates(internals);
 	nodes.forEach(function (d) {d.dateval = new Date(d.date)});
 	calc_deltaLBI(rootNode, nodes, false);
 
