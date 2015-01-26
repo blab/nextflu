@@ -42,12 +42,12 @@ function setDates(internals) {
 function getVaccines(tips) {
 	vaccineChoice = {};
 	vaccineChoice['A/Fujian/411/2002'] = "2003-09-25";
-	vaccineChoice['A/California/7/2004'] = "2005-02-21";	
-	vaccineChoice['A/Wisconsin/67/2005'] = "2006-02-21";		
+	vaccineChoice['A/California/7/2004'] = "2005-02-21";
+	vaccineChoice['A/Wisconsin/67/2005'] = "2006-02-21";
 	vaccineChoice['A/Brisbane/10/2007'] = "2007-09-25";
 	vaccineChoice['A/Perth/16/2009'] = "2009-09-25";
 	vaccineChoice['A/Victoria/361/2011'] = "2012-02-21";
-	vaccineChoice['A/Texas/50/2012'] = "2013-09-25";	
+	vaccineChoice['A/Texas/50/2012'] = "2013-09-25";
 	vaccineChoice['A/Switzerland/9715293/2013'] = "2014-09-25";
 	vaccineStrains = Object.keys(vaccineChoice);
 	vaccines = [];
@@ -77,7 +77,7 @@ function setDistances(node) {
 	}
 	if (typeof node.distance_ne == "undefined") {
 		node.distance_ne = 0.0;
-	}	
+	}
 	if (typeof node.children != "undefined") {
 		for (var i=0, c=node.children.length; i<c; i++) {
 			setDistances(node.children[i]);
@@ -100,7 +100,7 @@ function setFrequencies(node, date) {
 		for (var i=0, c=node.children.length; i<c; i++) {
 			setFrequencies(node.children[i], date);
 		}
-	}	
+	}
 }
 */
 
@@ -135,7 +135,7 @@ function calcUpPolarizers(node){
 		node.up_polarizer *= Math.exp(-bl);
 		node.up_polarizer += LBItau*(1-Math.exp(-bl));
 	}
-};	  
+};
 
 function calcDownPolarizers(node){
 	if (typeof node.children != "undefined") {
@@ -159,7 +159,7 @@ function calcDownPolarizers(node){
 function calcPolarizers(node){
 	calcUpPolarizers(node);
 	node.down_polarizer = 0;
-	calcDownPolarizers(node);	 
+	calcDownPolarizers(node);
 };
 
 function calcLBI(node, allnodes){
@@ -190,14 +190,14 @@ function calc_deltaLBI(node, allnodes, logdelta){
 	allnodes.forEach(function (d){
 	if (logdelta) {d.delta_LBI = d.LBI/(-d.delta_LBI+1e-10);}
 	else {d.delta_LBI += d.LBI;}
-	});	   
+	});
 	maxLBI = d3.max(allnodes.map(function (d) {return d.LBI;}));
 	maxdeltaLBI = d3.max(allnodes.map(function (d) {return d.delta_LBI;}));
 	console.log("maximal LBI: "+maxLBI+", maximal deltaLBI: "+maxdeltaLBI);
 	allnodes.forEach(function (d){
 	d.delta_LBI /= maxdeltaLBI;
 	d.LBI /= maxLBI;
-	});	   
+	});
 };
 
 function minimumAttribute(node, attr, min) {
@@ -230,7 +230,7 @@ function maximumAttribute(node, attr, max) {
 
 var width = 800,
 	height = 600;
-	
+
 var globalDate = new Date();
 var dateCutoff = globalDate;
 var ymd_format = d3.time.format("%Y-%m-%d");
@@ -244,7 +244,7 @@ var tree = d3.layout.tree()
 var treeplot = d3.select("#treeplot")
 	.attr("width", width)
 	.attr("height", height);
-		
+
 var tooltip = d3.tip()
 	.direction('e')
 	.attr('class', 'd3-tip')
@@ -266,7 +266,7 @@ var tooltip = d3.tip()
 		if (typeof d.distance_ne != "undefined") {
 			string += "<br>Non-epitope distance: "
 			string += d.distance_ne;
-		}		
+		}
 		if (typeof d.distance_rb != "undefined") {
 			string += "<br>Receptor binding distance: "
 			string += d.distance_rb;
@@ -274,152 +274,152 @@ var tooltip = d3.tip()
 		if (typeof d.distance_rb != "undefined") {
 			string += "<br>Local branching index: "
 			string += d.LBI.toFixed(3);
-		}							
+		}
 		return string;
 	});
-	
-treeplot.call(tooltip);		
+
+treeplot.call(tooltip);
 
 function rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, internals, vaccines) {
 
 	var speed = 1500;
 	xScale.domain([dMin,dMax]);
 	yScale.domain([lMin,lMax]);
-	
+
 	nodes.forEach(function (d) {
 		d.x = xScale(d.xvalue);
-		d.y = yScale(d.yvalue);			 
-	});	
-		
+		d.y = yScale(d.yvalue);
+	});
+
 	treeplot.selectAll(".tip").data(tips)
-    	.transition().duration(speed)
-    	.attr("cx", function(d) { return d.x; })
-    	.attr("cy", function(d) { return d.y; });
-    	
+		.transition().duration(speed)
+		.attr("cx", function(d) { return d.x; })
+		.attr("cy", function(d) { return d.y; });
+
 	treeplot.selectAll(".vaccine").data(vaccines)
-    	.transition().duration(speed)
-    	.attr("cx", function(d) { return d.x; })
-    	.attr("cy", function(d) { return d.y; });     	
-    	
+		.transition().duration(speed)
+		.attr("cx", function(d) { return d.x; })
+		.attr("cy", function(d) { return d.y; });
+
 	treeplot.selectAll(".internal").data(internals)
-    	.transition().duration(speed)
-		.attr("x", function(d) { 
-			if (typeof d.frequency != "undefined") {		
+		.transition().duration(speed)
+		.attr("x", function(d) {
+			if (typeof d.frequency != "undefined") {
 				return d.x - 5*Math.sqrt(d.frequency) - 0.5;
 			}
 			else {
 				return d.x - 1;
-			}			
+			}
 		})
-		.attr("y", function(d) { 
-			if (typeof d.frequency != "undefined") {		
+		.attr("y", function(d) {
+			if (typeof d.frequency != "undefined") {
 				return d.y - 5*Math.sqrt(d.frequency) - 0.5;
 			}
 			else {
 				return d.y - 1;
-			}			
-		});  
-	    
+			}
+		});
+
 	treeplot.selectAll(".link").data(links)
-    	.transition().duration(speed)
+		.transition().duration(speed)
 		.attr("points", function(d) {
 			var mod = 5*Math.sqrt(d.target.frequency)+0.5;
-			return (d.source.x-mod).toString() + "," + d.source.y.toString() + " " 
+			return (d.source.x-mod).toString() + "," + d.source.y.toString() + " "
 			+ (d.source.x-mod).toString() + "," + d.target.y.toString() + " "
 			+ (d.target.x).toString() + "," + d.target.y.toString()
-		});	   		
-		
+		});
+
 }
 
 d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error, root) {
 //d3.json("auspice.json", function(error, root) {
 
 	if (error) return console.warn(error);
-	
+
 	var nodes = tree.nodes(root),
 		links = tree.links(nodes);
-	
+
 	var rootNode = nodes[0];
 	var tips = gatherTips(rootNode, []);
 	var internals = gatherInternals(rootNode, []);
 	calcBranchLength(rootNode);
-	rootNode.branch_length= 0.01;	
+	rootNode.branch_length= 0.01;
 	setFrequencies(rootNode);
 	setDates(internals);
 	nodes.forEach(function (d) {d.dateval = new Date(d.date)});
-	calc_deltaLBI(rootNode, nodes, false);	
-	
-	var vaccines = getVaccines(tips);	
-		
-	var	xValues = nodes.map(function(d) {
-  		return +d.xvalue;
-  	});  
-  	
+	calc_deltaLBI(rootNode, nodes, false);
+
+	var vaccines = getVaccines(tips);
+
+	var xValues = nodes.map(function(d) {
+		return +d.xvalue;
+	});
+
 	var yValues = nodes.map(function(d) {
-  		return +d.yvalue;
-  	}); 
-  	  	
-  	var dateValues = nodes.filter(function(d) {
+		return +d.yvalue;
+	});
+
+	var dateValues = nodes.filter(function(d) {
 		return typeof d.date === 'string';
-  		}).map(function(d) {
-  		return new Date(d.date);
-  	}); 	
-  	
+		}).map(function(d) {
+		return new Date(d.date);
+	});
+
 	var xScale = d3.scale.linear()
 		.domain([d3.min(xValues), d3.max(xValues)])
 		.range([10, width-10]);
-		
+
 	var yScale = d3.scale.linear()
 		.domain([d3.min(yValues), d3.max(yValues)])
-		.range([10, height-10]);	
-						
+		.range([10, height-10]);
+
 	nodes.forEach(function (d) {
 		d.x = xScale(d.xvalue);
-		d.y = yScale(d.yvalue);		
-	});  						
-						
+		d.y = yScale(d.yvalue);
+	});
+
 	var earliestDate = new Date(d3.min(dateValues));
-	earliestDate.setDate(earliestDate.getDate() + 120);						
-						
+	earliestDate.setDate(earliestDate.getDate() + 120);
+
 	var dateScale = d3.time.scale()
 		.domain([earliestDate, globalDate])
 		.range([-100, 100])
 		.clamp([true]);
-		
+
 	var recencySizeScale = d3.scale.threshold()
 		.domain([0.0, 1.0])
-		.range([0, 4, 0]);			
-		
+		.range([0, 4, 0]);
+
 	var recencyVaccineSizeScale = d3.scale.threshold()
 		.domain([0.0])
 		.range([0, 8]);
-		
+
 	var recencyLinksSizeScale = d3.scale.threshold()
 		.domain([0.0])
-		.range([0, 2]);					
-				
+		.range([0, 2]);
+
 	var freqScale = d3.scale.sqrt()
 		.domain([0, 1])
 		.range([1, 10]);
-		
+
 	var colors = ["#5097BA", "#5DA8A3", "#6EB389", "#83BA70", "#9ABE5C", "#B2BD4D", "#C8B944", "#D9AD3D", "#E49938", "#E67C32", "#E2562B"];
-	var colorBy = "ep";		
-			
+	var colorBy = "ep";
+
 	var epitopeColorScale = d3.scale.threshold()
 		.domain([-1.8, -1.4, -1.0, -0.6, -0.2, 0.2, 0.6, 1.0, 1.4, 1.8])
 		.range(colors);
-		
+
 	var nonepitopeColorScale = d3.scale.threshold()
 		.domain([-1.8, -1.4, -1.0, -0.6, -0.2, 0.2, 0.6, 1.0, 1.4, 1.8])
 		.range(colors);
-		
+
 	var receptorBindingColorScale = d3.scale.threshold()
 		.domain([-0.9, -0.7, -0.5, -0.3, -0.1, 0.1, 0.3, 0.5, 0.7, 0.9])
 		.range(colors);
-		
+
 	var lbiColorScale = d3.scale.threshold()
 		.domain([0, 0.02, 0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16, 0.18])
-		.range(colors);		
+		.range(colors);
 
 	var colorScale = epitopeColorScale;
 	tips.map(function(d) { d.coloring = d.distance_ep; });
@@ -428,11 +428,11 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 	function adjust_coloring_by_date() {
 		if (colorBy == "ep" || colorBy == "ne" || colorBy == "rb") {
 			var mean = 0;
-			var recent_tip_count = 0;								
+			var recent_tip_count = 0;
 			tips.forEach(function (d) {
-				var date = new Date(d.date);		
+				var date = new Date(d.date);
 				var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
-				var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;		
+				var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
 				d.diff = diffYears;
 				if (d.diff < 1) {
 					mean += d.coloring;
@@ -446,39 +446,39 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 		}
 		if (colorBy == "lbi") {
 			tips.forEach(function (d) {
-				var date = new Date(d.date);		
+				var date = new Date(d.date);
 				var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
-				var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;		
+				var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
 				d.diff = diffYears;
-			});		
+			});
 			calc_deltaLBI(rootNode, nodes, false);
 			tips.forEach(function (d) {
 				d.adj_coloring = d.LBI;
-			});			
+			});
 		}
 	}
-				    
+
 	var link = treeplot.selectAll(".link")
 		.data(links)
 		.enter().append("polyline")
 		.attr("class", "link")
 		.attr("points", function(d) {
 			var mod = 5*Math.sqrt(d.target.frequency)+0.5;
-			return (d.source.x-mod).toString() + "," + d.source.y.toString() + " " 
+			return (d.source.x-mod).toString() + "," + d.source.y.toString() + " "
 			+ (d.source.x-mod).toString() + "," + d.target.y.toString() + " "
 			+ (d.target.x).toString() + "," + d.target.y.toString()
 		})
 		.style("stroke-width", 2)
-		.style("stroke", "#ccc")		
-    	.style("cursor", "pointer")		
-     	.on('click', function(d) { 
-      		var dMin = minimumAttribute(d.target, "xvalue", d.target.xvalue),
-      			dMax = maximumAttribute(d.target, "xvalue", d.target.xvalue),
-      			lMin = minimumAttribute(d.target, "yvalue", d.target.yvalue),
-      			lMax = maximumAttribute(d.target, "yvalue", d.target.yvalue);
-      		rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, internals, vaccines);
-      	}); 
-            		    
+		.style("stroke", "#ccc")
+		.style("cursor", "pointer")
+		.on('click', function(d) {
+			var dMin = minimumAttribute(d.target, "xvalue", d.target.xvalue),
+				dMax = maximumAttribute(d.target, "xvalue", d.target.xvalue),
+				lMin = minimumAttribute(d.target, "yvalue", d.target.yvalue),
+				lMax = maximumAttribute(d.target, "yvalue", d.target.yvalue);
+			rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, internals, vaccines);
+		});
+
 	var tipCircles = treeplot.selectAll(".tip")
 		.data(tips)
 		.enter()
@@ -489,38 +489,38 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 		.attr("cy", function(d) { return d.y; })
 		.attr("r", function(d) {
 			return recencySizeScale(d.diff);
-		})			
+		})
 		.style("fill", function(d) {
 			var col = colorScale(d.adj_coloring);
-			return d3.rgb(col).brighter([0.7]).toString();	
-		})	
-		.style("stroke", function(d) { 
+			return d3.rgb(col).brighter([0.7]).toString();
+		})
+		.style("stroke", function(d) {
 			var col = colorScale(d.adj_coloring);
 			return d3.rgb(col).toString();
-		})					
+		})
 		.on('mouseover', function(d) {
 			tooltip.show(d, this);
-		})		
-      	.on('mouseout', tooltip.hide);
-      	   
+		})
+		.on('mouseout', tooltip.hide);
+
 	var vaccineCircles = treeplot.selectAll(".vaccine")
 		.data(vaccines)
 		.enter()
 		.append("circle")
 		.attr("class", "vaccine")
 		.attr("cx", function(d) {return d.x})
-		.attr("cy", function(d) {return d.y})	
+		.attr("cy", function(d) {return d.y})
 		.attr("r", function(d) {
 			return recencyVaccineSizeScale(d.diff);
-		})	
-		.style("fill", d3.rgb("#A160AB").brighter([0.45]).toString())	
+		})
+		.style("fill", d3.rgb("#A160AB").brighter([0.45]).toString())
 		.style("stroke", "#A160AB")
 		.on('mouseover', function(d) {
 			tooltip.show(d, this);
-		})	
-      	.on('mouseout', tooltip.hide);					
-		     	   
-      	      	
+		})
+		.on('mouseout', tooltip.hide);
+
+
 	var drag = d3.behavior.drag()
 		.origin(function(d) { return d; })
 		.on("drag", dragged)
@@ -530,81 +530,81 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 		.on("dragend", function() {
 			 d3.select(this).style("fill", "#CCC");
 		});
-	
+
 	function dragged(d) {
-		
+
 		d.date = dateScale.invert(d3.event.x);
 		d.x = dateScale(d.date);
 		d3.selectAll(".counter-text")
-			.text(function(d){ 
-    			return format(d.date) 
-    		});
+			.text(function(d){
+				return format(d.date)
+			});
 		globalDate = d.date;
 		dateCutoff = d.date;
 		adjust_coloring_by_date();
 		d3.selectAll(".tip")
 			.attr("r", function(d) {
 				return recencySizeScale(d.diff);
-			})		
-			.style("fill", function(d) { 
+			})
+			.style("fill", function(d) {
 				var col = colorScale(d.adj_coloring);
-				return d3.rgb(col).brighter([0.7]).toString();	
-			})	    		
-			.style("stroke", function(d) { 
+				return d3.rgb(col).brighter([0.7]).toString();
+			})
+			.style("stroke", function(d) {
 				var col = colorScale(d.adj_coloring);
-				return d3.rgb(col).toString();	
-			}); 
+				return d3.rgb(col).toString();
+			});
 		d3.selectAll(".vaccine")
 			.attr("r", function(d) {
 				return recencyVaccineSizeScale(d.diff);
-			});	
-				
+			});
+
 	}
-		
+
 	var counterData = {}
-	counterData['date'] = globalDate	
+	counterData['date'] = globalDate
 	counterData['x'] = dateScale(globalDate)
-			    	
+
 	var format = d3.time.format("%Y %b %-d");
-	
+
 	d3.select("#counter")
 		.attr("width", 200)
 		.attr("height", 50);
-	
+
 	var counterText = d3.select("#counter").selectAll(".counter-text")
 		.data([counterData])
 		.enter()
-		.append("text")			
-		.attr("class", "counter-text") 
-    	.attr("transform", "translate(0,30)")
-    	.style("text-anchor", "left")
-    	.style("alignment-baseline", "middle")
-    	.text(function(d){ 
-    		return format(d.date) 
-    	})
-    	.on("mouseover", function() {
-    		d3.select(this).style("fill", "#5DA8A3");
-    	})
-    	.on("mouseout", function() {
-    		d3.select(this).style("fill", "#CCCCCC");
-    	})    	
-    	.style("cursor", "col-resize")
-    	.call(drag);     
-    	  	
-	d3.select("#reset")
-        .on("click", function(d) {
-			var dMin = d3.min(xValues),
-      			dMax = d3.max(xValues),
-      			lMin = d3.min(yValues),
-      			lMax = d3.max(yValues);        	
-            rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, internals, vaccines);
+		.append("text")
+		.attr("class", "counter-text")
+		.attr("transform", "translate(0,30)")
+		.style("text-anchor", "left")
+		.style("alignment-baseline", "middle")
+		.text(function(d){
+			return format(d.date)
 		})
-		
+		.on("mouseover", function() {
+			d3.select(this).style("fill", "#5DA8A3");
+		})
+		.on("mouseout", function() {
+			d3.select(this).style("fill", "#CCCCCC");
+		})
+		.style("cursor", "col-resize")
+		.call(drag);
+
+	d3.select("#reset")
+		.on("click", function(d) {
+			var dMin = d3.min(xValues),
+				dMax = d3.max(xValues),
+				lMin = d3.min(yValues),
+				lMax = d3.max(yValues);
+			rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, internals, vaccines);
+		})
+
 	d3.select("#coloring")
-        .on("change", function(d) {
-        
+		.on("change", function(d) {
+
 			colorBy = d3.select(this).node().value;
-			
+
 			if (colorBy == "ep") {
 				colorScale = epitopeColorScale;
 				tips.map(function(d) { d.coloring = d.distance_ep; });
@@ -616,36 +616,36 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 			if (colorBy == "rb") {
 				colorScale = receptorBindingColorScale;
 				tips.map(function(d) { d.coloring = d.distance_rb; });
-			}	
+			}
 			if (colorBy == "lbi") {
 				colorScale = lbiColorScale;
 				tips.map(function(d) { d.adj_coloring = d.LBI; });
-			}							
-				
+			}
+
 			adjust_coloring_by_date();
-			
+
 			d3.selectAll(".tip")
 				.attr("r", function(d) {
 					return recencySizeScale(d.diff);
-				})		
-				.style("fill", function(d) { 
+				})
+				.style("fill", function(d) {
 					var col = colorScale(d.adj_coloring);
-					return d3.rgb(col).brighter([0.7]).toString();	
-				})	    		
-				.style("stroke", function(d) { 
+					return d3.rgb(col).brighter([0.7]).toString();
+				})
+				.style("stroke", function(d) {
 					var col = colorScale(d.adj_coloring);
-					return d3.rgb(col).toString();	
+					return d3.rgb(col).toString();
 				});
-								
-		})					
-		
+
+		})
+
 	function onSelect(tip) {
 		d3.select("#"+(tip.strain).replace(/\//g, ""))
 			.call(function(d) {
 				tooltip.show(tip, d[0][0]);
 			});
-	}		
-		
+	}
+
 	var mc = autocomplete(document.getElementById('search'))
 		.keys(tips)
 		.dataField("strain")
@@ -653,8 +653,8 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 		.width(800)
 		.height(500)
 		.onSelected(onSelect)
-		.render();	
-		
+		.render();
+
 });
 
 
