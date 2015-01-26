@@ -378,17 +378,17 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 
 	var colors = ["#5097BA", "#5DA8A3", "#6EB389", "#83BA70", "#9ABE5C", "#B2BD4D", "#C8B944", "#D9AD3D", "#E49938", "#E67C32", "#E2562B"];
 	var colorBy = "ep";
+	
+	var epitopeColorScale = d3.scale.linear().clamp([true])
+      .domain([-1.66, -1.33, -1.0, -0.66, -0.33, 0, 0.33, 0.66, 1.0, 1.33, 1.66])
+      .range(colors);		
 
-	var epitopeColorScale = d3.scale.threshold()
-		.domain([-1.8, -1.4, -1.0, -0.6, -0.2, 0.2, 0.6, 1.0, 1.4, 1.8])
+	var nonepitopeColorScale = d3.scale.linear().clamp([true])
+		.domain([-1.66, -1.33, -1.0, -0.66, -0.33, 0, 0.33, 0.66, 1.0, 1.33, 1.66])
 		.range(colors);
 
-	var nonepitopeColorScale = d3.scale.threshold()
-		.domain([-1.8, -1.4, -1.0, -0.6, -0.2, 0.2, 0.6, 1.0, 1.4, 1.8])
-		.range(colors);
-
-	var receptorBindingColorScale = d3.scale.threshold()
-		.domain([-0.9, -0.7, -0.5, -0.3, -0.1, 0.1, 0.3, 0.5, 0.7, 0.9])
+	var receptorBindingColorScale = d3.scale.linear().clamp([true])
+		.domain([-1.0, -0.8, -0.6, -0.4, -0.2, 0, 0.2, 0.4, 0.6, 0.8, 1.0])
 		.range(colors);
 
 	var lbiColorScale = d3.scale.linear()
