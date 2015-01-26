@@ -62,10 +62,11 @@ def normalize(viruses):
 		virus['fitness_ne'] = -1 * ( ( virus['distance_ne'] - mean) / sd )
 		print virus['strain'] + ": " + str(virus['fitness_ne'])
 
-def main():
+def main(in_fname = None):
 	print "--- Non-epitope fitness at " + time.strftime("%H:%M:%S") + " ---"
 
-	viruses = read_json('data/virus_epitope.json')
+	if in_fname is None: in_fname='data/virus_epitope.json'
+	viruses = read_json(in_fname)
 
 	append_nonepitope_sites(viruses)
 	compute(viruses)
@@ -73,7 +74,9 @@ def main():
 	remove_nonepitope_sites(viruses)
 #	remove_nonepitope_distances(viruses)
 
-	write_json(viruses, "data/virus_nonepitope.json")
+	out_fname = "data/virus_nonepitope.json"
+	write_json(viruses, out_fname)
+	return out_fname
 
 if __name__ == "__main__":
 	main()
