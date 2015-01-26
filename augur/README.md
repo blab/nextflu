@@ -1,6 +1,6 @@
 ## Augur
 
-Augur is Python package to track (and eventually forecast) flu evolution.  It currently
+Augur is the processing pipeline that tracks (and eventually forecasts) flu evolution.  It currently
 
 * imports public sequence data
 * subsamples, cleans and aligns sequences
