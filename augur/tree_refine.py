@@ -130,6 +130,7 @@ def add_node_attributes(tree):
 	for node in tree.postorder_node_iter():
 		node.distance_ep = epitope_distance(node.seq, root.seq)
 		node.distance_ne = nonepitope_distance(node.seq, root.seq)
+		node.distance_rb = receptor_binding_distance(node.seq, root.seq)
 	for node in tree.postorder_node_iter():
 		node.trunk_count = 0
 		node.trunk = False
@@ -161,20 +162,6 @@ def define_trunk(tree):
 		if node.trunk_count == number_recent:
 			node.trunk = True;
 			
-def compute_distances(tree):
-	"""Calculate epitope and non-epitope distances to root"""
-	for node in tree.postorder_node_iter():
-		if node.is_leaf():
-			distance_ep = node.mut_ep
-			distance_ne = node.mut_ne
-			parent = node.parent_node
-			while (parent.parent_node != None):
-				distance_ep += parent.mut_ep
-				distance_ne += parent.mut_ne
-				parent = parent.parent_node
-			node.distance_ep = distance_ep
-			node.distance_ne = distance_ne	
-
 def main():
 
 	print "--- Tree refine at " + time.strftime("%H:%M:%S") + " ---"
@@ -195,8 +182,6 @@ def main():
 	add_node_attributes(tree)
 	print "Define trunk"
 	define_trunk(tree)
-#	print "Compute distances"
-#	compute_distances(tree)	
 
 	write_json(dendropy_to_json(tree.seed_node), "data/tree_refine.json")
 

@@ -36,6 +36,8 @@ def dendropy_to_json(node):
 		json['distance_ep'] = node.distance_ep
 	if hasattr(node, 'distance_ne'):
 		json['distance_ne'] = node.distance_ne
+	if hasattr(node, 'distance_rb'):
+		json['distance_rb'] = node.distance_rb		
 	if hasattr(node, 'date'):
 		json['date'] = node.date
 	if hasattr(node, 'seq'):
