@@ -166,7 +166,11 @@ var tooltip = d3.tip()
 		if (typeof d.distance_ne != "undefined") {
 			string += "<br>Non-epitope distance: "
 			string += d.distance_ne;
-		}			
+		}		
+		if (typeof d.distance_rb != "undefined") {
+			string += "<br>Receptor binding distance: "
+			string += d.distance_rb;
+		}					
 		return string;
 	});
 	
@@ -471,7 +475,10 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
   				}
 				if (val == "ne") {
   					d.distance = d.distance_ne;
-  				}  				
+  				}  	
+				if (val == "rb") {
+  					d.distance = 3 * d.distance_rb;
+  				}  	  							
   			});  
 			distance_adjust();
 			d3.selectAll(".tip")
