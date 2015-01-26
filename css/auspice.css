@@ -1,0 +1,318 @@
+.node circle {
+	fill: #fff;
+	stroke: steelblue;
+	stroke-width: 1.5px;
+}
+
+.node {
+	font: 10px sans-serif;
+}
+
+.link {
+	fill: none;
+	stroke: #ccc;
+	stroke-width: 1.5px;
+}				
+
+.d3-tip {
+	font: 14px "Helvetica Neue", Helvetica, Arial, sans-serif;
+	line-height: 1;
+	font-weight: bold;
+	padding: 7px;
+	background: rgba(0, 0, 0, 0.55);
+	color: #fff;
+	border-radius: 14px;
+}
+
+.counter-text {
+	font: 32px "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-weight: 500;
+	fill: #ccc;
+	height: 100px;
+}
+
+body {
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.plot-container {
+	width:800px;
+	position:absolute;
+	top: 65px;
+	left: 50%;
+	margin-left: -400px;	
+}
+
+.io-container {
+	width: 200px;
+	position:absolute;	
+}
+
+.bordered {
+	border-style: solid;
+	border-width: 1px;
+	border-color: gray;
+}
+
+/* general */
+
+.container {
+  padding-left: 25px;
+  padding-right: 25px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-weight: 300;
+	/* Museo */	
+}
+
+.center {
+     float: none;
+     margin-left: auto;
+     margin-right: auto;
+}
+
+.text-center {
+     text-align: center;
+}
+
+a {
+	color: #5DA8A3;
+}
+
+/* logo */
+
+.logo {
+	width: 60px;
+	height: 60px;
+	padding: 5px;
+}
+
+.biglogo {
+	width: 180px;
+	height: 180px;
+	padding: 5px;
+}
+
+.logobox {
+	height: 100px;
+	width: 500px;
+	display: table-cell; 
+	vertical-align: middle;
+}
+
+/* navbar */
+.navbar-brand { 
+	font-size: 30px; 
+	font-weight: 100;
+	/* Museo */	
+}
+.navbar-nav { 
+	font-size: 30px; 
+	font-weight: 100;
+	/* Museo */	
+}
+.navbar-text {
+	font-size: 15px;
+	font-weight: 300;	
+	/* Museo */		
+}
+
+/* colors */
+
+.c1 {
+	color: #4C90C0;
+}
+
+.c2 {
+	color: #5DA8A3;
+}
+
+.c3 {
+	color: #75B681;
+}
+
+.c4 {
+	color: #92BC63;
+}
+
+.c5 {
+	color: #B2BD4D;
+}
+
+.c6 {
+	color: #CEB541;
+}
+
+.c7 {
+	color: #E1A03A;
+}
+
+.c8 {
+	color: #E67C32;
+}
+
+.c9 {
+	color: #E04929;
+}
+
+/* headings */
+
+.bigtitle {
+	font-size: 92px; 
+	line-height: 90px;	
+	font-weight: 300;
+	/* Museo */	
+}
+
+.title {
+	font-size: 45px; 
+	line-height: 50px;	
+	font-weight: 100;
+	/* Museo */	
+}
+
+.bighead {
+	font-size: 32px;
+	font-weight: 300;
+	line-height:36px;
+	/* Museo */	
+}
+
+.head {
+	font-size: 26px;
+	font-weight: 300;
+	line-height:30px;
+	/* Museo */	
+}
+
+.smallhead {
+	font-size: 19px;
+	font-weight: 300;
+	line-height: 23px;
+	/* Museo */	
+}
+
+.note {
+	font-size: 15px;
+	font-weight: 300;
+	line-height: 18px;
+	/* Museo */	
+}
+
+.smallnote {
+	font-size: 13px;
+	font-weight: 300;
+	line-height: 16px;
+	/* Museo */	
+}
+
+.text-gray {
+	color: #cccccc;
+}
+
+.text-dark-gray {
+	color: #777777;
+}
+
+/* other */
+
+body {
+	font-weight: 300;
+	font-size: 16px;
+}
+
+p {
+	font-weight: 300;
+}
+
+.hugespacer {
+	height: 50px;
+}
+
+.bigspacer {
+	height: 20px;
+}
+
+.spacer {
+	height: 10px;
+}
+
+.smallspacer {
+	height: 5px;
+}
+
+a.off { 
+	color: inherit; 
+}
+
+code.has-jax {
+	background: inherit; 
+	color: inherit;
+}
+
+pre {
+    overflow-x: auto;
+}
+
+pre code {
+    overflow-wrap: normal;
+    white-space: pre;
+}
+
+table {
+	.table;
+	.table-striped;
+}
+
+img {
+	.img-responsive;
+}
+
+img.offset {
+	float: right; 
+	margin: 12px 0px 10px 15px;
+}
+
+blockquote {
+	.text-gray;
+	p {
+    font-size: (@font-size-base * 1.00);
+    }
+}
+
+.breadcrumb {
+	padding: 0px 0px;
+	background-color: @body-bg;
+	> li {
+		&+li:before {  
+			padding: 0px;
+		}
+		&+li:after {  
+			padding: 0px;
+		}		
+	}
+}
+
+.pad-right {
+	padding-right: 10px;
+}
+
+.pad-left {
+	padding-left: 10px;
+}
+
+#footer {
+	height: 80px;
+}
+
+.footernav {
+	.note;
+	.text-dark-gray;
+	text-align: center;
+}
