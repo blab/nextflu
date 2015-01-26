@@ -61,11 +61,11 @@ function setFrequencies(node) {
 }
 
 function setDistances(node) {
-	if (typeof node.distance_ep == "undefined") {
-		node.distance_ep = 0.0;
+	if (typeof node.ep == "undefined") {
+		node.ep = 0.0;
 	}
-	if (typeof node.distance_ne == "undefined") {
-		node.distance_ne = 0.0;
+	if (typeof node.ne == "undefined") {
+		node.ne = 0.0;
 	}
 	if (typeof node.children != "undefined") {
 		for (var i=0, c=node.children.length; i<c; i++) {
@@ -229,19 +229,19 @@ var tooltip = d3.tip()
 			string += "<br>Date: "
 			string += d.date;
 		}
-		if (typeof d.distance_ep != "undefined") {
+		if (typeof d.ep != "undefined") {
 			string += "<br>Epitope distance: "
-			string += d.distance_ep;
+			string += d.ep;
 		}
-		if (typeof d.distance_ne != "undefined") {
+		if (typeof d.ne != "undefined") {
 			string += "<br>Non-epitope distance: "
-			string += d.distance_ne;
+			string += d.ne;
 		}
-		if (typeof d.distance_rb != "undefined") {
+		if (typeof d.rb != "undefined") {
 			string += "<br>Receptor binding distance: "
-			string += d.distance_rb;
+			string += d.rb;
 		}
-		if (typeof d.distance_rb != "undefined") {
+		if (typeof d.rb != "undefined") {
 			string += "<br>Local branching index: "
 			string += d.LBI.toFixed(3);
 		}
@@ -391,7 +391,7 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 		.range(colors);
 
 	var colorScale = epitopeColorScale;
-	tips.map(function(d) { d.coloring = d.distance_ep; });
+	tips.map(function(d) { d.coloring = d.ep; });
 	adjust_coloring_by_date();
 
 	function adjust_coloring_by_date() {
@@ -576,15 +576,15 @@ d3.json("https://s3.amazonaws.com/augur-data/auspice/tree.json", function(error,
 
 			if (colorBy == "ep") {
 				colorScale = epitopeColorScale;
-				tips.map(function(d) { d.coloring = d.distance_ep; });
+				tips.map(function(d) { d.coloring = d.ep; });
 			}
 			if (colorBy == "ne") {
 				colorScale = nonepitopeColorScale;
-				tips.map(function(d) { d.coloring = d.distance_ne; });
+				tips.map(function(d) { d.coloring = d.ne; });
 			}
 			if (colorBy == "rb") {
 				colorScale = receptorBindingColorScale;
-				tips.map(function(d) { d.coloring = d.distance_rb; });
+				tips.map(function(d) { d.coloring = d.rb; });
 			}
 			if (colorBy == "lbi") {
 				colorScale = lbiColorScale;
