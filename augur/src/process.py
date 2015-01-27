@@ -1,4 +1,4 @@
-import time, os, sys
+import time, os, argparse
 import virus_download, virus_filter, virus_align, virus_clean
 import tree_infer, tree_ancestral, tree_refine, tree_streamline
 from io_util import *
@@ -40,10 +40,8 @@ def main(years_back=3, viruses_per_month=50):
 	write_json(meta, meta_fname)
 
 if __name__ == "__main__":
-	years_back = 3
-	viruses_per_month = 50
-	if (len(sys.argv) > 1):
-		years_back = int(sys.argv[1])
-	if (len(sys.argv) > 2):
-		viruses_per_month = int(sys.argv[2])
-	main(years_back=years_back, viruses_per_month=viruses_per_month)
+	parser = argparse.ArgumentParser(description='Process virus sequences, build tree, and prepare of web visualization')
+	parser.add_argument('-y', '--years_back', type = int, default=3, help='number of past years to sample sequences from')
+	parser.add_argument('-v', '--viruses_per_month', type = int, default = 50, help='number of viruses sampled per month')
+	params = parser.parse_args()
+	main(params.years_back, params.viruses_per_month)
