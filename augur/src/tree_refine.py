@@ -48,9 +48,11 @@ def get_xvalue(node):
 
 def remove_outgroup(tree):
 	"""Reroot tree to outgroup"""
-	outgroup_node = tree.find_node_with_taxon_label(OUTGROUP)
+	outgroup_node = None
+	for node in tree.postorder_node_iter():
+		if (str(node.taxon) == OUTGROUP):
+			outgroup_node = node
 	if outgroup_node:
-#		tree.to_outgroup_position(outgroup_node, update_splits=False)
 		tree.prune_subtree(outgroup_node)
 
 def collapse(tree):
@@ -183,6 +185,6 @@ def main(tree_fname = 'data/tree_ancestral.json', virus_fname='data/virus_clean.
 	out_fname = "data/tree_refine.json"
 	write_json(dendropy_to_json(tree.seed_node), out_fname)
 	return out_fname
-	
+
 if __name__ == "__main__":
 	main()

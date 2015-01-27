@@ -89,7 +89,7 @@ def json_to_dendropy(json):
 	tree.get_from_string(';', 'newick')
 	root = tree.leaf_nodes()[0]
 	json_to_dendropy_sub(json, root)
-	root.edge_length=0.01
+	root.edge_length=0.0
 	return tree
 
 def json_to_dendropy_sub(json, node):
