@@ -6,7 +6,6 @@ import dendropy
 from io_util import *
 from seq_util import *
 from date_util import *
-from tree_LBI import *
 from tree_util import *
 
 OUTGROUP = 'A/Beijing/32/1992'
@@ -162,14 +161,12 @@ def define_trunk(tree):
 		if node.trunk_count == number_recent:
 			node.trunk = True;
 
-def main(in_fname=None):
+def main(tree_fname = 'data/tree_ancestral.json', virus_fname='data/virus_clean.json'):
 
 	print "--- Tree refine at " + time.strftime("%H:%M:%S") + " ---"
 
-	if in_fname is None: in_fname='data/virus_clean.json'
-	viruses = read_json(in_fname)
-
-	tree = crossref_import('data/raxml_branches.newick', 'data/raxml_states.newick', 'data/raxml_states.txt')
+	viruses = read_json(virus_fname)
+	tree =  json_to_dendropy(read_json(tree_fname))
 	print "Remove outgroup"
 	remove_outgroup(tree)
 	print "Remove outlier branches"
