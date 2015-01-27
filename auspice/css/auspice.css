@@ -24,11 +24,22 @@
 	border-radius: 14px;
 }
 
-.counter-text {
-	font: 32px "Helvetica Neue", Helvetica, Arial, sans-serif;
+.date-input-text {
+	font: 28px "Helvetica Neue", Helvetica, Arial, sans-serif;
 	font-weight: 500;
-	fill: #ccc;
-	height: 100px;
+	fill: #CCC;
+}
+
+.date-input-axis path,
+.date-input-axis line {
+    fill: none;
+    stroke: #555555;
+    shape-rendering: crispEdges;
+}
+
+.date-input-axis text {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 12px;
 }
 
 body {
