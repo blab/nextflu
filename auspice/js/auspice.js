@@ -42,7 +42,7 @@ function getVaccines(tips) {
 	vaccines = [];
 	tips.forEach(function (tip) {
 		if (vaccineStrains.indexOf(tip.strain) != -1) {
-			tip.date = vaccineChoice[tip.strain];
+			tip.choice = vaccineChoice[tip.strain];
 			vaccines.push(tip);
 		}
 	})
@@ -273,8 +273,8 @@ function rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, int
 
 	treeplot.selectAll(".vaccine").data(vaccines)
 		.transition().duration(speed)
-		.attr("cx", function(d) { return d.x; })
-		.attr("cy", function(d) { return d.y; });
+		.attr("x", function(d) { return d.x; })
+		.attr("y", function(d) { return d.y; });
 
 	treeplot.selectAll(".internal").data(internals)
 		.transition().duration(speed)
@@ -485,15 +485,17 @@ d3.json("data/tree.json", function(error, root) {
 	var vaccineCircles = treeplot.selectAll(".vaccine")
 		.data(vaccines)
 		.enter()
-		.append("circle")
+		.append("text")
 		.attr("class", "vaccine")
-		.attr("cx", function(d) {return d.x})
-		.attr("cy", function(d) {return d.y})
-		.attr("r", function(d) {
-			return recencyVaccineSizeScale(d.diff);
-		})
-		.style("fill", d3.rgb("#A160AB").brighter([0.45]).toString())
-		.style("stroke", "#A160AB")
+		.attr("x", function(d) {return d.x})
+		.attr("y", function(d) {return d.y})
+		.attr('text-anchor', 'middle')
+		.attr('dominant-baseline', 'central')
+		.style("font-size", "28px")
+		.style('font-family', 'FontAwesome')
+		.style("fill", "#555555")
+		.text(function(d) { return '\uf00d'; })
+		.style("cursor", "default")
 		.on('mouseover', function(d) {
 			tooltip.show(d, this);
 		})
@@ -537,8 +539,12 @@ d3.json("data/tree.json", function(error, root) {
 				return d3.rgb(col).toString();
 			});
 		d3.selectAll(".vaccine")
-			.attr("r", function(d) {
-				return recencyVaccineSizeScale(d.diff);
+			.style("visibility", function(d) {
+				var date = new Date(d.choice);
+				var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
+				var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
+				if (diffYears > 0) { return "visible"; }
+				else { return "hidden"; }
 			});
 
 	}
