@@ -8,9 +8,6 @@
 import os, re, time, datetime
 from io_util import *
 
-YEARS_BACK = 3
-VIRUSES_PER_MONTH = 50
-
 def parse_gisaid(fasta):
 	"""Parse FASTA file from GISAID with default header formating"""
 	viruses = []
@@ -132,21 +129,21 @@ def filter_unique(viruses):
 			filtered_viruses.append(v)
 	return filtered_viruses
 
-def streamline(viruses):
+def streamline(viruses, years_back, viruses_per_month):
 	filtered_viruses = []
-	first_year = datetime.datetime.today().year - YEARS_BACK
+	first_year = datetime.datetime.today().year - years_back
 	first_month = datetime.datetime.today().month
 	print "Filtering between " + str(first_month) + "/" + str(first_year) + " and today"
-	print "Selecting " + str(VIRUSES_PER_MONTH) + " viruses per month"
+	print "Selecting " + str(viruses_per_month) + " viruses per month"
 	y = first_year
 	for m in range(first_month,13):
-		filtered_viruses.extend(select_viruses(viruses, y, m))
+		filtered_viruses.extend(select_viruses(viruses, y, m, viruses_per_month))
 	for y in range(first_year+1,datetime.datetime.today().year+1):
 		for m in range(1,13):
-			filtered_viruses.extend(select_viruses(viruses, y, m))
+			filtered_viruses.extend(select_viruses(viruses, y, m, viruses_per_month))
 	return filtered_viruses
 
-def select_viruses(viruses, y, m):
+def select_viruses(viruses, y, m, viruses_per_month):
 	count = 0
 	filtered = []
 	for v in viruses:
@@ -154,11 +151,11 @@ def select_viruses(viruses, y, m):
 		if y == date.year and m == date.month:
 			filtered.append(v)
 			count += 1
-			if count == VIRUSES_PER_MONTH:
+			if count == viruses_per_month:
 				break
 	return filtered
 
-def main(in_fname=None):
+def main(in_fname=None, years_back=3, viruses_per_month=50):
 
 	print "--- Filter at " + time.strftime("%H:%M:%S") + " ---"
 
@@ -197,7 +194,7 @@ def main(in_fname=None):
 	print str(len(viruses)) + " with unique strain names"
 
 	# reduce to manageable volume
-	viruses = streamline(viruses)
+	viruses = streamline(viruses, years_back, viruses_per_month)
 	print str(len(viruses)) + " after streamlining"
 
 	# add outgroup
