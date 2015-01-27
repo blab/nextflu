@@ -56,6 +56,8 @@ def BioPhylo_to_json(node):
 		json['clade'] = node.clade
 	if node.name:
 		json['strain'] = str(node.name).replace("'", '')
+	if hasattr(node, 'branch_length'):
+		json['branch_length'] = round(node.branch_length, 5)
 	if hasattr(node, 'xvalue'):
 		json['xvalue'] = round(node.xvalue, 5)
 	if hasattr(node, 'yvalue'):
@@ -100,7 +102,12 @@ def json_to_dendropy_sub(json, node):
 			for sub_json in val:
 				child_node = dendropy.Node()
 				json_to_dendropy_sub(sub_json, child_node)
-				node.add_child(child_node, edge_length = child_node.xvalue - node.xvalue)
+				if hasattr(child_node, 'xvalue'):
+					node.add_child(child_node, edge_length = child_node.xvalue - node.xvalue)
+				elif hasattr(child_node, 'branch_length'):
+					node.add_child(child_node, edge_length = child_node.branch_length)
+				else:
+					node.add_child(child_node, edge_length = 1.0)
 		else:
 			try:
 				node.__setattr__(attr, float(val))

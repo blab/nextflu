@@ -26,6 +26,8 @@ class ancestral_sequences:
 	'''
 	class that generates a biopython tree dressed with ancestral sequences 
 	and the marginal probabilities of different states in the tree
+	NOTE: THIS TREATS ANYTHING OTHER THAN ACGT AS MISSING DATA. NO GAPHANDLING
+	should be extended to handle ambiguous symbols correctly.
 	'''
 
 	def __init__(self, tree, aln, alphabet = 'ACGT', sub_matrix = None, 
