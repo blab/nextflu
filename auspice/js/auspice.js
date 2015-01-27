@@ -42,7 +42,7 @@ function getVaccines(tips) {
 	vaccines = [];
 	tips.forEach(function (tip) {
 		if (vaccineStrains.indexOf(tip.strain) != -1) {
-			tip.date = vaccineChoice[tip.strain];
+			tip.choice = vaccineChoice[tip.strain];
 			vaccines.push(tip);
 		}
 	})
@@ -273,8 +273,8 @@ function rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, int
 
 	treeplot.selectAll(".vaccine").data(vaccines)
 		.transition().duration(speed)
-		.attr("cx", function(d) { return d.x; })
-		.attr("cy", function(d) { return d.y; });
+		.attr("x", function(d) { return d.x; })
+		.attr("y", function(d) { return d.y; });
 
 	treeplot.selectAll(".internal").data(internals)
 		.transition().duration(speed)
@@ -487,15 +487,9 @@ d3.json("data/tree.json", function(error, root) {
 		.attr('dominant-baseline', 'central')
 		.style("font-size", "28px")
 		.style('font-family', 'FontAwesome')
-		.style("fill", function(d) {
-			var col = colorScale(d.adj_coloring);
-			return d3.rgb(col).brighter([0.7]).toString();
-		})
-		.style("stroke", function(d) {
-			var col = colorScale(d.adj_coloring);
-			return d3.rgb(col).toString();
-		})
-		.text(function(d) { return '\uf00d'; })	// 00d for cross
+		.style("fill", "#555555")
+		.text(function(d) { return '\uf00d'; })
+		.style("cursor", "default")
 		.on('mouseover', function(d) {
 			tooltip.show(d, this);
 		})
@@ -536,16 +530,11 @@ d3.json("data/tree.json", function(error, root) {
 			});
 		d3.selectAll(".vaccine")
 			.style("visibility", function(d) {
-				if (d.diff < 0) { return "hidden"; }
-				else { return "visible"; }
-			})
-			.style("fill", function(d) {
-				var col = colorScale(d.adj_coloring);
-				return d3.rgb(col).brighter([0.7]).toString();
-			})
-			.style("stroke", function(d) {
-				var col = colorScale(d.adj_coloring);
-				return d3.rgb(col).toString();
+				var date = new Date(d.choice);
+				var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
+				var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
+				if (diffYears > 0) { return "visible"; }
+				else { return "hidden"; }
 			});
 
 	}
@@ -617,16 +606,6 @@ d3.json("data/tree.json", function(error, root) {
 				.attr("r", function(d) {
 					return recencySizeScale(d.diff);
 				})
-				.style("fill", function(d) {
-					var col = colorScale(d.adj_coloring);
-					return d3.rgb(col).brighter([0.7]).toString();
-				})
-				.style("stroke", function(d) {
-					var col = colorScale(d.adj_coloring);
-					return d3.rgb(col).toString();
-				});
-
-			d3.selectAll(".vaccine")
 				.style("fill", function(d) {
 					var col = colorScale(d.adj_coloring);
 					return d3.rgb(col).brighter([0.7]).toString();
