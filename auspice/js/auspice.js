@@ -479,15 +479,23 @@ d3.json("data/tree.json", function(error, root) {
 	var vaccineCircles = treeplot.selectAll(".vaccine")
 		.data(vaccines)
 		.enter()
-		.append("circle")
+		.append("text")
 		.attr("class", "vaccine")
-		.attr("cx", function(d) {return d.x})
-		.attr("cy", function(d) {return d.y})
-		.attr("r", function(d) {
-			return recencyVaccineSizeScale(d.diff);
+		.attr("x", function(d) {return d.x})
+		.attr("y", function(d) {return d.y})
+		.attr('text-anchor', 'middle')
+		.attr('dominant-baseline', 'central')
+		.style("font-size", "28px")
+		.style('font-family', 'FontAwesome')
+		.style("fill", function(d) {
+			var col = colorScale(d.adj_coloring);
+			return d3.rgb(col).brighter([0.7]).toString();
 		})
-		.style("fill", d3.rgb("#A160AB").brighter([0.45]).toString())
-		.style("stroke", "#A160AB")
+		.style("stroke", function(d) {
+			var col = colorScale(d.adj_coloring);
+			return d3.rgb(col).toString();
+		})
+		.text(function(d) { return '\uf00d'; })	// 00d for cross
 		.on('mouseover', function(d) {
 			tooltip.show(d, this);
 		})
@@ -527,8 +535,17 @@ d3.json("data/tree.json", function(error, root) {
 				return d3.rgb(col).toString();
 			});
 		d3.selectAll(".vaccine")
-			.attr("r", function(d) {
-				return recencyVaccineSizeScale(d.diff);
+			.style("visibility", function(d) {
+				if (d.diff < 0) { return "hidden"; }
+				else { return "visible"; }
+			})
+			.style("fill", function(d) {
+				var col = colorScale(d.adj_coloring);
+				return d3.rgb(col).brighter([0.7]).toString();
+			})
+			.style("stroke", function(d) {
+				var col = colorScale(d.adj_coloring);
+				return d3.rgb(col).toString();
 			});
 
 	}
@@ -600,6 +617,16 @@ d3.json("data/tree.json", function(error, root) {
 				.attr("r", function(d) {
 					return recencySizeScale(d.diff);
 				})
+				.style("fill", function(d) {
+					var col = colorScale(d.adj_coloring);
+					return d3.rgb(col).brighter([0.7]).toString();
+				})
+				.style("stroke", function(d) {
+					var col = colorScale(d.adj_coloring);
+					return d3.rgb(col).toString();
+				});
+
+			d3.selectAll(".vaccine")
 				.style("fill", function(d) {
 					var col = colorScale(d.adj_coloring);
 					return d3.rgb(col).brighter([0.7]).toString();
