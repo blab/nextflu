@@ -352,12 +352,18 @@ d3.json("data/tree.json", function(error, root) {
 	});
 
 	var earliestDate = new Date(d3.min(dateValues));
-	earliestDate.setDate(earliestDate.getDate() + 120);
+	earliestDate.setDate(earliestDate.getDate() + 180);
 
 	var dateScale = d3.time.scale()
 		.domain([earliestDate, globalDate])
-		.range([-100, 100])
-		.clamp([true]);
+		.range([5, 195])
+		.clamp([true]);	
+
+	var niceDateScale = d3.time.scale()
+		.domain([earliestDate, globalDate])
+		.range([5, 195])
+		.clamp([true])
+    	.nice(d3.time.month);
 
 	var recencySizeScale = d3.scale.threshold()
 		.domain([0.0, 1.0])
@@ -498,20 +504,24 @@ d3.json("data/tree.json", function(error, root) {
 		.origin(function(d) { return d; })
 		.on("drag", dragged)
 		.on("dragstart", function() {
-			 d3.select(this).style("fill", "#5DA8A3");
+			d3.selectAll(".date-input-text").style("fill", "#5DA8A3");
 		})
 		.on("dragend", function() {
-			 d3.select(this).style("fill", "#CCC");
+			d3.selectAll(".date-input-text").style("fill", "#CCCCCC");
 		});
 
 	function dragged(d) {
 
 		d.date = dateScale.invert(d3.event.x);
 		d.x = dateScale(d.date);
-		d3.selectAll(".counter-text")
-			.text(function(d){
+		d3.selectAll(".date-input-text")
+			.attr("x", function(d) {return 0.25*d.x})
+			.text(function(d) {
+				var format = d3.time.format("%Y %b %-d");
 				return format(d.date)
 			});
+		d3.selectAll(".date-input-marker")
+			.attr("cx", function(d) {return d.x})
 		globalDate = d.date;
 		adjust_coloring_by_date();
 		d3.selectAll(".tip")
@@ -537,30 +547,62 @@ d3.json("data/tree.json", function(error, root) {
 	counterData['date'] = globalDate
 	counterData['x'] = dateScale(globalDate)
 
-	var format = d3.time.format("%Y %b %-d");
+	d3.select("#date-input")
+		.attr("width", 220)
+		.attr("height", 65);
 
-	d3.select("#counter")
-		.attr("width", 200)
-		.attr("height", 50);
-
-	var counterText = d3.select("#counter").selectAll(".counter-text")
+	var counter = d3.select("#date-input").selectAll(".date-input-text")
 		.data([counterData])
 		.enter()
 		.append("text")
-		.attr("class", "counter-text")
-		.attr("transform", "translate(0,30)")
-		.style("text-anchor", "left")
-		.style("alignment-baseline", "middle")
-		.text(function(d){
+		.attr("class", "date-input-text")
+		.attr("text-anchor", "left")
+		.attr("x", function(d) {return 0.25*d.x})
+		.attr("dy", "0.75em")
+		.text(function(d) {
+			var format = d3.time.format("%Y %b %-d");
 			return format(d.date)
 		})
-		.on("mouseover", function() {
-			d3.select(this).style("fill", "#5DA8A3");
-		})
-		.on("mouseout", function() {
-			d3.select(this).style("fill", "#CCCCCC");
-		})
-		.style("cursor", "col-resize")
+		.style("cursor", "pointer")
+		.call(drag);
+
+	var customTimeFormat = d3.time.format.multi([
+		[".%L", function(d) { return d.getMilliseconds(); }],
+		[":%S", function(d) { return d.getSeconds(); }],
+		["%I:%M", function(d) { return d.getMinutes(); }],
+		["%I %p", function(d) { return d.getHours(); }],
+		["%a %d", function(d) { return d.getDay() && d.getDate() != 1; }],
+		["%b %d", function(d) { return d.getDate() != 1; }],
+		["%b", function(d) { return d.getMonth(); }],
+		["%Y", function() { return true; }]
+	]);
+
+	var dateAxis = d3.svg.axis()
+		.scale(niceDateScale)
+		.orient('bottom')
+		.ticks(5)
+		.tickFormat(customTimeFormat)
+		.outerTickSize(2)
+		.tickPadding(8);
+
+	d3.select("#date-input").selectAll(".date-input-axis")
+		.data([counterData])
+		.enter()
+		.append("g")
+		.attr("class", "date-input-axis")
+		.attr("transform", "translate(0,35)")
+		.call(dateAxis);
+
+	var marker = d3.select("#date-input").selectAll(".date-input-marker")
+		.data([counterData])
+		.enter()
+		.append("circle")
+		.attr("class", "date-input-marker")
+		.attr("cx", function(d) {return d.x})
+		.attr("cy", 35)
+		.attr("r", 5)
+		.style("fill", "#5DA8A3")
+		.style("cursor", "pointer")
 		.call(drag);
 
 	d3.select("#reset")
@@ -573,6 +615,7 @@ d3.json("data/tree.json", function(error, root) {
 		})
 
 	d3.select("#coloring")
+		.style("cursor", "pointer")
 		.on("change", function(d) {
 
 			colorBy = d3.select(this).node().value;
