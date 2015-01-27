@@ -85,9 +85,12 @@ def main(in_fname = 'data/virus_clean.json'):
 
 	print "RAxML branch length optimization and rooting"
 	os.system("raxml -f e -T 6 -s temp.phyx -n branches -c 25 -m GTRGAMMA -p 344312987 -t raxml_tree.newick -o " + OUTGROUP)
-	os.rename('RAxML_result.branches', 'data/raxml_branches.newick')
 
+	out_fname = "data/tree_infer.newick"
+	os.rename('RAxML_result.branches', out_fname)
 	cleanup()
+	
+	return out_fname;
 
 if __name__ == "__main__":
 	main()

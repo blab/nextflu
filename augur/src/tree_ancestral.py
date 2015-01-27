@@ -245,7 +245,7 @@ class ancestral_sequences:
 				if hasattr(leaf, attrname):
 					delattr(leaf, attrname)
 
-def main(tree_fname, virus_fname='data/virus_clean.json'):
+def main(tree_fname='data/tree_infer.newick', virus_fname='data/virus_clean.json'):
 	print "--- Ancestral inference at " + time.strftime("%H:%M:%S") + " ---"
 	from Bio import Phylo
 	viruses = read_json(virus_fname)
@@ -270,5 +270,4 @@ def test():
 	return anc_seq.T
 
 if __name__=="__main__":
-	tree = test()
-
+	tree = main()
