@@ -3,6 +3,7 @@ environment.sh
 ec2-startup.sh
 notes/
 data/
+_site/
 
 # Compiled source #
 ###################
