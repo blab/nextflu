@@ -48,12 +48,11 @@ def delimit_newick(infile_name, outfile_name):
 	with open(outfile_name, 'w') as file:
 		file.write(newick)
 
-def main(in_fname = None):
+def main(in_fname = 'data/virus_clean.json'):
 
 	print "--- Tree infer at " + time.strftime("%H:%M:%S") + " ---"
 
 	cleanup()
-	if in_fname is None: in_fname = 'data/virus_clean.json'
 	viruses = read_json(in_fname)
 	write_fasta(viruses, 'temp.fasta')
 
@@ -87,11 +86,6 @@ def main(in_fname = None):
 	print "RAxML branch length optimization and rooting"
 	os.system("raxml -f e -T 6 -s temp.phyx -n branches -c 25 -m GTRGAMMA -p 344312987 -t raxml_tree.newick -o " + OUTGROUP)
 	os.rename('RAxML_result.branches', 'data/raxml_branches.newick')
-
-	print "RAxML ancestral state inference"
-	os.system("raxml -f A -T 6 -s temp.phyx -n states -c 25 -m GTRGAMMA -p 344312987 -t data/raxml_branches.newick")
-	os.rename('RAxML_nodeLabelledRootedTree.states', 'data/raxml_states.newick')
-	os.rename('RAxML_marginalAncestralStates.states', 'data/raxml_states.txt')
 
 	cleanup()
 

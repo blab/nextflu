@@ -50,6 +50,35 @@ def dendropy_to_json(node):
 			json["children"].append(dendropy_to_json(ch))
 	return json
 
+def BioPhylo_to_json(node):
+	json = {}
+	if hasattr(node, 'clade'):
+		json['clade'] = node.clade
+	if node.name:
+		json['strain'] = str(node.name).replace("'", '')
+	if hasattr(node, 'xvalue'):
+		json['xvalue'] = round(node.xvalue, 5)
+	if hasattr(node, 'yvalue'):
+		json['yvalue'] = round(node.yvalue, 5)
+	if hasattr(node, 'ep'):
+		json['ep'] = node.ep
+	if hasattr(node, 'ne'):
+		json['ne'] = node.ne
+	if hasattr(node, 'rb'):
+		json['rb'] = node.rb
+	if hasattr(node, 'date'):
+		json['date'] = node.date
+	if hasattr(node, 'seq'):
+		json['seq'] = str(node.seq)
+	if hasattr(node, 'LBI'):
+		json['LBI'] = round(node.LBI,5)
+	if len(node.clades):
+		json["children"] = []
+		for ch in node.clades:
+			json["children"].append(BioPhylo_to_json(ch))
+	return json
+
+
 def json_to_dendropy(json):
 	'''
 	read a json dictionary and make a dendropy tree from it.

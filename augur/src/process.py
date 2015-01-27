@@ -15,8 +15,13 @@ def main():
 	fname = virus_align.main(fname)			# Align sequences
 	fname = virus_clean.main(fname)			# Clean sequences
 	tree_infer.main(fname)					# Make tree, creates raxml files
-	fname = tree_refine.main(fname)			# Clean tree, reads viruses in fname + raxml files
-	fname = tree_streamline.main(fname)		# Streamline tree for auspice
+	# infer ancestral states using the cleaned viruses and the raxml tree
+	tree_fname = tree_infer_ancestral(tree_fname = 'data/raxml_branches.newick', 
+	                          		  virus_fname = fname)
+	# Clean tree, reads viruses in fname + raxml files
+	tree_fname = tree_refine.main(tree_fname=tree_fname, 
+	                              	virus_fname = fname)
+	tree_fname = tree_streamline.main(tree_fname)		# Streamline tree for auspice
 
 	# Write out metadata
 	print "Writing out metadata"
