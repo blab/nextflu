@@ -100,19 +100,14 @@ def layout(tree):
 		node.yvalue = get_yvalue(node)
 
 def add_virus_attributes(viruses, tree):
-	"""Add date and seq attributes to all tips in tree"""
+	"""Add date attribute to all tips in tree"""
 	strain_to_date = {}
-	strain_to_seq = {}
 	for v in viruses:
 		strain_to_date[v['strain']] = v['date']
-		strain_to_seq[v['strain']] = v['seq']
-
 	for node in tree.postorder_node_iter():
 		strain = str(node.taxon).replace("'", '')
 		if strain_to_date.has_key(strain):
 			node.date = strain_to_date[strain]
-		if strain_to_seq.has_key(strain):
-			node.seq = strain_to_seq[strain]
 
 def add_node_attributes(tree):
 	"""Add clade, xvalue, yvalue, mutation and trunk attributes to all nodes in tree"""
