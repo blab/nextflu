@@ -1,9 +1,9 @@
-import time, os
+import time, os, argparse
 import virus_download, virus_filter, virus_align, virus_clean
 import tree_infer, tree_ancestral, tree_refine, tree_streamline
 from io_util import *
 
-def main():
+def main(years_back=3, viruses_per_month=50):
 	"""Run full pipeline"""
 
 	print "--- Start processing at " + time.strftime("%H:%M:%S") + " ---"
@@ -13,7 +13,7 @@ def main():
 	virus_fname = 'data/gisaid_epiflu_sequence.fasta'
 
 	# Filter sequences
-	virus_fname = virus_filter.main(virus_fname)
+	virus_fname = virus_filter.main(virus_fname, years_back=years_back, viruses_per_month=viruses_per_month)
 
 	# Align sequences
 	virus_fname = virus_align.main(virus_fname)
@@ -40,4 +40,8 @@ def main():
 	write_json(meta, meta_fname)
 
 if __name__ == "__main__":
-	main()
+	parser = argparse.ArgumentParser(description='Process virus sequences, build tree, and prepare of web visualization')
+	parser.add_argument('-y', '--years_back', type = int, default=3, help='number of past years to sample sequences from')
+	parser.add_argument('-v', '--viruses_per_month', type = int, default = 50, help='number of viruses sampled per month')
+	params = parser.parse_args()
+	main(params.years_back, params.viruses_per_month)
