@@ -356,12 +356,12 @@ d3.json("data/tree.json", function(error, root) {
 
 	var dateScale = d3.time.scale()
 		.domain([earliestDate, globalDate])
-		.range([5, 195])
+		.range([5, 215])
 		.clamp([true]);	
 
 	var niceDateScale = d3.time.scale()
 		.domain([earliestDate, globalDate])
-		.range([5, 195])
+		.range([5, 215])
 		.clamp([true])
     	.nice(d3.time.month);
 
@@ -517,7 +517,7 @@ d3.json("data/tree.json", function(error, root) {
 		d.date = dateScale.invert(d3.event.x);
 		d.x = dateScale(d.date);
 		d3.selectAll(".date-input-text")
-			.attr("x", function(d) {return 0.25*d.x})
+			.attr("x", function(d) {return 0.3*d.x})
 			.text(function(d) {
 				var format = d3.time.format("%Y %b %-d");
 				return format(d.date)
@@ -554,7 +554,7 @@ d3.json("data/tree.json", function(error, root) {
 	counterData['x'] = dateScale(globalDate)
 
 	d3.select("#date-input")
-		.attr("width", 220)
+		.attr("width", 240)
 		.attr("height", 65);
 
 	var counter = d3.select("#date-input").selectAll(".date-input-text")
@@ -563,7 +563,7 @@ d3.json("data/tree.json", function(error, root) {
 		.append("text")
 		.attr("class", "date-input-text")
 		.attr("text-anchor", "left")
-		.attr("x", function(d) {return 0.25*d.x})
+		.attr("x", function(d) {return 0.3*d.x})
 		.attr("dy", "0.75em")
 		.text(function(d) {
 			var format = d3.time.format("%Y %b %-d");

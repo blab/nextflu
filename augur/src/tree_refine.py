@@ -48,9 +48,11 @@ def get_xvalue(node):
 
 def remove_outgroup(tree):
 	"""Reroot tree to outgroup"""
-	outgroup_node = tree.find_node_with_taxon_label(OUTGROUP)
+	outgroup_node = None
+	for node in tree.postorder_node_iter():
+		if (str(node.taxon) == OUTGROUP):
+			outgroup_node = node
 	if outgroup_node:
-#		tree.to_outgroup_position(outgroup_node, update_splits=False)
 		tree.prune_subtree(outgroup_node)
 
 def collapse(tree):
@@ -98,19 +100,14 @@ def layout(tree):
 		node.yvalue = get_yvalue(node)
 
 def add_virus_attributes(viruses, tree):
-	"""Add date and seq attributes to all tips in tree"""
+	"""Add date attribute to all tips in tree"""
 	strain_to_date = {}
-	strain_to_seq = {}
 	for v in viruses:
 		strain_to_date[v['strain']] = v['date']
-		strain_to_seq[v['strain']] = v['seq']
-
 	for node in tree.postorder_node_iter():
 		strain = str(node.taxon).replace("'", '')
 		if strain_to_date.has_key(strain):
 			node.date = strain_to_date[strain]
-		if strain_to_seq.has_key(strain):
-			node.seq = strain_to_seq[strain]
 
 def add_node_attributes(tree):
 	"""Add clade, xvalue, yvalue, mutation and trunk attributes to all nodes in tree"""
@@ -183,6 +180,6 @@ def main(tree_fname = 'data/tree_ancestral.json', virus_fname='data/virus_clean.
 	out_fname = "data/tree_refine.json"
 	write_json(dendropy_to_json(tree.seed_node), out_fname)
 	return out_fname
-	
+
 if __name__ == "__main__":
 	main()

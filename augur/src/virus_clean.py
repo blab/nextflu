@@ -103,12 +103,12 @@ def main(in_fname=None):
 	clean_ambiguous(viruses)
 
 	# clean gapped sequences
-	viruses = clean_gaps(viruses)
-	print str(len(viruses)) + " with complete HA"
+#	viruses = clean_gaps(viruses)
+#	print str(len(viruses)) + " with complete HA"
 
 	# clean sequences by distance
-	viruses = clean_distances(viruses)
-	print str(len(viruses)) + " with clock"
+#	viruses = clean_distances(viruses)
+#	print str(len(viruses)) + " with clock"
 
 	# clean sequences by outbreak
 	viruses = clean_outbreaks(viruses)
