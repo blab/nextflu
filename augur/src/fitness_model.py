@@ -11,14 +11,14 @@ class fitness_model(object):
 		'''
 		self.tree = tree
 		if predictors is None:
-			self.predictors = {'lb':calc_LBI, 'ep':calc_epitope_distance, 'ne':calc_nonepitope_distance}
+			self.predictors = [('lb',calc_LBI), ('ep',calc_epitope_distance), ('ne',calc_nonepitope_distance)]
 		else:
 			self.predictors = predictors
 
 	def calc_predictors(self):
-		for pred, func in self.predictors.iteritems():
+		for pred, func in self.predictors:
 			# calculate the predictors for all nodes of the tree and save as node.attr
-			func(selt.tree.seed_node, attr = pred)
+			func(self.tree.seed_node, attr = pred)
 
 	def make_flat_lists_per_season(self):
 		self.clades_in_season = []  # list of clades for each season...
@@ -26,7 +26,7 @@ class fitness_model(object):
 		self.freq_and_predictors = []
 		for clades in self.seasons:
 			tmp_freq = [[x.freq, x.next_freq] for x in clades]
-			tmp_pred = [[x.__getattr__[pred] for pred in self.predictors] for x in clades]
+			tmp_pred = [[x.__getattr__[pred[0]] for pred in self.predictors] for x in clades]
 			self.freq_and_predictors.append((np.array(tmp_freq), np.array(tmp_pred))
 
 
