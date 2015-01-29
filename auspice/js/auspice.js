@@ -134,8 +134,6 @@ function calcPolarizers(node){
  * allnodes is provided for easy normalization at the end
 **/
 function calcLBI(node, allnodes){
-	setLBIDateCutoffs(globalDate, time_window);
-	console.log("Calculating LBI for date cutoff "+LBIupperDateCutoff+" and "+ LBIlowerDateCutoff);
 	setNodeAlive(node);
 	calcPolarizers(node);
 	allnodes.forEach(function (d) {
@@ -152,9 +150,20 @@ function calcLBI(node, allnodes){
 	allnodes.forEach(function (d){ d.LBI /= maxLBI;});
 };
 
-function setLBIDateCutoffs(now, bl){
-	LBIupperDateCutoff.setTime(now.getTime());
-	LBIlowerDateCutoff.setTime(LBIupperDateCutoff.getTime()-bl*1000*60*60*24);
+/**
+ * for each node, calculate the number of tips in the currently selected time window. 
+**/
+function calcTipCounts(node){
+	node.tipCount = 0;
+	if (typeof node.children != "undefined") {
+		for (var i=0; i<node.children.length; i++) {
+			calcTipCounts(node.children[i]);
+			node.tipCount += node.children[i].tipCount;
+		}
+	}
+	else if (node.current){ 
+		node.tipCount = 1;
+	}
 };
 
 function minimumAttribute(node, attr, min) {
@@ -189,8 +198,6 @@ var width = 800,
 	height = 600;
 
 var globalDate = new Date();
-var LBIupperDateCutoff = new Date();
-var LBIlowerDateCutoff = new Date();
 var ymd_format = d3.time.format("%Y-%m-%d");
 
 var LBItau = 0.0008,
@@ -308,7 +315,6 @@ d3.json("data/tree.json", function(error, root) {
 	calcBranchLength(rootNode);
 	rootNode.branch_length= 0.01;
 	nodes.forEach(function (d) {d.dateval = new Date(d.date)});
-	calcLBI(rootNode, nodes, false);
 
 	var vaccines = getVaccines(tips);
 
@@ -386,15 +392,12 @@ d3.json("data/tree.json", function(error, root) {
 
 	var colorScale = epitopeColorScale;
 	tips.map(function(d) { d.coloring = d.ep; });
-	adjust_coloring_by_date();
 	
 	var freqScale = d3.scale.linear()
 		.domain([0, 1])
 		.range([1.5, 4.5]);
 		
-	adjust_freq_by_date();
-
-	function calc_node_age(tw){
+	function calcNodeAges(tw){
 		tips.forEach(function (d) {
 			var date = new Date(d.date);
 			var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
@@ -410,7 +413,6 @@ d3.json("data/tree.json", function(error, root) {
 
 	function adjust_coloring_by_date() {
 		if (colorBy == "ep" || colorBy == "ne" || colorBy == "rb") {
-			calc_node_age(time_window);
 			var mean = 0;
 			var recent_tip_count = 0;
 			tips.forEach(function (d) {
@@ -433,26 +435,18 @@ d3.json("data/tree.json", function(error, root) {
 	}
 	
 	function adjust_freq_by_date() {
-		calc_node_age(time_window);
-		var tipCount = 0;
+		calcTipCounts(rootNode);
+		var tipCount = rootNode.tipCount;		
+		console.log("Total tipcount: " + tipCount);	
 		nodes.forEach(function (d) {
-			d.freq = 0;
-		});			
-		tips.forEach(function (d) {
-			if (d.current) {
-				tipCount += 1;	
-				d.freq = 0;
-				p = d.parent;
-				while (p != null) {
-					p.freq += 1;
-					p = p.parent;
-				}
-			}
+			d.freq = (d.tipCount)/tipCount;
 		});
-		nodes.forEach(function (d) {
-			d.freq = d.freq / tipCount;
-		});		
 	}	
+
+	calcNodeAges(time_window);
+	adjust_coloring_by_date();
+	adjust_freq_by_date();
+	calcLBI(rootNode, nodes, false);
 
 	var link = treeplot.selectAll(".link")
 		.data(links)
@@ -533,6 +527,7 @@ d3.json("data/tree.json", function(error, root) {
 		})
 		.on("dragend", function() {
 			d3.selectAll(".date-input-text").style("fill", "#CCCCCC");
+			dragend();
 		});
 
 	function dragged(d) {
@@ -548,8 +543,16 @@ d3.json("data/tree.json", function(error, root) {
 		d3.selectAll(".date-input-marker")
 			.attr("cx", function(d) {return d.x})
 		globalDate = d.date;
+	}
+
+	function dragend() {
+		console.log("recalculating node ages");
+		calcNodeAges(time_window);
+		console.log("adjusting node colors");
 		adjust_coloring_by_date();
+		console.log("updating frequencies");
 		adjust_freq_by_date();
+
 		d3.selectAll(".link")
 			.attr("points", function(d) {
 				var mod = 0.5 * freqScale(d.target.freq) - freqScale(0);				
