@@ -64,6 +64,9 @@ function calcBranchLength(node){
 	}
 };
 
+/**
+sets each node in the tree to alive=true if it has at least one descendent with current=true
+**/
 function setNodeAlive(node){
 	if (typeof node.children != "undefined") {
 		var aliveChildren=false;
@@ -71,9 +74,9 @@ function setNodeAlive(node){
 			setNodeAlive(node.children[i]);
 			aliveChildren = aliveChildren||node.children[i].alive
 		}   
-		node.alive = aliveChildren
+		node.alive = aliveChildren;
 	}else{
-		node.alive = (node.dateval<LBIupperDateCutoff)&&(node.dateval>=LBIlowerDateCutoff);
+		node.alive = node.current;
 	}
 };
 
@@ -131,7 +134,7 @@ function calcPolarizers(node){
  * allnodes is provided for easy normalization at the end
 **/
 function calcLBI(node, allnodes){
-	setLBIDateCutoffs(globalDate, LBIBoundaryLayer);
+	setLBIDateCutoffs(globalDate, time_window);
 	console.log("Calculating LBI for date cutoff "+LBIupperDateCutoff+" and "+ LBIlowerDateCutoff);
 	setNodeAlive(node);
 	calcPolarizers(node);
@@ -191,7 +194,7 @@ var LBIlowerDateCutoff = new Date();
 var ymd_format = d3.time.format("%Y-%m-%d");
 
 var LBItau = 0.0008,
-	LBIBoundaryLayer = 250;
+	time_window = 1.0;  // layer of one year that is considered current or active
 
 
 var tree = d3.layout.tree()
@@ -391,16 +394,27 @@ d3.json("data/tree.json", function(error, root) {
 		
 	adjust_freq_by_date();
 
+	function calc_node_age(tw){
+		tips.forEach(function (d) {
+			var date = new Date(d.date);
+			var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
+			var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
+			d.diff = diffYears;
+			if (d.diff > 0 && d.diff < tw){
+				d.current  = true;
+			}else{
+				d.current = false;
+			}
+		});
+	}; 	
+
 	function adjust_coloring_by_date() {
 		if (colorBy == "ep" || colorBy == "ne" || colorBy == "rb") {
+			calc_node_age(time_window);
 			var mean = 0;
 			var recent_tip_count = 0;
 			tips.forEach(function (d) {
-				var date = new Date(d.date);
-				var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
-				var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
-				d.diff = diffYears;
-				if (d.diff > 0 && d.diff < 1) {
+				if (d.current) {
 					mean += d.coloring;
 					recent_tip_count += 1;
 				}
@@ -411,12 +425,6 @@ d3.json("data/tree.json", function(error, root) {
 			});
 		}
 		if (colorBy == "lbi") {
-			tips.forEach(function (d) {
-				var date = new Date(d.date);
-				var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
-				var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
-				d.diff = diffYears;
-			});
 			calcLBI(rootNode, nodes, false);
 			tips.forEach(function (d) {
 				d.adj_coloring = d.LBI;
@@ -425,16 +433,13 @@ d3.json("data/tree.json", function(error, root) {
 	}
 	
 	function adjust_freq_by_date() {
+		calc_node_age(time_window);
 		var tipCount = 0;
 		nodes.forEach(function (d) {
 			d.freq = 0;
 		});			
 		tips.forEach(function (d) {
-			var date = new Date(d.date);
-			var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
-			var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
-			d.diff = diffYears;
-			if (d.diff > 0 && d.diff < 1) {
+			if (d.current) {
 				tipCount += 1;	
 				d.freq = 0;
 				p = d.parent;
