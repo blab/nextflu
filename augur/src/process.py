@@ -1,6 +1,7 @@
 import time, os, argparse
 import virus_download, virus_filter, virus_align, virus_clean
 import tree_infer, tree_ancestral, tree_refine, tree_streamline
+import fitness_predictors
 from io_util import *
 
 def main(years_back=3, viruses_per_month=50):
@@ -30,8 +31,8 @@ def main(years_back=3, viruses_per_month=50):
 	# Clean tree, reads viruses in fname + raxml files
 	tree_fname = tree_refine.main(tree_fname=tree_fname, virus_fname = virus_fname)
 
-	# Calculate virus fitness based on mutations tolerance from Thyagarajan and Bloom
-	tree_fname = fitness_tolerance.main(tree_fname, tree=True)
+	# Calculate virus fitness predictors
+	tree_fname = fitness_predictors.main(tree_fname)
 
 	# Streamline tree for auspice
 	tree_fname = tree_streamline.main(tree_fname)
