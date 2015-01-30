@@ -1,9 +1,16 @@
 # For augur repo #
 environment.sh
 ec2-startup.sh
-notes/
 data/
 _site/
+
+# Tex # 
+###################
+*aux
+*pdf
+*bbl
+*blg
+*log
 
 # Compiled source #
 ###################
