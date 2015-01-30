@@ -1,6 +1,9 @@
 import numpy as np
 import dendropy
+from collections import defaultdict
 
+ymin = 2000
+ymax = 2015
 
 class fitness_model(object):
 
@@ -15,6 +18,32 @@ class fitness_model(object):
 		else:
 			self.predictors = predictors
 
+		from datetime import date
+		self.seasons = [ (date(year=y, month = 10, day = 1), date(year = y+1, month = 4, day=1)) 
+						for y in xrange(ymin, ymax)]
+
+	def calc_tip_counts(self):
+		for node in self.T.postorder_node_iter():
+			node.tip_counts = defaultdict(int)
+			for child in node.child_nodes():
+				for season, count in child.tip_counts.iteritems():
+					node.tip_counts[season]+=count
+			if node.is_leaf():
+				node_date = date(*map(int, node.date.split('-')))
+				tmp_season_list = [s for s in self.seasons if node_date>=s[0] and node_date<s[1]]
+				if len(tmp_season_list)==1:
+					node.tip_counts[tmp_season_list[0]]=1
+
+		total_counts = self.T.seed_node.tip_counts
+		self.test_fit_season_pairs = [(s,n) for s,n in izip(self.seasons[:-1], self.seasons[1:] 
+							if total_counts[s]>min_tips and total_counts[n]>min_tips]
+
+		for node in self.T.postorder_node_iter():
+			node.frequencies = defaultdict(float)
+			for season, count in child.tip_counts.iteritems():
+				node.frequencies[season]=float(count)/total_counts[season]
+
+
 	def calc_predictors(self):
 		for pred, func in self.predictors:
 			# calculate the predictors for all nodes of the tree and save as node.attr
@@ -22,10 +51,15 @@ class fitness_model(object):
 
 	def make_flat_lists_per_season(self):
 		self.clades_in_season = []  # list of clades for each season...
-		
+		for s,t in self.test_fit_season_pairs:
+			tmp_clades = []
+			for node in self.T.postorder_node_iter():
+				if node.frequencies[s]>=cut_off_frequency:
+					tmp_clades.append(node)
+
 		self.freq_and_predictors = []
-		for clades in self.seasons:
-			tmp_freq = [[x.freq, x.next_freq] for x in clades]
+		for (s,t), clades in izip(self.test_fit_season_pairs, self.clades_in_season):
+			tmp_freq = [[x.frequencies[s], x.frequencies[t]] for x in clades]
 			tmp_pred = [[x.__getattr__[pred[0]] for pred in self.predictors] for x in clades]
 			self.freq_and_predictors.append((np.array(tmp_freq), np.array(tmp_pred))
 
