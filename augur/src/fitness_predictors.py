@@ -1,6 +1,11 @@
 import dendropy, time
 import numpy as np
-from seq_util import epitope_mask
+from seq_util import epitope_distance
+from seq_util import nonepitope_distance
+from io_util import read_json
+from io_util import write_json
+from tree_util import json_to_dendropy
+from tree_util import dendropy_to_json
 
 def calc_epitope_distance(tree, attr='ep', ref = None):
 	'''
@@ -8,25 +13,21 @@ def calc_epitope_distance(tree, attr='ep', ref = None):
 	tree   --   dendropy tree
 	attr   --   the attribute name used to save the result
 	'''
-	epi_mask = np.fromstring(epitope_mask, 'S1')=='1'
-	def epitope_distance(seq, ref):
-		return np.sum(seq[epi_mask]!=ref[epi_mask])
-
+	if ref == None:
+		ref = tree.seed_node
 	for node in tree.postorder_node_iter():
-		node.__setattr__(attr, epitope_distance(node.seq, ref))
+		node.__setattr__(attr, epitope_distance(node.seq, ref.seq))
 
-def calc_epitope_distance(tree, attr='ne', ref = None):
+def calc_nonepitope_distance(tree, attr='ne', ref = None):
 	'''
-	calculates the distance at epitope sites of any tree node labeled current to ref
+	calculates the distance at nonepitope sites of any tree node labeled current to ref
 	tree   --   dendropy tree
 	attr   --   the attribute name used to save the result
 	'''
-	epi_mask = np.fromstring(epitope_mask, 'S1')=='1'
-	def epitope_distance(seq, ref):
-		return np.sum(seq[~epi_mask]!=ref[~epi_mask])
-
+	if ref == None:
+		ref = tree.seed_node
 	for node in tree.postorder_node_iter():
-		node.__setattr__(attr, epitope_distance(node.seq, ref))
+		node.__setattr__(attr, nonepitope_distance(node.seq, ref.seq))
 
 
 def calc_LBI(tree, attr = 'lbi', tau=0.0007):
@@ -67,6 +68,24 @@ def calc_LBI(tree, attr = 'lbi', tau=0.0007):
 		node.__setattr__(attr, tmp_LBI)
 
 
+def main(tree_fname = 'data/tree_refine.json'):
+
+	print "--- Testing predictor evaluations ---"
+	tree =  json_to_dendropy(read_json(tree_fname))
+
+	print "Calculating epitope distances"
+	calc_epitope_distance(tree)
+
+	print "Calculating nonepitope distances"
+	calc_nonepitope_distance(tree)
+
+	print "Calculating LBI"
+#	calc_LBI(tree)
+
+	print "Writing decorated tree"
+	out_fname = "data/tree_predictors.json"
+	write_json(dendropy_to_json(tree.seed_node), out_fname)
+	return out_fname
 
 if __name__=='__main__':
-	print "--- Testing predictor evaluations ---"
+	main()
