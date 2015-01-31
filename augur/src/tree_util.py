@@ -1,6 +1,77 @@
 import dendropy
 from io_util import *
 
+def color_BioTree_by_attribute(T,attribute, vmin=None, vmax = None, missing_val='min', transform = lambda x:x, cmap=None):
+	'''
+	simple function that assigns a color to each node in a biopython tree
+	the color can be determined by any attribute of the nodes. missing attributes will be
+	determined from the children, all children are assumed to have the attribute
+	in addition, the attribute can be transformed for example by taking the log
+	parameters:
+	T				-- BioPython tree
+	attribute		-- name of the attribute that is to be used to color the tree.
+	vmin			-- lower offset that is subtracted
+	vmax			-- values are scaled as (val-vmin)/(vmax-vmin)
+	missing val		-- if the attribute does not exist is a particular node,
+					   the min, max, or mean of the children is used
+	transform		-- function mapping float to float, e.g. log
+	cmap			-- colormap to be used
+	'''
+	import numpy as np
+	# make a list of tranformed data
+	vals = [transform(t.__getattribute__(attribute)) for t in
+			T.get_terminals()+T.get_nonterminals() if attribute in t.__dict__]
+	if vmin is None:  # if vmin or vmax is not provided, use min or max of data
+		vmin = min(vals)
+		print "Set vmin to",vmin
+	if vmax is None:
+		vmax = max(vals)
+		print "Set vmax to",vmax
+	if cmap is None:
+		from matplotlib.cm import jet
+		cmap=jet
+
+	# assign function used to determine missing values from children
+	if missing_val=='min':
+		missing_val_func = min
+	elif missing_val=='mean':
+		missing_val_func = mean
+	elif missing_val=='max':
+		missing_val_func = max
+	else:
+		missing_val_func = min
+
+	# loop over all nodes, catch missing values and assign
+	for node in T.get_nonterminals(order='postorder'):
+		if attribute not in node.__dict__:
+			node.__setattr__(attribute, missing_val_func([c.__getattribute__(attribute) for c in node.clades]))
+			print "node", node,"has no",attribute,"Setting to min:", node.__getattribute__(attribute)
+
+	# map value to color for each node
+	for node in T.get_terminals()+T.get_nonterminals():
+		node.color = map(int, np.array(cmap((transform(node.__getattribute__(attribute))-vmin)/(vmax-vmin))[:-1])*255)
+
+def to_Biopython(tree):
+	from Bio import Phylo
+	from StringIO import StringIO
+	from itertools import izip
+	bT	= Phylo.read(StringIO(tree.as_newick_string()), 'newick')
+
+	for new_leaf, old_leaf in izip(bT.get_terminals(), tree.leaf_nodes()):
+		for attr,val in old_leaf.__dict__.iteritems():
+			try:
+				new_leaf.__setattr__(attr, float(val))
+			except:
+				new_leaf.__setattr__(attr, val)
+
+	for new_leaf, old_leaf in izip(bT.get_nonterminals(order='postorder'), tree.postorder_internal_node_iter()):
+		for attr,val in old_leaf.__dict__.iteritems():
+			try:
+				new_leaf.__setattr__(attr, float(val))
+			except:
+				new_leaf.__setattr__(attr, val)
+	return bT
+
 def tip_descendants(node):
 	"""Take node, ie. dict, and return a flattened list of all tips descending from this node"""
 	if 'children' in node:
