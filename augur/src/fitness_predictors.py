@@ -9,28 +9,31 @@ from tree_util import dendropy_to_json
 
 def calc_epitope_distance(tree, attr='ep', ref = None):
 	'''
-	calculates the distance at epitope sites of any tree node labeled current to ref
+	calculates the distance at epitope sites of any tree node  to ref
 	tree   --   dendropy tree
 	attr   --   the attribute name used to save the result
 	'''
-	if ref == None:
-		ref = tree.seed_node
-	for node in tree.postorder_node_iter():
-		node.__setattr__(attr, epitope_distance(node.seq, ref.seq))
+	if not hasattr(tree, "epitope_distance_assigned") or tree.epitope_distance_assigned==False:
+		if ref == None:
+			ref = tree.seed_node
+		for node in tree.postorder_node_iter():
+			node.__setattr__(attr, epitope_distance(node.seq, ref.seq))
+		tree.epitope_distance_assigned=True
 
 def calc_nonepitope_distance(tree, attr='ne', ref = None):
 	'''
-	calculates the distance at nonepitope sites of any tree node labeled current to ref
+	calculates the distance at nonepitope sites of any tree node to ref
 	tree   --   dendropy tree
 	attr   --   the attribute name used to save the result
 	'''
-	if ref == None:
-		ref = tree.seed_node
-	for node in tree.postorder_node_iter():
-		node.__setattr__(attr, nonepitope_distance(node.seq, ref.seq))
+	if not hasattr(tree, "nonepitope_distance_assigned") or tree.nonepitope_distance_assigned==False:
+		if ref == None:
+			ref = tree.seed_node
+		for node in tree.postorder_node_iter():
+			node.__setattr__(attr, nonepitope_distance(node.seq, ref.seq))
+		tree.nonepitope_distance_assigned=True
 
-
-def calc_LBI(tree, attr = 'lbi', tau=0.0007):
+def calc_LBI(tree, attr = 'lbi', tau=0.0005, transform = lambda x:x):
 	'''
 	traverses the tree in postorder and preorder to calculate the
 	up and downstream tree length exponentially weighted by distance.
@@ -46,7 +49,7 @@ def calc_LBI(tree, attr = 'lbi', tau=0.0007):
 			node.up_polarizer += child.up_polarizer
 		bl =  node.edge_length/tau
 		node.up_polarizer *= np.exp(-bl)
-		if node.current: node.up_polarizer += tau*(1-np.exp(-bl))
+		if node.alive: node.up_polarizer += tau*(1-np.exp(-bl))
 
 	# traverse the tree in preorder (parents first) to calculate msg to children
 	for node in tree.preorder_internal_node_iter():
@@ -58,14 +61,14 @@ def calc_LBI(tree, attr = 'lbi', tau=0.0007):
 
 			bl =  child1.edge_length/tau
 			child1.down_polarizer *= np.exp(-bl)
-			if child1.current: child1.down_polarizer += tau*(1-np.exp(-bl))
+			if child1.alive: child1.down_polarizer += tau*(1-np.exp(-bl))
 
 	# go over all nodes and calculate the LBI (can be done in any order)
 	for node in tree.postorder_node_iter():
 		tmp_LBI = node.down_polarizer
 		for child in node.child_nodes():
 			tmp_LBI += child.up_polarizer
-		node.__setattr__(attr, tmp_LBI)
+		node.__setattr__(attr, transform(tmp_LBI))
 
 
 def main(tree_fname = 'data/tree_refine.json'):
