@@ -22,7 +22,7 @@ class fitness_model(object):
 		self.tree = tree
 		self.verbose=verbose
 		if predictors is None:
-			self.predictors = [('lb',calc_LBI, {'tau':0.0005, 'transform':lambda x:x**1.0}), 
+			self.predictors = [('lb',calc_LBI, {'tau':0.0005, 'transform':lambda x:x}), 
 								('ep',calc_epitope_distance,{}), 
 								('ne',calc_nonepitope_distance,{})]
 		else:
@@ -56,10 +56,6 @@ class fitness_model(object):
 			for d,c in sorted(total_counts.items()): 
 				print "number of tips in", d[0].strftime('%Y-%m-%d'), '--', \
 											d[1].strftime('%Y-%m-%d'),':',c
-		# prune seasons where few observations were made, only consecutive pairs
-		# with sufficient tip count are retained
-		self.fit_test_season_pairs = [(s,t) for s,t in izip(self.seasons[:-1], self.seasons[1:]) 
-							if total_counts[s]>min_tips and total_counts[t]>min_tips]
 
 		# calculate frequencies
 		for node in self.tree.postorder_node_iter():
@@ -67,52 +63,72 @@ class fitness_model(object):
 			for season, count in node.tip_counts.iteritems():
 				node.frequencies[season]=float(count)/(total_counts[season]+1e-10)
 
-
 	def calc_predictors(self):
 		for pred, func, kwargs in self.predictors:
 			# calculate the predictors for all nodes of the tree and save as node.attr
 			func(self.tree, attr = pred, **kwargs)
 
-	def make_flat_lists_per_season(self):
-		# for each pair of seaons with sufficient tip counts, 
-		# make a list of clades that are to be used in model fitting
-		self.clades_in_season = []  # list of clades for each season...
-		for s,t in self.fit_test_season_pairs:
-			tmp_clades = []
-			for node in self.tree.postorder_node_iter():
-				if node.frequencies[s]>=min_freq and node.frequencies[s]<max_freq:
-					if node.frequencies[s]>1.01*np.max([c.frequencies[s] for c in node.child_nodes()]):
-						tmp_clades.append(node)
-			self.clades_in_season.append(tmp_clades)
+	def select_nodes_in_season(self, season):
+		for node in self.tree.postorder_node_iter():
+			if node.tip_counts[season]>0:
+				node.alive=True
+			else:
+				node.alive=False
 
-		# calculate the predictors for the clades used for model fitting
-		self.freq_and_predictors = []
-		for (s,t), clades in izip(self.fit_test_season_pairs, self.clades_in_season):
-			if self.verbose>1:
-				print "calculating predictors for ", s[0].strftime('%Y-%m-%d'),'--',s[1].strftime('%Y-%m-%d')
-			for node in self.tree.postorder_node_iter():
-				if node.tip_counts[s]>0:
-					node.alive=True
-				else:
-					node.alive=False
+	def calc_all_predictors(self):
+		for node in self.tree.postorder_node_iter():
+			node.predictors = {}
+		for s in self.seasons:
+			if self.verbose: print "calculating predictors for season ", s[0].strftime("%Y-%m-%d"), '--', s[1].strftime("%Y-%m-%d")
+			self.select_nodes_in_season(s)
 			self.calc_predictors()
-			tmp_freq = [[x.frequencies[s], x.frequencies[t]] for x in clades]
-			#tmp_pred = [[0 for pred in self.predictors] for x in clades]
-			tmp_pred = [[x.__getattribute__(pred[0]) for pred in self.predictors] for x in clades]
-			self.freq_and_predictors.append([np.array(tmp_freq), np.array(tmp_pred)])
-
+			for node in self.tree.postorder_node_iter():
+				if node.alive:
+					node.predictors[s] = np.array([node.__getattribute__(pred[0]) 
+				                              for pred in self.predictors])
+				else:
+					node.predictors[s]=None
 
 	def standardize_predictors(self):
 		self.season_means = []
 		self.season_std = []
-		for freq, pred in self.freq_and_predictors:
-			self.season_means.append(pred.mean(axis=0))
-			self.season_std.append(pred.std(axis=0))
-			pred-=self.season_means[-1]
-		self.time_averaged_std = np.array(self.season_std).mean(axis=0)
-		for freq_pred in self.freq_and_predictors:
-			freq_pred[1]/=self.time_averaged_std
+		if self.verbose: print "standardize predictors for season"
+		for s in self.seasons:
+			tmp_pred = []
+			for node in self.tree.postorder_node_iter():
+				if node.predictors[s] is not None and node.is_leaf():
+					tmp_pred.append(node.predictors[s])	
+			self.season_means.append(np.mean(tmp_pred, axis=0))
+			self.season_std.append(np.std(tmp_pred, axis=0))
+		self.global_std = np.mean(self.season_std, axis=0)
 
+		for s, m in izip(self.seasons, self.season_means):
+			for node in self.tree.postorder_node_iter():
+				if node.predictors[s] is not None:
+					node.predictors[s] = (node.predictors[s]-m)/self.global_std
+
+
+	def select_clades_for_fitting(self):
+		if self.verbose: print "selectimg predictors for fitting"
+		# short cut to total number of tips per seaons
+		total_counts = self.tree.seed_node.tip_counts
+		# prune seasons where few observations were made, only consecutive pairs
+		# with sufficient tip count are retained
+		self.fit_test_season_pairs = [(s,t) for s,t in izip(self.seasons[:-1], self.seasons[1:]) 
+							if total_counts[s]>min_tips and total_counts[t]>min_tips]
+
+		# for each pair of seaons with sufficient tip counts, 
+		# select clades in a certain frequency window. 
+		self.freq_and_predictors = []
+		for s,t in self.fit_test_season_pairs:
+			tmp_freq = []
+			tmp_pred = []
+			for node in self.tree.postorder_node_iter():
+				if node.frequencies[s]>=min_freq and node.frequencies[s]<max_freq:
+					if node.frequencies[s]>1.01*np.max([c.frequencies[s] for c in node.child_nodes()]):
+						tmp_freq.append([node.frequencies[s], node.frequencies[t]])
+						tmp_pred.append(node.predictors[s])
+			self.freq_and_predictors.append((np.array(tmp_freq), np.array(tmp_pred)))
 
 
 	def model_fit_by_season(self, params):
@@ -126,43 +142,45 @@ class fitness_model(object):
 
 	def model_fit(self, params):
 		self.last_fit = np.sum(self.model_fit_by_season(params))
+		if self.verbose>2: print params, self.last_fit
 		return np.sum(self.last_fit)
 
 	def fitness(self, params, pred):
-		return np.sum(params*pred, axis=-1)
+		return params[0]+np.sum(params[1:]*pred, axis=-1)
 
 	def learn_parameters(self):
 		from scipy.optimize import fmin
-		if self.verbose: print "fitting parameters of the fitness model"
-		self.params = 0*np.ones(len(self.predictors))  # initial values
-		self.params = fmin(self.model_fit, self.params, disp = self.verbose>0) # minimzation. need to see what kind of minimization is useful 
+		# we seem to need an affine contribution since the normalization depends a lot on
+		# whether only leafs or all internal clades are included in the mean. 
+		self.params = 0*np.ones(1+len(self.predictors))  # initial values
 		if self.verbose: 
+			print "fitting parameters of the fitness model\ninitial function value:", self.model_fit(self.params)
+
+		self.params = fmin(self.model_fit, self.params, disp = self.verbose>1) # minimzation
+		if self.verbose: 
+			print "final function value:", self.last_fit
 			print "fit parameters:"
-			for pred, val in izip(self.predictors, self.params):
+			print "offset:", self.params[0]
+			for pred, val in izip(self.predictors, self.params[1:]):
 				print pred[0],':', val
 
-	def assign_fitness(self):
-		s =  self.seasons[-1]
+	def assign_fitness(self, season):
 		if self.verbose: print "calculating predictors for the last season"
-		for node in self.tree.postorder_node_iter():
-			if node.tip_counts[s]>0:
-				node.alive=True
-			else:
-				node.alive=False
-		self.calc_predictors()
+
 		#FIXME: standardize predictors
 		for node in self.tree.postorder_node_iter():
-			node.fitness = self.fitness(self.params, np.array([node.__getattribute__(pred[0]) 
-																for pred in self.predictors]))
-
+			if node.predictors[season] is not None:
+				node.fitness = self.fitness(self.params, node.predictors[season])
+			else:
+				node.fitness = 0.0
 
 	def predict(self):
 		self.calc_tip_counts()
-		self.make_flat_lists_per_season()
+		self.calc_all_predictors()
 		self.standardize_predictors()
+		self.select_clades_for_fitting()
 		self.learn_parameters()
-		self.assign_fitness()
-
+		self.assign_fitness(self.seasons[-1])
 
 
 if __name__=="__main__":
@@ -171,7 +189,7 @@ if __name__=="__main__":
 	from Bio import Phylo
 	tree_fname='data/tree_refine.json'
 	tree =  json_to_dendropy(read_json(tree_fname))
-	fm = fitness_model(tree, verbose=2)
+	fm = fitness_model(tree, verbose=1)
 	fm.predict()
 
 
