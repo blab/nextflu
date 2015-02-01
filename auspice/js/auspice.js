@@ -1,11 +1,3 @@
-function depthFirstSearch(node) {
-	if (typeof node.children != "undefined") {
-		for (var i=0, c=node.children.length; i<c; i++) {
-			depthFirstSearch(node.children[i]);
-		}
-	}
-}
-
 function gatherTips(node, tips) {
 	if (typeof node.children != "undefined") {
 		for (var i=0, c=node.children.length; i<c; i++) {
@@ -49,17 +41,6 @@ function getVaccines(tips) {
 	return vaccines;
 }
 
-function setFrequencies(node) {
-	if (typeof node.frequency == "undefined") {
-		node.frequency = 0.01;
-	}
-	if (typeof node.children != "undefined") {
-		for (var i=0, c=node.children.length; i<c; i++) {
-			setFrequencies(node.children[i]);
-		}
-	}
-}
-
 function setDistances(node) {
 	if (typeof node.ep == "undefined") {
 		node.ep = 0.0;
@@ -83,6 +64,9 @@ function calcBranchLength(node){
 	}
 };
 
+/**
+sets each node in the tree to alive=true if it has at least one descendent with current=true
+**/
 function setNodeAlive(node){
 	if (typeof node.children != "undefined") {
 		var aliveChildren=false;
@@ -90,9 +74,9 @@ function setNodeAlive(node){
 			setNodeAlive(node.children[i]);
 			aliveChildren = aliveChildren||node.children[i].alive
 		}   
-		node.alive = aliveChildren
+		node.alive = aliveChildren;
 	}else{
-		node.alive = (node.dateval<LBIupperDateCutoff)&&(node.dateval>=LBIlowerDateCutoff);
+		node.alive = node.current;
 	}
 };
 
@@ -150,8 +134,6 @@ function calcPolarizers(node){
  * allnodes is provided for easy normalization at the end
 **/
 function calcLBI(node, allnodes){
-	setLBIDateCutoffs(globalDate, LBIBoundaryLayer);
-	console.log("Calculating LBI for date cutoff "+LBIupperDateCutoff+" and "+ LBIlowerDateCutoff);
 	setNodeAlive(node);
 	calcPolarizers(node);
 	allnodes.forEach(function (d) {
@@ -168,9 +150,20 @@ function calcLBI(node, allnodes){
 	allnodes.forEach(function (d){ d.LBI /= maxLBI;});
 };
 
-function setLBIDateCutoffs(now, bl){
-	LBIupperDateCutoff.setTime(now.getTime());
-	LBIlowerDateCutoff.setTime(LBIupperDateCutoff.getTime()-bl*1000*60*60*24);
+/**
+ * for each node, calculate the number of tips in the currently selected time window. 
+**/
+function calcTipCounts(node){
+	node.tipCount = 0;
+	if (typeof node.children != "undefined") {
+		for (var i=0; i<node.children.length; i++) {
+			calcTipCounts(node.children[i]);
+			node.tipCount += node.children[i].tipCount;
+		}
+	}
+	else if (node.current){ 
+		node.tipCount = 1;
+	}
 };
 
 function minimumAttribute(node, attr, min) {
@@ -205,12 +198,10 @@ var width = 800,
 	height = 600;
 
 var globalDate = new Date();
-var LBIupperDateCutoff = new Date();
-var LBIlowerDateCutoff = new Date();
 var ymd_format = d3.time.format("%Y-%m-%d");
 
 var LBItau = 0.0008,
-	LBIBoundaryLayer = 250;
+	time_window = 1.0;  // layer of one year that is considered current or active
 
 
 var tree = d3.layout.tree()
@@ -220,40 +211,46 @@ var treeplot = d3.select("#treeplot")
 	.attr("width", width)
 	.attr("height", height);
 
-var tooltip = d3.tip()
+var virusTooltip = d3.tip()
 	.direction('e')
 	.attr('class', 'd3-tip')
 	.offset([0, 12])
 	.html(function(d) {
 		string = ""
 		if (typeof d.strain != "undefined") {
-			string += "Strain: "
-			string += d.strain;
+			string += "Strain: " + d.strain;
 		}
 		if (typeof d.date != "undefined") {
-			string += "<br>Date: "
-			string += d.date;
+			string += "<br>Date: " + d.date;
 		}
 		if (typeof d.ep != "undefined") {
-			string += "<br>Epitope distance: "
-			string += d.ep;
+			string += "<br>Epitope distance: " + d.ep;
 		}
 		if (typeof d.ne != "undefined") {
-			string += "<br>Non-epitope distance: "
-			string += d.ne;
+			string += "<br>Non-epitope distance: " + d.ne;
 		}
 		if (typeof d.rb != "undefined") {
-			string += "<br>Receptor binding distance: "
-			string += d.rb;
+			string += "<br>Receptor binding distance: " + d.rb;
 		}
 		if (typeof d.rb != "undefined") {
-			string += "<br>Local branching index: "
-			string += d.LBI.toFixed(3);
+			string += "<br>Local branching index: " + d.LBI.toFixed(3);
 		}
 		return string;
 	});
+treeplot.call(virusTooltip);
 
-treeplot.call(tooltip);
+var linkTooltip = d3.tip()
+	.direction('e')
+	.attr('class', 'd3-tip')
+	.offset([0, 12])
+	.html(function(d) {
+		string = ""
+		if (typeof d.freq != "undefined") {
+			string += "Frequency: " + (100 * d.freq).toFixed(1) + "%";
+		}
+		return string;
+	});
+treeplot.call(linkTooltip);
 
 function rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, internals, vaccines) {
 
@@ -279,16 +276,16 @@ function rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, int
 	treeplot.selectAll(".internal").data(internals)
 		.transition().duration(speed)
 		.attr("x", function(d) {
-			if (typeof d.frequency != "undefined") {
-				return d.x - 5*Math.sqrt(d.frequency) - 0.5;
+			if (typeof d.freq != "undefined") {
+				return d.x - 5*Math.sqrt(d.freq) - 0.5;
 			}
 			else {
 				return d.x - 1;
 			}
 		})
 		.attr("y", function(d) {
-			if (typeof d.frequency != "undefined") {
-				return d.y - 5*Math.sqrt(d.frequency) - 0.5;
+			if (typeof d.freq != "undefined") {
+				return d.y - 5*Math.sqrt(d.freq) - 0.5;
 			}
 			else {
 				return d.y - 1;
@@ -298,9 +295,8 @@ function rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, int
 	treeplot.selectAll(".link").data(links)
 		.transition().duration(speed)
 		.attr("points", function(d) {
-			var mod = 5*Math.sqrt(d.target.frequency)+0.5;
-			return (d.source.x-mod).toString() + "," + d.source.y.toString() + " "
-			+ (d.source.x-mod).toString() + "," + d.target.y.toString() + " "
+			return (d.source.x).toString() + "," + d.source.y.toString() + " "
+			+ (d.source.x).toString() + "," + d.target.y.toString() + " "
 			+ (d.target.x).toString() + "," + d.target.y.toString()
 		});
 
@@ -318,9 +314,7 @@ d3.json("data/tree.json", function(error, root) {
 	var internals = gatherInternals(rootNode, []);
 	calcBranchLength(rootNode);
 	rootNode.branch_length= 0.01;
-	setFrequencies(rootNode);
 	nodes.forEach(function (d) {d.dateval = new Date(d.date)});
-	calcLBI(rootNode, nodes, false);
 
 	var vaccines = getVaccines(tips);
 
@@ -377,10 +371,6 @@ d3.json("data/tree.json", function(error, root) {
 		.domain([0.0])
 		.range([0, 2]);
 
-	var freqScale = d3.scale.sqrt()
-		.domain([0, 1])
-		.range([1, 10]);
-
 	var colors = ["#5097BA", "#5DA8A3", "#6EB389", "#83BA70", "#9ABE5C", "#B2BD4D", "#C8B944", "#D9AD3D", "#E49938", "#E67C32", "#E2562B"];
 	var colorBy = "ep";
 	
@@ -402,18 +392,31 @@ d3.json("data/tree.json", function(error, root) {
 
 	var colorScale = epitopeColorScale;
 	tips.map(function(d) { d.coloring = d.ep; });
-	adjust_coloring_by_date();
+	
+	var freqScale = d3.scale.linear()
+		.domain([0, 1])
+		.range([1.5, 4.5]);
+		
+	function calcNodeAges(tw){
+		tips.forEach(function (d) {
+			var date = new Date(d.date);
+			var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
+			var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
+			d.diff = diffYears;
+			if (d.diff > 0 && d.diff < tw){
+				d.current  = true;
+			}else{
+				d.current = false;
+			}
+		});
+	}; 	
 
 	function adjust_coloring_by_date() {
 		if (colorBy == "ep" || colorBy == "ne" || colorBy == "rb") {
 			var mean = 0;
 			var recent_tip_count = 0;
 			tips.forEach(function (d) {
-				var date = new Date(d.date);
-				var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
-				var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
-				d.diff = diffYears;
-				if (d.diff < 1) {
+				if (d.current) {
 					mean += d.coloring;
 					recent_tip_count += 1;
 				}
@@ -424,32 +427,46 @@ d3.json("data/tree.json", function(error, root) {
 			});
 		}
 		if (colorBy == "lbi") {
-			tips.forEach(function (d) {
-				var date = new Date(d.date);
-				var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
-				var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
-				d.diff = diffYears;
-			});
 			calcLBI(rootNode, nodes, false);
 			tips.forEach(function (d) {
 				d.adj_coloring = d.LBI;
 			});
 		}
 	}
+	
+	function adjust_freq_by_date() {
+		calcTipCounts(rootNode);
+		var tipCount = rootNode.tipCount;		
+		console.log("Total tipcount: " + tipCount);	
+		nodes.forEach(function (d) {
+			d.freq = (d.tipCount)/tipCount;
+		});
+	}	
+
+	calcNodeAges(time_window);
+	adjust_coloring_by_date();
+	adjust_freq_by_date();
+	calcLBI(rootNode, nodes, false);
 
 	var link = treeplot.selectAll(".link")
 		.data(links)
 		.enter().append("polyline")
 		.attr("class", "link")
 		.attr("points", function(d) {
-			var mod = 5*Math.sqrt(d.target.frequency)+0.5;
+			var mod = 0.5 * freqScale(d.target.freq) - freqScale(0);
 			return (d.source.x-mod).toString() + "," + d.source.y.toString() + " "
 			+ (d.source.x-mod).toString() + "," + d.target.y.toString() + " "
 			+ (d.target.x).toString() + "," + d.target.y.toString()
 		})
-		.style("stroke-width", 2)
+		.style("stroke-width", function(d) {
+			return freqScale(d.target.freq);
+		})
 		.style("stroke", "#ccc")
 		.style("cursor", "pointer")
+		.on('mouseover', function(d) {
+			linkTooltip.show(d.target, this);
+		})
+		.on('mouseout', linkTooltip.hide)		
 		.on('click', function(d) {
 			var dMin = minimumAttribute(d.target, "xvalue", d.target.xvalue),
 				dMax = maximumAttribute(d.target, "xvalue", d.target.xvalue),
@@ -478,9 +495,9 @@ d3.json("data/tree.json", function(error, root) {
 			return d3.rgb(col).toString();
 		})
 		.on('mouseover', function(d) {
-			tooltip.show(d, this);
+			virusTooltip.show(d, this);
 		})
-		.on('mouseout', tooltip.hide);
+		.on('mouseout', virusTooltip.hide);
 
 	var vaccineCircles = treeplot.selectAll(".vaccine")
 		.data(vaccines)
@@ -497,9 +514,9 @@ d3.json("data/tree.json", function(error, root) {
 		.text(function(d) { return '\uf00d'; })
 		.style("cursor", "default")
 		.on('mouseover', function(d) {
-			tooltip.show(d, this);
+			virusTooltip.show(d, this);
 		})
-		.on('mouseout', tooltip.hide);
+		.on('mouseout', virusTooltip.hide);
 
 
 	var drag = d3.behavior.drag()
@@ -510,6 +527,7 @@ d3.json("data/tree.json", function(error, root) {
 		})
 		.on("dragend", function() {
 			d3.selectAll(".date-input-text").style("fill", "#CCCCCC");
+			dragend();
 		});
 
 	function dragged(d) {
@@ -525,7 +543,26 @@ d3.json("data/tree.json", function(error, root) {
 		d3.selectAll(".date-input-marker")
 			.attr("cx", function(d) {return d.x})
 		globalDate = d.date;
+	}
+
+	function dragend() {
+		console.log("recalculating node ages");
+		calcNodeAges(time_window);
+		console.log("adjusting node colors");
 		adjust_coloring_by_date();
+		console.log("updating frequencies");
+		adjust_freq_by_date();
+
+		d3.selectAll(".link")
+			.attr("points", function(d) {
+				var mod = 0.5 * freqScale(d.target.freq) - freqScale(0);				
+				return (d.source.x-mod).toString() + "," + d.source.y.toString() + " "
+				+ (d.source.x-mod).toString() + "," + d.target.y.toString() + " "
+				+ (d.target.x).toString() + "," + d.target.y.toString()
+			})
+			.style("stroke-width", function(d) {
+				return freqScale(d.target.freq);
+			});
 		d3.selectAll(".tip")
 			.attr("r", function(d) {
 				return recencySizeScale(d.diff);
@@ -663,7 +700,7 @@ d3.json("data/tree.json", function(error, root) {
 	function onSelect(tip) {
 		d3.select("#"+(tip.strain).replace(/\//g, ""))
 			.call(function(d) {
-				tooltip.show(tip, d[0][0]);
+				virusTooltip.show(tip, d[0][0]);
 			});
 	}
 

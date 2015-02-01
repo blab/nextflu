@@ -26,7 +26,7 @@ def obs_likelihood(obs, freq):
 	"""obs is 0 or 1 binary indicator for absence / presence"""
 	return (1-freq)**(1-obs) * freq**obs
 
-class Particle:
+class Particle(object):
 	"""An individual SMC particle.  Stores value and weight."""
 	min_value = 0.00001
 	max_value = 0.99999
@@ -71,7 +71,7 @@ class Particle:
 	def likelihood(self, obs):
 		return obs_likelihood(obs, self.value)
 
-class Filter:
+class Filter(object):
 	"""An SMC particle filter, comprising n particles."""
 	"""Takes a list of dates and a list of (0,1) observations."""
 	"""Time in encoded in continuous units of years."""

@@ -1,0 +1,63 @@
+\documentclass[11pt]{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath,amsfonts,amssymb,eucal,eurosym,textcomp}
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage[numbers]{natbib}
+%\usepackage{lineno}
+%\linenumbers
+
+\title{Estimation of frequency trajectories}
+
+\begin{document}
+\maketitle
+What we got is a series of dated observations that either belong to a particular clade or not
+\begin{equation}
+    (t_i, c_i) \; \mathrm{for}\; i\in 1,\ldots,n \; \mathrm{and}\; c_i\in[0,1],\; t_i = date
+\end{equation}
+the frequency of the clade in question is a continuous time trajectory $x(t)$. Given the 
+trajectory, the likelihood of observing the data is
+\begin{equation}
+    P(\{(t_i, c_i)\}|x(t)) \sim \prod_{i=1}^n x(t_i)^{c_i}(1-x(t_i))^{1-c_i}
+\end{equation}
+We want to estimate $x(t)$, which changes over time due to selection and chance. This could 
+modeled as 
+\begin{equation}
+    \dot{x} = x(1-x) (s-\bar{s}) + \sqrt{2Dx(1-x)}\eta + \mu(2x-1)
+\end{equation}
+where $\eta$ is a white noise Wiener process and $D$ is the diffusion constant (what other 
+people would call the inverse effective population size) and the last term could be 
+the mutational influx. The probability of a particular trajectory 
+\begin{equation}
+    \log P(x(t) | \{(t_i, c_i)\} ) \sim \sum_{i=1}^n c_i\log(x(t_i)) + (1-c_i)\log(1-x(t_i))
+     - \int dt \frac{(\dot{x}-x(1-x)(s-\bar{s}))^2}{4Dx(1-x)}
+\end{equation}
+One conveniently discretizes the time integral to 
+\begin{equation}
+    \sum_j \Delta t \frac{(x_{j+1}-x_j-x_j(1-x_j)(s-\bar{s}))^2}{4Dx_j(1-x_j)} 
+\end{equation}
+while interpreting the stochastic ODE as Ito.
+An alternative variable would be $z = x/(1-x)$ (such that $x = z/(1+z)$ and 
+$1-x = \frac{1}{1+z}$). Ignoring the determinant for now, the posterior becomes
+\begin{equation}
+\begin{split}
+    \log P(x(t) | \{(t_i, c_i)\} ) & \sim \sum_{i=1}^n c_i\log(z(t_i)/(1+z(t_i))) + (1-c_i)\log(1/(1+z(t_i)))\\
+    &+\sum_j \Delta t (1+z_j)^2\frac{(z_{j+1}-z_j-z_j(s-\bar{s}))^2}{4Dz_j}     \\
+    &=\sum_{i=1}^n c_i\log(z(t_i)) - \log(1+z(t_i))\\
+    &+\sum_j \Delta t (1+z_j)^2\frac{(z_{j+1}-z_j-z_j(s-\bar{s}))^2}{4Dz_j} 
+\end{split}
+\end{equation}
+The mix of exponential growth and diffusion means that this isn't very simple, but it 
+is not too bad after all. Taking derivatives with respect to $z_k$, we find
+\begin{equation}
+\begin{split}
+    &\sum_{i=1 | t_i \in \Delta t_k}^n \left[\frac{c_i}{z_k} - \frac{1}{1+z_k}\right] +\Delta t (1+z_k)\frac{(z_{k+1}-z_k-z_k(s-\bar{s}))^2}{2Dz_k}\\
+    &-\Delta t (1+z_k)^2\frac{(z_{k+1}-z_k-z_k(s-\bar{s}))^2}{4Dz_k^2} -\Delta t (1+z_k)^2\frac{(z_{k+1}-z_k-z_k(s-\bar{s}))(s-\bar{s})}{2Dz_k}  
+\end{split}
+\end{equation}
+Signs are mostly wrong. But I think we can solve this for the most likely trajectory -- at least approximately.
+
+\end{document}
