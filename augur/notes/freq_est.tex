@@ -45,19 +45,38 @@ $1-x = \frac{1}{1+z}$). Ignoring the determinant for now, the posterior becomes
 \begin{equation}
 \begin{split}
     \log P(x(t) | \{(t_i, c_i)\} ) & \sim \sum_{i=1}^n c_i\log(z(t_i)/(1+z(t_i))) + (1-c_i)\log(1/(1+z(t_i)))\\
-    &+\sum_j \Delta t (1+z_j)^2\frac{(z_{j+1}-z_j-z_j(s-\bar{s}))^2}{4Dz_j}     \\
+    &-\sum_j \Delta t (1+z_j)^2\frac{(z_{j+1}-z_j(1+s-\bar{s}))^2}{4Dz_j}     \\
     &=\sum_{i=1}^n c_i\log(z(t_i)) - \log(1+z(t_i))\\
-    &+\sum_j \Delta t (1+z_j)^2\frac{(z_{j+1}-z_j-z_j(s-\bar{s}))^2}{4Dz_j} 
+    &-\sum_j \Delta t (1+z_j)^2\frac{(z_{j+1}-z_j(1+s-\bar{s}))^2}{4Dz_j} 
 \end{split}
 \end{equation}
 The mix of exponential growth and diffusion means that this isn't very simple, but it 
 is not too bad after all. Taking derivatives with respect to $z_k$, we find
 \begin{equation}
 \begin{split}
-    &\sum_{i=1 | t_i \in \Delta t_k}^n \left[\frac{c_i}{z_k} - \frac{1}{1+z_k}\right] +\Delta t (1+z_k)\frac{(z_{k+1}-z_k-z_k(s-\bar{s}))^2}{2Dz_k}\\
-    &-\Delta t (1+z_k)^2\frac{(z_{k+1}-z_k-z_k(s-\bar{s}))^2}{4Dz_k^2} -\Delta t (1+z_k)^2\frac{(z_{k+1}-z_k-z_k(s-\bar{s}))(s-\bar{s})}{2Dz_k}  
+    &\frac{\partial}{\partial z_k}\log P(x(t) | \{(t_i, c_i)\} )  = 0 = 
+            \sum_{i=1 | t_i \in \Delta t_k}^n \left[\frac{c_i}{z_k} - \frac{1}{1+z_k}\right] \\
+           &-\Delta t (1+z_k)\frac{(z_{k+1}-z_k(1+s-\bar{s}))^2}{2Dz_k}
+            +\Delta t (1+z_k)^2\frac{(z_{k+1}-z_k(1+s-\bar{s}))^2}{4Dz_k^2}\\
+           &-\Delta t (1+z_k)^2\frac{(z_{k+1}-z_k(1+s-\bar{s}))(1+s-\bar{s})}{2Dz_k}  
+           -\Delta t (1+z_{k-1})^2\frac{(z_{k}-z_{k-1}(1+s-\bar{s}))}{2Dz_{k-1}}
 \end{split}
 \end{equation}
-Signs are mostly wrong. But I think we can solve this for the most likely trajectory -- at least approximately.
+We need to solve this for all $z_k$ simultaneously to obtain the most likely trajectory. 
+Regorganizing slightly and ignoring higher order terms, we have
+\begin{equation}
+\begin{split}
+     0  \approx  &4D \sum_{i=1 | t_i \in \Delta t_k}^n \left[\frac{c_i}{z_k} - \frac{1}{1+z_k}\right] \\
+           &-\Delta t \left[2z_k(1+z_k)+(1+z_k)^2\right](z_{k+1}/z_k-(1+s-\bar{s}))^2\\
+           &-\Delta t 2(1+z_k)^2 (z_{k+1}/z_k+z_{k}/z_{k-1}-2(1+s-\bar{s}))  
+\end{split}
+\end{equation}
+More promising, however, might be straight numerical minimization of the log-likelihood. 
+We could in principle fit $s$ for individual clades while calculating $\bar{s}$ as an average
+\begin{equation}
+    \bar{s}(t_i) = \sum_j x_j(t_i)s_j
+\end{equation}
+where $x_j$ is the frequency of clade $j$. What is not obvious to me at this point is how to
+consist the fitness of the subclades with that of the parent clade. 
 
 \end{document}
