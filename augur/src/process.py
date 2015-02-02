@@ -31,9 +31,6 @@ def main(years_back=3, viruses_per_month=50):
 	# Clean tree, reads viruses in fname + raxml files
 	tree_fname = tree_refine.main(tree_fname=tree_fname, virus_fname = virus_fname)
 
-	# Calculate virus fitness predictors
-	tree_fname = fitness_predictors.main(tree_fname)
-
 	# Streamline tree for auspice
 	tree_fname = tree_streamline.main(tree_fname)
 

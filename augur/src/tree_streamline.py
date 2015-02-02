@@ -15,7 +15,7 @@ def main(in_fname='data/tree_refine.json'):
 		node.pop("clade", None)
 
 	out_fname_tree = "../auspice/data/tree.json"
-	write_json(tree, out_fname_tree, indent=None)
+	write_json(tree, out_fname_tree, indent=0)
 
 if __name__ == "__main__":
 	main()
