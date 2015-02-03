@@ -8,7 +8,7 @@ from fitness_predictors import *
 ymin = 2005
 ymax = 2015
 min_freq = 0.1
-max_freq = 0.5
+max_freq = 0.9
 min_tips = 10
 pc=1e-2
 
@@ -109,7 +109,7 @@ class fitness_model(object):
 
 
 	def select_clades_for_fitting(self):
-		if self.verbose: print "selectimg predictors for fitting"
+		if self.verbose: print "selecting predictors for fitting"
 		# short cut to total number of tips per seaons
 		total_counts = self.tree.seed_node.tip_counts
 		# prune seasons where few observations were made, only consecutive pairs
@@ -117,7 +117,7 @@ class fitness_model(object):
 		self.fit_test_season_pairs = [(s,t) for s,t in izip(self.seasons[:-1], self.seasons[1:]) 
 							if total_counts[s]>min_tips and total_counts[t]>min_tips]
 
-		# for each pair of seaons with sufficient tip counts, 
+		# for each pair of seasons with sufficient tip counts, 
 		# select clades in a certain frequency window. 
 		self.freq_and_predictors = []
 		for s,t in self.fit_test_season_pairs:
@@ -135,14 +135,20 @@ class fitness_model(object):
 		'''
 		this function should work for a params = [1, ..., k] and a pred = n x k matrix 
 		'''
-#		return [np.sum((freq[:,1] - freq[:,0]*np.exp(self.fitness(params, pred)))**2) 
-#				for freq, pred in self.freq_and_predictors]
-		return [np.sum((np.log((freq[:,1]+pc)/(freq[:,0]+pc))-self.fitness(params, pred))**2) 
+		return [np.mean( np.absolute(freq[:,1] - freq[:,0]*np.exp(self.fitness(params, pred))) ) 		# mean absolute error of clade frequencies
 				for freq, pred in self.freq_and_predictors]
+#		return [np.sum((freq[:,1] - freq[:,0]*np.exp(self.fitness(params, pred)))**2) 					# sum of squared errors of clade frequencies
+#				for freq, pred in self.freq_and_predictors]
+#		return [np.sum((np.log((freq[:,1]+pc)/(freq[:,0]+pc))-self.fitness(params, pred))**2)			# sum of squared errors of log fold changes
+#				for freq, pred in self.freq_and_predictors]
 
 	def model_fit(self, params):
-		self.last_fit = np.sum(self.model_fit_by_season(params))
-		if self.verbose>2: print params, self.last_fit
+		self.last_fit = np.mean(self.model_fit_by_season(params))
+		if self.verbose>1: print params, self.last_fit
+		if self.verbose>2:
+			for freq, pred in self.freq_and_predictors:
+				print "freq: " + str(freq)
+				print "pred: " + str(pred) 		
 		return np.sum(self.last_fit)
 
 	def fitness(self, params, pred):
@@ -156,7 +162,7 @@ class fitness_model(object):
 		if self.verbose: 
 			print "fitting parameters of the fitness model\ninitial function value:", self.model_fit(self.params)
 
-		self.params = fmin(self.model_fit, self.params, disp = self.verbose>1) # minimzation
+		self.params = fmin(self.model_fit, self.params, disp = self.verbose>1) # minimization
 		if self.verbose: 
 			print "final function value:", self.last_fit
 			print "fit parameters:"
@@ -182,18 +188,30 @@ class fitness_model(object):
 		self.learn_parameters()
 		self.assign_fitness(self.seasons[-1])
 
-
-if __name__=="__main__":
-	from io_util import *
-	from tree_util import *
+def test():
+	from io_util import read_json
+	from tree_util import json_to_dendropy
 	from Bio import Phylo
 	tree_fname='data/tree_refine.json'
 	tree =  json_to_dendropy(read_json(tree_fname))
 	fm = fitness_model(tree, verbose=1)
 	fm.predict()
-
-
 	btree = to_Biopython(tree)
 	color_BioTree_by_attribute(btree, 'fitness')
 	Phylo.draw(btree, label_func=lambda x:'')
+	
+def main():
+	from io_util import read_json
+	from io_util import write_json	
+	from tree_util import json_to_dendropy
+	from tree_util import dendropy_to_json	
+	tree_fname='data/tree_refine.json'
+	tree =  json_to_dendropy(read_json(tree_fname))
+	fm = fitness_model(tree, verbose=3)
+	fm.predict()
+	out_fname = "data/tree_fitness.json"
+	write_json(dendropy_to_json(tree.seed_node), out_fname)
+	return out_fname
 
+if __name__=="__main__":
+	main()
