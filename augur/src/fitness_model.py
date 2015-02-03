@@ -12,6 +12,7 @@ min_freq = 0.1
 max_freq = 0.9
 min_tips = 10
 pc=1e-2
+default_predictors = ['lb', 'ep', 'ne_start']
 
 class fitness_model(object):
 
@@ -25,15 +26,16 @@ class fitness_model(object):
 		self.seasons = [ (date(year=y, month = 10, day = 1), date(year = y+1, month = 4, day=1)) 
 						for y in xrange(ymin, ymax)]
 
-		if predictors is None:
-			self.predictors = [
-								('lb',calc_LBI, {'tau':0.0005, 'transform':lambda x:x}), 
-								('ep',calc_epitope_distance,{}), 
-								#('ne',calc_nonepitope_distance,{}),
-								('ne_star',calc_nonepitope_star_distance,{"seasons":self.seasons})
-								]
-		else:
-			self.predictors = predictors
+		self.predictors = []
+		for p in predictors:
+			if p == 'lb':
+				self.predictors.append(('lb',calc_LBI, {'tau':0.0005, 'transform':lambda x:x}))
+			if p == 'ep':
+				self.predictors.append(('ep',calc_epitope_distance,{}))
+			if p == 'ne':
+				self.predictors.append(('ne',calc_nonepitope_distance,{}))
+			if p == 'ne_star':
+				self.predictors.append(('ne_star',calc_nonepitope_star_distance,{"seasons":self.seasons}))				
 
 	def calc_tip_counts(self):
 		'''
@@ -257,7 +259,7 @@ class fitness_model(object):
 		self.calc_all_predictors()
 		self.standardize_predictors()
 		self.select_clades_for_fitting()
-		self.learn_parameters(niter)
+		self.learn_parameters(niter = niter)
 		self.assign_fitness(self.seasons[-1])
 
 def test(params):
@@ -266,7 +268,7 @@ def test(params):
 	from Bio import Phylo
 	tree_fname='data/tree_refine_10y_50v.json'
 	tree =  json_to_dendropy(read_json(tree_fname))
-	fm = fitness_model(tree, verbose=2)
+	fm = fitness_model(tree, predictors = params['predictors'], verbose=2)
 	fm.predict(niter = params['niter'])
 	#btree = to_Biopython(tree)
 	#color_BioTree_by_attribute(btree, 'fitness')
@@ -283,7 +285,7 @@ def main(params):
 
 	tree_fname='data/tree_refine.json'
 	tree =  json_to_dendropy(read_json(tree_fname))
-	fm = fitness_model(tree, verbose=1)
+	fm = fitness_model(tree, predictors = params['predictors'], verbose=1)
 	fm.predict(niter = params['niter'])
 	out_fname = "data/tree_fitness.json"
 	write_json(dendropy_to_json(tree.seed_node), out_fname)
@@ -293,6 +295,7 @@ if __name__=="__main__":
 	parser = argparse.ArgumentParser(description='Optimize predictor coefficients')
 	parser.add_argument('-n', '--niter', type = int, default=10, help='number of replicate optimizations')
 	parser.add_argument("-t", "--test", help="run test", action="store_true")
+	parser.add_argument('-p', '--predictors', default=default_predictors, help='predictors to optimize', nargs='+')
 	params = parser.parse_args().__dict__
 	if params['test']:
 		test(params)
