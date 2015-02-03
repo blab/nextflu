@@ -1,6 +1,6 @@
 import dendropy, time
 import numpy as np
-from seq_util import epitope_distance
+from seq_util import epitope_distance, translate
 from seq_util import nonepitope_distance
 from io_util import read_json
 from io_util import write_json
@@ -15,9 +15,11 @@ def calc_epitope_distance(tree, attr='ep', ref = None):
 	'''
 	if not hasattr(tree, "epitope_distance_assigned") or tree.epitope_distance_assigned==False:
 		if ref == None:
-			ref = tree.seed_node
+			ref = translate(tree.seed_node.seq)
 		for node in tree.postorder_node_iter():
-			node.__setattr__(attr, epitope_distance(node.seq, ref.seq))
+			if not hasattr(node, 'aa'):
+				node.aa = translate(node.seq)
+			node.__setattr__(attr, epitope_distance(node.aa, ref))
 		tree.epitope_distance_assigned=True
 
 def calc_nonepitope_distance(tree, attr='ne', ref = None):
@@ -28,9 +30,11 @@ def calc_nonepitope_distance(tree, attr='ne', ref = None):
 	'''
 	if not hasattr(tree, "nonepitope_distance_assigned") or tree.nonepitope_distance_assigned==False:
 		if ref == None:
-			ref = tree.seed_node
+			ref = translate(tree.seed_node.seq)
 		for node in tree.postorder_node_iter():
-			node.__setattr__(attr, nonepitope_distance(node.seq, ref.seq))
+			if not hasattr(node, 'aa'):
+				node.aa = translate(node.seq)
+			node.__setattr__(attr, nonepitope_distance(node.aa, ref))
 		tree.nonepitope_distance_assigned=True
 
 def calc_LBI(tree, attr = 'lbi', tau=0.0005, transform = lambda x:x):

@@ -7,8 +7,8 @@ from fitness_predictors import *
 
 ymin = 2005
 ymax = 2015
-min_freq = 0.1
-max_freq = 0.9
+min_freq = 0.05
+max_freq = 0.95
 min_tips = 10
 pc=1e-2
 
@@ -22,9 +22,11 @@ class fitness_model(object):
 		self.tree = tree
 		self.verbose=verbose
 		if predictors is None:
-			self.predictors = [('lb',calc_LBI, {'tau':0.0005, 'transform':lambda x:x}), 
+			self.predictors = [
+								('lb',calc_LBI, {'tau':0.0005, 'transform':lambda x:x}), 
 								('ep',calc_epitope_distance,{}), 
-								('ne',calc_nonepitope_distance,{})]
+								('ne',calc_nonepitope_distance,{})
+								]
 		else:
 			self.predictors = predictors
 
@@ -39,19 +41,27 @@ class fitness_model(object):
 		a given season, i.e. the frequency 
 		'''
 		# count tips
+		leaf_count = 0
 		for node in self.tree.postorder_node_iter():
-			node.tip_counts = defaultdict(int)
+			tmp_list = defaultdict(list)
 			for child in node.child_nodes():
 				for season, count in child.tip_counts.iteritems():
-					node.tip_counts[season]+=count
+					tmp_list[season].extend(count)
+
+			node.tip_counts = {}
+			for season, strain_list in tmp_list.iteritems():
+				node.tip_counts[season] = np.array(strain_list, dtype=int)
+
 			if node.is_leaf():
 				node_date = date(*map(int, node.date.split('-')))
 				tmp_season_list = [s for s in self.seasons if node_date>=s[0] and node_date<s[1]]
 				if len(tmp_season_list)==1:
-					node.tip_counts[tmp_season_list[0]]=1
+					node.tip_counts[tmp_season_list[0]]=[leaf_count]
+				leaf_count+=1
+				node.leaf_index = leaf_count
 
 		# short cut to total number of tips per seaons
-		total_counts = self.tree.seed_node.tip_counts
+		total_counts = {s:len(strain_list) for s, strain_list in self.tree.seed_node.tip_counts.iteritems()} 
 		if self.verbose>1:
 			for d,c in sorted(total_counts.items()): 
 				print "number of tips in", d[0].strftime('%Y-%m-%d'), '--', \
@@ -60,8 +70,12 @@ class fitness_model(object):
 		# calculate frequencies
 		for node in self.tree.postorder_node_iter():
 			node.frequencies = defaultdict(float)
-			for season, count in node.tip_counts.iteritems():
-				node.frequencies[season]=float(count)/(total_counts[season]+1e-10)
+			for season, strain_list in node.tip_counts.iteritems():
+				if season in total_counts:
+					node.frequencies[season]=float(len(strain_list))/(total_counts[season]+1e-10)
+				else:
+					node.frequencies[season]=0
+
 
 	def calc_predictors(self):
 		for pred, func, kwargs in self.predictors:
@@ -70,48 +84,58 @@ class fitness_model(object):
 
 	def select_nodes_in_season(self, season):
 		for node in self.tree.postorder_node_iter():
-			if node.tip_counts[season]>0:
+			if season in node.tip_counts and len(node.tip_counts[season])>0:
 				node.alive=True
 			else:
 				node.alive=False
 
 	def calc_all_predictors(self):
+		self.predictor_arrays={}
 		for node in self.tree.postorder_node_iter():
 			node.predictors = {}
 		for s in self.seasons:
-			if self.verbose: print "calculating predictors for season ", s[0].strftime("%Y-%m-%d"), '--', s[1].strftime("%Y-%m-%d")
+			tmp_preds = []
+			t0=time.time()
+			if self.verbose: print "calculating predictors for season ", s[0].strftime("%Y-%m-%d"), '--', s[1].strftime("%Y-%m-%d"),
 			self.select_nodes_in_season(s)
 			self.calc_predictors()
+			if self.verbose: print np.round(time.time()-t0,2), 'seconds'
 			for node in self.tree.postorder_node_iter():
 				if node.alive:
 					node.predictors[s] = np.array([node.__getattribute__(pred[0]) 
 				                              for pred in self.predictors])
+					if node.is_leaf():
+						tmp_preds.append(node.predictors[s])
 				else:
 					node.predictors[s]=None
+					if node.is_leaf():
+						tmp_preds.append(np.zeros(len(self.predictors)))
+			self.predictor_arrays[s]=np.array(tmp_preds)
 
 	def standardize_predictors(self):
 		self.season_means = []
 		self.season_std = []
 		if self.verbose: print "standardize predictors for season"
 		for s in self.seasons:
-			tmp_pred = []
-			for node in self.tree.postorder_node_iter():
-				if node.predictors[s] is not None and node.is_leaf():
-					tmp_pred.append(node.predictors[s])	
-			self.season_means.append(np.mean(tmp_pred, axis=0))
-			self.season_std.append(np.std(tmp_pred, axis=0))
+			self.season_means.append(self.predictor_arrays[s][self.tree.seed_node.tip_counts[s],:].mean(axis=0))
+			self.season_std.append(self.predictor_arrays[s][self.tree.seed_node.tip_counts[s],:].std(axis=0))
+
 		self.global_std = np.mean(self.season_std, axis=0)
 
 		for s, m in izip(self.seasons, self.season_means):
+			# keep this for internal nodes
 			for node in self.tree.postorder_node_iter():
 				if node.predictors[s] is not None:
 					node.predictors[s] = (node.predictors[s]-m)/self.global_std
+
+			self.predictor_arrays[s]-=m
+			self.predictor_arrays[s]/=self.global_std
 
 
 	def select_clades_for_fitting(self):
 		if self.verbose: print "selecting predictors for fitting"
 		# short cut to total number of tips per seaons
-		total_counts = self.tree.seed_node.tip_counts
+		total_counts = {s:len(strain_list) for s, strain_list in self.tree.seed_node.seed_node.tip_counts.iteritems()}
 		# prune seasons where few observations were made, only consecutive pairs
 		# with sufficient tip count are retained
 		self.fit_test_season_pairs = [(s,t) for s,t in izip(self.seasons[:-1], self.seasons[1:]) 
@@ -149,7 +173,7 @@ class fitness_model(object):
 
 	def prep_clades_for_fitting_tree(self):
 		# short cut to total number of tips per seaons
-		total_counts = self.tree.seed_node.tip_counts
+		total_counts = {s:len(strain_list) for s, strain_list in self.tree.seed_node.tip_counts.iteritems()}
 		# prune seasons where few observations were made, only consecutive pairs
 		# with sufficient tip count are retained
 		self.fit_test_season_pairs = [(s,t) for s,t in izip(self.seasons[:-1], self.seasons[1:]) 
@@ -177,11 +201,11 @@ class fitness_model(object):
 		for s,t in self.fit_test_season_pairs:
 		
 			# normalize strain frequencies
-			total_strain_freq = 0.0
-			for node in self.tree.postorder_node_iter():
-				if node.is_leaf():
-					 if node.predictors[s] is not None:
-						total_strain_freq += node.frequencies[s] * np.exp( self.fitness_tree(params, node.predictors[s]) )		
+#			total_strain_freq = 0.0
+#			for node in self.tree.leaf_iter():
+#				 if node.predictors[s] is not None:
+#					total_strain_freq += np.exp( self.fitness_tree(params, node.predictors[s]) )		
+			total_strain_freq = np.exp(self.fitness_tree(params, self.predictor_arrays[s][self.tree.seed_node.tip_counts[s],:])).sum()
 		
 			# project clades forward according to strain makeup
 			clade_errors = []
@@ -189,15 +213,17 @@ class fitness_model(object):
 			for clade in test_clades:
 				initial_freq = clade.frequencies[s]
 				obs_freq = clade.frequencies[t]
-				pred_freq = 0.0
-				for v in clade.subtending:
-					if v.predictors[s] is not None:
-						pred_freq += v.frequencies[s] * np.exp( self.fitness_tree(params, v.predictors[s]) )
-				pred_freq = pred_freq / total_strain_freq;
+#				pred_freq = 0.0
+#				for v in clade.subtending:
+#					if v.predictors[s] is not None:
+#						pred_freq += np.exp( self.fitness_tree(params, v.predictors[s]) )
+#				pred_freq = pred_freq / total_strain_freq;
+				pred_freq = np.sum(np.exp(self.fitness_tree(params, self.predictor_arrays[s][clade.tip_counts[s],:])))/total_strain_freq
 				clade_errors.append(np.absolute(pred_freq - obs_freq))				
 			seasonal_errors.append(np.mean(clade_errors))
 		mean_error = np.mean(seasonal_errors)
 		self.last_fit = mean_error
+		if self.verbose>2: print params, self.last_fit
 		return mean_error
 		
 	def fitness_tree(self, params, pred):
@@ -273,21 +299,22 @@ class fitness_model(object):
 
 def test():
 	from io_util import read_json
-	from tree_util import json_to_dendropy
+	from tree_util import json_to_dendropy, to_Biopython, color_BioTree_by_attribute
 	from Bio import Phylo
-	tree_fname='data/tree_refine.json'
+	tree_fname='data/tree_refine_10y_50v.json'
 	tree =  json_to_dendropy(read_json(tree_fname))
-	fm = fitness_model(tree, verbose=1)
-	fm.predict()
-	btree = to_Biopython(tree)
-	color_BioTree_by_attribute(btree, 'fitness')
-	Phylo.draw(btree, label_func=lambda x:'')
-	
+	fm = fitness_model(tree, verbose=2)
+	fm.predict_tree()
+	#btree = to_Biopython(tree)
+	#color_BioTree_by_attribute(btree, 'fitness')
+	#Phylo.draw(btree, label_func=lambda x:'')
+	return fm
+
 def main():
 	from io_util import read_json
 	from io_util import write_json	
-	from tree_util import json_to_dendropy
-	from tree_util import dendropy_to_json	
+	from tree_util import json_to_dendropy, dendropy_to_json
+
 	tree_fname='data/tree_refine.json'
 	tree =  json_to_dendropy(read_json(tree_fname))
 	fm = fitness_model(tree, verbose=1)
@@ -297,4 +324,5 @@ def main():
 	return out_fname
 
 if __name__=="__main__":
-	main()
+	fm = test()
+	#main()
