@@ -173,7 +173,8 @@ class fitness_model(object):
 			for node in self.tree.postorder_node_iter():
 				if node.frequencies[s]>=min_freq and node.frequencies[s]<max_freq:
 					self.clades_for_season[(s,t)].append(node)
-					
+
+
 	def model_fit(self, params):
 		# walk through season pairs
 		seasonal_errors = []
@@ -196,34 +197,46 @@ class fitness_model(object):
 		self.last_fit = mean_error
 		if self.verbose>2: print params, self.last_fit
 		return mean_error
+
 		
 	def fitness(self, params, pred):
-		return np.sum(params*pred, axis=-1)														
-			
-	def learn_parameters(self, niter = 10):
+		return np.sum(params*pred, axis=-1)
+
+
+	def minimize_error(self):
 		from scipy.optimize import fmin as minimizer
+		if self.verbose:		
+			print "initial function value:", self.model_fit(self.params)
+			print "initial parameters:", self.params
+		self.params = minimizer(self.model_fit, self.params, disp = self.verbose>1)
+		if self.verbose:
+			print "final function value:", self.model_fit(self.params)		
+			print "final parameters:", self.params, '\n'		
+
+
+	def learn_parameters(self, niter = 10):
+
+		print "fitting parameters of the fitness model\n"
+
 		params_stack = []
-		
-		print "fitting parameters of the fitness model"
-		
+
+		if self.verbose:
+			print "null parameters"
 		self.params = 0*np.ones(len(self.predictors))  # initial values
-		if self.verbose: 
-			print "null function value:", self.model_fit(self.params)
-			print "null parameters:", self.params		
+		self.minimize_error()
+		params_stack.append((self.last_fit, self.params))
 		
 		for ii in xrange(niter):
+			if self.verbose:
+				print "iteration:", ii+1
 			self.params = 0.1+0.5*np.random.randn(len(self.predictors)) #0*np.ones(len(self.predictors))  # initial values
-			if self.verbose: 
-				print "iteration:", ii, "\ninitial function value:", self.model_fit(self.params)
-				print "initial parameters:", self.params
-				
-			self.params = minimizer(self.model_fit, self.params, disp = self.verbose>1) # minimization
+			self.minimize_error()
 			params_stack.append((self.last_fit, self.params))
-			if self.verbose: print "final parameters:", self.params, '\n'
+
 		self.params = params_stack[np.argmin([x[0] for x in params_stack])][1]
 		self.model_fit(self.params)
 		if self.verbose:
-			print "best after ",niter," iterations\nfunction value:", self.last_fit
+			print "best after",niter,"iterations\nfunction value:", self.last_fit
 			print "fit parameters:"
 			for pred, val in izip(self.predictors, self.params):
 				print pred[0],':', val
