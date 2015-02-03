@@ -137,29 +137,6 @@ class fitness_model(object):
 
 
 	def select_clades_for_fitting(self):
-		if self.verbose: print "selecting predictors for fitting"
-		# short cut to total number of tips per seaons
-		total_counts = {s:len(strain_list) for s, strain_list in self.tree.seed_node.seed_node.tips.iteritems()}
-		# prune seasons where few observations were made, only consecutive pairs
-		# with sufficient tip count are retained
-		self.fit_test_season_pairs = [(s,t) for s,t in izip(self.seasons[:-1], self.seasons[1:]) 
-							if total_counts[s]>min_tips and total_counts[t]>min_tips]
-
-		# for each pair of seasons with sufficient tip counts, 
-		# select clades in a certain frequency window. 
-		self.freq_and_predictors = []
-		for s,t in self.fit_test_season_pairs:
-			tmp_freq = []
-			tmp_pred = []
-			for node in self.tree.postorder_node_iter():
-				if node.frequencies[s]>=min_freq and node.frequencies[s]<max_freq:
-					if node.frequencies[s]>1.01*np.max([c.frequencies[s] for c in node.child_nodes()]):
-						tmp_freq.append([node.frequencies[s], node.frequencies[t]])
-						tmp_pred.append(node.predictors[s])
-			self.freq_and_predictors.append((np.array(tmp_freq), np.array(tmp_pred)))
-
-
-	def select_clades_for_fitting(self):
 		# short cut to total number of tips per seaons
 		total_counts = {s:len(strain_list) for s, strain_list in self.tree.seed_node.tips.iteritems()}
 		# prune seasons where few observations were made, only consecutive pairs
