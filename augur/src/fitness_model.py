@@ -137,7 +137,7 @@ class fitness_model(object):
 		'''
 		return [np.mean( np.absolute(freq[:,1] - freq[:,0]*np.exp(self.fitness(params, pred))) ) 		# mean absolute error of clade frequencies
 				for freq, pred in self.freq_and_predictors]
-#		return [np.sum((freq[:,1] - freq[:,0]*np.exp(self.fitness(params, pred)))**2) 					# sum of squared errors of clade frequencies
+#		return [np.mean((freq[:,1] - freq[:,0]*np.exp(self.fitness(params, pred)))**2) 					# mean squared errors of clade frequencies
 #				for freq, pred in self.freq_and_predictors]
 #		return [np.sum((np.log((freq[:,1]+pc)/(freq[:,0]+pc))-self.fitness(params, pred))**2)			# sum of squared errors of log fold changes
 #				for freq, pred in self.freq_and_predictors]
@@ -145,11 +145,86 @@ class fitness_model(object):
 	def model_fit(self, params):
 		self.last_fit = np.mean(self.model_fit_by_season(params))
 		if self.verbose>1: print params, self.last_fit
-		if self.verbose>2:
-			for freq, pred in self.freq_and_predictors:
-				print "freq: " + str(freq)
-				print "pred: " + str(pred) 		
 		return np.sum(self.last_fit)
+
+	def prep_clades_for_fitting_tree(self):
+		# short cut to total number of tips per seaons
+		total_counts = self.tree.seed_node.tip_counts
+		# prune seasons where few observations were made, only consecutive pairs
+		# with sufficient tip count are retained
+		self.fit_test_season_pairs = [(s,t) for s,t in izip(self.seasons[:-1], self.seasons[1:]) 
+							if total_counts[s]>min_tips and total_counts[t]>min_tips]
+		
+		# for each pair of seasons with sufficient tip counts, 
+		# select clades in a certain frequency window
+		# keep track of these season / clade combinations in the dict clades_for_season
+		self.clades_for_season = {}
+		for s,t in self.fit_test_season_pairs:
+			self.clades_for_season[(s,t)] = []
+			for node in self.tree.postorder_node_iter():
+				if node.frequencies[s]>=min_freq and node.frequencies[s]<max_freq:
+					self.clades_for_season[(s,t)].append(node)
+					
+		# make fast lookup table for clades to subtending nodes
+		for clade in self.tree.postorder_node_iter():
+			clade.subtending = []
+			for leaf in clade.leaf_iter():
+				clade.subtending.append(leaf)
+
+	def model_fit_tree(self, params):
+		# walk through season pairs
+		seasonal_errors = []
+		for s,t in self.fit_test_season_pairs:
+		
+			# normalize strain frequencies
+			total_strain_freq = 0.0
+			for node in self.tree.postorder_node_iter():
+				if node.is_leaf():
+					 if node.predictors[s] is not None:
+						total_strain_freq += node.frequencies[s] * np.exp( self.fitness_tree(params, node.predictors[s]) )		
+		
+			# project clades forward according to strain makeup
+			clade_errors = []
+			test_clades = self.clades_for_season[(s,t)]
+			for clade in test_clades:
+				initial_freq = clade.frequencies[s]
+				obs_freq = clade.frequencies[t]
+				pred_freq = 0.0
+				for v in clade.subtending:
+					if v.predictors[s] is not None:
+						pred_freq += v.frequencies[s] * np.exp( self.fitness_tree(params, v.predictors[s]) )
+				pred_freq = pred_freq / total_strain_freq;
+				clade_errors.append(np.absolute(pred_freq - obs_freq))				
+			seasonal_errors.append(np.mean(clade_errors))
+		mean_error = np.mean(seasonal_errors)
+		self.last_fit = mean_error
+		return mean_error
+		
+	def fitness_tree(self, params, pred):
+		return np.sum(params*pred, axis=-1)														
+			
+	def learn_parameters_tree(self):
+		from scipy.optimize import fmin
+		self.params = 0*np.ones(len(self.predictors))  # initial values
+		if self.verbose: 
+			print "fitting parameters of the fitness model\ninitial function value:", self.model_fit_tree(self.params)
+			
+		self.params = fmin(self.model_fit_tree, self.params, disp = self.verbose>1) # minimization
+		if self.verbose:
+			print "final function value:", self.last_fit
+			print "fit parameters:"
+			for pred, val in izip(self.predictors, self.params):
+				print pred[0],':', val				
+
+	def assign_fitness_tree(self, season):
+		if self.verbose: print "calculating predictors for the last season"
+
+		#FIXME: standardize predictors
+		for node in self.tree.postorder_node_iter():
+			if node.predictors[season] is not None:
+				node.fitness = self.fitness_tree(self.params, node.predictors[season])
+			else:
+				node.fitness = 0.0
 
 	def fitness(self, params, pred):
 		return params[0]+np.sum(params[1:]*pred, axis=-1)
@@ -188,6 +263,14 @@ class fitness_model(object):
 		self.learn_parameters()
 		self.assign_fitness(self.seasons[-1])
 
+	def predict_tree(self):
+		self.calc_tip_counts()
+		self.calc_all_predictors()
+		self.standardize_predictors()
+		self.prep_clades_for_fitting_tree()
+		self.learn_parameters_tree()
+		self.assign_fitness_tree(self.seasons[-1])
+
 def test():
 	from io_util import read_json
 	from tree_util import json_to_dendropy
@@ -207,8 +290,8 @@ def main():
 	from tree_util import dendropy_to_json	
 	tree_fname='data/tree_refine.json'
 	tree =  json_to_dendropy(read_json(tree_fname))
-	fm = fitness_model(tree, verbose=3)
-	fm.predict()
+	fm = fitness_model(tree, verbose=1)
+	fm.predict_tree()
 	out_fname = "data/tree_fitness.json"
 	write_json(dendropy_to_json(tree.seed_node), out_fname)
 	return out_fname
