@@ -190,6 +190,8 @@ class fitness_model(object):
 				clade_errors.append(np.absolute(pred_freq - obs_freq))				
 			seasonal_errors.append(np.mean(clade_errors))
 		mean_error = np.mean(seasonal_errors)
+		if any(np.isnan(seasonal_errors)+np.isinf(seasonal_errors)):
+			mean_error = 1e10
 		self.last_fit = mean_error
 		if self.verbose>2: print params, self.last_fit
 		return mean_error
@@ -199,16 +201,26 @@ class fitness_model(object):
 			
 	def learn_parameters_tree(self):
 		from scipy.optimize import fmin as minimizer
-		self.params = 0*np.ones(len(self.predictors))  # initial values
-		if self.verbose: 
-			print "fitting parameters of the fitness model\ninitial function value:", self.model_fit_tree(self.params)
-			
-		self.params = minimizer(self.model_fit_tree, self.params, disp = self.verbose>1) # minimization
+		params_stack = []
+		niter = 20
+		for ii in xrange(niter):
+			self.params = 0.1+0.5*np.random.randn(len(self.predictors)) #0*np.ones(len(self.predictors))  # initial values
+			if self.verbose: 
+				print "iteration:", ii, "\nfitting parameters of the fitness model\ninitial function value:", self.model_fit_tree(self.params)
+				print "initial parameters:", self.params
+				
+			self.params = minimizer(self.model_fit_tree, self.params, disp = self.verbose>1) # minimization
+			params_stack.append((self.last_fit, self.params))
+			if self.verbose: print "final parameters:", self.params, '\n'
+		print sorted(params_stack)[:10]
+		self.params = params_stack[np.argmin([x[0] for x in params_stack])][1]
+		self.model_fit_tree(self.params)
 		if self.verbose:
-			print "final function value:", self.last_fit
+			print "best after ",niter," iterations\nfunction value:", self.last_fit
 			print "fit parameters:"
 			for pred, val in izip(self.predictors, self.params):
-				print pred[0],':', val				
+				print pred[0],':', val
+
 
 	def assign_fitness_tree(self, season):
 		if self.verbose: print "calculating predictors for the last season"
@@ -234,7 +246,7 @@ def test():
 	from Bio import Phylo
 	tree_fname='data/tree_refine_10y_50v.json'
 	tree =  json_to_dendropy(read_json(tree_fname))
-	fm = fitness_model(tree, verbose=3)
+	fm = fitness_model(tree, verbose=2)
 	fm.predict_tree()
 	#btree = to_Biopython(tree)
 	#color_BioTree_by_attribute(btree, 'fitness')
