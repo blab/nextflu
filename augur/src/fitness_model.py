@@ -203,10 +203,18 @@ class fitness_model(object):
 	def learn_parameters(self, niter = 10):
 		from scipy.optimize import fmin as minimizer
 		params_stack = []
+		
+		print "fitting parameters of the fitness model"
+		
+		self.params = 0*np.ones(len(self.predictors))  # initial values
+		if self.verbose: 
+			print "null function value:", self.model_fit(self.params)
+			print "null parameters:", self.params		
+		
 		for ii in xrange(niter):
 			self.params = 0.1+0.5*np.random.randn(len(self.predictors)) #0*np.ones(len(self.predictors))  # initial values
 			if self.verbose: 
-				print "iteration:", ii, "\nfitting parameters of the fitness model\ninitial function value:", self.model_fit(self.params)
+				print "iteration:", ii, "\ninitial function value:", self.model_fit(self.params)
 				print "initial parameters:", self.params
 				
 			self.params = minimizer(self.model_fit, self.params, disp = self.verbose>1) # minimization
