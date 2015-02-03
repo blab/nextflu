@@ -175,7 +175,10 @@ class fitness_model(object):
 			self.clades_for_season[(s,t)] = []
 			for node in self.tree.postorder_node_iter():
 				if node.frequencies[s]>=min_freq and node.frequencies[s]<max_freq:
-					self.clades_for_season[(s,t)].append(node)
+					if max([c.frequencies[s] for c in node.child_nodes()])<node.frequencies[s]:
+						self.clades_for_season[(s,t)].append(node)
+					else:
+						if self.verbose: print "clade fully contained in daughter clade"
 
 
 	def model_fit(self, params):
@@ -192,7 +195,7 @@ class fitness_model(object):
 				initial_freq = clade.frequencies[s]
 				obs_freq = clade.frequencies[t]
 				pred_freq = np.sum(np.exp(self.fitness(params, self.predictor_arrays[s][clade.tips[s],:])))/total_strain_freq
-				clade_errors.append(np.absolute(pred_freq - obs_freq))				
+				clade_errors.append(np.absolute(pred_freq - obs_freq))
 			seasonal_errors.append(np.mean(clade_errors))
 		mean_error = np.mean(seasonal_errors)
 		if any(np.isnan(seasonal_errors)+np.isinf(seasonal_errors)):
@@ -298,7 +301,7 @@ if __name__=="__main__":
 	parser.add_argument('-p', '--predictors', default=default_predictors, help='predictors to optimize', nargs='+')
 	params = parser.parse_args().__dict__
 	if params['test']:
-		test(params)
+		fm = test(params)
 	else:
 		main(params)
 
