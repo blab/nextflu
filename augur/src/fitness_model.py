@@ -1,3 +1,4 @@
+import argparse
 import numpy as np
 import dendropy
 from collections import defaultdict
@@ -173,12 +174,12 @@ class fitness_model(object):
 				if node.frequencies[s]>=min_freq and node.frequencies[s]<max_freq:
 					self.clades_for_season[(s,t)].append(node)
 					
-	def model_fit_tree(self, params):
+	def model_fit(self, params):
 		# walk through season pairs
 		seasonal_errors = []
 		for s,t in self.fit_test_season_pairs:		
 			# normalize strain frequencies
-			total_strain_freq = np.exp(self.fitness_tree(params, self.predictor_arrays[s][self.tree.seed_node.tips[s],:])).sum()
+			total_strain_freq = np.exp(self.fitness(params, self.predictor_arrays[s][self.tree.seed_node.tips[s],:])).sum()
 		
 			# project clades forward according to strain makeup
 			clade_errors = []
@@ -186,7 +187,7 @@ class fitness_model(object):
 			for clade in test_clades:
 				initial_freq = clade.frequencies[s]
 				obs_freq = clade.frequencies[t]
-				pred_freq = np.sum(np.exp(self.fitness_tree(params, self.predictor_arrays[s][clade.tips[s],:])))/total_strain_freq
+				pred_freq = np.sum(np.exp(self.fitness(params, self.predictor_arrays[s][clade.tips[s],:])))/total_strain_freq
 				clade_errors.append(np.absolute(pred_freq - obs_freq))				
 			seasonal_errors.append(np.mean(clade_errors))
 		mean_error = np.mean(seasonal_errors)
@@ -196,25 +197,23 @@ class fitness_model(object):
 		if self.verbose>2: print params, self.last_fit
 		return mean_error
 		
-	def fitness_tree(self, params, pred):
+	def fitness(self, params, pred):
 		return np.sum(params*pred, axis=-1)														
 			
-	def learn_parameters_tree(self):
+	def learn_parameters(self, niter = 10):
 		from scipy.optimize import fmin as minimizer
 		params_stack = []
-		niter = 20
 		for ii in xrange(niter):
 			self.params = 0.1+0.5*np.random.randn(len(self.predictors)) #0*np.ones(len(self.predictors))  # initial values
 			if self.verbose: 
-				print "iteration:", ii, "\nfitting parameters of the fitness model\ninitial function value:", self.model_fit_tree(self.params)
+				print "iteration:", ii, "\nfitting parameters of the fitness model\ninitial function value:", self.model_fit(self.params)
 				print "initial parameters:", self.params
 				
-			self.params = minimizer(self.model_fit_tree, self.params, disp = self.verbose>1) # minimization
+			self.params = minimizer(self.model_fit, self.params, disp = self.verbose>1) # minimization
 			params_stack.append((self.last_fit, self.params))
 			if self.verbose: print "final parameters:", self.params, '\n'
-		print sorted(params_stack)[:10]
 		self.params = params_stack[np.argmin([x[0] for x in params_stack])][1]
-		self.model_fit_tree(self.params)
+		self.model_fit(self.params)
 		if self.verbose:
 			print "best after ",niter," iterations\nfunction value:", self.last_fit
 			print "fit parameters:"
@@ -222,50 +221,60 @@ class fitness_model(object):
 				print pred[0],':', val
 
 
-	def assign_fitness_tree(self, season):
+	def assign_fitness(self, season):
 		if self.verbose: print "calculating predictors for the last season"
 
 		#FIXME: standardize predictors
 		for node in self.tree.postorder_node_iter():
 			if node.predictors[season] is not None:
-				node.fitness = self.fitness_tree(self.params, node.predictors[season])
+				node.fitness = self.fitness(self.params, node.predictors[season])
 			else:
 				node.fitness = 0.0
 
-	def predict_tree(self):
+	def predict(self, niter = 10):
 		self.calc_tip_counts()
 		self.calc_all_predictors()
 		self.standardize_predictors()
 		self.select_clades_for_fitting()
-		self.learn_parameters_tree()
-		self.assign_fitness_tree(self.seasons[-1])
+		self.learn_parameters(niter)
+		self.assign_fitness(self.seasons[-1])
 
-def test():
+def test(params):
 	from io_util import read_json
 	from tree_util import json_to_dendropy, to_Biopython, color_BioTree_by_attribute
 	from Bio import Phylo
 	tree_fname='data/tree_refine_10y_50v.json'
 	tree =  json_to_dendropy(read_json(tree_fname))
 	fm = fitness_model(tree, verbose=2)
-	fm.predict_tree()
+	fm.predict(niter = params['niter'])
 	#btree = to_Biopython(tree)
 	#color_BioTree_by_attribute(btree, 'fitness')
 	#Phylo.draw(btree, label_func=lambda x:'')
 	return fm
 
-def main():
+def main(params):
+	import time
 	from io_util import read_json
 	from io_util import write_json	
 	from tree_util import json_to_dendropy, dendropy_to_json
+	
+	print "--- Start fitness model optimization at " + time.strftime("%H:%M:%S") + " ---"
 
 	tree_fname='data/tree_refine.json'
 	tree =  json_to_dendropy(read_json(tree_fname))
 	fm = fitness_model(tree, verbose=1)
-	fm.predict_tree()
+	fm.predict(niter = params['niter'])
 	out_fname = "data/tree_fitness.json"
 	write_json(dendropy_to_json(tree.seed_node), out_fname)
 	return out_fname
 
 if __name__=="__main__":
-	fm = test()
-	#main()
+	parser = argparse.ArgumentParser(description='Optimize predictor coefficients')
+	parser.add_argument('-n', '--niter', type = int, default=10, help='number of replicate optimizations')
+	parser.add_argument("-t", "--test", help="run test", action="store_true")
+	params = parser.parse_args().__dict__
+	if params['test']:
+		test(params)
+	else:
+		main(params)
+
