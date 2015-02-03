@@ -37,6 +37,36 @@ def calc_nonepitope_distance(tree, attr='ne', ref = None):
 			node.__setattr__(attr, nonepitope_distance(node.aa, ref))
 		tree.nonepitope_distance_assigned=True
 
+def calc_nonepitope_star_distance(tree, attr='ne_star', seasons = []):
+	'''
+	calculates the distance at nonepitope sites of any tree node to ref
+	tree   --   dendropy tree
+	attr   --   the attribute name used to save the result
+	'''
+	if not hasattr(tree, "nonepitope_star_distance_assigned") or tree.nonepitope_star_distance_assigned==False:
+		for node in tree.postorder_node_iter():
+			if len(node.tips) and node!=tree.seed_node:
+				if not hasattr(node, 'aa'):
+					node.aa = translate(node.seq)
+				tmp_node = node.parent_node
+				cur_season = min(node.tips.keys())
+				prev_season = seasons[max(0,seasons.index(cur_season)-1)]
+				while True:
+					if tmp_node!=tree.seed_node:
+						if prev_season in tmp_node.tips and len(tmp_node.tips[prev_season])>0:
+							break
+						else:
+							tmp_node=tmp_node.parent_node
+					else:
+						break
+				if not hasattr(tmp_node, 'aa'):
+					tmp_node.aa = translate(tmp_node.seq)
+				node.__setattr__(attr, nonepitope_distance(node.aa, tmp_node.aa))
+			else:
+				node.__setattr__(attr, np.nan)				
+		tree.nonepitope_star_distance_assigned=True
+
+
 def calc_LBI(tree, attr = 'lbi', tau=0.0005, transform = lambda x:x):
 	'''
 	traverses the tree in postorder and preorder to calculate the

@@ -21,17 +21,18 @@ class fitness_model(object):
 		'''
 		self.tree = tree
 		self.verbose=verbose
+		self.seasons = [ (date(year=y, month = 10, day = 1), date(year = y+1, month = 4, day=1)) 
+						for y in xrange(ymin, ymax)]
+
 		if predictors is None:
 			self.predictors = [
 								('lb',calc_LBI, {'tau':0.0005, 'transform':lambda x:x}), 
 								('ep',calc_epitope_distance,{}), 
-								('ne',calc_nonepitope_distance,{})
+								#('ne',calc_nonepitope_distance,{}),
+								('ne_star',calc_nonepitope_star_distance,{"seasons":self.seasons})
 								]
 		else:
 			self.predictors = predictors
-
-		self.seasons = [ (date(year=y, month = 10, day = 1), date(year = y+1, month = 4, day=1)) 
-						for y in xrange(ymin, ymax)]
 
 	def calc_tip_counts(self):
 		'''
@@ -194,7 +195,7 @@ class fitness_model(object):
 			mean_error = 1e10
 		self.last_fit = mean_error
 		if self.verbose>2: print params, self.last_fit
-		return mean_error
+		return mean_error + 0.001*np.sum(params**2)
 		
 	def fitness_tree(self, params, pred):
 		return np.sum(params*pred, axis=-1)														
