@@ -1,7 +1,7 @@
 # For augur repo #
 environment.sh
 ec2-startup.sh
-data/
+data
 _site/
 
 # Tex # 
