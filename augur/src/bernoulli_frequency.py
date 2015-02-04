@@ -7,14 +7,14 @@ from tree_util import *
 from date_util import *
 import numpy as np
 
-pc=1e-3
+pc=1e-2
 class frequency_estimator(object):
 
-	def __init__(self, observations, npivots = 10, stiffness = 2000.0):
+	def __init__(self, observations, npivots = 10, stiffness = 20.0):
 		self.tps = np.array([x[0] for x in observations])
 		self.obs = np.array([x[1]>0 for x in observations])
 		self.stiffness = stiffness
-
+		self.interolation_type = 'cubic'
 		# make sure they are sorted
 		tmp = np.argsort(self.tps)
 		self.tps = self.tps[tmp]
@@ -24,46 +24,41 @@ class frequency_estimator(object):
 		self.pivot_freq = np.mean(self.obs)*np.ones(npivots)
 
 	def stiffLH(self, pivots):
-		return -0.5*self.stiffness*np.sum(np.diff(pivots)**2/np.diff(self.pivot_tps))
+		return -0.25*self.stiffness*np.sum(np.diff(pivots)**2/np.diff(self.pivot_tps)/
+											(pivots[:-1]+pc)*(1-pivots[:-1]+pc))
+
 
 	def logLH(self, pivots):
-		freq = interp1d(self.pivot_tps, pivots)
+		freq = interp1d(self.pivot_tps, pivots, kind=self.interolation_type)
 		estfreq = freq(self.tps)
 		LH = self.stiffLH(pivots) + np.sum(np.log(np.maximum(estfreq[self.obs],pc))) + np.sum(np.log(np.maximum(1-estfreq[~self.obs], pc)))
-		print LH
-		return -LH +np.sum(pivots<0)+np.sum(pivots>1)
+		#LH =  np.sum(np.log(np.maximum(estfreq[self.obs],pc))) + np.sum(np.log(np.maximum(1-estfreq[~self.obs], pc)))
+		return -LH/len(self.obs)+100000*(np.sum(pivots<0)+np.sum(pivots>1))
 
 	def learn(self):
 		from scipy.optimize import fmin as minimizer
 		self.pivot_freq = minimizer(self.logLH, self.pivot_freq)
+		self.frequency_estimate = interp1d(self.pivot_tps, self.pivot_freq, kind=self.interolation_type)
 
-def main():
-	print "--- Frequencies at " + time.strftime("%H:%M:%S") + " ---"
-	from scipy.interpolate import UnivariateSpline
-	import matplotlib.pyplot as plt
-	tree_fname = 'data/tree_refine_10y_50v.json'
-	tree =  json_to_dendropy(read_json(tree_fname))
-	dates = []
-	for node in tree.postorder_node_iter():
-		if node.is_leaf():
-			node.date = datetime.datetime(*map(int, node.date.split('-')))
-		else:
-			node.date = min([c.date for c in node.child_nodes()])
-		dates.append(node.date)
-	dates.sort()
-	ordinal_dates = [d.toordinal() for d in dates]
-	dt=10
-	y,x = np.histogram(ordinal_dates, bins = np.arange(min(ordinal_dates), max(ordinal_dates)+dt, dt))
-	bc =  0.5*(x[:-1]+x[1:])
-	sampling_intensity = UnivariateSpline(bc,y, w=1.0/np.sqrt(y+5)) 
-	plt.plot(bc, y)
-	plt.plot(bc, sampling_intensity(bc))
-
-#	for node in tree.postorder_node_iter():
-#		print [c.date.toordinal() for c in node.child_nodes()]
-
-	return tree, dates, sampling_intensity
 
 if __name__ == "__main__":
-	fe = frequency_estimator(zip(np.arange(100), np.random.rand(100)<np.exp(-np.arange(100.0)/50)))
+	import matplotlib.pyplot as plt
+	tps = np.sort(100 * np.random.uniform(size=100))
+	freq = [0.1]
+	stiffness=1000
+	s=-0.02
+	for dt in np.diff(tps):
+		freq.append(freq[-1]*np.exp(-s*dt)+np.sqrt(2*freq[-1]*(1-freq[-1])*dt/stiffness)*np.random.normal())
+	obs = np.random.uniform(size=tps.shape)<freq
+	fe = frequency_estimator(zip(tps, obs), npivots=10, stiffness=stiffness)
 	fe.learn()
+	plt.figure()
+	plt.plot(tps, freq, 'o', label = 'actual frequency')
+	plt.plot(fe.tps, fe.frequency_estimate(fe.tps), '-', label='interpolation')
+	plt.plot(tps, (2*obs-1)*0.05, 'o')
+	plt.plot(tps[obs], 0.05*np.ones(np.sum(obs)), 'o', c='r', label = 'observations')
+	plt.plot(tps[~obs], -0.05*np.ones(np.sum(1-obs)), 'o', c='g')
+	plt.plot(tps, np.zeros_like(tps), 'k')
+	ws=20
+	plt.plot(fe.tps[ws/2:-ws/2+1], np.convolve(np.ones(ws, dtype=float)/ws, obs, mode='valid'), 'r', label = 'running avg')
+	plt.legend(loc=2)
