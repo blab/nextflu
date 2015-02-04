@@ -12,7 +12,8 @@ min_freq = 0.1
 max_freq = 0.9
 min_tips = 10
 pc=1e-2
-default_predictors = ['lb', 'ep', 'ne_start']
+regularization = 1e-3
+default_predictors = ['lb', 'ep', 'ne_star']
 
 class fitness_model(object):
 
@@ -181,7 +182,7 @@ class fitness_model(object):
 			mean_error = 1e10
 		self.last_fit = mean_error
 		if self.verbose>2: print params, self.last_fit
-		return mean_error
+		return mean_error + regularization*np.sum(params**2)
 		
 	def fitness(self, params, pred):
 		return np.sum(params*pred, axis=-1)
@@ -213,7 +214,7 @@ class fitness_model(object):
 		for ii in xrange(niter):
 			if self.verbose:
 				print "iteration:", ii+1
-			self.params = 0.1+0.5*np.random.randn(len(self.predictors)) #0*np.ones(len(self.predictors))  # initial values
+			self.params = 0.5*np.random.randn(len(self.predictors)) #0*np.ones(len(self.predictors))  # initial values
 			self.minimize_error()
 			params_stack.append((self.last_fit, self.params))
 
