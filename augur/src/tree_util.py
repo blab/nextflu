@@ -114,9 +114,11 @@ def dendropy_to_json(node):
 	if hasattr(node, 'seq'):
 		json['seq'] = node.seq
 	if hasattr(node, 'LBI'):
-		json['LBI'] = round(node.LBI,5)
+		json['LBI'] = round(node.LBI, 5)
+	if hasattr(node, 'tol'):
+		json['tol'] = round(node.tol, 5)		
 	if hasattr(node, 'fitness'):
-		json['fitness'] = round(node.fitness,5)		
+		json['fitness'] = round(node.fitness, 5)		
 	if node.child_nodes():
 		json["children"] = []
 		for ch in node.child_nodes():
