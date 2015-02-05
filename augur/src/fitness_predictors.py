@@ -31,7 +31,7 @@ def  calc_tolerance(tree, attr='tol'):
 	'''
 	from Bio import AlignIO
 	aa, sites, wt_aa, aa_prob = load_mutational_tolerance()
-	aln = AlignIO.read('data/H1_H3.fasta', 'fasta')
+	aln = AlignIO.read('source-data/H1_H3.fasta', 'fasta')
 	# returns true whenever either of the sequences have a gap
 	aligned = (np.array(aln)!='-').min(axis=0)
 	# map alignment positions to sequence positions, subset to aligned amino acids
