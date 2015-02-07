@@ -36,9 +36,9 @@ class fitness_model(object):
 			if p == 'ne':
 				self.predictors.append(('ne',calc_nonepitope_distance,{}))
 			if p == 'ne_star':
-				self.predictors.append(('ne_star',calc_nonepitope_star_distance,{"seasons":self.seasons}))				
+				self.predictors.append(('ne_star',calc_nonepitope_star_distance,{"seasons":self.seasons}))		
 			if p == 'tol':
-				self.predictors.append(('tol',calc_tolerance,{}))				
+				self.predictors.append(('tol',calc_tolerance,{}))
 
 	def calc_tip_counts(self):
 		'''

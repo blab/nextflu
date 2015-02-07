@@ -8,7 +8,7 @@ from tree_util import json_to_dendropy, dendropy_to_json
 import dendropy
 
 def load_mutational_tolerance():
-	fname = 'data/Thyagarajan_Bloom_HA_fitness.txt'
+	fname = 'source-data/Thyagarajan_Bloom_HA_fitness.txt'
 	with open(fname) as f:
 		aa = map(lambda x:x.split('_')[1], f.readline().strip().split()[3:])
 	sites = np.loadtxt(fname, usecols=[0], dtype=int)
@@ -28,7 +28,7 @@ def assign_fitness(nodes):
 	loops over all viruses, translates their sequences and calculates the virus fitness
 	'''
 	aa, sites, wt_aa, aa_prob = load_mutational_tolerance()
-	aln = AlignIO.read('data/H1_H3.fasta', 'fasta')
+	aln = AlignIO.read('source-data/H1_H3.fasta', 'fasta')
 	# returns true whenever either of the sequences have a gap
 	aligned = (np.array(aln)!='-').min(axis=0)
 	# map alignment positions to sequence positions, subset to aligned amino acids
@@ -42,20 +42,21 @@ def assign_fitness(nodes):
 	aa_prob = np.hstack((aa_prob, 1e-5*np.ones((aa_prob.shape[0],1))))
 	if isinstance(nodes, list):
 		for node in nodes:
-			node['fitness_tolerance'] = calc_fitness_tolerance(Seq.translate(node['seq']), 
+			node['tol'] = calc_fitness_tolerance(Seq.translate(node['seq']), 
 															aa_prob, aa, indices['H3'])
 	elif isinstance(nodes, dendropy.Tree):
 		for node in nodes.postorder_node_iter():
-			node.fitness_tolerance = calc_fitness_tolerance(Seq.translate(node.seq), 
+			node.tol = calc_fitness_tolerance(Seq.translate(node.seq), 
 															aa_prob, aa, indices['H3'])
 
 
-def main(in_fname='data/virus_clean.json', tree=False):
+def main(in_fname='data/tree_refine.json', tree=True):
 
 	print "--- Mutational tolerance at " + time.strftime("%H:%M:%S") + " ---"
 	viruses = read_json(in_fname)
 	if tree:
 		viruses = json_to_dendropy(viruses)
+
 	assign_fitness(viruses)
 
 	if tree:
