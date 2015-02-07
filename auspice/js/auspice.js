@@ -543,6 +543,25 @@ d3.json("data/tree.json", function(error, root) {
 		d3.selectAll(".date-input-marker")
 			.attr("cx", function(d) {return d.x})
 		globalDate = d.date;
+
+		calcNodeAges(time_window);			
+
+		d3.selectAll(".tip")
+			.attr("r", function(d) {
+				return recencySizeScale(d.diff);
+			})
+			.style("fill", "#CCC")
+			.style("stroke", "#AAA");
+
+		d3.selectAll(".vaccine")
+			.style("visibility", function(d) {
+				var date = new Date(d.choice);
+				var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
+				var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
+				if (diffYears > 0) { return "visible"; }
+				else { return "hidden"; }
+			});					
+		
 	}
 
 	function dragend() {
@@ -554,6 +573,7 @@ d3.json("data/tree.json", function(error, root) {
 		adjust_freq_by_date();
 
 		d3.selectAll(".link")
+			.transition().duration(500)
 			.attr("points", function(d) {
 				var mod = 0.5 * freqScale(d.target.freq) - freqScale(0);				
 				return (d.source.x-mod).toString() + "," + d.source.y.toString() + " "
@@ -564,6 +584,7 @@ d3.json("data/tree.json", function(error, root) {
 				return freqScale(d.target.freq);
 			});
 		d3.selectAll(".tip")
+			.transition().duration(500)
 			.attr("r", function(d) {
 				return recencySizeScale(d.diff);
 			})
@@ -574,14 +595,6 @@ d3.json("data/tree.json", function(error, root) {
 			.style("stroke", function(d) {
 				var col = colorScale(d.adj_coloring);
 				return d3.rgb(col).toString();
-			});
-		d3.selectAll(".vaccine")
-			.style("visibility", function(d) {
-				var date = new Date(d.choice);
-				var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
-				var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
-				if (diffYears > 0) { return "visible"; }
-				else { return "hidden"; }
 			});
 
 	}
@@ -716,7 +729,7 @@ d3.json("data/tree.json", function(error, root) {
 });
 
 
-d3.json("https://s3.amazonaws.com/augur-data/auspice/meta.json", function(error, json) {
+d3.json("data/meta.json", function(error, json) {
 	if (error) return console.warn(error);
 	d3.select("#updated").text(json['updated']);
 });
