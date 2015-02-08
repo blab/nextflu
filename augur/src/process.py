@@ -36,7 +36,7 @@ def main(years_back=3, viruses_per_month=50):
 
 	# Write out metadata
 	print "Writing out metadata"
-	meta = {"updated": time.strftime("%d %b %Y")}
+	meta = {"updated": time.strftime("X%d %b %Y").replace('X0','X').replace('X','')}
 	meta_fname = "../auspice/data/meta.json"
 	write_json(meta, meta_fname)
 

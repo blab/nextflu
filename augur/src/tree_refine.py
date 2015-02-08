@@ -124,9 +124,9 @@ def add_node_attributes(tree):
 		node.xvalue = node.distance_from_root()
 	root = tree.seed_node
 	for node in tree.postorder_node_iter():
-		node.ep = epitope_distance(node.seq, root.seq)
-		node.ne = nonepitope_distance(node.seq, root.seq)
-		node.rb = receptor_binding_distance(node.seq, root.seq)
+		node.ep = epitope_distance(translate(node.seq), translate(root.seq))
+		node.ne = nonepitope_distance(translate(node.seq), translate(root.seq))
+		node.rb = receptor_binding_distance(translate(node.seq), translate(root.seq))
 	for node in tree.postorder_node_iter():
 		node.trunk_count = 0
 		node.trunk = False
