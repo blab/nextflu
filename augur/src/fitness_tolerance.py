@@ -8,7 +8,7 @@ from tree_util import json_to_dendropy, dendropy_to_json
 import dendropy
 
 def load_mutational_tolerance():
-	fname = 'source-data/Thyagarajan_Bloom_HA_fitness.txt'
+	fname = '../source-data/Thyagarajan_Bloom_HA_fitness.txt'
 	with open(fname) as f:
 		aa = map(lambda x:x.split('_')[1], f.readline().strip().split()[3:])
 	sites = np.loadtxt(fname, usecols=[0], dtype=int)
@@ -28,7 +28,7 @@ def assign_fitness(nodes):
 	loops over all viruses, translates their sequences and calculates the virus fitness
 	'''
 	aa, sites, wt_aa, aa_prob = load_mutational_tolerance()
-	aln = AlignIO.read('source-data/H1_H3.fasta', 'fasta')
+	aln = AlignIO.read('../source-data/H1_H3.fasta', 'fasta')
 	# returns true whenever either of the sequences have a gap
 	aligned = (np.array(aln)!='-').min(axis=0)
 	# map alignment positions to sequence positions, subset to aligned amino acids

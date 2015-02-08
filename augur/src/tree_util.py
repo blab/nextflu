@@ -162,12 +162,12 @@ def json_to_dendropy(json):
 	'''
 	tree = dendropy.Tree()
 	tree.get_from_string(';', 'newick')
-	root = tree.leaf_nodes()[0]
-	json_to_dendropy_sub(json, root)
+	root = tree.seed_node
+	json_to_dendropy_sub(json, root, tree.taxon_set)
 	root.edge_length=0.0
 	return tree
 
-def json_to_dendropy_sub(json, node):
+def json_to_dendropy_sub(json, node, taxon_set):
 	'''
 	recursively calls itself for all children of node and
 	builds up the tree. entries in json are added as node attributes
@@ -176,7 +176,7 @@ def json_to_dendropy_sub(json, node):
 		if attr=='children':
 			for sub_json in val:
 				child_node = dendropy.Node()
-				json_to_dendropy_sub(sub_json, child_node)
+				json_to_dendropy_sub(sub_json, child_node, taxon_set)
 				if hasattr(child_node, 'xvalue'):
 					node.add_child(child_node, edge_length = child_node.xvalue - node.xvalue)
 				elif hasattr(child_node, 'branch_length'):
@@ -189,7 +189,9 @@ def json_to_dendropy_sub(json, node):
 			except:
 				node.__setattr__(attr, val)
 	if len(node.child_nodes())==0:
-		node.taxon = json['strain']
+		node.taxon = dendropy.Taxon(label=json['strain'].lower())
+		node.label = json['strain'].lower()
+		taxon_set.add_taxon(node.taxon)
 
 def main():
 
