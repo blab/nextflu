@@ -10,17 +10,18 @@ min_titer = 10.0
 def strain_name_fixing(name):
 	return name.replace(' ','').lower()
 
+def titer_to_number(val):
+	try:
+		if '<' in val:
+			return min_titer
+		else:
+			return float(val)
+	except:
+		print "Bad HI measurement:", val
+		return np.nan
+
 def parse_HI_matrix(fname):
 	import csv
-	def titer_to_number(val):
-		try:
-			if '<' in val:
-				return min_titer
-			else:
-				return float(val)
-		except:
-			print "Bad HI measurement:", val
-			return np.nan
 
 	with open(fname) as infile:
 		csv_reader = csv.reader(infile)
@@ -53,8 +54,41 @@ def parse_HI_matrix(fname):
 			else:
 				test_strains.append(strain_name_fixing(row[0]))
 				test_matrix.append(map(titer_to_number, row[4:]))
-		return ref_strains, np.log2(np.array(ref_matrix)), test_strains, np.log2(np.matrix(test_matrix))
+		try:
+			ref_matrix, test_matrix = normalize_HI_matrices(np.log2(np.array(ref_matrix)), np.log2(np.array(test_matrix)))
+			return ref_strains, ref_matrix, test_strains, test_matrix
+		except:
+			print fname, ref_strains, np.array(ref_matrix).shape, np.array(test_matrix).shape
+			return [], [], [], []
 
+def parse_bedford_elife(fname):
+	import csv
+	ref_names = set()
+	test_names = set()
+	measurements = {}
+
+	with open(fname) as infile:
+		csv_reader = csv.reader(infile, delimiter='\t')
+		for row in csv_reader:
+			test_strain, ref_strain, titer = strain_name_fixing(row[0]), strain_name_fixing(row[4]), titer_to_number(row[6])
+			measurements[(test_strain, ref_strain)] = np.log2(titer)
+			ref_names.add(ref_strain)
+			test_names.add(test_strain)
+
+	ref_names = list(ref_names)
+	test_names = list(test_names)
+	serum_normalizer = {}
+	for ref in ref_names:
+		if (ref, ref) in measurements:
+			serum_normalizer[ref] = measurements[(ref, ref)]
+		else:
+			serum_normalizer[ref] = np.nan
+	print serum_normalizer
+
+	for test, ref in measurements:
+		measurements[(test, ref)] = serum_normalizer[ref]-measurements[(test, ref)]
+
+	return ref_names, test_names, measurements
 
 def normalize_HI_matrices(ref_matrix, test_matrix):
 	norm_test_matrix = test_matrix - np.diag(ref_matrix)
@@ -124,6 +158,11 @@ def read_tables():
 		all_names.update(ref_names)	
 		all_names.update(test_names)
 		all_measurements.update([ (test, ref) for ref, test in product(test_names, ref_names)])
+
+	test_names, ref_names, measurements = parse_bedford_elife('../../../flu_HI_data/tables/trevor_elife_H3N2_HI_data.tsv')
+	all_measurements.update(measurements)
+	all_names.update(ref_names)
+	all_names.update(test_names)
 
 	return all_names, all_measurements, HI_matrices
 
