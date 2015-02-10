@@ -1,6 +1,12 @@
 import dendropy
 from io_util import *
 
+clade_designations = { "3C3.a":[(128,'A'),(142,'G'), (159,'S')],
+					   "3C3":[(128,'A'),(142,'G'), (159,'F')],
+					   "3C2.a":[(144,'S'), (159,'Y'), (225,'D'), (311,'H'),(489,'N')],
+					   "3C2":[(144,'S'), (159,'F'), (225,'D'), (311,'H'),(489,'N')],
+						}
+
 def color_BioTree_by_attribute(T,attribute, vmin=None, vmax = None, missing_val='min', transform = lambda x:x, cmap=None):
 	'''
 	simple function that assigns a color to each node in a biopython tree
