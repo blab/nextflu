@@ -131,6 +131,22 @@ def add_node_attributes(tree):
 		node.trunk_count = 0
 		node.trunk = False
 
+def translate_all(tree):
+	for node in tree.postorder_node_iter():
+		node.aa_seq = translate(node.seq)
+
+def unique_date(tree):
+	leaf_count = 0
+	for node in tree.postorder_node_iter():
+		if node.is_leaf():
+			# attach index to a leaf, to allow for array indexing later
+			node.tip_index = leaf_count
+			# modify date by a tiny amount << than a day to ensure uniqueness
+			node.num_date = numerical_date(node.date) + 1e-7*node.tip_index
+			leaf_count+=1
+		else: # internal node preceed the oldest child
+			node.num_date = min([c.num_date for c in node.child_nodes()])
+
 def define_trunk(tree):
 	"""Trace current lineages backward to define trunk"""
 
@@ -158,6 +174,7 @@ def define_trunk(tree):
 		if node.trunk_count == number_recent:
 			node.trunk = True;
 
+
 def main(tree_fname = 'data/tree_ancestral.json', virus_fname='data/virus_clean.json'):
 
 	print "--- Tree refine at " + time.strftime("%H:%M:%S") + " ---"
@@ -175,6 +192,10 @@ def main(tree_fname = 'data/tree_ancestral.json', virus_fname='data/virus_clean.
 	print "Append node attributes"
 	add_virus_attributes(viruses, tree)
 	add_node_attributes(tree)
+	print "translate nucleotide sequences"
+	translate_all(tree)
+	print "enumerate leaves of ladderized tree and calculate unique numerical date"
+	unique_date(tree)
 	print "Define trunk"
 	define_trunk(tree)
 	out_fname = "data/tree_refine.json"
