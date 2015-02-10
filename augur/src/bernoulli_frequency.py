@@ -10,6 +10,8 @@ import numpy as np
 
 pc=1e-4
 dfreq_pc = 1e-2
+time_interval = (2012, 2015.1)
+flu_stiffness = 10.0
 
 clade_designations = { "3C3.a":[(128,'A'),(142,'G'), (159,'S')],
 					   "3C3":[(128,'A'),(142,'G'), (159,'F')],
@@ -33,10 +35,11 @@ def fix_freq(freq, pc):
 	'''
 	restricts frequencies to the interval [pc, 1-pc]
 	'''
+	freq[np.isnan(freq)]=pc
 	return np.minimum(1-pc, np.maximum(pc,freq))
 
 def get_pivots(start, stop):
-	return np.arange(2012, 2015.3, 1.0/12)
+	return np.arange(time_interval[0], time_interval[1], 1.0/12)
 
 def logit_transform(freq):
 	return np.log(freq/(1-freq))
@@ -70,16 +73,16 @@ class frequency_estimator(object):
 		self.obs = self.obs[tmp]
 
 		if pivots is None:
-			self.pivots = get_pivots(self.tps[0], self.tps[1])
+			self.pivot_tps = get_pivots(self.tps[0], self.tps[1])
 		elif np.isscalar(pivots):
 			self.pivot_tps = np.linspace(self.tps[0], self.tps[-1], pivots)
 		else:
-			self.pivots = pivots
+			self.pivot_tps = pivots
 
 		# generate a useful initital case from a running average of the counts
 		ws=100
 		tmp_vals = running_average(self.obs, ws)
-		tmp_interpolator = interp1d(self.tps, tmp_vals)
+		tmp_interpolator = interp1d(self.tps, tmp_vals, bounds_error=False)
 		if self.logit:
 			freq = tmp_interpolator(self.pivot_tps)
 			self.pivot_freq = logit_transform(fix_freq(freq, pc))
@@ -180,7 +183,7 @@ def estimate_tree_frequencies(tree):
 			node.freq_est=None
 
 
-def estimate_genotype_frequency(tree, gt, time_interval=None):
+def estimate_genotype_frequency(tree, gt, time_interval=None, region = None):
 	'''
 	estimate the frequency of a particular genotype specified 
 	gt   --		[(position, amino acid), ....]
@@ -193,55 +196,81 @@ def estimate_genotype_frequency(tree, gt, time_interval=None):
 			good_time = (node.num_date>= time_interval[0]) and (node.num_date<time_interval[1])
 		else:
 			good_time=True
-		if good_time:
+		if region is not None:
+			good_region = node.region==region
+		else:
+			good_region = True
+
+		if good_time and good_region:
 			all_dates.append(node.num_date)
 			observations.append(is_gt)
-		leaf_count+=1
 
 	all_dates = np.array(all_dates)
 	leaf_order = np.argsort(all_dates)
 	tps = all_dates[leaf_order]
 	obs = np.array(observations)[leaf_order]
-
 	# define pivots and estimate
 	pivots = get_pivots(tps[0], tps[1])
 	print "number of pivots:", len(pivots)
-	fe = frequency_estimator(zip(tps, obs), npivots=npivots, stiffness=5.0, logit=True, verbose = 0)
+	fe = frequency_estimator(zip(tps, obs), pivots=pivots, stiffness=flu_stiffness, logit=True, verbose = 0)
 	fe.learn()
 	return fe.frequency_estimate, (tps,obs)
 
-def determine_major_genotypes(tree, HA1=True, positions=None, time_interval=None):
+
+def determine_clade_frequencies(tree):
+	'''
+	loop over different clades and determine their frequencies
+	returns a dictionary with clades:frequencies
+	'''
+	import matplotlib.pyplot as plt
+	clade_frequencies = {}
+	for clade_name, clade_gt in clade_designations.iteritems():
+		print clade_name, clade_gt
+		freq, (tps, obs) = estimate_genotype_frequency(tree, [(pos+15, aa) for pos, aa in clade_gt], time_interval)
+		clade_frequencies[clade_name] = [list(freq.y), list(logit_inv(freq.y))]
+		grid_tps = np.linspace(time_interval[0], time_interval[1], 100)
+		plt.plot(grid_tps, logit_inv(freq(grid_tps)), label=clade_name, lw=2)
+		r_avg = running_average(obs, 100)
+		plt.plot(tps, r_avg)
+	plt.legend()
+	ticloc = np.arange(time_interval[0], int(time_interval[1])+1,1)
+	plt.xticks(ticloc, map(str, ticloc))
+	plt.xlim([time_interval[0], time_interval[1]+1])
+	return clade_frequencies
+
+
+def determine_mutation_frequencies(tree):
+	import matplotlib.pyplot as plt
 	from collections import defaultdict
-	gt_counts = defaultdict(int)
-	leaf_count = 0
-	for node in tree.leaf_iter():
-		if time_interval is not None:
-			good_time = (node.num_date>= time_interval[0]) and (node.num_date<time_interval[1])
-		else:
-			good_time=True
-		if good_time:
-			if positions is not None:
-					gt_counts["".join([node.aa_seq[pos] for pos in positions])]+=1
-			else:
-				if HA1:
-					gt_counts[get_HA1(node.aa_seq)]+=1
-				else:
-					gt_counts[node.aa_seq]+=1
-		leaf_count+=1
-
-	return gt_counts
-
-def genotype_to_mutations(ref_aa_seq, gt):
 	from itertools import izip
-	return ",".join([a+str(pos+1)+b for pos, (a,b) in enumerate(izip(ref_aa_seq, gt)) if a!=b])
 
-def mutation_counts(gt_counts):
-	from collections import defaultdict
 	mut_counts = defaultdict(int)
-	for gt, val in gt_counts.iteritems():
-		for mut in gt.split(','):
-			mut_counts[mut] += val
-	return mut_counts
+	ref_seq = tree.seed_node.aa_seq
+	total_leaf_count = 0
+	for node in tree.leaf_iter():
+		if (node.num_date>= time_interval[0]) and (node.num_date<time_interval[1]):
+			total_leaf_count+=1
+			for pos, (a,b) in enumerate(izip(ref_seq, node.aa_seq)):
+				if a!=b: mut_counts[(pos, b)]+=1
+
+	plt.figure()
+	mutation_frequencies = {}
+	for mut, count in mut_counts.iteritems():
+		if count>50 and count<total_leaf_count-50:
+			print mut, count
+			freq, (tps, obs) = estimate_genotype_frequency(tree, [mut], time_interval)
+			mutation_frequencies[str(mut[0]-15)+mut[1]] = [list(freq.y), list(logit_inv(freq.y))]
+
+			grid_tps = np.linspace(time_interval[0], time_interval[1], 100)
+			plt.plot(grid_tps, logit_inv(freq(grid_tps)), label=str(mut[0]-15)+mut[1], lw=2)
+			r_avg = running_average(obs, 100)
+			plt.plot(tps, r_avg)
+	plt.legend()
+	ticloc = np.arange(time_interval[0], int(time_interval[1])+1,1)
+	plt.xticks(ticloc, map(str, ticloc))
+	plt.xlim([time_interval[0], time_interval[1]+1])
+	return mutation_frequencies
+
 
 
 
@@ -277,58 +306,24 @@ def main():
 	# load tree
 	import matplotlib.pyplot as plt
 	from io_util import read_json
-	from tree_util import json_to_dendropy, to_Biopython, color_BioTree_by_attribute
-	from Bio import Phylo
-	time_interval=(2012, 2015.5)
 
-	tree_fname='data/tree_refine_10y_50v.json'
-	koel_sites =  [160, 170, 171, 173, 174, 204, 208]
+	tree_fname='data/tree_refine.json'
 	tree =  json_to_dendropy(read_json(tree_fname))
-	gt_counts = determine_major_genotypes(tree, time_interval=time_interval, positions =koel_sites, HA1=False)
-	tree.seed_node.aa_seq = translate(tree.seed_node.seq)
 
-	for clade_name, clade_gt in clade_designations.iteritems():
-		print clade_name, clade_gt
-		if True:
-			freq, (tps, obs) = estimate_genotype_frequency(tree, [(pos+15, aa) for pos, aa in clade_gt], time_interval)
-			#
-			if np.mean(obs)<0.99:
-				grid_tps = np.linspace(time_interval[0], time_interval[1], 100)
-				freq_est = np.exp(freq(grid_tps))
-				freq_est = freq_est/(1+freq_est)
-				plt.plot(grid_tps, freq_est, label=clade_name, lw=2)
-				#r_avg = running_average(obs, 100)
-				#plt.plot(tps, r_avg)
-	plt.legend()
-	ticloc = np.arange(time_interval[0], int(time_interval[1])+1,1)
-	plt.xticks(ticloc, map(str, ticloc))
-	plt.xlim([time_interval[0], time_interval[1]+1])
-#
-#	gt_as_muts_counts = {genotype_to_mutations(get_HA1(tree.seed_node.aa_seq), gt):val for gt,val in gt_counts.iteritems()}
-#	mut_counts = mutation_counts(gt_as_muts_counts)
-#	for mut, val in mut_counts.iteritems():
-#		if val>50:
-#			freq, (tps, obs) = estimate_genotype_frequency(tree, [(int(mut[1:-1])+15,mut[-1])], time_interval)
-#			#
-#			if np.mean(obs)<0.99:
-#				grid_tps = np.linspace(time_interval[0], time_interval[1], 100)
-#				freq_est = np.exp(freq(grid_tps))
-#				freq_est = freq_est/(1+freq_est)
-#				plt.plot(grid_tps, freq_est, label=mut)
-#				r_avg = running_average(obs, 100)
-#				plt.plot(tps, r_avg)
-#	# return the final interpolation object
+	print "--- "+"determining clade frequencies "  + time.strftime("%H:%M:%S") + " ---"
+	clade_frequencies = determine_clade_frequencies(tree)
+	out_fname = 'data/clade_frequencies.json'
+	write_json(clade_frequencies, out_fname)
+	plt.savefig('data/clade_frequencies.pdf')
 
-#	estimate_tree_frequencies(tree)
-#	for node in tree.postorder_node_iter():
-#		if node.freq_est is not None:
-#			tps = np.linspace(node.freq_est.x[0], node.freq_est.x[-1],100)
-#			logit_freq = np.exp(node.freq_est(tps))
-#			plt.plot(tps, logit_freq/(1+logit_freq))
-#	return tree, gt_counts
+	print "--- "+"determining mutation frequencies "  + time.strftime("%H:%M:%S") + " ---"
+	mutation_frequencies = determine_mutation_frequencies(tree)
+	out_fname = 'data/mutation_frequencies.json'
+	write_json(mutation_frequencies, out_fname)
+	plt.savefig('data/mutation_frequencies.pdf')
 
 if __name__=="__main__":
-	test()
-	#tree,gt_counts = main()
+	#test()
+	main()
 
 
