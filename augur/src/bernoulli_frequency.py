@@ -11,7 +11,18 @@ import numpy as np
 pc=1e-4
 dfreq_pc = 1e-2
 
+clade_designations = { "3C3.a":[(128,'A'),(142,'G'), (159,'S')],
+					   "3C3":[(128,'A'),(142,'G'), (159,'F')],
+					   "3C2.a":[(144,'S'), (159,'Y'), (225,'D'), (311,'H'),(489,'N')],
+					   "3C2":[(144,'S'), (159,'F'), (225,'D'), (311,'H'),(489,'N')],
+						}
+
 def running_average(obs, ws):
+	'''
+	calculates a running average
+	obs 	--	observations
+	ws 		--	winodw size (number of points to average)
+	'''
 	tmp_vals = np.convolve(np.ones(ws, dtype=float)/ws, obs, mode='same')
 	# fix the edges. using mode='same' assumes zeros outside the range
 	tmp_vals[:ws//2]*=float(ws)/np.arange(ws//2,ws)
@@ -19,11 +30,34 @@ def running_average(obs, ws):
 	return tmp_vals
 
 def fix_freq(freq, pc):
+	'''
+	restricts frequencies to the interval [pc, 1-pc]
+	'''
 	return np.minimum(1-pc, np.maximum(pc,freq))
 
-class frequency_estimator(object):
+def get_pivots(start, stop):
+	return np.arange(2012, 2015.3, 1.0/12)
 
-	def __init__(self, observations, npivots = 10, stiffness = 20.0, logit=False, verbose = 0):
+def logit_transform(freq):
+	return np.log(freq/(1-freq))
+
+def logit_inv(logit_freq):
+	tmp_freq = np.exp(logit_freq)
+	return tmp_freq/(1.0+tmp_freq)
+
+def pq(p):
+	return p*(1-p)
+
+class frequency_estimator(object):
+	'''
+	estimates a smooth frequency trajectory given a series of time stamped
+	0/1 observations. The most likely set of frequencies at specified pivot values
+	is deterimned by numerical minimization. Likelihood consist of a bernoulli sampling
+	term as well as a term penalizing rapid frequency shifts. this term is motivated by 
+	genetic drift, i.e., sampling variation.
+	'''
+
+	def __init__(self, observations, pivots = None, stiffness = 20.0, logit=False, verbose = 0):
 		self.tps = np.array([x[0] for x in observations])
 		self.obs = np.array([x[1]>0 for x in observations])
 		self.stiffness = stiffness
@@ -35,16 +69,20 @@ class frequency_estimator(object):
 		self.tps = self.tps[tmp]
 		self.obs = self.obs[tmp]
 
+		if pivots is None:
+			self.pivots = get_pivots(self.tps[0], self.tps[1])
+		elif np.isscalar(pivots):
+			self.pivot_tps = np.linspace(self.tps[0], self.tps[-1], pivots)
+		else:
+			self.pivots = pivots
+
 		# generate a useful initital case from a running average of the counts
 		ws=100
-		self.pivot_tps = np.linspace(self.tps[0], self.tps[-1], npivots)
 		tmp_vals = running_average(self.obs, ws)
-
-		# calculate interpolated frequences as initial pivots
 		tmp_interpolator = interp1d(self.tps, tmp_vals)
 		if self.logit:
 			freq = tmp_interpolator(self.pivot_tps)
-			self.pivot_freq = np.log(fix_freq(freq, pc)/fix_freq(1-freq,pc))
+			self.pivot_freq = logit_transform(fix_freq(freq, pc))
 		else:
 			self.pivot_freq = tmp_interpolator(self.pivot_tps)
 		if self.verbose:
@@ -53,26 +91,22 @@ class frequency_estimator(object):
 
 	def stiffLH(self, pivots):
 		if self.logit: # if logit, convert to frequencies
-			logit_freq = np.exp(pivots)
-			freq = logit_freq/(1+logit_freq)
-			dfreq = np.diff(freq)
+			freq = logit_inv(pivots)
 		else:
-			dfreq = np.diff(pivots)
 			freq = pivots
+		dfreq = np.diff(freq)
 		# return wright fisher diffusion likelihood for frequency change. 
-		return -0.25*self.stiffness*np.sum(dfreq**2/np.diff(self.pivot_tps)/
-											(fix_freq(freq[:-1],dfreq_pc)*fix_freq(1-freq[:-1], dfreq_pc)))
+		return -0.25*self.stiffness*np.sum(dfreq**2/np.diff(self.pivot_tps)/pq(fix_freq(freq[:-1],dfreq_pc)))
 
 
 	def logLH(self, pivots):
 		freq = interp1d(self.pivot_tps, pivots, kind=self.interolation_type)
 		if self.logit: # if logit, convert to frequencies
-			logit_freq = np.exp(freq(self.tps))
-			estfreq = logit_freq/(1+logit_freq)
+			estfreq = fix_freq(logit_inv(freq(self.tps)), pc)
 		else:
-			estfreq = freq(self.tps)
+			estfreq = fix_freq(freq(self.tps), pc)
 		stiffness_LH = self.stiffLH(pivots)
-		bernoulli_LH = np.sum(np.log(fix_freq(estfreq[self.obs],pc))) + np.sum(np.log(fix_freq(1-estfreq[~self.obs], pc)))
+		bernoulli_LH = np.sum(np.log(estfreq[self.obs])) + np.sum(np.log((1-estfreq[~self.obs])))
 		LH = stiffness_LH + bernoulli_LH 
 		if self.verbose>2: print "LH:",bernoulli_LH,stiffness_LH
 		if self.logit:
@@ -106,26 +140,23 @@ def estimate_clade_frequency(node, all_dates, tip_to_date_index):
 		tps = tps[:new_stop_index-stop_index] 
 		obs = obs[:new_stop_index-stop_index] 
 
-	# make six pivots a year
-	npivots = int(6*(tps[-1]-tps[0]))
-	fe = frequency_estimator(zip(tps, obs), npivots=npivots, stiffness=2.0, logit=True)
+	# make n pivots a year
+	pivots = get_pivots(tps[0], tps[1])
+	fe = frequency_estimator(zip(tps, obs), pivots=pivots, stiffness=2.0, logit=True)
 	fe.learn()
 	# return the final interpolation object
 	return fe.frequency_estimate
 
 def estimate_tree_frequencies(tree):
+	'''
+	loop over nodes of the tree and estimate frequencies of all clade above a certain size
+	'''
 	all_dates = []
-	leaf_count = 0
 	# loop over all nodes, make time ordered lists of tips
 	for node in tree.postorder_node_iter():
-		if not node.is_leaf():
-			node.date = min([c.date for c in node.child_nodes()])
-		node.num_date = numerical_date(string_to_date(node.date))+1e-7*leaf_count
 		tmp_tips = []
 		if node.is_leaf():
 			all_dates.append(node.num_date)
-			node.tip_index = leaf_count
-			leaf_count+=1
 			tmp_tips.append((node.tip_index, node.num_date))			
 		for child in node.child_nodes():
 			tmp_tips.extend(child.tips)
@@ -156,12 +187,7 @@ def estimate_genotype_frequency(tree, gt, time_interval=None):
 	'''
 	all_dates = []
 	observations = []
-	leaf_count=0
 	for node in tree.leaf_iter():
-		if not hasattr(node, 'num_date'):
-			node.num_date = numerical_date(string_to_date(node.date))+1e-7*leaf_count
-		if not hasattr(node, 'aa_seq'):
-			node.aa_seq = translate(node.seq)
 		is_gt = all([node.aa_seq[pos]==aa for pos, aa in gt])
 		if time_interval is not None:
 			good_time = (node.num_date>= time_interval[0]) and (node.num_date<time_interval[1])
@@ -177,47 +203,18 @@ def estimate_genotype_frequency(tree, gt, time_interval=None):
 	tps = all_dates[leaf_order]
 	obs = np.array(observations)[leaf_order]
 
-	# make six pivots a year
-	npivots = int(12*(tps[-1]-tps[0]))
-	print "number of pivots:", npivots
+	# define pivots and estimate
+	pivots = get_pivots(tps[0], tps[1])
+	print "number of pivots:", len(pivots)
 	fe = frequency_estimator(zip(tps, obs), npivots=npivots, stiffness=5.0, logit=True, verbose = 0)
 	fe.learn()
 	return fe.frequency_estimate, (tps,obs)
-
-def test():
-	import matplotlib.pyplot as plt
-	tps = np.sort(100 * np.random.uniform(size=100))
-	freq = [0.1]
-	stiffness=1000
-	s=-0.02
-	for dt in np.diff(tps):
-		freq.append(freq[-1]*np.exp(-s*dt)+np.sqrt(2*np.max(0,freq[-1]*(1-freq[-1]))*dt/stiffness)*np.random.normal())
-	obs = np.random.uniform(size=tps.shape)<freq
-	fe = frequency_estimator(zip(tps, obs), npivots=10, stiffness=stiffness)
-	fe.learn()
-	plt.figure()
-	plt.plot(tps, freq, 'o', label = 'actual frequency')
-	freq = fe.frequency_estimate(fe.tps)
-	plt.plot(fe.tps, freq, '-', label='interpolation')
-	plt.plot(tps, (2*obs-1)*0.05, 'o')
-	plt.plot(tps[obs], 0.05*np.ones(np.sum(obs)), 'o', c='r', label = 'observations')
-	plt.plot(tps[~obs], -0.05*np.ones(np.sum(1-obs)), 'o', c='g')
-	plt.plot(tps, np.zeros_like(tps), 'k')
-	ws=20
-	r_avg = running_average(obs, ws)
-	plt.plot(fe.tps[ws/2:-ws/2+1], np.convolve(np.ones(ws, dtype=float)/ws, obs, mode='valid'), 'r', label = 'running avg')
-	plt.plot(fe.tps, r_avg, 'k', label = 'running avg')
-	plt.legend(loc=2)
 
 def determine_major_genotypes(tree, HA1=True, positions=None, time_interval=None):
 	from collections import defaultdict
 	gt_counts = defaultdict(int)
 	leaf_count = 0
 	for node in tree.leaf_iter():
-		if not hasattr(node, 'num_date'):
-			node.num_date = numerical_date(string_to_date(node.date))+1e-7*leaf_count
-		if not hasattr(node, 'aa_seq'):
-			node.aa_seq = translate(node.seq)
 		if time_interval is not None:
 			good_time = (node.num_date>= time_interval[0]) and (node.num_date<time_interval[1])
 		else:
@@ -246,8 +243,37 @@ def mutation_counts(gt_counts):
 			mut_counts[mut] += val
 	return mut_counts
 
-if __name__=="__main__":
-#def main():
+
+
+def test():
+	import matplotlib.pyplot as plt
+	tps = np.sort(100 * np.random.uniform(size=100))
+	freq = [0.1]
+	logit = True
+	stiffness=100
+	s=-0.02
+	for dt in np.diff(tps):
+		freq.append(freq[-1]*np.exp(-s*dt)+np.sqrt(2*np.max(0,freq[-1]*(1-freq[-1]))*dt/stiffness)*np.random.normal())
+	obs = np.random.uniform(size=tps.shape)<freq
+	fe = frequency_estimator(zip(tps, obs), pivots=10, stiffness=stiffness, logit=logit)
+	fe.learn()
+	plt.figure()
+	plt.plot(tps, freq, 'o', label = 'actual frequency')
+	freq = fe.frequency_estimate(fe.tps)
+	if logit: freq = logit_inv(freq)
+	plt.plot(fe.tps, freq, '-', label='interpolation')
+	plt.plot(tps, (2*obs-1)*0.05, 'o')
+	plt.plot(tps[obs], 0.05*np.ones(np.sum(obs)), 'o', c='r', label = 'observations')
+	plt.plot(tps[~obs], -0.05*np.ones(np.sum(1-obs)), 'o', c='g')
+	plt.plot(tps, np.zeros_like(tps), 'k')
+	ws=20
+	r_avg = running_average(obs, ws)
+	plt.plot(fe.tps[ws/2:-ws/2+1], np.convolve(np.ones(ws, dtype=float)/ws, obs, mode='valid'), 'r', label = 'running avg')
+	plt.plot(fe.tps, r_avg, 'k', label = 'running avg')
+	plt.legend(loc=2)
+
+
+def main():
 	# load tree
 	import matplotlib.pyplot as plt
 	from io_util import read_json
@@ -301,6 +327,8 @@ if __name__=="__main__":
 #			plt.plot(tps, logit_freq/(1+logit_freq))
 #	return tree, gt_counts
 
-#if __name__=="__main__":
-#	#test()
-#	tree,gt_counts = main()
+if __name__=="__main__":
+	test()
+	#tree,gt_counts = main()
+
+

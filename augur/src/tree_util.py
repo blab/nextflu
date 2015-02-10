@@ -1,12 +1,6 @@
 import dendropy
 from io_util import *
 
-clade_designations = { "3C3.a":[(128,'A'),(142,'G'), (159,'S')],
-					   "3C3":[(128,'A'),(142,'G'), (159,'F')],
-					   "3C2.a":[(144,'S'), (159,'Y'), (225,'D'), (311,'H'),(489,'N')],
-					   "3C2":[(144,'S'), (159,'F'), (225,'D'), (311,'H'),(489,'N')],
-						}
-
 def color_BioTree_by_attribute(T,attribute, vmin=None, vmax = None, missing_val='min', transform = lambda x:x, cmap=None):
 	'''
 	simple function that assigns a color to each node in a biopython tree
@@ -117,8 +111,14 @@ def dendropy_to_json(node):
 		json['rb'] = node.rb
 	if hasattr(node, 'date'):
 		json['date'] = node.date
+	if hasattr(node, 'num_date'):
+		json['num_date'] = node.num_date
 	if hasattr(node, 'seq'):
 		json['seq'] = node.seq
+	if hasattr(node, 'aa_seq'):
+		json['aa_seq'] = node.aa_seq
+	if hasattr(node, 'tip_index'):
+		json['tip_index'] = node.tip_index
 	if hasattr(node, 'LBI'):
 		json['LBI'] = round(node.LBI, 5)
 	if hasattr(node, 'tol'):
