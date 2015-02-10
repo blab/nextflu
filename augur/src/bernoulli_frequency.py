@@ -4,51 +4,64 @@ from scipy.interpolate import interp1d
 import time
 from io_util import *
 from tree_util import *
+from seq_util import *
 from date_util import *
 import numpy as np
 
-pc=1e-2
+pc=1e-4
+dfreq_pc = 1e-2
+
+def running_average(obs, ws):
+	tmp_vals = np.convolve(np.ones(ws, dtype=float)/ws, obs, mode='same')
+	# fix the edges. using mode='same' assumes zeros outside the range
+	tmp_vals[:ws//2]*=float(ws)/np.arange(ws//2,ws)
+	tmp_vals[-ws//2+1:]*=float(ws)/np.arange(ws-1,ws//2,-1.0)
+	return tmp_vals
+
+def fix_freq(freq, pc):
+	return np.minimum(1-pc, np.maximum(pc,freq))
 
 class frequency_estimator(object):
 
-	def __init__(self, observations, npivots = 10, stiffness = 20.0, logit=False):
+	def __init__(self, observations, npivots = 10, stiffness = 20.0, logit=False, verbose = 0):
 		self.tps = np.array([x[0] for x in observations])
 		self.obs = np.array([x[1]>0 for x in observations])
 		self.stiffness = stiffness
 		self.interolation_type = 'cubic'
 		self.logit = logit
+		self.verbose=verbose
 		# make sure they are searchsorted
 		tmp = np.argsort(self.tps)
 		self.tps = self.tps[tmp]
 		self.obs = self.obs[tmp]
 
 		# generate a useful initital case from a running average of the counts
-		ws=10
+		ws=100
 		self.pivot_tps = np.linspace(self.tps[0], self.tps[-1], npivots)
-		tmp_vals = np.convolve(np.ones(ws, dtype=float)/ws, self.obs, mode='same')
-		# fix the edges. using mode='same' assumes zeros outside the range
-		tmp_vals[:ws-1]*=ws/np.arange(1, ws)
-		tmp_vals[-ws+1:]*=ws/np.arange(ws-1,0,-1)
+		tmp_vals = running_average(self.obs, ws)
+
 		# calculate interpolated frequences as initial pivots
 		tmp_interpolator = interp1d(self.tps, tmp_vals)
 		if self.logit:
 			freq = tmp_interpolator(self.pivot_tps)
-			self.pivot_freq = np.log(np.maximum(pc,freq)/np.maximum(pc, 1-freq))
+			self.pivot_freq = np.log(fix_freq(freq, pc)/fix_freq(1-freq,pc))
 		else:
 			self.pivot_freq = tmp_interpolator(self.pivot_tps)
+		if self.verbose:
+			print "Initial pivots:", self.pivot_freq
 
 
 	def stiffLH(self, pivots):
 		if self.logit: # if logit, convert to frequencies
 			logit_freq = np.exp(pivots)
 			freq = logit_freq/(1+logit_freq)
-			dfreq = np.diff(pivots)
+			dfreq = np.diff(freq)
 		else:
 			dfreq = np.diff(pivots)
 			freq = pivots
 		# return wright fisher diffusion likelihood for frequency change. 
 		return -0.25*self.stiffness*np.sum(dfreq**2/np.diff(self.pivot_tps)/
-											(freq[:-1]+pc)*(1-freq[:-1]+pc))
+											(fix_freq(freq[:-1],dfreq_pc)*fix_freq(1-freq[:-1], dfreq_pc)))
 
 
 	def logLH(self, pivots):
@@ -58,7 +71,10 @@ class frequency_estimator(object):
 			estfreq = logit_freq/(1+logit_freq)
 		else:
 			estfreq = freq(self.tps)
-		LH = self.stiffLH(pivots) + np.sum(np.log(np.maximum(estfreq[self.obs],pc))) + np.sum(np.log(np.maximum(1-estfreq[~self.obs], pc)))
+		stiffness_LH = self.stiffLH(pivots)
+		bernoulli_LH = np.sum(np.log(fix_freq(estfreq[self.obs],pc))) + np.sum(np.log(fix_freq(1-estfreq[~self.obs], pc)))
+		LH = stiffness_LH + bernoulli_LH 
+		if self.verbose>2: print "LH:",bernoulli_LH,stiffness_LH
 		if self.logit:
 			return -LH/len(self.obs)+0.0001*np.mean(pivots**2) # penalize too large or two small pivots
 		else:
@@ -133,6 +149,40 @@ def estimate_tree_frequencies(tree):
 			node.freq_est=None
 
 
+def estimate_genotype_frequency(tree, gt, time_interval=None):
+	'''
+	estimate the frequency of a particular genotype specified 
+	gt   --		[(position, amino acid), ....]
+	'''
+	all_dates = []
+	observations = []
+	leaf_count=0
+	for node in tree.leaf_iter():
+		if not hasattr(node, 'num_date'):
+			node.num_date = numerical_date(string_to_date(node.date))+1e-7*leaf_count
+		if not hasattr(node, 'aa_seq'):
+			node.aa_seq = translate(node.seq)
+		is_gt = all([node.aa_seq[pos]==aa for pos, aa in gt])
+		if time_interval is not None:
+			good_time = (node.num_date>= time_interval[0]) and (node.num_date<time_interval[1])
+		else:
+			good_time=True
+		if good_time:
+			all_dates.append(node.num_date)
+			observations.append(is_gt)
+		leaf_count+=1
+
+	all_dates = np.array(all_dates)
+	leaf_order = np.argsort(all_dates)
+	tps = all_dates[leaf_order]
+	obs = np.array(observations)[leaf_order]
+
+	# make six pivots a year
+	npivots = int(12*(tps[-1]-tps[0]))
+	print "number of pivots:", npivots
+	fe = frequency_estimator(zip(tps, obs), npivots=npivots, stiffness=5.0, logit=True, verbose = 0)
+	fe.learn()
+	return fe.frequency_estimate, (tps,obs)
 
 def test():
 	import matplotlib.pyplot as plt
@@ -154,25 +204,103 @@ def test():
 	plt.plot(tps[~obs], -0.05*np.ones(np.sum(1-obs)), 'o', c='g')
 	plt.plot(tps, np.zeros_like(tps), 'k')
 	ws=20
+	r_avg = running_average(obs, ws)
 	plt.plot(fe.tps[ws/2:-ws/2+1], np.convolve(np.ones(ws, dtype=float)/ws, obs, mode='valid'), 'r', label = 'running avg')
+	plt.plot(fe.tps, r_avg, 'k', label = 'running avg')
 	plt.legend(loc=2)
 
-def main():
+def determine_major_genotypes(tree, HA1=True, positions=None, time_interval=None):
+	from collections import defaultdict
+	gt_counts = defaultdict(int)
+	leaf_count = 0
+	for node in tree.leaf_iter():
+		if not hasattr(node, 'num_date'):
+			node.num_date = numerical_date(string_to_date(node.date))+1e-7*leaf_count
+		if not hasattr(node, 'aa_seq'):
+			node.aa_seq = translate(node.seq)
+		if time_interval is not None:
+			good_time = (node.num_date>= time_interval[0]) and (node.num_date<time_interval[1])
+		else:
+			good_time=True
+		if good_time:
+			if positions is not None:
+					gt_counts["".join([node.aa_seq[pos] for pos in positions])]+=1
+			else:
+				if HA1:
+					gt_counts[get_HA1(node.aa_seq)]+=1
+				else:
+					gt_counts[node.aa_seq]+=1
+		leaf_count+=1
+
+	return gt_counts
+
+def genotype_to_mutations(ref_aa_seq, gt):
+	from itertools import izip
+	return ",".join([a+str(pos+1)+b for pos, (a,b) in enumerate(izip(ref_aa_seq, gt)) if a!=b])
+
+def mutation_counts(gt_counts):
+	from collections import defaultdict
+	mut_counts = defaultdict(int)
+	for gt, val in gt_counts.iteritems():
+		for mut in gt.split(','):
+			mut_counts[mut] += val
+	return mut_counts
+
+if __name__=="__main__":
+#def main():
 	# load tree
 	import matplotlib.pyplot as plt
 	from io_util import read_json
 	from tree_util import json_to_dendropy, to_Biopython, color_BioTree_by_attribute
 	from Bio import Phylo
-	tree_fname='data/tree_refine_10y_50v.json'
-	tree =  json_to_dendropy(read_json(tree_fname))
-	estimate_tree_frequencies(tree)
-	for node in tree.postorder_node_iter():
-		if node.freq_est is not None:
-			tps = np.linspace(node.freq_est.x[0], node.freq_est.x[-1],100)
-			logit_freq = np.exp(node.freq_est(tps))
-			plt.plot(tps, logit_freq/(1+logit_freq))
-	return tree
+	time_interval=(2012, 2015.5)
 
-if __name__=="__main__":
-	#test()
-	main()
+	tree_fname='data/tree_refine_10y_50v.json'
+	koel_sites =  [160, 170, 171, 173, 174, 204, 208]
+	tree =  json_to_dendropy(read_json(tree_fname))
+	gt_counts = determine_major_genotypes(tree, time_interval=time_interval, positions =koel_sites, HA1=False)
+	tree.seed_node.aa_seq = translate(tree.seed_node.seq)
+
+	for clade_name, clade_gt in clade_designations.iteritems():
+		print clade_name, clade_gt
+		if True:
+			freq, (tps, obs) = estimate_genotype_frequency(tree, [(pos+15, aa) for pos, aa in clade_gt], time_interval)
+			#
+			if np.mean(obs)<0.99:
+				grid_tps = np.linspace(time_interval[0], time_interval[1], 100)
+				freq_est = np.exp(freq(grid_tps))
+				freq_est = freq_est/(1+freq_est)
+				plt.plot(grid_tps, freq_est, label=clade_name, lw=2)
+				#r_avg = running_average(obs, 100)
+				#plt.plot(tps, r_avg)
+	plt.legend()
+	ticloc = np.arange(time_interval[0], int(time_interval[1])+1,1)
+	plt.xticks(ticloc, map(str, ticloc))
+	plt.xlim([time_interval[0], time_interval[1]+1])
+#
+#	gt_as_muts_counts = {genotype_to_mutations(get_HA1(tree.seed_node.aa_seq), gt):val for gt,val in gt_counts.iteritems()}
+#	mut_counts = mutation_counts(gt_as_muts_counts)
+#	for mut, val in mut_counts.iteritems():
+#		if val>50:
+#			freq, (tps, obs) = estimate_genotype_frequency(tree, [(int(mut[1:-1])+15,mut[-1])], time_interval)
+#			#
+#			if np.mean(obs)<0.99:
+#				grid_tps = np.linspace(time_interval[0], time_interval[1], 100)
+#				freq_est = np.exp(freq(grid_tps))
+#				freq_est = freq_est/(1+freq_est)
+#				plt.plot(grid_tps, freq_est, label=mut)
+#				r_avg = running_average(obs, 100)
+#				plt.plot(tps, r_avg)
+#	# return the final interpolation object
+
+#	estimate_tree_frequencies(tree)
+#	for node in tree.postorder_node_iter():
+#		if node.freq_est is not None:
+#			tps = np.linspace(node.freq_est.x[0], node.freq_est.x[-1],100)
+#			logit_freq = np.exp(node.freq_est(tps))
+#			plt.plot(tps, logit_freq/(1+logit_freq))
+#	return tree, gt_counts
+
+#if __name__=="__main__":
+#	#test()
+#	tree,gt_counts = main()
