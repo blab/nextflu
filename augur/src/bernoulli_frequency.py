@@ -10,8 +10,9 @@ import numpy as np
 
 pc=1e-4
 dfreq_pc = 1e-2
-time_interval = (2012, 2015.1)
+time_interval = (2012.0, 2015.1)
 flu_stiffness = 10.0
+pivots_per_year = 6.0
 
 clade_designations = { "3C3.a":[(128,'A'),(142,'G'), (159,'S')],
 					   "3C3":[(128,'A'),(142,'G'), (159,'F')],
@@ -19,6 +20,7 @@ clade_designations = { "3C3.a":[(128,'A'),(142,'G'), (159,'S')],
 					   "3C2":[(144,'S'), (159,'F'), (225,'D'), (311,'H'),(489,'N')],
 						}
 
+cols  = np.array([(166,206,227),(31,120,180),(178,223,138),(51,160,44),(251,154,153),(227,26,28),(253,191,111),(255,127,0),(202,178,214),(106,61,154)], dtype=float)/255
 def running_average(obs, ws):
 	'''
 	calculates a running average
@@ -38,8 +40,12 @@ def fix_freq(freq, pc):
 	freq[np.isnan(freq)]=pc
 	return np.minimum(1-pc, np.maximum(pc,freq))
 
-def get_pivots(start, stop):
-	return np.arange(time_interval[0], time_interval[1], 1.0/12)
+def get_pivots(start=None, stop=None):
+	return np.arange(np.floor(time_interval[0]*pivots_per_year), np.ceil(time_interval[1]*pivots_per_year)+0.5, 1.0)/pivots_per_year
+
+def get_extrapolation_pivots(start=None, dt=0.5):
+	return np.arange(np.floor(time_interval[1]*pivots_per_year), np.ceil((dt+time_interval[1])*pivots_per_year)+0.5, 1.0)/pivots_per_year
+
 
 def logit_transform(freq):
 	return np.log(freq/(1-freq))
@@ -50,6 +56,20 @@ def logit_inv(logit_freq):
 
 def pq(p):
 	return p*(1-p)
+
+def extrapolation(freq_interp,x):
+	def ep(freq_interp, x):
+		if x>freq_interp.x[-1]:
+			return freq_interp.y[-1] + (freq_interp.y[-1] - freq_interp.y[-2])/(freq_interp.x[-1] - freq_interp.x[-2]) * (x-freq_interp.x[-1])
+		elif x<freq_interp.x[0]:
+			return freq_interp.y[0] + (freq_interp.y[1] - freq_interp.y[0])/(freq_interp.x[1] - freq_interp.x[0]) * (x-freq_interp.x[0])
+		else:
+			return float(freq_interp(x))
+
+	if np.isscalar(x): 
+		return ep(freq_interp,x)
+	else:
+		return [ep(freq_interp,tmp_x) for tmp_x in x]	
 
 class frequency_estimator(object):
 	'''
@@ -64,7 +84,7 @@ class frequency_estimator(object):
 		self.tps = np.array([x[0] for x in observations])
 		self.obs = np.array([x[1]>0 for x in observations])
 		self.stiffness = stiffness
-		self.interolation_type = 'cubic'
+		self.interolation_type = 'linear'
 		self.logit = logit
 		self.verbose=verbose
 		# make sure they are searchsorted
@@ -223,15 +243,22 @@ def determine_clade_frequencies(tree):
 	returns a dictionary with clades:frequencies
 	'''
 	import matplotlib.pyplot as plt
-	clade_frequencies = {}
-	for clade_name, clade_gt in clade_designations.iteritems():
+	xpol_pivots = get_extrapolation_pivots(time_interval[1], dt=0.5)
+	clade_frequencies = {"pivots":list(get_pivots(time_interval[0], time_interval[1])),
+						 "xpol_pivots":list(xpol_pivots)}
+
+	for ci, (clade_name, clade_gt) in enumerate(clade_designations.iteritems()):
 		print clade_name, clade_gt
 		freq, (tps, obs) = estimate_genotype_frequency(tree, [(pos+15, aa) for pos, aa in clade_gt], time_interval)
+		xpol_freq = extrapolation(freq, xpol_pivots)
 		clade_frequencies[clade_name] = [list(freq.y), list(logit_inv(freq.y))]
+		clade_frequencies['xpol_'+clade_name] = [list(xpol_freq), list(logit_inv(xpol_freq))]
+
 		grid_tps = np.linspace(time_interval[0], time_interval[1], 100)
-		plt.plot(grid_tps, logit_inv(freq(grid_tps)), label=clade_name, lw=2)
+		plt.plot(grid_tps, logit_inv(freq(grid_tps)), label=clade_name, lw=2, c=cols[ci%len(cols)])
+		plt.plot(xpol_pivots, logit_inv(xpol_freq),lw=2, ls='--', c=cols[ci%len(cols)])
 		r_avg = running_average(obs, 100)
-		plt.plot(tps, r_avg)
+		plt.plot(tps, r_avg, c=cols[ci%len(cols)])
 	plt.legend()
 	ticloc = np.arange(time_interval[0], int(time_interval[1])+1,1)
 	plt.xticks(ticloc, map(str, ticloc))
@@ -254,17 +281,22 @@ def determine_mutation_frequencies(tree):
 				if a!=b: mut_counts[(pos, b)]+=1
 
 	plt.figure()
-	mutation_frequencies = {}
-	for mut, count in mut_counts.iteritems():
+	xpol_pivots = get_extrapolation_pivots(time_interval[1], dt=0.5)
+	mutation_frequencies = {"pivots":list(get_pivots(time_interval[0], time_interval[1])),
+						 "xpol_pivots":list(xpol_pivots)}
+	for mi, (mut, count) in enumerate(mut_counts.iteritems()):
 		if count>50 and count<total_leaf_count-50:
 			print mut, count
 			freq, (tps, obs) = estimate_genotype_frequency(tree, [mut], time_interval)
 			mutation_frequencies[str(mut[0]-15)+mut[1]] = [list(freq.y), list(logit_inv(freq.y))]
+			xpol_freq = extrapolation(freq, xpol_pivots)
+			mutation_frequencies['xpol_'+str(mut[0]-15)+mut[1]] = [list(xpol_freq), list(logit_inv(xpol_freq))]
 
 			grid_tps = np.linspace(time_interval[0], time_interval[1], 100)
-			plt.plot(grid_tps, logit_inv(freq(grid_tps)), label=str(mut[0]-15)+mut[1], lw=2)
+			plt.plot(grid_tps, logit_inv(freq(grid_tps)), label=str(mut[0]-15)+mut[1], lw=2, c=cols[mi%len(cols)])
+			plt.plot(xpol_pivots, logit_inv(xpol_freq), lw=2, ls='--', c=cols[mi%len(cols)])
 			r_avg = running_average(obs, 100)
-			plt.plot(tps, r_avg)
+			plt.plot(tps, r_avg, c=cols[mi%len(cols)])
 	plt.legend()
 	ticloc = np.arange(time_interval[0], int(time_interval[1])+1,1)
 	plt.xticks(ticloc, map(str, ticloc))
