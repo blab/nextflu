@@ -1,4 +1,5 @@
 import dendropy
+import numpy as np
 from io_util import *
 
 def color_BioTree_by_attribute(T,attribute, vmin=None, vmax = None, missing_val='min', transform = lambda x:x, cmap=None):
@@ -97,7 +98,7 @@ def dendropy_to_json(node):
 	json = {}
 	if hasattr(node, 'clade'):
 		json['clade'] = node.clade
-	if node.taxon:
+	if hasattr(node, 'taxon'):
 		json['strain'] = str(node.taxon).replace("'", '')
 	if hasattr(node, 'xvalue'):
 		json['xvalue'] = round(node.xvalue, 5)
@@ -125,6 +126,10 @@ def dendropy_to_json(node):
 		json['tol'] = round(node.tol, 5)		
 	if hasattr(node, 'fitness'):
 		json['fitness'] = round(node.fitness, 5)		
+	if hasattr(node, 'freq') and node.freq is not None:
+		json['freq'] = list(np.round(node.freq, 5))		
+	if hasattr(node, 'logit_freq') and node.logit_freq is not None:
+		json['logit_freq'] = list(np.round(node.logit_freq, 5))		
 	if node.child_nodes():
 		json["children"] = []
 		for ch in node.child_nodes():

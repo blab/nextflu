@@ -100,7 +100,7 @@ class frequency_estimator(object):
 			self.pivot_tps = pivots
 
 		# generate a useful initital case from a running average of the counts
-		ws=100
+		ws=40
 		tmp_vals = running_average(self.obs, ws)
 		tmp_interpolator = interp1d(self.tps, tmp_vals, bounds_error=False)
 		if self.logit:
@@ -144,31 +144,28 @@ class frequency_estimator(object):
 		self.frequency_estimate = interp1d(self.pivot_tps, self.pivot_freq, kind=self.interolation_type, bounds_error=False)
 
 
-def estimate_clade_frequency(node, all_dates, tip_to_date_index):
-	dt = 0.5 # time interval to include before the first after the last sample from a clade
-	first_date = all_dates[tip_to_date_index[node.tips[0]]]
-	last_date = all_dates[tip_to_date_index[node.tips[-1]]]
-
-	# add dt on both ends
-	start_index = max(0,np.searchsorted(all_dates, first_date-dt))
-	stop_index = min(np.searchsorted(all_dates, last_date+dt), all_dates.shape[0]-1)
-
+def estimate_clade_frequencies(node, all_dates, tip_to_date_index):
 	# extract time points and the subset of observations that fall in the clade.
-	tps = all_dates[start_index:stop_index]
+	tps = all_dates[tip_to_date_index[node.parent_node.tips]]
+	start_index = max(0,np.searchsorted(tps, time_interval[0]))
+	stop_index = min(np.searchsorted(tps, time_interval[1]), all_dates.shape[0]-1)
+	tps = tps[start_index:stop_index]
 	obs = np.in1d(tps, all_dates[tip_to_date_index[node.tips]])
-	last_negative = np.argmin(obs - np.linspace(0,0.5, obs.shape[0]))
-	stop_date = tps[last_negative]+dt
-	new_stop_index = min(np.searchsorted(all_dates, stop_date), all_dates.shape[0]-1)
-	if stop_index>new_stop_index:
-		tps = tps[:new_stop_index-stop_index] 
-		obs = obs[:new_stop_index-stop_index] 
+	if obs.sum()>50:
+		print node.num_date, len(node.tips)
 
-	# make n pivots a year
-	pivots = get_pivots(tps[0], tps[1])
-	fe = frequency_estimator(zip(tps, obs), pivots=pivots, stiffness=2.0, logit=True)
-	fe.learn()
-	# return the final interpolation object
-	return fe.frequency_estimate
+		# make n pivots a year
+		pivots = get_pivots(tps[0], tps[1])
+		fe = frequency_estimator(zip(tps, obs), pivots=pivots, stiffness=2.0, logit=True)
+		fe.learn()
+
+		node.freq = node.parent_node.freq * logit_inv(fe.pivot_freq)
+		node.logit_freq = logit_transform(node.freq)
+		for child in node.child_nodes():
+			estimate_clade_frequencies(child, all_dates, tip_to_date_index)
+	else:
+		node.freq=None
+		node.logit_freq=None
 
 def estimate_tree_frequencies(tree):
 	'''
@@ -194,13 +191,10 @@ def estimate_tree_frequencies(tree):
 	reverse_order = np.argsort(leaf_order)
 	all_dates = all_dates[leaf_order]
 
-	for node in tree.postorder_node_iter():
-		if node.tips.shape[0]>50: # only do this for reasonably large clades
-			print "# leafs:", node.tips.shape
-			print "date:", node.date
-			node.freq_est = estimate_clade_frequency(node, all_dates, reverse_order)
-		else:
-			node.freq_est=None
+	tree.seed_node.pivots = get_pivots(time_interval[0], time_interval[1])
+	tree.seed_node.freq = np.ones_like(tree.seed_node.pivots)
+	for child in tree.seed_node.child_nodes():
+		estimate_clade_frequencies(child, all_dates, reverse_order)
 
 
 def estimate_genotype_frequency(tree, gt, time_interval=None, region = None):
@@ -353,6 +347,11 @@ def main():
 	out_fname = 'data/mutation_frequencies.json'
 	write_json(mutation_frequencies, out_fname)
 	plt.savefig('data/mutation_frequencies.pdf')
+
+	print "--- "+"adding frequencies to tree "  + time.strftime("%H:%M:%S") + " ---"
+	out_fname = 'data/tree_frequencies.json'
+	estimate_tree_frequencies(tree)
+	write_json(dendropy_to_json(tree.seed_node), out_fname)
 
 if __name__=="__main__":
 	#test()
