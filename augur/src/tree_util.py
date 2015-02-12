@@ -173,7 +173,7 @@ def json_to_dendropy(json):
 	'''
 	tree = dendropy.Tree()
 	tree.get_from_string(';', 'newick')
-	root = tree.leaf_nodes()[0]
+	root = tree.seed_node
 	json_to_dendropy_sub(json, root)
 	root.edge_length=0.0
 	return tree
@@ -183,6 +183,8 @@ def json_to_dendropy_sub(json, node):
 	recursively calls itself for all children of node and
 	builds up the tree. entries in json are added as node attributes
 	'''
+	if 'xvalue' in json:
+		node.xvalue = float(json['xvalue'])
 	for attr,val in json.iteritems():
 		if attr=='children':
 			for sub_json in val:

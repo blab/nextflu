@@ -10,7 +10,7 @@ import numpy as np
 
 pc=1e-4
 dfreq_pc = 1e-2
-time_interval = (2012.0, 2015.1)
+time_interval = (2012.0, 2015.0)
 flu_stiffness = 10.0
 pivots_per_year = 6.0
 
