@@ -12,7 +12,7 @@ pc=1e-4
 dfreq_pc = 1e-2
 time_interval = (2012.0, 2015.0)
 flu_stiffness = 10.0
-pivots_per_year = 6.0
+pivots_per_year = 12.0
 
 clade_designations = { "3C3.a":[(128,'A'),(142,'G'), (159,'S')],
 					   "3C3":[(128,'A'),(142,'G'), (159,'F')],
@@ -69,7 +69,7 @@ def extrapolation(freq_interp,x):
 	if np.isscalar(x): 
 		return ep(freq_interp,x)
 	else:
-		return [ep(freq_interp,tmp_x) for tmp_x in x]	
+		return np.array([ep(freq_interp,tmp_x) for tmp_x in x])
 
 class frequency_estimator(object):
 	'''
@@ -144,28 +144,54 @@ class frequency_estimator(object):
 		self.frequency_estimate = interp1d(self.pivot_tps, self.pivot_freq, kind=self.interolation_type, bounds_error=False)
 
 
-def estimate_clade_frequencies(node, all_dates, tip_to_date_index):
+def estimate_sub_frequencies(node, all_dates, tip_to_date_index, threshold=50):
 	# extract time points and the subset of observations that fall in the clade.
-	tps = all_dates[tip_to_date_index[node.parent_node.tips]]
+	tps = all_dates[tip_to_date_index[node.tips]]
 	start_index = max(0,np.searchsorted(tps, time_interval[0]))
 	stop_index = min(np.searchsorted(tps, time_interval[1]), all_dates.shape[0]-1)
 	tps = tps[start_index:stop_index]
-	obs = np.in1d(tps, all_dates[tip_to_date_index[node.tips]])
-	if obs.sum()>50:
-		print node.num_date, len(node.tips)
+	# we estimate frequencies of subclades, they will be multiplied by the 
+	# frequency of the parent node and corrected for the frequency of sister clades 
+	# already fit
+	frequency_left = np.array(node.freq)
+	ci=0
+	for child in node.child_nodes()[:-1]: # clades are ordered by decreasing size
+		if len(child.tips)<threshold: # skip tiny clades
+			break
+		else:
+			print child.num_date, len(child.tips)
 
-		# make n pivots a year
-		pivots = get_pivots(tps[0], tps[1])
-		fe = frequency_estimator(zip(tps, obs), pivots=pivots, stiffness=2.0, logit=True)
-		fe.learn()
+			obs = np.in1d(tps, all_dates[tip_to_date_index[child.tips]])
 
-		node.freq = node.parent_node.freq * logit_inv(fe.pivot_freq)
-		node.logit_freq = logit_transform(node.freq)
-		for child in node.child_nodes():
-			estimate_clade_frequencies(child, all_dates, tip_to_date_index)
-	else:
-		node.freq=None
-		node.logit_freq=None
+			# make n pivots a year, interpolate frequencies
+			pivots = get_pivots(tps[0], tps[1])
+			fe = frequency_estimator(zip(tps, obs), pivots=pivots, stiffness=2.0, logit=True)
+			fe.learn()
+
+			# assign the frequency vector to the node
+			child.freq = frequency_left * logit_inv(fe.pivot_freq)
+			child.logit_freq = logit_transform(child.freq)
+
+			# update the frequency remaining to be explained and prune explained observations
+			frequency_left *= (1.0-logit_inv(fe.pivot_freq))
+			tps_left = np.ones_like(tps,dtype=bool)
+			tps_left[obs]=False # prune observations from clade
+			tps = tps[tps_left]
+		ci+=1
+
+	# if the above loop finished assign the frequency of the remaining clade to the frequency_left
+	if ci>0 and ci==len(node.child_nodes())-1:
+		last_child = node.child_nodes()[-1]
+		last_child.freq = frequency_left
+		last_child.logit_freq = logit_transform(last_child.freq)
+	else:  # broke out of loop because clades too small. 
+		for child in node.child_nodes()[ci:]: # assign freqs of all remaining clades to None.
+			child.freq = None
+			child.logit_freq = None
+
+	# recursively repeat for subclades
+	for child in node.child_nodes():
+		estimate_sub_frequencies(child, all_dates, tip_to_date_index, threshold)
 
 def estimate_tree_frequencies(tree):
 	'''
@@ -191,10 +217,12 @@ def estimate_tree_frequencies(tree):
 	reverse_order = np.argsort(leaf_order)
 	all_dates = all_dates[leaf_order]
 
+	# set the frequency of the root node to 1, the logit frequency to a large value
 	tree.seed_node.pivots = get_pivots(time_interval[0], time_interval[1])
 	tree.seed_node.freq = np.ones_like(tree.seed_node.pivots)
-	for child in tree.seed_node.child_nodes():
-		estimate_clade_frequencies(child, all_dates, reverse_order)
+	tree.seed_node.logit_freq = 10*np.ones_like(tree.seed_node.pivots)
+	# start estimating frequencies of subclades recursively
+	estimate_sub_frequencies(tree.seed_node, all_dates, reverse_order)
 
 
 def estimate_genotype_frequency(tree, gt, time_interval=None, region = None):
@@ -244,13 +272,13 @@ def determine_clade_frequencies(tree):
 	for ci, (clade_name, clade_gt) in enumerate(clade_designations.iteritems()):
 		print clade_name, clade_gt
 		freq, (tps, obs) = estimate_genotype_frequency(tree, [(pos+15, aa) for pos, aa in clade_gt], time_interval)
-		xpol_freq = extrapolation(freq, xpol_pivots)
+		xpol_freq = fix_freq(extrapolation(interp1d(freq.x, logit_inv(freq.y)), xpol_pivots), pc)
 		clade_frequencies[clade_name] = [list(freq.y), list(logit_inv(freq.y))]
-		clade_frequencies['xpol_'+clade_name] = [list(xpol_freq), list(logit_inv(xpol_freq))]
+		clade_frequencies['xpol_'+clade_name] = [list(logit_transform(xpol_freq)), list(xpol_freq)]
 
 		grid_tps = np.linspace(time_interval[0], time_interval[1], 100)
 		plt.plot(grid_tps, logit_inv(freq(grid_tps)), label=clade_name, lw=2, c=cols[ci%len(cols)])
-		plt.plot(xpol_pivots, logit_inv(xpol_freq),lw=2, ls='--', c=cols[ci%len(cols)])
+		plt.plot(xpol_pivots, xpol_freq,lw=2, ls='--', c=cols[ci%len(cols)])
 		r_avg = running_average(obs, 100)
 		plt.plot(tps, r_avg, c=cols[ci%len(cols)])
 	plt.legend()
@@ -283,12 +311,12 @@ def determine_mutation_frequencies(tree):
 			print mut, count
 			freq, (tps, obs) = estimate_genotype_frequency(tree, [mut], time_interval)
 			mutation_frequencies[str(mut[0]-15)+mut[1]] = [list(freq.y), list(logit_inv(freq.y))]
-			xpol_freq = extrapolation(freq, xpol_pivots)
-			mutation_frequencies['xpol_'+str(mut[0]-15)+mut[1]] = [list(xpol_freq), list(logit_inv(xpol_freq))]
+			xpol_freq = fix_freq(extrapolation(interp1d(freq.x, logit_inv(freq.y)), xpol_pivots), pc)
+			mutation_frequencies['xpol_'+str(mut[0]-15)+mut[1]] = [list(logit_transform(xpol_freq)), list(xpol_freq)]
 
 			grid_tps = np.linspace(time_interval[0], time_interval[1], 100)
 			plt.plot(grid_tps, logit_inv(freq(grid_tps)), label=str(mut[0]-15)+mut[1], lw=2, c=cols[mi%len(cols)])
-			plt.plot(xpol_pivots, logit_inv(xpol_freq), lw=2, ls='--', c=cols[mi%len(cols)])
+			plt.plot(xpol_pivots, xpol_freq, lw=2, ls='--', c=cols[mi%len(cols)])
 			r_avg = running_average(obs, 100)
 			plt.plot(tps, r_avg, c=cols[mi%len(cols)])
 	plt.legend()
