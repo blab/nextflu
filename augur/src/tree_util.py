@@ -131,10 +131,13 @@ def dendropy_to_json(node):
 		json['tol'] = round(node.tol, 5)		
 	if hasattr(node, 'fitness'):
 		json['fitness'] = round(node.fitness, 5)		
-	if hasattr(node, 'freq') and node.freq is not None:
-		json['freq'] = list(np.round(node.freq, 5))		
-	if hasattr(node, 'logit_freq') and node.logit_freq is not None:
-		json['logit_freq'] = list(np.round(node.logit_freq, 5))		
+	try:
+		if hasattr(node, 'freq') and node.freq is not None:
+			json['freq'] = {reg: list(np.round(freq, 5))  if freq is not None else "undefined" for reg, freq in node.freq.iteritems()}		
+		if hasattr(node, 'logit_freq') and node.logit_freq is not None:
+			json['logit_freq'] = {reg: list(np.round(freq, 5))  if freq is not None else "undefined" for reg, freq in node.logit_freq.iteritems()}
+	except:
+		import pdb; pdb.set_trace()
 	if node.child_nodes():
 		json["children"] = []
 		for ch in node.child_nodes():
