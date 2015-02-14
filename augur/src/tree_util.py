@@ -123,6 +123,10 @@ def dendropy_to_json(node):
 		json['seq'] = node.seq
 	if hasattr(node, 'aa_seq'):
 		json['aa_seq'] = node.aa_seq
+	if hasattr(node, 'gt'):
+		json['gt'] = node.gt
+	if hasattr(node, 'gt_pos'):
+		json['gt_pos'] = list(node.gt_pos)
 	if hasattr(node, 'tip_index'):
 		json['tip_index'] = node.tip_index
 	if hasattr(node, 'LBI'):
