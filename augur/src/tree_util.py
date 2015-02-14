@@ -111,6 +111,10 @@ def dendropy_to_json(node):
 		json['rb'] = node.rb
 	if hasattr(node, 'date'):
 		json['date'] = node.date
+	if hasattr(node, 'country'):
+		json['country'] = node.country
+	if hasattr(node, 'region'):
+		json['region'] = node.region				
 	if hasattr(node, 'seq'):
 		json['seq'] = node.seq
 	if hasattr(node, 'LBI'):

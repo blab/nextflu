@@ -64,7 +64,7 @@ def collapse(tree):
 def reduce(tree):
 	"""Remove outlier tips"""
 	for node in tree.postorder_node_iter():
-		if node.edge_length > 0.04 and node.is_leaf():
+		if node.edge_length > 0.01 and node.is_leaf():
 			parent = node.parent_node
 			parent.remove_child(node)
 
@@ -100,14 +100,22 @@ def layout(tree):
 		node.yvalue = get_yvalue(node)
 
 def add_virus_attributes(viruses, tree):
-	"""Add date attribute to all tips in tree"""
+	"""Add date and loc attributes to all tips in tree"""
 	strain_to_date = {}
+	strain_to_country = {}
+	strain_to_region = {}	
 	for v in viruses:
 		strain_to_date[v['strain']] = v['date']
+		strain_to_country[v['strain']] = v['country']
+		strain_to_region[v['strain']] = v['region']				
 	for node in tree.postorder_node_iter():
 		strain = str(node.taxon).replace("'", '')
 		if strain_to_date.has_key(strain):
 			node.date = strain_to_date[strain]
+		if strain_to_country.has_key(strain):
+			node.country = strain_to_country[strain]
+		if strain_to_region.has_key(strain):
+			node.region = strain_to_region[strain]						
 
 def add_node_attributes(tree):
 	"""Add clade, xvalue, yvalue, mutation and trunk attributes to all nodes in tree"""
