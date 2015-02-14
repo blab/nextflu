@@ -63,8 +63,13 @@ def collapse(tree):
 
 def reduce(tree):
 	"""Remove outlier tips"""
+	"""Remove internal nodes left as orphan tips"""
 	for node in tree.postorder_node_iter():
 		if node.edge_length > 0.01 and node.is_leaf():
+			parent = node.parent_node
+			parent.remove_child(node)
+	for node in tree.postorder_node_iter():
+		if node.is_leaf() and not hasattr(node, 'strain'):
 			parent = node.parent_node
 			parent.remove_child(node)
 
