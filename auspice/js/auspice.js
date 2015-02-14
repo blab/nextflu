@@ -235,6 +235,9 @@ var virusTooltip = d3.tip()
 		if (typeof d.rb != "undefined") {
 			string += "<br>Local branching index: " + d.LBI.toFixed(3);
 		}
+		if (typeof d.region != "undefined") {
+			string += "<br>Region: " + d.region.replace(/([A-Z])/g, ' $1');
+		}
 		return string;
 	});
 treeplot.call(virusTooltip);
@@ -396,7 +399,14 @@ d3.json("data/tree.json", function(error, root) {
 	var freqScale = d3.scale.linear()
 		.domain([0, 1])
 		.range([1.5, 4.5]);
-		
+
+	var regions = ["Africa", "SouthAmerica", "WestAsia", "Oceania", "Europe", "JapanKorea", "NorthAmerica", "SoutheastAsia", "India", "China"]
+	var regionColors = ["#5097BA", "#60AA9E", "#75B681", "#8EBC66", "#AABD52", "#C4B945", "#D9AD3D", "#E59637", "#E67030", "#DF4327"]
+
+	var regionColorScale = d3.scale.ordinal()
+		.domain(regions)
+		.range(regionColors);
+
 	function calcNodeAges(tw){
 		tips.forEach(function (d) {
 			var date = new Date(d.date);
@@ -589,11 +599,21 @@ d3.json("data/tree.json", function(error, root) {
 				return recencySizeScale(d.diff);
 			})
 			.style("fill", function(d) {
-				var col = colorScale(d.adj_coloring);
+				if (colorScale != regionColorScale) {
+					var col = colorScale(d.adj_coloring);
+				}
+				else {
+					var col = colorScale(d.region);
+				}
 				return d3.rgb(col).brighter([0.7]).toString();
 			})
 			.style("stroke", function(d) {
-				var col = colorScale(d.adj_coloring);
+				if (colorScale != regionColorScale) {
+					var col = colorScale(d.adj_coloring);
+				}
+				else {
+					var col = colorScale(d.region);
+				}
 				return d3.rgb(col).toString();
 			});
 
@@ -692,6 +712,10 @@ d3.json("data/tree.json", function(error, root) {
 				colorScale = lbiColorScale;
 				tips.map(function(d) { d.adj_coloring = d.LBI; });
 			}
+			if (colorBy == "region") {
+				colorScale = regionColorScale;
+				tips.map(function(d) { d.adj_coloring = d.LBI; });
+			}
 
 			adjust_coloring_by_date();
 
@@ -700,11 +724,21 @@ d3.json("data/tree.json", function(error, root) {
 					return recencySizeScale(d.diff);
 				})
 				.style("fill", function(d) {
-					var col = colorScale(d.adj_coloring);
+					if (colorScale != regionColorScale) {
+						var col = colorScale(d.adj_coloring);
+					}
+					else {
+						var col = colorScale(d.region);
+					}
 					return d3.rgb(col).brighter([0.7]).toString();
 				})
 				.style("stroke", function(d) {
-					var col = colorScale(d.adj_coloring);
+					if (colorScale != regionColorScale) {
+						var col = colorScale(d.adj_coloring);
+					}
+					else {
+						var col = colorScale(d.region);
+					}
 					return d3.rgb(col).toString();
 				});
 
