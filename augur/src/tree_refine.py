@@ -200,9 +200,9 @@ def main(tree_fname = 'data/tree_ancestral.json', virus_fname='data/virus_clean.
 	print "Append node attributes"
 	add_virus_attributes(viruses, tree)
 	add_node_attributes(tree)
-	print "translate nucleotide sequences"
+	print "Translate nucleotide sequences"
 	translate_all(tree)
-	print "enumerate leaves of ladderized tree and calculate unique numerical date"
+	print "Enumerate leaves of ladderized tree and calculate unique numerical date"
 	unique_date(tree)
 	print "Define trunk"
 	define_trunk(tree)

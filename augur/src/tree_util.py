@@ -99,7 +99,8 @@ def dendropy_to_json(node):
 	if hasattr(node, 'clade'):
 		json['clade'] = node.clade
 	if hasattr(node, 'taxon'):
-		json['strain'] = str(node.taxon).replace("'", '')
+		if node.taxon != None:
+			json['strain'] = str(node.taxon).replace("'", '')
 	if hasattr(node, 'xvalue'):
 		json['xvalue'] = round(node.xvalue, 5)
 	if hasattr(node, 'yvalue'):

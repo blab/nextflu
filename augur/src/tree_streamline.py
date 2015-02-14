@@ -12,7 +12,9 @@ def main(in_fname='data/tree_refine.json'):
 	tree = read_json(in_fname)
 	for node in all_descendants(tree):
 		node.pop("seq", None)
+		node.pop("aa_seq", None)
 		node.pop("clade", None)
+
 
 	out_fname_tree = "../auspice/data/tree.json"
 	write_json(tree, out_fname_tree, indent=0)
