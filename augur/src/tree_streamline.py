@@ -17,7 +17,12 @@ def main(in_fname='data/tree_refine.json'):
 
 
 	out_fname_tree = "../auspice/data/tree.json"
-	write_json(tree, out_fname_tree, indent=1)
+	write_json(tree, out_fname_tree, indent=None)
+	try:
+		read_json(out_fname_tree)
+	except:
+		print "Read failed, rewriting with indents"	
+		write_json(tree, out_fname_tree, indent=1)
 
 if __name__ == "__main__":
 	main()
