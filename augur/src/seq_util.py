@@ -26,6 +26,11 @@ def receptor_binding_sites(aa):
 	sites = [160, 170, 171, 173, 174, 204, 208]
 	return ''.join([aa[pos] for pos in sites])
 
+def get_HA1(aa):
+	'''
+	return the part of the peptide corresponding to HA1, starts at pos 16, is 329 aa long
+	'''
+	return aa[16:(16+329)]
 
 def epitope_distance(aaA, aaB):
 	"""Return distance of sequences aaA and aaB by comparing epitope sites"""

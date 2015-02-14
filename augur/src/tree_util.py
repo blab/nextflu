@@ -1,4 +1,5 @@
 import dendropy
+import numpy as np
 from io_util import *
 
 def color_BioTree_by_attribute(T,attribute, vmin=None, vmax = None, missing_val='min', transform = lambda x:x, cmap=None):
@@ -97,7 +98,7 @@ def dendropy_to_json(node):
 	json = {}
 	if hasattr(node, 'clade'):
 		json['clade'] = node.clade
-	if node.taxon:
+	if hasattr(node, 'taxon'):
 		json['strain'] = str(node.taxon).replace("'", '')
 	if hasattr(node, 'xvalue'):
 		json['xvalue'] = round(node.xvalue, 5)
@@ -111,18 +112,28 @@ def dendropy_to_json(node):
 		json['rb'] = node.rb
 	if hasattr(node, 'date'):
 		json['date'] = node.date
+	if hasattr(node, 'num_date'):
+		json['num_date'] = node.num_date
 	if hasattr(node, 'country'):
 		json['country'] = node.country
 	if hasattr(node, 'region'):
-		json['region'] = node.region				
+		json['region'] = node.region
 	if hasattr(node, 'seq'):
 		json['seq'] = node.seq
+	if hasattr(node, 'aa_seq'):
+		json['aa_seq'] = node.aa_seq
+	if hasattr(node, 'tip_index'):
+		json['tip_index'] = node.tip_index
 	if hasattr(node, 'LBI'):
 		json['LBI'] = round(node.LBI, 5)
 	if hasattr(node, 'tol'):
 		json['tol'] = round(node.tol, 5)		
 	if hasattr(node, 'fitness'):
 		json['fitness'] = round(node.fitness, 5)		
+	if hasattr(node, 'freq') and node.freq is not None:
+		json['freq'] = list(np.round(node.freq, 5))		
+	if hasattr(node, 'logit_freq') and node.logit_freq is not None:
+		json['logit_freq'] = list(np.round(node.logit_freq, 5))		
 	if node.child_nodes():
 		json["children"] = []
 		for ch in node.child_nodes():
@@ -166,7 +177,7 @@ def json_to_dendropy(json):
 	'''
 	tree = dendropy.Tree()
 	tree.get_from_string(';', 'newick')
-	root = tree.leaf_nodes()[0]
+	root = tree.seed_node
 	json_to_dendropy_sub(json, root)
 	root.edge_length=0.0
 	return tree
@@ -176,6 +187,8 @@ def json_to_dendropy_sub(json, node):
 	recursively calls itself for all children of node and
 	builds up the tree. entries in json are added as node attributes
 	'''
+	if 'xvalue' in json:
+		node.xvalue = float(json['xvalue'])
 	for attr,val in json.iteritems():
 		if attr=='children':
 			for sub_json in val:
