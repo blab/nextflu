@@ -3,7 +3,7 @@ layout: default
 title: nextflu
 ---
 
-<div class="row" style="height: 700px;">
+<div class="row" style="height: 1400px;">
 	<div class="col-md-12">
 		<div class="plot-container">
 			<svg id="treeplot"></svg>
@@ -33,6 +33,17 @@ title: nextflu
 				<button id="reset" class="btn btn-default">reset layout</button>
 			</div>
 		</div>
+		<div class="io-container">
+		<div>
+			<input id="gtspec" value="159Y,225D/NA:159S/AS:159Y">
+			<button id="plotfreq" class="btn btn-default">plot frequencies</button>
+			<button id="plotfreq_reset" class="btn btn-default">reset plot</button>
+		</div>
+		</div>
+		<div class="plot-container">
+			<svg id="gtfreqplot"></svg>
+		</div>
+
 	</div>
 </div>
 

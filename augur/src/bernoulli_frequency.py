@@ -295,7 +295,10 @@ def estimate_genotype_frequency(tree, gt, time_interval=None, regions = None):
 	all_dates = []
 	observations = []
 	for node in tree.leaf_iter():
-		is_gt = all([node.aa_seq[pos]==aa for pos, aa in gt])
+		if isinstance(gt, basestring):
+			is_gt = gt==node.aa_seq
+		else:
+			is_gt = all([node.aa_seq[pos]==aa for pos, aa in gt])
 		if time_interval is not None:
 			good_time = (node.num_date>= time_interval[0]) and (node.num_date<time_interval[1])
 		else:
@@ -430,6 +433,7 @@ def main():
 	# load tree
 	import matplotlib.pyplot as plt
 	from io_util import read_json
+	from collections import defaultdict
 	plot = True
 
 	tree_fname='data/tree_refine_3y_50v.json'
@@ -437,6 +441,22 @@ def main():
 
 	region_list = [("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
 			("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ]
+
+	gt_frequencies = {}
+	gt_counts = defaultdict(int)
+	for node in tree.postorder_node_iter():
+		gt_counts[node.aa_seq]+=1
+	for region_label, regions in region_list:
+		gt_frequencies[region_label]={"pivots":list(get_pivots(time_interval[0], time_interval[1]))}
+		print "--- "+"determining genotype frequencies "+region_label+ " "  + time.strftime("%H:%M:%S") + " ---"
+		for gt, c in gt_counts.iteritems():
+			if c>5:
+				print gt[:10], c
+				tmp_freq , (tps, obs) = estimate_genotype_frequency(tree, gt, regions=regions)
+				gt_frequencies[region_label][gt] = list(logit_inv(tmp_freq.y))
+	out_fname = 'data/genotype_frequencies.json'
+	write_json(gt_frequencies, out_fname)
+
 	clade_frequencies = {}
 	for region_label, regions in region_list:
 		print "--- "+"determining clade frequencies "+region_label+ " "  + time.strftime("%H:%M:%S") + " ---"
