@@ -287,7 +287,7 @@ def estimate_tree_frequencies(tree, regions=None, region_name = None):
 	estimate_sub_frequencies(tree.seed_node, all_dates, reverse_order, region_name = region_name)
 
 
-def estimate_genotype_frequency(tree, gt, time_interval=None, regions = None):
+def estimate_genotype_frequency(tree, gt, time_interval=None, regions = None, relevant_pos = None):
 	'''
 	estimate the frequency of a particular genotype specified 
 	gt   --		[(position, amino acid), ....]
@@ -298,7 +298,10 @@ def estimate_genotype_frequency(tree, gt, time_interval=None, regions = None):
 	for node in tree.leaf_iter():
 		total_leaf_count+=1
 		if isinstance(gt, basestring):
-			is_gt = gt==node.aa_seq
+			if relevant_pos is None:
+				is_gt = gt==node.aa_seq
+			else:
+				is_gt = gt==reduce_genotype(node.aa_seq, relevant_pos)
 		else:
 			is_gt = all([node.aa_seq[pos]==aa for pos, aa in gt])
 		if time_interval is not None:
@@ -369,16 +372,7 @@ def determine_mutation_frequencies(tree, regions=None, threshold=50, plot=False)
 			for pos, (a,b) in enumerate(izip(ref_seq, node.aa_seq)):
 				if a!=b: mut_counts[(pos, b)]+=1
 
-	for mut, count in mut_counts.iteritems():
-		relevant_pos[mut[0]]+=min(count, total_leaf_count-count)
-	relevant_pos = sorted(relevant_pos.items(), key=lambda x:x[1], reverse=True) # sort by count
-	print "Mutations:",relevant_pos[:10]
-	relevant_pos = sorted([x[0] for x in relevant_pos[:10]]) # take top ten
-	print "Most relevant positions:", relevant_pos
-
-	xpol_pivots = get_extrapolation_pivots(time_interval[1], dt=0.5)
-	mutation_frequencies = {"pivots":list(get_pivots(time_interval[0], time_interval[1])),
-						 "xpol_pivots":list(xpol_pivots)}
+	mutation_frequencies = {"pivots":list(get_pivots(time_interval[0], time_interval[1]))}
 	for mi, mut in enumerate(sorted(mut_counts.keys())):
 		count = mut_counts[mut]
 		if count>threshold:
@@ -395,6 +389,13 @@ def determine_mutation_frequencies(tree, regions=None, threshold=50, plot=False)
 					plt.plot(tps, r_avg, c=cols[mi%len(cols)])
 
 	return mutation_frequencies
+
+def reduce_genotype(gt, pos):
+	rgt = np.zeros(len(gt), dtype='S1')
+	rgt[:] = '.'
+	for p in pos:
+		rgt[p] = gt[p]
+	return "".join(rgt)
 
 def add_genotype_at_pos(tree, positions):
 	for node in tree.postorder_node_iter():
@@ -443,22 +444,6 @@ def main():
 			("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ]
 
 	gt_frequencies = {"genotypes":{}, "mutations":{}}
-	gt_counts = defaultdict(int)
-	for node in tree.leaf_iter():
-		gt_counts[node.aa_seq]+=1
-	for region_label, regions in region_list:
-		tc_in_region, sum_gts = 0,0
-		gt_frequencies["genotypes"][region_label]={"pivots":list(get_pivots(time_interval[0], time_interval[1]))}
-		print "--- "+"determining genotype frequencies "+region_label+ " "  + time.strftime("%H:%M:%S") + " ---"
-		for gt, c in gt_counts.iteritems():
-			if c>2:
-				tmp_freq , (tps, obs) = estimate_genotype_frequency(tree, gt, regions=regions)
-				gt_frequencies["genotypes"][region_label][gt] = list(logit_inv(tmp_freq.y))
-				sum_gts+=np.sum(obs)
-				tc_in_region = len(tps)
-		print "region: ", sum_gts, "out of", tc_in_region, "(",total_leaf_count," in total)"
-	out_fname = 'data/genotype_frequencies.json'
-	write_json(gt_frequencies, out_fname, indent=None)
 
 	for region_label, regions in region_list:
 		print "--- "+"determining mutation frequencies in "+region_label+ " "  + time.strftime("%H:%M:%S") + " ---"
@@ -474,6 +459,31 @@ def main():
 			plt.ylim([-0.05, 1.05])
 			plt.grid()
 			plt.savefig('data/mutation_frequencies'+region_label+'.pdf')
+	out_fname = 'data/genotype_frequencies.json'
+	write_json(gt_frequencies, out_fname, indent=None)
+
+	relevant_pos = []
+	for mut, freq in gt_frequencies["mutations"]["global"].iteritems():
+		if "pivot" not in mut:
+			if np.max(freq)-np.min(freq)>0.1:
+				pos = int(mut.split('_')[-1][:-1])+15
+				relevant_pos.append(pos)
+	relevant_pos = sorted(set(relevant_pos))
+	print relevant_pos
+	gt_counts = defaultdict(int)
+	for node in tree.leaf_iter():
+		gt_counts[reduce_genotype(node.aa_seq, relevant_pos)]+=1
+	for region_label, regions in region_list:
+		tc_in_region, sum_gts = 0,0
+		gt_frequencies["genotypes"][region_label]={"pivots":list(get_pivots(time_interval[0], time_interval[1]))}
+		print "--- "+"determining genotype frequencies "+region_label+ " "  + time.strftime("%H:%M:%S") + " ---"
+		for gt, c in gt_counts.iteritems():
+			print gt, c
+			tmp_freq , (tps, obs) = estimate_genotype_frequency(tree, gt, regions=regions, relevant_pos = relevant_pos)
+			gt_frequencies["genotypes"][region_label][gt] = list(logit_inv(tmp_freq.y))
+			sum_gts+=np.sum(obs)
+			tc_in_region = len(tps)
+		print "region: ", sum_gts, "out of", tc_in_region, "(",total_leaf_count," in total)"
 	out_fname = 'data/genotype_frequencies.json'
 	write_json(gt_frequencies, out_fname, indent=None)
 

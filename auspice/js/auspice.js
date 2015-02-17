@@ -741,8 +741,32 @@ d3.json("data/tree.json", function(error, root) {
 					}
 					return d3.rgb(col).toString();
 				});
-
+	 		
 		})
+
+	function color_by_genotype(positions){
+		var gts = nodes.map(function (d) {var tmp = [];
+											for (var i=0; i<positions.length; i++){
+												tmp[tmp.length] = d.aa_seq[positions[i]];
+											}
+											d.color_gt = tmp.join(""); 
+											return d.color_gt;});
+		var unique_gts = d3.set(gts).values();
+		var gt_counts = {};
+		for (var i=0; i<unique_gts.length; i++){gt_counts[unique_gts[i]]=0;}
+		gts.forEach(function (d) {gt_counts[d]+=1;});
+		var filtered_gts = unique_gts.filter(function (d) {return gt_counts[d]>=10;});
+		filtered_gts.sort(function (a,b){var res;
+			if (gt_counts[a]>gt_counts[b]){ res=-1;}
+			else if (gt_counts[a]<gt_counts[b]){ res=1;}
+			else {res=0;}
+			return res;});
+		console.log("genotypes passed filtering:"+filtered_gts);
+		var gtColorScale = d3.scale.category10()
+			.domain(filtered_gts);
+ 		treeplot.selectAll(".link")
+			.style("stroke", function(d){return gtColorScale(d.target.color_gt);})
+	}
 
 	function onSelect(tip) {
 		d3.select("#"+(tip.strain).replace(/\//g, ""))
@@ -759,6 +783,14 @@ d3.json("data/tree.json", function(error, root) {
 		.height(500)
 		.onSelected(onSelect)
 		.render();
+
+	d3.select("#gt_color_ok")
+		.on("click", function (){
+			var positions = document.getElementById("gt_color").value.split(',');
+			var positions2 = positions.map(function(d) {return parseInt(d)+15;});
+			console.log(positions2);
+			color_by_genotype(positions2);
+		});
 
 });
 
@@ -802,7 +834,8 @@ d3.json("data/genotype_frequencies.json", function(error, json){
 		if ((gt.length>1) || (json["mutations"][region][gt[0]]==undefined)){
 			for (freq_gt in json["genotypes"][region]){
 				var gt_agree = gt.map(function (d) {
-								return freq_gt[parseInt(d.substring(0,d.length-1))+15]==d[d.length-1];
+								var aa =freq_gt[parseInt(d.substring(0,d.length-1))+15]; 
+								return (aa==d[d.length-1])||(aa=='.');
 					});
 				if (gt_agree.every(function (d,i,a) {return d;}))
 				{
