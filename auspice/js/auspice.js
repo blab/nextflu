@@ -769,7 +769,7 @@ d3.json("data/meta.json", function(error, json) {
 
 
 d3.json("data/genotype_frequencies.json", function(error, json){
-	var pivots= json["global"]["pivots"].map(function (d) {return Math.round(parseFloat(d)*100)/100;});
+	var pivots= json["mutations"]["global"]["pivots"].map(function (d) {return Math.round(parseFloat(d)*100)/100;});
 
 	/** 
 		returns a list of genotypes segregating at the specified positions  
@@ -799,16 +799,22 @@ d3.json("data/genotype_frequencies.json", function(error, json){
 		console.log("calculating frequencies for :"+gt);
 		var freq = [];
 		for (var pi=0; pi<pivots.length; pi++){freq[freq.length]=0;}
-		for (freq_gt in json[region]){
-			var gt_agree = gt.map(function (d) {
-							return freq_gt[parseInt(d.substring(0,d.length-1))+15]==d[d.length-1];
-				});
-			if (gt_agree.every(function (d,i,a) {return d;}))
-			{
-				for (var pi=0; pi<freq.length; pi++){
-					freq[pi]+=json[region][freq_gt][pi];
+		if ((gt.length>1) || (json["mutations"][region][gt[0]]==undefined)){
+			for (freq_gt in json["genotypes"][region]){
+				var gt_agree = gt.map(function (d) {
+								return freq_gt[parseInt(d.substring(0,d.length-1))+15]==d[d.length-1];
+					});
+				if (gt_agree.every(function (d,i,a) {return d;}))
+				{
+					for (var pi=0; pi<freq.length; pi++){
+						freq[pi]+=json["genotypes"][region][freq_gt][pi];
+					}
 				}
 			}
+		}else{
+			for (var pi=0; pi<freq.length; pi++){
+				freq[pi]+=json["mutations"][region][gt[0]][pi];
+			}			
 		}
 		return freq.map(function (d) {return Math.round(d*100)/100;});
 	};
