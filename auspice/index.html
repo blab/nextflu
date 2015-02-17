@@ -33,16 +33,11 @@ title: nextflu
 				<button id="reset" class="btn btn-default">reset layout</button>
 			</div>
 		</div>
-		<div class="io-container">
 		<div>
-			<input id="gtspec" value="159Y,225D/NA:159S/AS:159Y">
+			<input id="gtspec" value="159Y,225D/NA:159S/AS:159Y", size=50>
 			<button id="plotfreq" class="btn btn-default">plot frequencies</button>
-			<button id="plotfreq_reset" class="btn btn-default">reset plot</button>
 		</div>
-		</div>
-		<div class="plot-container">
-			<svg id="gtfreqplot"></svg>
-		</div>
+		<div id="gtchart"></div>
 
 	</div>
 </div>
@@ -69,5 +64,6 @@ title: nextflu
 
 <script src="js/d3.min.js"></script>
 <script src="js/d3.tip.js"></script>
+<script src="js/c3.min.js"></script>
 <script src="js/autocomplete.js"></script>
 <script src="js/auspice.js"></script>

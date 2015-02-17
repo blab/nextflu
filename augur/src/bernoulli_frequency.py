@@ -294,7 +294,9 @@ def estimate_genotype_frequency(tree, gt, time_interval=None, regions = None):
 	'''
 	all_dates = []
 	observations = []
+	total_leaf_count = 0
 	for node in tree.leaf_iter():
+		total_leaf_count+=1
 		if isinstance(gt, basestring):
 			is_gt = gt==node.aa_seq
 		else:
@@ -318,7 +320,9 @@ def estimate_genotype_frequency(tree, gt, time_interval=None, regions = None):
 	obs = np.array(observations)[leaf_order]
 	# define pivots and estimate
 	pivots = get_pivots(tps[0], tps[1])
-	fe = frequency_estimator(zip(tps, obs), pivots=pivots, stiffness=flu_stiffness, logit=True, verbose = 0)
+	fe = frequency_estimator(zip(tps, obs), pivots=pivots, 
+	               stiffness=flu_stiffness*float(len(observations))/total_leaf_count, 
+                   logit=True, verbose = 0)
 	fe.learn()
 	return fe.frequency_estimate, (tps,obs)
 
@@ -438,7 +442,7 @@ def main():
 
 	tree_fname='data/tree_refine_3y_50v.json'
 	tree =  json_to_dendropy(read_json(tree_fname))
-
+	total_leaf_count = len(tree.leaf_nodes())
 	region_list = [("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
 			("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ]
 

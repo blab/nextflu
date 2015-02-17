@@ -194,7 +194,6 @@ function maximumAttribute(node, attr, max) {
 	return max;
 }
 
-var margin = {top: 20, right: 20, bottom: 30, left: 50};
 var width = 800,
 	height = 600;
 
@@ -211,13 +210,6 @@ var tree = d3.layout.tree()
 var treeplot = d3.select("#treeplot")
 	.attr("width", width)
 	.attr("height", height);
-
-var gtfreqplot = d3.select("#gtfreqplot")
-	.attr("width", width)
-	.attr("height", height+margin.top + margin.bottom)
-  .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
 
 var virusTooltip = d3.tip()
 	.direction('e')
@@ -777,46 +769,7 @@ d3.json("data/meta.json", function(error, json) {
 
 
 d3.json("data/genotype_frequencies.json", function(error, json){
-	var x = d3.time.scale()
-		.range([0, width]);
-	
-	var y = d3.scale.linear()
-		.range([height, 0]);
-	
-	var xAxis = d3.svg.axis()
-		.scale(x)
-		.orient("bottom");
-	
-	var yAxis = d3.svg.axis()
-		.scale(y)
-		.orient("left");
-	
-	var line = d3.svg.line()
-		.x(function(d) { return x(d.date); })
-		.y(function(d) { return y(d.freq); });
-
-	pivots= json["global"]["pivots"].filter(function (d) {return parseFloat(d);});
-	console.log(pivots[0]+ " - "+pivots[pivots.length-1]);
-	x.domain([pivots[0], pivots[pivots.length-1]]);
-	y.domain([0, 1.05]);
-
-	gtfreqplot.append("g")
-		.attr("class", "x axis")
-		.attr("transform", "translate(0," + height + ")")
-		.call(xAxis)
-		.append("text")
-		.style("text-anchor", "end")
-		.text("Time");
-
-	 gtfreqplot.append("g")
-		.attr("class", "y axis")
-		.call(yAxis)
-		.append("text")
-		.attr("transform", "rotate(-90)")
-		.attr("y", 6)
-		.attr("dy", ".71em")
-		.style("text-anchor", "end")
-		.text("Frequency");
+	var pivots= json["global"]["pivots"].map(function (d) {return Math.round(parseFloat(d)*100)/100;});
 
 	/** 
 		returns a list of genotypes segregating at the specified positions  
@@ -843,10 +796,9 @@ d3.json("data/genotype_frequencies.json", function(error, json){
 	of the genotype matches at the specified positions
 	**/
 	function get_frequencies(region, gt){
-		console.log(gt);
+		console.log("calculating frequencies for :"+gt);
 		var freq = [];
 		for (var pi=0; pi<pivots.length; pi++){freq[freq.length]=0;}
-		console.log(freq);
 		for (freq_gt in json[region]){
 			var gt_agree = gt.map(function (d) {
 							return freq_gt[parseInt(d.substring(0,d.length-1))+15]==d[d.length-1];
@@ -858,22 +810,37 @@ d3.json("data/genotype_frequencies.json", function(error, json){
 				}
 			}
 		}
-		return freq;
+		return freq.map(function (d) {return Math.round(d*100)/100;});
 	};
+
+	function make_gt_chart(gt){
+		var tmp_data = [];
+		var tmp_trace = ['x'];
+		tmp_data.push(tmp_trace.concat(pivots));
+		gt.forEach(function (d){
+			var freq = get_frequencies(d[0], d[1]);
+			tmp_trace = [d[0]+':\t'+d[1]];
+			tmp_data.push(tmp_trace.concat(freq));
+		})
+		var gt_chart= c3.generate({
+		    bindto: '#gtchart',
+		    size: {width:800, height: 400},
+		    legend: {position: "right"},
+			axis: {
+			  y: {label: 'frequency'},
+			  x: {label: 'time', tick: {values: [2012,2012.5,2013,2013.5,2014,2014.5,2015]}}
+			},			
+  			data: {
+	   	    x: 'x',
+	       	columns: tmp_data
+	    	}
+		});
+	}
 
 	d3.select("#plotfreq")
 		.on("click", function (){
 			gt = parse_gt_string(document.getElementById("gtspec").value);
-			gt.forEach(function (d){
-				console.log(d[0]+' : '+d[1]);
-				var freq = get_frequencies(d[0], d[1]);
-				console.log(pivots);
-				console.log(freq);
-				gtfreqplot.append("path")
-					.datum(function () { return freq.map(function (d,i){return {date:pivots[i], freq:d}})})
-					.attr("class", "line")
-					.attr("d", line);				
-			})
+			make_gt_chart(gt);
 		});
-
+	make_gt_chart(parse_gt_string(document.getElementById("gtspec").value));
 });
