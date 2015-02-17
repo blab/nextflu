@@ -498,7 +498,7 @@ def main():
 
 	# add genotype at the positions with mutation frequencies to the tree
 	# relevant_pos = sorted(set([int(mut[:-1].split('_')[-1]) for mut in mutation_frequencies[region_label] 
-								if 'pivot' not in mut]))
+ 	#								if 'pivot' not in mut]))
 	# add_genotype_at_pos(tree, relevant_pos)
 	# add the corresponding positions in canonical HA1 numbering to the seed_node
 	# tree.seed_node.gt_pos = [pos for pos in relevant_pos]
