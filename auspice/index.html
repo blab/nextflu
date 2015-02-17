@@ -4,7 +4,7 @@ title: nextflu
 ---
 
 <div class="row" style="height: 700px;">
-	<div class="col-md-12">
+	<div class="col-md-8">
 		<div class="plot-container">
 			<svg id="treeplot"></svg>
 		</div>
@@ -33,17 +33,27 @@ title: nextflu
 				<button id="reset" class="btn btn-default">reset layout</button>
 			</div>
 			<div id="positions">
-				<input id="gt_color" value="color by genotype" size=15>
-				<button id="gt_color_ok" class="btn btn-default">color</button>
+				<input id="gt_color" value="HA1 positions" size=12>
+				<button id="gt_color_ok" class="btn btn-default">paint tree</button>
 			</div>
 		</div>
 	</div>
+	<div class="col-md-4">
+		<div class="hugerspacer"></div>
+		<h4>Clade frequencies</h4>
+		<div id="clade_freq_chart"></div>
+	</div>
 </div>
-<div>
-	<input id="gtspec" value="159Y,225D/NA:159S/AS:159Y/EU:159Y,", size=50>
-	<button id="plotfreq" class="btn btn-default">plot frequencies</button>
+<div class="row">
+	<div class="col-md-2"></div>
+	<div class="col-md-8">
+		<div>
+			<input id="gtspec" value="159Y,225D/NA:159S/AS:159Y/EU:159Y,", size=50>
+			<button id="plotfreq" class="btn btn-default">plot frequencies</button>
+		</div>
+		<div id="gtchart"></div>
+	</div>
 </div>
-<div id="gtchart"></div>
 
 <div class="row">
 	<div class="col-md-1"></div>

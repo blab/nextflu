@@ -140,6 +140,8 @@ def dendropy_to_json(node):
 			json['freq'] = {reg: list(np.round(freq, 5))  if freq is not None else "undefined" for reg, freq in node.freq.iteritems()}		
 		if hasattr(node, 'logit_freq') and node.logit_freq is not None:
 			json['logit_freq'] = {reg: list(np.round(freq, 5))  if freq is not None else "undefined" for reg, freq in node.logit_freq.iteritems()}
+		if hasattr(node, 'pivots'):
+			json['pivots'] = list(node.pivots)		
 	except:
 		import pdb; pdb.set_trace()
 	if node.child_nodes():

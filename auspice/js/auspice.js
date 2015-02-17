@@ -248,12 +248,13 @@ var linkTooltip = d3.tip()
 	.offset([0, 12])
 	.html(function(d) {
 		string = ""
-		if (typeof d.freq != "undefined") {
-			string += "Frequency: " + (100 * d.freq).toFixed(1) + "%";
+		if (typeof d.frequency != "undefined") {
+			string += "Frequency: " + (100 * d.frequency).toFixed(1) + "%";
 		}
 		return string;
 	});
 treeplot.call(linkTooltip);
+var clade_freq_chart;
 
 function rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, internals, vaccines) {
 
@@ -279,16 +280,16 @@ function rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, int
 	treeplot.selectAll(".internal").data(internals)
 		.transition().duration(speed)
 		.attr("x", function(d) {
-			if (typeof d.freq != "undefined") {
-				return d.x - 5*Math.sqrt(d.freq) - 0.5;
+			if (typeof d.frequency != "undefined") {
+				return d.x - 5*Math.sqrt(d.frequency) - 0.5;
 			}
 			else {
 				return d.x - 1;
 			}
 		})
 		.attr("y", function(d) {
-			if (typeof d.freq != "undefined") {
-				return d.y - 5*Math.sqrt(d.freq) - 0.5;
+			if (typeof d.frequency != "undefined") {
+				return d.y - 5*Math.sqrt(d.frequency) - 0.5;
 			}
 			else {
 				return d.y - 1;
@@ -449,7 +450,7 @@ d3.json("data/tree.json", function(error, root) {
 		var tipCount = rootNode.tipCount;		
 		console.log("Total tipcount: " + tipCount);	
 		nodes.forEach(function (d) {
-			d.freq = (d.tipCount)/tipCount;
+			d.frequency = (d.tipCount)/tipCount;
 		});
 	}	
 
@@ -463,18 +464,38 @@ d3.json("data/tree.json", function(error, root) {
 		.enter().append("polyline")
 		.attr("class", "link")
 		.attr("points", function(d) {
-			var mod = 0.5 * freqScale(d.target.freq) - freqScale(0);
+			var mod = 0.5 * freqScale(d.target.frequency) - freqScale(0);
 			return (d.source.x-mod).toString() + "," + d.source.y.toString() + " "
 			+ (d.source.x-mod).toString() + "," + d.target.y.toString() + " "
 			+ (d.target.x).toString() + "," + d.target.y.toString()
 		})
 		.style("stroke-width", function(d) {
-			return freqScale(d.target.freq);
+			return freqScale(d.target.frequency);
 		})
 		.style("stroke", "#ccc")
 		.style("cursor", "pointer")
 		.on('mouseover', function(d) {
 			linkTooltip.show(d.target, this);
+			var plot_data = [['x'].concat(rootNode["pivots"])];
+			for (reg in d.target.freq){
+				if (d.target.freq[reg] != "undefined"){
+					plot_data[plot_data.length] = [reg].concat(d.target.freq[reg]);
+				}
+			}
+			console.log(plot_data[0]);
+			console.log(d.target.freq);
+			clade_freq_chart = c3.generate({
+			    bindto: '#clade_freq_chart',
+			    size: {width:500, height: 600},
+			    legend: {position: "right"},
+				axis: {
+				  x: {tick: {values: [2012,2012.5,2013,2013.5,2014,2014.5,2015]}}
+				},			
+	  			data: {
+		   	    x: 'x',
+		       	columns: plot_data
+   		    	}
+			});
 		})
 		.on('mouseout', linkTooltip.hide)		
 		.on('click', function(d) {
@@ -585,13 +606,13 @@ d3.json("data/tree.json", function(error, root) {
 		d3.selectAll(".link")
 			.transition().duration(500)
 			.attr("points", function(d) {
-				var mod = 0.5 * freqScale(d.target.freq) - freqScale(0);				
+				var mod = 0.5 * freqScale(d.target.frequency) - freqScale(0);				
 				return (d.source.x-mod).toString() + "," + d.source.y.toString() + " "
 				+ (d.source.x-mod).toString() + "," + d.target.y.toString() + " "
 				+ (d.target.x).toString() + "," + d.target.y.toString()
 			})
 			.style("stroke-width", function(d) {
-				return freqScale(d.target.freq);
+				return freqScale(d.target.frequency);
 			});
 		d3.selectAll(".tip")
 			.transition().duration(500)
@@ -719,6 +740,8 @@ d3.json("data/tree.json", function(error, root) {
 
 			adjust_coloring_by_date();
 
+	 		treeplot.selectAll(".link")
+				.style("stroke", function(d){return "#ccc";})
 			d3.selectAll(".tip")
 				.attr("r", function(d) {
 					return recencySizeScale(d.diff);
@@ -766,6 +789,9 @@ d3.json("data/tree.json", function(error, root) {
 			.domain(filtered_gts);
  		treeplot.selectAll(".link")
 			.style("stroke", function(d){return gtColorScale(d.target.color_gt);})
+ 		treeplot.selectAll(".tip")
+			.style("fill", function(d){return gtColorScale(d.color_gt);})
+			.style("stroke", function(d){return gtColorScale(d.color_gt);})
 	}
 
 	function onSelect(tip) {
@@ -802,13 +828,6 @@ d3.json("data/meta.json", function(error, json) {
 
 d3.json("data/genotype_frequencies.json", function(error, json){
 	var pivots= json["mutations"]["global"]["pivots"].map(function (d) {return Math.round(parseFloat(d)*100)/100;});
-
-	/** 
-		returns a list of genotypes segregating at the specified positions  
-	**/
-	function collect_genotypes(positions){
-		return;
-	};
 	/**
 		parses a genotype string into region and positions
 	**/
@@ -863,7 +882,7 @@ d3.json("data/genotype_frequencies.json", function(error, json){
 		})
 		var gt_chart= c3.generate({
 		    bindto: '#gtchart',
-		    size: {width:800, height: 400},
+		    size: {width:900, height: 400},
 		    legend: {position: "right"},
 			axis: {
 			  y: {label: 'frequency'},
