@@ -501,12 +501,10 @@ def all_clades(tree, region_list, plot=False):
 			plt.savefig('data/clade_frequencies_'+region_label+'.pdf')
 	return clade_frequencies
 
-def main():
+def main(tree_fname = 'data/tree_refine_3y_50v.json'):
 	# load tree
 	from io_util import read_json
-	plot = True
-
-	tree_fname='data/tree_refine_3y_50v.json'
+	plot = False
 	tree =  json_to_dendropy(read_json(tree_fname))
 	region_list = [("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
 			("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ]
@@ -524,20 +522,16 @@ def main():
 		for reg in region_list:
 			for gt in gt_frequencies[gt_type][reg[0]]:
 				tmp = gt_frequencies[gt_type][reg[0]][gt]
-				if "pivot" in gt:
-					gt_frequencies[gt_type][reg[0]][gt] = [y[:8] for y in map(str, [x for x in tmp])]
-				else:
-					gt_frequencies[gt_type][reg[0]][gt] = [y[:5] for y in map(str, [x for x in tmp])]
+				gt_frequencies[gt_type][reg[0]][gt] = [round(x,3) for x in tmp]
 
 	write_json(gt_frequencies, out_fname, indent=None)
 
-	out_fname = 'data/tree_frequencies.json'
+	tree_out_fname = 'data/tree_frequencies.json'
 	for region_label, regions in region_list:
 		print "--- "+"adding frequencies to tree "+region_label+ " "  + time.strftime("%H:%M:%S") + " ---"
 		estimate_tree_frequencies(tree, threshold = 10, regions=regions, region_name=region_label)
-	write_json(dendropy_to_json(tree.seed_node), out_fname, indent=None)
-
-
+	write_json(dendropy_to_json(tree.seed_node), tree_out_fname, indent=None)
+	return tree_out_fname
 
 if __name__=="__main__":
 	#test()
