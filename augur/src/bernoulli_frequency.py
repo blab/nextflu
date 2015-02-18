@@ -157,7 +157,7 @@ class frequency_estimator(object):
 
 	def learn(self):
 		from scipy.optimize import fmin_powell as minimizer
-		self.final_pivot_freq = self.initial_guess(self.final_pivot_tps, ws=50)
+		self.final_pivot_freq = self.initial_guess(self.final_pivot_tps, ws=2*(min(50,len(self.obs))//2))
 		if self.verbose:
 			print "Initial pivots:", self.final_pivot_freq
 		steps= [4,2,1]
@@ -209,8 +209,9 @@ def estimate_sub_frequencies(node, all_dates, tip_to_date_index, threshold=50, r
 			obs = np.in1d(tps, all_dates[tip_to_date_index[child.tips]])
 
 			# make n pivots a year, interpolate frequencies
+			# FIXME: adjust stiffness to total number of observations in a more robust manner
 			pivots = get_pivots(tps[0], tps[1])
-			fe = frequency_estimator(zip(tps, obs), pivots=pivots, stiffness=flu_stiffness, logit=True)
+			fe = frequency_estimator(zip(tps, obs), pivots=pivots, stiffness=flu_stiffness*len(all_dates)/2000.0, logit=True)
 			fe.learn()
 
 			try:
@@ -241,7 +242,7 @@ def estimate_sub_frequencies(node, all_dates, tip_to_date_index, threshold=50, r
 	for child in node.child_nodes():
 		estimate_sub_frequencies(child, all_dates, tip_to_date_index, threshold, region_name)
 
-def estimate_tree_frequencies(tree, regions=None, region_name = None):
+def estimate_tree_frequencies(tree, threshold = 20, regions=None, region_name = None):
 	'''
 	loop over nodes of the tree and estimate frequencies of all clade above a certain size
 	'''
@@ -284,7 +285,7 @@ def estimate_tree_frequencies(tree, regions=None, region_name = None):
 	tree.seed_node.logit_freq[region_name] = 10*np.ones_like(tree.seed_node.pivots)
 
 	# start estimating frequencies of subclades recursively
-	estimate_sub_frequencies(tree.seed_node, all_dates, reverse_order, region_name = region_name)
+	estimate_sub_frequencies(tree.seed_node, all_dates, reverse_order, threshold = threshold, region_name = region_name)
 
 
 def estimate_genotype_frequency(tree, gt, time_interval=None, regions = None, relevant_pos = None):
@@ -430,27 +431,17 @@ def test():
 	plt.legend(loc=2)
 
 
-def main():
-	# load tree
+
+
+def all_mutations(tree, region_list, plot=False):
 	import matplotlib.pyplot as plt
-	from io_util import read_json
-	from collections import defaultdict
-	plot = True
-
-	tree_fname='data/tree_refine_3y_50v.json'
-	tree =  json_to_dendropy(read_json(tree_fname))
-	total_leaf_count = len(tree.leaf_nodes())
-	region_list = [("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
-			("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ]
-
-	gt_frequencies = {"genotypes":{}, "mutations":{}}
-
+	mutation_frequencies = {}
 	for region_label, regions in region_list:
 		print "--- "+"determining mutation frequencies in "+region_label+ " "  + time.strftime("%H:%M:%S") + " ---"
 		if plot:
 			plt.figure("mutations in "+region_label, figsize = (12,7))
 			if regions is not None: plt.title("Region: "+", ".join(regions))
-		gt_frequencies["mutations"][region_label] = determine_mutation_frequencies(tree, regions, plot=plot, threshold = 5)
+		mutation_frequencies[region_label] = determine_mutation_frequencies(tree, regions, plot=plot, threshold = 5)
 		if plot:
 			plt.legend()
 			ticloc = np.arange(time_interval[0], int(time_interval[1])+1,1)
@@ -459,35 +450,41 @@ def main():
 			plt.ylim([-0.05, 1.05])
 			plt.grid()
 			plt.savefig('data/mutation_frequencies'+region_label+'.pdf')
-	out_fname = 'data/genotype_frequencies.json'
-	write_json(gt_frequencies, out_fname, indent=None)
 
 	relevant_pos = []
-	for mut, freq in gt_frequencies["mutations"]["global"].iteritems():
+	for mut, freq in mutation_frequencies["global"].iteritems():
 		if "pivot" not in mut:
 			if np.max(freq)-np.min(freq)>0.1:
 				pos = int(mut.split('_')[-1][:-1])+15
 				relevant_pos.append(pos)
 	relevant_pos = sorted(set(relevant_pos))
-	print relevant_pos
+
+	return mutation_frequencies, relevant_pos
+
+def all_genotypes(tree, region_list, relevant_pos):
+	from collections import defaultdict
+	total_leaf_count = len(tree.leaf_nodes())
 	gt_counts = defaultdict(int)
+	gt_frequencies = {}
 	for node in tree.leaf_iter():
 		gt_counts[reduce_genotype(node.aa_seq, relevant_pos)]+=1
 	for region_label, regions in region_list:
 		tc_in_region, sum_gts = 0,0
-		gt_frequencies["genotypes"][region_label]={"pivots":list(get_pivots(time_interval[0], time_interval[1]))}
+		gt_frequencies[region_label]={"pivots":list(get_pivots(time_interval[0], time_interval[1]))}
 		print "--- "+"determining genotype frequencies "+region_label+ " "  + time.strftime("%H:%M:%S") + " ---"
 		for gt, c in gt_counts.iteritems():
 			print gt, c
 			tmp_freq , (tps, obs) = estimate_genotype_frequency(tree, gt, regions=regions, relevant_pos = relevant_pos)
-			gt_frequencies["genotypes"][region_label][gt] = list(logit_inv(tmp_freq.y))
+			gt_frequencies[region_label][gt] = list(logit_inv(tmp_freq.y))
 			sum_gts+=np.sum(obs)
 			tc_in_region = len(tps)
 		print "region: ", sum_gts, "out of", tc_in_region, "(",total_leaf_count," in total)"
-	out_fname = 'data/genotype_frequencies.json'
-	write_json(gt_frequencies, out_fname, indent=None)
+	return gt_frequencies
 
+
+def all_clades(tree, region_list, plot=False):
 	clade_frequencies = {}
+	import matplotlib.pyplot as plt
 	for region_label, regions in region_list:
 		print "--- "+"determining clade frequencies "+region_label+ " "  + time.strftime("%H:%M:%S") + " ---"
 		if plot:
@@ -502,22 +499,45 @@ def main():
 			plt.ylim([-0.05, 1.05])
 			plt.grid()
 			plt.savefig('data/clade_frequencies_'+region_label+'.pdf')
-	out_fname = 'data/clade_frequencies.json'
-	write_json(clade_frequencies, out_fname, indent=None)
+	return clade_frequencies
 
+def main():
+	# load tree
+	from io_util import read_json
+	plot = True
 
-	# add genotype at the positions with mutation frequencies to the tree
-	# relevant_pos = sorted(set([int(mut[:-1].split('_')[-1]) for mut in mutation_frequencies[region_label] 
- 	#								if 'pivot' not in mut]))
-	# add_genotype_at_pos(tree, relevant_pos)
-	# add the corresponding positions in canonical HA1 numbering to the seed_node
-	# tree.seed_node.gt_pos = [pos for pos in relevant_pos]
+	tree_fname='data/tree_refine_3y_50v.json'
+	tree =  json_to_dendropy(read_json(tree_fname))
+	region_list = [("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
+			("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ]
+
+	out_fname = 'data/genotype_frequencies.json'
+	gt_frequencies = {}
+	gt_frequencies["mutations"], relevant_pos = all_mutations(tree, region_list, plot)
+	write_json(gt_frequencies, out_fname, indent=None)
+	gt_frequencies["genotypes"] = all_genotypes(tree, region_list, relevant_pos)
+	write_json(gt_frequencies, out_fname, indent=None)
+
+	gt_frequencies["clades"] = all_clades(tree, region_list, plot)
+	# round numbers hard
+	for gt_type in gt_frequencies:
+		for reg in region_list:
+			for gt in gt_frequencies[gt_type][reg[0]]:
+				tmp = gt_frequencies[gt_type][reg[0]][gt]
+				if "pivot" in gt:
+					gt_frequencies[gt_type][reg[0]][gt] = [y[:8] for y in map(str, [x for x in tmp])]
+				else:
+					gt_frequencies[gt_type][reg[0]][gt] = [y[:5] for y in map(str, [x for x in tmp])]
+
+	write_json(gt_frequencies, out_fname, indent=None)
 
 	out_fname = 'data/tree_frequencies.json'
 	for region_label, regions in region_list:
 		print "--- "+"adding frequencies to tree "+region_label+ " "  + time.strftime("%H:%M:%S") + " ---"
-		estimate_tree_frequencies(tree, regions=regions, region_name=region_label)
+		estimate_tree_frequencies(tree, threshold = 10, regions=regions, region_name=region_label)
 	write_json(dendropy_to_json(tree.seed_node), out_fname, indent=None)
+
+
 
 if __name__=="__main__":
 	#test()

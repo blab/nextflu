@@ -327,3 +327,14 @@ blockquote {
 	.text-dark-gray;
 	text-align: center;
 }
+
+
+.legend {
+font-size: 12px;
+}
+rect {
+stroke-width: 2;
+}
+text {
+font-size: 12px;
+}

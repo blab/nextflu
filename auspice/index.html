@@ -33,26 +33,39 @@ title: nextflu
 				<button id="reset" class="btn btn-default">reset layout</button>
 			</div>
 			<div id="positions">
-				<input id="gt_color" value="HA1 positions" size=12>
+				<input id="gt_color" value="HA1 positions" size=10>
 				<button id="gt_color_ok" class="btn btn-default">paint tree</button>
 			</div>
 		</div>
 	</div>
 	<div class="col-md-4">
-		<div class="hugerspacer"></div>
+	<div class="hugespacer"></div>
+		<h4>Legend</h4>
+		<svg id = "legend"></svg>
 		<h4>Clade frequencies</h4>
-		<div id="clade_freq_chart"></div>
+		<div id="clade_freq_chart" class="chart"></div>
 	</div>
 </div>
 <div class="row">
-	<div class="col-md-2"></div>
+<h4>Mutation and genotype frequencies</h4>
 	<div class="col-md-8">
+		<div id="gtchart"></div>
 		<div>
 			<input id="gtspec" value="159Y,225D/NA:159S/AS:159Y/EU:159Y,", size=50>
 			<button id="plotfreq" class="btn btn-default">plot frequencies</button>
 		</div>
-		<div id="gtchart"></div>
 	</div>
+	<div class="col-md-4"></div>
+	<h4>Feature Explanation</h4>
+	<ul>
+	<li> <b>date slider:</b> explore the tree through time
+	<li> <b>pull down menu:</b> decorate the tree with the number mutations relative to root
+	<li> <b>pull down menu:</b>  decorate the with the branching index 
+	<li> <b>mouse over</b> a branch to display the frequency trajectory on the right
+	<li> <b>mouse over</b> a strain to display strain name and features
+	<li> <b>paint tree:</b> specify positions (e.g. 159,225) to color the tree by genotype
+	<li> <b>plot frequencies:</b> specify genotypes (e.g. 159Y,225D) to graph frequency through time. Optionally, specify regions as NA:159Y, where supported regions are AS, NA, EU, and OC. Beware that regions specific frequencies are noisy.
+	</ul>
 </div>
 
 <div class="row">
