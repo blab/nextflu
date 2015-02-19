@@ -17,24 +17,30 @@ title: nextflu
 				<svg id="date-input"></svg>
 			</div>
 			<div class="spacer"></div>
-			<div>
-				<select id="coloring" class="form-control">
-					<option value="ep">epitope mutations</option>
-					<option value="ne">non-epitope mutations</option>
-					<option value="rb">receptor binding mutations</option>
-					<option value="lbi">local branching index</option>
-					<option value="region">geographic region</option>
-				</select>
-			</div>
-			<div class="spacer"></div>
+			<form class="form-horizontal form-small">
+				<div class="form-group">
+						<label class="col-xs-4 control-label">Color by</label>
+						<div class="col-xs-8 controls">
+							<select id="coloring" class="form-control">
+								<option value="ep">epitope mutations</option>
+								<option value="ne">non-epitope mutations</option>
+								<option value="rb">receptor binding mutations</option>
+								<option value="lbi">local branching index</option>
+								<option value="region">geographic region</option>
+							</select>
+						</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 control-label">Or</label>
+					<div class="col-xs-8 controls">
+						<input id="gt-color" type="search" placeholder="HA1 positions..." class="form-control">
+					</div>
+				</div>		
+			</form>
 			<div id="search"></div>
 			<div class="spacer"></div>
 			<div>
 				<button id="reset" class="btn btn-default">reset layout</button>
-			</div>
-			<div id="positions">
-				<input id="gt_color" value="HA1 positions" size=10>
-				<button id="gt_color_ok" class="btn btn-default">paint tree</button>
 			</div>
 		</div>
 	</div>

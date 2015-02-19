@@ -55,7 +55,7 @@ body {
 }
 
 .io-container {
-	width: 220px;
+	width: 240px;
 	position:absolute;	
 }
 
@@ -338,3 +338,14 @@ stroke-width: 2;
 text {
 font-size: 12px;
 }
+
+.form-small .control-label {
+    padding-right: 3px;
+	font-weight: 300;    
+}
+
+.form-small .controls {
+	padding-left: 3px;
+	
+}
+

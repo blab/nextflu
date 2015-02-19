@@ -359,12 +359,12 @@ d3.json("data/tree.json", function(error, root) {
 
 	var dateScale = d3.time.scale()
 		.domain([earliestDate, globalDate])
-		.range([5, 215])
+		.range([5, 235])
 		.clamp([true]);	
 
 	var niceDateScale = d3.time.scale()
 		.domain([earliestDate, globalDate])
-		.range([5, 215])
+		.range([5, 235])
 		.clamp([true])
 		.nice(d3.time.month);
 
@@ -573,7 +573,7 @@ d3.json("data/tree.json", function(error, root) {
 		d.date = dateScale.invert(d3.event.x);
 		d.x = dateScale(d.date);
 		d3.selectAll(".date-input-text")
-			.attr("x", function(d) {return 0.3*d.x})
+			.attr("x", function(d) {return 0.35*d.x})
 			.text(function(d) {
 				var format = d3.time.format("%Y %b %-d");
 				return format(d.date)
@@ -653,7 +653,7 @@ d3.json("data/tree.json", function(error, root) {
 	counterData['x'] = dateScale(globalDate)
 
 	d3.select("#date-input")
-		.attr("width", 240)
+		.attr("width", 260)
 		.attr("height", 65);
 
 	var counter = d3.select("#date-input").selectAll(".date-input-text")
@@ -662,7 +662,7 @@ d3.json("data/tree.json", function(error, root) {
 		.append("text")
 		.attr("class", "date-input-text")
 		.attr("text-anchor", "left")
-		.attr("x", function(d) {return 0.3*d.x})
+		.attr("x", function(d) {return 0.35*d.x})
 		.attr("dy", "0.75em")
 		.text(function(d) {
 			var format = d3.time.format("%Y %b %-d");
@@ -860,15 +860,28 @@ d3.json("data/tree.json", function(error, root) {
 		.onSelected(onSelect)
 		.render();
 
-	d3.select("#gt_color_ok")
-		.on("click", function (){
-			var positions = document.getElementById("gt_color").value.split(',');
-			var positions2 = positions.map(function(d) {return parseInt(d)+15;});
-			console.log(positions2);
-			colorBy="genotype";
-			color_by_genotype(positions2);
+	d3.select("#gt-color")
+		.on("keyup", function () {
+			var positions_string = document.getElementById("gt-color").value.split(',');
+			var positions_list = []
+			positions_string.map(function(d) {
+				val = parseInt(d)+15;
+				if (!isNaN(val)) {
+					positions_list.push(val);
+				}
+			});
+			console.log(positions_list);
+			if (positions_list.length > 0) {
+				colorBy = "genotype";
+				color_by_genotype(positions_list);
+			}
+			else {
+			
+			}
 		});
+
 	tree_legend = makeLegend();
+
 });
 
 d3.json("data/meta.json", function(error, json) {
