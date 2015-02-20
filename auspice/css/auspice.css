@@ -47,8 +47,8 @@ body {
 }
 
 .plot-container {
-	width:800px;
-	position:absolute;
+	width: 800px;
+	position: absolute;
 	top: 65px;
 	left: 50%;
 	margin-left: -400px;	
@@ -56,7 +56,7 @@ body {
 
 .io-container {
 	width: 240px;
-	position:absolute;	
+	position: absolute;	
 }
 
 .bordered {
