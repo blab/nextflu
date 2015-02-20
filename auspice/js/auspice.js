@@ -831,7 +831,7 @@ d3.json("data/tree.json", function(error, root) {
 		positions_string.map(function(d) {
 			val = parseInt(d)+15;
 			if (!isNaN(val)) {
-				if (val < 314) {
+				if (val < 561) {
 					positions_list.push(val);
 				}
 			}
@@ -988,7 +988,7 @@ d3.json("data/genotype_frequencies.json", function(error, json){
 		console.log("calculating frequencies for :"+gt);
 		var freq = [];
 		for (var pi=0; pi<pivots.length; pi++){freq[freq.length]=0;}
-		if ((gt.length>1) || (json["mutations"][region][gt[0]]==undefined)){
+		if (gt.length>1){
 			for (freq_gt in json["genotypes"][region]){
 				var gt_agree = gt.map(function (d) {
 								var aa =freq_gt[parseInt(d.substring(0,d.length-1))+15]; 
@@ -1001,9 +1001,13 @@ d3.json("data/genotype_frequencies.json", function(error, json){
 					}
 				}
 			}
-		}else{
+		}else if (json["mutations"][region][gt[0]]!=undefined) {
 			for (var pi=0; pi<freq.length; pi++){
 				freq[pi]+=json["mutations"][region][gt[0]][pi];
+			}			
+		}else if (json["clades"][region][gt[0]]!=undefined) {
+			for (var pi=0; pi<freq.length; pi++){
+				freq[pi]+=json["clades"][region][gt[0]][pi];
 			}			
 		}
 		return freq.map(function (d) {return Math.round(d*100)/100;});
