@@ -59,6 +59,11 @@ body {
 	position: absolute;	
 }
 
+.subtitle-box {
+	width: 300px;
+	margin-left: 5px;
+}
+
 .bordered {
 	border-style: solid;
 	border-width: 1px;
@@ -247,7 +252,7 @@ p {
 }
 
 .bigspacer {
-	height: 20px;
+	height: 30px;
 }
 
 .spacer {
