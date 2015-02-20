@@ -194,6 +194,19 @@ function maximumAttribute(node, attr, max) {
 	return max;
 }
 
+function branchStrokeColor(col) {
+	var modCol = d3.interpolateRgb(col, "#BBB")(0.6);
+	return d3.rgb(modCol).toString();
+}
+
+function tipStrokeColor(col) {
+	return d3.rgb(col).toString();	
+}
+
+function tipFillColor(col) {
+	return d3.rgb(col).brighter([0.65]).toString();
+}
+
 var width = 800,
 	height = 600;
 
@@ -202,7 +215,6 @@ var ymd_format = d3.time.format("%Y-%m-%d");
 
 var LBItau = 0.0008,
 	time_window = 1.0;  // layer of one year that is considered current or active
-
 
 var tree = d3.layout.tree()
 	.size([height, width]);
@@ -400,7 +412,7 @@ d3.json("data/tree.json", function(error, root) {
 		.range(colors);
 
 	var colorScale = epitopeColorScale;
-	tips.map(function(d) { d.coloring = d.ep; });
+	nodes.map(function(d) { d.coloring = d.ep; });
 	
 	var freqScale = d3.scale.linear()
 		.domain([0, 1])
@@ -429,6 +441,7 @@ d3.json("data/tree.json", function(error, root) {
 		});
 	}; 	
 
+	// set mean by alive tips
 	function adjust_coloring_by_date() {
 		if (colorBy == "ep" || colorBy == "ne" || colorBy == "rb") {
 			var mean = 0;
@@ -440,13 +453,13 @@ d3.json("data/tree.json", function(error, root) {
 				}
 			});
 			mean = mean / recent_tip_count;
-			tips.forEach(function (d) {
+			nodes.forEach(function (d) {
 				d.adj_coloring = d.coloring - mean;
 			});
 		}
 		if (colorBy == "lbi") {
 			calcLBI(rootNode, nodes, false);
-			tips.forEach(function (d) {
+			nodes.forEach(function (d) {
 				d.adj_coloring = d.LBI;
 			});
 		}
@@ -479,7 +492,10 @@ d3.json("data/tree.json", function(error, root) {
 		.style("stroke-width", function(d) {
 			return freqScale(d.target.frequency);
 		})
-		.style("stroke", "#ccc")
+		.style("stroke", function(d) {
+				var col = colorScale(d.target.adj_coloring);
+				return branchStrokeColor(col);
+			})		
 		.style("cursor", "pointer")
 		.on('mouseover', function(d) {
 			linkTooltip.show(d.target, this);
@@ -528,11 +544,11 @@ d3.json("data/tree.json", function(error, root) {
 		})
 		.style("fill", function(d) {
 			var col = colorScale(d.adj_coloring);
-			return d3.rgb(col).brighter([0.65]).toString();
+			return tipFillColor(col);
 		})
 		.style("stroke", function(d) {
 			var col = colorScale(d.adj_coloring);
-			return d3.rgb(col).toString();
+			return tipStrokeColor(col);
 		})
 		.on('mouseover', function(d) {
 			virusTooltip.show(d, this);
@@ -630,7 +646,17 @@ d3.json("data/tree.json", function(error, root) {
 				})
 				.style("stroke-width", function(d) {
 					return freqScale(d.target.frequency);
-				});
+				})
+				.style("stroke", function(d) {
+					if (colorScale != regionColorScale) {
+						var col = colorScale(d.target.adj_coloring);
+					}
+					else {
+						var col = "#AAA";
+					}
+					return branchStrokeColor(col);
+				});				
+				
 			d3.selectAll(".tip")
 				.transition().duration(500)
 				.attr("r", function(d) {
@@ -643,7 +669,7 @@ d3.json("data/tree.json", function(error, root) {
 					else {
 						var col = colorScale(d.region);
 					}
-					return d3.rgb(col).brighter([0.65]).toString();
+					return tipFillColor(col);
 				})
 				.style("stroke", function(d) {
 					if (colorScale != regionColorScale) {
@@ -652,7 +678,7 @@ d3.json("data/tree.json", function(error, root) {
 					else {
 						var col = colorScale(d.region);
 					}
-					return d3.rgb(col).toString();
+					return tipStrokeColor(col);
 				});
 		}
 	}
@@ -735,29 +761,37 @@ d3.json("data/tree.json", function(error, root) {
 
 		if (colorBy == "ep") {
 			colorScale = epitopeColorScale;
-			tips.map(function(d) { d.coloring = d.ep; });
+			nodes.map(function(d) { d.coloring = d.ep; });
 		}
 		if (colorBy == "ne") {
 			colorScale = nonepitopeColorScale;
-			tips.map(function(d) { d.coloring = d.ne; });
+			nodes.map(function(d) { d.coloring = d.ne; });
 		}
 		if (colorBy == "rb") {
 			colorScale = receptorBindingColorScale;
-			tips.map(function(d) { d.coloring = d.rb; });
+			nodes.map(function(d) { d.coloring = d.rb; });
 		}
 		if (colorBy == "lbi") {
 			colorScale = lbiColorScale;
-			tips.map(function(d) { d.adj_coloring = d.LBI; });
+			nodes.map(function(d) { d.adj_coloring = d.LBI; });
 		}
 		if (colorBy == "region") {
 			colorScale = regionColorScale;
-			tips.map(function(d) { d.adj_coloring = d.LBI; });
 		}
 
 		adjust_coloring_by_date();
 
 		treeplot.selectAll(".link")
-			.style("stroke", function(d){return "#ccc";})
+			.style("stroke", function(d) {
+					if (colorScale != regionColorScale) {
+						var col = colorScale(d.target.adj_coloring);
+					}
+					else {
+						var col = "#AAA";
+					}
+					return branchStrokeColor(col);
+				});
+			
 		d3.selectAll(".tip")
 			.attr("r", function(d) {
 				return recencySizeScale(d.diff);
@@ -769,7 +803,7 @@ d3.json("data/tree.json", function(error, root) {
 				else {
 					var col = colorScale(d.region);
 				}
-				return d3.rgb(col).brighter([0.65]).toString();
+				return tipFillColor(col);
 			})
 			.style("stroke", function(d) {
 				if (colorScale != regionColorScale) {
@@ -778,7 +812,7 @@ d3.json("data/tree.json", function(error, root) {
 				else {
 					var col = colorScale(d.region);
 				}
-				return d3.rgb(col).toString();
+				return tipStrokeColor(col);
 			});
 			
 		if (typeof tree_legend != undefined){
@@ -832,17 +866,16 @@ d3.json("data/tree.json", function(error, root) {
  		treeplot.selectAll(".link")
 			.style("stroke", function(d) {
 				var col = colorScale(d.target.color_gt);
-				var mod_col = d3.interpolateRgb(col, "#AAAAAA")(0.55)
-				return d3.rgb(mod_col).toString();
+				return branchStrokeColor(col);
 			});
  		treeplot.selectAll(".tip")
 			.style("fill", function(d) {
 				var col = colorScale(d.color_gt);
-				return d3.rgb(col).brighter([0.65]).toString();
+				return tipFillColor(col);
 			})
 			.style("stroke", function(d) {
 				var col = colorScale(d.color_gt);
-				return d3.rgb(col).toString();
+				return tipStrokeColor(col);
 			});
 		if (typeof tree_legend != undefined){
 			removeLegend();
