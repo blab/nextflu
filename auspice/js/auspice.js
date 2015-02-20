@@ -964,7 +964,7 @@ d3.json("data/meta.json", function(error, json) {
 });
 
 
-d3.json("data/genotype_frequencies.json", function(error, json){
+d3.json("data/frequencies.json", function(error, json){
 	var pivots= json["mutations"]["global"]["pivots"].map(function (d) {return Math.round(parseFloat(d)*100)/100;});
 	/**
 		parses a genotype string into region and positions

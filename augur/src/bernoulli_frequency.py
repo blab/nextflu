@@ -503,7 +503,7 @@ def all_clades(tree, region_list, plot=False):
 			plt.savefig('data/clade_frequencies_'+region_label+'.pdf')
 	return clade_frequencies
 
-def main(tree_fname = 'data/tree_refine_3y_50v.json'):
+def main(tree_fname = 'data/tree_refine.json'):
 	# load tree
 	from io_util import read_json
 	plot = debug
