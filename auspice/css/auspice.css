@@ -267,9 +267,13 @@ a.off {
 	color: inherit; 
 }
 
-code.has-jax {
-	background: inherit; 
-	color: inherit;
+.highlight {
+	background-color: #E3EBEA;
+}
+
+code {
+	background-color: white;
+	color: black;
 }
 
 pre {
