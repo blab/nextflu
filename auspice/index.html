@@ -66,13 +66,14 @@ title: nextflu
 			<input id="gtspec" value="225D, 159Y/225D, 159S/225D, 159S/225D/AS", size=50>
 			<button id="plotfreq" class="btn btn-default">plot frequencies</button>
 			<p></p>
-			Enter a mutation or genotype above (e.g. <code>159Y</code>) and click <b>plot frequencies</b>. Complex 
-			genotypes can be specified by combining mutations as <code>159Y/225D/498N</code>. In addition, geographic 
-			regions can be selected by adding AS (Asia), NA (North America), EU (Europe), or OC (Oceania) as 
-			<code>EU/159Y/225D/498N</code>. Several genotypes can be entered simultaneously when separated by commas 
-			(e.g. <code>159S, EU/159Y/225D</code> will graph the global frequency of 159S and the frequency of strains 
-			containing both 159Y and 225D in Europe). Positions with very little variation are omitted. Beware that 
-			region specific frequencies are noisy.
+			Enter a mutation or genotype above (e.g. <span class="highlight">225D</span>) and click 
+			<b>plot frequencies</b>. Complex genotypes can be specified by combining mutations as 
+			<span class="highlight">159Y/225D</span>. In addition, geographic regions can be specified by adding AS 
+			(Asia), NA (North America), EU (Europe), or OC (Oceania) as <span class="highlight">159S/225D/AS</span>.
+			Several genotypes can be entered simultaneously when separated by commas (e.g. 
+			<span class="highlight">225D, 159S/225D/AS</span> will graph the global frequency of 225D and the frequency 
+			of strains containing both 159S and 225D in Asia). Positions with very little variation are omitted. Beware 
+			that region specific frequencies are noisy.
 		</div>
 	</div>	
 </div>
@@ -80,19 +81,17 @@ title: nextflu
 <div class="row">
 	<div class="col-md-3"></div>
 	<div class="col-md-9">
-		<h3>Feature Explanation</h3>
-		<ul>
-		<li> <b>date slider:</b> Virus strains within 12 month prior to the date are highlighted
-		<li> <b>pull down menu:</b> display the number of epitope mutations relative to root
-		<li> <b>pull down menu:</b> display the number of non-epitope mutations relative to root
-		<li> <b>pull down menu:</b> display the number of mutations at the receptor binding site
-		<li> <b>pull down menu:</b> color the tree by the <a href="http://elifesciences.org/content/3/e03568">local branching index (LBI)</a>.   
-		<li> <b>pull down menu:</b> color the tree by geographic region
-		<li> <b>color by genotype:</b> specify positions to color the tree by genotype. Amino acid positions must be 
-		separated by a comma (e.g. <code>159,225</code>)
-		<li> <b>mouse over</b> a tip to show name, location, and features of the corresponding strain 
-		<li> <b>mouse over</b> a branch to graph the frequency of the correponding clade trajectory below 
-		</ul>
+		<h3>Feature explanation</h3>
+		<p> Use the <b>date slider</b> to highlight viruses sampled within 12 month of the date displayed.
+		<p> Use the <b>drop down menu</b> to color viruses by number of <span class="highlight">epitope mutations</span>, 
+		<span class="highlight">non-epitope mutations</span> or <span class="highlight">receptor binding mutations</span>
+		relative to root, or to color viruses by <span class="highlight">local branching index</span> or 
+		<span class="highlight">geographic region</span>.
+		<p> Use the <b>input box</b> to specify positions to color viruses by genotype. Amino acid positions must be 
+		separated by a comma (e.g. <span class="highlight">159,225</span>).
+		<p> <b>Mouse over</b> a tip to show virus name, location and features.
+		<p> <b>Mouse over</b> a branch to graph the frequency of the correponding clade trajectory below or <b>click</b>
+		on a branch to zoom into its descendent clade.
 	</div>	
 </div>
 
@@ -100,24 +99,26 @@ title: nextflu
 	<div class="col-md-3"></div>
 	<div class="col-md-9">
 		<h3>Rationale and details</h3>
-		<p> <b>Epitope mutations</b> are defined as in <i>Shih et al, PNAS 2007</i>. Multiple recent mutations at epitope
+		<p> <b>Epitope mutations</b> are based on 
+		<a href="http://www.nature.com/nature/journal/v289/n5796/abs/289366a0.html">HA structure and exposed residues</a>. 
+		Multiple recent mutations at epitope
 		sites have been <a href="http://www.nature.com/nature/journal/v507/n7490/abs/nature13087.html">
-		suggested</a> to be predicitive for strains dominating future seasons. Similarly, mutations
-		outside of these epitopes -- termed <b>non-epitope sites</b> tend to be damaging and suggested to 
-		be predictive of clade contraction. </p>
+		suggested</a> to be predictive for strains dominating future seasons. Similarly, mutations
+		outside of these epitopes -- termed <b>non-epitope sites</b> --- tend to be damaging and are suggested to 
+		be predictive of clade contraction.</p>
 		<p>Antigenic evolution has been <a href="http://www.sciencemag.org/content/342/6161/976.abs">shown</a> 
-		to depend primarily on subsitutions surrounding the receptor binding site of HA1. 
-		These seven positions (145, 155, 156, 158, 159, 189, 193 in HA1 numbering) are referred to 
+		to depend primarily on substitutions surrounding the receptor binding site of HA1. 
+		These seven positions (145, 155, 156, 158, 159, 189, 193 in HA1 numbering) are referred to here
 		as <b>receptor binding positions</b> and changes at these positions could correspond to 
 		large changes in antigenic properties.</p>
-		<p>The <b>local branching index (LBI)</b> is the exponentially weighted tree length surrounding 
+		<p>The <b>local branching index</b> is the exponentially weighted tree length surrounding 
 		a node, which is associated with <a href="http://elifesciences.org/content/3/e03568"> 
 		rapid branching and expansion of clades</a>. A more detailed explanation is available 
 		<a href="https://neherlab.wordpress.com/2014/11/11/now-out-in-elife-predicting-evolution/">here</a>. 
-		Clades with the highest LBI have often dominated the next season in past. 
+		Retrospective analysis has shown that LBI correlates with clade growth. 
 		</p><p>
 		<b>Frequencies</b> are estimated as maximum likelihood trajectories that penalize rapid changes in 
-		freqeuncy and slope. The frequencies of large clades or abundant genotypes have sufficiently 
+		frequency and slope. The frequencies of large clades or abundant genotypes have sufficiently 
 		many observations to by robust, while rare mutations or combinations thereof can't be reliably
 		estimated.
 	</div>
