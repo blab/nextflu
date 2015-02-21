@@ -48,10 +48,8 @@ body {
 
 .plot-container {
 	width: 800px;
-	position: absolute;
+	height: 650px;
 	top: 25px;
-	left: 50%;
-	margin-left: -400px;	
 }
 
 .io-container {
@@ -355,6 +353,5 @@ font-size: 12px;
 
 .form-small .controls {
 	padding-left: 3px;
-	
 }
 

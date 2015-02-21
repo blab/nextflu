@@ -3,8 +3,8 @@ layout: default
 title: nextflu
 ---
 
-<div class="row" style="height: 650px;">
-	<div class="col-md-3">
+<div class="row">
+	<div class="col-md-3" style="height: 150px;">
 		<div class="io-container">
 			<div class="bigtitle logobox">
 				<span class="c2">n</span><span class="c3">e</span><span class="c4">x</span><span class="c5">t</span><span class="c6">f</span><span class="c7">l</span><span class="c8">u</span>
@@ -15,6 +15,10 @@ title: nextflu
 			<div class="bigspacer"></div>		
 			<div>
 				<svg id="date-input"></svg>
+			</div>
+			<div>
+				<h5 id="legend-title">Legend</h5>
+				<svg id="legend"></svg>
 			</div>
 			<div class="spacer"></div>
 			<form class="form-horizontal form-small">
@@ -37,9 +41,6 @@ title: nextflu
 					</div>
 				</div>		
 			</form>
-			<div>
-				<svg id="legend"></svg>
-			</div>
 			<div class="spacer"></div>
 			<div id="search"></div>
 			<div class="spacer"></div>
@@ -49,7 +50,7 @@ title: nextflu
 			<div class="spacer"></div>						
 		</div>
 	</div>
-	<div class="col-md-9">
+	<div class="col-md-9" style="top: 45px;">
 		<div class="plot-container">
 			<svg id="treeplot"></svg>
 		</div>

@@ -587,6 +587,25 @@ d3.json("data/tree.json", function(error, root) {
     var legendRectSize = 15;
     var legendSpacing = 4;
     function makeLegend(){
+    	
+    	d3.select("#legend-title").text(function(d){
+    		if (colorBy == "ep") {
+    			return "Epitope mutations"
+    		}
+    		if (colorBy == "ne") {
+    			return "Non-epitope mutations"
+    		}
+    		if (colorBy == "rb") {
+    			return "Receptor binding mutations"
+    		}
+    		if (colorBy == "lbi") {
+    			return "Local branching index"
+    		}
+   			if (colorBy == "region") {
+    			return "Region"
+    		}    		
+    	});
+    
 		var tmp_leg = legend.selectAll(".legend")
 		    .data(colorScale.domain())
 		    .enter().append('g')
@@ -735,7 +754,6 @@ d3.json("data/tree.json", function(error, root) {
 		d.date = dateScale.invert(d3.event.x);
 		d.x = dateScale(d.date);
 		d3.selectAll(".date-input-text")
-			.attr("x", function(d) {return 0.35*d.x})
 			.text(function(d) {
 				var format = d3.time.format("%Y %b %-d");
 				return format(d.date)
@@ -841,7 +859,6 @@ d3.json("data/tree.json", function(error, root) {
 		.append("text")
 		.attr("class", "date-input-text")
 		.attr("text-anchor", "left")
-		.attr("x", function(d) {return 0.35*d.x})
 		.attr("dy", "0.75em")
 		.text(function(d) {
 			var format = d3.time.format("%Y %b %-d");
