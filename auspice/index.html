@@ -3,28 +3,42 @@ layout: default
 title: nextflu
 ---
 
-<div class="row" style="height: 700px;">
-	<div class="col-md-12">
-		<div class="plot-container">
-			<svg id="treeplot"></svg>
-		</div>
+<div class="row" style="height: 650px;">
+	<div class="col-md-3">
 		<div class="io-container">
 			<div class="bigtitle logobox">
 				<span class="c2">n</span><span class="c3">e</span><span class="c4">x</span><span class="c5">t</span><span class="c6">f</span><span class="c7">l</span><span class="c8">u</span>
 			</div>
-			<div class="bigspacer"></div>
+			<div class="subtitle-box">
+				Real-time tracking of seasonal influenza H3N2 virus evolution in humans
+			</div>
+			<div class="bigspacer"></div>		
 			<div>
 				<svg id="date-input"></svg>
 			</div>
 			<div class="spacer"></div>
+			<form class="form-horizontal form-small">
+				<div class="form-group">
+						<label class="col-xs-4 control-label">Color by</label>
+						<div class="col-xs-8 controls">
+							<select id="coloring" class="form-control">
+								<option value="ep">epitope mutations</option>
+								<option value="ne">non-epitope mutations</option>
+								<option value="rb">receptor binding mutations</option>
+								<option value="lbi">local branching index</option>
+								<option value="region">geographic region</option>
+							</select>
+						</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 control-label">Or</label>
+					<div class="col-xs-8 controls">
+						<input id="gt-color" type="search" placeholder="HA1 positions..." class="form-control">
+					</div>
+				</div>		
+			</form>
 			<div>
-				<select id="coloring" class="form-control">
-					<option value="ep">epitope mutations</option>
-					<option value="ne">non-epitope mutations</option>
-					<option value="rb">receptor binding mutations</option>
-					<option value="lbi">local branching index</option>
-					<option value="region">geographic region</option>
-				</select>
+				<svg id="legend"></svg>
 			</div>
 			<div class="spacer"></div>
 			<div id="search"></div>
@@ -32,13 +46,86 @@ title: nextflu
 			<div>
 				<button id="reset" class="btn btn-default">reset layout</button>
 			</div>
+			<div class="spacer"></div>						
 		</div>
 	</div>
+	<div class="col-md-9">
+		<div class="plot-container">
+			<svg id="treeplot"></svg>
+		</div>
+	</div>	
 </div>
 
 <div class="row">
+	<div class="col-md-3"></div>
+	<div class="col-md-9">
+		<h3>Mutation and clade frequencies</h3>
+		<div id="gtchart" class="center"></div>
+		<div>
+			<input id="gtspec" value="225D, 159Y/225D, 159S/225D, 159S/225D/AS", size=50>
+			<button id="plotfreq" class="btn btn-default">plot frequencies</button>
+			<p></p>
+			Enter a mutation or genotype above (e.g. <code>159Y</code>) and click <b>plot frequencies</b>. Complex 
+			genotypes can be specified by combining mutations as <code>159Y/225D/498N</code>. In addition, geographic 
+			regions can be selected by adding AS (Asia), NA (North America), EU (Europe), or OC (Oceania) as 
+			<code>EU/159Y/225D/498N</code>. Several genotypes can be entered simultaneously when separated by commas 
+			(e.g. <code>159S, EU/159Y/225D</code> will graph the global frequency of 159S and the frequency of strains 
+			containing both 159Y and 225D in Europe). Positions with very little variation are omitted. Beware that 
+			region specific frequencies are noisy.
+		</div>
+	</div>	
+</div>
+
+<div class="row">
+	<div class="col-md-3"></div>
+	<div class="col-md-9">
+		<h3>Feature Explanation</h3>
+		<ul>
+		<li> <b>date slider:</b> Virus strains within 12 month prior to the date are highlighted
+		<li> <b>pull down menu:</b> display the number of epitope mutations relative to root
+		<li> <b>pull down menu:</b> display the number of non-epitope mutations relative to root
+		<li> <b>pull down menu:</b> display the number of mutations at the receptor binding site
+		<li> <b>pull down menu:</b> color the tree by the <a href="http://elifesciences.org/content/3/e03568">local branching index (LBI)</a>.   
+		<li> <b>pull down menu:</b> color the tree by geographic region
+		<li> <b>color by genotype:</b> specify positions to color the tree by genotype. Amino acid positions must be 
+		separated by a comma (e.g. <code>159,225</code>)
+		<li> <b>mouse over</b> a tip to show name, location, and features of the corresponding strain 
+		<li> <b>mouse over</b> a branch to graph the frequency of the correponding clade trajectory below 
+		</ul>
+	</div>	
+</div>
+
+<div class="row">
+	<div class="col-md-3"></div>
+	<div class="col-md-9">
+		<h3>Rationale and details</h3>
+		<p> <b>Epitope mutations</b> are defined as in <i>Shih et al, PNAS 2007</i>. Multiple recent mutations at epitope
+		sites have been <a href="http://www.nature.com/nature/journal/v507/n7490/abs/nature13087.html">
+		suggested</a> to be predicitive for strains dominating future seasons. Similarly, mutations
+		outside of these epitopes -- termed <b>non-epitope sites</b> tend to be damaging and suggested to 
+		be predictive of clade contraction. </p>
+		<p>Antigenic evolution has been <a href="http://www.sciencemag.org/content/342/6161/976.abs">shown</a> 
+		to depend primarily on subsitutions surrounding the receptor binding site of HA1. 
+		These seven positions (145, 155, 156, 158, 159, 189, 193 in HA1 numbering) are referred to 
+		as <b>receptor binding positions</b> and changes at these positions could correspond to 
+		large changes in antigenic properties.</p>
+		<p>The <b>local branching index (LBI)</b> is the exponentially weighted tree length surrounding 
+		a node, which is associated with <a href="http://elifesciences.org/content/3/e03568"> 
+		rapid branching and expansion of clades</a>. A more detailed explanation is available 
+		<a href="https://neherlab.wordpress.com/2014/11/11/now-out-in-elife-predicting-evolution/">here</a>. 
+		Clades with the highest LBI have often dominated the next season in past. 
+		</p><p>
+		<b>Frequencies</b> are estimated as maximum likelihood trajectories that penalize rapid changes in 
+		freqeuncy and slope. The frequencies of large clades or abundant genotypes have sufficiently 
+		many observations to by robust, while rare mutations or combinations thereof can't be reliably
+		estimated.
+	</div>
 	<div class="col-md-1"></div>
-	<div class="col-md-10">
+</div>
+
+<div class="row">
+	<div class="col-md-3"></div>
+	<div class="col-md-9">
 		<hr>
 		Built by <a href="http://bedford.io">Trevor Bedford</a> and
 		<a href="https://neherlab.wordpress.com/">Richard Neher</a>.
@@ -47,8 +134,8 @@ title: nextflu
 		This work would not be possible without the open sharing of genetic data by influenza research groups
 		from all over the world. <a href="acknowledgements/">We gratefully acknowledge their contributions.</a>
 	</div>
-	<div class="col-md-1"></div>
 </div>
+
 
 <div class="row">
 	<div class="col-md-12">
@@ -58,5 +145,6 @@ title: nextflu
 
 <script src="js/d3.min.js"></script>
 <script src="js/d3.tip.js"></script>
+<script src="js/c3.min.js"></script>
 <script src="js/autocomplete.js"></script>
 <script src="js/auspice.js"></script>

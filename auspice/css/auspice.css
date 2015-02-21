@@ -47,16 +47,21 @@ body {
 }
 
 .plot-container {
-	width:800px;
-	position:absolute;
-	top: 65px;
+	width: 800px;
+	position: absolute;
+	top: 25px;
 	left: 50%;
 	margin-left: -400px;	
 }
 
 .io-container {
-	width: 220px;
-	position:absolute;	
+	width: 240px;
+	position: absolute;	
+}
+
+.subtitle-box {
+	width: 300px;
+	margin-left: 5px;
 }
 
 .bordered {
@@ -247,7 +252,7 @@ p {
 }
 
 .bigspacer {
-	height: 20px;
+	height: 30px;
 }
 
 .spacer {
@@ -262,9 +267,13 @@ a.off {
 	color: inherit; 
 }
 
-code.has-jax {
-	background: inherit; 
-	color: inherit;
+.highlight {
+	background-color: #E3EBEA;
+}
+
+code {
+	background-color: white;
+	color: black;
 }
 
 pre {
@@ -327,3 +336,25 @@ blockquote {
 	.text-dark-gray;
 	text-align: center;
 }
+
+
+.legend {
+font-size: 12px;
+}
+rect {
+stroke-width: 2;
+}
+text {
+font-size: 12px;
+}
+
+.form-small .control-label {
+    padding-right: 3px;
+	font-weight: 300;    
+}
+
+.form-small .controls {
+	padding-left: 3px;
+	
+}
+

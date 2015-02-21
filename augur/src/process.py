@@ -1,7 +1,8 @@
 import time, os, argparse
 import virus_download, virus_filter, virus_align, virus_clean
-import tree_infer, tree_ancestral, tree_refine, tree_streamline
-import fitness_predictors
+import tree_infer, tree_ancestral, tree_refine
+import bernoulli_frequency
+import streamline
 from io_util import *
 
 def main(years_back=3, viruses_per_month=50):
@@ -30,9 +31,12 @@ def main(years_back=3, viruses_per_month=50):
 
 	# Clean tree, reads viruses in fname + raxml files
 	tree_fname = tree_refine.main(tree_fname=tree_fname, virus_fname = virus_fname)
+	
+	# Estimate frequencies
+	tree_fname = bernoulli_frequency.main(tree_fname=tree_fname)
 
 	# Streamline tree for auspice
-	tree_fname = tree_streamline.main(tree_fname)
+	tree_fname = streamline.main(tree_fname)
 
 	# Write out metadata
 	print "Writing out metadata"
