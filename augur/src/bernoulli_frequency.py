@@ -261,6 +261,7 @@ def estimate_tree_frequencies(tree, threshold = 20, regions=None, region_name = 
 		node.tips = np.array([x for x in sorted(tmp_tips, key = lambda x:x[1] )])
 		if not hasattr(node, "freq"): node.freq = {}
 		if not hasattr(node, "logit_freq"): node.logit_freq = {}
+		if not hasattr(node, "virus_count"): node.virus_count = {}
 
 	# erase the dates from the tip lists and cast to int such that they can be used for indexing
 	for node in tree.postorder_node_iter():
@@ -281,6 +282,7 @@ def estimate_tree_frequencies(tree, threshold = 20, regions=None, region_name = 
 		region_name = ",".join(regions)
 	# set the frequency of the root node to 1, the logit frequency to a large value
 	tree.seed_node.pivots = get_pivots(time_interval[0], time_interval[1])
+	tree.seed_node.virus_count[region_name] = np.histogram(all_dates, bins = tree.seed_node.pivots)
 	tree.seed_node.freq[region_name] = np.ones_like(tree.seed_node.pivots)
 	tree.seed_node.logit_freq[region_name] = 10*np.ones_like(tree.seed_node.pivots)
 

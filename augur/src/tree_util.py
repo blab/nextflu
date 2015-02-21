@@ -140,6 +140,8 @@ def dendropy_to_json(node):
 			json['freq'] = {reg: [round(x, 3) for x in freq]  if freq is not None else "undefined" for reg, freq in node.freq.iteritems()}		
 		if hasattr(node, 'logit_freq') and node.logit_freq is not None:
 			json['logit_freq'] = {reg: [round(x,3) for x in freq]  if freq is not None else "undefined" for reg, freq in node.logit_freq.iteritems()}
+		if hasattr(node, 'virus_count'):
+			json['virus_count'] = {reg: [round(x,3) for x in vc]  if vc is not None else "undefined" for reg, vc in node.virus_count.iteritems()}
 		if hasattr(node, 'pivots'):
 			json['pivots'] = [round(x,3) for x in node.pivots]
 	except:
