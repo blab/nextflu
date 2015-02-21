@@ -61,11 +61,18 @@ title: nextflu
 	<div class="col-md-3"></div>
 	<div class="col-md-9">
 		<h3>Mutation and clade frequencies</h3>
-		<div id="gtchart" class="center"></div>
+		<div id="gtchart"></div>
+		<div class="spacer"></div>		
+		<div class="center">
+			<form class="form-inline">
+				<div class="form-group">
+					<input id="gtspec" class="form-control" value="225D, 159Y/225D, 159S/225D, 159S/225D/AS" size=50>
+				</div>
+				<button id="plotfreq" type=button class="btn btn-default" style="text-align:center;">plot frequencies</button>
+			</form>
+		</div>
+		<div class="spacer"></div>
 		<div>
-			<input id="gtspec" value="225D, 159Y/225D, 159S/225D, 159S/225D/AS", size=50>
-			<button id="plotfreq" class="btn btn-default">plot frequencies</button>
-			<p></p>
 			Enter a mutation or genotype above (e.g. <span class="highlight">225D</span>) and click 
 			<b>plot frequencies</b>. Complex genotypes can be specified by combining mutations as 
 			<span class="highlight">159Y/225D</span>. In addition, geographic regions can be specified by adding AS 

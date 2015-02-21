@@ -86,9 +86,14 @@ h6 {
 }
 
 .center {
-     float: none;
-     margin-left: auto;
-     margin-right: auto;
+	float: none;
+	margin-left: auto;
+	margin-right: auto;
+	text-align: center;     
+}
+
+.center form {
+	display: inline-block;
 }
 
 .text-center {

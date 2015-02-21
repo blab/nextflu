@@ -282,6 +282,9 @@ var gt_chart = c3.generate({
 	bindto: '#gtchart',
 	size: {width:800, height: 350},
 	legend: {position: "right"},
+  	color: {
+        pattern: ["#60AA9E", "#D9AD3D", "#5097BA", "#E67030", "#8EBC66", "#E59637", "#AABD52", "#DF4327", "#C4B945", "#75B681"]
+    },
 	axis: {
 		y: {
 			label: {
@@ -1072,19 +1075,25 @@ d3.json("data/frequencies.json", function(error, json){
 		var tmp_data = [];
 		var tmp_trace = ['x'];
 		tmp_data.push(tmp_trace.concat(pivots));
-		gt.forEach(function (d){
-			var freq = get_frequencies(d[0], d[1]);
-			tmp_trace = [d[0]+':\t'+d[1]];
-			tmp_data.push(tmp_trace.concat(freq));
-		})
+		gt.forEach(function (d) {
+			var region = d[0];
+			var genotype = d[1];
+			var freq = get_frequencies(region, genotype);
+			var tmp_trace = genotype.toString().replace(/,/g, ', ');
+			if (region != "global") {
+				tmp_trace = region + ':\t' + tmp_trace;
+			}
+			tmp_data.push([tmp_trace].concat(freq));
+		});
 		gt_chart.load({
-	       	columns: tmp_data
+	       	columns: tmp_data,
+	       	unload: true
 		});
 	}
 
 	d3.select("#plotfreq")
 		.on("click", function (){
-			gt = parse_gt_string(document.getElementById("gtspec").value);
+			gt = parse_gt_string(document.getElementById("gtspec").value);			
 			make_gt_chart(gt);
 		});
 	make_gt_chart(parse_gt_string(document.getElementById("gtspec").value));
