@@ -280,11 +280,31 @@ treeplot.call(linkTooltip);
 
 var gt_chart = c3.generate({
 	bindto: '#gtchart',
-	size: {width:700, height: 400},
+	size: {width:800, height: 350},
 	legend: {position: "right"},
 	axis: {
-	  y: {label: 'frequency', tick: {values: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]}},
-	  x: {label: 'time', tick: {values: [2012,2012.5,2013,2013.5,2014,2014.5,2015]}}
+		y: {
+			label: {
+				text: 'frequency',
+				position: 'outer-middle'	
+			},
+			tick: {
+				values: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0],
+				outer: false
+			},
+            min: 0,			
+			max: 1	
+		},
+		x: {
+			label: {
+				text: 'time',
+				position: 'outer-center'	
+			},
+			tick: {
+				values: [2012,2012.5,2013,2013.5,2014,2014.5,2015],
+				outer: false				
+			}
+		}
 	},			
 	data: {
 		x: 'x',

@@ -3,11 +3,8 @@ layout: default
 title: nextflu
 ---
 
-<div class="row" style="height: 700px;">
-	<div class="col-md-12">
-		<div class="plot-container">
-			<svg id="treeplot"></svg>
-		</div>
+<div class="row" style="height: 650px;">
+	<div class="col-md-3">
 		<div class="io-container">
 			<div class="bigtitle logobox">
 				<span class="c2">n</span><span class="c3">e</span><span class="c4">x</span><span class="c5">t</span><span class="c6">f</span><span class="c7">l</span><span class="c8">u</span>
@@ -15,7 +12,7 @@ title: nextflu
 			<div class="subtitle-box">
 				Real-time tracking of seasonal influenza H3N2 virus evolution in humans
 			</div>
-			<div class="bigspacer"></div>
+			<div class="bigspacer"></div>		
 			<div>
 				<svg id="date-input"></svg>
 			</div>
@@ -49,58 +46,59 @@ title: nextflu
 			<div>
 				<button id="reset" class="btn btn-default">reset layout</button>
 			</div>
+			<div class="spacer"></div>						
 		</div>
 	</div>
+	<div class="col-md-9">
+		<div class="plot-container">
+			<svg id="treeplot"></svg>
+		</div>
+	</div>	
 </div>
 
 <div class="row">
-	<div class="col-md-8">
-		<h4>Mutation and genotype frequencies</h4>
-		<div id="gtchart"></div>
+	<div class="col-md-3"></div>
+	<div class="col-md-9">
+		<h3>Mutation and clade frequencies</h3>
+		<div id="gtchart" class="center"></div>
 		<div>
 			<input id="gtspec" value="225D, 159Y/225D, 159S/225D, 159S/225D/AS", size=50>
 			<button id="plotfreq" class="btn btn-default">plot frequencies</button>
 			<p></p>
-			Enter a mutation or genotype above (e.g. 159Y) and click <b>plot frequencies</b>. Complex genotypes can be specified by combining mutations as <i>159Y/225D/498N</i>. In addition, geographic regions can be selected by adding AS (Asia), NA (North America), EU (Europe), or OC (Oceania) as <i>EU/159Y/225D/498N</i>. Several genotypes can be entered simultaneously when separated by commas (e.g. <i>159S, EU/159Y/225D</i> will graph the global frequency of <i>159S</i> and the frequency of strains containing both <i>159Y</i> and <i>225D</i> in Europe). Positions with very little variation are omitted. Beware that region specific frequencies are noisy.
-
+			Enter a mutation or genotype above (e.g. 159Y) and click <b>plot frequencies</b>. Complex genotypes can be 
+			specified by combining mutations as <i>159Y/225D/498N</i>. In addition, geographic regions can be selected 
+			by adding AS (Asia), NA (North America), EU (Europe), or OC (Oceania) as <i>EU/159Y/225D/498N</i>. Several 
+			genotypes can be entered simultaneously when separated by commas (e.g. <i>159S, EU/159Y/225D</i> will graph 
+			the global frequency of <i>159S</i> and the frequency of strains containing both <i>159Y</i> and <i>225D</i> 
+			in Europe). Positions with very little variation are omitted. Beware that region specific frequencies are 
+			noisy.
 		</div>
-	</div>
-	<div class="col-md-4">
-		<h4>Feature Explanation</h4>
+	</div>	
+</div>
+
+<div class="row">
+	<div class="col-md-3"></div>
+	<div class="col-md-9">
+		<h3>Feature Explanation</h3>
 		<ul>
 		<li> <b>date slider:</b> Virus within 12 month prior to the date are highlighted
-		<li> <b>pull down menu:</b> decorate branch tips with number of epitope mutations relative to root
-		<li> <b>pull down menu:</b> decorate branch tips with number of non-epitope mutations rel. to root
-		<li> <b>pull down menu:</b> decorate branch tips with number of mutations at the receptor binding site
-		<li> <b>pull down menu:</b> color branch tips by the <a href="http://elifesciences.org/content/3/e03568">local branching index (LBI)</a>, see below.   
-		<li> <b>pull down menu:</b> color branch tips by geographic region
+		<li> <b>pull down menu:</b> display the number of epitope mutations relative to root
+		<li> <b>pull down menu:</b> display the number of non-epitope mutations relative to root
+		<li> <b>pull down menu:</b> display the number of mutations at the receptor binding site
+		<li> <b>pull down menu:</b> display the number of epitope mutations relative to root
+		<li> <b>pull down menu:</b>  color the tree by the <a href="http://elifesciences.org/content/3/e03568">local branching index (LBI)</a>, see below.   
 		<li> <b>color by genotype:</b> specify positions to color the tree by genotype. Amino acid positions must be separated by a comma (e.g. 159,225)
-		<li> <b>mouse over</b> a branch tip to show name, location, and features of the corresponding strain 
-		<li> <b>mouse over</b> a branch ancestral to a big clade to graph its frequency trajectory. 
+		<li> <b>mouse over</b> a tip to show name, location, and features of the corresponding strain 
+		<li> <b>mouse over</b> a branch to graph the frequency of the correponding clade trajectory below 
 		</ul>
 		More detailed explanations of the rational of different features are given below.
-	</div>
+	</div>	
 </div>
 
 <div class="row">
-	<div class="col-md-1"></div>
-	<div class="col-md-10">
-		<hr>
-		Built by <a href="http://bedford.io">Trevor Bedford</a> and
-		<a href="https://neherlab.wordpress.com/">Richard Neher</a>.
-		All <a href="http://github.com/blab/nextflu">source code</a> is freely available. Data last updated
-		<span id="updated"></span>.
-		This work would not be possible without the open sharing of genetic data by influenza research groups
-		from all over the world. <a href="acknowledgements/">We gratefully acknowledge their contributions.</a>
-	</div>
-	<div class="col-md-1"></div>
-</div>
-
-<div class="row">
-	<div class="col-md-1"></div>
-	<div class="col-md-10">
-		<hr>
-		<h4>Rationale and details</h4>
+	<div class="col-md-3"></div>
+	<div class="col-md-9">
+		<h3>Rationale and details</h3>
 		<p> <b>Epitope mutations</b> are defined as <i>Shih et al, PNAS 2007</i>. Many recent mutations at epitope
 		sites have been <a href="http://www.nature.com/nature/journal/v507/n7490/abs/nature13087.html">
 		suggested</a> to be predicitive for strains dominating future seasons. Similarly, mutations
@@ -123,6 +121,19 @@ title: nextflu
 		estimated.
 	</div>
 	<div class="col-md-1"></div>
+</div>
+
+<div class="row">
+	<div class="col-md-3"></div>
+	<div class="col-md-9">
+		<hr>
+		Built by <a href="http://bedford.io">Trevor Bedford</a> and
+		<a href="https://neherlab.wordpress.com/">Richard Neher</a>.
+		All <a href="http://github.com/blab/nextflu">source code</a> is freely available. Data last updated
+		<span id="updated"></span>.
+		This work would not be possible without the open sharing of genetic data by influenza research groups
+		from all over the world. <a href="acknowledgements/">We gratefully acknowledge their contributions.</a>
+	</div>
 </div>
 
 
