@@ -416,16 +416,16 @@ d3.json("data/tree.json", function(error, root) {
 	var colorBy = "ep";
 	
 	var epitopeColorScale = d3.scale.linear().clamp([true])
-		.domain([-1.8, -1.4, -1.0, -0.6, -0.2, 0.2, 0.6, 1.0, 1.4, 1.8])
+		.domain([0,1,2,3,4,5,6,7,8,9])
 		.range(colors);		
 
 	var nonepitopeColorScale = d3.scale.linear().clamp([true])
-	  	.domain([-1.8, -1.4, -1.0, -0.6, -0.2, 0.2, 0.6, 1.0, 1.4, 1.8])
+		.domain([0,1,2,3,4,5,6,7,8,9])
 		.range(colors);
 
 	var receptorBindingColorScale = d3.scale.linear().clamp([true])
-		.domain([-0.9, -0.7, -0.5, -0.3, -0.1, 0.1, 0.3, 0.5, 0.7, 0.9])
-		.range(colors);
+		.domain([0,1,2, 3, 4,])
+		.range(colors.filter( function(d,i){return i%2;}));
 
 	var lbiColorScale = d3.scale.linear()
 		.domain([0.0, 0.02, 0.04, 0.07, 0.1, 0.2, 0.4, 0.7, 0.9, 1.0])
@@ -478,7 +478,7 @@ d3.json("data/tree.json", function(error, root) {
 		if (colorBy == "ep" || colorBy == "ne" || colorBy == "rb") {
 			var mean = getMeanColoring();
 			nodes.forEach(function (d) {
-				d.adj_coloring = d.coloring - mean;
+				d.adj_coloring = d.coloring; // - mean;
 			});
 		}
 		if (colorBy == "lbi") {
