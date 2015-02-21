@@ -413,7 +413,7 @@ d3.json("data/tree.json", function(error, root) {
 		.range([0, 2]);
 
 	var colors = ["#5097BA", "#60AA9E", "#75B681", "#8EBC66", "#AABD52", "#C4B945", "#D9AD3D", "#E59637", "#E67030", "#DF4327"];
-	var colorBy = "ep";
+	var colorBy = document.getElementById("coloring").value;
 	
 	var epitopeColorScale = d3.scale.linear().clamp([true])
 		.domain([0,1,2,3,4,5,6,7,8,9])
@@ -431,8 +431,7 @@ d3.json("data/tree.json", function(error, root) {
 		.domain([0.0, 0.02, 0.04, 0.07, 0.1, 0.2, 0.4, 0.7, 0.9, 1.0])
 		.range(colors);
 
-	var colorScale = epitopeColorScale;
-	nodes.map(function(d) { d.coloring = d.ep; });
+	var colorScale;
 	
 	var freqScale = d3.scale.linear()
 		.domain([0, 1])
@@ -498,10 +497,120 @@ d3.json("data/tree.json", function(error, root) {
 		});
 	}	
 
+	function colorByTrait() {
+		
+		colorBy = document.getElementById("coloring").value;
+		console.log(colorBy);
+
+		if (colorBy == "ep") {
+			colorScale = epitopeColorScale;
+			nodes.map(function(d) { d.coloring = d.ep; });
+		}
+		if (colorBy == "ne") {
+			colorScale = nonepitopeColorScale;
+			nodes.map(function(d) { d.coloring = d.ne; });
+		}
+		if (colorBy == "rb") {
+			colorScale = receptorBindingColorScale;
+			nodes.map(function(d) { d.coloring = d.rb; });
+		}
+		if (colorBy == "lbi") {
+			colorScale = lbiColorScale;
+			nodes.map(function(d) { d.adj_coloring = d.LBI; });
+		}
+		if (colorBy == "region") {
+			colorScale = regionColorScale;
+		}
+
+		adjust_coloring_by_date();
+
+		treeplot.selectAll(".link")
+			.style("stroke", function(d) {
+					if (colorScale != regionColorScale) {
+						var col = colorScale(d.target.adj_coloring);
+					}
+					else {
+						var col = "#AAA";
+					}
+					return branchStrokeColor(col);
+				});
+			
+		d3.selectAll(".tip")
+			.attr("r", function(d) {
+				return recencySizeScale(d.diff);
+			})
+			.style("fill", function(d) {
+				if (colorScale != regionColorScale) {
+					var col = colorScale(d.adj_coloring);
+				}
+				else {
+					var col = colorScale(d.region);
+				}
+				return tipFillColor(col);
+			})
+			.style("stroke", function(d) {
+				if (colorScale != regionColorScale) {
+					var col = colorScale(d.adj_coloring);
+				}
+				else {
+					var col = colorScale(d.region);
+				}
+				return tipStrokeColor(col);
+			});
+			
+		if (typeof tree_legend != undefined){
+			removeLegend();
+		}
+		tree_legend = makeLegend();	 				
+	}
+
+    var legendRectSize = 15;
+    var legendSpacing = 4;
+    function makeLegend(){
+		var tmp_leg = legend.selectAll(".legend")
+		    .data(colorScale.domain())
+		    .enter().append('g')
+		    .attr('class', 'legend')
+		    .attr('transform', function(d, i) {
+		    	var stack = 5;
+				var height = legendRectSize + legendSpacing;
+				var fromRight = Math.floor(i / stack);
+				var fromTop = i % stack;
+				var horz = fromRight * 145 + 5;				
+				var vert = fromTop * height + 5;
+				return 'translate(' + horz + ',' + vert + ')';
+		    	});
+		tmp_leg.append('rect')
+		    .attr('width', legendRectSize)
+		    .attr('height', legendRectSize)
+		    .style('fill', function (d) {
+		   		var col = colorScale(d);
+		   		return d3.rgb(col).brighter([0.35]).toString();
+		    })
+		    .style('stroke', function (d) {
+		    	var col = colorScale(d);
+		    	return tipStrokeColor(col);
+		    });
+		
+		tmp_leg.append('text')
+		    .attr('x', legendRectSize + legendSpacing + 5)
+		    .attr('y', legendRectSize - legendSpacing)
+		    .text(function(d) {
+		    	return d.toString().replace(/([a-z])([A-Z])/g, '$1 $2').replace(/,/g, ', ');
+		    });		
+		return tmp_leg;
+    }
+
+    function removeLegend(){
+    	legend.selectAll('.legend')
+    		.remove();
+    }
+
 	calcNodeAges(time_window);
+	calcLBI(rootNode, nodes, false);
+	colorByTrait();
 	adjust_coloring_by_date();
 	adjust_freq_by_date();
-	calcLBI(rootNode, nodes, false);
 
 	var link = treeplot.selectAll(".link")
 		.data(links)
@@ -769,73 +878,6 @@ d3.json("data/tree.json", function(error, root) {
 			rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, internals, vaccines);
 		})
 		
-	function colorByTrait() {
-		
-		colorBy = d3.select(this).node().value;
-		console.log(colorBy);
-
-		if (colorBy == "ep") {
-			colorScale = epitopeColorScale;
-			nodes.map(function(d) { d.coloring = d.ep; });
-		}
-		if (colorBy == "ne") {
-			colorScale = nonepitopeColorScale;
-			nodes.map(function(d) { d.coloring = d.ne; });
-		}
-		if (colorBy == "rb") {
-			colorScale = receptorBindingColorScale;
-			nodes.map(function(d) { d.coloring = d.rb; });
-		}
-		if (colorBy == "lbi") {
-			colorScale = lbiColorScale;
-			nodes.map(function(d) { d.adj_coloring = d.LBI; });
-		}
-		if (colorBy == "region") {
-			colorScale = regionColorScale;
-		}
-
-		adjust_coloring_by_date();
-
-		treeplot.selectAll(".link")
-			.style("stroke", function(d) {
-					if (colorScale != regionColorScale) {
-						var col = colorScale(d.target.adj_coloring);
-					}
-					else {
-						var col = "#AAA";
-					}
-					return branchStrokeColor(col);
-				});
-			
-		d3.selectAll(".tip")
-			.attr("r", function(d) {
-				return recencySizeScale(d.diff);
-			})
-			.style("fill", function(d) {
-				if (colorScale != regionColorScale) {
-					var col = colorScale(d.adj_coloring);
-				}
-				else {
-					var col = colorScale(d.region);
-				}
-				return tipFillColor(col);
-			})
-			.style("stroke", function(d) {
-				if (colorScale != regionColorScale) {
-					var col = colorScale(d.adj_coloring);
-				}
-				else {
-					var col = colorScale(d.region);
-				}
-				return tipStrokeColor(col);
-			});
-			
-		if (typeof tree_legend != undefined){
-			removeLegend();
-		}
-		tree_legend = makeLegend();	 				
-	}
-
 	function colorByGenotype() {
 		var positions_string = document.getElementById("gt-color").value.split(',');
 		var positions_list = []
@@ -902,48 +944,6 @@ d3.json("data/tree.json", function(error, root) {
 		.style("cursor", "pointer")
 		.on("change", colorByTrait);
 
-    var legendRectSize = 15;
-    var legendSpacing = 4;
-    function makeLegend(){
-		var tmp_leg = legend.selectAll(".legend")
-		    .data(colorScale.domain())
-		    .enter().append('g')
-		    .attr('class', 'legend')
-		    .attr('transform', function(d, i) {
-		    	var stack = 5;
-				var height = legendRectSize + legendSpacing;
-				var fromRight = Math.floor(i / stack);
-				var fromTop = i % stack;
-				var horz = fromRight * 145 + 5;				
-				var vert = fromTop * height + 5;
-				return 'translate(' + horz + ',' + vert + ')';
-		    	});
-		tmp_leg.append('rect')
-		    .attr('width', legendRectSize)
-		    .attr('height', legendRectSize)
-		    .style('fill', function (d) {
-		   		var col = colorScale(d);
-		   		return d3.rgb(col).brighter([0.35]).toString();
-		    })
-		    .style('stroke', function (d) {
-		    	var col = colorScale(d);
-		    	return tipStrokeColor(col);
-		    });
-		
-		tmp_leg.append('text')
-		    .attr('x', legendRectSize + legendSpacing + 5)
-		    .attr('y', legendRectSize - legendSpacing)
-		    .text(function(d) {
-		    	return d.toString().replace(/([a-z])([A-Z])/g, '$1 $2').replace(/,/g, ', ');
-		    });		
-		return tmp_leg;
-    }
-
-    function removeLegend(){
-    	legend.selectAll('.legend')
-    		.remove();
-    }
-
 	function onSelect(tip) {
 		d3.select("#"+(tip.strain).replace(/\//g, ""))
 			.call(function(d) {
@@ -984,7 +984,6 @@ d3.json("data/frequencies.json", function(error, json){
 		separate_plots = gt.split(',');
 		mutations = separate_plots.map(
 			function (d) {	var tmp = d.split(/[\s//]/); //FIXME: make more inclusive
-							console.log(d+" "+tmp);
 							var region;
 							var positions = [];
 							for (var i=0; i<tmp.length; i++){
@@ -995,7 +994,6 @@ d3.json("data/frequencies.json", function(error, json){
 								}
 							}
 							if (typeof region == "undefined") region="global"; 
-							console.log(region +" "+ positions);
 							return [region, positions];});
 		return mutations;
 	};
