@@ -13,7 +13,7 @@ title: nextflu
 				<span class="c2">n</span><span class="c3">e</span><span class="c4">x</span><span class="c5">t</span><span class="c6">f</span><span class="c7">l</span><span class="c8">u</span>
 			</div>
 			<div class="subtitle-box">
-				Real-time tracking of seasonal influenza H3N2 virus evolution
+				Real-time tracking of seasonal influenza H3N2 virus evolution in humans
 			</div>
 			<div class="bigspacer"></div>
 			<div>
@@ -54,25 +54,31 @@ title: nextflu
 </div>
 
 <div class="row">
-	<h4>Mutation and genotype frequencies</h4>
 	<div class="col-md-8">
+		<h4>Mutation and genotype frequencies</h4>
 		<div id="gtchart"></div>
 		<div>
 			<input id="gtspec" value="159Y,225D/NA:159S/AS:159Y/EU:159Y,", size=50>
 			<button id="plotfreq" class="btn btn-default">plot frequencies</button>
+			<p></p>
+			Enter a mutation or genotype above (e.g. 159Y) and click <b>plot frequencies</b>. Complex genotypes can be specified by combining mutations as <i>159Y/225D/498N</i>. In addition, geographic regions can be selected by adding AS (Asia), NA (North America), EU (Europe), or OC (Oceania) as <i>EU/159Y/225D/498N</i>. Several genotypes can be entered simultaneously when separated by commas (e.g. <i>159S, EU/159Y/225D</i> will graph the global frequency of <i>159S</i> and the frequency of strains containing both <i>159Y</i> and <i>225D</i> in Europe). Positions with very little variation are omitted. Beware that region specific frequencies are noisy.
+
 		</div>
 	</div>
 	<div class="col-md-4">
 		<h4>Feature Explanation</h4>
 		<ul>
-		<li> <b>date slider:</b> explore the tree through time
-		<li> <b>pull down menu:</b> decorate the tree with the number mutations relative to root
-		<li> <b>pull down menu:</b>  decorate the with the branching index 
-		<li> <b>mouse over</b> a branch to display the frequency trajectory on the right
-		<li> <b>mouse over</b> a strain to display strain name and features
-		<li> <b>paint tree:</b> specify positions (e.g. 159,225) to color the tree by genotype
-		<li> <b>plot frequencies:</b> specify genotypes (e.g. 159Y,225D) to graph frequency through time. Optionally, specify regions as NA:159Y, where supported regions are AS, NA, EU, and OC. Beware that regions specific frequencies are noisy.
+		<li> <b>date slider:</b> Virus within 12 month prior to the date are highlighted
+		<li> <b>pull down menu:</b> display the number of epitope mutations relative to root
+		<li> <b>pull down menu:</b> display the number of non-epitope mutations relative to root
+		<li> <b>pull down menu:</b> display the number of mutations at the receptor binding site
+		<li> <b>pull down menu:</b> display the number of epitope mutations relative to root
+		<li> <b>pull down menu:</b>  color the tree by the <a href="http://elifesciences.org/content/3/e03568">local branching index (LBI)</a>, see below.   
+		<li> <b>color by genotype:</b> specify positions to color the tree by genotype. Amino acid positions must be separated by a comma (e.g. 159,225)
+		<li> <b>mouse over</b> a tip to show name, location, and features of the corresponding strain 
+		<li> <b>mouse over</b> a branch to graph the frequency of the correponding clade trajectory below 
 		</ul>
+		More detailed explanations of the rational of different features are given below.
 	</div>
 </div>
 
@@ -89,6 +95,36 @@ title: nextflu
 	</div>
 	<div class="col-md-1"></div>
 </div>
+
+<div class="row">
+	<div class="col-md-1"></div>
+	<div class="col-md-10">
+		<hr>
+		<h4>Rationale and details</h4>
+		<p> <b>Epitope mutations</b> are defined as <i>Shih et al, PNAS 2007</i>. Many recent mutations at epitope
+		sites have been <a href="http://www.nature.com/nature/journal/v507/n7490/abs/nature13087.html">
+		suggested</a> to be predicitive for strains dominating future seasons. Similarly, mutations
+		outside of these epitopes -- termed <b>non-epitope sites</b> tend to be damaging and suggested to 
+		be predictive of clade contraction. </p>
+		<p>Antigenic evolution has been <a href="http://www.sciencemag.org/content/342/6161/976.abs">shown</a> 
+		to depend primarily on subsitutions surrounding the receptor binding site of HA1. 
+		These seven positions (145, 155, 156, 158, 159, 189, 193 in HA1 numbering) are referred to 
+		as <b>receptor binding positions</b> and changes at these positions could correspond to 
+		large changes in antigenic properties.</p>
+		<p>The <b>local branching index (LBI)</b> is the exponentially weighted tree length surrounding 
+		a node, which is associated with <a href="http://elifesciences.org/content/3/e03568"> 
+		rapid branching and expansion of clades</a>. A more detailed explanation is available 
+		<a href="https://neherlab.wordpress.com/2014/11/11/now-out-in-elife-predicting-evolution/">here</a>. 
+		Clades with the highest LBI have in past often dominated the next season. 
+		</p><p>
+		<b>Frequencies</b> are estimated as maximum likelihood trajectories that penalize rapid changes in 
+		freqeuncy and slope. The frequencies of large clades or abundant genotypes have sufficiently 
+		many observations to by robust, while rare mutations or combinations thereof can't be reliably
+		estimated.
+	</div>
+	<div class="col-md-1"></div>
+</div>
+
 
 <div class="row">
 	<div class="col-md-12">
