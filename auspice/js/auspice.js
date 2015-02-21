@@ -270,7 +270,20 @@ var linkTooltip = d3.tip()
 		return string;
 	});
 treeplot.call(linkTooltip);
-var clade_freq_chart;
+
+var gt_chart = c3.generate({
+	bindto: '#gtchart',
+	size: {width:700, height: 400},
+	legend: {position: "right"},
+	axis: {
+	  y: {label: 'frequency', tick: {values: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]}},
+	  x: {label: 'time', tick: {values: [2012,2012.5,2013,2013.5,2014,2014.5,2015]}}
+	},			
+	data: {
+		x: 'x',
+		columns: []
+	}
+});
 
 function rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, internals, vaccines) {
 
@@ -508,22 +521,13 @@ d3.json("data/tree.json", function(error, root) {
 			if (d.target.freq[reg] != "undefined"){
 				plot_data[plot_data.length] = [reg].concat(d.target.freq[reg]);				
 			}
-//			for (reg in d.target.freq){
-//				if ((d.target.freq[reg] != "undefined") && (reg!="global")){
-//					plot_data[plot_data.length] = [reg].concat(d.target.freq[reg]);
-//				}
-//			}
-			clade_freq_chart = c3.generate({
-			    bindto: '#clade_freq_chart',
-			    size: {width:400, height: 300},
-//			    legend: {position: "right"},
-				axis: {
-				  x: {tick: {values: [2012,2012.5,2013,2013.5,2014,2014.5,2015]}}
-				},			
-	  			data: {
-		   	    x: 'x',
+			if (plot_data.length > 1) {
+				if (plot_data[1][0] == "global") {
+					plot_data[1][0] = "clade";
+				}
+			}
+			gt_chart.load({
 		       	columns: plot_data
-   		    	}
 			});
 		})
 		.on('mouseout', linkTooltip.hide)		
@@ -1022,18 +1026,8 @@ d3.json("data/frequencies.json", function(error, json){
 			tmp_trace = [d[0]+':\t'+d[1]];
 			tmp_data.push(tmp_trace.concat(freq));
 		})
-		var gt_chart= c3.generate({
-		    bindto: '#gtchart',
-		    size: {width:700, height: 400},
-		    legend: {position: "right"},
-			axis: {
-			  y: {label: 'frequency'},
-			  x: {label: 'time', tick: {values: [2012,2012.5,2013,2013.5,2014,2014.5,2015]}}
-			},			
-  			data: {
-	   	    x: 'x',
+		gt_chart.load({
 	       	columns: tmp_data
-	    	}
 		});
 	}
 
