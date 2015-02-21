@@ -194,6 +194,13 @@ function maximumAttribute(node, attr, max) {
 	return max;
 }
 
+function contains(arr, obj) {
+    for(var i=0; i<arr.length; i++) {
+        if (arr[i] == obj) return true;
+    }
+}
+
+
 function branchStrokeColor(col) {
 	var modCol = d3.interpolateRgb(col, "#BBB")(0.6);
 	return d3.rgb(modCol).toString();
@@ -974,13 +981,22 @@ d3.json("data/frequencies.json", function(error, json){
 		parses a genotype string into region and positions
 	**/
 	function parse_gt_string(gt){
-		separate_plots = gt.split('/');
+		separate_plots = gt.split(',');
 		mutations = separate_plots.map(
-			function (d) {	var tmp = d.split(':');
+			function (d) {	var tmp = d.split(/[\s//]/); //FIXME: make more inclusive
+							console.log(d+" "+tmp);
 							var region;
-							if (tmp.length==1) region="global"; 
-							else region = tmp[0];
-							return [region, tmp[tmp.length-1].split(',')];});
+							var positions = [];
+							for (var i=0; i<tmp.length; i++){
+								if (contains(["EU","NA","AS","OC"], tmp[i])){
+									region = tmp[i];
+								}else{
+									if (tmp[i].length>0) positions.push(tmp[i]);
+								}
+							}
+							if (typeof region == "undefined") region="global"; 
+							console.log(region +" "+ positions);
+							return [region, positions];});
 		return mutations;
 	};
 
