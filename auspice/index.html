@@ -65,13 +65,13 @@ title: nextflu
 			<input id="gtspec" value="225D, 159Y/225D, 159S/225D, 159S/225D/AS", size=50>
 			<button id="plotfreq" class="btn btn-default">plot frequencies</button>
 			<p></p>
-			Enter a mutation or genotype above (e.g. 159Y) and click <b>plot frequencies</b>. Complex genotypes can be 
-			specified by combining mutations as <i>159Y/225D/498N</i>. In addition, geographic regions can be selected 
-			by adding AS (Asia), NA (North America), EU (Europe), or OC (Oceania) as <i>EU/159Y/225D/498N</i>. Several 
-			genotypes can be entered simultaneously when separated by commas (e.g. <i>159S, EU/159Y/225D</i> will graph 
-			the global frequency of <i>159S</i> and the frequency of strains containing both <i>159Y</i> and <i>225D</i> 
-			in Europe). Positions with very little variation are omitted. Beware that region specific frequencies are 
-			noisy.
+			Enter a mutation or genotype above (e.g. <code>159Y</code>) and click <b>plot frequencies</b>. Complex 
+			genotypes can be specified by combining mutations as <code>159Y/225D/498N</code>. In addition, geographic 
+			regions can be selected by adding AS (Asia), NA (North America), EU (Europe), or OC (Oceania) as 
+			<code>EU/159Y/225D/498N</code>. Several genotypes can be entered simultaneously when separated by commas 
+			(e.g. <code>159S, EU/159Y/225D</code> will graph the global frequency of 159S and the frequency of strains 
+			containing both 159Y and 225D in Europe). Positions with very little variation are omitted. Beware that 
+			region specific frequencies are noisy.
 		</div>
 	</div>	
 </div>
@@ -86,8 +86,10 @@ title: nextflu
 		<li> <b>pull down menu:</b> display the number of non-epitope mutations relative to root
 		<li> <b>pull down menu:</b> display the number of mutations at the receptor binding site
 		<li> <b>pull down menu:</b> display the number of epitope mutations relative to root
-		<li> <b>pull down menu:</b>  color the tree by the <a href="http://elifesciences.org/content/3/e03568">local branching index (LBI)</a>, see below.   
-		<li> <b>color by genotype:</b> specify positions to color the tree by genotype. Amino acid positions must be separated by a comma (e.g. 159,225)
+		<li> <b>pull down menu:</b>  color the tree by the <a href="http://elifesciences.org/content/3/e03568">local 
+		branching index (LBI)</a>, see below.   
+		<li> <b>color by genotype:</b> specify positions to color the tree by genotype. Amino acid positions must be 
+		separated by a comma (e.g. <code>159,225</code>)
 		<li> <b>mouse over</b> a tip to show name, location, and features of the corresponding strain 
 		<li> <b>mouse over</b> a branch to graph the frequency of the correponding clade trajectory below 
 		</ul>
