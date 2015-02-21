@@ -81,17 +81,16 @@ title: nextflu
 	<div class="col-md-9">
 		<h3>Feature Explanation</h3>
 		<ul>
-		<li> <b>date slider:</b> Virus within 12 month prior to the date are highlighted
+		<li> <b>date slider:</b> Virus strains within 12 month prior to the date are highlighted
 		<li> <b>pull down menu:</b> display the number of epitope mutations relative to root
 		<li> <b>pull down menu:</b> display the number of non-epitope mutations relative to root
 		<li> <b>pull down menu:</b> display the number of mutations at the receptor binding site
-		<li> <b>pull down menu:</b> display the number of epitope mutations relative to root
-		<li> <b>pull down menu:</b>  color the tree by the <a href="http://elifesciences.org/content/3/e03568">local branching index (LBI)</a>, see below.   
+		<li> <b>pull down menu:</b> color the tree by the <a href="http://elifesciences.org/content/3/e03568">local branching index (LBI)</a>.   
+		<li> <b>pull down menu:</b> color the tree by geographic region
 		<li> <b>color by genotype:</b> specify positions to color the tree by genotype. Amino acid positions must be separated by a comma (e.g. 159,225)
 		<li> <b>mouse over</b> a tip to show name, location, and features of the corresponding strain 
 		<li> <b>mouse over</b> a branch to graph the frequency of the correponding clade trajectory below 
 		</ul>
-		More detailed explanations of the rational of different features are given below.
 	</div>	
 </div>
 
@@ -99,7 +98,7 @@ title: nextflu
 	<div class="col-md-3"></div>
 	<div class="col-md-9">
 		<h3>Rationale and details</h3>
-		<p> <b>Epitope mutations</b> are defined as <i>Shih et al, PNAS 2007</i>. Many recent mutations at epitope
+		<p> <b>Epitope mutations</b> are defined as in <i>Shih et al, PNAS 2007</i>. Multiple recent mutations at epitope
 		sites have been <a href="http://www.nature.com/nature/journal/v507/n7490/abs/nature13087.html">
 		suggested</a> to be predicitive for strains dominating future seasons. Similarly, mutations
 		outside of these epitopes -- termed <b>non-epitope sites</b> tend to be damaging and suggested to 
@@ -113,7 +112,7 @@ title: nextflu
 		a node, which is associated with <a href="http://elifesciences.org/content/3/e03568"> 
 		rapid branching and expansion of clades</a>. A more detailed explanation is available 
 		<a href="https://neherlab.wordpress.com/2014/11/11/now-out-in-elife-predicting-evolution/">here</a>. 
-		Clades with the highest LBI have in past often dominated the next season. 
+		Clades with the highest LBI have often dominated the next season in past. 
 		</p><p>
 		<b>Frequencies</b> are estimated as maximum likelihood trajectories that penalize rapid changes in 
 		freqeuncy and slope. The frequencies of large clades or abundant genotypes have sufficiently 
