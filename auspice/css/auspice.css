@@ -266,12 +266,14 @@ a.off {
 }
 
 .highlight {
-	background-color: #E3EBEA;
+	background-color: white;
+	color: #647372;
+	font-size: 94%;
 }
 
 code {
 	background-color: white;
-	color: black;
+	color: #637A78;	
 }
 
 pre {
@@ -355,3 +357,14 @@ font-size: 12px;
 	padding-left: 3px;
 }
 
+.dl-horizontal dt {
+    text-align: left;
+    margin-bottom: 1em;
+    width: auto;
+    padding-right: 1em;
+}
+
+.dl-horizontal dd {
+    margin-left: 0;
+    margin-bottom: 1em;
+}
