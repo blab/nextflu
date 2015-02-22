@@ -1075,10 +1075,10 @@ d3.json("data/frequencies.json", function(error, json){
 			for (var pi=0; pi<freq.length; pi++){
 				freq[pi]+=json["mutations"][region][gt[0]][pi];
 			}			
-		}else if (json["clades"][region][gt[0]]!=undefined) {
+		}else if (json["clades"][region][gt[0].toLowerCase()]!=undefined) {
 			for (var pi=0; pi<freq.length; pi++){
-				freq[pi]+=json["clades"][region][gt[0]][pi];
-			}			
+				freq[pi]+=json["clades"][region][gt[0].toLowerCase()][pi];
+			}
 		}
 		return freq.map(function (d) {return Math.round(d*100)/100;});
 	};
