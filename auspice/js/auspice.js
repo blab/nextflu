@@ -217,6 +217,8 @@ function tipFillColor(col) {
 var width = 800,
 	height = 600;
 
+var cladeToSeq = {}
+
 var globalDate = new Date();
 var ymd_format = d3.time.format("%Y-%m-%d");
 
@@ -942,7 +944,8 @@ d3.json("data/tree.json", function(error, root) {
 	function colorByGenotypePosition (positions) {
 		var gts = nodes.map(function (d) {var tmp = [];
 											for (var i=0; i<positions.length; i++){
-												tmp[tmp.length] = (positions[i]-15)+d.aa_seq[positions[i]];
+												var aa = cladeToSeq[d.clade];
+												tmp[tmp.length] = (positions[i]-15)+aa[positions[i]];
 											}
 											d.color_gt = tmp.join(","); 
 											return d.color_gt;});
@@ -1014,6 +1017,15 @@ d3.json("data/meta.json", function(error, json) {
 	d3.select("#updated").text(json['updated']);
 });
 
+d3.json("data/sequences.json", function(error, json) {
+	if (error) return console.warn(error);
+	for (var key in json) {
+		if (json.hasOwnProperty(key)) {
+			var hash = json[key];
+			cladeToSeq[hash['clade']] = hash['aa_seq'];		
+		}
+	}
+});
 
 d3.json("data/frequencies.json", function(error, json){
 	var pivots= json["mutations"]["global"]["pivots"].map(function (d) {return Math.round(parseFloat(d)*100)/100;});
