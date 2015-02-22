@@ -1,0 +1,148 @@
+---
+layout: default
+title: nextflu / help
+---
+
+<div class="row">
+	<div class="col-md-12">
+		<a name="feature_overview"><h2>Feature overview, individual features are explained below</h2></a>
+		<img class="center" src="/images/overview.svg">
+		<div class="hugespacer"></div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<a name="date_slider"><h2>The date slider allows to explore the addition of viruses through time</h2></a>
+		<div class="spacer"></div>
+		<img src="/images/date_slider.svg">
+		<div class="hugespacer"></div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<a name="epitope_mutations"><h2>Color tree by epitope evolution</h2></a>
+		<div class="spacer"></div>
+		<img src="/images/epitope.svg">
+	</div>
+	<div class="spacer"></div>
+	<div class="col-md-8">
+		<p> <b>Epitope mutations</b> are based on 
+		<a href="http://www.nature.com/nature/journal/v289/n5796/abs/289366a0.html">HA structure 
+		and exposed residues</a>. Multiple recent mutations at epitope
+		sites have been <a href="http://www.nature.com/nature/journal/v507/n7490/abs/nature13087.html">
+		suggested</a> to be predictive for strains dominating future seasons.</p>
+	</div>
+	<div class="hugespacer"></div>
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<a name="nonepitope_mutations"><h2>Color tree by evolution outside epitopes</h2></a>
+		<div class="spacer"></div>
+		<img src="/images/nonepitope.svg">
+		<div class="spacer"></div>
+	</div>
+	<div class="col-md-8">
+		<p> Mutations outside of the epitopes (see above) -- termed <b>non-epitope sites</b> --- tend to be damaging and are suggested to be predictive of clade contraction.</p>
+	</div>
+	<div class="hugespacer"></div>
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<a name="rbs"><h2>Color tree by evolution at the receptor binding site</h2></a>
+		<div class="spacer"></div>
+		<img src="/images/rbs_mutations.svg">
+		<div class="spacer"></div>
+	</div>
+	<div class="col-md-8">
+		<p>Antigenic evolution has been <a href="http://www.sciencemag.org/content/342/6161/976.abs">shown</a> 
+		to depend primarily on substitutions surrounding the receptor binding site of HA1. 
+		These seven positions (145, 155, 156, 158, 159, 189, 193 in HA1 numbering) are referred to here
+		as <b>receptor binding positions</b> and changes at these positions could correspond to 
+		large changes in antigenic properties.</p>	
+	</div>
+	<div class="hugespacer"></div>
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<a name="lbi"><h2>Color tree by the local branching index</h2></a>
+		<div class="spacer"></div>
+		<img src="/images/lbi.svg">
+		<div class="spacer"></div>
+	</div>	
+	<div class="col-md-8">
+		<p>The <b>local branching index</b> is the exponentially weighted tree length surrounding 
+		a node, which is associated with <a href="http://elifesciences.org/content/3/e03568"> 
+		rapid branching and expansion of clades</a>. A more detailed explanation is available 
+		<a href="https://neherlab.wordpress.com/2014/11/11/now-out-in-elife-predicting-evolution/">here</a>. 
+		Retrospective analysis has shown that LBI correlates with clade growth. For coloring,
+		the LBI is normalized to the interval 0-1. </p>
+	</div>
+	<div class="hugespacer"></div>
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<a name="geo"><h2>Color tree by sampling location</h2></a>
+		<div class="spacer"></div>
+		<img src="/images/geo.svg">
+		<div class="spacer"></div>
+	</div>	
+	<div class="hugespacer"></div>
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<a name="genotype"><h2>Color tree by genotype</h2></a>
+		<div class="spacer"></div>
+		<img src="/images/genotype.svg">
+		<div class="spacer"></div>
+	</div>	
+	<div class="col-md-8">
+	<p>Use the <b>input box</b> to specify positions to color viruses by genotype. 
+	Amino acid positions must be separated by a comma (e.g. <span class="highlight">159,225</span>).
+	Only positions at which at least 10 strains have mutations are included. 
+	</p>
+	</div>
+	<div class="hugespacer"></div>
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<a name="mouse_tip"><h2>Mouse-over tips</h2></a>
+		<div class="spacer"></div>
+		<img src="/images/mouse_over_tip.png">
+		<div class="spacer"></div>
+	</div>	
+	<div class="col-md-8">
+	Placing the mouse over a circle corresponding to a virus strain displays the name, sampling date, and the numerical values of the different features. 
+	</div>
+	<div class="hugespacer"></div>
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<a name="mouse_branch"><h2>Mouse-over branch</h2></a>
+		<div class="spacer"></div>
+		<img src="/images/mouse_over_branch.svg">
+		<div class="spacer"></div>
+	</div>	
+	<div class="col-md-8">
+	<p>Placing the mouse a branch ancestral to a clade will display the frequency at the date specified
+	by the date slider. For large clades, the frequency trajectory will be shown in the "mutation and genotype frequencies" plot as the curve labeled "clade".</p>
+	</div>
+	<div class="hugespacer"></div>
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<a name="frequencies"><h2>Plotting frequencies of mutations and genotypes </h2></a>
+		<div class="spacer"></div>
+		<img src="/images/frequencies.svg">
+		<div class="spacer"></div>
+	</div>	
+</div>

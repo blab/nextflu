@@ -101,7 +101,17 @@ h6 {
 }
 
 a {
+	text-decoration: inherit;
+	font-style: inherit;
+	color: inherit;
+}
+
+a:link, a:visited {
 	color: #5DA8A3;
+}
+
+a:hover {
+	text-decoration: underline;
 }
 
 /* logo */
