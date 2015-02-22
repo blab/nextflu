@@ -5,16 +5,75 @@ title: nextflu help
 
 <div class="row">
 	<div class="col-md-12">
-	<h2>feature overview -- individual features are explained below</h2>
+		<a name="feature_overview"><h2>feature overview -- individual features are explained below</h2></a>
+		<div class="spacer"></div>
+		<img src =  "help_figures/overview.svg">
+		<div class="hugespacer"></div>
+	</div>
+
+	<div class="col-md-12">
+		<a name="date_slider"><h2>the date slider allows to explore the addition of viruses through time</h2></a>
+		<div class="spacer"></div>
+		<img src =  "help_figures/date_slider.svg">
+		<div class="hugespacer"></div>
+	</div>
+
+	<div class="col-md-12">
+		<a name="epitope_mutations"><h2>Color tree by epitope evolution</h2></a>
+		<div class="spacer"></div>
+		<img src =  "help_figures/epitope.svg">
+	</div>
 	<div class="spacer"></div>
-	<img src =  "help_figures/overview.svg">
+	<div class="col-md-8">
+		<p> <b>Epitope mutations</b> are based on 
+		<a href="http://www.nature.com/nature/journal/v289/n5796/abs/289366a0.html">HA structure 
+		and exposed residues</a>. Multiple recent mutations at epitope
+		sites have been <a href="http://www.nature.com/nature/journal/v507/n7490/abs/nature13087.html">
+		suggested</a> to be predictive for strains dominating future seasons.</p>
+	</div>
 	<div class="hugespacer"></div>
 
-	<a name="date_slider"><h2>the date slider allows to explore the addition of viruses through time</h2></a>
-	<div class="spacer"></div>
-	<img src =  "help_figures/date_slider.svg">
-	<div class="spacer"></div>
+	<div class="col-md-12">
+		<a name="nonepitope_mutations"><h2>Color tree by evolution outside epitopes</h2></a>
+		<div class="spacer"></div>
+		<img src =  "help_figures/nonepitope.svg">
+		<div class="spacer"></div>
+	</div>
+	<div class="col-md-8">
+		<p> Mutations outside of the epitopes (see above) -- termed <b>non-epitope sites</b> --- tend to be damaging and are suggested to be predictive of clade contraction.</p>
+	</div>
 	<div class="hugespacer"></div>
+
+	<div class="col-md-12">
+		<a name="rbs"><h2>Color tree by evolution at the receptor binding site</h2></a>
+		<div class="spacer"></div>
+		<img src =  "help_figures/rbs_mutations.svg">
+		<div class="spacer"></div>
+	</div>
+	<div class="col-md-8">
+		<p>Antigenic evolution has been <a href="http://www.sciencemag.org/content/342/6161/976.abs">shown</a> 
+		to depend primarily on substitutions surrounding the receptor binding site of HA1. 
+		These seven positions (145, 155, 156, 158, 159, 189, 193 in HA1 numbering) are referred to here
+		as <b>receptor binding positions</b> and changes at these positions could correspond to 
+		large changes in antigenic properties.</p>	
+	</div>
+	<div class="hugespacer"></div>
+
+	<div class="col-md-12">
+		<a name="lbi"><h2>Color tree by the local branching index</h2></a>
+		<div class="spacer"></div>
+		<img src =  "help_figures/lbi.svg">
+		<div class="spacer"></div>
 	</div>	
+	<div class="col-md-8">
+		<p>The <b>local branching index</b> is the exponentially weighted tree length surrounding 
+		a node, which is associated with <a href="http://elifesciences.org/content/3/e03568"> 
+		rapid branching and expansion of clades</a>. A more detailed explanation is available 
+		<a href="https://neherlab.wordpress.com/2014/11/11/now-out-in-elife-predicting-evolution/">here</a>. 
+		Retrospective analysis has shown that LBI correlates with clade growth. For coloring,
+		the LBI is normalized to the interval 0-1. </p>
+	</div>
+	<div class="hugespacer"></div>
+
 </div>
 
