@@ -47,16 +47,19 @@ body {
 }
 
 .plot-container {
-	width:800px;
-	position:absolute;
-	top: 65px;
-	left: 50%;
-	margin-left: -400px;	
+	width: 800px;
+	height: 650px;
+	top: 25px;
 }
 
 .io-container {
-	width: 220px;
-	position:absolute;	
+	width: 240px;
+	position: absolute;	
+}
+
+.subtitle-box {
+	width: 300px;
+	margin-left: 5px;
 }
 
 .bordered {
@@ -83,9 +86,14 @@ h6 {
 }
 
 .center {
-     float: none;
-     margin-left: auto;
-     margin-right: auto;
+	float: none;
+	margin-left: auto;
+	margin-right: auto;
+	text-align: center;     
+}
+
+.center form {
+	display: inline-block;
 }
 
 .text-center {
@@ -93,7 +101,17 @@ h6 {
 }
 
 a {
+	text-decoration: inherit;
+	font-style: inherit;
+	color: inherit;
+}
+
+a:link, a:visited {
 	color: #5DA8A3;
+}
+
+a:hover {
+	text-decoration: underline;
 }
 
 /* logo */
@@ -247,7 +265,7 @@ p {
 }
 
 .bigspacer {
-	height: 20px;
+	height: 30px;
 }
 
 .spacer {
@@ -262,9 +280,15 @@ a.off {
 	color: inherit; 
 }
 
-code.has-jax {
-	background: inherit; 
-	color: inherit;
+.highlight {
+	background-color: white;
+	color: #647372;
+	font-size: 94%;
+}
+
+code {
+	background-color: white;
+	color: #637A78;	
 }
 
 pre {
@@ -326,4 +350,36 @@ blockquote {
 	.note;
 	.text-dark-gray;
 	text-align: center;
+}
+
+
+.legend {
+font-size: 12px;
+}
+rect {
+stroke-width: 2;
+}
+text {
+font-size: 12px;
+}
+
+.form-small .control-label {
+    padding-right: 3px;
+	font-weight: 300;    
+}
+
+.form-small .controls {
+	padding-left: 3px;
+}
+
+.dl-horizontal dt {
+    text-align: left;
+    margin-bottom: 1em;
+    width: auto;
+    padding-right: 1em;
+}
+
+.dl-horizontal dd {
+    margin-left: 0;
+    margin-bottom: 1em;
 }

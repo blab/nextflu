@@ -63,8 +63,13 @@ def collapse(tree):
 
 def reduce(tree):
 	"""Remove outlier tips"""
+	"""Remove internal nodes left as orphan tips"""
 	for node in tree.postorder_node_iter():
-		if node.edge_length > 0.04 and node.is_leaf():
+		if node.edge_length > 0.01 and node.is_leaf():
+			parent = node.parent_node
+			parent.remove_child(node)
+	for node in tree.postorder_node_iter():
+		if node.is_leaf() and not hasattr(node, 'strain'):
 			parent = node.parent_node
 			parent.remove_child(node)
 
@@ -100,14 +105,22 @@ def layout(tree):
 		node.yvalue = get_yvalue(node)
 
 def add_virus_attributes(viruses, tree):
-	"""Add date attribute to all tips in tree"""
+	"""Add date and loc attributes to all tips in tree"""
 	strain_to_date = {}
+	strain_to_country = {}
+	strain_to_region = {}	
 	for v in viruses:
 		strain_to_date[v['strain']] = v['date']
+		strain_to_country[v['strain']] = v['country']
+		strain_to_region[v['strain']] = v['region']				
 	for node in tree.postorder_node_iter():
 		strain = str(node.taxon).replace("'", '')
 		if strain_to_date.has_key(strain):
 			node.date = strain_to_date[strain]
+		if strain_to_country.has_key(strain):
+			node.country = strain_to_country[strain]
+		if strain_to_region.has_key(strain):
+			node.region = strain_to_region[strain]						
 
 def add_node_attributes(tree):
 	"""Add clade, xvalue, yvalue, mutation and trunk attributes to all nodes in tree"""
@@ -124,12 +137,28 @@ def add_node_attributes(tree):
 		node.xvalue = node.distance_from_root()
 	root = tree.seed_node
 	for node in tree.postorder_node_iter():
-		node.ep = epitope_distance(node.seq, root.seq)
-		node.ne = nonepitope_distance(node.seq, root.seq)
-		node.rb = receptor_binding_distance(node.seq, root.seq)
+		node.ep = epitope_distance(translate(node.seq), translate(root.seq))
+		node.ne = nonepitope_distance(translate(node.seq), translate(root.seq))
+		node.rb = receptor_binding_distance(translate(node.seq), translate(root.seq))
 	for node in tree.postorder_node_iter():
 		node.trunk_count = 0
 		node.trunk = False
+
+def translate_all(tree):
+	for node in tree.postorder_node_iter():
+		node.aa_seq = translate(node.seq)
+
+def unique_date(tree):
+	leaf_count = 0
+	for node in tree.postorder_node_iter():
+		if node.is_leaf():
+			# attach index to a leaf, to allow for array indexing later
+			node.tip_index = leaf_count
+			# modify date by a tiny amount << than a day to ensure uniqueness
+			node.num_date = numerical_date(node.date) + 1e-7*node.tip_index
+			leaf_count+=1
+		else: # internal node preceed the oldest child
+			node.num_date = min([c.num_date for c in node.child_nodes()])
 
 def define_trunk(tree):
 	"""Trace current lineages backward to define trunk"""
@@ -158,6 +187,7 @@ def define_trunk(tree):
 		if node.trunk_count == number_recent:
 			node.trunk = True;
 
+
 def main(tree_fname = 'data/tree_ancestral.json', virus_fname='data/virus_clean.json'):
 
 	print "--- Tree refine at " + time.strftime("%H:%M:%S") + " ---"
@@ -175,6 +205,10 @@ def main(tree_fname = 'data/tree_ancestral.json', virus_fname='data/virus_clean.
 	print "Append node attributes"
 	add_virus_attributes(viruses, tree)
 	add_node_attributes(tree)
+	print "Translate nucleotide sequences"
+	translate_all(tree)
+	print "Enumerate leaves of ladderized tree and calculate unique numerical date"
+	unique_date(tree)
 	print "Define trunk"
 	define_trunk(tree)
 	out_fname = "data/tree_refine.json"

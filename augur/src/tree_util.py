@@ -1,4 +1,5 @@
 import dendropy
+import numpy as np
 from io_util import *
 
 def color_BioTree_by_attribute(T,attribute, vmin=None, vmax = None, missing_val='min', transform = lambda x:x, cmap=None):
@@ -97,8 +98,9 @@ def dendropy_to_json(node):
 	json = {}
 	if hasattr(node, 'clade'):
 		json['clade'] = node.clade
-	if node.taxon:
-		json['strain'] = str(node.taxon).replace("'", '')
+	if hasattr(node, 'taxon'):
+		if node.taxon != None:
+			json['strain'] = str(node.taxon).replace("'", '')
 	if hasattr(node, 'xvalue'):
 		json['xvalue'] = round(node.xvalue, 5)
 	if hasattr(node, 'yvalue'):
@@ -111,14 +113,39 @@ def dendropy_to_json(node):
 		json['rb'] = node.rb
 	if hasattr(node, 'date'):
 		json['date'] = node.date
+	if hasattr(node, 'num_date'):
+		json['num_date'] = node.num_date
+	if hasattr(node, 'country'):
+		json['country'] = node.country
+	if hasattr(node, 'region'):
+		json['region'] = node.region
 	if hasattr(node, 'seq'):
 		json['seq'] = node.seq
+	if hasattr(node, 'aa_seq'):
+		json['aa_seq'] = node.aa_seq
+	if hasattr(node, 'gt'):
+		json['gt'] = node.gt
+	if hasattr(node, 'gt_pos'):
+		json['gt_pos'] = list(node.gt_pos)
+	if hasattr(node, 'tip_index'):
+		json['tip_index'] = node.tip_index
 	if hasattr(node, 'LBI'):
 		json['LBI'] = round(node.LBI, 5)
 	if hasattr(node, 'tol'):
 		json['tol'] = round(node.tol, 5)		
 	if hasattr(node, 'fitness'):
 		json['fitness'] = round(node.fitness, 5)		
+	try:
+		if hasattr(node, 'freq') and node.freq is not None:
+			json['freq'] = {reg: [round(x, 3) for x in freq]  if freq is not None else "undefined" for reg, freq in node.freq.iteritems()}		
+		if hasattr(node, 'logit_freq') and node.logit_freq is not None:
+			json['logit_freq'] = {reg: [round(x,3) for x in freq]  if freq is not None else "undefined" for reg, freq in node.logit_freq.iteritems()}
+		if hasattr(node, 'virus_count'):
+			json['virus_count'] = {reg: [round(x,3) for x in vc]  if vc is not None else "undefined" for reg, vc in node.virus_count.iteritems()}
+		if hasattr(node, 'pivots'):
+			json['pivots'] = [round(x,3) for x in node.pivots]
+	except:
+		import pdb; pdb.set_trace()
 	if node.child_nodes():
 		json["children"] = []
 		for ch in node.child_nodes():
@@ -164,6 +191,7 @@ def json_to_dendropy(json):
 	tree.get_from_string(';', 'newick')
 	root = tree.seed_node
 	json_to_dendropy_sub(json, root, tree.taxon_set)
+
 	root.edge_length=0.0
 	return tree
 
@@ -172,6 +200,8 @@ def json_to_dendropy_sub(json, node, taxon_set):
 	recursively calls itself for all children of node and
 	builds up the tree. entries in json are added as node attributes
 	'''
+	if 'xvalue' in json:
+		node.xvalue = float(json['xvalue'])
 	for attr,val in json.iteritems():
 		if attr=='children':
 			for sub_json in val:

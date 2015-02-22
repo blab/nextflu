@@ -3,41 +3,139 @@ layout: default
 title: nextflu
 ---
 
-<div class="row" style="height: 700px;">
-	<div class="col-md-12">
-		<div class="plot-container">
-			<svg id="treeplot"></svg>
-		</div>
+<div class="row">
+	<div class="col-md-3" style="height: 150px;">
 		<div class="io-container">
 			<div class="bigtitle logobox">
 				<span class="c2">n</span><span class="c3">e</span><span class="c4">x</span><span class="c5">t</span><span class="c6">f</span><span class="c7">l</span><span class="c8">u</span>
 			</div>
-			<div class="bigspacer"></div>
+			<div class="subtitle-box">
+				Real-time tracking of seasonal influenza H3N2 virus evolution in humans
+			</div>
+			<div class="bigspacer"></div>		
 			<div>
 				<svg id="date-input"></svg>
 			</div>
-			<div class="spacer"></div>
 			<div>
-				<select id="coloring" class="form-control">
-					<option value="ep">epitope mutations</option>
-					<option value="ne">non-epitope mutations</option>
-					<option value="rb">receptor binding mutations</option>
-					<option value="lbi">local branching index</option>
-				</select>
+				<h5 id="legend-title">Legend</h5>
+				<svg id="legend"></svg>
 			</div>
+			<div class="spacer"></div>
+			<form class="form-horizontal form-small">
+				<div class="form-group">
+						<label class="col-xs-4 control-label">Color by</label>
+						<div class="col-xs-8 controls">
+							<select id="coloring" class="form-control">
+								<option value="ep">epitope mutations</option>
+								<option value="ne">non-epitope mutations</option>
+								<option value="rb">receptor binding mutations</option>
+								<option value="lbi">local branching index</option>
+								<option value="region">geographic region</option>
+							</select>
+						</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 control-label">Or</label>
+					<div class="col-xs-8 controls">
+						<input id="gt-color" type="search" placeholder="HA1 positions..." class="form-control">
+					</div>
+				</div>		
+			</form>
 			<div class="spacer"></div>
 			<div id="search"></div>
 			<div class="spacer"></div>
 			<div>
 				<button id="reset" class="btn btn-default">reset layout</button>
 			</div>
+			<div class="spacer"></div>						
 		</div>
 	</div>
+	<div class="col-md-9" style="top: 45px;">
+		<div class="plot-container">
+			<svg id="treeplot"></svg>
+		</div>
+	</div>	
 </div>
 
 <div class="row">
+	<div class="col-md-3"></div>
+	<div class="col-md-9">
+		<h3>Mutation and clade frequencies</h3>
+		<div id="gtchart"></div>
+		<div class="spacer"></div>		
+		<div class="center">
+			<form class="form-inline">
+				<div class="form-group">
+					<input id="gtspec" class="form-control" value="225D, 159Y/225D, 159S/225D/AS, 3c2.a/NA" size=50>
+				</div>
+				<button id="plotfreq" type=button class="btn btn-default" style="text-align:center;">plot frequencies</button>
+			</form>
+		</div>
+		<div class="spacer"></div>
+		<div>
+			Enter a mutation or genotype above (e.g. <span class="highlight">225D</span>) and click 
+			<b>plot frequencies</b> to show estimated frequency of this mutation through time. Complex genotypes can be specified by combining mutations as 
+			<span class="highlight">159Y/225D</span>. In addition, geographic regions can be specified by adding AS 
+			(Asia), NA (North America), EU (Europe), or OC (Oceania) as <span class="highlight">159S/225D/AS</span>.
+			Several genotypes can be entered simultaneously when separated by commas (e.g. 
+			<span class="highlight">225D, 159S/225D/AS</span> will graph the global frequency of 225D and the frequency 
+			of strains containing both 159S and 225D in Asia). Instead of a genotype, the common clades 3c3, 3c3.a, 3c2, 3c2.a can be used. Positions with very little variation are omitted. Beware 
+			that region specific frequencies are noisy. <a href="/help/#frequencies">Click here for help with the interface.</a>
+		</div>
+	</div>	
+</div>
+
+<div class="row">
+	<div class="col-md-3"></div>
+	<div class="col-md-9">
+		<h3>Feature explanation</h3>
+		<p> Use the <a href="/help/#date_slider"><b>date slider</b></a> to highlight viruses sampled within 12 month of the date displayed.
+		<p> Use the <a href="/help/#epitope_mutations"><b>drop down menu</b></a> to color viruses by number of <span class="highlight"><a href="/help/#epitope_mutations">epitope mutations</a></span>, 
+		<span class="highlight"><a href="/help/#nonepitope_mutations">non-epitope mutations</a></span> or 
+		<span class="highlight"><a href="/help/#rbs">receptor binding mutations</a></span>
+		relative to root, or to color viruses by <span class="highlight"><a href="/help/#lbi">local branching index</a></span> or 
+		<span class="highlight"><a href="/help/#geo">geographic region</a></span>.
+		<p> Use the <a href="/help/#genotype"><b>input box</b></a> to specify positions to color viruses by genotype. Amino acid positions must be 
+		separated by a comma (e.g. <span class="highlight">159,225</span>).
+		<p> <a href="/help/#mouse_tip"><b>Mouse over</b></a> a tip to show virus name, location and features.
+		<p> <a href="/help/#mouse_branch"><b>Mouse over</b></a> a branch to graph the frequency of the correponding clade trajectory below or <b>click</b>
+		on a branch to zoom into its descendent clade.
+	</div>	
+</div>
+
+<div class="row">
+	<div class="col-md-3"></div>
+	<div class="col-md-9">
+		<h3>Rationale and details</h3>
+		<p> <b>Epitope mutations</b> are based on 
+		<a href="http://www.nature.com/nature/journal/v289/n5796/abs/289366a0.html">HA structure and exposed residues</a>. 
+		Multiple recent mutations at epitope
+		sites have been <a href="http://www.nature.com/nature/journal/v507/n7490/abs/nature13087.html">
+		suggested</a> to be predictive for strains dominating future seasons. Similarly, mutations
+		outside of these epitopes -- termed <b>non-epitope sites</b> --- tend to be damaging and are suggested to 
+		be predictive of clade contraction.</p>
+		<p>Antigenic evolution has been <a href="http://www.sciencemag.org/content/342/6161/976.abs">shown</a> 
+		to depend primarily on substitutions surrounding the receptor binding site of HA1. 
+		These seven positions (145, 155, 156, 158, 159, 189, 193 in HA1 numbering) are referred to here
+		as <b>receptor binding positions</b> and changes at these positions could correspond to 
+		large changes in antigenic properties.</p>
+		<p>The <b>local branching index</b> is the exponentially weighted tree length surrounding 
+		a node, which is associated with <a href="http://elifesciences.org/content/3/e03568"> 
+		rapid branching and expansion of clades</a>. A more detailed explanation is available 
+		<a href="https://neherlab.wordpress.com/2014/11/11/now-out-in-elife-predicting-evolution/">here</a>. 
+		Retrospective analysis has shown that LBI correlates with clade growth. 
+		</p><p>
+		<b>Frequencies</b> are estimated as maximum likelihood trajectories that penalize rapid changes in 
+		frequency and slope. The frequencies of large clades or abundant genotypes have sufficiently 
+		many observations to by robust, while rare mutations or combinations thereof can't be reliably
+		estimated.
+	</div>
 	<div class="col-md-1"></div>
-	<div class="col-md-10">
+</div>
+
+<div class="row">
+	<div class="col-md-3"></div>
+	<div class="col-md-9">
 		<hr>
 		Built by <a href="http://bedford.io">Trevor Bedford</a> and
 		<a href="https://neherlab.wordpress.com/">Richard Neher</a>.
@@ -46,8 +144,8 @@ title: nextflu
 		This work would not be possible without the open sharing of genetic data by influenza research groups
 		from all over the world. <a href="acknowledgements/">We gratefully acknowledge their contributions.</a>
 	</div>
-	<div class="col-md-1"></div>
 </div>
+
 
 <div class="row">
 	<div class="col-md-12">
@@ -57,5 +155,6 @@ title: nextflu
 
 <script src="js/d3.min.js"></script>
 <script src="js/d3.tip.js"></script>
+<script src="js/c3.min.js"></script>
 <script src="js/autocomplete.js"></script>
 <script src="js/auspice.js"></script>

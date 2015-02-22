@@ -5,7 +5,7 @@
 #  - a single sequence per virus strain, taken as first sequence in list
 # outputs to virus_filter.json
 
-import os, re, time, datetime
+import os, re, time, datetime, csv
 from io_util import *
 
 def parse_gisaid(fasta):
@@ -38,11 +38,14 @@ def parse_gisaid(fasta):
 	return viruses
 
 def sort_length(viruses):
+	"""Sort by length, but randomize viruses of a given length"""
+	from random import shuffle
+	shuffle(viruses)
 	return sorted(viruses, key = lambda v: len(v['seq']), reverse = True)
 
 def fix_strain_names(viruses):
 	for v in viruses:
-		v['strain'] = v['strain'].replace('\'','').replace('(','').replace(')','').replace('H3N2','')
+		v['strain'] = v['strain'].replace('\'','').replace('(','').replace(')','').replace('H3N2','').replace('Human','').replace('human','').replace('//','/')
 
 def filter_strain_names(viruses):
 	filtered_viruses = filter(lambda v: re.match(r'^A/', v['strain']) != None, viruses)
@@ -64,6 +67,8 @@ def add_outgroup(viruses):
 		'db': 'IRD',
 		'accession': 'U26830',
 		'date': '1992-01-01',
+		'country': 'China',
+		'region': 'China',
 		'seq': 'ATGAAGACTATCATTGCTTTGAGCTACATTTTATGTCTGGTTTTCGCTCAAAAACTTCCCGGAAATGACAACAGCACAGCAACGCTGTGCCTGGGACATCATGCAGTGCCAAACGGAACGCTAGTGAAAACAATCACGAATGATCAAATTGAAGTGACTAATGCTACTGAGCTGGTTCAGAGTTCCTCAACAGGTAGAATATGCGACAGTCCTCACCGAATCCTTGATGGAAAAAACTGCACACTGATAGATGCTCTATTGGGAGACCCTCATTGTGATGGCTTCCAAAATAAGGAATGGGACCTTTTTGTTGAACGCAGCAAAGCTTACAGCAACTGTTACCCTTATGATGTACCGGATTATGCCTCCCTTAGGTCACTAGTTGCCTCATCAGGCACCCTGGAGTTTATCAATGAAGACTTCAATTGGACTGGAGTCGCTCAGGATGGGGGAAGCTATGCTTGCAAAAGGGGATCTGTTAACAGTTTCTTTAGTAGATTGAATTGGTTGCACAAATCAGAATACAAATATCCAGCGCTGAACGTGACTATGCCAAACAATGGCAAATTTGACAAATTGTACATTTGGGGGGTTCACCACCCGAGCACGGACAGAGACCAAACCAGCCTATATGTTCGAGCATCAGGGAGAGTCACAGTCTCTACCAAAAGAAGCCAACAAACTGTAACCCCGAATATCGGGTCTAGACCCTGGGTAAGGGGTCAGTCCAGTAGAATAAGCATCTATTGGACAATAGTAAAACCGGGAGACATACTTTTGATTAATAGCACAGGGAATCTAATTGCTCCTCGGGGTTACTTCAAAATACGAAATGGGAAAAGCTCAATAATGAGGTCAGATGCACCCATTGGCACCTGCAGTTCTGAATGCATCACTCCAAATGGAAGCATTCCCAATGACAAACCTTTTCAAAATGTAAACAGGATCACATATGGGGCCTGCCCCAGATATGTTAAGCAAAACACTCTGAAATTGGCAACAGGGATGCGGAATGTACCAGAGAAACAAACTAGAGGCATATTCGGCGCAATCGCAGGTTTCATAGAAAATGGTTGGGAGGGAATGGTAGACGGTTGGTACGGTTTCAGGCATCAAAATTCTGAGGGCACAGGACAAGCAGCAGATCTTAAAAGCACTCAAGCAGCAATCGACCAAATCAACGGGAAACTGAATAGGTTAATCGAGAAAACGAACGAGAAATTCCATCAAATCGAAAAAGAATTCTCAGAAGTAGAAGGGAGAATTCAGGACCTCGAGAAATATGTTGAAGACACTAAAATAGATCTCTGGTCTTACAACGCGGAGCTTCTTGTTGCCCTGGAGAACCAACATACAATTGATCTTACTGACTCAGAAATGAACAAACTGTTTGAAAAAACAAGGAAGCAACTGAGGGAAAATGCTGAGGACATGGGCAATGGTTGCTTCAAAATATACCACAAATGTGACAATGCCTGCATAGGGTCAATCAGAAATGGAACTTATGACCATGATGTATACAGAGACGAAGCATTAAACAACCGGTTCCAGATCAAAGGTGTTGAGCTGAAGTCAGGATACAAAGATTGGATCCTGTGGATTTCCTTTGCCATATCATGCTTTTTGCTTTGTGTTGTTTTGCTGGGGTTCATCATGTGGGCCTGCCAAAAAGGCAACATTAGGTGTAACATTTGCATTTGA'
 #		'seq': 'ATGAAGACTATCATTGCTTTGAGCTACATTTTATGTCTGGTTTTCGCTCAAAAACTTCCCGGAAATGACAACAGCACAGCAACGCTGTGCCTGGGACATCATGCAGTGCCAAACGGAACGCTAGTGAAAACAATCACGAATGATCAAATTGAAGTGACTAATGCTACTGAGCTGGTTCAGAGTTCCTCAACAGGTAGAATATGCGACAGTCCTCACCGAATCCTTGATGGAAAAAACTGCACACTGATAGATGCTCTATTGGGAGACCCTCATTGTGATGGCTTCCAAAATAAGGAATGGGACCTTTTTGTTGAACGCAGCAAAGCTTACAGCAACTGTTACCCTTATGATGTACCGGATTATGCCTCCCTTAGGTCACTAGTTGCCTCATCAGGCACCCTGGAGTTTATCAATGAAGACTTCAATTGGACTGGAGTCGCTCAGGATGGGGGAAGCTATGCTTGCAAAAGGGGATCTGTTAACAGTTTCTTTAGTAGATTGAATTGGTTGCACAAATCAGAATACAAATATCCAGCGCTGAACGTGACTATGCCAAACAATGGCAAATTTGACAAATTGTACATTTGGGGGGTTCACCACCCGAGCACGGACAGAGACCAAACCAGCCTATATGTTCGAGCATCAGGGAGAGTCACAGTCTCTACCAAAAGAAGCCAACAAACTGTAACCCCGAATATCGGGTCTAGACCCTGGGTAAGGGGTCAGTCCAGTAGAATAAGCATCTATTGGACAATAGTAAAACCGGGAGACATACTTTTGATTAATAGCACAGGGAATCTAATTGCTCCTCGGGGTTACTTCAAAATACGAAATGGGAAAAGCTCAATAATGAGGTCAGATGCACCCATTGGCACCTGCAGTTCTGAATGCATCACTCCAAATGGAAGCATTCCCAATGACAAACCTTTTCAAAATGTAAACAGGATCACATATGGGGCCTGCCCCAGATATGTTAAGCAAAACACT'
 
@@ -129,31 +134,87 @@ def filter_unique(viruses):
 			filtered_viruses.append(v)
 	return filtered_viruses
 
+def append_country_and_region(viruses):
+	"""Label viruses with geographic location based on strain name"""
+	"""Location is to the level of country of administrative division when available"""
+	reader = csv.DictReader(open("source-data/geo_synonyms.tsv"), delimiter='\t')		# list of dicts
+	label_to_country = {}
+	for line in reader:
+		label_to_country[line['label'].lower()] = line['country']
+	for v in viruses:
+		label = re.match(r'^A/([^/]+)/', v['strain']).group(1).lower()					# check first for whole geo match
+		v['country'] = 'Unknown'
+		if label in label_to_country:
+			v['country'] = label_to_country[label]
+		else:
+			label = re.match(r'^A/([^\-^\/]+)[\-\/]', v['strain']).group(1).lower()		# check for partial geo match
+			if label in label_to_country:
+				v['country'] = label_to_country[label]
+
+	reader = csv.DictReader(open("source-data/geo_regions.tsv"), delimiter='\t')		# list of dicts
+	country_to_region = {}
+	for line in reader:
+		country_to_region[line['country']] = line['region']
+	for v in viruses:
+		v['region'] = 'Unknown'
+		if v['country'] in country_to_region:
+			v['region'] = country_to_region[v['country']]
+	
+	return filter(lambda v: v['region'] != 'Unknown', viruses)
+
+def get_virus_tuples(viruses):
+	virus_tuples = {}
+	for v in viruses:
+		vdate = datetime.datetime.strptime(v['date'], '%Y-%m-%d').date()
+		tuple = (vdate.year, vdate.month, v['region'])
+		if tuple not in virus_tuples:
+			virus_tuples[tuple] = []
+		virus_tuples[tuple].append(v)
+	return virus_tuples
+
 def streamline(viruses, years_back, viruses_per_month):
+	"""Subsample x viruses per month"""
+	"""Take from beginning of list - this will prefer longer sequences"""
+	"""Take viruses 1 per region in a cycle to get geographic diversity"""
+	"""But pad with additional viruses from populous regions if necessary"""
+
+	virus_tuples = get_virus_tuples(viruses)
+
 	filtered_viruses = []
 	first_year = datetime.datetime.today().year - years_back
 	first_month = datetime.datetime.today().month
+	regions = [v['region'] for v in viruses]
+	regions = list(set(regions))
+
 	print "Filtering between " + str(first_month) + "/" + str(first_year) + " and today"
 	print "Selecting " + str(viruses_per_month) + " viruses per month"
 	y = first_year
 	for m in range(first_month,13):
-		filtered_viruses.extend(select_viruses(viruses, y, m, viruses_per_month))
+		filtered_viruses.extend(select_viruses(virus_tuples, y, m, viruses_per_month, regions))
 	for y in range(first_year+1,datetime.datetime.today().year+1):
 		for m in range(1,13):
-			filtered_viruses.extend(select_viruses(viruses, y, m, viruses_per_month))
+			filtered_viruses.extend(select_viruses(virus_tuples, y, m, viruses_per_month, regions))
 	return filtered_viruses
 
-def select_viruses(viruses, y, m, viruses_per_month):
-	count = 0
-	filtered = []
-	for v in viruses:
-		date = datetime.datetime.strptime(v['date'], '%Y-%m-%d').date()
-		if y == date.year and m == date.month:
-			filtered.append(v)
-			count += 1
-			if count == viruses_per_month:
-				break
-	return filtered
+def select_viruses(virus_tuples, y, m, viruses_per_month, regions):
+
+	select_set = []
+	counts = [0]
+	for r in regions:
+		if (y, m, r) in virus_tuples:
+			counts.append(len(virus_tuples[(y, m, r)]))
+	max_count = max(counts)
+	for index in range(0, max_count):
+		for r in regions:
+			if (y, m, r) in virus_tuples:
+				viruses = virus_tuples[(y, m, r)]
+				if len(viruses) > index:
+					select_set.append(viruses[index])
+
+	if len(select_set) > viruses_per_month:
+		select_set = select_set[0:viruses_per_month]
+
+	return select_set
 
 def main(in_fname=None, years_back=3, viruses_per_month=50):
 
@@ -192,6 +253,10 @@ def main(in_fname=None, years_back=3, viruses_per_month=50):
 	# filter to unique strains
 	viruses = filter_unique(viruses)
 	print str(len(viruses)) + " with unique strain names"
+	
+	# append geo information
+	viruses = append_country_and_region(viruses)
+	print str(len(viruses)) + " with geographic information"	
 
 	# reduce to manageable volume
 	viruses = streamline(viruses, years_back, viruses_per_month)
