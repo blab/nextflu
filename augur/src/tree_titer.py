@@ -250,6 +250,8 @@ def infer_ancestral(tree_fname, aln_fname):
 
 def map_HI_to_tree(tree, measurements, method = 'nnls', lam=10):
 	names_to_clades = {leaf.strain.lower(): leaf for leaf in tree.leaf_iter()}
+	ref_names = list(set([x[1] for x in measurements]))
+	print len(ref_names)
 	# assign indices to branches
 	branch_count = 0
 	for node in tree.postorder_node_iter():
@@ -264,8 +266,9 @@ def map_HI_to_tree(tree, measurements, method = 'nnls', lam=10):
 			try:
 				if pair[0] != pair[1] and pair[0] in names_to_clades and pair[1] in names_to_clades:
 					path = get_path_dendropy(tree, names_to_clades[pair[0]], names_to_clades[pair[1]])
-					tmp = np.zeros(branch_count)
+					tmp = np.zeros(branch_count + len(ref_names))
 					tmp[[c.branch_index for c in path]] = 1
+					tmp[branch_count+ref_names.index(pair[1])] = 1
 					tree_graph.append(tmp)
 					HI_diff.append(val)
 				else:
@@ -303,23 +306,28 @@ def map_HI_to_tree(tree, measurements, method = 'nnls', lam=10):
 		print 'QP', fit_func(w, tree_graph, HI_diff), np.sum((HI_diff-1)**2)
 	elif method=='nnl1reg':
 		# non-negative l1 reg
-		P1 = np.zeros((2*tree_graph.shape[1],2*tree_graph.shape[1]))
+		P1 = np.zeros((tree_graph.shape[1]+branch_count,tree_graph.shape[1]+branch_count))
 		P1[:tree_graph.shape[1], :tree_graph.shape[1]] = np.dot(tree_graph.T, tree_graph)
+		for ii in xrange(branch_count, tree_graph.shape[1]):
+			P1[ii,ii]+=1
 		P = matrix(P1)
-		q1 = np.zeros(2*tree_graph.shape[1])
+
+		q1 = np.zeros(tree_graph.shape[1]+branch_count)
 		q1[:tree_graph.shape[1]] = np.dot( HI_diff, tree_graph)
 		q1[tree_graph.shape[1]:] = -lam
+		#q1[branch_count:tree_graph.shape[1]] -= lam
 		q = -matrix(q1)
-		h = matrix(np.zeros(2*tree_graph.shape[1])) # Gw <=h
-		G1 = np.zeros((2*tree_graph.shape[1],2*tree_graph.shape[1]))
-		G1[:tree_graph.shape[1], :tree_graph.shape[1]] = -np.eye(tree_graph.shape[1])
-		G1[tree_graph.shape[1]:, :tree_graph.shape[1]] = np.eye(tree_graph.shape[1])
-		G1[tree_graph.shape[1]:, tree_graph.shape[1]:] = -np.eye(tree_graph.shape[1])
+
+		h = matrix(np.zeros(2*branch_count)) # Gw <=h
+		G1 = np.zeros((2*branch_count,tree_graph.shape[1]+branch_count))
+		G1[:branch_count, :branch_count] = -np.eye(branch_count)
+		G1[branch_count:, :branch_count] = np.eye(branch_count)
+		G1[branch_count:, tree_graph.shape[1]:] = -np.eye(branch_count)
 		G = matrix(G1)
 		W = solvers.qp(P,q,G,h)
 		w = np.array([x for x in W['x']])[:tree_graph.shape[1]]
 		print 'QP l1', fit_func(w, tree_graph, HI_diff), np.sum((HI_diff-1)**2)
-		plt.plot(sorted(w), np.linspace(0,1,len(w)))
+		plt.plot(sorted(w[:branch_count]), np.linspace(0,1,branch_count))
 
 
 	tree.seed_node.cHI = 0
@@ -331,12 +339,12 @@ def map_HI_to_tree(tree, measurements, method = 'nnls', lam=10):
 			if node.constraints>0:
 				node.dHI = w[node.branch_index]
 			else:
-				node.dHI = 0
+				node.dHI = 0.01
 
 			node.cHI = node.parent_node.cHI + node.dHI
-			node.branch_length = node.dHI
+			#node.branch_length = node.dHI
 
-	return tree
+	return tree, w
 
 
 if __name__ == "__main__":
@@ -357,7 +365,7 @@ if __name__ == "__main__":
 			if normalized_val<=10:
 				normalized_measurements[(test, ref)] = max(0,normalized_val)
 
-	tree = map_HI_to_tree(tree, normalized_measurements, method='l1reg', lam = 20)
+	tree,w = map_HI_to_tree(tree, normalized_measurements, method='nnl1reg', lam = 20)
 
 	names_to_clades = {leaf.strain.lower(): leaf for leaf in tree.leaf_iter()}
 	for ref in ref_names:
@@ -375,8 +383,8 @@ if __name__ == "__main__":
 	plt.figure()
 	thres = [1,2,3,100]
 	tmp = [x[0] for x in mut_dHI if x[1]=='']
-	plt.plot(sorted(tmp), linspace(0,1, len(tmp)), label='#aa=0')
+	plt.plot(sorted(tmp), np.linspace(0,1, len(tmp)), label='#aa=0'+', total '+str(len(tmp)))
 	for lower, upper in zip(thres[:-1], thres[1:]):
 		tmp = [x[0] for x in mut_dHI if x[1].count(',')>=lower and x[1].count(',')<upper]
-		plt.plot(sorted(tmp), np.linspace(0,1, len(tmp)), label='#aa='+str(lower))
+		plt.plot(sorted(tmp), np.linspace(0,1, len(tmp)), label='#aa='+str(lower)+', total '+str(len(tmp)))
 	plt.legend(loc=4)
