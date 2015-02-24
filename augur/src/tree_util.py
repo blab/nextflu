@@ -174,6 +174,10 @@ def BioPhylo_to_json(node):
 		json['date'] = node.date
 	if hasattr(node, 'seq'):
 		json['seq'] = str(node.seq)
+	if hasattr(node, 'aa_seq'):
+		json['aa_seq'] = str(node.aa_seq)
+	if hasattr(node, 'mutations'):
+		json['mutations'] = str(node.mutations)
 	if hasattr(node, 'LBI'):
 		json['LBI'] = round(node.LBI,5)
 	if len(node.clades):

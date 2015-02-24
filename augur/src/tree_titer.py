@@ -3,8 +3,11 @@
 import numpy as np
 from io_util import *
 from tree_util import *
+from tree_ancestral import *
+from seq_util import *
 import time
 from collections import defaultdict
+from matplotlib import pyplot as plt
 
 min_titer = 10.0
 
@@ -125,21 +128,21 @@ def assign_tree_graph(tree, HI_distances):
 def get_path_dendropy(tree, v1, v2):
 	p1 = [v1]
 	p2 = [v2]
-	while p1[-1].parent != tree.seed_node:
+	while p1[-1].parent_node != tree.seed_node:
 		p1.append(p1[-1].parent_node)
 	p1.append(tree.seed_node)
 	p1.reverse()
 
-	while p2[-1].parent != tree.seed_node:
+	while p2[-1].parent_node != tree.seed_node:
 		p2.append(p2[-1].parent_node)
 	p2.append(tree.seed_node)
 	p2.reverse()
 
-	for pi, tmp_v1, tmp_v2 in enumerate(izip(p1,p2)):
+#	import pdb; pdb.set_trace()
+	for pi, (tmp_v1, tmp_v2) in enumerate(izip(p1,p2)):
 		if tmp_v1!=tmp_v2:
 			break
-	path = p1[pi-1:] + p2[pi:].reverse()
-
+	path = p1[pi:] + p2[pi:]
 	return path
 
 def get_path_biopython(tree, v1, v2):
@@ -204,36 +207,54 @@ def fix_HI_tree():
 	Phylo.write(tree, 'data/HI_tree.newick',  'newick')
 	return tree
 
-if __name__ == "__main__":
-	from Bio import Phylo
-#	get_strains_with_HI_and_sequence()
-#	tree = fix_HI_tree()
-	tree = Phylo.read('data/HI_tree.newick', 'newick')
-	tree.root.branch_length = 0.001
-	for node in tree.get_nonterminals():
-		if node.branch_length<0.00015:
-			node.branch_length=0
-			tree.collapse(node)
-	tree.ladderize()
+def collapse_branches_without_mutations(node):
+	children = list(node.clades)
+	for c in children:
+		if not c.is_terminal():
+			if node.seq == c.seq:
+				node.collapse(c)
+				print "collapsing", c
+	for c in node.clades:
+		if not c.is_terminal():
+			collapse_branches_without_mutations(c)
 
-	names, measurements, tables = read_tables()
-	normalized_measurements = {}
-	ref_names = set()
-	for (test, ref), val in measurements.iteritems():
-		if (ref,ref) in measurements:
-			ref_names.add(ref)
-			normalized_val = np.log2(measurements[(ref, ref)]).mean() - np.log2(val).mean()
-			if normalized_val<=10:
-				normalized_measurements[(test, ref)] = max(0,normalized_val)
+def infer_ancestral(tree_fname, aln_fname):
+	from Bio import AlignIO, Phylo
+	from itertools import izip
 
-	names_to_clades = {leaf.name.lower(): leaf for leaf in tree.get_terminals()}
+	aln = AlignIO.read(aln_fname, 'fasta')
+	for seq in aln:
+		seq.name = "/".join(seq.name.split('/')[:-1])
+		seq.id = seq.name
+		print seq.name, seq.id
+	tree = Phylo.read(tree_fname, 'newick')
+	anc_seq = ancestral_sequences(tree, aln, seqtype='str')
+	anc_seq.calc_ancestral_sequences()
+	anc_seq.cleanup_tree()
+	for node in anc_seq.T.get_terminals()+anc_seq.T.get_nonterminals():
+		node.aa_seq = translate(node.seq)
+	anc_seq.T.root.mutations= ''
+	for node in anc_seq.T.get_nonterminals(order='postorder'):
+		for c in node.clades:
+			c.mutations = ','.join([a+str(pos-15)+b for pos, (a,b) in enumerate(izip(node.aa_seq, c.aa_seq)) if a!=b])
+
+	collapse_branches_without_mutations(anc_seq.T.root)
+	anc_seq.T.ladderize()
+	anc_seq.T.root.branch_length = 0.001
+
+	out_fname = "data/tree_HI_ancestral.json"
+	write_json(BioPhylo_to_json(anc_seq.T.root), out_fname)
+
+	return anc_seq.T
+
+
+def map_HI_to_tree(tree, measurements, method = 'nnls', lam=10):
+	names_to_clades = {leaf.strain.lower(): leaf for leaf in tree.leaf_iter()}
 	# assign indices to branches
 	branch_count = 0
-	for node in tree.get_nonterminals():
-		for c in node.clades:
-			if True: #not c.is_terminal():
-				c.branch_index = branch_count
-				branch_count+=1
+	for node in tree.postorder_node_iter():
+		node.branch_index = branch_count
+		branch_count+=1
 
 	tree_graph = []
 	HI_diff = []
@@ -242,7 +263,7 @@ if __name__ == "__main__":
 		if not np.isnan(val):
 			try:
 				if pair[0] != pair[1] and pair[0] in names_to_clades and pair[1] in names_to_clades:
-					path = get_path_biopython(tree, names_to_clades[pair[0]], names_to_clades[pair[1]])
+					path = get_path_dendropy(tree, names_to_clades[pair[0]], names_to_clades[pair[1]])
 					tmp = np.zeros(branch_count)
 					tmp[[c.branch_index for c in path]] = 1
 					tree_graph.append(tmp)
@@ -256,26 +277,106 @@ if __name__ == "__main__":
 	tree_graph= np.array(tree_graph)
 
 	from scipy.optimize import nnls
-	w = nnls(tree_graph, HI_diff)
-	tree.root.cHI = 0
-	for node in tree.get_nonterminals():
-		node.ref=False
-		for c in node.clades:
-			if True: #not c.is_terminal():
-				c.constraints = tree_graph[:,c.branch_index].sum()
-				if c.constraints>0:
-					c.dHI = w[0][c.branch_index]
-				else:
-					c.dHI = 0
-			else:
-				c.dHI=0
-			c.cHI = node.cHI + c.dHI
-			c.ref=False
-			c.branch_length = c.dHI
+	from cvxopt import matrix, solvers
+	from l1regls import l1regls
+	if method=='l1reg':
+		A = matrix(tree_graph)
+		b = matrix(HI_diff)
+		w = np.array([x for x in l1regls(A/np.sqrt(lam),b/np.sqrt(lam))])
+		plt.figure()
+		plt.plot(sorted(w), np.linspace(0,1,len(w)))
+		print 'l1reg', fit_func(w, tree_graph, HI_diff), np.sum((HI_diff-1)**2)
+	elif method=='nnls':
+		w = nnls(tree_graph, HI_diff)[0]
+		plt.plot(sorted(w), np.linspace(0,1,len(w)))
+		print 'nnls', fit_func(w, tree_graph, HI_diff), np.sum((HI_diff-1)**2)
+	elif method=='nnl2reg':
+		
+		P = matrix(np.dot(tree_graph.T, tree_graph) + lam*np.eye(tree_graph.shape[1]))
+		q = -matrix(np.dot( HI_diff, tree_graph))
+		h = matrix(np.zeros(tree_graph.shape[1])) # Gw <=h
+		G = matrix(-np.eye(tree_graph.shape[1]))
+		W = solvers.qp(P,q,G,h)
+		w = np.array([x for x in W['x']])
+		print W['status']
+		plt.plot(sorted(w), np.linspace(0,1,len(w)))
+		print 'QP', fit_func(w, tree_graph, HI_diff), np.sum((HI_diff-1)**2)
+	elif method=='nnl1reg':
+		# non-negative l1 reg
+		P1 = np.zeros((2*tree_graph.shape[1],2*tree_graph.shape[1]))
+		P1[:tree_graph.shape[1], :tree_graph.shape[1]] = np.dot(tree_graph.T, tree_graph)
+		P = matrix(P1)
+		q1 = np.zeros(2*tree_graph.shape[1])
+		q1[:tree_graph.shape[1]] = np.dot( HI_diff, tree_graph)
+		q1[tree_graph.shape[1]:] = -lam
+		q = -matrix(q1)
+		h = matrix(np.zeros(2*tree_graph.shape[1])) # Gw <=h
+		G1 = np.zeros((2*tree_graph.shape[1],2*tree_graph.shape[1]))
+		G1[:tree_graph.shape[1], :tree_graph.shape[1]] = -np.eye(tree_graph.shape[1])
+		G1[tree_graph.shape[1]:, :tree_graph.shape[1]] = np.eye(tree_graph.shape[1])
+		G1[tree_graph.shape[1]:, tree_graph.shape[1]:] = -np.eye(tree_graph.shape[1])
+		G = matrix(G1)
+		W = solvers.qp(P,q,G,h)
+		w = np.array([x for x in W['x']])[:tree_graph.shape[1]]
+		print 'QP l1', fit_func(w, tree_graph, HI_diff), np.sum((HI_diff-1)**2)
+		plt.plot(sorted(w), np.linspace(0,1,len(w)))
 
+
+	tree.seed_node.cHI = 0
+	tree.seed_node.dHI = 0
+	for node in tree.preorder_node_iter():
+		node.ref=False
+		if node!=tree.seed_node:
+			node.constraints = tree_graph[:,node.branch_index].sum()
+			if node.constraints>0:
+				node.dHI = w[node.branch_index]
+			else:
+				node.dHI = 0
+
+			node.cHI = node.parent_node.cHI + node.dHI
+			node.branch_length = node.dHI
+
+	return tree
+
+
+if __name__ == "__main__":
+	from Bio import Phylo
+#	get_strains_with_HI_and_sequence()
+#	tree = fix_HI_tree()
+#	tree = infer_ancestral('data/HI_tree.newick', 'data/strains_with_HI_aligned.fasta')
+	tree_fname = 'data/tree_HI_ancestral.json'
+	tree =  json_to_dendropy(read_json(tree_fname))
+
+	names, measurements, tables = read_tables()
+	normalized_measurements = {}
+	ref_names = set()
+	for (test, ref), val in measurements.iteritems():
+		if (ref,ref) in measurements:
+			ref_names.add(ref)
+			normalized_val = np.log2(measurements[(ref, ref)]).mean() - np.log2(val).mean()
+			if normalized_val<=10:
+				normalized_measurements[(test, ref)] = max(0,normalized_val)
+
+	tree = map_HI_to_tree(tree, normalized_measurements, method='l1reg', lam = 20)
+
+	names_to_clades = {leaf.strain.lower(): leaf for leaf in tree.leaf_iter()}
 	for ref in ref_names:
 		if ref in names_to_clades:
 			names_to_clades[ref].ref = True
 
-	color_BioTree_by_attribute(tree, "cHI", transform = lambda x:x)
-	Phylo.draw(tree, label_func = lambda  x: x.name if x.ref else '', show_confidence= False)
+	mut_dHI = sorted([(c.dHI, c.mutations) for c in tree.postorder_node_iter()], reverse=True, key=lambda x:x[0])
+
+
+	btree = to_Biopython(tree)
+	color_BioTree_by_attribute(btree, "cHI", transform = lambda x:x)
+	Phylo.draw(btree, label_func = lambda  x: 'X' if x.ref else '', 
+		show_confidence= False, branch_labels = lambda x:x.mutations)
+
+	plt.figure()
+	thres = [1,2,3,100]
+	tmp = [x[0] for x in mut_dHI if x[1]=='']
+	plt.plot(sorted(tmp), linspace(0,1, len(tmp)), label='#aa=0')
+	for lower, upper in zip(thres[:-1], thres[1:]):
+		tmp = [x[0] for x in mut_dHI if x[1].count(',')>=lower and x[1].count(',')<upper]
+		plt.plot(sorted(tmp), np.linspace(0,1, len(tmp)), label='#aa='+str(lower))
+	plt.legend(loc=4)
