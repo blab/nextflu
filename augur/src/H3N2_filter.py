@@ -72,7 +72,7 @@ def main(in_fname='data/gisaid_epiflu_sequence.fasta', years_back=3, viruses_per
 
 	out_fname = 'data/virus_filter.json'
 	write_json(myH3N2_filter.virus_subsample, out_fname)
-	return out_fname, myH3N2_filter
+	return out_fname
 	
 if __name__ == "__main__":
 	main()

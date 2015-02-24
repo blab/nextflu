@@ -156,6 +156,18 @@ class flu_filter(virus_filter):
 			handle.close()
 		return viruses
 
+	def filter(self):
+		self.filter_generic(prepend_strains = self.vaccine_strains)	
+		self.filter_strain_names()
+		print len(self.viruses), "with proper strain names"
+		self.filter_passage()
+		print len(self.viruses), "without egg passage"
+		self.filter_geo()
+		print len(self.viruses), "with geographic information"
+
+	def filter_strain_names(self):
+		self.viruses = filter(lambda v: re.match(r'^A/', v['strain']) != None, self.viruses)
+
 	def fix_strain_names(self):
 		for v in self.viruses:
 			v['strain'] = v['strain'].replace('\'','').replace('(','').replace(')','').replace('H3N2','').replace('Human','').replace('human','').replace('//','/')
@@ -163,12 +175,6 @@ class flu_filter(virus_filter):
 	def filter_passage(self):
 		self.viruses = filter(lambda v: re.match(r'^E\d+', v.get('passage',''), re.I) == None, self.viruses)
 		self.viruses = filter(lambda v: re.match(r'^Egg', v.get('passage',''), re.I) == None, self.viruses)
-
-	def filter(self):
-		self.filter_generic(prepend_strains = self.vaccine_strains)	
-		self.filter_passage()
-		print len(self.viruses), "without egg passage"
-		self.filter_geo()
 
 	def filter_geo(self):
 		"""Label viruses with geographic location based on strain name"""
