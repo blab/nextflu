@@ -1,8 +1,10 @@
+import time
+from io_util import write_json
 from virus_filter import flu_filter
 
 class H3N2_filter(flu_filter):
-	def __init__(self, fasta_fname):
-		flu_filter.__init__(fasta_fname)
+	def __init__(self, fasta_fname, fasta_header):
+		flu_filter.__init__(self, fasta_fname, fasta_header)
 		self.vaccine_strains =[
 				{ 
 					"strain": "A/Wisconsin/67/2005",
@@ -64,13 +66,13 @@ class H3N2_filter(flu_filter):
 def main(in_fname='data/gisaid_epiflu_sequence.fasta', years_back=3, viruses_per_month=50):
 
 	print "--- Filter at " + time.strftime("%H:%M:%S") + " ---"
-	myH3N2_filter = H3N2_filter(in_fname)
-	myH3N2_filter.fiter()
+	myH3N2_filter = H3N2_filter(in_fname, {0:'strain', 1:"date", 4:"passage", -1:'accession'})
+	myH3N2_filter.filter()
 	myH3N2_filter.subsample(years_back, viruses_per_month)
 
 	out_fname = 'data/virus_filter.json'
-	write_json(myH3N3_filter.virus_subsample, out_fname)
-	return out_fname
+	write_json(myH3N2_filter.virus_subsample, out_fname)
+	return out_fname, myH3N2_filter
 	
 if __name__ == "__main__":
 	main()
