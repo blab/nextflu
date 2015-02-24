@@ -1,6 +1,6 @@
 ## Auspice
 
-Website for visualizing and interacting with phylogenies produced by the [augur](../augur/) pipeline.
+Website for visualizing and interacting with phylogenies produced by the [augur](../augur/) pipeline. Interactive visualization is done with [d3.js](http://d3js.org/).
 
 ### Compiling
 
