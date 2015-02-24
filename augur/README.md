@@ -45,7 +45,7 @@ Reroot the tree based on outgroup strain, collapse nodes with zero-length branch
 
 Estimate genotype and clade frequency trajectories using a Bernoulli observation model combined with a genetic drift model of process noise.
 
-### Streamline[src/streamline.py]
+### [Streamline](src/streamline.py)
 
 Prep and remove cruft from data files for [auspice](../auspice/) visualization.
 
