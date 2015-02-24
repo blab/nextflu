@@ -1,3 +1,7 @@
+## Live website
+
+nextflu is live at [nextflu.org](http://nextflu.org).
+
 ## Introduction
 
 nextflu is designed to perform near real-time tracking of influenza virus evolution. It's divided into two components: [augur](augur/), which takes a `.fasta` file of flu sequences and builds an annotated phylogeny, and [auspice](auspice/), which displays this annotated phylogeny in an interactive web-based visualization.
