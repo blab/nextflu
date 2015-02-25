@@ -66,7 +66,7 @@ class virus_filter(object):
 		elif date_spec=='year':
 			self.viruses = filter(lambda v: re.match(r'\d\d\d\d', v['date']) != None, self.viruses)
 
-	def subsample(self, years_back, viruses_per_month, prioritize = None):
+	def subsample(self, years_back, viruses_per_month, prioritize = None, all_priority=False):
 		'''
 		Subsample x viruses per month
 		Take from beginning of list - this will prefer longer sequences
@@ -91,11 +91,11 @@ class virus_filter(object):
 		y = first_year
 		for m in range(first_month,13):
 			filtered_viruses.extend(self.select_viruses(priority_viruses,other_viruses, 
-												y, m, viruses_per_month, regions))
+												y, m, viruses_per_month, regions, all_priority=all_priority))
 		for y in range(first_year+1,datetime.datetime.today().year+1):
 			for m in range(1,13):
 				filtered_viruses.extend(self.select_viruses(priority_viruses,other_viruses, 
-												y, m, viruses_per_month, regions))
+												y, m, viruses_per_month, regions, all_priority=all_priority))
 		if self.outgroup is not None:
 			filtered_viruses.append(self.outgroup)
 			print len(filtered_viruses), "with outgroup"
@@ -113,17 +113,23 @@ class virus_filter(object):
 
 		return virus_tuples
 
-	def select_viruses(self, priority_viruses,other_viruses, y, m, viruses_per_month, regions):
+	def select_viruses(self, priority_viruses,other_viruses, y, m, viruses_per_month, regions, all_priority = False):
 		'''
 		select viruses_per_month strains as evenly as possible from all regions
 		'''
 		from itertools import izip_longest
 		select_set = []
 		for vset in [priority_viruses, other_viruses]:
+			select_set.append([])
 			for representative in izip_longest(*[vset[(y,m,r)] for r in regions], fillvalue = None):
-				select_set.extend([v for v in representative if v is not None])
-		print "found",len(select_set), 'in year',y,'month',m, 'subsampling to', viruses_per_month
-		return select_set[:viruses_per_month]
+				select_set[-1].extend([v for v in representative if v is not None])
+			print "found",len(select_set[-1]), 'in year',y,'month',m
+		if all_priority:
+			n_other = max(0,viruses_per_month-len(select_set[0]))
+			return select_set[0] + select_set[1][:n_other]
+		else:
+			tmp = select_set[0] + select_set[1]
+			return tmp[:viruses_per_month]
 
 
 class flu_filter(virus_filter):

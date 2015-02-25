@@ -68,7 +68,7 @@ def main(in_fname='data/gisaid_epiflu_sequence.fasta', years_back=3, viruses_per
 	print "--- Filter at " + time.strftime("%H:%M:%S") + " ---"
 	myH3N2_filter = H3N2_filter(in_fname, {0:'strain', 1:"date", 4:"passage", -1:'accession'})
 	myH3N2_filter.filter()
-	myH3N2_filter.subsample(years_back, viruses_per_month)
+	myH3N2_filter.subsample(years_back, viruses_per_month, prioritize = [])
 
 	out_fname = 'data/virus_filter.json'
 	write_json(myH3N2_filter.virus_subsample, out_fname)
