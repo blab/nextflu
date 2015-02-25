@@ -1,5 +1,5 @@
 import time, os, argparse
-import virus_download, virus_filter, virus_align, virus_clean
+import virus_download, H3N2_filter, virus_align, virus_clean
 import tree_infer, tree_ancestral, tree_refine
 import bernoulli_frequency
 import streamline
@@ -21,7 +21,7 @@ def main(years_back=3, viruses_per_month=50):
 	virus_fname = virus_align.main(virus_fname)
 
 	# Clean sequences
-	virus_fname = virus_clean.main(virus_fname)
+	virus_fname = H3N2_filter.main(virus_fname)
 
 	# Make tree, creates raxml files
 	tree_fname = tree_infer.main(virus_fname)
