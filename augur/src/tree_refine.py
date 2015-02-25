@@ -110,9 +110,9 @@ def add_virus_attributes(viruses, tree):
 	strain_to_country = {}
 	strain_to_region = {}	
 	for v in viruses:
-		strain_to_date[v['strain']] = v['date']
-		strain_to_country[v['strain']] = v['country']
-		strain_to_region[v['strain']] = v['region']				
+		strain_to_date[v['strain'].lower()] = v['date']
+		strain_to_country[v['strain'].lower()] = v['country']
+		strain_to_region[v['strain'].lower()] = v['region']				
 	for node in tree.postorder_node_iter():
 		strain = str(node.taxon).replace("'", '')
 		if strain_to_date.has_key(strain):
