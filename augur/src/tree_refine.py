@@ -110,9 +110,9 @@ def add_virus_attributes(viruses, tree):
 	strain_to_country = {}
 	strain_to_region = {}	
 	for v in viruses:
-		strain_to_date[v['strain']] = v['date']
-		strain_to_country[v['strain']] = v['country']
-		strain_to_region[v['strain']] = v['region']				
+		strain_to_date[v['strain'].lower()] = v['date']
+		strain_to_country[v['strain'].lower()] = v['country']
+		strain_to_region[v['strain'].lower()] = v['region']				
 	for node in tree.postorder_node_iter():
 		strain = str(node.taxon).replace("'", '')
 		if strain_to_date.has_key(strain):
@@ -155,7 +155,10 @@ def unique_date(tree):
 			# attach index to a leaf, to allow for array indexing later
 			node.tip_index = leaf_count
 			# modify date by a tiny amount << than a day to ensure uniqueness
-			node.num_date = numerical_date(node.date) + 1e-7*node.tip_index
+			try:
+				node.num_date = numerical_date(node.date) + 1e-7*node.tip_index
+			except:
+				import pdb; pdb.set_trace()
 			leaf_count+=1
 		else: # internal node preceed the oldest child
 			node.num_date = min([c.num_date for c in node.child_nodes()])

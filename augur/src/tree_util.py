@@ -111,6 +111,14 @@ def dendropy_to_json(node):
 		json['ne'] = node.ne
 	if hasattr(node, 'rb'):
 		json['rb'] = node.rb
+	if hasattr(node, 'serum'):
+		json['serum'] = 1 if node.serum else 0
+	if hasattr(node, 'HI_info'):
+		json['HI_info'] = 1 if node.HI_info else 0
+	if hasattr(node, 'dHI'):
+		json['dHI'] = round(node.dHI, 5)
+	if hasattr(node, 'cHI'):
+		json['cHI'] = round(node.cHI, 5)
 	if hasattr(node, 'date'):
 		json['date'] = node.date
 	if hasattr(node, 'num_date'):
