@@ -20,7 +20,6 @@ from Bio import Phylo, Seq
 import copy, time
 from seq_util import json_to_Bio_alignment
 from io_util import write_json, read_json
-from tree_util import BioPhylo_to_json
 
 class ancestral_sequences:
 	'''
@@ -266,7 +265,6 @@ def test():
 	aln = AlignIO.read('../scratch/test_aln.phyx', 'phylip-relaxed')
 	anc_seq = ancestral_sequences(tree=tree, aln=aln, seqtype='str')
 	anc_seq.calc_ancestral_sequences()
-	write_json(BioPhylo_to_json(anc_seq.T.root), 'test.json')
 	return anc_seq.T
 
 if __name__=="__main__":
