@@ -1,6 +1,7 @@
 import time
 from io_util import write_json
 from virus_filter import flu_filter
+from Bio import SeqIO
 
 class H3N2_filter(flu_filter):
 	def __init__(self, fasta_fname, fasta_header):
@@ -67,20 +68,12 @@ def main(in_fname='data/gisaid_epiflu_sequence.fasta', years_back=3, viruses_per
 	print "--- Filter at " + time.strftime("%H:%M:%S") + " ---"
 	myH3N2_filter = H3N2_filter(in_fname, {0:'strain', 1:"date", 4:"passage", -1:'accession'})
 	myH3N2_filter.filter()
-	myH3N2_filter.subsample(years_back, viruses_per_month, prioritize = [])
+	HI_data_strains = [seq.name for seq in SeqIO.parse('data/strains_with_HI.fasta', 'fasta')]
+	myH3N2_filter.subsample(years_back, viruses_per_month, prioritize = HI_data_strains, all_priority = True)
 
 	out_fname = 'data/virus_filter.json'
 	write_json(myH3N2_filter.virus_subsample, out_fname)
 	return out_fname
 	
 if __name__ == "__main__":
-	#main()
-	from Bio import SeqIO
-	print "--- Filter at " + time.strftime("%H:%M:%S") + " ---"
-	myH3N2_filter = H3N2_filter('data/20150222_all_H3N2_HA1.fasta', {0:'strain', 1:"date", 4:"passage", -1:'accession'})
-	myH3N2_filter.filter()
-	HI_data_strains = [seq.name for seq in SeqIO.parse('data/strains_with_HI.fasta', 'fasta')]
-	myH3N2_filter.subsample(20, 10, prioritize=HI_data_strains, all_priority=True)
-
-	out_fname = 'data/virus_filter.json'
-	write_json(myH3N2_filter.virus_subsample, out_fname)
+	main()

@@ -13,15 +13,16 @@ def main(years_back=3, viruses_per_month=50):
 	# Run pipeline
 #	virus_download.main()		# Download from GISAID
 	virus_fname = 'data/gisaid_epiflu_sequence.fasta'
+	virus_fname = 'data/20150222_all_H3N2_HA1.fasta'
 
 	# Filter sequences
-	virus_fname = virus_filter.main(virus_fname, years_back=years_back, viruses_per_month=viruses_per_month)
+	virus_fname = H3N2_filter.main(virus_fname, years_back, viruses_per_month)
 
 	# Align sequences
 	virus_fname = virus_align.main(virus_fname)
 
 	# Clean sequences
-	virus_fname = H3N2_filter.main(virus_fname)
+	virus_fname = virus_clean.main()
 
 	# Make tree, creates raxml files
 	tree_fname = tree_infer.main(virus_fname)

@@ -250,7 +250,7 @@ def map_HI_to_tree(tree, measurements, method = 'nnls', lam=10):
 
 	tree_graph = []
 	HI_diff = []
-	for (test, ref), val in normalized_measurements.iteritems():
+	for (test, ref), val in measurements.iteritems():
 		if not np.isnan(val):
 			try:
 				if test != ref and ref in names_to_clades and test in names_to_clades:
@@ -318,13 +318,22 @@ def map_HI_to_tree(tree, measurements, method = 'nnls', lam=10):
 	for HI_split, branches in HI_split_map.iteritems():
 		likely_branch = branches[np.argmax([len(index_to_branch[b].mutations) for b in branches])]
 		index_to_branch[likely_branch].dHI = w[HI_split]
-		index_to_branch[likely_branch].constrains = tree_graph[:,HI_split].sum()
+		index_to_branch[likely_branch].constraints = tree_graph[:,HI_split].sum()
 
 	# integrate the HI change dHI into a cumulative antigentic evolution score cHI
 	for node in tree.preorder_node_iter():
 		if node!=tree.seed_node:
 			node.cHI = node.parent_node.cHI + node.dHI
-	return tree, w
+	return tree, {serum:w[HI_sc+ii] for ii, serum in enumerate(sera)}
+
+def predict_HI(virus, serum, tree,avidities):
+	v = tree.find_node_with_taxon_label(virus)
+	s = tree.find_node_with_taxon_label(serum)
+	if v is not None and s is not None:
+		path = get_path_dendropy(tree, v,s)
+		return avidities[serum] + np.sum(b.dHI for b in path)
+	else:
+		return None
 
 def plot_tree(tree):
 	btree = to_Biopython(tree)
@@ -345,11 +354,31 @@ def plot_dHI_distribution(tree):
 
 if __name__ == "__main__":
 	from Bio import Phylo
-
+	reg = 5
+	#tree_fname = 'data/tree_long_HI.json'
 	tree_fname = 'data/tree_refine.json'
 	tree =  json_to_dendropy(read_json(tree_fname))
 	normalized_measurements, HI_strains, sera = get_normalized_HI_titers()
-	tree,w = map_HI_to_tree(tree, normalized_measurements, method='nnl1reg', lam = 10)
+	test_HI, train_HI = {}, {}
+	for key, val in normalized_measurements.iteritems():
+		if np.random.uniform()<0.2:
+			test_HI[key]=val
+		else:
+			train_HI[key]=val
+
+	tree,avidities = map_HI_to_tree(tree, train_HI, method='nnl1reg', lam = reg)
+	validation = {}
+	for key, val in test_HI.iteritems():
+		pred_HI = predict_HI(key[0], key[1], tree, avidities)
+		if pred_HI is not None:
+			validation[key] = (val, pred_HI)
+	a = np.array(validation.values())
+	plt.scatter(a[:,0], a[:,1])
+	plt.xlabel("measured")
+	plt.ylabel("predicted")
+	plt.xlabel("measured")
+	plt.title('reg='+str(reg)+', avg error '+str(round(np.mean(np.abs(a[:,0]-a[:,1])),3)))
+
 	out_tree_fname = 'data/tree_HI.json'
 	write_json(dendropy_to_json(tree.seed_node), out_tree_fname, indent=None)
 
