@@ -260,6 +260,9 @@ var virusTooltip = d3.tip()
 		if (typeof d.rb != "undefined") {
 			string += "<br>Local branching index: " + d.LBI.toFixed(3);
 		}
+		if (typeof d.cHI != "undefined") {
+			string += "<br>Antigenic advance: " + d.cHI.toFixed(3);
+		}
 		if (typeof d.region != "undefined") {
 			string += "<br>Region: " + d.region.replace(/([A-Z])/g, ' $1');
 		}
@@ -442,6 +445,11 @@ d3.json("data/tree.json", function(error, root) {
 	
 	var epitopeColorScale = d3.scale.linear().clamp([true])
 		.domain([0,1,2,3,4,5,6,7,8,9])
+		.range(colors);
+
+	var HIColorScale = d3.scale.linear().clamp([true])
+		.domain([-2.5,-2, 1.5, -1, 0.5, 0,0.5 ,1,1.5, 2])
+		//.domain([0,1.5, 3, 4.5, 6, 7.5, 9, 10.5, 12, 13.5])
 		.range(colors);		
 
 	var nonepitopeColorScale = d3.scale.linear().clamp([true])
@@ -502,13 +510,17 @@ d3.json("data/tree.json", function(error, root) {
 		if (colorBy == "ep" || colorBy == "ne" || colorBy == "rb") {
 			var mean = getMeanColoring();
 			nodes.forEach(function (d) {
-				d.adj_coloring = d.coloring; // - mean;
+				d.adj_coloring = d.coloring - mean;
 			});
-		}
-		if (colorBy == "lbi") {
+		}else if (colorBy == "lbi") {
 			calcLBI(rootNode, nodes, false);
 			nodes.forEach(function (d) {
 				d.adj_coloring = d.LBI;
+			});
+		}else if (colorBy=='HI'){
+						var mean = getMeanColoring();
+			nodes.forEach(function (d) {
+				d.adj_coloring = d.coloring - mean;
 			});
 		}
 	}
@@ -530,6 +542,10 @@ d3.json("data/tree.json", function(error, root) {
 		if (colorBy == "ep") {
 			colorScale = epitopeColorScale;
 			nodes.map(function(d) { d.coloring = d.ep; });
+		}
+		if (colorBy == "HI") {
+			colorScale = HIColorScale;
+			nodes.map(function(d) { d.coloring = d.cHI; });
 		}
 		if (colorBy == "ne") {
 			colorScale = nonepitopeColorScale;
@@ -609,6 +625,9 @@ d3.json("data/tree.json", function(error, root) {
    			if (colorBy == "region") {
     			return "Region"
     		}    		
+   			if (colorBy == "HI") {
+    			return "Antigenic advance"
+    		}
     	});
     
 		var tmp_leg = legend.selectAll(".legend")
