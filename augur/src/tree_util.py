@@ -170,3 +170,24 @@ def json_to_dendropy_sub(json, node, taxon_set):
 		taxon_set.add_taxon(node.taxon)
 
 
+def BioPhylo_to_json(node):
+	json = {}
+	if hasattr(node, 'clade'):
+		json['clade'] = node.clade
+	if node.name:
+		json['strain'] = str(node.name).replace("'", '')
+	if hasattr(node, 'branch_length'):
+		json['branch_length'] = round(node.branch_length, 5)
+	if hasattr(node, 'xvalue'):
+		json['xvalue'] = round(node.xvalue, 5)
+	if hasattr(node, 'yvalue'):
+		json['yvalue'] = round(node.yvalue, 5)
+	if hasattr(node, 'date'):
+		json['date'] = node.date
+	if hasattr(node, 'seq'):
+		json['seq'] = str(node.seq)
+	if len(node.clades):
+		json["children"] = []
+		for ch in node.clades:
+			json["children"].append(BioPhylo_to_json(ch))
+	return json

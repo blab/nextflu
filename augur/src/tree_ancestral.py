@@ -20,6 +20,7 @@ from Bio import Phylo, Seq
 import copy, time
 from seq_util import json_to_Bio_alignment
 from io_util import write_json, read_json
+from tree_util import BioPhylo_to_json
 
 class ancestral_sequences:
 	'''
