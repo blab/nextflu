@@ -100,17 +100,17 @@ def dendropy_to_json(node, extra_attr = ['ep', 'ne', 'rb','tol', 'fitness', 'ser
 	num_attr = ['xvalue', 'yvalue', 'num_date', 'tip_index']
 	for prop in str_attr:
 		if hasattr(node, prop):
-			json[prop] = node.__getattr__(prop)
+			json[prop] = node.__getattribute__(prop)
 	for prop in num_attr:
 		if hasattr(node, prop):
-			json[prop] = round(node.__getattr__(prop),5)
+			json[prop] = round(node.__getattribute__(prop),5)
 	for prop in extra_attr:
 		if len(prop)==2 and callable(prop[1]):
 			if hasattr(node, prop[0]):
-				json[prop] = prop[1](node.__getattr__(prop[0]))
+				json[prop] = prop[1](node.__getattribute__(prop[0]))
 		else:
 			if hasattr(node, prop):
-				json[prop] = node.__getattr__(prop)
+				json[prop] = node.__getattribute__(prop)
 
 	try:
 		if hasattr(node, 'freq') and node.freq is not None:
