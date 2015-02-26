@@ -66,7 +66,7 @@ class virus_filter(object):
 		elif date_spec=='year':
 			self.viruses = filter(lambda v: re.match(r'\d\d\d\d', v['date']) != None, self.viruses)
 
-	def subsample(self, years_back, viruses_per_month, prioritize = None, all_priority=False):
+	def subsample(self, years_back, viruses_per_month, prioritize = None, all_priority=False, region_specific = True):
 		'''
 		Subsample x viruses per month
 		Take from beginning of list - this will prefer longer sequences
@@ -77,6 +77,10 @@ class virus_filter(object):
 			prioritize=[]
 		else:
 			prioritize = [v.lower() for v in prioritize]
+		if region_specific:
+			select_func = self.select_viruses
+		else:
+			select_func = self.select_viruses_global
 
 		priority_viruses = self.viruses_by_date_region([v for v in self.viruses if v['strain'].lower() in prioritize]) 
 		other_viruses = self.viruses_by_date_region([v for v in self.viruses if v['strain'].lower() not in prioritize]) 
@@ -90,11 +94,11 @@ class virus_filter(object):
 		print "Selecting " + str(viruses_per_month), "viruses per month"
 		y = first_year
 		for m in range(first_month,13):
-			filtered_viruses.extend(self.select_viruses(priority_viruses,other_viruses, 
+			filtered_viruses.extend(select_func(priority_viruses,other_viruses, 
 												y, m, viruses_per_month, regions, all_priority=all_priority))
 		for y in range(first_year+1,datetime.datetime.today().year+1):
 			for m in range(1,13):
-				filtered_viruses.extend(self.select_viruses(priority_viruses,other_viruses, 
+				filtered_viruses.extend(select_func(priority_viruses,other_viruses, 
 												y, m, viruses_per_month, regions, all_priority=all_priority))
 		if self.outgroup is not None:
 			filtered_viruses.append(self.outgroup)
@@ -130,6 +134,18 @@ class virus_filter(object):
 		else:
 			tmp = select_set[0] + select_set[1]
 			return tmp[:viruses_per_month]
+
+	def select_viruses_global(self, priority_viruses,other_viruses, y, m, viruses_per_month, regions, all_priority = False):
+		'''
+		select viruses_per_month strains as evenly as possible from all regions
+		'''
+		from random import sample
+		priority_viruses_flat = sum(priority_viruses[(y,m,r)] for r in regions)
+		other_viruses_flat = sum(other_viruses[(y,m,r)] for r in regions)
+		n_other = max(0,viruses_per_month-len(priority_viruses))
+		return sample(priority_viruses[:viruses_per_month], min(len(priority_viruses), viruses_per_month)\
+				+ sample(other_viruses, min(n_other, len(other_viruses)))
+
 
 class flu_filter(virus_filter):
 
