@@ -74,7 +74,7 @@ def normalize_HI_matrices(ref_matrix, test_matrix):
 def read_tables():
 	import glob
 	from itertools import product
-	flist = glob.glob('../../../flu_HI_data/tables/Flu*csv')
+	flist = glob.glob('/home/richard/Projects/flu_HI_data/tables/Flu*csv')
 	all_names = set()
 	all_measurements = defaultdict(list)
 	HI_matrices = []
@@ -96,7 +96,7 @@ def read_tables():
 		print fname, len(all_measurements), "measurements"
 
 	print "total from tables:", len(all_measurements), "measurements"
-	trevor_table = '../../../flu_HI_data/tables/trevor_elife_H3N2_HI_data.tsv'
+	trevor_table = '/home/richard/Projects/flu_HI_data/tables/trevor_elife_H3N2_HI_data.tsv'
 	import csv
 	with open(trevor_table) as infile:
 		table_reader = csv.reader(infile, delimiter="\t")
@@ -128,25 +128,26 @@ def get_strains_with_HI_and_sequence():
 
 class HI_tree(object):
 
-	def __init__(self, tree, HI_measurments):
+	def __init__(self, tree, HI_measurements):
 		self.tree = tree
-		self.HI = HI_measurments
+		self.names_to_clades = {leaf.strain.lower(): leaf for leaf in self.tree.leaf_iter()}
+		self.HI = HI_measurements
 		self.normalize_HI()
 		self.add_mutations()
 		self.mark_HI_splits()
-		self.names_to_clades = {leaf.strain.lower(): leaf for leaf in self.tree.leaf_iter()}
 
 	def normalize_HI(self):
 		self.HI_normalized = {}
 		sera = set()
 		HI_strains = set()
 		for (test, ref), val in self.HI.iteritems():
-			HI_strains.add(test.lower())
-			HI_strains.add(ref.lower())
-			if (ref,ref) in self.HI:
-				sera.add(ref)
-				normalized_val = np.log2(self.HI[(ref, ref)]).mean() - np.log2(val).mean()
-				self.HI_normalized[(test, ref)] = max(0,normalized_val)
+			if test.lower() in self.names_to_clades and ref.lower() in self.names_to_clades:
+				HI_strains.add(test.lower())
+				HI_strains.add(ref.lower())
+				if (ref,ref) in self.HI:
+					sera.add(ref)
+					normalized_val = np.log2(self.HI[(ref, ref)]).mean() - np.log2(val).mean()
+					self.HI_normalized[(test, ref)] = max(0,normalized_val)
 		self.sera = list(sera)
 		self.HI_strains = list(HI_strains)
 
@@ -156,7 +157,7 @@ class HI_tree(object):
 		'''
 		self.tree.seed_node.mutations= ''
 		for node in self.tree.postorder_node_iter():
-			if node is not tree.seed_node:
+			if node is not self.tree.seed_node:
 				node.mutations = [a+str(pos-15)+b for pos, (a,b) in 
 								enumerate(izip(node.parent_node.aa_seq, node.aa_seq)) if a!=b]
 
@@ -193,7 +194,7 @@ class HI_tree(object):
 			for tmp_p in [p1,p2]:
 				while tmp_p[-1].parent_node != self.tree.seed_node:
 					tmp_p.append(tmp_p[-1].parent_node)
-				tmp_p.append(tree.seed_node)
+				tmp_p.append(self.tree.seed_node)
 				tmp_p.reverse()
 
 			for pi, (tmp_v1, tmp_v2) in enumerate(izip(p1,p2)):
@@ -351,6 +352,23 @@ def plot_dHI_distribution(tree):
 	plt.show()
 
 
+def censor_late_viruses(tree, measurements, cutoff):
+	names_to_clades = {leaf.strain.lower():leaf for leaf in tree.leaf_iter()}
+	censored_measurements = {}
+	for (test, ref), val in measurements.iteritems():
+		if test in names_to_clades and ref in names_to_clades:
+			if names_to_clades[test].num_date<cutoff and names_to_clades[ref].num_date<cutoff:
+				censored_measurements[(test, ref)] = val
+	return censored_measurements
+
+
+def estimate_HI_to_date(tree, cutoff, reg=10):
+	names, measurements, tables = read_tables()
+	measurements = censor_late_viruses(tree, measurements, cutoff)
+	HI_map = HI_tree(tree, measurements)
+	HI_map.map_HI_to_tree(method = 'nnl1reg', lam=reg)
+	return HI_map
+
 def main(tree_fname = 'data/tree_ancestral.json', HI_fname='data/HI_titers.txt'):
 
 	print "--- Fitting HI titers at " + time.strftime("%H:%M:%S") + " ---"
@@ -369,6 +387,7 @@ if __name__ == "__main__":
 	HI_map = HI_tree(tree, measurements)
 	HI_map.map_HI_to_tree(training_fraction=0.9, method = 'nnl1reg', lam=reg)
 	HI_map.validate(plot=True)
+	HI_map = estimate_HI_to_date(tree, 2010)
 
 	out_tree_fname = 'data/tree_HI.json'
 	write_json(dendropy_to_json(tree.seed_node), out_tree_fname, indent=None)

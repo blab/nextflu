@@ -4,6 +4,7 @@ import dendropy
 from collections import defaultdict
 from datetime import date
 from itertools import izip
+from tree_titer import *
 from fitness_predictors import *
 
 ymin = 2005
@@ -39,6 +40,8 @@ class fitness_model(object):
 				self.predictors.append(('ne_star',calc_nonepitope_star_distance,{"seasons":self.seasons}))		
 			if p == 'tol':
 				self.predictors.append(('tol',calc_tolerance,{}))
+			if p == 'HI':
+				self.predictors.append(('HI',calc_HI,{}))
 
 	def calc_tip_counts(self):
 		'''
@@ -250,6 +253,7 @@ def test(params):
 	from tree_util import json_to_dendropy, to_Biopython, color_BioTree_by_attribute
 	from Bio import Phylo
 	tree_fname='data/tree_refine_10y_50v.json'
+	tree_fname='data/tree_refine.json'
 	tree =  json_to_dendropy(read_json(tree_fname))
 	fm = fitness_model(tree, predictors = params['predictors'], verbose=2)
 	fm.predict(niter = params['niter'])
