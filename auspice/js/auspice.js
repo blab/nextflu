@@ -608,7 +608,10 @@ d3.json("data/tree.json", function(error, root) {
     		}
    			if (colorBy == "region") {
     			return "Region"
-    		}    		
+    		}
+   			if (colorBy == "genotype") {
+    			return "Genotype"
+    		}        			
     	});
     
 		var tmp_leg = legend.selectAll(".legend")
@@ -947,7 +950,7 @@ d3.json("data/tree.json", function(error, root) {
 												var aa = cladeToSeq[d.clade];
 												tmp[tmp.length] = (positions[i]-15)+aa[positions[i]];
 											}
-											d.color_gt = tmp.join(","); 
+											d.color_gt = tmp.join(" / "); 
 											return d.color_gt;});
 		var unique_gts = d3.set(gts).values();
 		var gt_counts = {};
