@@ -8,7 +8,6 @@
 import os, re, time, datetime, csv, sys
 from io_util import *
 from collections import defaultdict
-sys.path.append('../source-data')
 
 class virus_filter(object):
 
@@ -66,7 +65,7 @@ class virus_filter(object):
 		elif date_spec=='year':
 			self.viruses = filter(lambda v: re.match(r'\d\d\d\d', v['date']) != None, self.viruses)
 
-	def subsample(self, years_back, viruses_per_month, prioritize = None, all_priority=False):
+	def subsample(self, years_back, viruses_per_month, prioritize = None, all_priority=False, region_specific = True):
 		'''
 		Subsample x viruses per month
 		Take from beginning of list - this will prefer longer sequences
@@ -77,6 +76,10 @@ class virus_filter(object):
 			prioritize=[]
 		else:
 			prioritize = [v.lower() for v in prioritize]
+		if region_specific:
+			select_func = self.select_viruses
+		else:
+			select_func = self.select_viruses_global
 
 		priority_viruses = self.viruses_by_date_region([v for v in self.viruses if v['strain'].lower() in prioritize]) 
 		other_viruses = self.viruses_by_date_region([v for v in self.viruses if v['strain'].lower() not in prioritize]) 
@@ -90,11 +93,11 @@ class virus_filter(object):
 		print "Selecting " + str(viruses_per_month), "viruses per month"
 		y = first_year
 		for m in range(first_month,13):
-			filtered_viruses.extend(self.select_viruses(priority_viruses,other_viruses, 
+			filtered_viruses.extend(select_func(priority_viruses,other_viruses, 
 												y, m, viruses_per_month, regions, all_priority=all_priority))
 		for y in range(first_year+1,datetime.datetime.today().year+1):
 			for m in range(1,13):
-				filtered_viruses.extend(self.select_viruses(priority_viruses,other_viruses, 
+				filtered_viruses.extend(select_func(priority_viruses,other_viruses, 
 												y, m, viruses_per_month, regions, all_priority=all_priority))
 		if self.outgroup is not None:
 			filtered_viruses.append(self.outgroup)
@@ -130,6 +133,21 @@ class virus_filter(object):
 		else:
 			tmp = select_set[0] + select_set[1]
 			return tmp[:viruses_per_month]
+
+	def select_viruses_global(self, priority_viruses,other_viruses, y, m, viruses_per_month, regions, all_priority = False):
+		'''
+		select viruses_per_month strains as evenly as possible from all regions
+		'''
+		from random import sample
+		priority_viruses_flat = []
+		for r in regions: priority_viruses_flat.extend(priority_viruses[(y,m,r)])
+		other_viruses_flat = []
+		for r in regions: other_viruses_flat.extend(other_viruses[(y,m,r)])
+
+		print "found",len(priority_viruses_flat)+len(other_viruses_flat), 'in year',y,'month',m
+		n_other = max(0,viruses_per_month-len(priority_viruses_flat))
+		return sample(priority_viruses_flat, min(len(priority_viruses_flat), viruses_per_month))\
+				+ sample(other_viruses_flat, min(n_other, len(other_viruses_flat)))
 
 
 class flu_filter(virus_filter):
@@ -185,7 +203,7 @@ class flu_filter(virus_filter):
 	def filter_geo(self):
 		"""Label viruses with geographic location based on strain name"""
 		"""Location is to the level of country of administrative division when available"""
-		reader = csv.DictReader(open("../source-data/geo_synonyms.tsv"), delimiter='\t')		# list of dicts
+		reader = csv.DictReader(open("source-data/geo_synonyms.tsv"), delimiter='\t')		# list of dicts
 		label_to_country = {}
 		for line in reader:
 			label_to_country[line['label'].lower()] = line['country']
@@ -202,7 +220,7 @@ class flu_filter(virus_filter):
 			except:
 				print "couldn't parse", v['strain']
 
-		reader = csv.DictReader(open("../source-data/geo_regions.tsv"), delimiter='\t')		# list of dicts
+		reader = csv.DictReader(open("source-data/geo_regions.tsv"), delimiter='\t')		# list of dicts
 		country_to_region = {}
 		for line in reader:
 			country_to_region[line['country']] = line['region']
