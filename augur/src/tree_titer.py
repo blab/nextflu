@@ -111,80 +111,6 @@ def read_tables():
 	print "grand total:", len(all_measurements), "measurements"
 	return all_names, all_measurements, HI_matrices
 
-def get_normalized_HI_titers():
-	names, measurements, tables = read_tables()
-	normalized_measurements = {}
-	sera = set()
-	HI_strains = set()
-	for (test, ref), val in measurements.iteritems():
-		HI_strains.add(test.lower())
-		HI_strains.add(ref.lower())
-		if (ref,ref) in measurements:
-			sera.add(ref)
-			normalized_val = np.log2(measurements[(ref, ref)]).mean() - np.log2(val).mean()
-			if normalized_val<=10:
-				normalized_measurements[(test, ref)] = max(0,normalized_val)
-	return normalized_measurements, HI_strains, sera
-
-def get_path_dendropy(tree, v1, v2):
-	p1 = [v1]
-	p2 = [v2]
-	while p1[-1].parent_node != tree.seed_node:
-		p1.append(p1[-1].parent_node)
-	p1.append(tree.seed_node)
-	p1.reverse()
-
-	while p2[-1].parent_node != tree.seed_node:
-		p2.append(p2[-1].parent_node)
-	p2.append(tree.seed_node)
-	p2.reverse()
-
-#	import pdb; pdb.set_trace()
-	for pi, (tmp_v1, tmp_v2) in enumerate(izip(p1,p2)):
-		if tmp_v1!=tmp_v2:
-			break
-	path = p1[pi:] + p2[pi:]
-	return path
-
-def get_path_biopython(tree, v1, v2):
-	#print "getting path for", v1.name, v2.name
-	p1 = tree.get_path(v1)
-	p2 = tree.get_path(v2)
-	path = None
-	for ii, (c1,c2) in enumerate(zip(p1, p2)):
-		if c1!=c2:
-			#print "found match", ii
-			path = p1[ii:] + p2[ii:]
-			break
-
-	return path
-
-def calc_tree_HI_distance(v1,v2, tree, lca):
-	dist = 0
-	tmp_lca = lca[(v1,v2)]
-	for tmp_v in [v1, v2]:
-		while tmp_v.parent_node != tmp_lca:
-			dist+=tmp_v.dHI
-			tmp_v1 = tmp_v.parent_node
-
-	return dist
-
-def fit_func(dHI, tree_graph, distances):
-	return np.sum( (distances - np.dot(tree_graph, dHI))**2 )
-
-
-def prune_tree(tree, taxa_with_HI):
-	seq_strains = set([leaf.label for leaf in tree.leaf_iter()])
-	print seq_strains.intersection(taxa_with_HI)
-	tree.retain_taxa_with_labels(taxa_with_HI)
-
-
-def main(tree_fname = 'data/tree_ancestral.json', HI_fname='data/HI_titers.txt'):
-
-	print "--- Fitting HI titers at " + time.strftime("%H:%M:%S") + " ---"
-
-	tree =  json_to_dendropy(read_json(tree_fname))
-	HI_distances = load_HI_distances(HI_fname)
 
 def get_strains_with_HI_and_sequence():
 	names, measurements, HI_matrices = read_tables()
@@ -199,141 +125,213 @@ def get_strains_with_HI_and_sequence():
 				good_strains.add(reduced_name)
 				print seq_rec.name
 
-def mark_HI_strains(tree, HI_strains, sera):
-	for leaf in tree.leaf_iter():
-		if leaf.strain.lower() in HI_strains:
-			leaf.serum = leaf.strain.lower() in sera
-			leaf.HI_info= True
+
+class HI_tree(object):
+
+	def __init__(self, tree, HI_measurments):
+		self.tree = tree
+		self.HI = HI_measurments
+		self.normalize_HI()
+		self.add_mutations()
+		self.mark_HI_splits()
+		self.names_to_clades = {leaf.strain.lower(): leaf for leaf in self.tree.leaf_iter()}
+
+	def normalize_HI(self):
+		self.HI_normalized = {}
+		sera = set()
+		HI_strains = set()
+		for (test, ref), val in self.HI.iteritems():
+			HI_strains.add(test.lower())
+			HI_strains.add(ref.lower())
+			if (ref,ref) in self.HI:
+				sera.add(ref)
+				normalized_val = np.log2(self.HI[(ref, ref)]).mean() - np.log2(val).mean()
+				self.HI_normalized[(test, ref)] = max(0,normalized_val)
+		self.sera = list(sera)
+		self.HI_strains = list(HI_strains)
+
+	def add_mutations(self):
+		'''
+		add amino acid mutations to the tree
+		'''
+		self.tree.seed_node.mutations= ''
+		for node in self.tree.postorder_node_iter():
+			if node is not tree.seed_node:
+				node.mutations = [a+str(pos-15)+b for pos, (a,b) in 
+								enumerate(izip(node.parent_node.aa_seq, node.aa_seq)) if a!=b]
+
+	def mark_HI_splits(self):
+		for leaf in self.tree.leaf_iter():
+			if leaf.strain.lower() in self.HI_strains:
+				leaf.serum = leaf.strain.lower() in self.sera
+				leaf.HI_info= True
+			else:
+				leaf.serum, leaf.HI_info=False, False
+
+		for node in self.tree.postorder_node_iter():
+			if not node.is_leaf():
+				node.HI_info = any([c.HI_info for c in node.child_nodes()])
+
+		# combine sets of branches that span identical sets of HI measurements
+		self.HI_split_count = 0  # HI measurment split counter
+		self.HI_split_to_branch = defaultdict(list)
+		for node in self.tree.preorder_node_iter():
+			node.dHI, node.cHI, node.constraints =0, 0, 0
+			if node.is_internal(): node.serum=False
+			if node.HI_info:
+				node.HI_branch_index = self.HI_split_count
+				self.HI_split_to_branch[node.HI_branch_index].append(node)
+				if node.is_leaf() or sum([c.HI_info for c in node.child_nodes()])>1:
+					self.HI_split_count+=1
+
+		print "# of reference strains:",len(self.sera), "# of branches with HI contraint", self.HI_split_count
+
+	def get_path(self, v1, v2):
+		if v1 in self.names_to_clades and v2 in self.names_to_clades:
+			p1 = [self.names_to_clades[v1]]
+			p2 = [self.names_to_clades[v2]]
+			for tmp_p in [p1,p2]:
+				while tmp_p[-1].parent_node != self.tree.seed_node:
+					tmp_p.append(tmp_p[-1].parent_node)
+				tmp_p.append(tree.seed_node)
+				tmp_p.reverse()
+
+			for pi, (tmp_v1, tmp_v2) in enumerate(izip(p1,p2)):
+				if tmp_v1!=tmp_v2:
+					break
+			path = p1[pi:] + p2[pi:]
 		else:
-			leaf.serum, leaf.HI_info=False, False
+			path = None
+		return path
 
-	for node in tree.postorder_node_iter():
-		if not node.is_leaf():
-			node.HI_info = any([c.HI_info for c in node.child_nodes()])
+	def make_treegraph(self):
+		tree_graph = []
+		HI_dist = []
+		for (test, ref), val in self.train_HI.iteritems():
+			if not np.isnan(val):
+				if True: #try:
+					if test != ref  and ref in self.names_to_clades \
+									and test in self.names_to_clades:
+						path = self.get_path(test, ref)
+						tmp = np.zeros(self.HI_split_count + len(self.sera))
+						branches = np.unique([c.HI_branch_index for c in path])
+						tmp[branches] = 1
+						tmp[self.HI_split_count+self.sera.index(ref)] = 1
+						tree_graph.append(tmp)
+						HI_dist.append(val)
+#				except:
+#					print test, ref, "ERROR"
 
-	# combine sets of branches that span identical sets of HI measurements
-	branch_count = 0
-	HI_split_count = 0  # HI measurment split counter
-	HI_split_to_branch = defaultdict(list)
-	for node in tree.preorder_node_iter():
-		node.dHI, node.cHI, node.constrains, node.branch_index =0, 0, 0, branch_count
-		if node.is_internal(): node.serum=False
-		branch_count+=1
-		if node.HI_info:
-			node.HI_branch_index = HI_split_count
-			HI_split_to_branch[node.HI_branch_index].append(node.branch_index)
-			if node.is_leaf() or sum([c.HI_info for c in node.child_nodes()])>1:
-				HI_split_count+=1
+		self.HI_dist =  np.array(HI_dist)
+		self.tree_graph= np.array(tree_graph)
+		print "Found", self.tree_graph.shape, "measurements x parameters"
 
-	return HI_split_to_branch, HI_split_count
+	def fit_func(self):
+		return np.mean( (self.HI_dist - np.dot(self.tree_graph, self.params))**2 )
 
-
-def add_mutations(tree):
-	'''
-	add amino acid mutations to the tree
-	'''
-	tree.seed_node.mutations= ''
-	for node in tree.postorder_node_iter():
-		if node is not tree.seed_node:
-			node.mutations = [a+str(pos-15)+b for pos, (a,b) in 
-							enumerate(izip(node.parent_node.aa_seq, node.aa_seq)) if a!=b]
-
-
-def map_HI_to_tree(tree, measurements, method = 'nnls', lam=10):
-	names_to_clades = {leaf.strain.lower(): leaf for leaf in tree.leaf_iter()}
-	sera = list(set([x[1].lower() for x in measurements]))
-	HI_names = list(set([x[0].lower() for x in measurements] + sera))
-	# assign indices to branches
-	HI_split_map, HI_sc = mark_HI_strains(tree, HI_names, sera)
-	add_mutations(tree)
-	print "# of reference strains:",len(sera), "# of branches with HI contraint", HI_sc
-
-	tree_graph = []
-	HI_diff = []
-	for (test, ref), val in measurements.iteritems():
-		if not np.isnan(val):
-			try:
-				if test != ref and ref in names_to_clades and test in names_to_clades:
-					path = get_path_dendropy(tree, names_to_clades[test], names_to_clades[ref])
-					tmp = np.zeros(HI_sc + len(sera))
-					branches = np.unique([c.HI_branch_index for c in path])
-					tmp[branches] = 1
-					tmp[HI_sc+sera.index(ref)] = 1
-					tree_graph.append(tmp)
-					HI_diff.append(val)
-#				else:
-#					print test, ref, "not found"
-			except:
-				print test, ref, "ERROR"
-
-	HI_diff =  np.array(HI_diff)
-	tree_graph= np.array(tree_graph)
-	print "matrix dimensions: ", tree_graph.shape, "measurements x parameters"
-
-	if method=='l1reg':  # l1 regularized fit, no constraint on sign of effect
+	def fit_l1reg(self):
 		from l1regls import l1regls
-		A = matrix(tree_graph)
-		b = matrix(HI_diff)
-		w = np.array([x for x in l1regls(A/np.sqrt(lam),b/np.sqrt(lam))])
-		print 'l1reg', fit_func(w, tree_graph, HI_diff), np.sum((HI_diff-1)**2)
-	elif method=='nnls':  # non-negative least square, not regularized
+		A = matrix(self.tree_graph)
+		b = matrix(self.HI_dist)
+		return np.array([x for x in l1regls(A/np.sqrt(self.lam),b/np.sqrt(self.lam))])
+
+	def fit_nnls(self):
 		from scipy.optimize import nnls
-		w = nnls(tree_graph, HI_diff)[0]
-		print 'nnls', fit_func(w, tree_graph, HI_diff), np.sum((HI_diff-1)**2)
-	elif method=='nnl2reg':	# non-negative L2 norm regularized fit
+		return nnls(self.tree_graph, self.HI_dist)[0]
+
+	def fit_nnl2reg(self):
 		from cvxopt import matrix, solvers
-		P = matrix(np.dot(tree_graph.T, tree_graph) + lam*np.eye(tree_graph.shape[1]))
-		q = matrix( -np.dot( HI_diff, tree_graph))
-		h = matrix(np.zeros(tree_graph.shape[1])) # Gw <=h
-		G = matrix(-np.eye(tree_graph.shape[1]))
+		n_params = self.tree_graph.shape[1]
+		P = matrix(np.dot(self.tree_graph.T, self.tree_graph) + self.lam*np.eye(n_params))
+		q = matrix( -np.dot( self.HI_dist, self.tree_graph))
+		h = matrix(np.zeros(n_params)) # Gw <=h
+		G = matrix(-np.eye(n_params))
 		W = solvers.qp(P,q,G,h)
-		w = np.array([x for x in W['x']])
-		print 'QP', fit_func(w, tree_graph, HI_diff), np.sum((HI_diff-1)**2)
-	elif method=='nnl1reg':  # non-negative fit, branch terms L1 regularized, avidity terms L2 regularized
+		return np.array([x for x in W['x']])
+
+	def fit_nnl1reg(self):
 		from cvxopt import matrix, solvers
-		P1 = np.zeros((tree_graph.shape[1]+HI_sc,tree_graph.shape[1]+HI_sc))
-		P1[:tree_graph.shape[1], :tree_graph.shape[1]] = np.dot(tree_graph.T, tree_graph)
-		for ii in xrange(HI_sc, tree_graph.shape[1]):
-			P1[ii,ii]+=lam
+		n_params = self.tree_graph.shape[1]
+		HI_sc = self.HI_split_count
+		P1 = np.zeros((n_params+HI_sc,n_params+HI_sc))
+		P1[:n_params, :n_params] = np.dot(self.tree_graph.T, self.tree_graph)
+		for ii in xrange(HI_sc, n_params):
+			P1[ii,ii]+=self.lam
 		P = matrix(P1)
 
-		q1 = np.zeros(tree_graph.shape[1]+HI_sc)
-		q1[:tree_graph.shape[1]] = -np.dot( HI_diff, tree_graph)
-		q1[tree_graph.shape[1]:] = lam
+		q1 = np.zeros(n_params+HI_sc)
+		q1[:n_params] = -np.dot( self.HI_dist, self.tree_graph)
+		q1[n_params:] = self.lam
 		q = matrix(q1)
 
 		h = matrix(np.zeros(2*HI_sc)) 	# Gw <=h
-		G1 = np.zeros((2*HI_sc,tree_graph.shape[1]+HI_sc))
+		G1 = np.zeros((2*HI_sc,n_params+HI_sc))
 		G1[:HI_sc, :HI_sc] = -np.eye(HI_sc)
 		G1[HI_sc:, :HI_sc] = np.eye(HI_sc)
-		G1[HI_sc:, tree_graph.shape[1]:] = -np.eye(HI_sc)
+		G1[HI_sc:, n_params:] = -np.eye(HI_sc)
 		G = matrix(G1)
 		W = solvers.qp(P,q,G,h)
-		w = np.array([x for x in W['x']])[:tree_graph.shape[1]]
-		print 'QP l1', fit_func(w, tree_graph, HI_diff), np.sum((HI_diff-1)**2)
+		return np.array([x for x in W['x']])[:n_params]
 
-	# for each set of branches with HI constraints, pick the branch with most aa mutations
-	# and assign the dHI to that one, record the number of constraints
-	index_to_branch = {n.branch_index:n for n in tree.postorder_node_iter()}
-	for HI_split, branches in HI_split_map.iteritems():
-		likely_branch = branches[np.argmax([len(index_to_branch[b].mutations) for b in branches])]
-		index_to_branch[likely_branch].dHI = w[HI_split]
-		index_to_branch[likely_branch].constraints = tree_graph[:,HI_split].sum()
+	def map_HI_to_tree(self, training_fraction = 1.0, method = 'nnls', lam=10):
+		self.lam = lam
+		if training_fraction<1.0:
+			self.test_HI, self.train_HI = {}, {}
+			for key, val in self.HI_normalized.iteritems():
+				if np.random.uniform()>training_fraction:
+					self.test_HI[key]=val
+				else:
+					self.train_HI[key]=val
+		else:
+			self.train_HI = self.HI_normalized
 
-	# integrate the HI change dHI into a cumulative antigentic evolution score cHI
-	for node in tree.preorder_node_iter():
-		if node!=tree.seed_node:
-			node.cHI = node.parent_node.cHI + node.dHI
-	return tree, {serum:w[HI_sc+ii] for ii, serum in enumerate(sera)}
+		self.make_treegraph()
+		if method=='l1reg':  # l1 regularized fit, no constraint on sign of effect
+			self.params = self.fit_l1reg()
+		elif method=='nnls':  # non-negative least square, not regularized
+			self.params = self.fit_nnls()
+		elif method=='nnl2reg':	# non-negative L2 norm regularized fit
+			self.params = self.fit_nnl2reg()
+		elif method=='nnl1reg':  # non-negative fit, branch terms L1 regularized, avidity terms L2 regularized
+			self.params = self.fit_nnl1reg()
 
-def predict_HI(virus, serum, tree,avidities):
-	v = tree.find_node_with_taxon_label(virus)
-	s = tree.find_node_with_taxon_label(serum)
-	if v is not None and s is not None:
-		path = get_path_dendropy(tree, v,s)
-		return avidities[serum] + np.sum(b.dHI for b in path)
-	else:
-		return None
+		print "method",method, "regularized by", self.lam, "squared deviation=",self.fit_func()
+		# for each set of branches with HI constraints, pick the branch with most aa mutations
+		# and assign the dHI to that one, record the number of constraints
+		for HI_split, branches in self.HI_split_to_branch.iteritems():
+			likely_branch = branches[np.argmax([len(b.mutations) for b in branches])]
+			likely_branch.dHI = self.params[HI_split]
+			likely_branch.constraints = self.tree_graph[:,HI_split].sum()
+
+		# integrate the HI change dHI into a cumulative antigentic evolution score cHI
+		for node in self.tree.preorder_node_iter():
+			if node!=self.tree.seed_node:
+				node.cHI = node.parent_node.cHI + node.dHI
+		self.avidities = {serum:self.params[self.HI_split_count+ii] for ii, serum in enumerate(self.sera)}
+
+	def validate(self, plot=False):
+		self.validation = {}
+		for key, val in self.test_HI.iteritems():
+			pred_HI = self.predict_HI(key[0], key[1])
+			if pred_HI is not None:
+				self.validation[key] = (val, pred_HI)
+		if plot:
+			import matplotlib.pyplot as plt
+			a = np.array(self.validation.values())
+			plt.figure()
+			plt.scatter(a[:,0], a[:,1])
+			plt.xlabel("measured")
+			plt.ylabel("predicted")
+			plt.xlabel("measured")
+			plt.title('reg='+str(reg)+', avg error '+str(round(np.mean(np.abs(a[:,0]-a[:,1])),3)))
+
+
+	def predict_HI(self, virus, serum):
+		path = self.get_path(virus,serum)
+		if path is not None:
+			return self.avidities[serum] + np.sum(b.dHI for b in path)
+		else:
+			return None
 
 def plot_tree(tree):
 	btree = to_Biopython(tree)
@@ -352,32 +350,25 @@ def plot_dHI_distribution(tree):
 	plt.legend(loc=1)
 	plt.show()
 
+
+def main(tree_fname = 'data/tree_ancestral.json', HI_fname='data/HI_titers.txt'):
+
+	print "--- Fitting HI titers at " + time.strftime("%H:%M:%S") + " ---"
+
+	tree =  json_to_dendropy(read_json(tree_fname))
+	HI_distances = load_HI_distances(HI_fname)
+
+
 if __name__ == "__main__":
 	from Bio import Phylo
-	reg = 5
+	reg = 10
 	#tree_fname = 'data/tree_long_HI.json'
 	tree_fname = 'data/tree_refine.json'
 	tree =  json_to_dendropy(read_json(tree_fname))
-	normalized_measurements, HI_strains, sera = get_normalized_HI_titers()
-	test_HI, train_HI = {}, {}
-	for key, val in normalized_measurements.iteritems():
-		if np.random.uniform()<0.2:
-			test_HI[key]=val
-		else:
-			train_HI[key]=val
-
-	tree,avidities = map_HI_to_tree(tree, train_HI, method='nnl1reg', lam = reg)
-	validation = {}
-	for key, val in test_HI.iteritems():
-		pred_HI = predict_HI(key[0], key[1], tree, avidities)
-		if pred_HI is not None:
-			validation[key] = (val, pred_HI)
-	a = np.array(validation.values())
-	plt.scatter(a[:,0], a[:,1])
-	plt.xlabel("measured")
-	plt.ylabel("predicted")
-	plt.xlabel("measured")
-	plt.title('reg='+str(reg)+', avg error '+str(round(np.mean(np.abs(a[:,0]-a[:,1])),3)))
+	names, measurements, tables = read_tables()
+	HI_map = HI_tree(tree, measurements)
+	HI_map.map_HI_to_tree(training_fraction=0.9, method = 'nnl1reg', lam=reg)
+	HI_map.validate(plot=True)
 
 	out_tree_fname = 'data/tree_HI.json'
 	write_json(dendropy_to_json(tree.seed_node), out_tree_fname, indent=None)
