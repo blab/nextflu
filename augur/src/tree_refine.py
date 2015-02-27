@@ -8,8 +8,6 @@ from seq_util import *
 from date_util import *
 from tree_util import *
 
-OUTGROUP = 'A/Beijing/32/1992'
-
 def delimit_newick(infile_name):
 	with open(infile_name, 'r') as file:
 		newick = file.read().replace('\n', '')
@@ -46,14 +44,20 @@ def get_xvalue(node):
 	root = node.get_tree_root()
 	return node.get_distance(root)
 
-def remove_outgroup(tree):
+def remove_outgroup(tree, outgroup):
 	"""Reroot tree to outgroup"""
 	outgroup_node = None
 	for node in tree.postorder_node_iter():
-		if (str(node.taxon) == OUTGROUP):
+		if (str(node.taxon) == outgroup):
 			outgroup_node = node
 	if outgroup_node:
 		tree.prune_subtree(outgroup_node)
+	else:
+		print "outgroup",outgroup, "not found"
+	if len(tree.seed_node.child_nodes())==1:
+		tree.seed_node = tree.seed_node.child_nodes()[0]
+		tree.seed_node.parent_node = None
+		tree.seed_node.edge_length = 0.002
 
 def collapse(tree):
 	"""Collapse edges without mutations to polytomies"""
@@ -189,10 +193,10 @@ def define_trunk(tree):
 			node.trunk = True;
 
 
-def main(tree, viruses):
+def main(tree, viruses, outgroup):
 	print "--- Tree refine at " + time.strftime("%H:%M:%S") + " ---"
 	print "Remove outgroup"
-	remove_outgroup(tree)
+	remove_outgroup(tree, outgroup)
 	print "Remove outlier branches"
 	reduce(tree)
 	print "Collapse internal nodes"

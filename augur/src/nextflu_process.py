@@ -1,6 +1,5 @@
 import time, argparse,os,subprocess, shutil, glob, sys
 sys.path.append('./src')
-from nextflu_config import config
 from Bio import SeqIO
 from io_util import write_json, read_json, write_fasta, read_fasta
 from tree_util import dendropy_to_json, json_to_dendropy, delimit_newick
@@ -36,7 +35,7 @@ class nextflu(object):
 		my_filter = virus_filter(aln_fname, fasta_fields)
 		my_filter.filter()
 		my_filter.subsample(years_back, viruses_per_month, prioritize = force_include_strains, 
-								all_priority = True, region_specific=False)
+								all_priority = True, region_specific=config['max_global'])
 
 		self.viruses = my_filter.virus_subsample
 		write_json(self.viruses, self.initial_virus_fname)
@@ -65,7 +64,7 @@ class nextflu(object):
 
 	def refine_tree(self):
 		import tree_refine
-		tree_refine.main(self.tree, self.viruses)
+		tree_refine.main(self.tree, self.viruses, config['outgroup'])
 		write_json(dendropy_to_json(self.tree.seed_node), self.intermediate_tree_fname)
 
 	def estimate_frequencies(self, tasks = ['mutations','genotypes' 'clades', 'tree']):
@@ -108,8 +107,12 @@ if __name__=="__main__":
 	parser.add_argument('-y', '--years_back', type = int, default=3, help='number of past years to sample sequences from')
 	parser.add_argument('-v', '--viruses_per_month', type = int, default = 50, help='number of viruses sampled per month')
 	parser.add_argument('-r', '--raxml_time_limit', type = float, default = 1.0, help='number of hours raxml is run')
+	parser.add_argument('--config', default = "nextflu_config.py" , type=str, help ="config file")
 	parser.add_argument('--test', default = False, action="store_true",  help ="don't run the pipeline")
 	params = parser.parse_args()
+
+	execfile(params.config)
+	print config
 
 	my_nextflu = nextflu()
 	if not params.test:

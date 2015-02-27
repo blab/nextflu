@@ -3,6 +3,7 @@ config = {
 	'alignment_file':'data/20150222_all_H3N2_HA1.fasta',
 	'fasta_fields':{0:'strain', 1:"date", 4:"passage", -1:'accession'},
 	'outgroup':'A/Beijing/32/1992',
+	'max_global':True,   # sample as evenly as possible from different geographic regions 
 	'aggregate_regions': [  ("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
 							("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ],
 	'frequency_stiffness':1.0,
