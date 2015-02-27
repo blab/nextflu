@@ -15,13 +15,13 @@ def main(years_back=3, viruses_per_month=50):
 	virus_fname = 'data/gisaid_epiflu_sequence.fasta'
 
 	# Filter sequences
-	virus_fname = virus_filter.main(virus_fname, years_back=years_back, viruses_per_month=viruses_per_month)
+	virus_fname = H3N2_filter.main(virus_fname, years_back=years_back, viruses_per_month=viruses_per_month)
 
 	# Align sequences
 	virus_fname = virus_align.main(virus_fname)
 
 	# Clean sequences
-	virus_fname = H3N2_filter.main(virus_fname)
+	vires_fname = virus_clean.main(virus_fname)
 
 	# Make tree, creates raxml files
 	tree_fname = tree_infer.main(virus_fname)

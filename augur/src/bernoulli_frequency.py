@@ -12,6 +12,7 @@ dfreq_pc = 1e-2
 time_interval = (2012.0, 2015.1)
 flu_stiffness = 10.0
 pivots_per_year = 12.0
+relevant_pos_cutoff = 0.1
 inertia = 0.7    # fraction of previous frequency changes that is carried over
 window_size = 20 # smooting window
 tol = 1e-4
@@ -230,7 +231,7 @@ def estimate_sub_frequencies(node, all_dates, tip_to_date_index, threshold=50, r
 		ci+=1
 
 	# if the above loop finished assign the frequency of the remaining clade to the frequency_left
-	if ci>0 and ci==len(node.child_nodes())-1:
+	if ci==len(node.child_nodes())-1 and frequency_left is not None:
 		last_child = children_by_size[-1]
 		last_child.freq[region_name] = frequency_left
 		last_child.logit_freq[region_name] = logit_transform(last_child.freq[region_name])
@@ -438,7 +439,7 @@ def test():
 
 
 
-def all_mutations(tree, region_list, plot=False):
+def all_mutations(tree, region_list, threshold = 5, plot=False):
 	import matplotlib.pyplot as plt
 	mutation_frequencies = {}
 	for region_label, regions in region_list:
@@ -446,7 +447,7 @@ def all_mutations(tree, region_list, plot=False):
 		if plot:
 			plt.figure("mutations in "+region_label, figsize = (12,7))
 			if regions is not None: plt.title("Region: "+", ".join(regions))
-		mutation_frequencies[region_label] = determine_mutation_frequencies(tree, regions, plot=plot, threshold = 5)
+		mutation_frequencies[region_label] = determine_mutation_frequencies(tree, regions, plot=plot, threshold = threshold)
 		if plot:
 			plt.legend()
 			ticloc = np.arange(time_interval[0], int(time_interval[1])+1,1)
@@ -459,7 +460,7 @@ def all_mutations(tree, region_list, plot=False):
 	relevant_pos = []
 	for mut, freq in mutation_frequencies["global"].iteritems():
 		if "pivot" not in mut:
-			if np.max(freq)-np.min(freq)>0.1:
+			if np.max(freq)-np.min(freq)>relevant_pos_cutoff:
 				pos = int(mut.split('_')[-1][:-1])+15
 				relevant_pos.append(pos)
 	relevant_pos = sorted(set(relevant_pos))

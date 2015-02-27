@@ -10,14 +10,16 @@ class nextflu(object):
 	def __init__(self):
 		self.viruses = None
 		self.tree = None
+		self.frequencies = {}
 		self.initial_virus_fname = 'data/virus_ingest.json'
 		self.clean_virus_fname = 'data/virus_clean.json'
+		self.intermediate_tree_fname = 'data/tree_refine.json'
 
 	def load_from_file(self, tree_fname=None, virus_fname = None):
-		if tree_fname is None: tree_fname = 'data/tree_refine.json'
+		if tree_fname is None: tree_fname = self.intermediate_tree_fname
 		if os.path.isfile(tree_fname):
 			self.tree = json_to_dendropy(read_json(tree_fname))
-		if virus_fname is None: virus_fname = 'data/virus_clean.json'
+		if virus_fname is None: virus_fname = self.clean_virus_fname
 		if os.path.isfile(virus_fname):
 			self.viruses = read_json(virus_fname)
 
@@ -64,20 +66,41 @@ class nextflu(object):
 	def refine_tree(self):
 		import tree_refine
 		tree_refine.main(self.tree, self.viruses)
-		write_json(dendropy_to_json(self.tree.seed_node), 'data/tree_refine.json')
+		write_json(dendropy_to_json(self.tree.seed_node), self.intermediate_tree_fname)
+
+	def estimate_frequencies(self, tasks = ['mutations','genotypes' 'clades', 'tree']):
+		import bernoulli_frequency as freq_est
+		plot=False
+		freq_est.flu_stiffness = config['frequency_stiffness']
+		freq_est.time_interval = config['time_interval']
+		freq_est.pivots_per_year = config['pivots_per_year']
+		freq_est.relevant_pos_cutoff = 0.1
+
+		if 'mutations' in tasks or 'genotypes' in tasks:
+			self.frequencies['mutations'], relevant_pos = freq_est.all_mutations(self.tree, config['aggregate_regions'], threshold = 5, plot=plot)
+		if 'genotypes' in tasks:
+			self.frequencies['genotypes'] = freq_est.all_genotypes(self.tree, config['aggregate_regions'], relevant_pos)
+		if 'clades' in tasks:
+			self.frequencies['clades'] = freq_est.all_clades(self.tree, config['aggregate_regions'], plot)
+
+		if 'tree' in tasks:
+			for region_label, regions in config['aggregate_regions']:
+				print "--- "+"adding frequencies to tree "+region_label+ " "  + time.strftime("%H:%M:%S") + " ---"
+				freq_est.estimate_tree_frequencies(self.tree, threshold = 10, regions=regions, region_name=region_label)
 
 	def export_to_auspice(self):
 		import streamline
 		tree_json = dendropy_to_json(self.tree.seed_node)
-		streamline.main(tree_json)
+		streamline.main(tree_json, self.frequencies)
 
-	def run(self,years_back=3, viruses_per_month=50, raxml_time_limit = 1.0):
+	def run(self,years_back=3, viruses_per_month=50, raxml_time_limit = 1.0,  **kwargs):
 		self.load_viruses(years_back=years_back, viruses_per_month=viruses_per_month)
-		self.clean_viruses()
 		self.align()
+		self.clean_viruses()
 		self.infer_tree(raxml_time_limit = raxml_time_limit)
 		self.infer_ancestral()
 		self.refine_tree()
+		self.estimate_frequencies()
 		self.export_to_auspice()
 
 if __name__=="__main__":

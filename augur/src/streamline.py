@@ -2,7 +2,7 @@ import time, os, shutil
 from io_util import *
 from tree_util import *
 
-def main(tree_json):
+def main(tree_json, frequencies):
 	"""Prep tree for auspice, stripping sequence data"""
 
 	print "--- Streamline at " + time.strftime("%H:%M:%S") + " ---"
@@ -35,7 +35,7 @@ def main(tree_json):
 		write_json(tree_json, out_fname_tree, indent=1)
 		
 	# Include genotype frequencies
-	shutil.copy2("data/genotype_frequencies.json", "../auspice/data/frequencies.json")
+	write_json(frequencies, "../auspice/data/frequencies.json")
 
 if __name__ == "__main__":
 	main()
