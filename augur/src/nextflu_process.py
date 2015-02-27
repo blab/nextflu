@@ -14,12 +14,12 @@ class nextflu(object):
 		self.clean_virus_fname = 'data/virus_clean.json'
 
 	def load_from_file(self, tree_fname=None, virus_fname = None):
-		if tree_fname is None: tree_fname = 'data/tree_ancestral.json'
+		if tree_fname is None: tree_fname = 'data/tree_refine.json'
 		if os.path.isfile(tree_fname):
-			self.tree = dendropy_to_json(read_json(tree_fname))
+			self.tree = json_to_dendropy(read_json(tree_fname))
 		if virus_fname is None: virus_fname = 'data/virus_clean.json'
 		if os.path.isfile(virus_fname):
-			self.viruses = dendropy_to_json(read_json(virus_fname))
+			self.viruses = read_json(virus_fname)
 
 	def load_viruses(self, aln_fname = None, years_back=3, viruses_per_month=50):
 		if config['virus']:
@@ -85,7 +85,9 @@ if __name__=="__main__":
 	parser.add_argument('-y', '--years_back', type = int, default=3, help='number of past years to sample sequences from')
 	parser.add_argument('-v', '--viruses_per_month', type = int, default = 50, help='number of viruses sampled per month')
 	parser.add_argument('-r', '--raxml_time_limit', type = float, default = 1.0, help='number of hours raxml is run')
+	parser.add_argument('--test', default = False, action="store_true",  help ="don't run the pipeline")
 	params = parser.parse_args()
 
 	my_nextflu = nextflu()
-	my_nextflu.run(**params.__dict__)
+	if not params.test:
+		my_nextflu.run(**params.__dict__)
