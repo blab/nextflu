@@ -47,18 +47,19 @@ body {
 }
 
 .plot-container {
-	width: 800px;
 	height: 650px;
 	top: 25px;
 }
 
+.logo-container {
+	min-width: 300px;
+}
+
 .io-container {
-	width: 240px;
-	position: absolute;	
+	min-width: 280px;
 }
 
 .subtitle-box {
-	width: 300px;
 	margin-left: 5px;
 }
 
@@ -128,12 +129,6 @@ a:hover {
 	padding: 5px;
 }
 
-.logobox {
-	height: 100px;
-	width: 500px;
-	display: table-cell; 
-	vertical-align: middle;
-}
 
 /* navbar */
 .navbar-brand { 

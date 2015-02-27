@@ -4,53 +4,59 @@ title: nextflu
 ---
 
 <div class="row">
-	<div class="col-md-3" style="height: 150px;">
-		<div class="io-container">
-			<div class="bigtitle logobox">
+	<div class="col-md-3">
+		<div class="logo-container">
+			<div class="bigtitle">
 				<span class="c2">n</span><span class="c3">e</span><span class="c4">x</span><span class="c5">t</span><span class="c6">f</span><span class="c7">l</span><span class="c8">u</span>
 			</div>
 			<div class="subtitle-box">
 				Real-time tracking of seasonal influenza H3N2 virus evolution in humans
 			</div>
 			<div class="bigspacer"></div>		
-			<div>
-				<svg id="date-input"></svg>
-			</div>
-			<div>
-				<h5 id="legend-title">Legend</h5>
-				<svg id="legend"></svg>
-			</div>
-			<div class="spacer"></div>
-			<form class="form-horizontal form-small">
-				<div class="form-group">
-						<label class="col-xs-4 control-label">Color by</label>
-						<div class="col-xs-8 controls">
-							<select id="coloring" class="form-control">
-								<option value="ep">epitope mutations</option>
-								<option value="ne">non-epitope mutations</option>
-								<option value="rb">receptor binding mutations</option>
-								<option value="lbi">local branching index</option>
-								<option value="region">geographic region</option>
-							</select>
-						</div>
+		</div>
+		<div class="row">			
+			<div class="col-xs-6 io-container">
+				<div>
+					<svg id="date-input"></svg>
 				</div>
-				<div class="form-group">
-					<label class="col-xs-4 control-label">Or</label>
-					<div class="col-xs-8 controls">
-						<input id="gt-color" type="search" placeholder="HA1 positions..." class="form-control">
-					</div>
-				</div>		
-			</form>
-			<div class="spacer"></div>
-			<div id="search"></div>
-			<div class="spacer"></div>
-			<div>
-				<button id="reset" class="btn btn-default">reset layout</button>
+				<div>
+					<h5 id="legend-title">Legend</h5>
+					<svg id="legend"></svg>
+				</div>
+				<div class="spacer"></div>
 			</div>
-			<div class="spacer"></div>						
+			<div class="col-xs-6 io-container">			
+				<form class="form-horizontal form-small">
+					<div class="form-group">
+							<label class="col-xs-4 control-label">Color by</label>
+							<div class="col-xs-8 controls">
+								<select id="coloring" class="form-control">
+									<option value="ep">epitope mutations</option>
+									<option value="ne">non-epitope mutations</option>
+									<option value="rb">receptor binding mutations</option>
+									<option value="lbi">local branching index</option>
+									<option value="region">geographic region</option>
+								</select>
+							</div>
+					</div>
+					<div class="form-group">
+						<label class="col-xs-4 control-label">Or</label>
+						<div class="col-xs-8 controls">
+							<input id="gt-color" type="search" placeholder="HA1 positions..." class="form-control">
+						</div>
+					</div>		
+				</form>
+				<div class="spacer"></div>
+				<div id="search"></div>
+				<div class="spacer"></div>
+				<div>
+					<button id="reset" class="btn btn-default">reset layout</button>
+				</div>
+				<div class="spacer"></div>	
+			</div>					
 		</div>
 	</div>
-	<div class="col-md-9" style="top: 45px;">
+	<div class="col-md-9" style="top: 30px;">
 		<div class="plot-container">
 			<svg id="treeplot"></svg>
 		</div>
