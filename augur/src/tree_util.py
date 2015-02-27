@@ -2,6 +2,15 @@ import dendropy
 import numpy as np
 from io_util import *
 
+def delimit_newick(infile_name, outfile_name):
+	import re
+	with open(infile_name, 'r') as file:
+		newick = file.read().replace('\n', '')
+		newick = re.sub(r'(A/[^\:^,]+)', r"'\1'", newick)
+	with open(outfile_name, 'w') as file:
+		file.write(newick)
+
+
 def color_BioTree_by_attribute(T,attribute, vmin=None, vmax = None, missing_val='min', transform = lambda x:x, cmap=None):
 	'''
 	simple function that assigns a color to each node in a biopython tree

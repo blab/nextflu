@@ -105,12 +105,9 @@ def clean_reassortants(viruses):
 
 	return new_viruses
 
-def main(in_fname=None):
+def main(viruses):
 
 	print "--- Clean at " + time.strftime("%H:%M:%S") + " ---"
-
-	if in_fname is None: in_fname = 'data/virus_align.json'
-	viruses = read_json(in_fname)
 	print str(len(viruses)) + " initial viruses"
 
 	# mask extraneous columns and ambiguous bases
@@ -132,10 +129,7 @@ def main(in_fname=None):
 	# clean sequences by distance
 	viruses = clean_distances(viruses)
 	print str(len(viruses)) + " with clock"
-
-	out_fname = 'data/virus_clean.json'
-	write_json(viruses, out_fname)
-	return out_fname
+	return viruses
 
 if __name__ == "__main__":
 	main()

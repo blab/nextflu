@@ -2,16 +2,15 @@ import time, os, shutil
 from io_util import *
 from tree_util import *
 
-def main(in_fname='data/tree_frequencies.json'):
+def main(tree_json):
 	"""Prep tree for auspice, stripping sequence data"""
 
 	print "--- Streamline at " + time.strftime("%H:%M:%S") + " ---"
 
 	# Move sequence data to separate file
-	print "Writing sequences"	
-	tree = read_json(in_fname)
+	print "Writing sequences"
 	elems = []
-	for node in all_descendants(tree):
+	for node in all_descendants(tree_json):
 		elem = {}
 		if 'clade' in node:
 			elem['clade'] = node['clade']
@@ -22,19 +21,18 @@ def main(in_fname='data/tree_frequencies.json'):
 
 	# Streamline tree for auspice
 	print "Writing streamlined tree"
-	tree = read_json(in_fname)
-	for node in all_descendants(tree):
+	for node in all_descendants(tree_json):
 		node.pop("seq", None)
 		node.pop("aa_seq", None)
 		node.pop("logit_freq", None)
 
 	out_fname_tree = "../auspice/data/tree.json"
-	write_json(tree, out_fname_tree, indent=None)
+	write_json(tree_json, out_fname_tree, indent=None)
 	try:
 		read_json(out_fname_tree)
 	except:
 		print "Read failed, rewriting with indents"	
-		write_json(tree, out_fname_tree, indent=1)
+		write_json(tree_json, out_fname_tree, indent=1)
 		
 	# Include genotype frequencies
 	shutil.copy2("data/genotype_frequencies.json", "../auspice/data/frequencies.json")
