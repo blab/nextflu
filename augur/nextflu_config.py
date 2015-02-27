@@ -8,5 +8,6 @@ config = {
 							("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ],
 	'frequency_stiffness':1.0,
 	'time_interval':(2012.0, 2015.1),
-	'pivots_per_year':6.0
+	'pivots_per_year':6.0,
+	'cds':[48,-1]
 }

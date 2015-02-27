@@ -67,7 +67,7 @@ class nextflu(object):
 
 	def refine_tree(self):
 		import tree_refine
-		tree_refine.main(self.tree, self.viruses, config['outgroup'])
+		tree_refine.main(self.tree, self.viruses, config['outgroup'], config['cds'])
 		write_json(dendropy_to_json(self.tree.seed_node), self.intermediate_tree_fname)
 
 	def estimate_frequencies(self, tasks = ['mutations','genotypes', 'clades', 'tree']):

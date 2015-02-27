@@ -149,9 +149,9 @@ def add_node_attributes(tree):
 		node.trunk_count = 0
 		node.trunk = False
 
-def translate_all(tree):
+def translate_all(tree, cds):
 	for node in tree.postorder_node_iter():
-		node.aa_seq = translate(node.seq)
+		node.aa_seq = translate(node.seq[cds[0]:cds[1]])
 
 def unique_date(tree):
 	leaf_count = 0
@@ -193,7 +193,7 @@ def define_trunk(tree):
 			node.trunk = True;
 
 
-def main(tree, viruses, outgroup):
+def main(tree, viruses, outgroup, cds = [0,-1]):
 	print "--- Tree refine at " + time.strftime("%H:%M:%S") + " ---"
 	print "Remove outgroup"
 	remove_outgroup(tree, outgroup)
@@ -207,7 +207,7 @@ def main(tree, viruses, outgroup):
 	add_virus_attributes(viruses, tree)
 	add_node_attributes(tree)
 	print "Translate nucleotide sequences"
-	translate_all(tree)
+	translate_all(tree, cds)
 	print "Enumerate leaves of ladderized tree and calculate unique numerical date"
 	unique_date(tree)
 	print "Define trunk"
