@@ -929,9 +929,9 @@ d3.json("data/tree.json", function(error, root) {
 		var positions_string = document.getElementById("gt-color").value.split(',');
 		var positions_list = []
 		positions_string.map(function(d) {
-			val = parseInt(d)+15;
+			val = parseInt(d)+1;
 			if (!isNaN(val)) {
-				if (val < 561) {
+				if (val < 551) {
 					positions_list.push(val);
 				}
 			}
@@ -950,7 +950,7 @@ d3.json("data/tree.json", function(error, root) {
 		var gts = nodes.map(function (d) {var tmp = [];
 											for (var i=0; i<positions.length; i++){
 												var aa = cladeToSeq[d.clade];
-												tmp[tmp.length] = (positions[i]-15)+aa[positions[i]];
+												tmp[tmp.length] = (positions[i]-1)+aa[positions[i]];
 											}
 											d.color_gt = tmp.join(" / "); 
 											return d.color_gt;});
@@ -1025,12 +1025,6 @@ d3.json("data/meta.json", function(error, json) {
 d3.json("data/sequences.json", function(error, json) {
 	if (error) return console.warn(error);
 	cladeToSeq=json;
-//	for (var key in json) {
-//		if (json.hasOwnProperty(key)) {
-//			var hash = json[key];
-//			cladeToSeq[hash['clade']] = hash['aa_seq'];		
-//		}
-//	}
 });
 
 d3.json("data/frequencies.json", function(error, json){
@@ -1067,7 +1061,7 @@ d3.json("data/frequencies.json", function(error, json){
 		if (gt.length>1){
 			for (freq_gt in json["genotypes"][region]){
 				var gt_agree = gt.map(function (d) {
-								var aa =freq_gt[parseInt(d.substring(0,d.length-1))+15]; 
+								var aa =freq_gt[parseInt(d.substring(0,d.length-1))+1]; 
 								return (aa==d[d.length-1])||(aa=='.');
 					});
 				if (gt_agree.every(function (d,i,a) {return d;}))
