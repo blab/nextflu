@@ -214,8 +214,10 @@ function tipFillColor(col) {
 	return d3.rgb(col).brighter([0.65]).toString();
 }
 
-var width = 800,
-	height = 600;
+var containerWidth = parseInt(d3.select(".plot-container").style("width"), 10);
+
+var width = containerWidth,
+	height = 520 + 0.1 * containerWidth;
 
 var cladeToSeq = {}
 
@@ -416,12 +418,12 @@ d3.json("data/tree.json", function(error, root) {
 
 	var dateScale = d3.time.scale()
 		.domain([earliestDate, globalDate])
-		.range([5, 235])
+		.range([5, 240])
 		.clamp([true]);	
 
 	var niceDateScale = d3.time.scale()
 		.domain([earliestDate, globalDate])
-		.range([5, 235])
+		.range([5, 240])
 		.clamp([true])
 		.nice(d3.time.month);
 
