@@ -56,10 +56,11 @@ def remove_outgroup(tree):
 		tree.prune_subtree(outgroup_node)
 
 def collapse(tree):
-	"""Collapse short edges to polytomies"""
+	"""Collapse edges without mutations to polytomies"""
 	for edge in tree.postorder_edge_iter():
-		if edge.length < 0.00001 and edge.is_internal():
-			edge.collapse()
+		if edge.tail_node is not None:
+			if edge.is_internal() and edge.head_node.seq==edge.tail_node.seq:
+				edge.collapse()
 
 def reduce(tree):
 	"""Remove outlier tips"""

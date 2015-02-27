@@ -28,9 +28,9 @@ def main(viruses, raxml_time_limit, outgroup):
 	tree.resolve_polytomies()
 	tree.write_to_path("initial_tree.newick", "newick")
 
+	os.system("seqmagick convert temp.fasta temp.phyx")
 	if raxml_time_limit>0:
 		print "RAxML tree optimization with time limit " + str(raxml_time_limit) + " hours"
-		os.system("seqmagick convert temp.fasta temp.phyx")
 		# using exec to be able to kill process
 		end_time = time.time() + int(raxml_time_limit*3600)
 		process = subprocess.Popen("exec raxml -f d -T 6 -j -s temp.phyx -n topology -c 25 -m GTRCAT -p 344312987 -t initial_tree.newick", shell=True)
