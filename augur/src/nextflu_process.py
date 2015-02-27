@@ -83,7 +83,8 @@ class nextflu(object):
 		if 'genotypes' in tasks:
 			self.frequencies['genotypes'] = freq_est.all_genotypes(self.tree, config['aggregate_regions'], relevant_pos)
 		if 'clades' in tasks:
-			self.frequencies['clades'] = freq_est.all_clades(self.tree, config['aggregate_regions'], plot)
+			self.frequencies['clades'] = freq_est.all_clades(self.tree, config['clade_designations'], 
+															config['aggregate_regions'], plot)
 		if any(x in tasks for x in ['mutations','clades', 'genotypes']):
 			write_json(self.frequencies, self.frequency_fname)
 

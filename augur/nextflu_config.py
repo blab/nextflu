@@ -9,5 +9,11 @@ config = {
 	'frequency_stiffness':1.0,
 	'time_interval':(2012.0, 2015.1),
 	'pivots_per_year':12.0,
-	'cds':[48,-1]
+	'cds':[48,-1], # define the HA1 start i n 0 numbering
+	# define relevant clades in canonical HA1 numbering (+1)
+	'clade_designations': { "3c3.a":[(128,'A'), (142,'G'), (159,'S')],
+						   "3c3":  [(128,'A'), (142,'G'), (159,'F')],
+						   "3c2.a":[(144,'S'), (159,'Y'), (225,'D'), (311,'H'),(489,'N')],
+						   "3c2":  [(144,'N'), (159,'F'),(225,'N'), (489,'N')]
+							}
 }
