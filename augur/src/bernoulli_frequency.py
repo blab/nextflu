@@ -161,11 +161,11 @@ class frequency_estimator(object):
 			else:
 				first_switch = self.tps[0]
 				last_switch = self.tps[-1]
-			if first_switch>self.final_pivot_tps[0]:
+			if first_switch>self.final_pivot_tps[0] and first_switch < self.final_pivot_tps[-1]:
 				first_pivot = max(0, np.where(first_switch<=self.final_pivot_tps)[0][0] - extra_pivots)
 			else:
 				first_pivot=0
-			if last_switch<self.final_pivot_tps[-1]:
+			if last_switch<self.final_pivot_tps[-1] and last_switch>self.final_pivot_tps[0]:
 				last_pivot = min(len(self.final_pivot_tps), np.where(last_switch>self.final_pivot_tps)[0][-1]+extra_pivots)
 			else:
 				last_pivot = len(self.final_pivot_tps)
