@@ -188,12 +188,8 @@ def define_trunk(tree):
 			node.trunk = True;
 
 
-def main(tree_fname = 'data/tree_ancestral.json', virus_fname='data/virus_clean.json'):
-
+def main(tree, viruses):
 	print "--- Tree refine at " + time.strftime("%H:%M:%S") + " ---"
-
-	viruses = read_json(virus_fname)
-	tree =  json_to_dendropy(read_json(tree_fname))
 	print "Remove outgroup"
 	remove_outgroup(tree)
 	print "Remove outlier branches"
@@ -211,9 +207,6 @@ def main(tree_fname = 'data/tree_ancestral.json', virus_fname='data/virus_clean.
 	unique_date(tree)
 	print "Define trunk"
 	define_trunk(tree)
-	out_fname = "data/tree_refine.json"
-	write_json(dendropy_to_json(tree.seed_node), out_fname)
-	return out_fname
 
 if __name__ == "__main__":
 	main()
