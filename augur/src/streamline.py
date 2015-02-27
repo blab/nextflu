@@ -9,14 +9,15 @@ def main(tree_json, frequencies):
 
 	# Move sequence data to separate file
 	print "Writing sequences"
-	elems = []
+	elems = {}
 	for node in all_descendants(tree_json):
-		elem = {}
-		if 'clade' in node:
-			elem['clade'] = node['clade']
-		if 'aa_seq' in node:
-			elem['aa_seq'] = node['aa_seq']			
-		elems.append(elem)
+		if "clade" in tree_json:
+			elems[node["clade"]] = node["aa_seq"]
+#		if 'clade' in node:
+#			elem['clade'] = node['clade']
+#		if 'aa_seq' in node:
+#			elem['aa_seq'] = node['aa_seq']			
+#		elems.append(elem)
 	write_json(elems, "../auspice/data/sequences.json", indent=None)
 
 	# Streamline tree for auspice

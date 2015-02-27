@@ -13,6 +13,7 @@ class nextflu(object):
 		self.initial_virus_fname = 'data/virus_ingest.json'
 		self.clean_virus_fname = 'data/virus_clean.json'
 		self.intermediate_tree_fname = 'data/tree_refine.json'
+		self.frequency_fname = 'data/frequencies.json'
 
 	def load_from_file(self, tree_fname=None, virus_fname = None):
 		if tree_fname is None: tree_fname = self.intermediate_tree_fname
@@ -21,6 +22,8 @@ class nextflu(object):
 		if virus_fname is None: virus_fname = self.clean_virus_fname
 		if os.path.isfile(virus_fname):
 			self.viruses = read_json(virus_fname)
+		if os.path.isfile(self.frequency_fname):
+			self.frequencies = read_json(self.frequency_fname)
 
 	def load_viruses(self, aln_fname = None, years_back=3, viruses_per_month=50):
 		if config['virus']:
@@ -67,7 +70,7 @@ class nextflu(object):
 		tree_refine.main(self.tree, self.viruses, config['outgroup'])
 		write_json(dendropy_to_json(self.tree.seed_node), self.intermediate_tree_fname)
 
-	def estimate_frequencies(self, tasks = ['mutations','genotypes' 'clades', 'tree']):
+	def estimate_frequencies(self, tasks = ['mutations','genotypes', 'clades', 'tree']):
 		import bernoulli_frequency as freq_est
 		plot=False
 		freq_est.flu_stiffness = config['frequency_stiffness']
@@ -81,6 +84,8 @@ class nextflu(object):
 			self.frequencies['genotypes'] = freq_est.all_genotypes(self.tree, config['aggregate_regions'], relevant_pos)
 		if 'clades' in tasks:
 			self.frequencies['clades'] = freq_est.all_clades(self.tree, config['aggregate_regions'], plot)
+		if any(x in tasks for x in ['mutations','clades', 'genotypes']):
+			write_json(self.frequencies, self.frequency_fname)
 
 		if 'tree' in tasks:
 			for region_label, regions in config['aggregate_regions']:
@@ -109,11 +114,25 @@ if __name__=="__main__":
 	parser.add_argument('-r', '--raxml_time_limit', type = float, default = 1.0, help='number of hours raxml is run')
 	parser.add_argument('--config', default = "nextflu_config.py" , type=str, help ="config file")
 	parser.add_argument('--test', default = False, action="store_true",  help ="don't run the pipeline")
+	parser.add_argument('--virus', default = False, action="store_true",  help ="only select viruses")
+	parser.add_argument('--tree', default = False, action="store_true",  help ="only build tree")
+	parser.add_argument('--frequencies', default = False, action="store_true",  help ="only estimate frequencies")
 	params = parser.parse_args()
 
 	execfile(params.config)
 	print config
 
 	my_nextflu = nextflu()
-	if not params.test:
+	my_nextflu.load_from_file()
+	if params.virus:
+		my_nextflu.load_viruses(years_back=params.years_back, viruses_per_month = params.viruses_per_month)
+		my_nextflu.align()
+		my_nextflu.clean_viruses()
+	elif params.tree:
+		my_nextflu.infer_tree(raxml_time_limit=params.raxml_time_limit)
+		my_nextflu.infer_ancestral()
+		my_nextflu.refine_tree()
+	elif params.frequencies:
+		my_nextflu.estimate_frequencies()
+	elif not params.test:
 		my_nextflu.run(**params.__dict__)

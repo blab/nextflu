@@ -48,7 +48,7 @@ def remove_outgroup(tree, outgroup):
 	"""Reroot tree to outgroup"""
 	outgroup_node = None
 	for node in tree.postorder_node_iter():
-		if (str(node.taxon) == outgroup):
+		if (str(node.taxon).lower() == outgroup.lower()):
 			outgroup_node = node
 	if outgroup_node:
 		tree.prune_subtree(outgroup_node)

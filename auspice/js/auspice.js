@@ -1022,12 +1022,13 @@ d3.json("data/meta.json", function(error, json) {
 
 d3.json("data/sequences.json", function(error, json) {
 	if (error) return console.warn(error);
-	for (var key in json) {
-		if (json.hasOwnProperty(key)) {
-			var hash = json[key];
-			cladeToSeq[hash['clade']] = hash['aa_seq'];		
-		}
-	}
+	cladeToSeq=json;
+//	for (var key in json) {
+//		if (json.hasOwnProperty(key)) {
+//			var hash = json[key];
+//			cladeToSeq[hash['clade']] = hash['aa_seq'];		
+//		}
+//	}
 });
 
 d3.json("data/frequencies.json", function(error, json){

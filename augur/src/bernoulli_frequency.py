@@ -35,10 +35,13 @@ def running_average(obs, ws):
 	obs 	--	observations
 	ws 		--	winodw size (number of points to average)
 	'''
-	tmp_vals = np.convolve(np.ones(ws, dtype=float)/ws, obs, mode='same')
-	# fix the edges. using mode='same' assumes zeros outside the range
-	tmp_vals[:ws//2]*=float(ws)/np.arange(ws//2,ws)
-	tmp_vals[-ws//2+1:]*=float(ws)/np.arange(ws-1,ws//2,-1.0)
+	try:
+		tmp_vals = np.convolve(np.ones(ws, dtype=float)/ws, obs, mode='same')
+		# fix the edges. using mode='same' assumes zeros outside the range
+		tmp_vals[:ws//2]*=float(ws)/np.arange(ws//2,ws)
+		tmp_vals[-ws//2+1:]*=float(ws)/np.arange(ws-1,ws//2,-1.0)
+	except:
+		import pdb; pdb.set_trace()
 	return tmp_vals
 
 def fix_freq(freq, pc):
