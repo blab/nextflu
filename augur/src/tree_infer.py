@@ -9,35 +9,11 @@ from io_util import *
 from tree_util import delimit_newick
 
 def cleanup():
-	for file in glob.glob("RAxML_*"):
+	for file in glob.glob("RAxML_*") + glob.glob("temp*") + ["raxml_tree.newick", "initial_tree.newick"]:
 		try:
 			os.remove(file)
 		except OSError:
 			pass
-	try:
-		os.remove("temp.fasta")
-	except OSError:
-		pass
-	try:
-		os.remove("temp.newick")
-	except OSError:
-		pass
-	try:
-		os.remove("temp.phyx")
-	except OSError:
-		pass
-	try:
-		os.remove("temp.phyx.reduced")
-	except OSError:
-		pass
-	try:
-		os.remove("raxml_tree.newick")
-	except OSError:
-		pass
-	try:
-		os.remove("initial_tree.newick")
-	except OSError:
-		pass
 
 def main(viruses, raxml_time_limit, outgroup):
 

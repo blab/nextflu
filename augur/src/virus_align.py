@@ -4,18 +4,16 @@ import os, time
 from io_util import *
 
 def update_viruses(alignment, viruses):
+	strain_to_sequence_map = {x['strain'].lower(): x['seq'] for x in alignment}
 	for v in viruses:
-		v['seq'] = next(x for x in alignment if x['strain'] == v['strain'])['seq']
+		v['seq'] = strain_to_sequence_map[v['strain'].lower()]
 
 def cleanup():
-	try:
-		os.remove('temp_in.fasta')
-	except OSError:
-		pass
-	try:
-		os.remove('temp_out.fasta')
-	except OSError:
-		pass
+	for tmp_file in ['temp_in.fasta', 'temp_out.fasta']:
+		try:
+			os.remove(tmp_file)
+		except OSError:
+			pass
 
 def main(viruses):
 
