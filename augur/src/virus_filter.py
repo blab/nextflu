@@ -116,26 +116,29 @@ class virus_filter(object):
 
 		return virus_tuples
 
-	def select_viruses(self, priority_viruses,other_viruses, y, m, viruses_per_month, regions, all_priority = False):
+	def select_viruses(self, priority_viruses, other_viruses, y, m, viruses_per_month, regions, all_priority = False):
 		'''
 		select viruses_per_month strains as evenly as possible from all regions
 		'''
 		from itertools import izip_longest
-		from random import sample
+		from random import shuffle
 		select_set = []
 		for vset in [priority_viruses, other_viruses]:
 			select_set.append([])
 			for representative in izip_longest(*[vset[(y,m,r)] for r in regions], fillvalue = None):
-				select_set[-1].extend([v for v in representative if v is not None])
+				tmp = [v for v in representative if v is not None]
+				shuffle(tmp)
+				select_set[-1].extend(tmp)
 			print "found",len(select_set[-1]), 'in year',y,'month',m
 		if all_priority:
 			n_other = max(0,viruses_per_month-len(select_set[0]))
-			return select_set[0] + sample(select_set[1], min(len(select_set[1]), n_other))
+			return select_set[0] + select_set[1][:n_other]
 		else:
 			tmp = select_set[0] + select_set[1]
-			return sample(tmp, max(len(tmp), viruses_per_month))
+			n_other = max(viruses_per_month, len(tmp[0]))
+			return tmp[:n_other]
 
-	def select_viruses_global(self, priority_viruses,other_viruses, y, m, viruses_per_month, regions, all_priority = False):
+	def select_viruses_global(self, priority_viruses, other_viruses, y, m, viruses_per_month, regions, all_priority = False):
 		'''
 		select viruses_per_month strains as evenly as possible from all regions
 		'''

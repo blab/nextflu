@@ -1,8 +1,8 @@
 config = {
 	# data source and sequence parsing/cleaning/processing
 	'virus':'H3N2',
-	'alignment_file':'data/20150222_all_H3N2_HA1.fasta',
-	'fasta_fields':{0:'strain', 1:"date", 4:"passage", -1:'accession'},
+	'alignment_file':'data/gisaid_epiflu_sequence.fasta',
+	'fasta_fields':{0:'strain', 1:'accession', 3:"passage", 5:"date"},
 	'outgroup':'A/Beijing/32/1992',
 	'force_include':'source-data/HI_strains.txt',
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
