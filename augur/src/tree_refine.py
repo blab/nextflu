@@ -142,9 +142,9 @@ def add_node_attributes(tree):
 		node.xvalue = node.distance_from_root()
 	root = tree.seed_node
 	for node in tree.postorder_node_iter():
-		node.ep = epitope_distance(translate(node.seq), translate(root.seq))
-		node.ne = nonepitope_distance(translate(node.seq), translate(root.seq))
-		node.rb = receptor_binding_distance(translate(node.seq), translate(root.seq))
+		node.ep = epitope_distance(node.aa_seq, root.aa_seq)
+		node.ne = nonepitope_distance(node.aa_seq, root.aa_seq)
+		node.rb = receptor_binding_distance(node.aa_seq, root.aa_seq)
 	for node in tree.postorder_node_iter():
 		node.trunk_count = 0
 		node.trunk = False
@@ -206,11 +206,11 @@ def main(tree, viruses, outgroup, cds = [0,-1]):
 	collapse(tree)
 	print "Ladderize tree"
 	ladderize(tree)
+	print "Translate nucleotide sequences"
+	translate_all(tree, cds)
 	print "Append node attributes"
 	add_virus_attributes(viruses, tree)
 	add_node_attributes(tree)
-	print "Translate nucleotide sequences"
-	translate_all(tree, cds)
 	print "Enumerate leaves of ladderized tree and calculate unique numerical date"
 	unique_date(tree)
 	print "Define trunk"
