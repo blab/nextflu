@@ -13,19 +13,20 @@ min_titer = 10.0
 
 def strain_name_fixing(name):
 	return name.replace(' ','').lower()
+def titer_to_number(val):
+	try:
+		if '<' in val:
+			return np.nan
+		if len(val.split())>1:
+			return float(val.split()[0])
+		else:
+			return float(val)
+	except:
+		print "Bad HI measurement:", val
+		return np.nan
 
 def parse_HI_matrix(fname):
 	import csv
-	def titer_to_number(val):
-		try:
-			if '<' in val:
-				return min_titer
-			else:
-				return float(val)
-		except:
-			print "Bad HI measurement:", val
-			return np.nan
-
 	with open(fname) as infile:
 		csv_reader = csv.reader(infile)
 
@@ -60,38 +61,33 @@ def parse_HI_matrix(fname):
 		return ref_strains, np.array(ref_matrix), test_strains, np.matrix(test_matrix)
 
 
-def normalize_HI_matrices(ref_matrix, test_matrix):
-	self_avidity = np.diag(ref_matrix)
-	norm_test_matrix = np.array(test_matrix[:,:len(self_avidity)])
-	norm_ref_matrix = np.array(ref_matrix[:,:len(self_avidity)])
-	for ai, av in enumerate(self_avidity):
-		print av
-		norm_test_matrix[:,ai] -= av
-		norm_ref_matrix[:,ai]  -= av
-
-	return -norm_ref_matrix, -norm_test_matrix
-
 def read_tables():
 	import glob
 	from itertools import product
-	flist = glob.glob('/home/richard/Projects/flu_HI_data/tables/Flu*csv')
+	flist = glob.glob('/home/richard/Projects/flu_HI_data/tables/*csv')
 	all_names = set()
 	all_measurements = defaultdict(list)
 	HI_matrices = []
 	for fname in flist:
 		ref_names, ref_matrix, test_names, test_matrix = parse_HI_matrix(fname)
-#		try:
-#			ref_matrix, test_matrix = normalize_HI_matrices(ref_matrix, test_matrix)
-#		except:
-#			continue
 		HI_matrices.append( (ref_names, ref_matrix[:,:len(ref_names)], test_names, test_matrix[:,:len(ref_names)] ))
 		all_names.update(ref_names)	
 		all_names.update(test_names)
 
 		for test, ref in product(test_names, ref_names):
-			all_measurements[(test, ref)].append(test_matrix[test_names.index(test), ref_names.index(ref)])
+			try:
+				val = test_matrix[test_names.index(test), ref_names.index(ref)]
+				if not np.isnan(val):
+					all_measurements[(test, ref)].append(val)
+			except:
+				continue
 		for ref_test, ref in product(ref_names, ref_names):
-			all_measurements[(ref_test, ref)].append(ref_matrix[ref_names.index(ref_test), ref_names.index(ref)])
+			try:
+				val = ref_matrix[ref_names.index(ref_test), ref_names.index(ref)]
+				if not np.isnan(val):
+					all_measurements[(ref_test, ref)].append(val)
+			except:
+				continue
 
 		print fname, len(all_measurements), "measurements"
 
@@ -104,9 +100,11 @@ def read_tables():
 		for row in table_reader:
 			try:
 				all_names.add(strain_name_fixing(row[1]))
-				all_measurements[(strain_name_fixing(row[1]), strain_name_fixing(row[4]))].append(float(row[6]))
+				val = titer_to_number(row[6])
+				if not np.isnan(val):
+					all_measurements[(strain_name_fixing(row[1]), strain_name_fixing(row[4]))].append(val)
 			except:
-				pass #print row
+				print row
 
 	print "grand total:", len(all_measurements), "measurements"
 	return all_names, all_measurements, HI_matrices
@@ -137,6 +135,7 @@ class HI_tree(object):
 		self.mark_HI_splits()
 
 	def normalize_HI(self):
+		consensus_func = np.max
 		self.HI_normalized = {}
 		sera = set()
 		HI_strains = set()
@@ -146,7 +145,7 @@ class HI_tree(object):
 				HI_strains.add(ref.lower())
 				if (ref,ref) in self.HI:
 					sera.add(ref)
-					normalized_val = np.log2(self.HI[(ref, ref)]).mean() - np.log2(val).mean()
+					normalized_val = consensus_func(np.log2(self.HI[(ref, ref)])) - consensus_func(np.log2(val))
 					self.HI_normalized[(test, ref)] = max(0,normalized_val)
 		self.sera = list(sera)
 		self.HI_strains = list(HI_strains)
@@ -185,7 +184,7 @@ class HI_tree(object):
 				if node.is_leaf() or sum([c.HI_info for c in node.child_nodes()])>1:
 					self.HI_split_count+=1
 
-		print "# of reference strains:",len(self.sera), "# of branches with HI contraint", self.HI_split_count
+		print "# of reference strains:",len(self.sera), "# of branches with HI constraint", self.HI_split_count
 
 	def get_path(self, v1, v2):
 		if v1 in self.names_to_clades and v2 in self.names_to_clades:
@@ -210,7 +209,7 @@ class HI_tree(object):
 		HI_dist = []
 		for (test, ref), val in self.train_HI.iteritems():
 			if not np.isnan(val):
-				if True: #try:
+				try:
 					if test != ref  and ref in self.names_to_clades \
 									and test in self.names_to_clades:
 						path = self.get_path(test, ref)
@@ -220,8 +219,8 @@ class HI_tree(object):
 						tmp[self.HI_split_count+self.sera.index(ref)] = 1
 						tree_graph.append(tmp)
 						HI_dist.append(val)
-#				except:
-#					print test, ref, "ERROR"
+				except:
+					print test, ref, "ERROR"
 
 		self.HI_dist =  np.array(HI_dist)
 		self.tree_graph= np.array(tree_graph)
@@ -324,7 +323,7 @@ class HI_tree(object):
 			plt.xlabel("measured")
 			plt.ylabel("predicted")
 			plt.xlabel("measured")
-			plt.title('reg='+str(reg)+', avg error '+str(round(np.mean(np.abs(a[:,0]-a[:,1])),3)))
+			plt.title('reg='+str(self.lam)+', avg error '+str(round(np.mean(np.abs(a[:,0]-a[:,1])),3)))
 
 
 	def predict_HI(self, virus, serum):
@@ -351,6 +350,27 @@ def plot_dHI_distribution(tree):
 	plt.legend(loc=1)
 	plt.show()
 
+def flat_HI_titers(measurements, fname = 'source-data/HI_titers.txt'):
+	with open('source-data/HI_strains.txt') as infile:
+		strains = [line.strip().lower() for line in infile]	
+	with open(fname, 'w') as outfile:
+		for (test, ref), val in measurements.iteritems():
+			if test.lower() in strains and ref.lower() in strains:
+				outfile.write(test+'\t'+ref+'\t'+'\t'.join(map(str,val))+'\n')
+
+def read_HI_titers(fname = 'source-data/HI_titers.txt'):
+	strains = set()
+	measurements = {}
+	with open(fname, 'r') as infile:
+		for line in infile:
+			entries = line.strip().split()
+			test, ref, val = entries[0], entries[1], map(float, entries[2:])
+			if len(val):
+				measurements[(test, ref)] = val
+				strains.update([test, ref])
+			else:
+				print line.strip()
+	return measurements, strains
 
 def censor_late_viruses(tree, measurements, cutoff):
 	names_to_clades = {leaf.strain.lower():leaf for leaf in tree.leaf_iter()}
@@ -369,29 +389,25 @@ def estimate_HI_to_date(tree, cutoff, reg=10):
 	HI_map.map_HI_to_tree(method = 'nnl1reg', lam=reg)
 	return HI_map
 
-def main(tree_fname = 'data/tree_ancestral.json', HI_fname='data/HI_titers.txt'):
-
+def main(tree, HI_fname='source-data/HI_titers.txt', training_fraction = 1.0, reg=5):
 	print "--- Fitting HI titers at " + time.strftime("%H:%M:%S") + " ---"
-
-	tree =  json_to_dendropy(read_json(tree_fname))
-	HI_distances = load_HI_distances(HI_fname)
+	measurements, strains = read_HI_titers(HI_fname)
+	HI_map = HI_tree(tree, measurements)
+	HI_map.map_HI_to_tree(training_fraction=training_fraction, method = 'nnl1reg', lam=reg)
+	return HI_map
 
 
 if __name__ == "__main__":
 	from Bio import Phylo
 	reg = 10
-	#tree_fname = 'data/tree_long_HI.json'
 	tree_fname = 'data/tree_refine.json'
 	tree =  json_to_dendropy(read_json(tree_fname))
-	names, measurements, tables = read_tables()
-	HI_map = HI_tree(tree, measurements)
-	HI_map.map_HI_to_tree(training_fraction=0.9, method = 'nnl1reg', lam=reg)
+	HI_map = main(tree, training_fraction=0.8, reg=reg)
 	HI_map.validate(plot=True)
-	HI_map = estimate_HI_to_date(tree, 2010)
+	plot_tree(tree)
+	plot_dHI_distribution(tree)
 
 	out_tree_fname = 'data/tree_HI.json'
 	write_json(dendropy_to_json(tree.seed_node), out_tree_fname, indent=None)
 
-	#plot_tree(tree)
-	#plot_dHI_distribution(tree)
 

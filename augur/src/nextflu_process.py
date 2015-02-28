@@ -32,6 +32,7 @@ class nextflu(object):
 			if 'force_include' in config and os.path.isfile(config['force_include']):
 				with open(config['force_include']) as force_include_file:
 					force_include_strains = [line.strip() for line in force_include_file]
+				print "found ",len(force_include_strains),"strains to include"
 			else:
 				force_include_strains = []
 		else:
