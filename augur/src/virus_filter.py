@@ -121,6 +121,7 @@ class virus_filter(object):
 		select viruses_per_month strains as evenly as possible from all regions
 		'''
 		from itertools import izip_longest
+		from random import sample
 		select_set = []
 		for vset in [priority_viruses, other_viruses]:
 			select_set.append([])
@@ -129,10 +130,10 @@ class virus_filter(object):
 			print "found",len(select_set[-1]), 'in year',y,'month',m
 		if all_priority:
 			n_other = max(0,viruses_per_month-len(select_set[0]))
-			return select_set[0] + select_set[1][:n_other]
+			return select_set[0] + sample(select_set[1], min(len(select_set[1]), n_other))
 		else:
 			tmp = select_set[0] + select_set[1]
-			return tmp[:viruses_per_month]
+			return sample(tmp, max(len(tmp), viruses_per_month))
 
 	def select_viruses_global(self, priority_viruses,other_viruses, y, m, viruses_per_month, regions, all_priority = False):
 		'''

@@ -282,6 +282,13 @@ var linkTooltip = d3.tip()
 	});
 treeplot.call(linkTooltip);
 
+//from http://jsfiddle.net/agcsi/w6g5pths/
+c3.chart.fn.update_tick_values = function(tick_values) {
+    var $$ = this.internal, config = $$.config;    
+    config.axis_x_tick_values = tick_values;                            
+    $$.redraw();
+}
+
 var gt_chart = c3.generate({
 	bindto: '#gtchart',
 	size: {width:800, height: 350},
@@ -318,6 +325,7 @@ var gt_chart = c3.generate({
 		columns: []
 	}
 });
+
 
 function rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, internals, vaccines) {
 
@@ -1028,7 +1036,14 @@ d3.json("data/sequences.json", function(error, json) {
 });
 
 d3.json("data/frequencies.json", function(error, json){
+	console.log(error);
 	var pivots= json["mutations"]["global"]["pivots"].map(function (d) {return Math.round(parseFloat(d)*100)/100;});
+	var ticks = [Math.round(pivots[0])];
+	var step = Math.round((pivots[pivots.length-1]-pivots[0])/6*10)/10;
+	while (ticks[ticks.length-1]<pivots[pivots.length-1]){
+		ticks.push(Math.round((ticks[ticks.length-1]+step)*10)/10);
+	}	
+	gt_chart.update_tick_values(ticks);
 	/**
 		parses a genotype string into region and positions
 	**/
@@ -1074,7 +1089,7 @@ d3.json("data/frequencies.json", function(error, json){
 		}else if (json["mutations"][region][gt[0]]!=undefined) {
 			for (var pi=0; pi<freq.length; pi++){
 				freq[pi]+=json["mutations"][region][gt[0]][pi];
-			}			
+			}
 		}else if (json["clades"][region][gt[0].toLowerCase()]!=undefined) {
 			for (var pi=0; pi<freq.length; pi++){
 				freq[pi]+=json["clades"][region][gt[0].toLowerCase()][pi];

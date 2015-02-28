@@ -13,11 +13,6 @@ def main(tree_json, frequencies):
 	for node in all_descendants(tree_json):
 		if "clade" in tree_json:
 			elems[node["clade"]] = node["aa_seq"]
-#		if 'clade' in node:
-#			elem['clade'] = node['clade']
-#		if 'aa_seq' in node:
-#			elem['aa_seq'] = node['aa_seq']			
-#		elems.append(elem)
 	write_json(elems, "../auspice/data/sequences.json", indent=None)
 
 	# Streamline tree for auspice
@@ -26,6 +21,11 @@ def main(tree_json, frequencies):
 		node.pop("seq", None)
 		node.pop("aa_seq", None)
 		node.pop("logit_freq", None)
+		for reg in node["freq"]:
+			try:
+				node["freq"][reg] = [round(x,3) for x in node["freq"][reg]]
+			except:
+				node["freq"][reg] = "undefined"				
 
 	out_fname_tree = "../auspice/data/tree.json"
 	write_json(tree_json, out_fname_tree, indent=None)

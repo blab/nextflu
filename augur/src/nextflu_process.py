@@ -29,7 +29,11 @@ class nextflu(object):
 		if config['virus']:
 			from H3N2_filter import H3N2_filter as virus_filter
 			fasta_fields = config['fasta_fields']
-			force_include_strains = [seq.name for seq in SeqIO.parse('data/strains_with_HI.fasta', 'fasta')]
+			if 'force_include' in config and os.path.isfile(config['force_include']):
+				with open(config['force_include']) as force_include_file:
+					force_include_strains = [line.strip() for line in force_include_file]
+			else:
+				force_include_strains = []
 		else:
 			from virus_filter import virus_filter as virus_filter
 			fasta_fields = {0:'strain'}
@@ -79,7 +83,8 @@ class nextflu(object):
 		freq_est.relevant_pos_cutoff = 0.1
 
 		if 'mutations' in tasks or 'genotypes' in tasks:
-			self.frequencies['mutations'], relevant_pos = freq_est.all_mutations(self.tree, config['aggregate_regions'], threshold = 5, plot=plot)
+			self.frequencies['mutations'], relevant_pos = freq_est.all_mutations(self.tree, config['aggregate_regions'], 
+														threshold = config['min_mutation_count'], plot=plot)
 		if 'genotypes' in tasks:
 			self.frequencies['genotypes'] = freq_est.all_genotypes(self.tree, config['aggregate_regions'], relevant_pos)
 		if 'clades' in tasks:

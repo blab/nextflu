@@ -30,8 +30,13 @@ def running_average(obs, ws):
 	try:
 		tmp_vals = np.convolve(np.ones(ws, dtype=float)/ws, obs, mode='same')
 		# fix the edges. using mode='same' assumes zeros outside the range
-		tmp_vals[:ws//2]*=float(ws)/np.arange(ws//2,ws)
-		tmp_vals[-ws//2+1:]*=float(ws)/np.arange(ws-1,ws//2,-1.0)
+		if ws%2==0:
+			tmp_vals[:ws//2]*=float(ws)/np.arange(ws//2,ws)
+			if ws//2>1:
+				tmp_vals[-ws//2+1:]*=float(ws)/np.arange(ws-1,ws//2,-1.0)
+		else:
+			tmp_vals[:ws//2]*=float(ws)/np.arange(ws//2+1,ws)
+			tmp_vals[-ws//2:]*=float(ws)/np.arange(ws,ws//2,-1.0)			
 	except:
 		import pdb; pdb.set_trace()
 	return tmp_vals
@@ -51,7 +56,7 @@ def get_extrapolation_pivots(start=None, dt=0.5):
 
 
 def logit_transform(freq):
-	return np.log(freq/(1-freq))
+	return np.log(freq/np.maximum(1e-10,(1-freq)))
 
 def logit_inv(logit_freq):
 	logit_freq[logit_freq<-20]=-20
@@ -213,10 +218,10 @@ def estimate_sub_frequencies(node, all_dates, tip_to_date_index, threshold=50, r
 	# we estimate frequencies of subclades, they will be multiplied by the 
 	# frequency of the parent node and corrected for the frequency of sister clades 
 	# already fit
-	try:
+	if node.freq[region_name] is None:
+		frequency_left=None
+	else:
 		frequency_left = np.array(node.freq[region_name])
-	except:
-		import pdb; pdb.set_trace()
 	ci=0
 	# need to resort, since the clade size order might differs after subsetting to regions
 	children_by_size = sorted(node.child_nodes(), key = lambda x:len(x.tips), reverse=True)
@@ -254,7 +259,6 @@ def estimate_sub_frequencies(node, all_dates, tip_to_date_index, threshold=50, r
 		for child in children_by_size[ci:]: # assign freqs of all remaining clades to None.
 			child.freq[region_name] = None
 			child.logit_freq[region_name] = None
-
 	# recursively repeat for subclades
 	for child in node.child_nodes():
 		estimate_sub_frequencies(child, all_dates, tip_to_date_index, threshold, region_name)
@@ -343,12 +347,15 @@ def estimate_genotype_frequency(tree, gt, time_interval=None, regions = None, re
 	tps = all_dates[leaf_order]
 	obs = np.array(observations)[leaf_order]
 	# define pivots and estimate
-	pivots = get_pivots(tps[0], tps[1])
-	fe = frequency_estimator(zip(tps, obs), pivots=pivots, 
-	               stiffness=flu_stiffness*float(len(observations))/total_leaf_count, 
-                   logit=True, verbose = 0)
-	fe.learn()
-	return fe.frequency_estimate, (tps,obs)
+	pivots = get_pivots()
+	if len(tps)>10:
+		fe = frequency_estimator(zip(tps, obs), pivots=pivots, 
+		               stiffness=flu_stiffness*float(len(observations))/total_leaf_count, 
+	                   logit=True, verbose = 0)
+		fe.learn()
+		return fe.frequency_estimate, (tps,obs)
+	else:
+		return interp1d(pivots, np.zeros_like(pivots)), (tps,obs)
 
 
 def determine_clade_frequencies(tree, clades, regions=None, plot=False):
@@ -423,37 +430,6 @@ def add_genotype_at_pos(tree, positions):
 	for node in tree.postorder_node_iter():
 		node.gt = "".join([node.aa_seq[pos] for pos in positions])
 
-
-def test():
-	import matplotlib.pyplot as plt
-	tps = np.sort(100 * np.random.uniform(size=100))
-	freq = [0.1]
-	logit = True
-	stiffness=100
-	s=-0.02
-	for dt in np.diff(tps):
-		freq.append(freq[-1]*np.exp(-s*dt)+np.sqrt(2*np.max(0,freq[-1]*(1-freq[-1]))*dt/stiffness)*np.random.normal())
-	obs = np.random.uniform(size=tps.shape)<freq
-	fe = frequency_estimator(zip(tps, obs), pivots=10, stiffness=stiffness, logit=logit)
-	fe.learn()
-	plt.figure()
-	plt.plot(tps, freq, 'o', label = 'actual frequency')
-	freq = fe.frequency_estimate(fe.tps)
-	if logit: freq = logit_inv(freq)
-	plt.plot(fe.tps, freq, '-', label='interpolation')
-	plt.plot(tps, (2*obs-1)*0.05, 'o')
-	plt.plot(tps[obs], 0.05*np.ones(np.sum(obs)), 'o', c='r', label = 'observations')
-	plt.plot(tps[~obs], -0.05*np.ones(np.sum(1-obs)), 'o', c='g')
-	plt.plot(tps, np.zeros_like(tps), 'k')
-	ws=20
-	r_avg = running_average(obs, ws)
-	plt.plot(fe.tps[ws/2:-ws/2+1], np.convolve(np.ones(ws, dtype=float)/ws, obs, mode='valid'), 'r', label = 'running avg')
-	plt.plot(fe.tps, r_avg, 'k', label = 'running avg')
-	plt.legend(loc=2)
-
-
-
-
 def all_mutations(tree, region_list, threshold = 5, plot=False):
 	import matplotlib.pyplot as plt
 	mutation_frequencies = {}
@@ -487,6 +463,9 @@ def all_genotypes(tree, region_list, relevant_pos):
 	total_leaf_count = len(tree.leaf_nodes())
 	gt_counts = defaultdict(int)
 	gt_frequencies = {}
+	# TODO: determine the number of relevant 2,3..mutation genotypes as in 159F/225D
+	# TODO: for each such genotype above a cut-off, calculate frequency trajectories
+	# TODO: this is completely analoguous to mutations, just 
 	for node in tree.leaf_iter():
 		gt_counts[reduce_genotype(node.aa_seq, relevant_pos)]+=1
 	for region_label, regions in region_list:
@@ -521,6 +500,34 @@ def all_clades(tree, clades, region_list, plot=False):
 			plt.grid()
 			plt.savefig('data/clade_frequencies_'+region_label+'.pdf')
 	return clade_frequencies
+
+
+def test():
+	import matplotlib.pyplot as plt
+	tps = np.sort(100 * np.random.uniform(size=100))
+	freq = [0.1]
+	logit = True
+	stiffness=100
+	s=-0.02
+	for dt in np.diff(tps):
+		freq.append(freq[-1]*np.exp(-s*dt)+np.sqrt(2*np.max(0,freq[-1]*(1-freq[-1]))*dt/stiffness)*np.random.normal())
+	obs = np.random.uniform(size=tps.shape)<freq
+	fe = frequency_estimator(zip(tps, obs), pivots=10, stiffness=stiffness, logit=logit)
+	fe.learn()
+	plt.figure()
+	plt.plot(tps, freq, 'o', label = 'actual frequency')
+	freq = fe.frequency_estimate(fe.tps)
+	if logit: freq = logit_inv(freq)
+	plt.plot(fe.tps, freq, '-', label='interpolation')
+	plt.plot(tps, (2*obs-1)*0.05, 'o')
+	plt.plot(tps[obs], 0.05*np.ones(np.sum(obs)), 'o', c='r', label = 'observations')
+	plt.plot(tps[~obs], -0.05*np.ones(np.sum(1-obs)), 'o', c='g')
+	plt.plot(tps, np.zeros_like(tps), 'k')
+	ws=20
+	r_avg = running_average(obs, ws)
+	plt.plot(fe.tps[ws/2:-ws/2+1], np.convolve(np.ones(ws, dtype=float)/ws, obs, mode='valid'), 'r', label = 'running avg')
+	plt.plot(fe.tps, r_avg, 'k', label = 'running avg')
+	plt.legend(loc=2)
 
 def main(tree_fname = 'data/tree_refine.json', clades=None, clades_freq = True, mutation_freq = True, tree_freq = True):
 	# load tree
