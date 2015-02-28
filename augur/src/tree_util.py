@@ -123,7 +123,7 @@ def dendropy_to_json(node, extra_attr = ['ep', 'ne', 'rb','tol', 'fitness', 'ser
 
 	try:
 		if hasattr(node, 'freq') and node.freq is not None:
-			json['freq'] = {reg: [round(x, 3) for x in freq]  if freq is not None else "undefined" for reg, freq in node.freq.iteritems()}		
+			json['freq'] = {reg: [round(x, 3) for x in freq] if freq is not None else "undefined" for reg, freq in node.freq.iteritems()}		
 		if hasattr(node, 'logit_freq') and node.logit_freq is not None:
 			json['logit_freq'] = {reg: [round(x,3) for x in freq]  if freq is not None else "undefined" for reg, freq in node.logit_freq.iteritems()}
 		if hasattr(node, 'pivots'):
@@ -172,7 +172,10 @@ def json_to_dendropy_sub(json, node, taxon_set):
 			try:
 				node.__setattr__(attr, float(val))
 			except:
-				node.__setattr__(attr, val)
+				if val=='undefined':
+					node.__setattr__(attr, None)
+				else:
+					node.__setattr__(attr, val)
 	if len(node.child_nodes())==0:
 		node.taxon = dendropy.Taxon(label=json['strain'].lower())
 		node.strain = json['strain']

@@ -9,35 +9,11 @@ from io_util import *
 from tree_util import delimit_newick
 
 def cleanup():
-	for file in glob.glob("RAxML_*"):
+	for file in glob.glob("RAxML_*") + glob.glob("temp*") + ["raxml_tree.newick", "initial_tree.newick"]:
 		try:
 			os.remove(file)
 		except OSError:
 			pass
-	try:
-		os.remove("temp.fasta")
-	except OSError:
-		pass
-	try:
-		os.remove("temp.newick")
-	except OSError:
-		pass
-	try:
-		os.remove("temp.phyx")
-	except OSError:
-		pass
-	try:
-		os.remove("temp.phyx.reduced")
-	except OSError:
-		pass
-	try:
-		os.remove("raxml_tree.newick")
-	except OSError:
-		pass
-	try:
-		os.remove("initial_tree.newick")
-	except OSError:
-		pass
 
 def main(viruses, raxml_time_limit, outgroup):
 
@@ -52,9 +28,9 @@ def main(viruses, raxml_time_limit, outgroup):
 	tree.resolve_polytomies()
 	tree.write_to_path("initial_tree.newick", "newick")
 
+	os.system("seqmagick convert temp.fasta temp.phyx")
 	if raxml_time_limit>0:
 		print "RAxML tree optimization with time limit " + str(raxml_time_limit) + " hours"
-		os.system("seqmagick convert temp.fasta temp.phyx")
 		# using exec to be able to kill process
 		end_time = time.time() + int(raxml_time_limit*3600)
 		process = subprocess.Popen("exec raxml -f d -T 6 -j -s temp.phyx -n topology -c 25 -m GTRCAT -p 344312987 -t initial_tree.newick", shell=True)
