@@ -234,7 +234,8 @@ class ancestral_sequences:
 		self.calc_marginal_probabilities(self.T.seed_node)
 		print "--- Most likely nucleotides at " + time.strftime("%H:%M:%S") + " ---"
 		self.calc_most_likely_sequences(self.T.seed_node)
-
+		self.cleanup_tree()
+		
 	
 	def cleanup_tree(self, attrnames=['prob', 'down_message', 'up_message']):
 		'''Clean up pollution attributes of leaves'''

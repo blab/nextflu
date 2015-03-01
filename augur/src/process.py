@@ -4,18 +4,20 @@ from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 import dendropy
 from tree_util import delimit_newick
-from StringIO import StringIO
-from itertools import izip
 import numpy as np
 
 class process(object):
 	"""generic template class for processing virus sequences into trees"""
 	def __init__(self, tree_fname = 'data/tree.pkl', virus_fname = 'data/virus.pkl', 
-				frequency_fname = 'data/frequency.pkl', min_freq = 0.01, **kwargs):
+				frequency_fname = 'data/frequency.pkl', auspice_frequency_fname ='../auspice/data/frequencies.json',
+				auspice_sequences_fname='../auspice/data/sequences.json', auspice_tree_fname='../auspice/data/tree.json', min_freq = 0.01, **kwargs):
 		self.tree_fname = tree_fname
 		self.virus_fname = virus_fname
 		self.frequency_fname = frequency_fname
 		self.min_freq = min_freq
+		self.auspice_tree_fname = auspice_tree_fname
+		self.auspice_sequences_fname = auspice_sequences_fname
+		self.auspice_frequency_fname = auspice_frequency_fname
 
 	def dump(self):
 		import cPickle
@@ -40,6 +42,44 @@ class process(object):
 		if os.path.isfile(self.frequency_fname):
 			with open(self.frequency_fname, 'r') as infile:
 				self.frequencies = cPickle.load(infile)
+
+	def export_to_auspice(self, tree_fields = [], tree_pop_list = []):
+		from tree_util import dendropy_to_json, all_descendants
+		from io_util import write_json, read_json
+		print "--- Streamline at " + time.strftime("%H:%M:%S") + " ---"
+		# Move sequence data to separate file
+		print "Writing sequences"
+		elems = {}
+		for node in self.tree:
+			if hasattr(node,"clade"):
+				elems[node.clade] = node.aa_seq
+		write_json(elems, self.auspice_sequences_fname, indent=None)
+
+		print "writing tree"
+		self.tree_json = dendropy_to_json(self.tree.seed_node, tree_fields)
+		for node in all_descendants(self.tree_json):
+			for attr in tree_pop_list:
+				if attr in node:
+					node.pop(attr, None)
+			if "freq" in node:
+				for reg in node["freq"]:
+					try:
+						node["freq"][reg] = [round(x,3) for x in node["freq"][reg]]
+					except:
+						node["freq"][reg] = "undefined"				
+
+		write_json(self.tree_json, self.auspice_tree_fname, indent=None)
+		try:
+			read_json(self.auspice_tree_fname)
+		except:
+			print "Read failed, rewriting with indents"	
+			write_json(self.tree_json, self.auspice_tree_fname, indent=1)
+			
+		# Include genotype frequencies
+		if hasattr(self, 'frequencies'):
+			write_json(self.frequencies, self.auspice_frequency_fname)
+
+
 
 	def align(self):
 		'''

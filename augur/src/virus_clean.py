@@ -7,7 +7,6 @@ from Bio.Align import MultipleSeqAlignment
 from Bio.Seq import Seq
 from scipy import stats
 import numpy as np
-from io_util import *
 
 class virus_clean(object):
 	"""docstring for virus_clean"""

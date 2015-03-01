@@ -22,6 +22,7 @@ virus_config = {
 	'force_include':'source-data/HI_strains.txt',
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
 	'cds':[48,-1], # define the HA1 start i n 0 numbering
+	'n_std':3,     # standard deviations from clock
 
 	# frequency estimation parameters
 	'aggregate_regions': [  ("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
@@ -42,6 +43,10 @@ virus_config = {
 
 class H3N2_filter(flu_filter):
 	def __init__(self,min_length = 987, **kwargs):
+		'''
+		parameters
+		min_length  -- minimal length for a sequence to be acceptable
+		'''
 		self.min_length = min_length
 		flu_filter.__init__(self, **kwargs)
 		self.vaccine_strains =[
@@ -251,6 +256,8 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 		print "--- Tree refine at " + time.strftime("%H:%M:%S") + " ---"
 		self.refine()
 
+		self.export_to_auspice()
+
 
 if __name__=="__main__":
 	parser = argparse.ArgumentParser(description='Process virus sequences, build tree, and prepare of web visualization')
@@ -264,7 +271,10 @@ if __name__=="__main__":
 	parser.add_argument('--frequencies', default = False, action="store_true",  help ="only estimate frequencies")
 	params = parser.parse_args()
 	params.cds = (48,None)
+
+	# add all arguments to virus_config (possibly overriding)
 	virus_config.update(params.__dict__)
+	# pass all these arguments to the processor: will be passed down as kwargs through all classes
 	myH3N2 = H3N2_process(**virus_config) 
 	if params.test:
 		myH3N2.load()

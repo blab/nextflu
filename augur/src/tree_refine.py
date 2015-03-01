@@ -3,10 +3,8 @@
 
 import os, re, time
 import dendropy
-from io_util import *
 from seq_util import *
 from date_util import *
-from tree_util import *
 
 class tree_refine(object):
 	def __init__(self,cds = (0,None), max_length = 0.01, dt=1, **kwargs):

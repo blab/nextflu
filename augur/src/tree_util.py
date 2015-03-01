@@ -103,10 +103,10 @@ def get_dates(node):
 	"""Return ordered list of dates of descendants of a node"""
 	return sorted([n['date'] for n in node.leaf_iter()])
 
-def dendropy_to_json(node, extra_attr = ['ep', 'ne', 'rb','tol', 'fitness', 'serum', 'dHI', 'cHI', 'HI_info']):
+def dendropy_to_json(node, extra_attr = []):
 	json = {}
-	str_attr = ['country','region','seq','aa_seq','clade','strain', 'date']
-	num_attr = ['xvalue', 'yvalue', 'num_date', 'tip_index']
+	str_attr = ['country','region','clade','strain', 'date']
+	num_attr = ['xvalue', 'yvalue', 'num_date']
 	for prop in str_attr:
 		if hasattr(node, prop):
 			json[prop] = node.__getattribute__(prop)
@@ -121,21 +121,15 @@ def dendropy_to_json(node, extra_attr = ['ep', 'ne', 'rb','tol', 'fitness', 'ser
 			if hasattr(node, prop):
 				json[prop] = node.__getattribute__(prop)
 
-	try:
-		if hasattr(node, 'freq') and node.freq is not None:
-			json['freq'] = {reg: [round(x, 3) for x in freq] if freq is not None else "undefined" for reg, freq in node.freq.iteritems()}		
-		if hasattr(node, 'logit_freq') and node.logit_freq is not None:
-			json['logit_freq'] = {reg: [round(x,3) for x in freq]  if freq is not None else "undefined" for reg, freq in node.logit_freq.iteritems()}
-		if hasattr(node, 'pivots'):
-			json['pivots'] = [round(x,3) for x in node.pivots]
-		if hasattr(node, 'virus_count'):
-			json['virus_count'] = {reg: [round(x,3) for x in vc[0]]  if vc is not None else "undefined" for reg, vc in node.virus_count.iteritems()}
-	except:
-		import pdb; pdb.set_trace()
+	if hasattr(node, 'freq') and node.freq is not None:
+		json['freq'] = {reg: list(freq) if freq is not None else "undefined" for reg, freq in node.freq.iteritems()}
+	if hasattr(node, 'pivots'):
+		json['pivots'] = list(node.pivots)
+
 	if node.child_nodes():
 		json["children"] = []
 		for ch in node.child_nodes():
-			json["children"].append(dendropy_to_json(ch))
+			json["children"].append(dendropy_to_json(ch, extra_attr))
 	return json
 
 def json_to_dendropy(json):

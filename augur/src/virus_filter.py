@@ -33,7 +33,7 @@ class virus_filter(object):
 			self.filter_length(self.min_length)
 			print len(self.viruses), "after filtering by length >=", self.min_length
 
-		self.filter_date(date_spec)
+		self.filter_date()
 		print len(self.viruses), "after filtering for precise dates"
 		self.sort_length()
 		if prepend_strains is not None:
@@ -65,7 +65,7 @@ class virus_filter(object):
 	def filter_length(self, min_length):
 		self.viruses = filter(lambda v: len(v['seq']) >= min_length, self.viruses)
 
-	def filter_date(self, date_spec):
+	def filter_date(self):
 		if self.date_spec=='full':
 			self.viruses = filter(lambda v: re.match(r'\d\d\d\d-\d\d-\d\d', v['date']) != None, self.viruses)
 		elif self.date_spec=='year':
