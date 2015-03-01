@@ -11,8 +11,12 @@ from io_util import *
 
 class virus_clean(object):
 	"""docstring for virus_clean"""
-	def __init__(self):
-		pass
+	def __init__(self,n_std  = 5, **kwargs):
+		'''
+		parameters
+		n_std	-- number of standard deviations accepted in molecular clock filter 
+		'''
+		self.n_std = n_std
 
 	def remove_insertions(self):
 		outgroup_ok = np.array(self.sequence_lookup[self.outgroup['strain']])!='-'
@@ -43,7 +47,7 @@ class virus_clean(object):
 		outgroup_seq = self.sequence_lookup[self.outgroup['strain']].seq
 		return np.array([hamming_distance(x.seq, outgroup_seq) for x in self.viruses])
 
-	def clean_distances(self, n_std = 5):
+	def clean_distances(self):
 		"""Remove viruses that don't follow a loose clock """
 		times = self.times_from_outgroup()
 		distances = self.distance_from_outgroup()
@@ -56,7 +60,7 @@ class virus_clean(object):
 			print "\tresiduals sd: " + str(r_sd)
 		new_viruses = []
 		for (v,r) in izip(self.viruses,residuals):		# filter viruses more than 5 sds up or down
-			if np.abs(r)<n_std * r_sd or v.id == self.outgroup["strain"]:
+			if np.abs(r)<self.n_std * r_sd or v.id == self.outgroup["strain"]:
 				new_viruses.append(v)
 			else:
 				if self.verbose>1:

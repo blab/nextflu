@@ -9,10 +9,22 @@ from date_util import *
 from tree_util import *
 
 class tree_refine(object):
-	def __init__(self,cds = (0,None), **kwargs):
-		self.cds = cds
+	def __init__(self,cds = (0,None), max_length = 0.01, dt=1, **kwargs):
+		'''
+		parameters:
+		cds 		-- coding region		
+		max_length  -- maximal lenght of external branches
+		dt 			-- time interval used to define the trunk of the tree
+		'''
+		self.cds = cds 
+		self.max_length = max_length
+		self.dt = dt
 
 	def refine_generic(self):
+		'''
+		run through the generic refining methods, 
+		will add strain attributes to nodes and translate the sequences -> produces aa_aln
+		'''
 		self.node_lookup = {node.taxon.label:node for node in self.tree.leaf_iter()}
 		self.remove_outgroup()
 		self.ladderize()
@@ -51,13 +63,13 @@ class tree_refine(object):
 				if edge.is_internal() and edge.head_node.seq==edge.tail_node.seq:
 					edge.collapse()
 
-	def reduce(self, max_length =0.01):
+	def reduce(self):
 		"""
 		Remove outlier tips
 		Remove internal nodes left as orphan tips
 		"""
 		for node in self.tree.postorder_node_iter():
-			if node.edge_length > max_length and node.is_leaf():
+			if node.edge_length > self.max_length and node.is_leaf():
 				parent = node.parent_node
 				parent.remove_child(node)
 		for node in self.tree.postorder_node_iter():
@@ -108,9 +120,10 @@ class tree_refine(object):
 				for attr in ['strain', 'date', 'accession', 'num_date', 'db', 'region', 'country']:
 					node.__setattr__(attr, v.__getattribute__(attr))
 
-	def define_trunk(self, dt = 1):
+	def define_trunk(self, dt = None):
 		"""Trace current lineages backward to define trunk"""
-
+		if dt is None:
+			dt = self.dt
 		# Find most recent tip
 		most_recent_date = -1e10
 		for node in self.tree.leaf_iter():

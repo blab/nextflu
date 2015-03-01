@@ -29,19 +29,21 @@ virus_config = {
 	'frequency_stiffness':10.0,
 	'time_interval':(2012.0, 2015.1),
 	'pivots_per_year':12.0,
-	'min_mutation_count':10,
+	'min_freq':10,
 	# define relevant clades in canonical HA1 numbering (+1)
 	'clade_designations': { "3c3.a":[(128,'A'), (142,'G'), (159,'S')],
 						   "3c3":  [(128,'A'), (142,'G'), (159,'F')],
 						   "3c2.a":[(144,'S'), (159,'Y'), (225,'D'), (311,'H'),(489,'N')],
 						   "3c2":  [(144,'N'), (159,'F'),(225,'N'), (489,'N')]
-							}
+							},
+	'verbose':1
 }
 
 
 class H3N2_filter(flu_filter):
-	def __init__(self,**kwargs):
-		flu_filter.__init__(self, virus_config['alignment_file'], virus_config['fasta_fields'], **kwargs)
+	def __init__(self,min_length = 987, **kwargs):
+		self.min_length = min_length
+		flu_filter.__init__(self, **kwargs)
 		self.vaccine_strains =[
 				{ 
 					"strain": "A/Wisconsin/67/2005",
@@ -100,7 +102,7 @@ class H3N2_filter(flu_filter):
 
 class H3N2_clean(virus_clean):
 	def __init__(self,**kwargs):
-		pass
+		virus_clean.__init__(self, **kwargs)
 
 	def clean_outbreaks(self):
 		"""Remove duplicate strains, where the geographic location, date of sampling and sequence are identical"""
@@ -262,8 +264,9 @@ if __name__=="__main__":
 	parser.add_argument('--frequencies', default = False, action="store_true",  help ="only estimate frequencies")
 	params = parser.parse_args()
 	params.cds = (48,None)
-	myH3N2 = H3N2_process(**params.__dict__) 
+	virus_config.update(params.__dict__)
+	myH3N2 = H3N2_process(**virus_config) 
 	if params.test:
 		myH3N2.load()
 	else:
-		myH3N2.run(**params.__dict__)
+		myH3N2.run(**virus_config)

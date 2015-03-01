@@ -11,21 +11,27 @@ from collections import defaultdict
 
 class virus_filter(object):
 
-	def __init__(self,viruses=None, **kwargs):
+	def __init__(self,viruses=None, date_spec='full', **kwargs):
+		'''
+		parameters:
+		viruses    -- a list of virses. dict structures as of now
+		date_spec  -- if 'full', dates with day are required, if 'year', only year is accepted
+		'''
 		if viruses is None: viruses=[]
 		self.viruses = viruses
 		self.strain_lookup = {}
 		self.outgroup = None
+		self.date_spec = date_spec
 
-	def filter_generic(self, min_length=None, date_spec = 'full', prepend_strains = None):
+	def filter_generic(self, prepend_strains = None):
 		'''
 		filter viruses by length and accurate date, sort, add additioanl strains such
 		as vaccine strains that are preferentially retained and prune to unique strains
 		'''
 		print len(self.viruses), "initial viruses"
-		if min_length is not None:
-			self.filter_length(min_length)
-			print len(self.viruses), "after filtering by length >=", min_length
+		if hasattr(self, 'min_length'):
+			self.filter_length(self.min_length)
+			print len(self.viruses), "after filtering by length >=", self.min_length
 
 		self.filter_date(date_spec)
 		print len(self.viruses), "after filtering for precise dates"
@@ -60,9 +66,9 @@ class virus_filter(object):
 		self.viruses = filter(lambda v: len(v['seq']) >= min_length, self.viruses)
 
 	def filter_date(self, date_spec):
-		if date_spec=='full':
+		if self.date_spec=='full':
 			self.viruses = filter(lambda v: re.match(r'\d\d\d\d-\d\d-\d\d', v['date']) != None, self.viruses)
-		elif date_spec=='year':
+		elif self.date_spec=='year':
 			self.viruses = filter(lambda v: re.match(r'\d\d\d\d', v['date']) != None, self.viruses)
 
 	def subsample(self, years_back, viruses_per_month, prioritize = None, all_priority=False, region_specific = True):
@@ -157,12 +163,13 @@ class virus_filter(object):
 
 class flu_filter(virus_filter):
 
-	def __init__(self,fasta_fname, fasta_header=None, **kwargs):
-		if fasta_header is None:
-			self.fasta_header = {0:'strain', 1:'accession', 3:'passage', 5:'date' }
+	def __init__(self, alignment_file='', fasta_fields=None, **kwargs):
+		if fasta_fields is None:
+			self.fasta_fields = {0:'strain', 1:'accession', 3:'passage', 5:'date' }
 		else:
-			self.fasta_header = fasta_header
-		viruses = self.parse_gisaid(fasta_fname)
+			self.fasta_fields = fasta_fields
+		self.alignment_file = alignment_file
+		viruses = self.parse_gisaid(self.alignment_file)
 		virus_filter.__init__(self, viruses, **kwargs)
 		self.fix_strain_names()
 		self.vaccine_strains=[]
@@ -177,7 +184,7 @@ class flu_filter(virus_filter):
 		else:
 			for record in SeqIO.parse(handle, "fasta"):
 				words = record.description.replace(">","").replace(" ","").split('|')
-				v = {key:words[ii] for ii, key in self.fasta_header.iteritems()}
+				v = {key:words[ii] for ii, key in self.fasta_fields.iteritems()}
 				v['db']="GISAID"
 				v['seq']= str(record.seq)
 				if 'passage' not in v: v['passage']=''

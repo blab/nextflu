@@ -11,10 +11,11 @@ import numpy as np
 class process(object):
 	"""generic template class for processing virus sequences into trees"""
 	def __init__(self, tree_fname = 'data/tree.pkl', virus_fname = 'data/virus.pkl', 
-				frequency_fname = 'data/frequency.pkl',**kwargs):
+				frequency_fname = 'data/frequency.pkl', min_freq = 0.01, **kwargs):
 		self.tree_fname = tree_fname
 		self.virus_fname = virus_fname
 		self.frequency_fname = frequency_fname
+		self.min_freq = min_freq
 
 	def dump(self):
 		import cPickle
@@ -41,6 +42,10 @@ class process(object):
 				self.frequencies = cPickle.load(infile)
 
 	def align(self):
+		'''
+		aligns viruses using mafft. produces temporary files and deletes those at the end
+		after this step, self.viruses is a BioPhython multiple alignment object
+		'''
 		SeqIO.write([SeqRecord(Seq(v['seq']), id=v['strain']) for v in self.viruses], "temp_in.fasta", "fasta")
 		os.system("mafft --nofft temp_in.fasta > temp_out.fasta")
 		aln = AlignIO.read('temp_out.fasta', 'fasta')
@@ -57,6 +62,10 @@ class process(object):
 		self.viruses = aln
 
 	def infer_tree(self, raxml_time_limit):
+		'''
+		builds a tree from the alignment using fasttree and RAxML. raxml runs for 
+		raxml_time_limit and is terminated thereafter. raxml_time_limit can be 0.
+		'''
 		def cleanup():
 			for file in glob.glob("RAxML_*") + glob.glob("temp*") + ["raxml_tree.newick", "initial_tree.newick"]:
 				try:
@@ -110,12 +119,6 @@ class process(object):
 		from tree_ancestral import ancestral_sequences
 		anc_seq = ancestral_sequences(self.tree, self.viruses,seqtype='str')
 		anc_seq.calc_ancestral_sequences()
-		# copy the inferred sequences into the  biopython tree
-#		for node, anc_node in izip(self.tree.postorder_internal_node_iter(), anc_seq.T.get_nonterminals(order='postorder')):
-#			node.seq = anc_node.seq
-#		for node, anc_node in izip(self.tree.leaf_iter(), anc_seq.T.get_terminals()):
-#			node.seq = anc_node.seq
-
 
 	def temporal_regional_statistics(self):
 		'''
@@ -140,7 +143,7 @@ class process(object):
 		self.regions = sorted(regions)
 		self.region_totals = {reg:sum(val[reg] for val in self.date_region_count.values()) for reg in self.regions}
 
-	def determine_variable_positions(self, min_freq = 0.01):
+	def determine_variable_positions(self):
 		'''
 		calculates nucleoties_frequencies and aa_frequencies at each position of the alignment
 		also computes consensus sequences and position at which the major allele is at less than 1-min_freq
@@ -156,7 +159,7 @@ class process(object):
 		for ni,nuc in enumerate(self.nuc_alphabet):
 			self.nucleoties_frequencies[ni,:]=(aln_array==nuc).mean(axis=0)
 
-		self.variable_nucleotides = np.where(np.max(self.nucleoties_frequencies,axis=0)<1.0-min_freq)[0]
+		self.variable_nucleotides = np.where(np.max(self.nucleoties_frequencies,axis=0)<1.0-self.min_freq)[0]
 		self.consensus_nucleotides = "".join(np.fromstring(self.nuc_alphabet, 'S1')[np.argmax(self.nucleoties_frequencies,axis=0)])
 
 		if hasattr(self, 'aa_aln'):
@@ -166,5 +169,5 @@ class process(object):
 			for ai,aa in enumerate(self.aa_alphabet):
 				self.aa_frequencies[ai,:]=(aln_array==aa).mean(axis=0)
 
-			self.variable_aa = np.where(np.max(self.aa_frequencies,axis=0)<1.0-min_freq)[0]
+			self.variable_aa = np.where(np.max(self.aa_frequencies,axis=0)<1.0-self.min_freq)[0]
 			self.consensus_aa = "".join(np.fromstring(self.aa_alphabet, 'S1')[np.argmax(self.aa_frequencies,axis=0)])
