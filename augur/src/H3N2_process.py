@@ -255,6 +255,8 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 		if self.force_include is not None and os.path.isfile(self.force_include):
 			with open(self.force_include) as infile:
 				forced_strains = [line.strip().lower() for line in infile]
+		else:
+			forced_strains = []
 		self.subsample(years_back, viruses_per_month, 
 			prioritize=forced_strains, all_priority=self.force_include_all, 
 			region_specific = self.max_global)
