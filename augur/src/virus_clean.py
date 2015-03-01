@@ -18,18 +18,31 @@ class virus_clean(object):
 		self.n_std = n_std
 
 	def remove_insertions(self):
+		'''
+		remove all columns from the alignment in which the outgroup is gapped
+		'''
 		outgroup_ok = np.array(self.sequence_lookup[self.outgroup['strain']])!='-'
 		for seq in self.viruses:
 			seq.seq = Seq("".join(np.array(seq.seq)[outgroup_ok]).upper())
 
 	def clean_gaps(self):
+		'''
+		remove viruses with gaps -- not part of the standard pipeline
+		'''
 		self.viruses = filter(lambda x: '-' in x.seq, self.viruses)
 
 	def clean_ambiguous(self):
+		'''
+		substitute all ambiguous characters with '-', 
+		ancestral inference will interpret this as missing data
+		'''
 		for v in self.viruses:
 			v.seq = Seq(re.sub(r'[BDEFHIJKLMNOPQRSUVWXYZ]', '-',str(v.seq)))
 
 	def unique_date(self):
+		'''
+		add a unique numerical date to each leaf. uniqueness is achieved adding a small number
+		'''
 		from date_util import numerical_date
 		og = self.sequence_lookup[self.outgroup['strain']]
 		og.num_date = numerical_date(og.date)
@@ -51,14 +64,15 @@ class virus_clean(object):
 		times = self.times_from_outgroup()
 		distances = self.distance_from_outgroup()
 		slope, intercept, r_value, p_value, std_err = stats.linregress(times, distances)
-		residuals = slope*times - distances
+		residuals = slope*times + intercept - distances
 		r_sd = residuals.std()
 		if self.verbose:
 			print "\tslope: " + str(slope)
 			print "\tr: " + str(r_value)
 			print "\tresiduals sd: " + str(r_sd)
 		new_viruses = []
-		for (v,r) in izip(self.viruses,residuals):		# filter viruses more than 5 sds up or down
+		for (v,r) in izip(self.viruses,residuals):
+			# filter viruses more than n_std standard devitations up or down
 			if np.abs(r)<self.n_std * r_sd or v.id == self.outgroup["strain"]:
 				new_viruses.append(v)
 			else:

@@ -11,7 +11,7 @@ class tree_refine(object):
 		'''
 		parameters:
 		cds 		-- coding region		
-		max_length  -- maximal lenght of external branches
+		max_length  -- maximal length of external branches
 		dt 			-- time interval used to define the trunk of the tree
 		'''
 		self.cds = cds 

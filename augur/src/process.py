@@ -3,14 +3,16 @@ from Bio import SeqIO, AlignIO,Phylo
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 import dendropy
+from bernoulli_frequency import virus_frequencies
 from tree_util import delimit_newick
 import numpy as np
 
-class process(object):
+class process(virus_frequencies):
 	"""generic template class for processing virus sequences into trees"""
 	def __init__(self, tree_fname = 'data/tree.pkl', virus_fname = 'data/virus.pkl', 
 				frequency_fname = 'data/frequency.pkl', auspice_frequency_fname ='../auspice/data/frequencies.json',
 				auspice_sequences_fname='../auspice/data/sequences.json', auspice_tree_fname='../auspice/data/tree.json', min_freq = 0.01, **kwargs):
+		virus_frequencies.__init__(self, **kwargs)
 		self.tree_fname = tree_fname
 		self.virus_fname = virus_fname
 		self.frequency_fname = frequency_fname
@@ -78,6 +80,17 @@ class process(object):
 		# Include genotype frequencies
 		if hasattr(self, 'frequencies'):
 			write_json(self.frequencies, self.auspice_frequency_fname)
+
+		# Write out metadata
+		print "Writing out metadata"
+		meta = {"updated": time.strftime("X%d %b %Y").replace('X0','X').replace('X','')}
+		if hasattr(self,"viruses_by_date_and_region"):
+			meta["regions"] = self.regions
+			meta["virus_stats"] = [ [str(y)+'-'+str(m)] + [row[reg] for reg in self.regions]
+									for y,m in sorted(self.viruses_by_date_and_region) ]
+		meta_fname = "../auspice/data/meta.json"
+		write_json(meta, meta_fname, indent=1)
+
 
 	def align(self):
 		'''
@@ -211,26 +224,11 @@ class process(object):
 			self.consensus_aa = "".join(np.fromstring(self.aa_alphabet, 'S1')[np.argmax(self.aa_frequencies,axis=0)])
 
 	def estimate_frequencies(self, tasks = ['mutations','genotypes', 'clades', 'tree']):
-		import bernoulli_frequency as freq_est
-		plot=False
-		freq_est.flu_stiffness = config['frequency_stiffness']
-		freq_est.time_interval = config['time_interval']
-		freq_est.pivots_per_year = config['pivots_per_year']
-		freq_est.relevant_pos_cutoff = 0.1
-
-		if 'mutations' in tasks or 'genotypes' in tasks:
-			self.frequencies['mutations'], relevant_pos = freq_est.all_mutations(self.tree, config['aggregate_regions'], 
-														threshold = config['min_mutation_count'], plot=plot)
+		if 'mutations' in tasks:
+			self.all_mutation_frequencies() 
 		if 'genotypes' in tasks:
-			self.frequencies['genotypes'] = freq_est.all_genotypes(self.tree, config['aggregate_regions'], relevant_pos)
+			self.all_genotypes_frequencies() 
 		if 'clades' in tasks:
-			self.frequencies['clades'] = freq_est.all_clades(self.tree, config['clade_designations'], 
-															config['aggregate_regions'], plot)
-		if any(x in tasks for x in ['mutations','clades', 'genotypes']):
-			write_json(self.frequencies, self.frequency_fname)
-
+			self.all_clade_frequencies() 
 		if 'tree' in tasks:
-			for region_label, regions in config['aggregate_regions']:
-				print "--- "+"adding frequencies to tree "+region_label+ " "  + time.strftime("%H:%M:%S") + " ---"
-				freq_est.estimate_tree_frequencies(self.tree, threshold = 10, regions=regions, region_name=region_label)
-
+			self.all_tree_frequencies() 

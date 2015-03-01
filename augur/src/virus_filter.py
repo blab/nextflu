@@ -3,11 +3,10 @@
 #  - viruses with exact dates
 #  - viruses that are not egg-passaged
 #  - a single sequence per virus strain, taken as first sequence in list
-# outputs to virus_filter.json
 
 import os, re, time, datetime, csv, sys
-from io_util import *
 from collections import defaultdict
+from Bio import SeqIO
 
 class virus_filter(object):
 

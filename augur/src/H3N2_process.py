@@ -22,7 +22,7 @@ virus_config = {
 	'force_include':'source-data/HI_strains.txt',
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
 	'cds':[48,-1], # define the HA1 start i n 0 numbering
-	'n_std':3,     # standard deviations from clock
+	'n_std':5,     # standard deviations from clock
 
 	# frequency estimation parameters
 	'aggregate_regions': [  ("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
@@ -37,7 +37,11 @@ virus_config = {
 						   "3c2.a":[(144,'S'), (159,'Y'), (225,'D'), (311,'H'),(489,'N')],
 						   "3c2":  [(144,'N'), (159,'F'),(225,'N'), (489,'N')]
 							},
-	'verbose':1
+	'verbose':2, 
+	'tol':1e-3, #tolerance for frequency optimization
+	'pc':1e-3, #pseudocount for frequencies 
+	'extra_pivots': 6,  # number of pivot point for or after the last observations of a mutations
+	'inertia':0.7,		# fraction of frequency change carry over in the stiffness term
 }
 
 
@@ -252,12 +256,15 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 		self.dump()
 		print "--- Infer ancestral sequences " + time.strftime("%H:%M:%S") + " ---"
 		self.infer_ancestral()  # -> every node has a sequence
-		self.dump()
 		print "--- Tree refine at " + time.strftime("%H:%M:%S") + " ---"
 		self.refine()
+		self.dump()
 
-		self.export_to_auspice()
+		print "--- Estimating frequencies at " + time.strftime("%H:%M:%S") + " ---"
+		self.estimate_frequencies()
+		self.dump()
 
+		self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb'])
 
 if __name__=="__main__":
 	parser = argparse.ArgumentParser(description='Process virus sequences, build tree, and prepare of web visualization')
