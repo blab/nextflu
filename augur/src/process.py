@@ -79,8 +79,6 @@ class process(object):
 		if hasattr(self, 'frequencies'):
 			write_json(self.frequencies, self.auspice_frequency_fname)
 
-
-
 	def align(self):
 		'''
 		aligns viruses using mafft. produces temporary files and deletes those at the end
@@ -211,3 +209,28 @@ class process(object):
 
 			self.variable_aa = np.where(np.max(self.aa_frequencies,axis=0)<1.0-self.min_freq)[0]
 			self.consensus_aa = "".join(np.fromstring(self.aa_alphabet, 'S1')[np.argmax(self.aa_frequencies,axis=0)])
+
+	def estimate_frequencies(self, tasks = ['mutations','genotypes', 'clades', 'tree']):
+		import bernoulli_frequency as freq_est
+		plot=False
+		freq_est.flu_stiffness = config['frequency_stiffness']
+		freq_est.time_interval = config['time_interval']
+		freq_est.pivots_per_year = config['pivots_per_year']
+		freq_est.relevant_pos_cutoff = 0.1
+
+		if 'mutations' in tasks or 'genotypes' in tasks:
+			self.frequencies['mutations'], relevant_pos = freq_est.all_mutations(self.tree, config['aggregate_regions'], 
+														threshold = config['min_mutation_count'], plot=plot)
+		if 'genotypes' in tasks:
+			self.frequencies['genotypes'] = freq_est.all_genotypes(self.tree, config['aggregate_regions'], relevant_pos)
+		if 'clades' in tasks:
+			self.frequencies['clades'] = freq_est.all_clades(self.tree, config['clade_designations'], 
+															config['aggregate_regions'], plot)
+		if any(x in tasks for x in ['mutations','clades', 'genotypes']):
+			write_json(self.frequencies, self.frequency_fname)
+
+		if 'tree' in tasks:
+			for region_label, regions in config['aggregate_regions']:
+				print "--- "+"adding frequencies to tree "+region_label+ " "  + time.strftime("%H:%M:%S") + " ---"
+				freq_est.estimate_tree_frequencies(self.tree, threshold = 10, regions=regions, region_name=region_label)
+

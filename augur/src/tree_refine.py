@@ -36,7 +36,7 @@ class tree_refine(object):
 		from Bio.Align import MultipleSeqAlignment
 		from Bio.Seq import Seq
 		from Bio.SeqRecord import SeqRecord
-		tmp_aaseqs = [SeqRecord(Seq(node.aa_seq), id=node.strain, annotations = {'num_date':node.num_date}) for node in self.tree.leaf_iter()]
+		tmp_aaseqs = [SeqRecord(Seq(node.aa_seq), id=node.strain, annotations = {'num_date':node.num_date, 'region':node.region}) for node in self.tree.leaf_iter()]
 		tmp_aaseqs.sort(key = lambda x:x.annotations['num_date'])
 		self.aa_aln = MultipleSeqAlignment(tmp_aaseqs)
 
