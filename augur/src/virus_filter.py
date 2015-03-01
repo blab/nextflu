@@ -102,7 +102,7 @@ class virus_filter(object):
 		if self.outgroup is not None:
 			filtered_viruses.append(self.outgroup)
 			print len(filtered_viruses), "with outgroup"
-		self.virus_subsample = filtered_viruses
+		self.viruses = filtered_viruses
 
 	def viruses_by_date_region(self, tmp_viruses):
 		'''
@@ -129,7 +129,8 @@ class virus_filter(object):
 				tmp = [v for v in representative if v is not None]
 				shuffle(tmp)
 				select_set[-1].extend(tmp)
-			print "found",len(select_set[-1]), 'in year',y,'month',m
+			if self.verbose>1:
+				print "\t\tfound",len(select_set[-1]), 'in year',y,'month',m
 		if all_priority:
 			n_other = max(0,viruses_per_month-len(select_set[0]))
 			return select_set[0] + select_set[1][:n_other]
@@ -147,7 +148,8 @@ class virus_filter(object):
 		other_viruses_flat = []
 		for r in regions: other_viruses_flat.extend(other_viruses[(y,m,r)])
 
-		print "found",len(priority_viruses_flat)+len(other_viruses_flat), 'in year',y,'month',m
+		if self.verbose>1:
+			print "\t\tfound",len(priority_viruses_flat)+len(other_viruses_flat), 'in year',y,'month',m
 		n_other = max(0,viruses_per_month-len(priority_viruses_flat))
 		return sample(priority_viruses_flat, len(priority_viruses_flat) if all_priority else min(len(priority_viruses_flat), viruses_per_month))\
 				+ sample(other_viruses_flat, min(n_other, len(other_viruses_flat)))
@@ -177,7 +179,7 @@ class flu_filter(virus_filter):
 				words = record.description.replace(">","").replace(" ","").split('|')
 				v = {key:words[ii] for ii, key in self.fasta_header.iteritems()}
 				v['db']="GISAID"
-				v['seq']=str(record.seq).upper()
+				v['seq']= str(record.seq)
 				if 'passage' not in v: v['passage']=''
 				viruses.append(v)
 			handle.close()

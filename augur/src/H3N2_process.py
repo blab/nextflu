@@ -1,11 +1,47 @@
-import time
-from io_util import write_json
+import time, argparse,re, sys
+sys.path.append('src')
 from virus_filter import flu_filter
+from virus_clean import virus_clean
+from tree_refine import tree_refine
+from process import process
 from Bio import SeqIO
+from Bio.Seq import Seq
+from Bio.Align import MultipleSeqAlignment
+import numpy as np
+from itertools import izip
+
+epitope_mask = np.fromstring("0000000000000000000000000000000000000000000011111011011001010011000100000001001011110011100110101000001100000100000001000110101011111101011010111110001010011111000101011011111111010010001111101110111001010001110011111111000000111110000000101010101110000000000011100100000001011011100000000000001001011000110111111000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", dtype='S1')
+
+	
+virus_config = {
+	# data source and sequence parsing/cleaning/processing
+	'virus':'H3N2',
+	'alignment_file':'data/20150222_all_H3N2_HA1.fasta',
+	'fasta_fields':{0:'strain', 1:"date", 4:"passage", -1:'accession'},
+	'outgroup':'A/Beijing/32/1992',
+	'force_include':'source-data/HI_strains.txt',
+	'max_global':True,   # sample as evenly as possible from different geographic regions 
+	'cds':[48,-1], # define the HA1 start i n 0 numbering
+
+	# frequency estimation parameters
+	'aggregate_regions': [  ("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
+							("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ],
+	'frequency_stiffness':10.0,
+	'time_interval':(2012.0, 2015.1),
+	'pivots_per_year':12.0,
+	'min_mutation_count':10,
+	# define relevant clades in canonical HA1 numbering (+1)
+	'clade_designations': { "3c3.a":[(128,'A'), (142,'G'), (159,'S')],
+						   "3c3":  [(128,'A'), (142,'G'), (159,'F')],
+						   "3c2.a":[(144,'S'), (159,'Y'), (225,'D'), (311,'H'),(489,'N')],
+						   "3c2":  [(144,'N'), (159,'F'),(225,'N'), (489,'N')]
+							}
+}
+
 
 class H3N2_filter(flu_filter):
-	def __init__(self, fasta_fname, fasta_header):
-		flu_filter.__init__(self, fasta_fname, fasta_header)
+	def __init__(self):
+		flu_filter.__init__(self, virus_config['alignment_file'], virus_config['fasta_fields'])
 		self.vaccine_strains =[
 				{ 
 					"strain": "A/Wisconsin/67/2005",
@@ -62,19 +98,171 @@ class H3N2_filter(flu_filter):
 	#		'seq': 'ATGAAGACTATCATTGCTTTGAGCTACATTTTATGTCTGGTTTTCGCTCAAAAACTTCCCGGAAATGACAACAGCACAGCAACGCTGTGCCTGGGACATCATGCAGTGCCAAACGGAACGCTAGTGAAAACAATCACGAATGATCAAATTGAAGTGACTAATGCTACTGAGCTGGTTCAGAGTTCCTCAACAGGTAGAATATGCGACAGTCCTCACCGAATCCTTGATGGAAAAAACTGCACACTGATAGATGCTCTATTGGGAGACCCTCATTGTGATGGCTTCCAAAATAAGGAATGGGACCTTTTTGTTGAACGCAGCAAAGCTTACAGCAACTGTTACCCTTATGATGTACCGGATTATGCCTCCCTTAGGTCACTAGTTGCCTCATCAGGCACCCTGGAGTTTATCAATGAAGACTTCAATTGGACTGGAGTCGCTCAGGATGGGGGAAGCTATGCTTGCAAAAGGGGATCTGTTAACAGTTTCTTTAGTAGATTGAATTGGTTGCACAAATCAGAATACAAATATCCAGCGCTGAACGTGACTATGCCAAACAATGGCAAATTTGACAAATTGTACATTTGGGGGGTTCACCACCCGAGCACGGACAGAGACCAAACCAGCCTATATGTTCGAGCATCAGGGAGAGTCACAGTCTCTACCAAAAGAAGCCAACAAACTGTAACCCCGAATATCGGGTCTAGACCCTGGGTAAGGGGTCAGTCCAGTAGAATAAGCATCTATTGGACAATAGTAAAACCGGGAGACATACTTTTGATTAATAGCACAGGGAATCTAATTGCTCCTCGGGGTTACTTCAAAATACGAAATGGGAAAAGCTCAATAATGAGGTCAGATGCACCCATTGGCACCTGCAGTTCTGAATGCATCACTCCAAATGGAAGCATTCCCAATGACAAACCTTTTCAAAATGTAAACAGGATCACATATGGGGCCTGCCCCAGATATGTTAAGCAAAACACT'
 		}
 
+class H3N2_clean(virus_clean):
+	def __init__(self):
+		pass
+
+	def clean_outbreaks(self):
+		"""Remove duplicate strains, where the geographic location, date of sampling and sequence are identical"""
+		virus_hashes = set()
+		new_viruses = []
+		for v in self.viruses:
+			geo = re.search(r'A/([^/]+)/', v.strain).group(1)
+			if geo:
+				vhash = (geo, v.date, str(v.seq))
+				if vhash not in virus_hashes:
+					new_viruses.append(v)
+					virus_hashes.add(vhash)
+
+		self.viruses = MultipleSeqAlignment(new_viruses)
+		return new_viruses
+
+	def clean_reassortants(self):
+		from seq_util import hamming_distance as distance
+		"""Remove viruses from the outbreak of triple reassortant pH1N1"""
+		remove_viruses = []
+		
+		reassortant_seq = "ATGAAGACTATCATTGCTTTTAGCTGCATTTTATGTCTGATTTTCGCTCAAAAACTTCCCGGAAGTGACAACAGCATGGCAACGCTGTGCCTGGGACACCATGCAGTGCCAAACGGAACATTAGTGAAAACAATCACGGATGACCAAATTGAAGTGACTAATGCTACTGAGCTGGTCCAGAGTTCCTCAACAGGTGGAATATGCAACAGTCCTCACCAAATCCTTGATGGGAAAAATTGCACACTGATAGATGCTCTATTGGGGGACCCTCATTGTGATGACTTCCAAAACAAGGAATGGGACCTTTTTGTTGAACGAAGCACAGCCTACAGCAACTGTTACCCTTATTACGTGCCGGATTATGCCACCCTTAGATCATTAGTTGCCTCATCCGGCAACCTGGAATTTACCCAAGAAAGCTTCAATTGGACTGGAGTTGCTCAAGGCGGATCAAGCTATGCCTGCAGAAGGGGATCTGTTAACAGTTTCTTTAGTAGATTGAATTGGTTGTATAACTTGAATTACAAGTATCCAGAGCAGAACGTAACTATGCCAAACAATGACAAATTTGACAAATTGTACATTTGGGGGGTTCACCACCCGGGTACGGACAAGGACCAAACCAACCTATATGTCCAAGCATCAGGGAGAGTTATAGTCTCTACCAAAAGAAGCCAACAAACTGTAATCCCGAATATCGGGTCTAGACCCTGGGTAAGGGGTGTCTCCAGCATAATAAGCATCTATTGGACGATAGTAAAACCGGGAGACATACTTTTGATTAACAGCACAGGGAATCTAATTGCCCCTCGGGGTTACTTCAAAATACAAAGTGGGAAAAGCTCAATAATGAGATCAGATGCACACATTGATGAATGCAATTCTGAATGCATTACTCCAAATGGAAGCATTCCCAATGACAAACCTTTTCAAAATGTAAACAAGATCACATATGGAGCCTGTCCCAGATATGTTAAGCAAAACACCCTGAAATTGGCAACAGGAATGCGGAATGTACCAGAGAAACAAACTAGAGGCATATTCGGCGCAATTGCAGGTTTCATAGAAAATGGTTGGGAGGGAATGGTAGACGGTTGGTACGGTTTCAGGCATCAGAATTCTGAAGGCACAGGACAAGCAGCAGATCTTAAAAGCACTCAAGCAGCAATCAACCAAATCACCGGGAAACTAAATAGAGTAATCAAGAAAACAAACGAGAAATTCCATCAAATCGAAAAAGAATTCTCAGAAGTAGAAGGAAGAATTCAGGACCTAGAGAAATACGTTGAAGACACTAAAATAGATCTCTGGTCTTACAACGCTGAGATTCTTGTTGCCCTGGAGAACCAACATACAATTGATTTAACCGACTCAGAGATGAGCAAACTGTTCGAAAGAACAAGAAGGCAACTGCGGGAAAATGCTGAGGACATGGGCAATGGTTGCTTCAAAATATACCACAAATGTGACAATGCCTGCATAGGATCAATCAGAAATGGAACTTATGACCATGATATATACAGAAACGAGGCATTAAACAATCGGTTCCAGATCAAAGGTGTTCAGCTAAAGTCAGGATACAAAGATTGGATCCTATGGATTTCCTTTGCCATATCATGCTTTTTGCTTTGTGTTGTTCTGCTGGGGTTCATTATGTGGGCCTGCCAAAAAGGCAACATTAGGTGCAACATTTGCATTTGA"
+		for v in self.viruses:
+			dist = distance(Seq(reassortant_seq), v)
+			if (dist < 0.02):
+				remove_viruses.append(v)
+				if self.verbose>1:
+					print "\t\tremoving",v.strain
+
+		reassortant_seq = "ATGAAGACTATCATTGCTTTTAGCTGCATCTTATGTCAGATCTCCGCTCAAAAACTCCCCGGAAGTGACAACAGCATGGCAACGCTGTGCCTGGGGCATCACGCAGTACCAAACGGAACGTTAGTGAAAACAATAACAGATGACCAAATTGAAGTGACTAATGCTACTGAGCTGGTCCAGAGTACCTCAAAAGGTGAAATATGCAGTAGTCCTCACCAAATCCTTGATGGAAAAAATTGTACACTGATAGATGCTCTATTGGGAGACCCTCATTGTGATGACTTCCAAAACAAGAAATGGGACCTTTTTGTTGAACGAAGCACAGCTTACAGCAACTGTTACCCTTATTATGTGCCGGATTATGCCTCCCTTAGGTCACTAGTTGCCTCATCCGGCACCCTGGAATTTACTCAAGAAAGCTTCAATTGGACTGGGGTTGCTCAAGACGGAGCAAGCTATTCTTGCAGAAGGGAATCTGAAAACAGTTTCTTTAGTAGATTGAATTGGTTATATAGTTTGAATTACAAATATCCAGCGCTGAACGTAACTATGCCAAACAATGACAAATTTGACAAATTGTACATTTGGGGGGTACACCACCCGGGTACGGACAAGGACCAAACCAGTCTATATATTCAAGCATCAGGGAGAGTTACAGTCTCCACCAAATGGAGCCAACAAACTGTAATCCCGAATATCGGGTCTAGACCCTGGATAAGGGGTGTCTCCAGCATAATAAGCATCTATTGGACAATAGTAAAACCGGGAGACATACTTTTGATTAACAGCACAGGGAATCTAATTGCCCCTCGGGGTTACTTCAAAATACAAAGTGGGAAAAGCTCAATAATGAGGTCAGATGCACACATTGGCAACTGCAACTCTGAATGCATTACCCCAAATGGAAGCATTCCCAACGACAAACCTTTTCAAAATGTAAACAGAATAACATATGGGGCCTGTCCCAGATATGTTAAGCAAAACACTCTGAAATTAGCAACAGGAATGCGGAATGTACCAGAGAAACAAACTAGAGGCATATTCGGCGCAATCGCAGGTTTCATAGAAAATGGTTGGGAAGGGATGGTGGACGGTTGGTATGGTTTCAGGCATCAAAACTCTGAAGGCACAGGGCAAGCAGCAGATCTTAAAAGCACTCAAGCGGCAATCAACCAAATCACCGGGAAACTAAATAGAGTAATCAAGAAGACGAATGAAAAATTCCATCAGATCGAAAAAGAATTCTCAGAAGTAGAAGGGAGAATTCAGGACCTAGAGAGATACGTTGAAGACACTAAAATAGACCTCTGGTCTTACAACGCGGAGCTTCTTGTTGCCCTGGAGAACCAACATACAATTGATTTAACTGACTCAGAAATGAACAAACTGTTCGAAAGGACAAGGAAGCAACTGCGGGAAAATGCTGAGGACATGGGCAATGGATGCTTTAAAATATATCACAAATGTGACAATGCCTGCATAGGATCAATCAGAAATGGAACTTATGACCATGATGTATACAGAGACGAAGCAGTAAACAATCGGTTCCAGATCAAAGGTGTTCAGCTGAAGTTAGGATACAAAGATTGGATCCTATGGATTTCCTTTGCCATATCATGCTTTTTGCTTTGTGCTGTTCTGCTAGGATTCATTATGTGGGCATGCCAAAAAGGCAACATTAGGTGCAACATTTGCATTTGA"
+		for v in self.viruses:
+			dist = distance(Seq(reassortant_seq), v)
+			if (dist < 0.02):
+				remove_viruses.append(v)
+				if self.verbose>1:
+					print "\t\tremoving",v.strain
+
+		reassortant_seq = "ATGAAGACTAGTAGTTCTGCTATATACATTGCAA------------------------CCGCAAATG---------CAGACACATTATGTATAGGTTATCATGCAGTACTAGAAAAGAATGTAACAGTAACACACTCTGTTAACCAAACTGAGAGGGGTAGCCCCATTGCATTTG--------------------GGTAAATGTAACATTGCTGGCTGGATCC------------------------------------TGGGAAATCCAGAGTGTGACACTCTCCACAGCAAGCTCATGGTCCTACATCGTGGAAACATCTAAGACAATGGAACGTGCTACCCAGGAGATTTCATCAATTATGAGGAGCTAAGGTCATCATTTGAAAGGTTTGAGATATTACAAGTTCATGGCCCAATCATGACTCGAACAAAGGTTCCTCAAGCTGGAGCAA---------------------------AAAGCTTCTACAAAAATTTAATATGGCTAGTTAAAAAAGGAAATTCATACCCAA------------------------------AGCTCAGCAAATCCTACATTTGGGGCATTCACCATCCATCTACTAGTGCTGACCAA-------CAAAGTCTCTATCAGAGTGCAGATGCATATGTTTTATCAAAATACAGCAAGAAGTTCAAG--CCGGAAATAGCAGTAAGACCCAAAGTGAGGGATCAAGAAGGGAGAATGAACTATTACTGGACACTAGTAGAGCCGGGAGACAAAATAACATTCGAAGCAACTGGAAATCTATTGGTACCGAGATATGCATTCGCAATGGAAA----GAAATGCTGGATTATCATTTCAGATACACCAGTCCACGATTGCAATACAACTTGTCAGACACCCAAGGGTGCTATAAACACCAGCCTCCCATTTCAGAATATACATCCGATCACAATTGGAAAATGTCCCAAATATGTAAAAAGCACAAAATTGAGACTGGCCACAGGATTGAGGAATGTCCCGTCTATTCAATCTAGAGGCCTATTTGGGGCCATTGCCGGTTTCATTGAAGGGGGGTGGACAGGGATGGTAGATGGATGGTACGGTTATCACCATCAAAATGCGCAGGGGTCAGGATATGCAGCCGACCTGAAGAGCACACAGAATGCCATTGACAAGATTACTAACAAAGTAAATTCTGTTATTGAAAAGATGAATACACAGTTCACAGCAGTAGGTAAAGAGTTCAACCACCTGGAAAAAAGAATAGAGAATTTAAATAAAAAAGTTGATGATGGTTTCCTGGACATTTGGACTTACAATGCCGAACTGTTGGTTCTATTGGAAAATGAAAGAACTTTGGACTACCACGATTCAAATGTGAAAAACTTATATGAAAAGGTAAGAAGCCAGTTAAAAAACAATGCCAAGGAAATTGGAAACGGCTGCTTTGAATTTTACCACAAATGCGATAACACGTGCATGGAAAGTGTCAAAAATGGGACTTATGACTACCCAAAATACTCAGAGGAAGCAAAATTAAACAGAGAAGAAATAGATGGGGTAAAGCTGGAATCAACAAGGATTTACCAGATTTTGGCGATCTATTCAACTGTCGCCAGTTCATTGGTACTGGTAGTCTCCCTGGGGGCAATCATCTGGATGTGCTCTAATGGGTCTCTACAGTGTAGAATATGTATTTAA"
+		for v in self.viruses:
+			dist = distance(Seq(reassortant_seq), v)
+			if (dist < 0.02):
+				remove_viruses.append(v)
+				if self.verbose>1:
+					print "\t\tremoving",v.strain
+
+		self.viruses = MultipleSeqAlignment([v for v in self.viruses if v not in remove_viruses])
+
+	def clean(self):
+		self.clean_generic()
+		self.clean_outbreaks()
+		print "Number of viruses after outbreak filtering:",len(self.viruses)
+		self.clean_reassortants()
+		print "Number of viruses after reassortant filtering:",len(self.viruses)
 
 
-def main(in_fname='data/gisaid_epiflu_sequence.fasta', years_back=3, viruses_per_month=50):
-	print "--- Filter at " + time.strftime("%H:%M:%S") + " ---"
-	myH3N2_filter = H3N2_filter(in_fname, {0:'strain', 1:"date", 4:"passage", -1:'accession'})
-	myH3N2_filter.filter()
-	HI_data_strains = [seq.name for seq in SeqIO.parse('data/strains_with_HI.fasta', 'fasta')]
-	myH3N2_filter.subsample(years_back, viruses_per_month, prioritize = HI_data_strains, 
-							all_priority = True, region_specific=False)
+class H3N2_refine(tree_refine):
+	def __init__(self, **kwargs):
+		tree_refine.__init__(self, **kwargs)
 
-	out_fname = 'data/virus_filter.json'
-	write_json(myH3N2_filter.virus_subsample, out_fname)
-	return out_fname
-	
-if __name__ == "__main__":
-	main()
+	def refine(self):
+		self.refine_generic()  # -> all nodes now have aa_seq, xvalue, yvalue, trunk, and basic virus properties
+		self.add_H3N2_attributes()
+
+	def epitope_sites(self, aa):
+		aaa = np.fromstring(aa, 'S1')
+		return ''.join(aaa[epitope_mask[:len(aa)]=='1'])
+
+	def nonepitope_sites(self, aa):
+		aaa = np.fromstring(aa, 'S1')
+		return ''.join(aaa[epitope_mask[:len(aa)]=='0'])
+
+	def receptor_binding_sites(self, aa):
+		'''
+		Receptor binding site mutations from Koel et al. 2014
+		These are (145, 155, 156, 158, 159, 189, 193) in canonical HA numbering
+		need to subtract one since python arrays start at 0
+		'''
+		sites = [144, 154, 155, 157, 158, 188, 192]
+		return ''.join([aa[pos] for pos in sites])
+
+	def get_HA1(self, aa):
+		'''
+		return the part of the peptide corresponding to HA1, starts is 329 aa long
+		'''
+		return aa[:329]
+
+	def epitope_distance(self, aaA, aaB):
+		"""Return distance of sequences aaA and aaB by comparing epitope sites"""
+		epA = self.epitope_sites(aaA)
+		epB = self.epitope_sites(aaB)
+		distance = sum(a != b for a, b in izip(epA, epB))
+		return distance
+
+	def nonepitope_distance(self, aaA, aaB):
+		"""Return distance of sequences aaA and aaB by comparing non-epitope sites"""
+		neA = self.nonepitope_sites(aaA)
+		neB = self.nonepitope_sites(aaB)
+		distance = sum(a != b for a, b in izip(neA, neB))
+		return distance
+
+	def receptor_binding_distance(self, aaA, aaB):
+		"""Return distance of sequences aaA and aaB by comparing receptor binding sites"""
+		neA = self.receptor_binding_sites(aaA)
+		neB = self.receptor_binding_sites(aaB)
+		distance = sum(a != b for a, b in izip(neA, neB))
+		return distance
+
+	def add_H3N2_attributes(self):
+		root = self.tree.seed_node
+		for node in self.tree.postorder_node_iter():
+			node.ep = self.epitope_distance(node.aa_seq, root.aa_seq)
+			node.ne = self.nonepitope_distance(node.aa_seq, root.aa_seq)
+			node.rb = self.receptor_binding_distance(node.aa_seq, root.aa_seq)
+
+		for v in self.viruses:
+			if v.strain in self.node_lookup:
+				node = self.node_lookup[v.strain]
+				try:
+					node.passage=v.passage
+				except:
+					pass
+
+class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
+	"""docstring for H3N2_process, H3N2_filter"""
+	def __init__(self,verbose = 0, **kwargs):
+		process.__init__(self, **kwargs)
+		H3N2_filter.__init__(self,**kwargs)
+		H3N2_clean.__init__(self,**kwargs)
+		H3N2_refine.__init__(self,**kwargs)
+		self.verbose = verbose
+
+	def run(self, years_back=3, viruses_per_month=50, raxml_time_limit = 1.0,  **kwargs):
+		print "--- Virus filtering at " + time.strftime("%H:%M:%S") + " ---"
+		self.filter()
+		self.subsample(years_back, viruses_per_month)
+		self.align()   # -> self.viruses is an alignment object
+		print "--- Clean at " + time.strftime("%H:%M:%S") + " ---"
+		self.clean()   # -> every node as a numerical date
+		self.dump()
+		print "--- Tree infer at " + time.strftime("%H:%M:%S") + " ---"
+		self.infer_tree(raxml_time_limit)  # -> self has a tree
+		self.dump()
+		print "--- Infer ancestral sequences " + time.strftime("%H:%M:%S") + " ---"
+		self.infer_ancestral()  # -> every node has a sequence
+		self.dump()
+		print "--- Tree refine at " + time.strftime("%H:%M:%S") + " ---"
+		self.refine()
+
+
+if __name__=="__main__":
+	parser = argparse.ArgumentParser(description='Process virus sequences, build tree, and prepare of web visualization')
+	parser.add_argument('-y', '--years_back', type = int, default=3, help='number of past years to sample sequences from')
+	parser.add_argument('-v', '--viruses_per_month', type = int, default = 50, help='number of viruses sampled per month')
+	parser.add_argument('-r', '--raxml_time_limit', type = float, default = 1.0, help='number of hours raxml is run')
+	parser.add_argument('--config', default = "nextflu_config.py" , type=str, help ="config file")
+	parser.add_argument('--test', default = False, action="store_true",  help ="don't run the pipeline")
+	parser.add_argument('--virus', default = False, action="store_true",  help ="only select viruses")
+	parser.add_argument('--tree', default = False, action="store_true",  help ="only build tree")
+	parser.add_argument('--frequencies', default = False, action="store_true",  help ="only estimate frequencies")
+	params = parser.parse_args()
+
+	myH3N2 = H3N2_process() 
+	myH3N2.load()
+	if not params.test:
+		myH3N2.run(**params.__dict__)
