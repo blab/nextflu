@@ -1,4 +1,4 @@
-import time, argparse,re, sys
+import time, argparse,re, sys,os
 sys.path.append('src')
 from virus_filter import flu_filter
 from virus_clean import virus_clean
@@ -16,10 +16,12 @@ epitope_mask = np.fromstring("00000000000000000000000000000000000000000000111110
 virus_config = {
 	# data source and sequence parsing/cleaning/processing
 	'virus':'H3N2',
-	'alignment_file':'data/20150222_all_H3N2_HA1.fasta',
+	'alignment_file':'data/gisaid_epiflu_sequence.fasta',
 	'fasta_fields':{0:'strain', 1:"date", 4:"passage", -1:'accession'},
+	#'fasta_fields':{0:'strain', 1:"date", 4:"passage", -1:'accession'},
 	'outgroup':'A/Beijing/32/1992',
-	'force_include':'source-data/HI_strains.txt',
+	#'force_include':'source-data/HI_strains.txt',
+	'force_include_all':False,
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
 	'cds':[48,-1], # define the HA1 start i n 0 numbering
 	'n_std':5,     # standard deviations from clock
@@ -236,7 +238,11 @@ class H3N2_refine(tree_refine):
 
 class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 	"""docstring for H3N2_process, H3N2_filter"""
-	def __init__(self,verbose = 0, **kwargs):
+	def __init__(self,verbose = 0, force_include = None, 
+				force_include_all = False, max_global= True, **kwargs):
+		self.force_include = force_include
+		self.force_include_all = force_include_all
+		self.max_global = max_global
 		process.__init__(self, **kwargs)
 		H3N2_filter.__init__(self,**kwargs)
 		H3N2_clean.__init__(self,**kwargs)
@@ -246,7 +252,12 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 	def run(self, years_back=3, viruses_per_month=50, raxml_time_limit = 1.0,  **kwargs):
 		print "--- Virus filtering at " + time.strftime("%H:%M:%S") + " ---"
 		self.filter()
-		self.subsample(years_back, viruses_per_month)
+		if self.force_include is not None and os.path.isfile(self.force_include):
+			with open(self.force_include) as infile:
+				forced_strains = [line.strip().lower() for line in infile]
+		self.subsample(years_back, viruses_per_month, 
+			prioritize=forced_strains, all_priority=self.force_include_all, 
+			region_specific = self.max_global)
 		self.align()   # -> self.viruses is an alignment object
 		print "--- Clean at " + time.strftime("%H:%M:%S") + " ---"
 		self.clean()   # -> every node as a numerical date
