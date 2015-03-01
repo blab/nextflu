@@ -84,13 +84,12 @@ class process(virus_frequencies):
 		# Write out metadata
 		print "Writing out metadata"
 		meta = {"updated": time.strftime("X%d %b %Y").replace('X0','X').replace('X','')}
-		if hasattr(self,"viruses_by_date_and_region"):
+		if hasattr(self,"date_region_count"):
 			meta["regions"] = self.regions
-			meta["virus_stats"] = [ [str(y)+'-'+str(m)] + [row[reg] for reg in self.regions]
-									for y,m in sorted(self.viruses_by_date_and_region) ]
+			meta["virus_stats"] = [ [str(y)+'-'+str(m)] + [self.date_region_count[(y,m)][reg] for reg in self.regions]
+									for y,m in sorted(self.date_region_count.keys()) ]
 		meta_fname = "../auspice/data/meta.json"
-		write_json(meta, meta_fname, indent=1)
-
+		write_json(meta, meta_fname, indent=0)
 
 	def align(self):
 		'''

@@ -272,9 +272,11 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 		self.dump()
 
 		print "--- Estimating frequencies at " + time.strftime("%H:%M:%S") + " ---"
+		self.determine_variable_positions()
 		self.estimate_frequencies()
 		self.dump()
 
+		self.temporal_regional_statistics()
 		self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb'])
 
 if __name__=="__main__":
