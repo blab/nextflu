@@ -22,6 +22,15 @@ class tree_refine(object):
 		self.reduce()
 		self.define_trunk()
 
+		# make an amino acid aligment
+		from Bio.Align import MultipleSeqAlignment
+		from Bio.Seq import Seq
+		from Bio.SeqRecord import SeqRecord
+		tmp_aaseqs = [SeqRecord(Seq(node.aa_seq), id=node.strain, annotations = {'num_date':node.num_date}) for node in self.tree.leaf_iter()]
+		tmp_aaseqs.sort(key = lambda x:x.annotations['num_date'])
+		self.aa_aln = MultipleSeqAlignment(tmp_aaseqs)
+
+
 	def remove_outgroup(self):
 		"""Reroot tree to outgroup"""
 		if self.outgroup['strain'] in self.node_lookup:
@@ -70,6 +79,7 @@ class tree_refine(object):
 	def translate_all(self):
 		for node in self.tree.postorder_node_iter():
 			node.aa_seq = translate(node.seq[self.cds[0]:self.cds[1]])
+
 
 	def get_yvalue(self, node):
 		"""Return y location based on recursive mean of daughter locations"""

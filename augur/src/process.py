@@ -6,6 +6,7 @@ import dendropy
 from tree_util import delimit_newick
 from StringIO import StringIO
 from itertools import izip
+import numpy as np
 
 class process(object):
 	"""generic template class for processing virus sequences into trees"""
@@ -107,12 +108,63 @@ class process(object):
 	def infer_ancestral(self):
 		from tree_util import to_Biopython
 		from tree_ancestral import ancestral_sequences
-		anc_seq = ancestral_sequences(to_Biopython(self.tree), self.viruses,seqtype='str')
+		anc_seq = ancestral_sequences(self.tree, self.viruses,seqtype='str')
 		anc_seq.calc_ancestral_sequences()
 		# copy the inferred sequences into the  biopython tree
-		for node, anc_node in izip(self.tree.postorder_internal_node_iter(), anc_seq.T.get_nonterminals(order='postorder')):
-			node.seq = anc_node.seq
-		for node, anc_node in izip(self.tree.leaf_iter(), anc_seq.T.get_terminals()):
-			node.seq = anc_node.seq
+#		for node, anc_node in izip(self.tree.postorder_internal_node_iter(), anc_seq.T.get_nonterminals(order='postorder')):
+#			node.seq = anc_node.seq
+#		for node, anc_node in izip(self.tree.leaf_iter(), anc_seq.T.get_terminals()):
+#			node.seq = anc_node.seq
 
 
+	def temporal_regional_statistics(self):
+		'''
+		produces a dictionary with (year, month) keys, each entry of which is a
+		a dictionary that contains the isolate count in each region observed
+		stored as:
+
+		self.date_region_count
+		self.regions
+		self.region_totals
+		'''
+		from collections import defaultdict, Counter
+		self.date_region_count = defaultdict(lambda:defaultdict(int))
+		regions = set()
+		# count viruses in every month and every region
+		for v in self.viruses:
+			if v.strain != self.outgroup['strain']:
+				year, month, day = map(int, v.date.split('-'))
+				self.date_region_count[(year, month)][v.region]+=1
+				regions.add(v.region)
+		# add a sorted list of all regions to self and calculate region totals
+		self.regions = sorted(regions)
+		self.region_totals = {reg:sum(val[reg] for val in self.date_region_count.values()) for reg in self.regions}
+
+	def determine_variable_positions(self, min_freq = 0.01):
+		'''
+		calculates nucleoties_frequencies and aa_frequencies at each position of the alignment
+		also computes consensus sequences and position at which the major allele is at less than 1-min_freq
+		results are stored as
+		self.nucleoties_frequencies
+		self.aa_frequencies
+		self.variable_nucleotides
+		self.variable_aa
+		'''
+		aln_array = np.array(self.viruses)
+		self.nuc_alphabet = 'ACGT-N'
+		self.nucleoties_frequencies = np.zeros((len(self.nuc_alphabet),aln_array.shape[1]))
+		for ni,nuc in enumerate(self.nuc_alphabet):
+			self.nucleoties_frequencies[ni,:]=(aln_array==nuc).mean(axis=0)
+
+		self.variable_nucleotides = np.where(np.max(self.nucleoties_frequencies,axis=0)<1.0-min_freq)[0]
+		self.consensus_nucleotides = "".join(np.fromstring(self.nuc_alphabet, 'S1')[np.argmax(self.nucleoties_frequencies,axis=0)])
+
+		if hasattr(self, 'aa_aln'):
+			aln_array = np.array(self.aa_aln)
+			self.aa_alphabet = 'ACDEFGHIKLMNPQRSTVWY*X'
+			self.aa_frequencies = np.zeros((len(self.aa_alphabet),aln_array.shape[1]))
+			for ai,aa in enumerate(self.aa_alphabet):
+				self.aa_frequencies[ai,:]=(aln_array==aa).mean(axis=0)
+
+			self.variable_aa = np.where(np.max(self.aa_frequencies,axis=0)<1.0-min_freq)[0]
+			self.consensus_aa = "".join(np.fromstring(self.aa_alphabet, 'S1')[np.argmax(self.aa_frequencies,axis=0)])

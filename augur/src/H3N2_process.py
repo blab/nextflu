@@ -40,8 +40,8 @@ virus_config = {
 
 
 class H3N2_filter(flu_filter):
-	def __init__(self):
-		flu_filter.__init__(self, virus_config['alignment_file'], virus_config['fasta_fields'])
+	def __init__(self,**kwargs):
+		flu_filter.__init__(self, virus_config['alignment_file'], virus_config['fasta_fields'], **kwargs)
 		self.vaccine_strains =[
 				{ 
 					"strain": "A/Wisconsin/67/2005",
@@ -99,7 +99,7 @@ class H3N2_filter(flu_filter):
 		}
 
 class H3N2_clean(virus_clean):
-	def __init__(self):
+	def __init__(self,**kwargs):
 		pass
 
 	def clean_outbreaks(self):
@@ -261,8 +261,9 @@ if __name__=="__main__":
 	parser.add_argument('--tree', default = False, action="store_true",  help ="only build tree")
 	parser.add_argument('--frequencies', default = False, action="store_true",  help ="only estimate frequencies")
 	params = parser.parse_args()
-
-	myH3N2 = H3N2_process() 
-	myH3N2.load()
-	if not params.test:
+	params.cds = (48,None)
+	myH3N2 = H3N2_process(**params.__dict__) 
+	if params.test:
+		myH3N2.load()
+	else:
 		myH3N2.run(**params.__dict__)

@@ -68,4 +68,5 @@ class virus_clean(object):
 		self.remove_insertions()
 		self.clean_ambiguous()
 		self.clean_distances()
+		self.viruses.sort(key=lambda x:x.num_date)
 		print "Number of viruses after outlier filtering:",len(self.viruses)

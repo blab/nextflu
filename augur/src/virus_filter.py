@@ -11,7 +11,7 @@ from collections import defaultdict
 
 class virus_filter(object):
 
-	def __init__(self,viruses=None):
+	def __init__(self,viruses=None, **kwargs):
 		if viruses is None: viruses=[]
 		self.viruses = viruses
 		self.strain_lookup = {}
@@ -157,13 +157,13 @@ class virus_filter(object):
 
 class flu_filter(virus_filter):
 
-	def __init__(self,fasta_fname, fasta_header=None):
+	def __init__(self,fasta_fname, fasta_header=None, **kwargs):
 		if fasta_header is None:
 			self.fasta_header = {0:'strain', 1:'accession', 3:'passage', 5:'date' }
 		else:
 			self.fasta_header = fasta_header
 		viruses = self.parse_gisaid(fasta_fname)
-		virus_filter.__init__(self, viruses)
+		virus_filter.__init__(self, viruses, **kwargs)
 		self.fix_strain_names()
 		self.vaccine_strains=[]
 
