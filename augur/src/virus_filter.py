@@ -3,31 +3,36 @@
 #  - viruses with exact dates
 #  - viruses that are not egg-passaged
 #  - a single sequence per virus strain, taken as first sequence in list
-# outputs to virus_filter.json
 
 import os, re, time, datetime, csv, sys
-from io_util import *
 from collections import defaultdict
+from Bio import SeqIO
 
 class virus_filter(object):
 
-	def __init__(self,viruses=None):
+	def __init__(self,viruses=None, date_spec='full', **kwargs):
+		'''
+		parameters:
+		viruses    -- a list of virses. dict structures as of now
+		date_spec  -- if 'full', dates with day are required, if 'year', only year is accepted
+		'''
 		if viruses is None: viruses=[]
 		self.viruses = viruses
 		self.strain_lookup = {}
 		self.outgroup = None
+		self.date_spec = date_spec
 
-	def filter_generic(self, min_length=None, date_spec = 'full', prepend_strains = None):
+	def filter_generic(self, prepend_strains = None):
 		'''
 		filter viruses by length and accurate date, sort, add additioanl strains such
 		as vaccine strains that are preferentially retained and prune to unique strains
 		'''
 		print len(self.viruses), "initial viruses"
-		if min_length is not None:
-			self.filter_length(min_length)
-			print len(self.viruses), "after filtering by length >=", min_length
+		if hasattr(self, 'min_length'):
+			self.filter_length(self.min_length)
+			print len(self.viruses), "after filtering by length >=", self.min_length
 
-		self.filter_date(date_spec)
+		self.filter_date()
 		print len(self.viruses), "after filtering for precise dates"
 		self.sort_length()
 		if prepend_strains is not None:
@@ -59,10 +64,10 @@ class virus_filter(object):
 	def filter_length(self, min_length):
 		self.viruses = filter(lambda v: len(v['seq']) >= min_length, self.viruses)
 
-	def filter_date(self, date_spec):
-		if date_spec=='full':
+	def filter_date(self):
+		if self.date_spec=='full':
 			self.viruses = filter(lambda v: re.match(r'\d\d\d\d-\d\d-\d\d', v['date']) != None, self.viruses)
-		elif date_spec=='year':
+		elif self.date_spec=='year':
 			self.viruses = filter(lambda v: re.match(r'\d\d\d\d', v['date']) != None, self.viruses)
 
 	def subsample(self, years_back, viruses_per_month, prioritize = None, all_priority=False, region_specific = True):
@@ -102,7 +107,7 @@ class virus_filter(object):
 		if self.outgroup is not None:
 			filtered_viruses.append(self.outgroup)
 			print len(filtered_viruses), "with outgroup"
-		self.virus_subsample = filtered_viruses
+		self.viruses = filtered_viruses
 
 	def viruses_by_date_region(self, tmp_viruses):
 		'''
@@ -121,19 +126,22 @@ class virus_filter(object):
 		select viruses_per_month strains as evenly as possible from all regions
 		'''
 		from itertools import izip_longest
-		from random import sample
+		from random import sample,shuffle
 		select_set = []
 		for vset in [priority_viruses, other_viruses]:
 			select_set.append([])
 			for representative in izip_longest(*[vset[(y,m,r)] for r in regions], fillvalue = None):
-				select_set[-1].extend([v for v in representative if v is not None])
-			print "found",len(select_set[-1]), 'in year',y,'month',m
+				tmp = [v for v in representative if v is not None]
+				shuffle(tmp)
+				select_set[-1].extend(tmp)
+			if self.verbose>1:
+				print "\t\tfound",len(select_set[-1]), 'in year',y,'month',m
 		if all_priority:
 			n_other = max(0,viruses_per_month-len(select_set[0]))
-			return select_set[0] + sample(select_set[1], min(len(select_set[1]), n_other))
+			return select_set[0] + select_set[1][:n_other]
 		else:
 			tmp = select_set[0] + select_set[1]
-			return sample(tmp, max(len(tmp), viruses_per_month))
+			return tmp[:viruses_per_month]
 
 	def select_viruses_global(self, priority_viruses,other_viruses, y, m, viruses_per_month, regions, all_priority = False):
 		'''
@@ -145,21 +153,23 @@ class virus_filter(object):
 		other_viruses_flat = []
 		for r in regions: other_viruses_flat.extend(other_viruses[(y,m,r)])
 
-		print "found",len(priority_viruses_flat)+len(other_viruses_flat), 'in year',y,'month',m
+		if self.verbose>1:
+			print "\t\tfound",len(priority_viruses_flat)+len(other_viruses_flat), 'in year',y,'month',m
 		n_other = max(0,viruses_per_month-len(priority_viruses_flat))
-		return sample(priority_viruses_flat, min(len(priority_viruses_flat), viruses_per_month))\
+		return sample(priority_viruses_flat, len(priority_viruses_flat) if all_priority else min(len(priority_viruses_flat), viruses_per_month))\
 				+ sample(other_viruses_flat, min(n_other, len(other_viruses_flat)))
 
 
 class flu_filter(virus_filter):
 
-	def __init__(self,fasta_fname, fasta_header=None):
-		if fasta_header is None:
-			self.fasta_header = {0:'strain', 1:'accession', 3:'passage', 5:'date' }
+	def __init__(self, alignment_file='', fasta_fields=None, **kwargs):
+		if fasta_fields is None:
+			self.fasta_fields = {0:'strain', 1:'accession', 3:'passage', 5:'date' }
 		else:
-			self.fasta_header = fasta_header
-		viruses = self.parse_gisaid(fasta_fname)
-		virus_filter.__init__(self, viruses)
+			self.fasta_fields = fasta_fields
+		self.alignment_file = alignment_file
+		viruses = self.parse_gisaid(self.alignment_file)
+		virus_filter.__init__(self, viruses, **kwargs)
 		self.fix_strain_names()
 		self.vaccine_strains=[]
 
@@ -173,9 +183,9 @@ class flu_filter(virus_filter):
 		else:
 			for record in SeqIO.parse(handle, "fasta"):
 				words = record.description.replace(">","").replace(" ","").split('|')
-				v = {key:words[ii] for ii, key in self.fasta_header.iteritems()}
+				v = {key:words[ii] for ii, key in self.fasta_fields.iteritems()}
 				v['db']="GISAID"
-				v['seq']=str(record.seq).upper()
+				v['seq']= str(record.seq)
 				if 'passage' not in v: v['passage']=''
 				viruses.append(v)
 			handle.close()
