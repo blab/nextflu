@@ -9,14 +9,13 @@ import numpy as np
 
 class process(virus_frequencies):
 	"""generic template class for processing virus sequences into trees"""
-	def __init__(self, tree_fname = 'data/tree.pkl', virus_fname = 'data/virus.pkl', aa_seq_fname = 'data/aa_seq.pkl',
-				frequency_fname = 'data/frequency.pkl', auspice_frequency_fname ='../auspice/data/frequencies.json',
+	def __init__(self, prefix = 'data/', auspice_frequency_fname ='../auspice/data/frequencies.json',
 				auspice_sequences_fname='../auspice/data/sequences.json', auspice_tree_fname='../auspice/data/tree.json', min_freq = 0.01, **kwargs):
 		virus_frequencies.__init__(self, **kwargs)
-		self.tree_fname = tree_fname
-		self.virus_fname = virus_fname
-		self.frequency_fname = frequency_fname
-		self.aa_seq_fname = aa_seq_fname
+		self.tree_fname = prefix+'tree.pkl'
+		self.virus_fname = prefix+'virus.pkl'
+		self.frequency_fname = prefix+'frequencies.pkl'
+		self.aa_seq_fname = prefix+'aa_seq.pkl'
 		self.min_freq = min_freq
 		self.auspice_tree_fname = auspice_tree_fname
 		self.auspice_sequences_fname = auspice_sequences_fname
