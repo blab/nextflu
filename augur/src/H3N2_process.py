@@ -249,9 +249,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 		H3N2_refine.__init__(self,**kwargs)
 		self.verbose = verbose
 
-	def run(self, years_back=3, viruses_per_month=50, raxml_time_limit = 1.0,  **kwargs):
-		all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies', 'export']
-		steps = all_steps[all_steps.index(kwargs['start']):(all_steps.index(kwargs['stop'])+1)]
+	def run(self, steps, years_back=3, viruses_per_month=50, raxml_time_limit = 1.0):
 		if 'filter' in steps:
 			print "--- Virus filtering at " + time.strftime("%H:%M:%S") + " ---"
 			self.filter()
@@ -293,17 +291,19 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb'])
 
 if __name__=="__main__":
+	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies', 'export']
 	parser = argparse.ArgumentParser(description='Process virus sequences, build tree, and prepare of web visualization')
 	parser.add_argument('-y', '--years_back', type = int, default=3, help='number of past years to sample sequences from')
 	parser.add_argument('-v', '--viruses_per_month', type = int, default = 50, help='number of viruses sampled per month')
 	parser.add_argument('-r', '--raxml_time_limit', type = float, default = 1.0, help='number of hours raxml is run')
-	parser.add_argument('--config', default = "nextflu_config.py" , type=str, help ="config file")
+	parser.add_argument('--prefix', type = str, default = 'data/', help='path+prefix of file dumps')
 	parser.add_argument('--test', default = False, action="store_true",  help ="don't run the pipeline")
 	parser.add_argument('--start', default = 'filter', type = str,  help ="start pipeline at virus selection")
 	parser.add_argument('--stop', default = 'export', type=str,  help ="run to end")
 	params = parser.parse_args()
 	params.cds = (48,None)
 
+	steps = all_steps[all_steps.index(params.start):(all_steps.index(params.stop)+1)]
 	# add all arguments to virus_config (possibly overriding)
 	virus_config.update(params.__dict__)
 	# pass all these arguments to the processor: will be passed down as kwargs through all classes
@@ -311,4 +311,6 @@ if __name__=="__main__":
 	if params.test:
 		myH3N2.load()
 	else:
-		myH3N2.run(**virus_config)
+		myH3N2.run(steps, years_back=virus_config['years_back'], 
+			viruses_per_month = virus_config['viruses_per_month'], 
+			raxml_time_limit = virus_config['raxml_time_limit'])
