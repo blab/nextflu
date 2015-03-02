@@ -30,6 +30,7 @@ class tree_refine(object):
 		self.translate_all()
 		self.add_node_attributes()
 		self.reduce()
+		self.layout()
 		self.define_trunk()
 
 		# make an amino acid aligment
@@ -49,10 +50,10 @@ class tree_refine(object):
 			print "removed outgroup",self.outgroup['strain']
 		else:
 			print "outgroup",self.outgroup['strain'], "not found"
-		if len(self.tree.seed_node.child_nodes())==1:
-			self.tree.seed_node = self.tree.seed_node.child_nodes()[0]
-			self.tree.seed_node.parent_node = None
-			self.tree.seed_node.edge_length = 0.002
+#		if len(self.tree.seed_node.child_nodes())==1:
+#			self.tree.seed_node = self.tree.seed_node.child_nodes()[0]
+#			self.tree.seed_node.parent_node = None
+		self.tree.seed_node.edge_length = 0.001
 
 	def collapse(self):
 		"""Collapse edges without mutations to polytomies"""
@@ -98,7 +99,7 @@ class tree_refine(object):
 		if node.child_nodes():
 			return np.mean([n.yvalue for n in node.child_nodes()])
 
-	def add_node_attributes(self):
+	def layout(self):
 		"""Add clade, xvalue, yvalue, mutation and trunk attributes to all nodes in tree"""
 		clade = 0
 		yvalue = 0
@@ -112,6 +113,7 @@ class tree_refine(object):
 			node.yvalue = self.get_yvalue(node)
 			node.xvalue = node.distance_from_root()
 
+	def add_node_attributes(self):
 		for v in self.viruses:
 			if v.strain in self.node_lookup:
 				node = self.node_lookup[v.strain]

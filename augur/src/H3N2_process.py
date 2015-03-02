@@ -24,7 +24,7 @@ virus_config = {
 	'force_include_all':False,
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
 	'cds':[48,-1], # define the HA1 start i n 0 numbering
-	'n_std':5,     # standard deviations from clock
+	'n_iqd':3,     # standard deviations from clock
 
 	# frequency estimation parameters
 	'aggregate_regions': [  ("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
@@ -53,8 +53,8 @@ class H3N2_filter(flu_filter):
 		parameters
 		min_length  -- minimal length for a sequence to be acceptable
 		'''
-		self.min_length = min_length
 		flu_filter.__init__(self, **kwargs)
+		self.min_length = min_length
 		self.vaccine_strains =[
 				{ 
 					"strain": "A/Wisconsin/67/2005",
@@ -250,36 +250,47 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 		self.verbose = verbose
 
 	def run(self, years_back=3, viruses_per_month=50, raxml_time_limit = 1.0,  **kwargs):
-		print "--- Virus filtering at " + time.strftime("%H:%M:%S") + " ---"
-		self.filter()
-		if self.force_include is not None and os.path.isfile(self.force_include):
-			with open(self.force_include) as infile:
-				forced_strains = [line.strip().lower() for line in infile]
+		all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies', 'export']
+		steps = all_steps[all_steps.index(kwargs['start']):(all_steps.index(kwargs['stop'])+1)]
+		if 'filter' in steps:
+			print "--- Virus filtering at " + time.strftime("%H:%M:%S") + " ---"
+			self.filter()
+			if self.force_include is not None and os.path.isfile(self.force_include):
+				with open(self.force_include) as infile:
+					forced_strains = [line.strip().lower() for line in infile]
+			else:
+				forced_strains = []
+			self.subsample(years_back, viruses_per_month, 
+				prioritize=forced_strains, all_priority=self.force_include_all, 
+				region_specific = self.max_global)
+			self.dump()
 		else:
-			forced_strains = []
-		self.subsample(years_back, viruses_per_month, 
-			prioritize=forced_strains, all_priority=self.force_include_all, 
-			region_specific = self.max_global)
-		self.align()   # -> self.viruses is an alignment object
-		print "--- Clean at " + time.strftime("%H:%M:%S") + " ---"
-		self.clean()   # -> every node as a numerical date
-		self.dump()
-		print "--- Tree infer at " + time.strftime("%H:%M:%S") + " ---"
-		self.infer_tree(raxml_time_limit)  # -> self has a tree
-		self.dump()
-		print "--- Infer ancestral sequences " + time.strftime("%H:%M:%S") + " ---"
-		self.infer_ancestral()  # -> every node has a sequence
-		print "--- Tree refine at " + time.strftime("%H:%M:%S") + " ---"
-		self.refine()
-		self.dump()
-
-		print "--- Estimating frequencies at " + time.strftime("%H:%M:%S") + " ---"
-		self.determine_variable_positions()
-		self.estimate_frequencies()
-		self.dump()
-
-		self.temporal_regional_statistics()
-		self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb'])
+			self.load()
+		if 'align' in steps:
+			self.align()   	# -> self.viruses is an alignment object
+		if 'clean' in steps:
+			print "--- Clean at " + time.strftime("%H:%M:%S") + " ---"
+			self.clean()   # -> every node as a numerical date
+			self.dump()
+		if 'tree' in steps:
+			print "--- Tree	 infer at " + time.strftime("%H:%M:%S") + " ---"
+			self.infer_tree(raxml_time_limit)  # -> self has a tree
+			self.dump()
+		if 'ancestral' in steps:
+			print "--- Infer ancestral sequences " + time.strftime("%H:%M:%S") + " ---"
+			self.infer_ancestral()  # -> every node has a sequence
+		if 'refine' in steps:
+			print "--- Tree refine at " + time.strftime("%H:%M:%S") + " ---"
+			self.refine()
+			self.dump()
+		if 'frequencies' in steps:
+			print "--- Estimating frequencies at " + time.strftime("%H:%M:%S") + " ---"
+			self.determine_variable_positions()
+			self.estimate_frequencies()
+			self.dump()
+		if 'export' in steps:
+			self.temporal_regional_statistics()
+			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb'])
 
 if __name__=="__main__":
 	parser = argparse.ArgumentParser(description='Process virus sequences, build tree, and prepare of web visualization')
@@ -288,9 +299,8 @@ if __name__=="__main__":
 	parser.add_argument('-r', '--raxml_time_limit', type = float, default = 1.0, help='number of hours raxml is run')
 	parser.add_argument('--config', default = "nextflu_config.py" , type=str, help ="config file")
 	parser.add_argument('--test', default = False, action="store_true",  help ="don't run the pipeline")
-	parser.add_argument('--virus', default = False, action="store_true",  help ="only select viruses")
-	parser.add_argument('--tree', default = False, action="store_true",  help ="only build tree")
-	parser.add_argument('--frequencies', default = False, action="store_true",  help ="only estimate frequencies")
+	parser.add_argument('--start', default = 'filter', type = str,  help ="start pipeline at virus selection")
+	parser.add_argument('--stop', default = 'export', type=str,  help ="run to end")
 	params = parser.parse_args()
 	params.cds = (48,None)
 

@@ -10,12 +10,12 @@ import numpy as np
 
 class virus_clean(object):
 	"""docstring for virus_clean"""
-	def __init__(self,n_std  = 5, **kwargs):
+	def __init__(self,n_iqd  = 5, **kwargs):
 		'''
 		parameters
-		n_std	-- number of standard deviations accepted in molecular clock filter 
+		n_std	-- number of interquartile distances accepted in molecular clock filter 
 		'''
-		self.n_std = n_std
+		self.n_iqd = n_iqd
 
 	def remove_insertions(self):
 		'''
@@ -52,12 +52,12 @@ class virus_clean(object):
 	def times_from_outgroup(self):
 		self.unique_date()
 		outgroup_date = self.sequence_lookup[self.outgroup['strain']].num_date
-		return np.array([x.num_date-outgroup_date for x in self.viruses])
+		return np.array([x.num_date-outgroup_date for x in self.viruses  if x.strain])
 
 	def distance_from_outgroup(self):
 		from seq_util import hamming_distance
 		outgroup_seq = self.sequence_lookup[self.outgroup['strain']].seq
-		return np.array([hamming_distance(x.seq, outgroup_seq) for x in self.viruses])
+		return np.array([hamming_distance(x.seq, outgroup_seq) for x in self.viruses if x.strain])
 
 	def clean_distances(self):
 		"""Remove viruses that don't follow a loose clock """
@@ -65,15 +65,15 @@ class virus_clean(object):
 		distances = self.distance_from_outgroup()
 		slope, intercept, r_value, p_value, std_err = stats.linregress(times, distances)
 		residuals = slope*times + intercept - distances
-		r_sd = residuals.std()
+		r_iqd = stats.scoreatpercentile(residuals,75) - stats.scoreatpercentile(residuals,25)
 		if self.verbose:
 			print "\tslope: " + str(slope)
 			print "\tr: " + str(r_value)
-			print "\tresiduals sd: " + str(r_sd)
+			print "\tresiduals iqd: " + str(r_iqd)
 		new_viruses = []
 		for (v,r) in izip(self.viruses,residuals):
 			# filter viruses more than n_std standard devitations up or down
-			if np.abs(r)<self.n_std * r_sd or v.id == self.outgroup["strain"]:
+			if np.abs(r)<self.n_iqd * r_iqd or v.id == self.outgroup["strain"]:
 				new_viruses.append(v)
 			else:
 				if self.verbose>1:
