@@ -41,9 +41,12 @@ class process(virus_frequencies):
 		if os.path.isfile(self.tree_fname):
 			with open(self.tree_fname, 'r') as infile:
 				self.tree = cPickle.load(infile)
+				self.node_lookup = {l.strain:l for l in self.tree.leaf_iter()}
+				self.node_lookup.update({node.strain.lower():node for node in self.tree.leaf_iter()})
 		if os.path.isfile(self.virus_fname):
 			with open(self.virus_fname, 'r') as infile:
 				self.viruses = cPickle.load(infile)
+				self.sequence_lookup = {v.strain:v for v in self.viruses}
 		if os.path.isfile(self.frequency_fname):
 			with open(self.frequency_fname, 'r') as infile:
 				self.frequencies = cPickle.load(infile)
