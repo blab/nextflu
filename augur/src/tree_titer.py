@@ -9,130 +9,28 @@ import time
 from collections import defaultdict
 from matplotlib import pyplot as plt
 
-min_titer = 10.0
-
-def strain_name_fixing(name):
-	return name.replace(' ','').lower()
-def titer_to_number(val):
-	try:
-		if '<' in val:
-			return np.nan
-		if len(val.split())>1:
-			return float(val.split()[0])
-		else:
-			return float(val)
-	except:
-		print "Bad HI measurement:", val
-		return np.nan
-
-def parse_HI_matrix(fname):
-	import csv
-	with open(fname) as infile:
-		csv_reader = csv.reader(infile)
-
-		# parse sera
-		row1 = csv_reader.next()
-		row2 = csv_reader.next()
-		print row1
-		print row2
-		ref_sera = [(e1+'/'+e2).replace(' ','') for e1,e2 in zip(row1, row2)[4:]]
-		print ref_sera
-		for row in csv_reader: # advance until the reference virus
-			if row[0].startswith('REFERENCE'):
-				break
-
-		ref_strains = []
-		ref_matrix = []
-		for row in csv_reader: 
-			if row[0].startswith('TEST'):
-				break
-			else: # load matrices until the test virus section starts
-				ref_strains.append(strain_name_fixing(row[0]))
-				ref_matrix.append(map(titer_to_number, row[4:]))
-
-		test_strains = []
-		test_matrix = []
-		for row in csv_reader: # load test viruses until it is no longer an A/ flu  name
-			if not row[0].startswith('A/'):
-				break
-			else:
-				test_strains.append(strain_name_fixing(row[0]))
-				test_matrix.append(map(titer_to_number, row[4:]))
-		return ref_strains, np.array(ref_matrix), test_strains, np.matrix(test_matrix)
-
-
-def read_tables():
-	import glob
-	from itertools import product
-	flist = glob.glob('/home/richard/Projects/flu_HI_data/tables/*csv')
-	all_names = set()
-	all_measurements = defaultdict(list)
-	HI_matrices = []
-	for fname in flist:
-		ref_names, ref_matrix, test_names, test_matrix = parse_HI_matrix(fname)
-		HI_matrices.append( (ref_names, ref_matrix[:,:len(ref_names)], test_names, test_matrix[:,:len(ref_names)] ))
-		all_names.update(ref_names)	
-		all_names.update(test_names)
-
-		for test, ref in product(test_names, ref_names):
-			try:
-				val = test_matrix[test_names.index(test), ref_names.index(ref)]
-				if not np.isnan(val):
-					all_measurements[(test, ref)].append(val)
-			except:
-				continue
-		for ref_test, ref in product(ref_names, ref_names):
-			try:
-				val = ref_matrix[ref_names.index(ref_test), ref_names.index(ref)]
-				if not np.isnan(val):
-					all_measurements[(ref_test, ref)].append(val)
-			except:
-				continue
-
-		print fname, len(all_measurements), "measurements"
-
-	print "total from tables:", len(all_measurements), "measurements"
-	trevor_table = '/home/richard/Projects/flu_HI_data/tables/trevor_elife_H3N2_HI_data.tsv'
-	import csv
-	with open(trevor_table) as infile:
-		table_reader = csv.reader(infile, delimiter="\t")
-		header = table_reader.next()
-		for row in table_reader:
-			try:
-				all_names.add(strain_name_fixing(row[1]))
-				val = titer_to_number(row[6])
-				if not np.isnan(val):
-					all_measurements[(strain_name_fixing(row[1]), strain_name_fixing(row[4]))].append(val)
-			except:
-				print row
-
-	print "grand total:", len(all_measurements), "measurements"
-	return all_names, all_measurements, HI_matrices
-
-
-def get_strains_with_HI_and_sequence():
-	names, measurements, HI_matrices = read_tables()
-	from Bio import SeqIO
-	good_strains = set()
-	with open("data/strains_with_HI.fasta", 'w') as outfile, \
-		 open("data/20150222_all_H3N2_HA1.fasta", 'r') as infile:
-		for seq_rec in SeqIO.parse(infile, 'fasta'):
-			reduced_name = strain_name_fixing(seq_rec.name)
-			if reduced_name in names and (reduced_name not in good_strains):
-				SeqIO.write(seq_rec, outfile,'fasta')
-				good_strains.add(reduced_name)
-				print seq_rec.name
-
-
 class HI_tree(object):
 
-	def __init__(self, tree, HI_measurements):
-		self.tree = tree
-		self.names_to_clades = {leaf.strain.lower(): leaf for leaf in self.tree.leaf_iter()}
-		self.HI = HI_measurements
+	def __init__(self, HI_fname = 'source-data/HI_titers.txt'):
+		self.HI, tmp = read_HI_titers(HI_fname)
 		self.normalize_HI()
 		self.add_mutations()
 		self.mark_HI_splits()
+
+
+	def read_HI_titers(self, fname):
+		strains = set()
+		measurements = {}
+		with open(fname, 'r') as infile:
+			for line in infile:
+				entries = line.strip().split()
+				test, ref, val = entries[0], entries[1], map(float, entries[2:])
+				if len(val):
+					measurements[(test, ref)] = val
+					strains.update([test, ref])
+				else:
+					print line.strip()
+		return measurements, strains
 
 	def normalize_HI(self):
 		consensus_func = np.max
@@ -333,6 +231,10 @@ class HI_tree(object):
 		else:
 			return None
 
+######################################################################################
+####  utility functions for reading and writing HI Tables, plotting trees, etc
+######################################################################################
+
 def plot_tree(tree):
 	btree = to_Biopython(tree)
 	color_BioTree_by_attribute(btree,"cHI", transform = lambda x:x)
@@ -350,6 +252,121 @@ def plot_dHI_distribution(tree):
 	plt.legend(loc=1)
 	plt.show()
 
+min_titer = 10.0
+
+def strain_name_fixing(name):
+	return name.replace(' ','').lower()
+def titer_to_number(val):
+	try:
+		if '<' in val:
+			return np.nan
+		if len(val.split())>1:
+			return float(val.split()[0])
+		else:
+			return float(val)
+	except:
+		print "Bad HI measurement:", val
+		return np.nan
+
+def parse_HI_matrix(fname):
+	import csv
+	with open(fname) as infile:
+		csv_reader = csv.reader(infile)
+
+		# parse sera
+		row1 = csv_reader.next()
+		row2 = csv_reader.next()
+		print row1
+		print row2
+		ref_sera = [(e1+'/'+e2).replace(' ','') for e1,e2 in zip(row1, row2)[4:]]
+		print ref_sera
+		for row in csv_reader: # advance until the reference virus
+			if row[0].startswith('REFERENCE'):
+				break
+
+		ref_strains = []
+		ref_matrix = []
+		for row in csv_reader: 
+			if row[0].startswith('TEST'):
+				break
+			else: # load matrices until the test virus section starts
+				ref_strains.append(strain_name_fixing(row[0]))
+				ref_matrix.append(map(titer_to_number, row[4:]))
+
+		test_strains = []
+		test_matrix = []
+		for row in csv_reader: # load test viruses until it is no longer an A/ flu  name
+			if not row[0].startswith('A/'):
+				break
+			else:
+				test_strains.append(strain_name_fixing(row[0]))
+				test_matrix.append(map(titer_to_number, row[4:]))
+		return ref_strains, np.array(ref_matrix), test_strains, np.matrix(test_matrix)
+
+
+def read_tables():
+	import glob
+	from itertools import product
+	flist = glob.glob('/home/richard/Projects/flu_HI_data/tables/*csv')
+	all_names = set()
+	all_measurements = defaultdict(list)
+	HI_matrices = []
+	for fname in flist:
+		ref_names, ref_matrix, test_names, test_matrix = parse_HI_matrix(fname)
+		HI_matrices.append( (ref_names, ref_matrix[:,:len(ref_names)], test_names, test_matrix[:,:len(ref_names)] ))
+		all_names.update(ref_names)	
+		all_names.update(test_names)
+
+		for test, ref in product(test_names, ref_names):
+			try:
+				val = test_matrix[test_names.index(test), ref_names.index(ref)]
+				if not np.isnan(val):
+					all_measurements[(test, ref)].append(val)
+			except:
+				continue
+		for ref_test, ref in product(ref_names, ref_names):
+			try:
+				val = ref_matrix[ref_names.index(ref_test), ref_names.index(ref)]
+				if not np.isnan(val):
+					all_measurements[(ref_test, ref)].append(val)
+			except:
+				continue
+
+		print fname, len(all_measurements), "measurements"
+
+	print "total from tables:", len(all_measurements), "measurements"
+	trevor_table = '/home/richard/Projects/flu_HI_data/tables/trevor_elife_H3N2_HI_data.tsv'
+	import csv
+	with open(trevor_table) as infile:
+		table_reader = csv.reader(infile, delimiter="\t")
+		header = table_reader.next()
+		for row in table_reader:
+			try:
+				all_names.add(strain_name_fixing(row[1]))
+				val = titer_to_number(row[6])
+				if not np.isnan(val):
+					all_measurements[(strain_name_fixing(row[1]), strain_name_fixing(row[4]))].append(val)
+			except:
+				print row
+
+	print "grand total:", len(all_measurements), "measurements"
+	return all_names, all_measurements, HI_matrices
+
+
+def get_strains_with_HI_and_sequence():
+	names, measurements, HI_matrices = read_tables()
+	from Bio import SeqIO
+	good_strains = set()
+	with open("data/strains_with_HI.fasta", 'w') as outfile, \
+		 open("data/20150222_all_H3N2_HA1.fasta", 'r') as infile:
+		for seq_rec in SeqIO.parse(infile, 'fasta'):
+			reduced_name = strain_name_fixing(seq_rec.name)
+			if reduced_name in names and (reduced_name not in good_strains):
+				SeqIO.write(seq_rec, outfile,'fasta')
+				good_strains.add(reduced_name)
+				print seq_rec.name
+
+
 def flat_HI_titers(measurements, fname = 'source-data/HI_titers.txt'):
 	with open('source-data/HI_strains.txt') as infile:
 		strains = [line.strip().lower() for line in infile]	
@@ -357,20 +374,6 @@ def flat_HI_titers(measurements, fname = 'source-data/HI_titers.txt'):
 		for (test, ref), val in measurements.iteritems():
 			if test.lower() in strains and ref.lower() in strains:
 				outfile.write(test+'\t'+ref+'\t'+'\t'.join(map(str,val))+'\n')
-
-def read_HI_titers(fname = 'source-data/HI_titers.txt'):
-	strains = set()
-	measurements = {}
-	with open(fname, 'r') as infile:
-		for line in infile:
-			entries = line.strip().split()
-			test, ref, val = entries[0], entries[1], map(float, entries[2:])
-			if len(val):
-				measurements[(test, ref)] = val
-				strains.update([test, ref])
-			else:
-				print line.strip()
-	return measurements, strains
 
 def censor_late_viruses(tree, measurements, cutoff):
 	names_to_clades = {leaf.strain.lower():leaf for leaf in tree.leaf_iter()}

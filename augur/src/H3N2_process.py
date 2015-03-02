@@ -3,6 +3,7 @@ sys.path.append('src')
 from virus_filter import flu_filter
 from virus_clean import virus_clean
 from tree_refine import tree_refine
+from tree_titer import HI_tree
 from process import process
 from Bio import SeqIO
 from Bio.Seq import Seq
@@ -27,11 +28,11 @@ virus_config = {
 	'n_iqd':3,     # standard deviations from clock
 
 	# frequency estimation parameters
-	'aggregate_regions': [  ("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
-							("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ],
+	'aggregate_regions': [  ("global", None)], #, ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
+#							("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ],
 	'frequency_stiffness':10.0,
 	'time_interval':(2012.0, 2015.1),
-	'pivots_per_year':12.0,
+	'pivots_per_year':6.0,
 	'min_freq':10,
 	# define relevant clades in canonical HA1 numbering (+1)
 	'clade_designations': { "3c3.a":[(128,'A'), (142,'G'), (159,'S')],
@@ -235,7 +236,7 @@ class H3N2_refine(tree_refine):
 				except:
 					pass
 
-class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
+class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree):
 	"""docstring for H3N2_process, H3N2_filter"""
 	def __init__(self,verbose = 0, force_include = None, 
 				force_include_all = False, max_global= True, **kwargs):
@@ -249,7 +250,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 		self.verbose = verbose
 
 	def run(self, years_back=3, viruses_per_month=50, raxml_time_limit = 1.0,  **kwargs):
-		all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies', 'export']
+		all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies', 'HI', 'export']
 		steps = all_steps[all_steps.index(kwargs['start']):(all_steps.index(kwargs['stop'])+1)]
 		if 'filter' in steps:
 			print "--- Virus filtering at " + time.strftime("%H:%M:%S") + " ---"
@@ -287,6 +288,11 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 			self.determine_variable_positions()
 			self.estimate_frequencies()
 			self.dump()
+		if 'HI' in steps:
+			print "--- Adding HI titers to the tree " + time.strftime("%H:%M:%S") + " ---"
+			self.map_HI_to_tree(training_fraction=0.9, method = 'nnl1reg', lam=reg)
+			self.dump()
+
 		if 'export' in steps:
 			self.temporal_regional_statistics()
 			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb'])
