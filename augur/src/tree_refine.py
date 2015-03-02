@@ -109,6 +109,8 @@ class tree_refine(object):
 			if node.is_leaf():
 				node.yvalue = yvalue
 				yvalue += 1
+			else:
+				node.yvalue = 0
 		for node in self.tree.postorder_node_iter():
 			node.yvalue = self.get_yvalue(node)
 			node.xvalue = node.distance_from_root()

@@ -27,11 +27,11 @@ virus_config = {
 	'n_iqd':3,     # standard deviations from clock
 
 	# frequency estimation parameters
-	'aggregate_regions': [  ("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
-							("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ],
+	'aggregate_regions': [  ("global", None)],# ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
+#							("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ],
 	'frequency_stiffness':10.0,
 	'time_interval':(2012.0, 2015.1),
-	'pivots_per_year':12.0,
+	'pivots_per_year':6.0,
 	'min_freq':10,
 	# define relevant clades in canonical HA1 numbering (+1)
 	'clade_designations': { "3c3.a":[(128,'A'), (142,'G'), (159,'S')],

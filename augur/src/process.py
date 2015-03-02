@@ -9,13 +9,14 @@ import numpy as np
 
 class process(virus_frequencies):
 	"""generic template class for processing virus sequences into trees"""
-	def __init__(self, tree_fname = 'data/tree.pkl', virus_fname = 'data/virus.pkl', 
+	def __init__(self, tree_fname = 'data/tree.pkl', virus_fname = 'data/virus.pkl', aa_seq_fname = 'data/aa_seq.pkl',
 				frequency_fname = 'data/frequency.pkl', auspice_frequency_fname ='../auspice/data/frequencies.json',
 				auspice_sequences_fname='../auspice/data/sequences.json', auspice_tree_fname='../auspice/data/tree.json', min_freq = 0.01, **kwargs):
 		virus_frequencies.__init__(self, **kwargs)
 		self.tree_fname = tree_fname
 		self.virus_fname = virus_fname
 		self.frequency_fname = frequency_fname
+		self.aa_seq_fname = aa_seq_fname
 		self.min_freq = min_freq
 		self.auspice_tree_fname = auspice_tree_fname
 		self.auspice_sequences_fname = auspice_sequences_fname
@@ -32,6 +33,9 @@ class process(virus_frequencies):
 		if hasattr(self, 'frequencies'):
 			with open(self.frequency_fname, 'w') as outfile:
 				cPickle.dump(self.frequencies, outfile)
+		if hasattr(self, 'aa_aln'):
+			with open(self.aa_seq_fname, 'w') as outfile:
+				cPickle.dump(self.aa_aln, outfile)
 
 	def load(self):
 		import cPickle
@@ -44,6 +48,9 @@ class process(virus_frequencies):
 		if os.path.isfile(self.frequency_fname):
 			with open(self.frequency_fname, 'r') as infile:
 				self.frequencies = cPickle.load(infile)
+		if os.path.isfile(self.aa_seq_fname):
+			with open(self.aa_seq_fname, 'r') as infile:
+				self.aa_aln = cPickle.load(infile)
 
 	def export_to_auspice(self, tree_fields = [], tree_pop_list = []):
 		from tree_util import dendropy_to_json, all_descendants
