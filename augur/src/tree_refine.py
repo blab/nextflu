@@ -94,10 +94,11 @@ class tree_refine(object):
 
 	def get_yvalue(self, node):
 		"""Return y location based on recursive mean of daughter locations"""
-		if hasattr(node, 'yvalue'):
+		if node.is_leaf():
 			return node.yvalue
-		if node.child_nodes():
-			return np.mean([n.yvalue for n in node.child_nodes()])
+		else:
+			if node.child_nodes():
+				return np.mean([n.yvalue for n in node.child_nodes()])
 
 	def layout(self):
 		"""Add clade, xvalue, yvalue, mutation and trunk attributes to all nodes in tree"""
@@ -109,8 +110,6 @@ class tree_refine(object):
 			if node.is_leaf():
 				node.yvalue = yvalue
 				yvalue += 1
-			else:
-				node.yvalue = 0
 		for node in self.tree.postorder_node_iter():
 			node.yvalue = self.get_yvalue(node)
 			node.xvalue = node.distance_from_root()
