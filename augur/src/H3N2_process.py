@@ -1,5 +1,6 @@
 import time, argparse,re, sys,os
 sys.path.append('src')
+sys.setrecursionlimit(10000)  # needed since we are dealing with large trees
 from virus_filter import flu_filter
 from virus_clean import virus_clean
 from tree_refine import tree_refine
