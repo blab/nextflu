@@ -10,7 +10,7 @@ from fitness_predictors import *
 
 min_freq = 0.1
 max_freq = 0.9
-min_tips = 10
+min_tips = 100
 pc=1e-2
 regularization = 1e-5
 
@@ -30,8 +30,8 @@ class fitness_model(object):
 		self.predictor_functions = {'lb':self.calc_LBI, 
 									'ne_star':self.calc_nonepitope_star_distance,
 									'HI':self.calc_HI}
-		self.LBI_tau = 0.008
-		self.LBI_trans = lambda x:x**0.5
+		self.LBI_tau = 0.005
+		self.LBI_trans = lambda x:x**1.0
 		self.current_season = self.seasons[-1]
 
 	def calc_tip_counts(self):
@@ -43,6 +43,7 @@ class fitness_model(object):
 		'''
 		# count tips
 		leaf_count = 0
+		self.tip_aln = []
 		for node in self.tree.postorder_node_iter():
 			tmp_list = defaultdict(list)
 			for child in node.child_nodes():
@@ -58,8 +59,10 @@ class fitness_model(object):
 				if len(tmp_season_list)==1:
 					node.tips_by_season[tmp_season_list[0]]=[leaf_count]
 				leaf_count+=1
+				self.tip_aln.append(np.fromstring(node.seq, 'S1'))
 				node.tip_index = leaf_count
 
+		self.tip_aln = np.array(self.tip_aln)
 		# short cut to total number of tips per seaons
 		total_counts = {s:len(strain_list) for s, strain_list in self.tree.seed_node.tips_by_season.iteritems()} 
 		if self.verbose>1:
@@ -88,9 +91,14 @@ class fitness_model(object):
 
 	def calc_all_predictors(self):
 		self.predictor_arrays={}
+		self.season_af = {}
 		for node in self.tree.postorder_node_iter():
 			node.predictors = {}
 		for s in self.seasons:
+			self.season_af[s] = np.zeros((len(self.nuc_alphabet), self.tip_aln.shape[1]))
+			for ni, nuc in enumerate(self.nuc_alphabet):
+				self.season_af[s][ni,:] = (self.tip_aln[self.tree.seed_node.tips_by_season[s],:]==nuc).mean(axis=0)
+
 			tmp_preds = []
 			t0=time.time()
 			if self.verbose: print "calculating predictors for season ", s[0], '--', s[1],
@@ -119,37 +127,16 @@ class fitness_model(object):
 
 		self.global_std = np.mean(self.season_std, axis=0)
 
-		for s, m in izip(self.seasons, self.season_means):
+		for s, m, stddev in izip(self.seasons, self.season_means, self.season_std):
 			# keep this for internal nodes
 			for node in self.tree.postorder_node_iter():
 				if node.predictors[s] is not None:
-					node.predictors[s] = (node.predictors[s]-m)/self.global_std
+					#node.predictors[s] = (node.predictors[s]-m)/self.global_std
+					node.predictors[s] = (node.predictors[s]-m)/stddev
 
 			self.predictor_arrays[s]-=m
-			self.predictor_arrays[s]/=self.global_std
-
-
-	def select_clades_for_fitting(self):
-		# short cut to total number of tips per seaons
-		total_counts = {s:len(strain_list) for s, strain_list in self.tree.seed_node.tips_by_season.iteritems()}
-		# prune seasons where few observations were made, only consecutive pairs
-		# with sufficient tip count are retained
-		self.fit_test_season_pairs = [(s,t) for s,t in izip(self.seasons[:-1], self.seasons[1:]) 
-							if total_counts[s]>min_tips and total_counts[t]>min_tips]
-		
-		# for each pair of seasons with sufficient tip counts, 
-		# select clades in a certain frequency window
-		# keep track of these season / clade combinations in the dict clades_for_season
-		self.clades_for_season = {}
-		for s,t in self.fit_test_season_pairs:
-			self.clades_for_season[(s,t)] = []
-			for node in self.tree.postorder_node_iter():
-				if node.frequencies[s]>=min_freq and node.frequencies[s]<max_freq:
-					if max([c.frequencies[s] for c in node.child_nodes()])<node.frequencies[s]:
-						self.clades_for_season[(s,t)].append(node)
-					else:
-						if self.verbose: print "clade fully contained in daughter clade"
-
+			#self.predictor_arrays[s]/=self.global_std
+			self.predictor_arrays[s]/=stddev
 
 	def model_fit(self, params):
 		# walk through season pairs
@@ -157,31 +144,32 @@ class fitness_model(object):
 		#import pdb; pdb.set_trace()
 		for s,t in self.fit_test_season_pairs:		
 			# normalize strain frequencies
-			total_strain_freq = np.exp(self.fitness(params, self.predictor_arrays[s][self.tree.seed_node.tips_by_season[s],:])).sum()
-			# project clades forward according to strain makeup
-			clade_errors = []
-			test_clades = self.clades_for_season[(s,t)]
-			for clade in test_clades:
-				initial_freq = clade.frequencies[s]
-				obs_freq = clade.frequencies[t]
-				pred_freq = np.sum(np.exp(self.fitness(params, self.predictor_arrays[s][clade.tips_by_season[s],:])))/total_strain_freq
-				print initial_freq, obs_freq, pred_freq
-				clade_errors.append(np.absolute(pred_freq - obs_freq))
-			seasonal_errors.append(np.mean(clade_errors))
+			pred_af = self.fitness_biased_af(params, s)
+			seasonal_errors.append(self.allele_frequency_distance(pred_af, self.season_af[t]))
 		mean_error = np.mean(seasonal_errors)
 		if any(np.isnan(seasonal_errors)+np.isinf(seasonal_errors)):
 			mean_error = 1e10
 		self.last_fit = mean_error
-		print params, total_strain_freq, mean_error
 		if self.verbose>2: print params, self.last_fit
 		return mean_error + regularization*np.sum(params**2)
 		
 	def fitness(self, params, pred):
 		return np.sum(params*pred, axis=-1)
 
+	def fitness_biased_af(self, params, season):
+		pred_af = np.zeros_like(self.season_af[season])
+		ind = self.tree.seed_node.tips_by_season[season]
+		pred_freq = np.exp(self.fitness(params, self.predictor_arrays[season][ind,:]))
+		for ni, nuc in enumerate(self.nuc_alphabet):
+			pred_af[ni,:] = ((self.tip_aln[ind,:]==nuc).T*pred_freq).sum(axis=1)
+		pred_af/=pred_af.sum(axis=0)
+		return pred_af
+
+	def allele_frequency_distance(self, af1, af2):
+		return 1.0 - (af1*af2).sum(axis=0).mean(axis=-1)
 
 	def minimize_error(self):
-		from scipy.optimize import fmin as minimizer
+		from scipy.optimize import fmin_powell as minimizer
 		if self.verbose:		
 			print "initial function value:", self.model_fit(self.params)
 			print "initial parameters:", self.params
@@ -233,7 +221,6 @@ class fitness_model(object):
 		self.calc_tip_counts()
 		self.calc_all_predictors()
 		self.standardize_predictors()
-		self.select_clades_for_fitting()
 		self.learn_parameters(niter = niter)
 		self.assign_fitness(self.seasons[-1])
 

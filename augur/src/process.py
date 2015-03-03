@@ -20,6 +20,8 @@ class process(virus_frequencies):
 		self.auspice_tree_fname = auspice_tree_fname
 		self.auspice_sequences_fname = auspice_sequences_fname
 		self.auspice_frequency_fname = auspice_frequency_fname
+		self.nuc_alphabet = 'ACGT-N'
+		self.aa_alphabet = 'ACDEFGHIKLMNPQRSTVWY*X'
 
 	def dump(self):
 		import cPickle
@@ -219,7 +221,6 @@ class process(virus_frequencies):
 		self.variable_aa
 		'''
 		aln_array = np.array(self.viruses)
-		self.nuc_alphabet = 'ACGT-N'
 		self.nucleoties_frequencies = np.zeros((len(self.nuc_alphabet),aln_array.shape[1]))
 		for ni,nuc in enumerate(self.nuc_alphabet):
 			self.nucleoties_frequencies[ni,:]=(aln_array==nuc).mean(axis=0)
@@ -229,7 +230,6 @@ class process(virus_frequencies):
 
 		if hasattr(self, 'aa_aln'):
 			aln_array = np.array(self.aa_aln)
-			self.aa_alphabet = 'ACDEFGHIKLMNPQRSTVWY*X'
 			self.aa_frequencies = np.zeros((len(self.aa_alphabet),aln_array.shape[1]))
 			for ai,aa in enumerate(self.aa_alphabet):
 				self.aa_frequencies[ai,:]=(aln_array==aa).mean(axis=0)

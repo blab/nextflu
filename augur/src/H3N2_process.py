@@ -23,9 +23,9 @@ virus_config = {
 	'fasta_fields':{0:'strain', 1:"date", 4:"passage", -1:'accession'},
 	#'fasta_fields':{0:'strain', 1:"date", 4:"passage", -1:'accession'},
 	'outgroup':'A/Beijing/32/1992',
-	'force_include':'', #source-data/HI_strains.txt',
+	'force_include':'source-data/HI_strains.txt',
 	'force_include_all':True,
-	'max_global':False,   # sample as evenly as possible from different geographic regions 
+	'max_global':True,   # sample as evenly as possible from different geographic regions 
 	'cds':[48,-1], # define the HA1 start i n 0 numbering
 	'n_iqd':3,     # standard deviations from clock
 
