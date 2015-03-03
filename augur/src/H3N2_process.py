@@ -24,7 +24,7 @@ virus_config = {
 	'n_iqd':3,     # standard deviations from clock
 
 	# frequency estimation parameters
-	'aggregate_regions': [  ("global", None)], ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
+	'aggregate_regions': [  ("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
 							("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ],
 	'frequency_stiffness':10.0,
 	'time_interval':(2012.0, 2015.1),
