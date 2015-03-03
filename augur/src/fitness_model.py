@@ -7,8 +7,6 @@ from itertools import izip
 from tree_titer import *
 from fitness_predictors import *
 
-ymin = 2005
-ymax = 2015
 min_freq = 0.1
 max_freq = 0.9
 min_tips = 10
@@ -18,15 +16,14 @@ default_predictors = ['lb', 'ep', 'ne_star']
 
 class fitness_model(object):
 
-	def __init__(self, tree, predictors = None, verbose=0):
+	def __init__(self, predictors = None, verbose=0,**kwargs):
 		'''
 		parameters:
 		tree -- tree of sequences for which a fitness model is to be determined
 		'''
-		self.tree = tree
 		self.verbose=verbose
 		self.seasons = [ (date(year=y, month = 10, day = 1), date(year = y+1, month = 4, day=1)) 
-						for y in xrange(ymin, ymax)]
+						for y in xrange(self.time_interval[0], self.time_interval[1])]
 
 		self.predictors = []
 		for p in predictors:

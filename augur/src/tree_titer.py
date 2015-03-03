@@ -11,12 +11,8 @@ from matplotlib import pyplot as plt
 
 class HI_tree(object):
 
-	def __init__(self, HI_fname = 'source-data/HI_titers.txt'):
-		self.HI, tmp = read_HI_titers(HI_fname)
-		self.normalize_HI()
-		self.add_mutations()
-		self.mark_HI_splits()
-
+	def __init__(self, HI_fname = 'source-data/HI_titers.txt',**kwargs):
+		self.HI, tmp = self.read_HI_titers(HI_fname)
 
 	def read_HI_titers(self, fname):
 		strains = set()
@@ -38,7 +34,7 @@ class HI_tree(object):
 		sera = set()
 		HI_strains = set()
 		for (test, ref), val in self.HI.iteritems():
-			if test.lower() in self.names_to_clades and ref.lower() in self.names_to_clades:
+			if test.lower() in self.node_lookup and ref.lower() in self.node_lookup:
 				HI_strains.add(test.lower())
 				HI_strains.add(ref.lower())
 				if (ref,ref) in self.HI:
@@ -85,9 +81,9 @@ class HI_tree(object):
 		print "# of reference strains:",len(self.sera), "# of branches with HI constraint", self.HI_split_count
 
 	def get_path(self, v1, v2):
-		if v1 in self.names_to_clades and v2 in self.names_to_clades:
-			p1 = [self.names_to_clades[v1]]
-			p2 = [self.names_to_clades[v2]]
+		if v1 in self.node_lookup and v2 in self.node_lookup:
+			p1 = [self.node_lookup[v1]]
+			p2 = [self.node_lookup[v2]]
 			for tmp_p in [p1,p2]:
 				while tmp_p[-1].parent_node != self.tree.seed_node:
 					tmp_p.append(tmp_p[-1].parent_node)
@@ -108,8 +104,8 @@ class HI_tree(object):
 		for (test, ref), val in self.train_HI.iteritems():
 			if not np.isnan(val):
 				try:
-					if test != ref  and ref in self.names_to_clades \
-									and test in self.names_to_clades:
+					if test != ref  and ref in self.node_lookup \
+									and test in self.node_lookup:
 						path = self.get_path(test, ref)
 						tmp = np.zeros(self.HI_split_count + len(self.sera))
 						branches = np.unique([c.HI_branch_index for c in path])
@@ -128,6 +124,7 @@ class HI_tree(object):
 		return np.mean( (self.HI_dist - np.dot(self.tree_graph, self.params))**2 )
 
 	def fit_l1reg(self):
+		from cvxopt import matrix
 		from l1regls import l1regls
 		A = matrix(self.tree_graph)
 		b = matrix(self.HI_dist)
@@ -172,6 +169,9 @@ class HI_tree(object):
 		return np.array([x for x in W['x']])[:n_params]
 
 	def map_HI_to_tree(self, training_fraction = 1.0, method = 'nnls', lam=10):
+		self.normalize_HI()
+		self.add_mutations()
+		self.mark_HI_splits()
 		self.lam = lam
 		if training_fraction<1.0:
 			self.test_HI, self.train_HI = {}, {}
