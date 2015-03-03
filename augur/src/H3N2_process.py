@@ -1,6 +1,4 @@
-import time, argparse,re, sys,os
-sys.path.append('src')
-sys.setrecursionlimit(10000)  # needed since we are dealing with large trees
+import time, argparse,re,os
 from virus_filter import flu_filter
 from virus_clean import virus_clean
 from tree_refine import tree_refine
@@ -12,28 +10,27 @@ import numpy as np
 from itertools import izip
 
 epitope_mask = np.fromstring("0000000000000000000000000000000000000000000011111011011001010011000100000001001011110011100110101000001100000100000001000110101011111101011010111110001010011111000101011011111111010010001111101110111001010001110011111111000000111110000000101010101110000000000011100100000001011011100000000000001001011000110111111000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", dtype='S1')
-
 	
 virus_config = {
 	# data source and sequence parsing/cleaning/processing
 	'virus':'H3N2',
 	'alignment_file':'data/gisaid_epiflu_sequence.fasta',
-	'fasta_fields':{0:'strain', 1:"date", 4:"passage", -1:'accession'},
+	'fasta_fields':{0:'strain', 1:'accession', 3:'passage', 5:'date' },
 	#'fasta_fields':{0:'strain', 1:"date", 4:"passage", -1:'accession'},
 	'outgroup':'A/Beijing/32/1992',
 	#'force_include':'source-data/HI_strains.txt',
 	'force_include_all':False,
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
-	'cds':[48,-1], # define the HA1 start i n 0 numbering
+	'cds':[48,None], # define the HA1 start i n 0 numbering
 	'n_iqd':3,     # standard deviations from clock
 
 	# frequency estimation parameters
-	'aggregate_regions': [  ("global", None)],# ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
-#							("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ],
+	'aggregate_regions': [  ("global", None)], ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
+							("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ],
 	'frequency_stiffness':10.0,
 	'time_interval':(2012.0, 2015.1),
-	'pivots_per_year':6.0,
-	'min_freq':10,
+	'pivots_per_year':12.0,
+	'min_freq':0.01,
 	# define relevant clades in canonical HA1 numbering (+1)
 	'clade_designations': { "3c3.a":[(128,'A'), (142,'G'), (159,'S')],
 						   "3c3":  [(128,'A'), (142,'G'), (159,'F')],
@@ -41,7 +38,7 @@ virus_config = {
 						   "3c2":  [(144,'N'), (159,'F'),(225,'N'), (489,'N')]
 							},
 	'verbose':2, 
-	'tol':1e-3, #tolerance for frequency optimization
+	'tol':1e-4, #tolerance for frequency optimization
 	'pc':1e-3, #pseudocount for frequencies 
 	'extra_pivots': 6,  # number of pivot point for or after the last observations of a mutations
 	'inertia':0.7,		# fraction of frequency change carry over in the stiffness term
@@ -289,6 +286,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 			self.dump()
 		if 'export' in steps:
 			self.temporal_regional_statistics()
+			# exporting to json, including the H3N2 specific fields
 			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb'])
 
 if __name__=="__main__":
