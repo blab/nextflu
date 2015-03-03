@@ -1,5 +1,15 @@
 import dendropy
+import numpy as np
 from io_util import *
+
+# FIXME: make flu unspecific
+def delimit_newick(infile_name):
+	import re
+	with open(infile_name, 'r') as file:
+		newick = file.read().replace('\n', '')
+		newick = re.sub(r'(A/[^\:^,]+)', r"'\1'", newick)
+	return newick
+
 
 def color_BioTree_by_attribute(T,attribute, vmin=None, vmax = None, missing_val='min', transform = lambda x:x, cmap=None):
 	'''
@@ -91,70 +101,36 @@ def all_descendants(node):
 
 def get_dates(node):
 	"""Return ordered list of dates of descendants of a node"""
-	return sorted([n['date'] for n in tip_descendants(node)])
+	return sorted([n['date'] for n in node.leaf_iter()])
 
-def dendropy_to_json(node):
+def dendropy_to_json(node, extra_attr = []):
 	json = {}
-	if hasattr(node, 'clade'):
-		json['clade'] = node.clade
-	if node.taxon:
-		json['strain'] = str(node.taxon).replace("'", '')
-	if hasattr(node, 'xvalue'):
-		json['xvalue'] = round(node.xvalue, 5)
-	if hasattr(node, 'yvalue'):
-		json['yvalue'] = round(node.yvalue, 5)
-	if hasattr(node, 'ep'):
-		json['ep'] = node.ep
-	if hasattr(node, 'ne'):
-		json['ne'] = node.ne
-	if hasattr(node, 'rb'):
-		json['rb'] = node.rb
-	if hasattr(node, 'date'):
-		json['date'] = node.date
-	if hasattr(node, 'seq'):
-		json['seq'] = node.seq
-	if hasattr(node, 'LBI'):
-		json['LBI'] = round(node.LBI, 5)
-	if hasattr(node, 'tol'):
-		json['tol'] = round(node.tol, 5)		
-	if hasattr(node, 'fitness'):
-		json['fitness'] = round(node.fitness, 5)		
+	str_attr = ['country','region','clade','strain', 'date']
+	num_attr = ['xvalue', 'yvalue', 'num_date']
+	for prop in str_attr:
+		if hasattr(node, prop):
+			json[prop] = node.__getattribute__(prop)
+	for prop in num_attr:
+		if hasattr(node, prop):
+			json[prop] = round(node.__getattribute__(prop),5)
+	for prop in extra_attr:
+		if len(prop)==2 and callable(prop[1]):
+			if hasattr(node, prop[0]):
+				json[prop] = prop[1](node.__getattribute__(prop[0]))
+		else:
+			if hasattr(node, prop):
+				json[prop] = node.__getattribute__(prop)
+
+	if hasattr(node, 'freq') and node.freq is not None:
+		json['freq'] = {reg: list(freq) if freq is not None else "undefined" for reg, freq in node.freq.iteritems()}
+	if hasattr(node, 'pivots'):
+		json['pivots'] = list(node.pivots)
+
 	if node.child_nodes():
 		json["children"] = []
 		for ch in node.child_nodes():
-			json["children"].append(dendropy_to_json(ch))
+			json["children"].append(dendropy_to_json(ch, extra_attr))
 	return json
-
-def BioPhylo_to_json(node):
-	json = {}
-	if hasattr(node, 'clade'):
-		json['clade'] = node.clade
-	if node.name:
-		json['strain'] = str(node.name).replace("'", '')
-	if hasattr(node, 'branch_length'):
-		json['branch_length'] = round(node.branch_length, 5)
-	if hasattr(node, 'xvalue'):
-		json['xvalue'] = round(node.xvalue, 5)
-	if hasattr(node, 'yvalue'):
-		json['yvalue'] = round(node.yvalue, 5)
-	if hasattr(node, 'ep'):
-		json['ep'] = node.ep
-	if hasattr(node, 'ne'):
-		json['ne'] = node.ne
-	if hasattr(node, 'rb'):
-		json['rb'] = node.rb
-	if hasattr(node, 'date'):
-		json['date'] = node.date
-	if hasattr(node, 'seq'):
-		json['seq'] = str(node.seq)
-	if hasattr(node, 'LBI'):
-		json['LBI'] = round(node.LBI,5)
-	if len(node.clades):
-		json["children"] = []
-		for ch in node.clades:
-			json["children"].append(BioPhylo_to_json(ch))
-	return json
-
 
 def json_to_dendropy(json):
 	'''
@@ -164,6 +140,7 @@ def json_to_dendropy(json):
 	tree.get_from_string(';', 'newick')
 	root = tree.seed_node
 	json_to_dendropy_sub(json, root, tree.taxon_set)
+
 	root.edge_length=0.0
 	return tree
 
@@ -172,6 +149,8 @@ def json_to_dendropy_sub(json, node, taxon_set):
 	recursively calls itself for all children of node and
 	builds up the tree. entries in json are added as node attributes
 	'''
+	if 'xvalue' in json:
+		node.xvalue = float(json['xvalue'])
 	for attr,val in json.iteritems():
 		if attr=='children':
 			for sub_json in val:
@@ -187,28 +166,34 @@ def json_to_dendropy_sub(json, node, taxon_set):
 			try:
 				node.__setattr__(attr, float(val))
 			except:
-				node.__setattr__(attr, val)
+				if val=='undefined':
+					node.__setattr__(attr, None)
+				else:
+					node.__setattr__(attr, val)
 	if len(node.child_nodes())==0:
 		node.taxon = dendropy.Taxon(label=json['strain'].lower())
-		node.label = json['strain'].lower()
+		node.strain = json['strain']
 		taxon_set.add_taxon(node.taxon)
 
-def main():
 
-	tree = read_json('tree.json')
-
-#	print "Whole tree"
-#	for tip in descendants(tree):
-#		print tip['date']
-
-#	node = tree['children'][0]
-
-#	dates = get_dates(tree)
-#	print dates
-
-	for node in all_descendants(tree):
-		dates = get_dates(node)
-		print str(node['clade']) + ": " + str(len(dates))
-
-if __name__ == "__main__":
-	main()
+def BioPhylo_to_json(node):
+	json = {}
+	if hasattr(node, 'clade'):
+		json['clade'] = node.clade
+	if node.name:
+		json['strain'] = str(node.name).replace("'", '')
+	if hasattr(node, 'branch_length'):
+		json['branch_length'] = round(node.branch_length, 5)
+	if hasattr(node, 'xvalue'):
+		json['xvalue'] = round(node.xvalue, 5)
+	if hasattr(node, 'yvalue'):
+		json['yvalue'] = round(node.yvalue, 5)
+	if hasattr(node, 'date'):
+		json['date'] = node.date
+	if hasattr(node, 'seq'):
+		json['seq'] = str(node.seq)
+	if len(node.clades):
+		json["children"] = []
+		for ch in node.clades:
+			json["children"].append(BioPhylo_to_json(ch))
+	return json

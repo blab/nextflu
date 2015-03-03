@@ -1,12 +1,21 @@
 import dendropy, time
 import numpy as np
-from seq_util import epitope_distance, translate
-from seq_util import nonepitope_distance
 from io_util import read_json
 from io_util import write_json
 from tree_util import json_to_dendropy
 from tree_util import dendropy_to_json
+from tree_titer import *
 from fitness_tolerance import load_mutational_tolerance, calc_fitness_tolerance
+
+def calc_HI(tree, attr='HI'):
+	'''
+	calculates the HI titer for nodes using measurements only for "alive" nodes 
+	'''
+	max_date = max([n.num_date for n in tree.leaf_iter() if n.alive])
+	estimate_HI_to_date(tree, max_date)
+	for n in tree.postorder_node_iter():
+		n.__setattr__(attr, n.cHI)
+
 
 def calc_epitope_distance(tree, attr='ep', ref = None):
 	'''
@@ -16,10 +25,8 @@ def calc_epitope_distance(tree, attr='ep', ref = None):
 	'''
 	if not hasattr(tree, "epitope_distance_assigned") or tree.epitope_distance_assigned==False:
 		if ref == None:
-			ref = translate(tree.seed_node.seq)
+			ref = tree.seed_node.aa_seq
 		for node in tree.postorder_node_iter():
-			if not hasattr(node, 'aa'):
-				node.aa = translate(node.seq)
 			node.__setattr__(attr, epitope_distance(node.aa, ref))
 		tree.epitope_distance_assigned=True
 
@@ -31,7 +38,7 @@ def  calc_tolerance(tree, attr='tol'):
 	'''
 	from Bio import AlignIO
 	aa, sites, wt_aa, aa_prob = load_mutational_tolerance()
-	aln = AlignIO.read('../source-data/H1_H3.fasta', 'fasta')
+	aln = AlignIO.read('source-data/H1_H3.fasta', 'fasta')
 	# returns true whenever either of the sequences have a gap
 	aligned = (np.array(aln)!='-').min(axis=0)
 	# map alignment positions to sequence positions, subset to aligned amino acids
@@ -60,11 +67,9 @@ def calc_nonepitope_distance(tree, attr='ne', ref = None):
 	'''
 	if not hasattr(tree, "nonepitope_distance_assigned") or tree.nonepitope_distance_assigned==False:
 		if ref == None:
-			ref = translate(tree.seed_node.seq)
+			ref = tree.seed_node.aa_seq
 		for node in tree.postorder_node_iter():
-			if not hasattr(node, 'aa'):
-				node.aa = translate(node.seq)
-			node.__setattr__(attr, nonepitope_distance(node.aa, ref))
+			node.__setattr__(attr, nonepitope_distance(node.aa_seq, ref))
 		tree.nonepitope_distance_assigned=True
 
 def calc_nonepitope_star_distance(tree, attr='ne_star', seasons = []):
@@ -76,8 +81,6 @@ def calc_nonepitope_star_distance(tree, attr='ne_star', seasons = []):
 	if not hasattr(tree, "nonepitope_star_distance_assigned") or tree.nonepitope_star_distance_assigned==False:
 		for node in tree.postorder_node_iter():
 			if len(node.tips) and node!=tree.seed_node:
-				if not hasattr(node, 'aa'):
-					node.aa = translate(node.seq)
 				tmp_node = node.parent_node
 				cur_season = min(node.tips.keys())
 				prev_season = seasons[max(0,seasons.index(cur_season)-1)]
@@ -89,9 +92,7 @@ def calc_nonepitope_star_distance(tree, attr='ne_star', seasons = []):
 							tmp_node=tmp_node.parent_node
 					else:
 						break
-				if not hasattr(tmp_node, 'aa'):
-					tmp_node.aa = translate(tmp_node.seq)
-				node.__setattr__(attr, nonepitope_distance(node.aa, tmp_node.aa))
+				node.__setattr__(attr, nonepitope_distance(node.aa_seq, tmp_node.aa_seq))
 			else:
 				node.__setattr__(attr, np.nan)				
 		tree.nonepitope_star_distance_assigned=True

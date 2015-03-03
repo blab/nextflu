@@ -16,6 +16,8 @@ def year_delta(start_date, years):
 
 def numerical_date(date):
 	"""Takes a calendar date and a numerical dates in terms of years"""
+	if isinstance(date, basestring):
+		date = datetime.date(*map(int, date.split('-')))
 	start_date = datetime.date(year=date.year, month=1, day=1)
 	start_ord = start_date.toordinal()
 	end_ord = date.toordinal()
