@@ -26,7 +26,7 @@ virus_config = {
 	'force_include':'source-data/HI_strains.txt',
 	'force_include_all':True,
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
-	'cds':[48,-1], # define the HA1 start i n 0 numbering
+	'cds':[48,None], # define the HA1 start i n 0 numbering
 	'n_iqd':3,     # standard deviations from clock
 
 	# frequency estimation parameters
@@ -35,7 +35,7 @@ virus_config = {
 	'frequency_stiffness':10.0,
 	'time_interval':(2005.0, 2015.1),
 	'pivots_per_year':3.0,
-	'min_freq':10,
+	'min_freq':0.01,
 	# define relevant clades in canonical HA1 numbering (+1)
 	'clade_designations': { "3c3.a":[(128,'A'), (142,'G'), (159,'S')],
 						   "3c3":  [(128,'A'), (142,'G'), (159,'F')],
