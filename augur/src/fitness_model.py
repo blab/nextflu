@@ -29,7 +29,8 @@ class fitness_model(object):
 		self.predictors = predictors
 		self.predictor_functions = {'lb':self.calc_LBI, 
 									'ne_star':self.calc_nonepitope_star_distance,
-									'HI':self.calc_HI}
+									'HI':self.calc_HI,
+									'tol':self.calc_tolerance}
 		self.LBI_tau = 0.005
 		self.LBI_trans = lambda x:x**1.0
 		self.current_season = self.seasons[-1]
@@ -74,6 +75,9 @@ class fitness_model(object):
 			node.frequencies = defaultdict(float)
 			for season, strain_list in node.tips_by_season.iteritems():
 				node.frequencies[season]=float(len(strain_list))/(total_counts[season]+1e-10)
+		self.fit_test_season_pairs = [(s,t) for s,t in izip(self.seasons[:-1], self.seasons[1:]) 
+							if total_counts[s]>min_tips and total_counts[t]>min_tips]
+
 
 	def calc_predictors(self):
 		print "calculating predictors"

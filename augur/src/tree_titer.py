@@ -401,5 +401,3 @@ if __name__ == "__main__":
 
 	out_tree_fname = 'data/tree_HI.json'
 	write_json(dendropy_to_json(tree.seed_node), out_tree_fname, indent=None)
-
-
