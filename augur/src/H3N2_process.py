@@ -1,5 +1,4 @@
-import time, argparse,re, sys,os
-sys.path.append('src')
+import time, argparse,re,os
 from virus_filter import flu_filter
 from virus_clean import virus_clean
 from tree_refine import tree_refine
@@ -11,28 +10,26 @@ import numpy as np
 from itertools import izip
 
 epitope_mask = np.fromstring("0000000000000000000000000000000000000000000011111011011001010011000100000001001011110011100110101000001100000100000001000110101011111101011010111110001010011111000101011011111111010010001111101110111001010001110011111111000000111110000000101010101110000000000011100100000001011011100000000000001001011000110111111000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", dtype='S1')
-
 	
 virus_config = {
 	# data source and sequence parsing/cleaning/processing
 	'virus':'H3N2',
 	'alignment_file':'data/gisaid_epiflu_sequence.fasta',
-	#'fasta_fields':{0:'strain', 1:"date", 4:"passage", -1:'accession'},
-	'fasta_fields':{0:'strain', 1:'accession', 3:"passage", 5:"date"},
+	'fasta_fields':{0:'strain', 1:'accession', 3:'passage', 5:'date' },
 	'outgroup':'A/Beijing/32/1992',
 	#'force_include':'source-data/HI_strains.txt',
 	'force_include_all':False,
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
-	'cds':[48,-1], # define the HA1 start i n 0 numbering
+	'cds':[48,None], # define the HA1 start i n 0 numbering
 	'n_iqd':3,     # standard deviations from clock
 
 	# frequency estimation parameters
-	'aggregate_regions': [  ("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
+	'aggregate_regions': [  ("global", None)], ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
 							("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ],
 	'frequency_stiffness':10.0,
 	'time_interval':(2012.0, 2015.1),
 	'pivots_per_year':12.0,
-	'min_freq':10,
+	'min_freq':0.01,
 	# define relevant clades in canonical HA1 numbering (+1)
 	'clade_designations': { "3c3.a":[(128,'A'), (142,'G'), (159,'S')],
 						   "3c3":  [(128,'A'), (142,'G'), (159,'F')],
@@ -40,7 +37,7 @@ virus_config = {
 						   "3c2":  [(144,'N'), (159,'F'),(225,'N'), (489,'N')]
 							},
 	'verbose':2, 
-	'tol':1e-3, #tolerance for frequency optimization
+	'tol':1e-4, #tolerance for frequency optimization
 	'pc':1e-3, #pseudocount for frequencies 
 	'extra_pivots': 6,  # number of pivot point for or after the last observations of a mutations
 	'inertia':0.7,		# fraction of frequency change carry over in the stiffness term
@@ -242,9 +239,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 		H3N2_refine.__init__(self,**kwargs)
 		self.verbose = verbose
 
-	def run(self, years_back=3, viruses_per_month=50, raxml_time_limit = 1.0,  **kwargs):
-		all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies', 'export']
-		steps = all_steps[all_steps.index(kwargs['start']):(all_steps.index(kwargs['stop'])+1)]
+	def run(self, steps, years_back=3, viruses_per_month=50, raxml_time_limit = 1.0):
 		if 'filter' in steps:
 			print "--- Virus filtering at " + time.strftime("%H:%M:%S") + " ---"
 			self.filter()
@@ -283,20 +278,23 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 			self.dump()
 		if 'export' in steps:
 			self.temporal_regional_statistics()
+			# exporting to json, including the H3N2 specific fields
 			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb'])
 
 if __name__=="__main__":
+	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies', 'export']
 	parser = argparse.ArgumentParser(description='Process virus sequences, build tree, and prepare of web visualization')
 	parser.add_argument('-y', '--years_back', type = int, default=3, help='number of past years to sample sequences from')
 	parser.add_argument('-v', '--viruses_per_month', type = int, default = 50, help='number of viruses sampled per month')
 	parser.add_argument('-r', '--raxml_time_limit', type = float, default = 1.0, help='number of hours raxml is run')
-	parser.add_argument('--config', default = "nextflu_config.py" , type=str, help ="config file")
+	parser.add_argument('--prefix', type = str, default = 'data/', help='path+prefix of file dumps')
 	parser.add_argument('--test', default = False, action="store_true",  help ="don't run the pipeline")
 	parser.add_argument('--start', default = 'filter', type = str,  help ="start pipeline at virus selection")
 	parser.add_argument('--stop', default = 'export', type=str,  help ="run to end")
 	params = parser.parse_args()
 	params.cds = (48,None)
 
+	steps = all_steps[all_steps.index(params.start):(all_steps.index(params.stop)+1)]
 	# add all arguments to virus_config (possibly overriding)
 	virus_config.update(params.__dict__)
 	# pass all these arguments to the processor: will be passed down as kwargs through all classes
@@ -304,4 +302,6 @@ if __name__=="__main__":
 	if params.test:
 		myH3N2.load()
 	else:
-		myH3N2.run(**virus_config)
+		myH3N2.run(steps, years_back=virus_config['years_back'], 
+			viruses_per_month = virus_config['viruses_per_month'], 
+			raxml_time_limit = virus_config['raxml_time_limit'])

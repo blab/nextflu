@@ -50,9 +50,10 @@ class tree_refine(object):
 			print "removed outgroup",self.outgroup['strain']
 		else:
 			print "outgroup",self.outgroup['strain'], "not found"
-#		if len(self.tree.seed_node.child_nodes())==1:
-#			self.tree.seed_node = self.tree.seed_node.child_nodes()[0]
-#			self.tree.seed_node.parent_node = None
+		if len(self.tree.seed_node.child_nodes())==1:
+			print "ROOT had one child only, moving root up!"
+			self.tree.seed_node = self.tree.seed_node.child_nodes()[0]
+			self.tree.seed_node.parent_node = None
 		self.tree.seed_node.edge_length = 0.001
 
 	def collapse(self):
@@ -94,10 +95,11 @@ class tree_refine(object):
 
 	def get_yvalue(self, node):
 		"""Return y location based on recursive mean of daughter locations"""
-		if hasattr(node, 'yvalue'):
+		if node.is_leaf():
 			return node.yvalue
-		if node.child_nodes():
-			return np.mean([n.yvalue for n in node.child_nodes()])
+		else:
+			if node.child_nodes():
+				return np.mean([n.yvalue for n in node.child_nodes()])
 
 	def layout(self):
 		"""Add clade, xvalue, yvalue, mutation and trunk attributes to all nodes in tree"""

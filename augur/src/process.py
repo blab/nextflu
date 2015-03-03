@@ -1,4 +1,6 @@
-import time, os, argparse,shutil,subprocess, glob
+import sys, time, os, argparse,shutil,subprocess, glob
+sys.path.append('src')
+sys.setrecursionlimit(10000)  # needed since we are dealing with large trees
 from Bio import SeqIO, AlignIO,Phylo
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
@@ -9,17 +11,19 @@ import numpy as np
 
 class process(virus_frequencies):
 	"""generic template class for processing virus sequences into trees"""
-	def __init__(self, tree_fname = 'data/tree.pkl', virus_fname = 'data/virus.pkl', 
-				frequency_fname = 'data/frequency.pkl', auspice_frequency_fname ='../auspice/data/frequencies.json',
+	def __init__(self, prefix = 'data/', auspice_frequency_fname ='../auspice/data/frequencies.json',
 				auspice_sequences_fname='../auspice/data/sequences.json', auspice_tree_fname='../auspice/data/tree.json', min_freq = 0.01, **kwargs):
 		virus_frequencies.__init__(self, **kwargs)
-		self.tree_fname = tree_fname
-		self.virus_fname = virus_fname
-		self.frequency_fname = frequency_fname
+		self.tree_fname = prefix+'tree.pkl'
+		self.virus_fname = prefix+'virus.pkl'
+		self.frequency_fname = prefix+'frequencies.pkl'
+		self.aa_seq_fname = prefix+'aa_seq.pkl'
 		self.min_freq = min_freq
 		self.auspice_tree_fname = auspice_tree_fname
 		self.auspice_sequences_fname = auspice_sequences_fname
 		self.auspice_frequency_fname = auspice_frequency_fname
+		self.nuc_alphabet = 'ACGT-N'
+		self.aa_alphabet = 'ACDEFGHIKLMNPQRSTVWY*X'
 
 	def dump(self):
 		import cPickle
@@ -32,18 +36,33 @@ class process(virus_frequencies):
 		if hasattr(self, 'frequencies'):
 			with open(self.frequency_fname, 'w') as outfile:
 				cPickle.dump(self.frequencies, outfile)
+		if hasattr(self, 'aa_aln'):
+			with open(self.aa_seq_fname, 'w') as outfile:
+				cPickle.dump(self.aa_aln, outfile)
 
 	def load(self):
 		import cPickle
 		if os.path.isfile(self.tree_fname):
 			with open(self.tree_fname, 'r') as infile:
 				self.tree = cPickle.load(infile)
+				try:
+					self.node_lookup = {l.strain:l for l in self.tree.leaf_iter()}
+					self.node_lookup.update({node.strain.lower():node for node in self.tree.leaf_iter()})
+				except:
+					pass
 		if os.path.isfile(self.virus_fname):
 			with open(self.virus_fname, 'r') as infile:
 				self.viruses = cPickle.load(infile)
+				try:
+					self.sequence_lookup = {v.strain:v for v in self.viruses}
+				except:
+					pass
 		if os.path.isfile(self.frequency_fname):
 			with open(self.frequency_fname, 'r') as infile:
 				self.frequencies = cPickle.load(infile)
+		if os.path.isfile(self.aa_seq_fname):
+			with open(self.aa_seq_fname, 'r') as infile:
+				self.aa_aln = cPickle.load(infile)
 
 	def export_to_auspice(self, tree_fields = [], tree_pop_list = []):
 		from tree_util import dendropy_to_json, all_descendants
@@ -204,7 +223,6 @@ class process(virus_frequencies):
 		self.variable_aa
 		'''
 		aln_array = np.array(self.viruses)
-		self.nuc_alphabet = 'ACGT-N'
 		self.nucleoties_frequencies = np.zeros((len(self.nuc_alphabet),aln_array.shape[1]))
 		for ni,nuc in enumerate(self.nuc_alphabet):
 			self.nucleoties_frequencies[ni,:]=(aln_array==nuc).mean(axis=0)
@@ -214,7 +232,6 @@ class process(virus_frequencies):
 
 		if hasattr(self, 'aa_aln'):
 			aln_array = np.array(self.aa_aln)
-			self.aa_alphabet = 'ACDEFGHIKLMNPQRSTVWY*X'
 			self.aa_frequencies = np.zeros((len(self.aa_alphabet),aln_array.shape[1]))
 			for ai,aa in enumerate(self.aa_alphabet):
 				self.aa_frequencies[ai,:]=(aln_array==aa).mean(axis=0)
