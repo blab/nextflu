@@ -2,6 +2,7 @@ import argparse
 import numpy as np
 import dendropy
 from collections import defaultdict
+from date_util import numerical_date
 from datetime import date
 from itertools import izip
 from tree_titer import *
@@ -11,34 +12,27 @@ min_freq = 0.1
 max_freq = 0.9
 min_tips = 10
 pc=1e-2
-regularization = 1e-3
-default_predictors = ['lb', 'ep', 'ne_star']
+regularization = 1e-5
 
 class fitness_model(object):
 
-	def __init__(self, predictors = None, verbose=0,**kwargs):
+	def __init__(self, predictors = ['lb', 'ep', 'ne_star'], verbose=0,**kwargs):
 		'''
 		parameters:
 		tree -- tree of sequences for which a fitness model is to be determined
 		'''
 		self.verbose=verbose
-		self.seasons = [ (date(year=y, month = 10, day = 1), date(year = y+1, month = 4, day=1)) 
-						for y in xrange(self.time_interval[0], self.time_interval[1])]
+		self.seasons = [ (numerical_date(date(year=y, month = 10, day = 1)), 
+							numerical_date(date(year = y+1, month = 4, day=1)))
+						for y in xrange(int(self.time_interval[0]), int(self.time_interval[1]))]
 
-		self.predictors = []
-		for p in predictors:
-			if p == 'lb':
-				self.predictors.append(('lb',calc_LBI, {'tau':0.0005, 'transform':lambda x:x}))
-			if p == 'ep':
-				self.predictors.append(('ep',calc_epitope_distance,{}))
-			if p == 'ne':
-				self.predictors.append(('ne',calc_nonepitope_distance,{}))
-			if p == 'ne_star':
-				self.predictors.append(('ne_star',calc_nonepitope_star_distance,{"seasons":self.seasons}))		
-			if p == 'tol':
-				self.predictors.append(('tol',calc_tolerance,{}))
-			if p == 'HI':
-				self.predictors.append(('HI',calc_HI,{}))
+		self.predictors = predictors
+		self.predictor_functions = {'lb':self.calc_LBI, 
+									'ne_star':self.calc_nonepitope_star_distance,
+									'HI':self.calc_HI}
+		self.LBI_tau = 0.008
+		self.LBI_trans = lambda x:x**0.5
+		self.current_season = self.seasons[-1]
 
 	def calc_tip_counts(self):
 		'''
@@ -52,46 +46,42 @@ class fitness_model(object):
 		for node in self.tree.postorder_node_iter():
 			tmp_list = defaultdict(list)
 			for child in node.child_nodes():
-				for season, count in child.tips.iteritems():
+				for season, count in child.tips_by_season.iteritems():
 					tmp_list[season].extend(count)
 
-			node.tips = {}
+			node.tips_by_season = {}
 			for season, strain_list in tmp_list.iteritems():
-				node.tips[season] = np.array(strain_list, dtype=int)
+				node.tips_by_season[season] = np.array(strain_list, dtype=int)
 
 			if node.is_leaf():
-				node_date = date(*map(int, node.date.split('-')))
-				tmp_season_list = [s for s in self.seasons if node_date>=s[0] and node_date<s[1]]
+				tmp_season_list = [s for s in self.seasons if node.num_date>=s[0] and node.num_date<s[1]]
 				if len(tmp_season_list)==1:
-					node.tips[tmp_season_list[0]]=[leaf_count]
+					node.tips_by_season[tmp_season_list[0]]=[leaf_count]
 				leaf_count+=1
 				node.tip_index = leaf_count
 
 		# short cut to total number of tips per seaons
-		total_counts = {s:len(strain_list) for s, strain_list in self.tree.seed_node.tips.iteritems()} 
+		total_counts = {s:len(strain_list) for s, strain_list in self.tree.seed_node.tips_by_season.iteritems()} 
 		if self.verbose>1:
 			for d,c in sorted(total_counts.items()): 
-				print "number of tips in", d[0].strftime('%Y-%m-%d'), '--', \
-											d[1].strftime('%Y-%m-%d'),':',c
+				print "number of tips in", d[0], '--', d[1],':',c
 
 		# calculate frequencies
 		for node in self.tree.postorder_node_iter():
 			node.frequencies = defaultdict(float)
-			for season, strain_list in node.tips.iteritems():
-				if season in total_counts:
-					node.frequencies[season]=float(len(strain_list))/(total_counts[season]+1e-10)
-				else:
-					node.frequencies[season]=0
-
+			for season, strain_list in node.tips_by_season.iteritems():
+				node.frequencies[season]=float(len(strain_list))/(total_counts[season]+1e-10)
 
 	def calc_predictors(self):
-		for pred, func, kwargs in self.predictors:
-			# calculate the predictors for all nodes of the tree and save as node.attr
-			func(self.tree, attr = pred, **kwargs)
+		print "calculating predictors"
+		for pred in self.predictors:
+			if pred in self.predictor_functions:
+				self.predictor_functions[pred]()
 
 	def select_nodes_in_season(self, season):
+		self.current_season = season
 		for node in self.tree.postorder_node_iter():
-			if season in node.tips and len(node.tips[season])>0:
+			if season in node.tips_by_season and len(node.tips_by_season[season])>0:
 				node.alive=True
 			else:
 				node.alive=False
@@ -103,13 +93,13 @@ class fitness_model(object):
 		for s in self.seasons:
 			tmp_preds = []
 			t0=time.time()
-			if self.verbose: print "calculating predictors for season ", s[0].strftime("%Y-%m-%d"), '--', s[1].strftime("%Y-%m-%d"),
+			if self.verbose: print "calculating predictors for season ", s[0], '--', s[1],
 			self.select_nodes_in_season(s)
 			self.calc_predictors()
 			if self.verbose: print np.round(time.time()-t0,2), 'seconds'
 			for node in self.tree.postorder_node_iter():
 				if node.alive:
-					node.predictors[s] = np.array([node.__getattribute__(pred[0]) 
+					node.predictors[s] = np.array([node.__getattribute__(pred) 
 				                              for pred in self.predictors])
 					if node.is_leaf():
 						tmp_preds.append(node.predictors[s])
@@ -124,8 +114,8 @@ class fitness_model(object):
 		self.season_std = []
 		if self.verbose: print "standardize predictors for season"
 		for s in self.seasons:
-			self.season_means.append(self.predictor_arrays[s][self.tree.seed_node.tips[s],:].mean(axis=0))
-			self.season_std.append(self.predictor_arrays[s][self.tree.seed_node.tips[s],:].std(axis=0))
+			self.season_means.append(self.predictor_arrays[s][self.tree.seed_node.tips_by_season[s],:].mean(axis=0))
+			self.season_std.append(self.predictor_arrays[s][self.tree.seed_node.tips_by_season[s],:].std(axis=0))
 
 		self.global_std = np.mean(self.season_std, axis=0)
 
@@ -141,7 +131,7 @@ class fitness_model(object):
 
 	def select_clades_for_fitting(self):
 		# short cut to total number of tips per seaons
-		total_counts = {s:len(strain_list) for s, strain_list in self.tree.seed_node.tips.iteritems()}
+		total_counts = {s:len(strain_list) for s, strain_list in self.tree.seed_node.tips_by_season.iteritems()}
 		# prune seasons where few observations were made, only consecutive pairs
 		# with sufficient tip count are retained
 		self.fit_test_season_pairs = [(s,t) for s,t in izip(self.seasons[:-1], self.seasons[1:]) 
@@ -164,23 +154,25 @@ class fitness_model(object):
 	def model_fit(self, params):
 		# walk through season pairs
 		seasonal_errors = []
+		#import pdb; pdb.set_trace()
 		for s,t in self.fit_test_season_pairs:		
 			# normalize strain frequencies
-			total_strain_freq = np.exp(self.fitness(params, self.predictor_arrays[s][self.tree.seed_node.tips[s],:])).sum()
-		
+			total_strain_freq = np.exp(self.fitness(params, self.predictor_arrays[s][self.tree.seed_node.tips_by_season[s],:])).sum()
 			# project clades forward according to strain makeup
 			clade_errors = []
 			test_clades = self.clades_for_season[(s,t)]
 			for clade in test_clades:
 				initial_freq = clade.frequencies[s]
 				obs_freq = clade.frequencies[t]
-				pred_freq = np.sum(np.exp(self.fitness(params, self.predictor_arrays[s][clade.tips[s],:])))/total_strain_freq
+				pred_freq = np.sum(np.exp(self.fitness(params, self.predictor_arrays[s][clade.tips_by_season[s],:])))/total_strain_freq
+				print initial_freq, obs_freq, pred_freq
 				clade_errors.append(np.absolute(pred_freq - obs_freq))
 			seasonal_errors.append(np.mean(clade_errors))
 		mean_error = np.mean(seasonal_errors)
 		if any(np.isnan(seasonal_errors)+np.isinf(seasonal_errors)):
 			mean_error = 1e10
 		self.last_fit = mean_error
+		print params, total_strain_freq, mean_error
 		if self.verbose>2: print params, self.last_fit
 		return mean_error + regularization*np.sum(params**2)
 		
@@ -224,7 +216,7 @@ class fitness_model(object):
 			print "best after",niter,"iterations\nfunction value:", self.last_fit
 			print "fit parameters:"
 			for pred, val in izip(self.predictors, self.params):
-				print pred[0],':', val
+				print pred,':', val
 
 
 	def assign_fitness(self, season):
@@ -244,6 +236,81 @@ class fitness_model(object):
 		self.select_clades_for_fitting()
 		self.learn_parameters(niter = niter)
 		self.assign_fitness(self.seasons[-1])
+
+	######################################################################
+	### fitness predictors
+	######################################################################
+
+	def calc_nonepitope_star_distance(self, attr='ne_star'):
+		'''
+		calculates the distance at nonepitope sites of any tree node to ref
+		tree   --   dendropy tree
+		attr   --   the attribute name used to save the result
+		'''
+		if not hasattr(self.tree, "nonepitope_star_distance_assigned") \
+						or self.tree.nonepitope_star_distance_assigned==False:
+			for node in self.tree.postorder_node_iter():
+				if len(node.tips_by_season) and node!=self.tree.seed_node:
+					tmp_node = node.parent_node
+					cur_season = min(node.tips_by_season.keys())
+					prev_season = self.seasons[max(0,self.seasons.index(cur_season)-1)]
+					while True:
+						if tmp_node!=self.tree.seed_node:
+							if prev_season in tmp_node.tips_by_season and len(tmp_node.tips_by_season[prev_season])>0:
+								break
+							else:
+								tmp_node=tmp_node.parent_node
+						else:
+							break
+					node.__setattr__(attr, self.nonepitope_distance(node.aa_seq, tmp_node.aa_seq))
+				else:
+					node.__setattr__(attr, np.nan)				
+			self.tree.nonepitope_star_distance_assigned=True
+
+
+
+	def calc_LBI(self, attr = 'lb'):
+		'''
+		traverses the tree in postorder and preorder to calculate the
+		up and downstream tree length exponentially weighted by distance.
+		then adds them as LBI
+		tree -- dendropy tree for whose node the LBI is being computed
+		attr	 -- the attribute name used to store the result
+		'''
+		# traverse the tree in postorder (children first) to calculate msg to parents
+		for node in self.tree.postorder_node_iter():
+			node.down_polarizer = 0
+			node.up_polarizer = 0
+			for child in node.child_nodes():
+				node.up_polarizer += child.up_polarizer
+			bl =  node.edge_length/self.LBI_tau
+			node.up_polarizer *= np.exp(-bl)
+			if node.alive: node.up_polarizer += self.LBI_tau*(1-np.exp(-bl))
+
+		# traverse the tree in preorder (parents first) to calculate msg to children
+		for node in self.tree.preorder_internal_node_iter():
+			for child1 in node.child_nodes():
+				child1.down_polarizer = node.down_polarizer
+				for child2 in node.child_nodes():
+					if child1!=child2:
+						child1.down_polarizer += child2.up_polarizer
+
+				bl =  child1.edge_length/self.LBI_tau
+				child1.down_polarizer *= np.exp(-bl)
+				if child1.alive: child1.down_polarizer += self.LBI_tau*(1-np.exp(-bl))
+
+		# go over all nodes and calculate the LBI (can be done in any order)
+		for node in self.tree.postorder_node_iter():
+			tmp_LBI = node.down_polarizer
+			for child in node.child_nodes():
+				tmp_LBI += child.up_polarizer
+			node.__setattr__(attr, self.LBI_trans(tmp_LBI))
+
+	def calc_HI(self, attr = 'HI'):
+		print "estimating HI for season",self.current_season
+		self.map_HI_to_tree(method='nnl1reg', lam=5, cutoff_date = self.current_season[1])
+		for node in self.tree.postorder_node_iter():
+			node.__setattr__(attr, node.cHI)
 
 def test(params):
 	from io_util import read_json

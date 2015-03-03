@@ -168,7 +168,7 @@ class HI_tree(object):
 		W = solvers.qp(P,q,G,h)
 		return np.array([x for x in W['x']])[:n_params]
 
-	def map_HI_to_tree(self, training_fraction = 1.0, method = 'nnls', lam=10):
+	def map_HI_to_tree(self, training_fraction = 1.0, method = 'nnls', lam=10, cutoff_date = None):
 		self.normalize_HI()
 		self.add_mutations()
 		self.mark_HI_splits()
@@ -182,6 +182,11 @@ class HI_tree(object):
 					self.train_HI[key]=val
 		else:
 			self.train_HI = self.HI_normalized
+
+		if cutoff_date is not None:
+			self.train_HI = {key:val for key,val in self.train_HI.iteritems()
+							if self.node_lookup[key[0]].num_date<cutoff_date and 
+							   self.node_lookup[key[1]].num_date<cutoff_date}
 
 		self.make_treegraph()
 		if method=='l1reg':  # l1 regularized fit, no constraint on sign of effect
@@ -375,22 +380,6 @@ def flat_HI_titers(measurements, fname = 'source-data/HI_titers.txt'):
 			if test.lower() in strains and ref.lower() in strains:
 				outfile.write(test+'\t'+ref+'\t'+'\t'.join(map(str,val))+'\n')
 
-def censor_late_viruses(tree, measurements, cutoff):
-	names_to_clades = {leaf.strain.lower():leaf for leaf in tree.leaf_iter()}
-	censored_measurements = {}
-	for (test, ref), val in measurements.iteritems():
-		if test in names_to_clades and ref in names_to_clades:
-			if names_to_clades[test].num_date<cutoff and names_to_clades[ref].num_date<cutoff:
-				censored_measurements[(test, ref)] = val
-	return censored_measurements
-
-
-def estimate_HI_to_date(tree, cutoff, reg=10):
-	names, measurements, tables = read_tables()
-	measurements = censor_late_viruses(tree, measurements, cutoff)
-	HI_map = HI_tree(tree, measurements)
-	HI_map.map_HI_to_tree(method = 'nnl1reg', lam=reg)
-	return HI_map
 
 def main(tree, HI_fname='source-data/HI_titers.txt', training_fraction = 1.0, reg=5):
 	print "--- Fitting HI titers at " + time.strftime("%H:%M:%S") + " ---"

@@ -4,7 +4,7 @@ from virus_filter import flu_filter
 from virus_clean import virus_clean
 from tree_refine import tree_refine
 from tree_titer import HI_tree
-#from fitness_model import fitness_model
+from fitness_model import fitness_model
 from process import process
 from Bio import SeqIO
 from Bio.Seq import Seq
@@ -22,7 +22,7 @@ virus_config = {
 	'fasta_fields':{0:'strain', 1:"date", 4:"passage", -1:'accession'},
 	#'fasta_fields':{0:'strain', 1:"date", 4:"passage", -1:'accession'},
 	'outgroup':'A/Beijing/32/1992',
-	'force_include':'source-data/HI_strains.txt',
+	'force_include':'', #source-data/HI_strains.txt',
 	'force_include_all':True,
 	'max_global':False,   # sample as evenly as possible from different geographic regions 
 	'cds':[48,-1], # define the HA1 start i n 0 numbering
@@ -237,7 +237,7 @@ class H3N2_refine(tree_refine):
 				except:
 					pass
 
-class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree): #, fitness_model):
+class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitness_model):
 	"""docstring for H3N2_process, H3N2_filter"""
 	def __init__(self,verbose = 0, force_include = None, 
 				force_include_all = False, max_global= True, **kwargs):
@@ -249,7 +249,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree): #, f
 		H3N2_clean.__init__(self,**kwargs)
 		H3N2_refine.__init__(self,**kwargs)
 		HI_tree.__init__(self,**kwargs)
-		#fitness_model.__init__(self,**kwargs)
+		fitness_model.__init__(self,**kwargs)
 		self.verbose = verbose
 
 	def run(self, steps, years_back=3, viruses_per_month=50, raxml_time_limit = 1.0):
