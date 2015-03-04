@@ -6,7 +6,7 @@ from date_util import numerical_date
 from datetime import date
 from itertools import izip
 from tree_titer import *
-from fitness_predictors import *
+#from fitness_predictors import *
 
 min_freq = 0.1
 max_freq = 0.9
@@ -30,7 +30,7 @@ class fitness_model(object):
 		self.predictor_functions = {'lb':self.calc_LBI, 
 									'ne_star':self.calc_nonepitope_star_distance,
 									'HI':self.calc_HI,
-									'tol':self.calc_tolerance}
+									'tol':self.assign_tolerance}
 		self.LBI_tau = 0.005
 		self.LBI_trans = lambda x:x**1.0
 		self.current_season = self.seasons[-1]
@@ -45,6 +45,9 @@ class fitness_model(object):
 		# count tips
 		leaf_count = 0
 		self.tip_aln = []
+		self.min_freq = 0.01
+		self.determine_variable_positions()
+		self.index_subset = self.variable_nucleotides[(self.variable_nucleotides<987+48)*(self.variable_nucleotides>47)]
 		for node in self.tree.postorder_node_iter():
 			tmp_list = defaultdict(list)
 			for child in node.child_nodes():
@@ -60,7 +63,7 @@ class fitness_model(object):
 				if len(tmp_season_list)==1:
 					node.tips_by_season[tmp_season_list[0]]=[leaf_count]
 				leaf_count+=1
-				self.tip_aln.append(np.fromstring(node.seq, 'S1'))
+				self.tip_aln.append(np.fromstring(node.seq, 'S1')[self.index_subset])
 				node.tip_index = leaf_count
 
 		self.tip_aln = np.array(self.tip_aln)
@@ -135,23 +138,22 @@ class fitness_model(object):
 			# keep this for internal nodes
 			for node in self.tree.postorder_node_iter():
 				if node.predictors[s] is not None:
-					#node.predictors[s] = (node.predictors[s]-m)/self.global_std
-					node.predictors[s] = (node.predictors[s]-m)/stddev
+					node.predictors[s] = (node.predictors[s]-m)/self.global_std
+					#node.predictors[s] = (node.predictors[s]-m)/stddev
 
 			self.predictor_arrays[s]-=m
-			#self.predictor_arrays[s]/=self.global_std
-			self.predictor_arrays[s]/=stddev
+			self.predictor_arrays[s]/=self.global_std
+			#self.predictor_arrays[s]/=stddev
 
 	def model_fit(self, params):
 		# walk through season pairs
-		seasonal_errors = []
-		#import pdb; pdb.set_trace()
+		self.seasonal_errors = []
 		for s,t in self.fit_test_season_pairs:		
 			# normalize strain frequencies
 			pred_af = self.fitness_biased_af(params, s)
-			seasonal_errors.append(self.allele_frequency_distance(pred_af, self.season_af[t]))
-		mean_error = np.mean(seasonal_errors)
-		if any(np.isnan(seasonal_errors)+np.isinf(seasonal_errors)):
+			self.seasonal_errors.append(self.allele_frequency_distance(pred_af, self.season_af[t]))
+		mean_error = np.mean(self.seasonal_errors)
+		if any(np.isnan(self.seasonal_errors)+np.isinf(self.seasonal_errors)):
 			mean_error = 1e10
 		self.last_fit = mean_error
 		if self.verbose>2: print params, self.last_fit
@@ -173,7 +175,7 @@ class fitness_model(object):
 		return 1.0 - (af1*af2).sum(axis=0).mean(axis=-1)
 
 	def minimize_error(self):
-		from scipy.optimize import fmin_powell as minimizer
+		from scipy.optimize import fmin as minimizer
 		if self.verbose:		
 			print "initial function value:", self.model_fit(self.params)
 			print "initial parameters:", self.params
@@ -302,6 +304,49 @@ class fitness_model(object):
 		self.map_HI_to_tree(method='nnl1reg', lam=5, cutoff_date = self.current_season[1])
 		for node in self.tree.postorder_node_iter():
 			node.__setattr__(attr, node.cHI)
+
+
+	def load_mutational_tolerance_data(self):
+		from Bio import AlignIO
+		fname = 'source-data/Thyagarajan_Bloom_HA_fitness.txt'
+		with open(fname) as f:
+			self.tolerance_alphabet = map(lambda x:x.split('_')[1], f.readline().strip().split()[3:])
+		self.sites = np.loadtxt(fname, usecols=[0], dtype=int)
+		self.H1_aa = np.loadtxt(fname, usecols=[1], dtype='S1')
+		self.H1_aa_prob = np.loadtxt(fname, usecols=range(3,23), dtype=float)
+
+		aln = AlignIO.read('source-data/H1_H3.fasta', 'fasta')
+		# returns true whenever neither of the sequences have a gap
+		self.H1_H3_aligned = (np.array(aln)!='-').min(axis=0)
+		# map alignment positions to sequence positions, subset to aligned amino acids
+		self.H3_H1_map = {}
+		for seq in aln:
+			self.H3_H1_map[seq.name] = (np.cumsum(np.fromstring(str(seq.seq), dtype='S1')!='-')-1)[self.H1_H3_aligned]
+
+		# make a reduced set of amino-acid probabilities that only contains aligned positions
+		self.H1_aa_prob=self.H1_aa_prob[self.H3_H1_map['H1'],:]
+		# attach another column for non-canonical amino acids
+		self.H1_aa_prob = np.hstack((self.H1_aa_prob, 1e-5*np.ones((self.H1_aa_prob.shape[0],1))))
+
+	def calc_tolerance(self, aa_seq, beta = 1.0):
+		'''
+		determine the indices of aligned amino acids and sum the logged probabilities
+		'''
+		H3_aa_indices = [self.tolerance_alphabet.index(aa_seq[p]) 
+						if aa_seq[p] in self.tolerance_alphabet else -1 
+						for p in self.H3_H1_map['H3']]
+		return np.sum(np.log(self.H1_aa_prob[(np.arange(len(self.H3_H1_map['H3'])), H3_aa_indices)])*beta)
+
+	def assign_tolerance(self):
+		'''
+		loops over all viruses, translates their sequences and calculates the virus fitness
+		'''
+		if not hasattr(self, "tolerance_assigned") or self.tolerance_assigned==False:
+			from Bio import Seq
+			self.load_mutational_tolerance_data()
+			for node in self.tree.postorder_node_iter():
+				node.tol = self.calc_tolerance(Seq.translate(node.seq))
+			self.tolerance_assigned = True
 
 def test(params):
 	from io_util import read_json
