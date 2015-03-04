@@ -1028,6 +1028,12 @@ d3.json("data/tree.json", function(error, root) {
 d3.json("data/meta.json", function(error, json) {
 	if (error) return console.warn(error);
 	d3.select("#updated").text(json['updated']);
+	commit_id = json['commit'];
+	short_id = commit_id.substring(0, 6);	
+	d3.select("#commit")
+		.append("a")
+		.attr("href", "http://github.com/blab/nextflu/commit/" + commit_id)
+		.text(short_id);
 });
 
 d3.json("data/sequences.json", function(error, json) {

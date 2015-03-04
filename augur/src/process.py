@@ -101,8 +101,17 @@ class process(virus_frequencies):
 			write_json(self.frequencies, self.auspice_frequency_fname)
 
 		# Write out metadata
-		print "Writing out metadata"
-		meta = {"updated": time.strftime("X%d %b %Y").replace('X0','X').replace('X','')}
+		print "Writing out metadata"		
+		from pygit2 import Repository
+		from pygit2 import discover_repository
+		current_working_directory = os.getcwd()
+		repository_path = discover_repository(current_working_directory)
+		repo = Repository(repository_path)
+		commit_id = repo[repo.head.target].id
+		
+		meta = {}
+		meta["updated"] = time.strftime("X%d %b %Y").replace('X0','X').replace('X','')
+		meta["commit"] = str(commit_id)
 		if hasattr(self,"date_region_count"):
 			meta["regions"] = self.regions
 			meta["virus_stats"] = [ [str(y)+'-'+str(m)] + [self.date_region_count[(y,m)][reg] for reg in self.regions]
