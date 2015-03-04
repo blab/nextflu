@@ -1,10 +1,6 @@
 # clean, reroot, ladderize newick tree
 # output to tree.json
 import numpy as np
-from io_util import *
-from tree_util import *
-from tree_ancestral import *
-from seq_util import *
 import time
 from collections import defaultdict
 from matplotlib import pyplot as plt
@@ -55,16 +51,17 @@ class HI_tree(object):
 								enumerate(izip(node.parent_node.aa_seq, node.aa_seq)) if a!=b]
 
 	def mark_HI_splits(self):
+		# flag all branches on the tree with HI_strain = True if they lead to strain with titer data
 		for leaf in self.tree.leaf_iter():
 			if leaf.strain.lower() in self.HI_strains:
 				leaf.serum = leaf.strain.lower() in self.sera
-				leaf.HI_info= True
+				leaf.HI_info= 1
 			else:
-				leaf.serum, leaf.HI_info=False, False
+				leaf.serum, leaf.HI_info=False, 0
 
 		for node in self.tree.postorder_node_iter():
 			if not node.is_leaf():
-				node.HI_info = any([c.HI_info for c in node.child_nodes()])
+				node.HI_info = sum([c.HI_info for c in node.child_nodes()])
 
 		# combine sets of branches that span identical sets of HI measurements
 		self.HI_split_count = 0  # HI measurment split counter
@@ -72,15 +69,15 @@ class HI_tree(object):
 		for node in self.tree.preorder_node_iter():
 			node.dHI, node.cHI, node.constraints =0, 0, 0
 			if node.is_internal(): node.serum=False
-			if node.HI_info:
+			if node.HI_info>1:
 				node.HI_branch_index = self.HI_split_count
 				self.HI_split_to_branch[node.HI_branch_index].append(node)
-				if node.is_leaf() or sum([c.HI_info for c in node.child_nodes()])>1:
+				if sum([c.HI_info for c in node.child_nodes()])>1:
 					self.HI_split_count+=1
 
 		print "# of reference strains:",len(self.sera), "# of branches with HI constraint", self.HI_split_count
 
-	def get_path(self, v1, v2):
+	def get_path_no_terminals(self, v1, v2):
 		if v1 in self.node_lookup and v2 in self.node_lookup:
 			p1 = [self.node_lookup[v1]]
 			p2 = [self.node_lookup[v2]]
@@ -93,7 +90,7 @@ class HI_tree(object):
 			for pi, (tmp_v1, tmp_v2) in enumerate(izip(p1,p2)):
 				if tmp_v1!=tmp_v2:
 					break
-			path = p1[pi:] + p2[pi:]
+			path = p1[pi:-1] + p2[pi:-1]
 		else:
 			path = None
 		return path
@@ -101,19 +98,23 @@ class HI_tree(object):
 	def make_treegraph(self):
 		tree_graph = []
 		HI_dist = []
+		n_params = self.HI_split_count + len(self.sera) + len(self.HI_strains)
 		for (test, ref), val in self.train_HI.iteritems():
 			if not np.isnan(val):
 				try:
 					if test != ref  and ref in self.node_lookup \
 									and test in self.node_lookup:
-						path = self.get_path(test, ref)
-						tmp = np.zeros(self.HI_split_count + len(self.sera))
-						branches = np.unique([c.HI_branch_index for c in path])
-						tmp[branches] = 1
+						path = self.get_path_no_terminals(test, ref)
+						tmp = np.zeros(n_params)
+						branches = np.unique([c.HI_branch_index for c in path if hasattr(c, 'HI_branch_index')])
+						if len(branches): tmp[branches] = 1
 						tmp[self.HI_split_count+self.sera.index(ref)] = 1
 						tree_graph.append(tmp)
+						tmp[self.HI_split_count+self.sera.index(ref)] = 1
+						tmp[self.HI_split_count+len(self.sera)+self.HI_strains.index(test)] = 1
 						HI_dist.append(val)
 				except:
+					import pdb; pdb.set_trace()
 					print test, ref, "ERROR"
 
 		self.HI_dist =  np.array(HI_dist)
@@ -148,6 +149,8 @@ class HI_tree(object):
 		from cvxopt import matrix, solvers
 		n_params = self.tree_graph.shape[1]
 		HI_sc = self.HI_split_count
+		n_sera = len(self.sera)
+		n_v = len(self.HI_strains)
 		P1 = np.zeros((n_params+HI_sc,n_params+HI_sc))
 		P1[:n_params, :n_params] = np.dot(self.tree_graph.T, self.tree_graph)
 		for ii in xrange(HI_sc, n_params):
@@ -201,6 +204,8 @@ class HI_tree(object):
 		print "method",method, "regularized by", self.lam, "squared deviation=",self.fit_func()
 		# for each set of branches with HI constraints, pick the branch with most aa mutations
 		# and assign the dHI to that one, record the number of constraints
+		for node in self.tree.postorder_node_iter():
+			node.dHI=0
 		for HI_split, branches in self.HI_split_to_branch.iteritems():
 			likely_branch = branches[np.argmax([len(b.mutations) for b in branches])]
 			likely_branch.dHI = self.params[HI_split]
@@ -210,7 +215,10 @@ class HI_tree(object):
 		for node in self.tree.preorder_node_iter():
 			if node!=self.tree.seed_node:
 				node.cHI = node.parent_node.cHI + node.dHI
-		self.avidities = {serum:self.params[self.HI_split_count+ii] for ii, serum in enumerate(self.sera)}
+		self.serum_potency = {serum:self.params[self.HI_split_count+ii] 
+							  for ii, serum in enumerate(self.sera)}
+		self.virus_effect = {strain:self.params[self.HI_split_count+len(self.sera)+ii]
+							  for ii, strain in enumerate(self.HI_strains)}
 
 	def validate(self, plot=False):
 		self.validation = {}
@@ -230,9 +238,9 @@ class HI_tree(object):
 
 
 	def predict_HI(self, virus, serum):
-		path = self.get_path(virus,serum)
+		path = self.get_path_no_terminals(virus,serum)
 		if path is not None:
-			return self.avidities[serum] + np.sum(b.dHI for b in path)
+			return self.serum_potency[serum] + self.virus_effect[virus] + np.sum(b.dHI for b in path)
 		else:
 			return None
 
@@ -240,11 +248,13 @@ class HI_tree(object):
 ####  utility functions for reading and writing HI Tables, plotting trees, etc
 ######################################################################################
 
-def plot_tree(tree):
-	btree = to_Biopython(tree)
-	color_BioTree_by_attribute(btree,"cHI", transform = lambda x:x)
-	Phylo.draw(btree, label_func = lambda  x: 'X' if x.serum else 'o' if x.HI_info else '', 
-		show_confidence= False) #, branch_labels = lambda x:x.mutations)
+	def plot_tree(tree):
+		from Bio import Phylo
+		from tree_util import to_Biopython, color_BioTree_by_attribute
+		btree = to_Biopython(tree)
+		color_BioTree_by_attribute(btree,"cHI", transform = lambda x:x)
+		Phylo.draw(btree, label_func = lambda  x: 'X' if x.serum else 'o' if x.HI_info else '', 
+			show_confidence= False) #, branch_labels = lambda x:x.mutations)
 
 def plot_dHI_distribution(tree):
 	plt.figure()
@@ -340,7 +350,7 @@ def read_tables():
 		print fname, len(all_measurements), "measurements"
 
 	print "total from tables:", len(all_measurements), "measurements"
-	trevor_table = '/home/richard/Projects/flu_HI_data/tables/trevor_elife_H3N2_HI_data.tsv'
+	trevor_table = 'source-data/H3N2_HI.tsv'
 	import csv
 	with open(trevor_table) as infile:
 		table_reader = csv.reader(infile, delimiter="\t")
@@ -391,6 +401,7 @@ def main(tree, HI_fname='source-data/HI_titers.txt', training_fraction = 1.0, re
 
 if __name__ == "__main__":
 	from Bio import Phylo
+	from io_util import json_to_dendropy
 	reg = 10
 	tree_fname = 'data/tree_refine.json'
 	tree =  json_to_dendropy(read_json(tree_fname))
