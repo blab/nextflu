@@ -1,4 +1,6 @@
-import time, os, argparse,shutil,subprocess, glob
+import sys, time, os, argparse,shutil,subprocess, glob
+sys.path.append('src')
+sys.setrecursionlimit(10000)  # needed since we are dealing with large trees
 from Bio import SeqIO, AlignIO,Phylo
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
