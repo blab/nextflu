@@ -29,7 +29,7 @@ virus_config = {
 	'aggregate_regions': [  ("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
 							("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ],
 	'frequency_stiffness':10.0,
-	'time_interval':(2012.0, 2015.1),
+	'time_interval':(2005.0, 2015.1),
 	'pivots_per_year':12.0,
 	'min_freq':0.01,
 	# define relevant clades in canonical HA1 numbering (+1)
