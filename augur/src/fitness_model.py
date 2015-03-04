@@ -147,13 +147,13 @@ class fitness_model(object):
 
 	def model_fit(self, params):
 		# walk through season pairs
-		seasonal_errors = []
+		self.seasonal_errors = []
 		for s,t in self.fit_test_season_pairs:		
 			# normalize strain frequencies
 			pred_af = self.fitness_biased_af(params, s)
-			seasonal_errors.append(self.allele_frequency_distance(pred_af, self.season_af[t]))
-		mean_error = np.mean(seasonal_errors)
-		if any(np.isnan(seasonal_errors)+np.isinf(seasonal_errors)):
+			self.seasonal_errors.append(self.allele_frequency_distance(pred_af, self.season_af[t]))
+		mean_error = np.mean(self.seasonal_errors)
+		if any(np.isnan(self.seasonal_errors)+np.isinf(self.seasonal_errors)):
 			mean_error = 1e10
 		self.last_fit = mean_error
 		if self.verbose>2: print params, self.last_fit
