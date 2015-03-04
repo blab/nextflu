@@ -454,8 +454,7 @@ d3.json("data/tree.json", function(error, root) {
 	var colorBy = document.getElementById("coloring").value;
 	
 	var epitopeColorScale = d3.scale.linear().clamp([true])
-		.domain([0,1,2,3,4,5,6,7,8,9])
-		.range(colors);
+		.domain([4,5,6,7,8,9,10,11,12,13])
 
 	var HIColorScale = d3.scale.linear().clamp([true])
 		.domain([-2.5,-2, 1.5, -1, 0.5, 0,0.5 ,1,1.5, 2])
@@ -463,11 +462,11 @@ d3.json("data/tree.json", function(error, root) {
 		.range(colors);		
 
 	var nonepitopeColorScale = d3.scale.linear().clamp([true])
-		.domain([0,1,2,3,4,5,6,7,8,9])
+		.domain([2,3,4,5,6,7,8,9,10,11])
 		.range(colors);
 
 	var receptorBindingColorScale = d3.scale.linear().clamp([true])
-		.domain([0,1,2, 3, 4,])
+		.domain([0,1,2,3,4])
 		.range(colors.filter( function(d,i){return i%2;}));
 
 	var lbiColorScale = d3.scale.linear()
@@ -1092,18 +1091,9 @@ d3.json("data/frequencies.json", function(error, json){
 		console.log("calculating frequencies for :"+gt);
 		var freq = [];
 		for (var pi=0; pi<pivots.length; pi++){freq[freq.length]=0;}
-		if (gt.length>1){
-			for (freq_gt in json["genotypes"][region]){
-				var gt_agree = gt.map(function (d) {
-								var aa =freq_gt[parseInt(d.substring(0,d.length-1))-1]; 
-								return (aa==d[d.length-1])||(aa=='.');
-					});
-				if (gt_agree.every(function (d,i,a) {return d;}))
-				{
-					for (var pi=0; pi<freq.length; pi++){
-						freq[pi]+=json["genotypes"][region][freq_gt][pi];
-					}
-				}
+		if (json["genotypes"][region][gt[0]]!=undefined) {
+			for (var pi=0; pi<freq.length; pi++){
+				freq[pi]+=json["genotypes"][region][gt[0]][pi];
 			}
 		}else if (json["mutations"][region][gt[0]]!=undefined) {
 			for (var pi=0; pi<freq.length; pi++){
