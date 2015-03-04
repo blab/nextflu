@@ -20,7 +20,7 @@ from Bio import Phylo, Seq
 import copy, time
 from seq_util import json_to_Bio_alignment
 from io_util import write_json, read_json
-from tree_util import BioPhylo_to_json
+from tree_util import BioPhylo_to_json, to_Biopython, json_to_dendropy
 
 class ancestral_sequences:
 	'''
@@ -245,19 +245,17 @@ class ancestral_sequences:
 				if hasattr(leaf, attrname):
 					delattr(leaf, attrname)
 
-def main(tree_fname='data/tree_infer.newick', virus_fname='data/virus_clean.json'):
+def main(tree, viruses):
 	print "--- Ancestral inference at " + time.strftime("%H:%M:%S") + " ---"
 	from Bio import Phylo
-	viruses = read_json(virus_fname)
 	aln = json_to_Bio_alignment(viruses)
-	tree = Phylo.read(tree_fname, 'newick')
+	tree = to_Biopython(tree)
 	print "--- Set-up ancestral inference at " + time.strftime("%H:%M:%S") + " ---"
 	anc_seq = ancestral_sequences(tree, aln, seqtype='str')
 	anc_seq.calc_ancestral_sequences()
 	anc_seq.cleanup_tree()
 	out_fname = "data/tree_ancestral.json"
-	write_json(BioPhylo_to_json(anc_seq.T.root), out_fname)
-	return out_fname
+	return json_to_dendropy(BioPhylo_to_json(anc_seq.T.root))
 
 def test():
 	from Bio import Phylo, AlignIO
@@ -266,7 +264,6 @@ def test():
 	aln = AlignIO.read('../scratch/test_aln.phyx', 'phylip-relaxed')
 	anc_seq = ancestral_sequences(tree=tree, aln=aln, seqtype='str')
 	anc_seq.calc_ancestral_sequences()
-	write_json(BioPhylo_to_json(anc_seq.T.root), 'test.json')
 	return anc_seq.T
 
 if __name__=="__main__":

@@ -8,8 +8,6 @@ from seq_util import *
 from date_util import *
 from tree_util import *
 
-OUTGROUP = 'A/Beijing/32/1992'
-
 def delimit_newick(infile_name):
 	with open(infile_name, 'r') as file:
 		newick = file.read().replace('\n', '')
@@ -46,20 +44,27 @@ def get_xvalue(node):
 	root = node.get_tree_root()
 	return node.get_distance(root)
 
-def remove_outgroup(tree):
+def remove_outgroup(tree, outgroup):
 	"""Reroot tree to outgroup"""
 	outgroup_node = None
 	for node in tree.postorder_node_iter():
-		if (str(node.taxon) == OUTGROUP):
+		if (str(node.taxon).lower() == outgroup.lower()):
 			outgroup_node = node
 	if outgroup_node:
 		tree.prune_subtree(outgroup_node)
+	else:
+		print "outgroup",outgroup, "not found"
+	if len(tree.seed_node.child_nodes())==1:
+		tree.seed_node = tree.seed_node.child_nodes()[0]
+		tree.seed_node.parent_node = None
+		tree.seed_node.edge_length = 0.002
 
 def collapse(tree):
-	"""Collapse short edges to polytomies"""
+	"""Collapse edges without mutations to polytomies"""
 	for edge in tree.postorder_edge_iter():
-		if edge.length < 0.00001 and edge.is_internal():
-			edge.collapse()
+		if edge.tail_node is not None:
+			if edge.is_internal() and edge.head_node.seq==edge.tail_node.seq:
+				edge.collapse()
 
 def reduce(tree):
 	"""Remove outlier tips"""
@@ -110,9 +115,9 @@ def add_virus_attributes(viruses, tree):
 	strain_to_country = {}
 	strain_to_region = {}	
 	for v in viruses:
-		strain_to_date[v['strain']] = v['date']
-		strain_to_country[v['strain']] = v['country']
-		strain_to_region[v['strain']] = v['region']				
+		strain_to_date[v['strain'].lower()] = v['date']
+		strain_to_country[v['strain'].lower()] = v['country']
+		strain_to_region[v['strain'].lower()] = v['region']				
 	for node in tree.postorder_node_iter():
 		strain = str(node.taxon).replace("'", '')
 		if strain_to_date.has_key(strain):
@@ -137,16 +142,16 @@ def add_node_attributes(tree):
 		node.xvalue = node.distance_from_root()
 	root = tree.seed_node
 	for node in tree.postorder_node_iter():
-		node.ep = epitope_distance(translate(node.seq), translate(root.seq))
-		node.ne = nonepitope_distance(translate(node.seq), translate(root.seq))
-		node.rb = receptor_binding_distance(translate(node.seq), translate(root.seq))
+		node.ep = epitope_distance(node.aa_seq, root.aa_seq)
+		node.ne = nonepitope_distance(node.aa_seq, root.aa_seq)
+		node.rb = receptor_binding_distance(node.aa_seq, root.aa_seq)
 	for node in tree.postorder_node_iter():
 		node.trunk_count = 0
 		node.trunk = False
 
-def translate_all(tree):
+def translate_all(tree, cds):
 	for node in tree.postorder_node_iter():
-		node.aa_seq = translate(node.seq)
+		node.aa_seq = translate(node.seq[cds[0]:cds[1]])
 
 def unique_date(tree):
 	leaf_count = 0
@@ -188,32 +193,25 @@ def define_trunk(tree):
 			node.trunk = True;
 
 
-def main(tree_fname = 'data/tree_ancestral.json', virus_fname='data/virus_clean.json'):
-
+def main(tree, viruses, outgroup, cds = [0,-1]):
 	print "--- Tree refine at " + time.strftime("%H:%M:%S") + " ---"
-
-	viruses = read_json(virus_fname)
-	tree =  json_to_dendropy(read_json(tree_fname))
 	print "Remove outgroup"
-	remove_outgroup(tree)
+	remove_outgroup(tree, outgroup)
 	print "Remove outlier branches"
 	reduce(tree)
 	print "Collapse internal nodes"
 	collapse(tree)
 	print "Ladderize tree"
 	ladderize(tree)
+	print "Translate nucleotide sequences"
+	translate_all(tree, cds)
 	print "Append node attributes"
 	add_virus_attributes(viruses, tree)
 	add_node_attributes(tree)
-	print "Translate nucleotide sequences"
-	translate_all(tree)
 	print "Enumerate leaves of ladderized tree and calculate unique numerical date"
 	unique_date(tree)
 	print "Define trunk"
 	define_trunk(tree)
-	out_fname = "data/tree_refine.json"
-	write_json(dendropy_to_json(tree.seed_node), out_fname)
-	return out_fname
 
 if __name__ == "__main__":
 	main()

@@ -12,20 +12,13 @@ dfreq_pc = 1e-2
 time_interval = (2012.0, 2015.1)
 flu_stiffness = 10.0
 pivots_per_year = 12.0
+relevant_pos_cutoff = 0.1
 inertia = 0.7    # fraction of previous frequency changes that is carried over
 window_size = 20 # smooting window
+extra_pivots=5
 tol = 1e-4
 reg = 1e-6
 debug = False
-
-clade_designations = { "3c3.a":[(128,'A'), (142,'G'), (159,'S')],
-					   "3c3":  [(128,'A'), (142,'G'), (159,'F')],
-					   "3c2.a":[(144,'S'), (159,'Y'), (225,'D'), (311,'H'),(489,'N')],
-					   "3c2":  [(144,'N'), (159,'F'),(225,'N'), (489,'N')],
-						}
-
-region_names = ['Europe', 'India', 'NorthAmerica', 'SouthAmerica', 'Africa', 
-			'JapanKorea', 'Oceania', 'China', 'WestAsia', 'SoutheastAsia']
 
 cols  = np.array([(166,206,227),(31,120,180),(178,223,138),(51,160,44),(251,154,153),(227,26,28),(253,191,111),(255,127,0),(202,178,214),(106,61,154)], dtype=float)/255
 def running_average(obs, ws):
@@ -34,10 +27,18 @@ def running_average(obs, ws):
 	obs 	--	observations
 	ws 		--	winodw size (number of points to average)
 	'''
-	tmp_vals = np.convolve(np.ones(ws, dtype=float)/ws, obs, mode='same')
-	# fix the edges. using mode='same' assumes zeros outside the range
-	tmp_vals[:ws//2]*=float(ws)/np.arange(ws//2,ws)
-	tmp_vals[-ws//2+1:]*=float(ws)/np.arange(ws-1,ws//2,-1.0)
+	try:
+		tmp_vals = np.convolve(np.ones(ws, dtype=float)/ws, obs, mode='same')
+		# fix the edges. using mode='same' assumes zeros outside the range
+		if ws%2==0:
+			tmp_vals[:ws//2]*=float(ws)/np.arange(ws//2,ws)
+			if ws//2>1:
+				tmp_vals[-ws//2+1:]*=float(ws)/np.arange(ws-1,ws//2,-1.0)
+		else:
+			tmp_vals[:ws//2]*=float(ws)/np.arange(ws//2+1,ws)
+			tmp_vals[-ws//2:]*=float(ws)/np.arange(ws,ws//2,-1.0)			
+	except:
+		import pdb; pdb.set_trace()
 	return tmp_vals
 
 def fix_freq(freq, pc):
@@ -55,7 +56,7 @@ def get_extrapolation_pivots(start=None, dt=0.5):
 
 
 def logit_transform(freq):
-	return np.log(freq/(1-freq))
+	return np.log(freq/np.maximum(1e-10,(1-freq)))
 
 def logit_inv(logit_freq):
 	logit_freq[logit_freq<-20]=-20
@@ -101,8 +102,8 @@ class frequency_estimator(object):
 		self.verbose=verbose
 		# make sure they are searchsorted
 		tmp = np.argsort(self.tps)
-		self.tps = self.tps[tmp]
-		self.obs = self.obs[tmp]
+		self.full_tps = self.tps[tmp]
+		self.full_obs = self.obs[tmp]
 
 		if pivots is None:
 			self.final_pivot_tps = get_pivots(self.tps[0], self.tps[1])
@@ -157,33 +158,56 @@ class frequency_estimator(object):
 
 	def learn(self):
 		from scipy.optimize import fmin_powell as minimizer
-		self.final_pivot_freq = self.initial_guess(self.final_pivot_tps, ws=2*(min(50,len(self.obs))//2))
+		switches = np.abs(np.diff(self.obs)).nonzero()[0]
+		try:
+			if len(switches)>5:
+				first_switch = self.tps[switches[0]]
+				last_switch = self.tps[switches[-1]]
+			else:
+				first_switch = self.tps[0]
+				last_switch = self.tps[-1]
+			if first_switch>self.final_pivot_tps[0] and first_switch < self.final_pivot_tps[-1]:
+				first_pivot = max(0, np.where(first_switch<=self.final_pivot_tps)[0][0] - extra_pivots)
+			else:
+				first_pivot=0
+			if last_switch<self.final_pivot_tps[-1] and last_switch>self.final_pivot_tps[0]:
+				last_pivot = min(len(self.final_pivot_tps), np.where(last_switch>self.final_pivot_tps)[0][-1]+extra_pivots)
+			else:
+				last_pivot = len(self.final_pivot_tps)
+			tmp_pivots = self.final_pivot_tps[first_pivot:last_pivot]
+			if min(np.diff(tmp_pivots))<0.000001:
+				print pivots
+			self.tps = self.full_tps[(self.full_tps>=tmp_pivots[0])*(self.full_tps<tmp_pivots[-1])]
+			self.obs = self.full_obs[(self.full_tps>=tmp_pivots[0])*(self.full_tps<tmp_pivots[-1])]
+		except:
+			import pdb; pdb.set_trace()
+
+		self.pivot_freq = self.initial_guess(tmp_pivots, ws=2*(min(50,len(self.obs))//2))
+		self.frequency_estimate = interp1d(tmp_pivots, self.pivot_freq, kind=self.interolation_type, bounds_error=False)
 		if self.verbose:
-			print "Initial pivots:", self.final_pivot_freq
+			print "Initial pivots:", tmp_pivots
 		steps= [4,2,1]
 		for step in steps:
 			# subset the pivots, if the last point is not included, attach it
-			self.pivot_tps = self.final_pivot_tps[::step]
-			if self.pivot_tps[-1]!=self.final_pivot_tps[-1]:
-				self.pivot_tps = np.concatenate((self.pivot_tps, self.final_pivot_tps[-1:]))
-				attached_endpoint=True
-			else:
-				attached_endpoint=False				
+			self.pivot_tps = tmp_pivots[::step]
+			if self.pivot_tps[-1]!=tmp_pivots[-1]:
+				self.pivot_tps = np.concatenate((self.pivot_tps, tmp_pivots[-1:]))
 
-			if step==steps[0]: # in first iteration, take intial frequency from the running average calc above
-				self.pivot_freq = self.final_pivot_freq[::step]
-				if attached_endpoint:
-					self.pivot_freq = np.concatenate((self.pivot_freq, self.final_pivot_freq[-1:]))
-			else: #otherwise interpolate from previous iterations
-				self.pivot_freq = self.frequency_estimate(self.pivot_tps)
+			self.pivot_freq = self.frequency_estimate(self.pivot_tps)
 
 			# determine the optimal pivot freqquencies
 			self.pivot_freq = minimizer(self.logLH, self.pivot_freq, ftol = tol, xtol = tol, disp = self.verbose>0)
 			# instantiate an interpolation object based on the optimal frequency pivots
 			self.frequency_estimate = interp1d(self.pivot_tps, self.pivot_freq, kind=self.interolation_type, bounds_error=False)
+			if min(np.diff(self.pivot_tps))<0.000001:
+				print pivots
 			if self.verbose: print "neg logLH using",len(self.pivot_tps),"pivots:", self.logLH(self.pivot_freq)
-		self.final_pivot_freq=self.pivot_freq			
 
+		self.final_pivot_freq=np.zeros_like(self.final_pivot_tps)
+		self.final_pivot_freq[first_pivot:last_pivot]=self.pivot_freq			
+		self.final_pivot_freq[:first_pivot] = self.final_pivot_freq[first_pivot]
+		self.final_pivot_freq[last_pivot:] = self.final_pivot_freq[last_pivot-1]
+		self.frequency_estimate = interp1d(self.final_pivot_tps, self.final_pivot_freq, kind=self.interolation_type, bounds_error=False)
 
 def estimate_sub_frequencies(node, all_dates, tip_to_date_index, threshold=50, region_name="global"):
 	# extract time points and the subset of observations that fall in the clade.
@@ -194,10 +218,10 @@ def estimate_sub_frequencies(node, all_dates, tip_to_date_index, threshold=50, r
 	# we estimate frequencies of subclades, they will be multiplied by the 
 	# frequency of the parent node and corrected for the frequency of sister clades 
 	# already fit
-	try:
+	if node.freq[region_name] is None:
+		frequency_left=None
+	else:
 		frequency_left = np.array(node.freq[region_name])
-	except:
-		import pdb; pdb.set_trace()
 	ci=0
 	# need to resort, since the clade size order might differs after subsetting to regions
 	children_by_size = sorted(node.child_nodes(), key = lambda x:len(x.tips), reverse=True)
@@ -215,22 +239,19 @@ def estimate_sub_frequencies(node, all_dates, tip_to_date_index, threshold=50, r
 			fe = frequency_estimator(zip(tps, obs), pivots=pivots, stiffness=flu_stiffness*len(all_dates)/2000.0, logit=True)
 			fe.learn()
 
-			try:
-				# assign the frequency vector to the node
-				child.freq[region_name] = frequency_left * logit_inv(fe.pivot_freq)
-				child.logit_freq[region_name] = logit_transform(child.freq[region_name])
-			except:
-				import pdb; pdb.set_trace()
+			# assign the frequency vector to the node
+			child.freq[region_name] = frequency_left * logit_inv(fe.final_pivot_freq)
+			child.logit_freq[region_name] = logit_transform(child.freq[region_name])
 
 			# update the frequency remaining to be explained and prune explained observations
-			frequency_left *= (1.0-logit_inv(fe.pivot_freq))
+			frequency_left *= (1.0-logit_inv(fe.final_pivot_freq))
 			tps_left = np.ones_like(tps,dtype=bool)
 			tps_left[obs]=False # prune observations from clade
 			tps = tps[tps_left]
 		ci+=1
 
 	# if the above loop finished assign the frequency of the remaining clade to the frequency_left
-	if ci>0 and ci==len(node.child_nodes())-1:
+	if ci==len(node.child_nodes())-1 and frequency_left is not None:
 		last_child = children_by_size[-1]
 		last_child.freq[region_name] = frequency_left
 		last_child.logit_freq[region_name] = logit_transform(last_child.freq[region_name])
@@ -238,7 +259,6 @@ def estimate_sub_frequencies(node, all_dates, tip_to_date_index, threshold=50, r
 		for child in children_by_size[ci:]: # assign freqs of all remaining clades to None.
 			child.freq[region_name] = None
 			child.logit_freq[region_name] = None
-
 	# recursively repeat for subclades
 	for child in node.child_nodes():
 		estimate_sub_frequencies(child, all_dates, tip_to_date_index, threshold, region_name)
@@ -327,15 +347,18 @@ def estimate_genotype_frequency(tree, gt, time_interval=None, regions = None, re
 	tps = all_dates[leaf_order]
 	obs = np.array(observations)[leaf_order]
 	# define pivots and estimate
-	pivots = get_pivots(tps[0], tps[1])
-	fe = frequency_estimator(zip(tps, obs), pivots=pivots, 
-	               stiffness=flu_stiffness*float(len(observations))/total_leaf_count, 
-                   logit=True, verbose = 0)
-	fe.learn()
-	return fe.frequency_estimate, (tps,obs)
+	pivots = get_pivots()
+	if len(tps)>10:
+		fe = frequency_estimator(zip(tps, obs), pivots=pivots, 
+		               stiffness=flu_stiffness*float(len(observations))/total_leaf_count, 
+	                   logit=True, verbose = 0)
+		fe.learn()
+		return fe.frequency_estimate, (tps,obs)
+	else:
+		return interp1d(pivots, np.zeros_like(pivots)), (tps,obs)
 
 
-def determine_clade_frequencies(tree, regions=None, plot=False):
+def determine_clade_frequencies(tree, clades, regions=None, plot=False):
 	'''
 	loop over different clades and determine their frequencies
 	returns a dictionary with clades:frequencies
@@ -345,9 +368,9 @@ def determine_clade_frequencies(tree, regions=None, plot=False):
 	clade_frequencies = {"pivots":list(get_pivots(time_interval[0], time_interval[1])),
 						 "xpol_pivots":list(xpol_pivots)}
 
-	for ci, (clade_name, clade_gt) in enumerate(clade_designations.iteritems()):
+	for ci, (clade_name, clade_gt) in enumerate(clades.iteritems()):
 		print "estimating frequency of clade", clade_name, clade_gt
-		freq, (tps, obs) = estimate_genotype_frequency(tree, [(pos+15, aa) for pos, aa in clade_gt], time_interval, regions)
+		freq, (tps, obs) = estimate_genotype_frequency(tree, [(pos-1, aa) for pos, aa in clade_gt], time_interval, regions)
 		clade_frequencies[clade_name] = list(np.round(logit_inv(freq.y),3))
 		if plot:
 			grid_tps = np.linspace(time_interval[0], time_interval[1], 100)
@@ -384,12 +407,12 @@ def determine_mutation_frequencies(tree, regions=None, threshold=50, plot=False)
 		if count>threshold and count<total_leaf_count-threshold:
 			print "estimating freq of ", mut, "total count:", count
 			freq, (tps, obs) = estimate_genotype_frequency(tree, [mut], time_interval, regions)
-			mutation_frequencies[str(mut[0]-15)+mut[1]] = list(np.round(logit_inv(freq.y),3))
+			mutation_frequencies[str(mut[0]+1)+mut[1]] = list(np.round(logit_inv(freq.y),3))
 #			xpol_freq = fix_freq(extrapolation(interp1d(freq.x, logit_inv(freq.y)), xpol_pivots), pc)
-#			mutation_frequencies['xpol_'+str(mut[0]-15)+mut[1]] = list(np.round(xpol_freq,3))
+#			mutation_frequencies['xpol_'+str(mut[0]-1)+mut[1]] = list(np.round(xpol_freq,3))
 			if plot:
 				grid_tps = np.linspace(time_interval[0], time_interval[1], 100)
-				plt.plot(grid_tps, logit_inv(freq(grid_tps)), label=str(mut[0]-15)+mut[1], lw=2, c=cols[mi%len(cols)])
+				plt.plot(grid_tps, logit_inv(freq(grid_tps)), label=str(mut[0]+1)+mut[1], lw=2, c=cols[mi%len(cols)])
 				if debug:
 					r_avg = running_average(obs, window_size)
 					plt.plot(tps, r_avg, c=cols[mi%len(cols)])
@@ -406,6 +429,77 @@ def reduce_genotype(gt, pos):
 def add_genotype_at_pos(tree, positions):
 	for node in tree.postorder_node_iter():
 		node.gt = "".join([node.aa_seq[pos] for pos in positions])
+
+def all_mutations(tree, region_list, threshold = 5, plot=False):
+	import matplotlib.pyplot as plt
+	mutation_frequencies = {}
+	for region_label, regions in region_list:
+		print "--- "+"determining mutation frequencies in "+region_label+ " "  + time.strftime("%H:%M:%S") + " ---"
+		if plot:
+			plt.figure("mutations in "+region_label, figsize = (12,7))
+			if regions is not None: plt.title("Region: "+", ".join(regions))
+		mutation_frequencies[region_label] = determine_mutation_frequencies(tree, regions, plot=plot, threshold = threshold)
+		if plot:
+			plt.legend()
+			ticloc = np.arange(time_interval[0], int(time_interval[1])+1,1)
+			plt.xticks(ticloc, map(str, ticloc))
+			plt.xlim([time_interval[0], time_interval[1]+1])
+			plt.ylim([-0.05, 1.05])
+			plt.grid()
+			plt.savefig('data/mutation_frequencies'+region_label+'.pdf')
+
+	relevant_pos = []
+	for mut, freq in mutation_frequencies["global"].iteritems():
+		if "pivot" not in mut:
+			if np.max(freq)-np.min(freq)>relevant_pos_cutoff:
+				pos = int(mut.split('_')[-1][:-1])-1
+				relevant_pos.append(pos)
+	relevant_pos = sorted(set(relevant_pos))
+
+	return mutation_frequencies, relevant_pos
+
+def all_genotypes(tree, region_list, relevant_pos):
+	from collections import defaultdict
+	total_leaf_count = len(tree.leaf_nodes())
+	gt_counts = defaultdict(int)
+	gt_frequencies = {}
+	# TODO: determine the number of relevant 2,3..mutation genotypes as in 159F/225D
+	# TODO: for each such genotype above a cut-off, calculate frequency trajectories
+	# TODO: this is completely analoguous to mutations, just 
+	for node in tree.leaf_iter():
+		gt_counts[reduce_genotype(node.aa_seq, relevant_pos)]+=1
+	for region_label, regions in region_list:
+		tc_in_region, sum_gts = 0,0
+		gt_frequencies[region_label]={"pivots":list(get_pivots(time_interval[0], time_interval[1]))}
+		print "--- "+"determining genotype frequencies "+region_label+ " "  + time.strftime("%H:%M:%S") + " ---"
+		for gt, c in gt_counts.iteritems():
+			print gt, c
+			tmp_freq , (tps, obs) = estimate_genotype_frequency(tree, gt, regions=regions, relevant_pos = relevant_pos)
+			gt_frequencies[region_label][gt] = list(logit_inv(tmp_freq.y))
+			sum_gts+=np.sum(obs)
+			tc_in_region = len(tps)
+		print "region: ", sum_gts, "out of", tc_in_region, "(",total_leaf_count," in total)"
+	return gt_frequencies
+
+
+def all_clades(tree, clades, region_list, plot=False):
+	clade_frequencies = {}
+	import matplotlib.pyplot as plt
+	for region_label, regions in region_list:
+		print "--- "+"determining clade frequencies "+region_label+ " "  + time.strftime("%H:%M:%S") + " ---"
+		if plot:
+			plt.figure("region "+region_label, figsize = (12,7))
+			if regions is not None: plt.title("Region: "+", ".join(regions))
+		clade_frequencies[region_label] = determine_clade_frequencies(tree, clades, regions=regions, plot=plot)
+		if plot:
+			plt.legend()
+			ticloc = np.arange(time_interval[0], int(time_interval[1])+1,1)
+			plt.xticks(ticloc, map(str, ticloc))
+			plt.xlim([time_interval[0], time_interval[1]+1])
+			plt.ylim([-0.05, 1.05])
+			plt.grid()
+			plt.savefig('data/clade_frequencies_'+region_label+'.pdf')
+	return clade_frequencies
 
 
 def test():
@@ -435,78 +529,7 @@ def test():
 	plt.plot(fe.tps, r_avg, 'k', label = 'running avg')
 	plt.legend(loc=2)
 
-
-
-
-def all_mutations(tree, region_list, plot=False):
-	import matplotlib.pyplot as plt
-	mutation_frequencies = {}
-	for region_label, regions in region_list:
-		print "--- "+"determining mutation frequencies in "+region_label+ " "  + time.strftime("%H:%M:%S") + " ---"
-		if plot:
-			plt.figure("mutations in "+region_label, figsize = (12,7))
-			if regions is not None: plt.title("Region: "+", ".join(regions))
-		mutation_frequencies[region_label] = determine_mutation_frequencies(tree, regions, plot=plot, threshold = 5)
-		if plot:
-			plt.legend()
-			ticloc = np.arange(time_interval[0], int(time_interval[1])+1,1)
-			plt.xticks(ticloc, map(str, ticloc))
-			plt.xlim([time_interval[0], time_interval[1]+1])
-			plt.ylim([-0.05, 1.05])
-			plt.grid()
-			plt.savefig('data/mutation_frequencies'+region_label+'.pdf')
-
-	relevant_pos = []
-	for mut, freq in mutation_frequencies["global"].iteritems():
-		if "pivot" not in mut:
-			if np.max(freq)-np.min(freq)>0.1:
-				pos = int(mut.split('_')[-1][:-1])+15
-				relevant_pos.append(pos)
-	relevant_pos = sorted(set(relevant_pos))
-
-	return mutation_frequencies, relevant_pos
-
-def all_genotypes(tree, region_list, relevant_pos):
-	from collections import defaultdict
-	total_leaf_count = len(tree.leaf_nodes())
-	gt_counts = defaultdict(int)
-	gt_frequencies = {}
-	for node in tree.leaf_iter():
-		gt_counts[reduce_genotype(node.aa_seq, relevant_pos)]+=1
-	for region_label, regions in region_list:
-		tc_in_region, sum_gts = 0,0
-		gt_frequencies[region_label]={"pivots":list(get_pivots(time_interval[0], time_interval[1]))}
-		print "--- "+"determining genotype frequencies "+region_label+ " "  + time.strftime("%H:%M:%S") + " ---"
-		for gt, c in gt_counts.iteritems():
-			print gt, c
-			tmp_freq , (tps, obs) = estimate_genotype_frequency(tree, gt, regions=regions, relevant_pos = relevant_pos)
-			gt_frequencies[region_label][gt] = list(logit_inv(tmp_freq.y))
-			sum_gts+=np.sum(obs)
-			tc_in_region = len(tps)
-		print "region: ", sum_gts, "out of", tc_in_region, "(",total_leaf_count," in total)"
-	return gt_frequencies
-
-
-def all_clades(tree, region_list, plot=False):
-	clade_frequencies = {}
-	import matplotlib.pyplot as plt
-	for region_label, regions in region_list:
-		print "--- "+"determining clade frequencies "+region_label+ " "  + time.strftime("%H:%M:%S") + " ---"
-		if plot:
-			plt.figure("region "+region_label, figsize = (12,7))
-			if regions is not None: plt.title("Region: "+", ".join(regions))
-		clade_frequencies[region_label] = determine_clade_frequencies(tree, regions=regions, plot=plot)
-		if plot:
-			plt.legend()
-			ticloc = np.arange(time_interval[0], int(time_interval[1])+1,1)
-			plt.xticks(ticloc, map(str, ticloc))
-			plt.xlim([time_interval[0], time_interval[1]+1])
-			plt.ylim([-0.05, 1.05])
-			plt.grid()
-			plt.savefig('data/clade_frequencies_'+region_label+'.pdf')
-	return clade_frequencies
-
-def main(tree_fname = 'data/tree_refine.json', clades_freq = True, mutation_freq = True, tree_freq = True):
+def main(tree_fname = 'data/tree_refine.json', clades=None, clades_freq = True, mutation_freq = True, tree_freq = True):
 	# load tree
 	from io_util import read_json
 	plot = debug
@@ -524,8 +547,8 @@ def main(tree_fname = 'data/tree_refine.json', clades_freq = True, mutation_freq
 		gt_frequencies["genotypes"] = all_genotypes(tree, region_list, relevant_pos)
 		write_json(gt_frequencies, out_fname, indent=None)
 
-	if clades_freq:
-		gt_frequencies["clades"] = all_clades(tree, region_list, plot)
+	if clades_freq and clades is not None:
+		gt_frequencies["clades"] = all_clades(tree, clades, region_list, plot)
 
 	if clades_freq or mutation_freq:
 		# round frequencies
