@@ -1073,18 +1073,9 @@ d3.json("data/frequencies.json", function(error, json){
 		console.log("calculating frequencies for :"+gt);
 		var freq = [];
 		for (var pi=0; pi<pivots.length; pi++){freq[freq.length]=0;}
-		if (gt.length>1){
-			for (freq_gt in json["genotypes"][region]){
-				var gt_agree = gt.map(function (d) {
-								var aa =freq_gt[parseInt(d.substring(0,d.length-1))-1]; 
-								return (aa==d[d.length-1])||(aa=='.');
-					});
-				if (gt_agree.every(function (d,i,a) {return d;}))
-				{
-					for (var pi=0; pi<freq.length; pi++){
-						freq[pi]+=json["genotypes"][region][freq_gt][pi];
-					}
-				}
+		if (json["genotypes"][region][gt[0]]!=undefined) {
+			for (var pi=0; pi<freq.length; pi++){
+				freq[pi]+=json["genotypes"][region][gt[0]][pi];
 			}
 		}else if (json["mutations"][region][gt[0]]!=undefined) {
 			for (var pi=0; pi<freq.length; pi++){
