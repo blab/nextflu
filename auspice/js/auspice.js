@@ -214,8 +214,10 @@ function tipFillColor(col) {
 	return d3.rgb(col).brighter([0.65]).toString();
 }
 
-var width = 800,
-	height = 600;
+var containerWidth = parseInt(d3.select(".plot-container").style("width"), 10);
+
+var width = containerWidth,
+	height = 520 + 0.1 * containerWidth;
 
 var cladeToSeq = {}
 
@@ -280,6 +282,13 @@ var linkTooltip = d3.tip()
 	});
 treeplot.call(linkTooltip);
 
+//from http://jsfiddle.net/agcsi/w6g5pths/
+c3.chart.fn.update_tick_values = function(tick_values) {
+    var $$ = this.internal, config = $$.config;    
+    config.axis_x_tick_values = tick_values;                            
+    $$.redraw();
+}
+
 var gt_chart = c3.generate({
 	bindto: '#gtchart',
 	size: {width:800, height: 350},
@@ -316,6 +325,7 @@ var gt_chart = c3.generate({
 		columns: []
 	}
 });
+
 
 function rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, internals, vaccines) {
 
@@ -416,12 +426,12 @@ d3.json("data/tree.json", function(error, root) {
 
 	var dateScale = d3.time.scale()
 		.domain([earliestDate, globalDate])
-		.range([5, 235])
+		.range([5, 240])
 		.clamp([true]);	
 
 	var niceDateScale = d3.time.scale()
 		.domain([earliestDate, globalDate])
-		.range([5, 235])
+		.range([5, 240])
 		.clamp([true])
 		.nice(d3.time.month);
 
@@ -441,15 +451,15 @@ d3.json("data/tree.json", function(error, root) {
 	var colorBy = document.getElementById("coloring").value;
 	
 	var epitopeColorScale = d3.scale.linear().clamp([true])
-		.domain([0,1,2,3,4,5,6,7,8,9])
+		.domain([4,5,6,7,8,9,10,11,12,13])
 		.range(colors);		
 
 	var nonepitopeColorScale = d3.scale.linear().clamp([true])
-		.domain([0,1,2,3,4,5,6,7,8,9])
+		.domain([2,3,4,5,6,7,8,9,10,11])
 		.range(colors);
 
 	var receptorBindingColorScale = d3.scale.linear().clamp([true])
-		.domain([0,1,2, 3, 4,])
+		.domain([0,1,2,3,4])
 		.range(colors.filter( function(d,i){return i%2;}));
 
 	var lbiColorScale = d3.scale.linear()
@@ -927,9 +937,9 @@ d3.json("data/tree.json", function(error, root) {
 		var positions_string = document.getElementById("gt-color").value.split(',');
 		var positions_list = []
 		positions_string.map(function(d) {
-			val = parseInt(d)+15;
+			val = parseInt(d)-1;
 			if (!isNaN(val)) {
-				if (val < 561) {
+				if (val < 551) {
 					positions_list.push(val);
 				}
 			}
@@ -948,7 +958,7 @@ d3.json("data/tree.json", function(error, root) {
 		var gts = nodes.map(function (d) {var tmp = [];
 											for (var i=0; i<positions.length; i++){
 												var aa = cladeToSeq[d.clade];
-												tmp[tmp.length] = (positions[i]-15)+aa[positions[i]];
+												tmp[tmp.length] = (positions[i]+1)+aa[positions[i]];
 											}
 											d.color_gt = tmp.join(" / "); 
 											return d.color_gt;});
@@ -1022,16 +1032,18 @@ d3.json("data/meta.json", function(error, json) {
 
 d3.json("data/sequences.json", function(error, json) {
 	if (error) return console.warn(error);
-	for (var key in json) {
-		if (json.hasOwnProperty(key)) {
-			var hash = json[key];
-			cladeToSeq[hash['clade']] = hash['aa_seq'];		
-		}
-	}
+	cladeToSeq=json;
 });
 
 d3.json("data/frequencies.json", function(error, json){
+	console.log(error);
 	var pivots= json["mutations"]["global"]["pivots"].map(function (d) {return Math.round(parseFloat(d)*100)/100;});
+	var ticks = [Math.round(pivots[0])];
+	var step = Math.round((pivots[pivots.length-1]-pivots[0])/6*10)/10;
+	while (ticks[ticks.length-1]<pivots[pivots.length-1]){
+		ticks.push(Math.round((ticks[ticks.length-1]+step)*10)/10);
+	}	
+	gt_chart.update_tick_values(ticks);
 	/**
 		parses a genotype string into region and positions
 	**/
@@ -1061,23 +1073,14 @@ d3.json("data/frequencies.json", function(error, json){
 		console.log("calculating frequencies for :"+gt);
 		var freq = [];
 		for (var pi=0; pi<pivots.length; pi++){freq[freq.length]=0;}
-		if (gt.length>1){
-			for (freq_gt in json["genotypes"][region]){
-				var gt_agree = gt.map(function (d) {
-								var aa =freq_gt[parseInt(d.substring(0,d.length-1))+15]; 
-								return (aa==d[d.length-1])||(aa=='.');
-					});
-				if (gt_agree.every(function (d,i,a) {return d;}))
-				{
-					for (var pi=0; pi<freq.length; pi++){
-						freq[pi]+=json["genotypes"][region][freq_gt][pi];
-					}
-				}
+		if (json["genotypes"][region][gt[0]]!=undefined) {
+			for (var pi=0; pi<freq.length; pi++){
+				freq[pi]+=json["genotypes"][region][gt[0]][pi];
 			}
 		}else if (json["mutations"][region][gt[0]]!=undefined) {
 			for (var pi=0; pi<freq.length; pi++){
 				freq[pi]+=json["mutations"][region][gt[0]][pi];
-			}			
+			}
 		}else if (json["clades"][region][gt[0].toLowerCase()]!=undefined) {
 			for (var pi=0; pi<freq.length; pi++){
 				freq[pi]+=json["clades"][region][gt[0].toLowerCase()][pi];

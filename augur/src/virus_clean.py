@@ -2,140 +2,88 @@
 # make inline with canonical ordering (no extra gaps)
 
 import os, datetime, time, re
+from itertools import izip
+from Bio.Align import MultipleSeqAlignment
+from Bio.Seq import Seq
 from scipy import stats
-import numpy
-from io_util import *
+import numpy as np
 
-OUTGROUP = 'A/Beijing/32/1992'
+class virus_clean(object):
+	"""docstring for virus_clean"""
+	def __init__(self,n_iqd  = 5, **kwargs):
+		'''
+		parameters
+		n_std	-- number of interquartile distances accepted in molecular clock filter 
+		'''
+		self.n_iqd = n_iqd
 
-def mask_from_outgroup(viruses):
-	outgroup_seq = next(v for v in viruses if v['strain'] == OUTGROUP)['seq']
-	for v in viruses:
-		filtered = ""
-		for (a, b) in zip(list(v['seq']), list(outgroup_seq)):
-			if b != '-':
-				filtered += str(a)
-		v['seq'] = filtered
+	def remove_insertions(self):
+		'''
+		remove all columns from the alignment in which the outgroup is gapped
+		'''
+		outgroup_ok = np.array(self.sequence_lookup[self.outgroup['strain']])!='-'
+		for seq in self.viruses:
+			seq.seq = Seq("".join(np.array(seq.seq)[outgroup_ok]).upper())
 
-def clean_gaps(viruses):
-	return [v for v in viruses if not '-' in v['seq']]
+	def clean_gaps(self):
+		'''
+		remove viruses with gaps -- not part of the standard pipeline
+		'''
+		self.viruses = filter(lambda x: '-' in x.seq, self.viruses)
 
-def clean_ambiguous(viruses):
-	for virus in viruses:
-		virus['seq'] = re.sub(r'[BDEFHIJKLMNOPQRSUVWXYZ]', '-', virus['seq'])
+	def clean_ambiguous(self):
+		'''
+		substitute all ambiguous characters with '-', 
+		ancestral inference will interpret this as missing data
+		'''
+		for v in self.viruses:
+			v.seq = Seq(re.sub(r'[BDEFHIJKLMNOPQRSUVWXYZ]', '-',str(v.seq)))
 
-def date_from_virus(virus):
-	return datetime.datetime.strptime(virus['date'], '%Y-%m-%d').date()
+	def unique_date(self):
+		'''
+		add a unique numerical date to each leaf. uniqueness is achieved adding a small number
+		'''
+		from date_util import numerical_date
+		og = self.sequence_lookup[self.outgroup['strain']]
+		og.num_date = numerical_date(og.date)
+		for ii, v in enumerate(self.viruses):
+			v.num_date = numerical_date(v.date) + 1e-7*(ii+1)
 
-def times_from_outgroup(viruses):
-	outgroup_date = date_from_virus(filter(lambda v: v['strain'] == OUTGROUP, viruses)[0])
-	return map(lambda v: (date_from_virus(v) - outgroup_date).days, viruses)
+	def times_from_outgroup(self):
+		self.unique_date()
+		outgroup_date = self.sequence_lookup[self.outgroup['strain']].num_date
+		return np.array([x.num_date-outgroup_date for x in self.viruses  if x.strain])
 
-def distance(seq_a, seq_b):
-	dist = 0
-	total = 0
-	for (a, b) in zip(list(seq_a), list(seq_b)):
-		if a != '-' and b != '-':
-			total += 1
-			if a != b:
-				dist += 1
-	return float(dist) / float(total)
+	def distance_from_outgroup(self):
+		from seq_util import hamming_distance
+		outgroup_seq = self.sequence_lookup[self.outgroup['strain']].seq
+		return np.array([hamming_distance(x.seq, outgroup_seq) for x in self.viruses if x.strain])
 
-def ha1_distances_from_outgroup(viruses):
-	outgroup_seq = filter(lambda v: v['strain'] == OUTGROUP, viruses)[0]['seq']
-	return map(lambda v: distance(outgroup_seq[:987], v['seq'][:987]), viruses)
-
-def clean_distances(viruses):
-	"""Remove viruses that don't follow a loose clock for HA1"""
-	times = times_from_outgroup(viruses)
-	distances = ha1_distances_from_outgroup(viruses)
-	slope, intercept, r_value, p_value, std_err = stats.linregress(times, distances)
-	print "  slope: " + str(slope*365)
-	print "  r: " + str(r_value)
-	residuals = map(lambda t, d: (intercept + slope*t) - d, times, distances)
-	r_sd = numpy.std(residuals)
-	print "  residuals sd: " + str(r_sd)
-	new_viruses = []
-	for (v,r) in zip(viruses,residuals):		# filter viruses more than 5 sds up or down
-		if (r > -3 * r_sd and r < 3 * r_sd) or v['strain'] == OUTGROUP:
-			new_viruses.append(v)
-	return new_viruses
-
-def clean_outbreaks(viruses):
-	"""Remove duplicate strains, where the geographic location, date of sampling and sequence are identical"""
-	hash_to_count = {}
-	new_viruses = []
-	for v in viruses:
-		geo = re.search(r'A/([^/]+)/', v['strain']).group(1)
-		if geo:
-			hash = geo + "_" + v['date'] + "_" + v['seq']
-			if hash in hash_to_count:
-				hash_to_count[hash] += 1
-			else:
-				hash_to_count[hash] = 1
+	def clean_distances(self):
+		"""Remove viruses that don't follow a loose clock """
+		times = self.times_from_outgroup()
+		distances = self.distance_from_outgroup()
+		slope, intercept, r_value, p_value, std_err = stats.linregress(times, distances)
+		residuals = slope*times + intercept - distances
+		r_iqd = stats.scoreatpercentile(residuals,75) - stats.scoreatpercentile(residuals,25)
+		if self.verbose:
+			print "\tslope: " + str(slope)
+			print "\tr: " + str(r_value)
+			print "\tresiduals iqd: " + str(r_iqd)
+		new_viruses = []
+		for (v,r) in izip(self.viruses,residuals):
+			# filter viruses more than n_std standard devitations up or down
+			if np.abs(r)<self.n_iqd * r_iqd or v.id == self.outgroup["strain"]:
 				new_viruses.append(v)
-	return new_viruses
+			else:
+				if self.verbose>1:
+					print "\t\tresidual:", r, "\nremoved ",v.strain
+		self.viruses = MultipleSeqAlignment(new_viruses)
 
-def clean_reassortants(viruses):
-	"""Remove viruses from the outbreak of triple reassortant pH1N1"""
-	remove_viruses = []	
-	
-	reassortant_seq = "ATGAAGACTATCATTGCTTTTAGCTGCATTTTATGTCTGATTTTCGCTCAAAAACTTCCCGGAAGTGACAACAGCATGGCAACGCTGTGCCTGGGACACCATGCAGTGCCAAACGGAACATTAGTGAAAACAATCACGGATGACCAAATTGAAGTGACTAATGCTACTGAGCTGGTCCAGAGTTCCTCAACAGGTGGAATATGCAACAGTCCTCACCAAATCCTTGATGGGAAAAATTGCACACTGATAGATGCTCTATTGGGGGACCCTCATTGTGATGACTTCCAAAACAAGGAATGGGACCTTTTTGTTGAACGAAGCACAGCCTACAGCAACTGTTACCCTTATTACGTGCCGGATTATGCCACCCTTAGATCATTAGTTGCCTCATCCGGCAACCTGGAATTTACCCAAGAAAGCTTCAATTGGACTGGAGTTGCTCAAGGCGGATCAAGCTATGCCTGCAGAAGGGGATCTGTTAACAGTTTCTTTAGTAGATTGAATTGGTTGTATAACTTGAATTACAAGTATCCAGAGCAGAACGTAACTATGCCAAACAATGACAAATTTGACAAATTGTACATTTGGGGGGTTCACCACCCGGGTACGGACAAGGACCAAACCAACCTATATGTCCAAGCATCAGGGAGAGTTATAGTCTCTACCAAAAGAAGCCAACAAACTGTAATCCCGAATATCGGGTCTAGACCCTGGGTAAGGGGTGTCTCCAGCATAATAAGCATCTATTGGACGATAGTAAAACCGGGAGACATACTTTTGATTAACAGCACAGGGAATCTAATTGCCCCTCGGGGTTACTTCAAAATACAAAGTGGGAAAAGCTCAATAATGAGATCAGATGCACACATTGATGAATGCAATTCTGAATGCATTACTCCAAATGGAAGCATTCCCAATGACAAACCTTTTCAAAATGTAAACAAGATCACATATGGAGCCTGTCCCAGATATGTTAAGCAAAACACCCTGAAATTGGCAACAGGAATGCGGAATGTACCAGAGAAACAAACTAGAGGCATATTCGGCGCAATTGCAGGTTTCATAGAAAATGGTTGGGAGGGAATGGTAGACGGTTGGTACGGTTTCAGGCATCAGAATTCTGAAGGCACAGGACAAGCAGCAGATCTTAAAAGCACTCAAGCAGCAATCAACCAAATCACCGGGAAACTAAATAGAGTAATCAAGAAAACAAACGAGAAATTCCATCAAATCGAAAAAGAATTCTCAGAAGTAGAAGGAAGAATTCAGGACCTAGAGAAATACGTTGAAGACACTAAAATAGATCTCTGGTCTTACAACGCTGAGATTCTTGTTGCCCTGGAGAACCAACATACAATTGATTTAACCGACTCAGAGATGAGCAAACTGTTCGAAAGAACAAGAAGGCAACTGCGGGAAAATGCTGAGGACATGGGCAATGGTTGCTTCAAAATATACCACAAATGTGACAATGCCTGCATAGGATCAATCAGAAATGGAACTTATGACCATGATATATACAGAAACGAGGCATTAAACAATCGGTTCCAGATCAAAGGTGTTCAGCTAAAGTCAGGATACAAAGATTGGATCCTATGGATTTCCTTTGCCATATCATGCTTTTTGCTTTGTGTTGTTCTGCTGGGGTTCATTATGTGGGCCTGCCAAAAAGGCAACATTAGGTGCAACATTTGCATTTGA"
-	for v in viruses:
-		dist = distance(reassortant_seq, v['seq'])
-		if (dist < 0.02):
-			remove_viruses.append(v)
-
-	reassortant_seq = "ATGAAGACTATCATTGCTTTTAGCTGCATCTTATGTCAGATCTCCGCTCAAAAACTCCCCGGAAGTGACAACAGCATGGCAACGCTGTGCCTGGGGCATCACGCAGTACCAAACGGAACGTTAGTGAAAACAATAACAGATGACCAAATTGAAGTGACTAATGCTACTGAGCTGGTCCAGAGTACCTCAAAAGGTGAAATATGCAGTAGTCCTCACCAAATCCTTGATGGAAAAAATTGTACACTGATAGATGCTCTATTGGGAGACCCTCATTGTGATGACTTCCAAAACAAGAAATGGGACCTTTTTGTTGAACGAAGCACAGCTTACAGCAACTGTTACCCTTATTATGTGCCGGATTATGCCTCCCTTAGGTCACTAGTTGCCTCATCCGGCACCCTGGAATTTACTCAAGAAAGCTTCAATTGGACTGGGGTTGCTCAAGACGGAGCAAGCTATTCTTGCAGAAGGGAATCTGAAAACAGTTTCTTTAGTAGATTGAATTGGTTATATAGTTTGAATTACAAATATCCAGCGCTGAACGTAACTATGCCAAACAATGACAAATTTGACAAATTGTACATTTGGGGGGTACACCACCCGGGTACGGACAAGGACCAAACCAGTCTATATATTCAAGCATCAGGGAGAGTTACAGTCTCCACCAAATGGAGCCAACAAACTGTAATCCCGAATATCGGGTCTAGACCCTGGATAAGGGGTGTCTCCAGCATAATAAGCATCTATTGGACAATAGTAAAACCGGGAGACATACTTTTGATTAACAGCACAGGGAATCTAATTGCCCCTCGGGGTTACTTCAAAATACAAAGTGGGAAAAGCTCAATAATGAGGTCAGATGCACACATTGGCAACTGCAACTCTGAATGCATTACCCCAAATGGAAGCATTCCCAACGACAAACCTTTTCAAAATGTAAACAGAATAACATATGGGGCCTGTCCCAGATATGTTAAGCAAAACACTCTGAAATTAGCAACAGGAATGCGGAATGTACCAGAGAAACAAACTAGAGGCATATTCGGCGCAATCGCAGGTTTCATAGAAAATGGTTGGGAAGGGATGGTGGACGGTTGGTATGGTTTCAGGCATCAAAACTCTGAAGGCACAGGGCAAGCAGCAGATCTTAAAAGCACTCAAGCGGCAATCAACCAAATCACCGGGAAACTAAATAGAGTAATCAAGAAGACGAATGAAAAATTCCATCAGATCGAAAAAGAATTCTCAGAAGTAGAAGGGAGAATTCAGGACCTAGAGAGATACGTTGAAGACACTAAAATAGACCTCTGGTCTTACAACGCGGAGCTTCTTGTTGCCCTGGAGAACCAACATACAATTGATTTAACTGACTCAGAAATGAACAAACTGTTCGAAAGGACAAGGAAGCAACTGCGGGAAAATGCTGAGGACATGGGCAATGGATGCTTTAAAATATATCACAAATGTGACAATGCCTGCATAGGATCAATCAGAAATGGAACTTATGACCATGATGTATACAGAGACGAAGCAGTAAACAATCGGTTCCAGATCAAAGGTGTTCAGCTGAAGTTAGGATACAAAGATTGGATCCTATGGATTTCCTTTGCCATATCATGCTTTTTGCTTTGTGCTGTTCTGCTAGGATTCATTATGTGGGCATGCCAAAAAGGCAACATTAGGTGCAACATTTGCATTTGA"
-	for v in viruses:
-		dist = distance(reassortant_seq, v['seq'])
-		if (dist < 0.02):
-			remove_viruses.append(v)
-
-	reassortant_seq = "ATGAAGACTAGTAGTTCTGCTATATACATTGCAA------------------------CCGCAAATG---------CAGACACATTATGTATAGGTTATCATGCAGTACTAGAAAAGAATGTAACAGTAACACACTCTGTTAACCAAACTGAGAGGGGTAGCCCCATTGCATTTG--------------------GGTAAATGTAACATTGCTGGCTGGATCC------------------------------------TGGGAAATCCAGAGTGTGACACTCTCCACAGCAAGCTCATGGTCCTACATCGTGGAAACATCTAAGACAATGGAACGTGCTACCCAGGAGATTTCATCAATTATGAGGAGCTAAGGTCATCATTTGAAAGGTTTGAGATATTACAAGTTCATGGCCCAATCATGACTCGAACAAAGGTTCCTCAAGCTGGAGCAA---------------------------AAAGCTTCTACAAAAATTTAATATGGCTAGTTAAAAAAGGAAATTCATACCCAA------------------------------AGCTCAGCAAATCCTACATTTGGGGCATTCACCATCCATCTACTAGTGCTGACCAA-------CAAAGTCTCTATCAGAGTGCAGATGCATATGTTTTATCAAAATACAGCAAGAAGTTCAAG--CCGGAAATAGCAGTAAGACCCAAAGTGAGGGATCAAGAAGGGAGAATGAACTATTACTGGACACTAGTAGAGCCGGGAGACAAAATAACATTCGAAGCAACTGGAAATCTATTGGTACCGAGATATGCATTCGCAATGGAAA----GAAATGCTGGATTATCATTTCAGATACACCAGTCCACGATTGCAATACAACTTGTCAGACACCCAAGGGTGCTATAAACACCAGCCTCCCATTTCAGAATATACATCCGATCACAATTGGAAAATGTCCCAAATATGTAAAAAGCACAAAATTGAGACTGGCCACAGGATTGAGGAATGTCCCGTCTATTCAATCTAGAGGCCTATTTGGGGCCATTGCCGGTTTCATTGAAGGGGGGTGGACAGGGATGGTAGATGGATGGTACGGTTATCACCATCAAAATGCGCAGGGGTCAGGATATGCAGCCGACCTGAAGAGCACACAGAATGCCATTGACAAGATTACTAACAAAGTAAATTCTGTTATTGAAAAGATGAATACACAGTTCACAGCAGTAGGTAAAGAGTTCAACCACCTGGAAAAAAGAATAGAGAATTTAAATAAAAAAGTTGATGATGGTTTCCTGGACATTTGGACTTACAATGCCGAACTGTTGGTTCTATTGGAAAATGAAAGAACTTTGGACTACCACGATTCAAATGTGAAAAACTTATATGAAAAGGTAAGAAGCCAGTTAAAAAACAATGCCAAGGAAATTGGAAACGGCTGCTTTGAATTTTACCACAAATGCGATAACACGTGCATGGAAAGTGTCAAAAATGGGACTTATGACTACCCAAAATACTCAGAGGAAGCAAAATTAAACAGAGAAGAAATAGATGGGGTAAAGCTGGAATCAACAAGGATTTACCAGATTTTGGCGATCTATTCAACTGTCGCCAGTTCATTGGTACTGGTAGTCTCCCTGGGGGCAATCATCTGGATGTGCTCTAATGGGTCTCTACAGTGTAGAATATGTATTTAA"
-	for v in viruses:
-		dist = distance(reassortant_seq, v['seq'])
-		if (dist < 0.02):
-			remove_viruses.append(v)
-			
-	new_viruses = []
-	for v in viruses:
-		if v not in remove_viruses:
-			new_viruses.append(v)
-
-	return new_viruses
-
-def main(in_fname=None):
-
-	print "--- Clean at " + time.strftime("%H:%M:%S") + " ---"
-
-	if in_fname is None: in_fname = 'data/virus_align.json'
-	viruses = read_json(in_fname)
-	print str(len(viruses)) + " initial viruses"
-
-	# mask extraneous columns and ambiguous bases
-	mask_from_outgroup(viruses)
-	clean_ambiguous(viruses)
-
-	# clean gapped sequences
-#	viruses = clean_gaps(viruses)
-#	print str(len(viruses)) + " with complete HA"
-
-	# clean sequences by outbreak
-	viruses = clean_outbreaks(viruses)
-	print str(len(viruses)) + " with outbreak sequences removed"
-
-	# clean reassortant sequences
-	viruses = clean_reassortants(viruses)
-	print str(len(viruses)) + " with triple reassortants removed"
-
-	# clean sequences by distance
-	viruses = clean_distances(viruses)
-	print str(len(viruses)) + " with clock"
-
-	out_fname = 'data/virus_clean.json'
-	write_json(viruses, out_fname)
-	return out_fname
-
-if __name__ == "__main__":
-	main()
+	def clean_generic(self):
+		print "Number of viruses before cleaning:",len(self.viruses)
+		self.remove_insertions()
+		self.clean_ambiguous()
+		self.clean_distances()
+		self.viruses.sort(key=lambda x:x.num_date)
+		print "Number of viruses after outlier filtering:",len(self.viruses)

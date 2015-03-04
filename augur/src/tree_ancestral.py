@@ -16,11 +16,8 @@ or, slightly less Pythonic,
 
 
 import numpy as np
-from Bio import Phylo, Seq
+from Bio import Seq
 import copy, time
-from seq_util import json_to_Bio_alignment
-from io_util import write_json, read_json
-from tree_util import BioPhylo_to_json
 
 class ancestral_sequences:
 	'''
@@ -66,11 +63,11 @@ class ancestral_sequences:
 			self.calc_eigendecomp()
 
 		names_to_seqs = {seq.id:seq  for seq in aln}
-		for leaf in self.T.get_terminals():
-			if leaf.name in names_to_seqs:
+		for leaf in self.T.leaf_iter():
+			if leaf.taxon.label in names_to_seqs:
 				leaf.prob = self.get_state_array()
 
-				seqtmp = names_to_seqs[leaf.name].seq
+				seqtmp = names_to_seqs[leaf.taxon.label].seq
 
 				if self.seqtype != 'Seq':
 					seqtmp = ''.join(seqtmp)
@@ -86,17 +83,19 @@ class ancestral_sequences:
 				for ni in xrange(self.nstates):
 					leaf.prob[:,ni]+=missing_prob
 			else:
-				print('ancestral sequences: Leaf '+leaf.name+' has no sequence')
+				print('ancestral sequences: Leaf '+leaf.taxon.label+' has no sequence')
 
 		if self.seqtype == 'Seq':
 			self.biopython_alphabet = leaf.seq.alphabet
 
 		# dress each internal node with a probability vector for the ancestral state
-		for node in self.T.get_nonterminals():
+		for node in self.T.postorder_internal_node_iter():
 			node.prob = self.get_state_array()
+			if node.edge_length is None:
+				node.edge_length = 0.0
 		# there is no parental information to the root (the root node is artificial)
 		# hence init the message with ones
-		self.T.root.up_message = self.get_state_array()
+		self.T.seed_node.up_message = self.get_state_array()
 	
 	
 	def get_state_array(self):
@@ -129,7 +128,7 @@ class ancestral_sequences:
 		clade.prob/=np.repeat(np.array([np.sum(clade.prob, axis=1)]).T, self.nstates, axis=1)
 		
 		if np.isnan(np.sum(clade.prob[:])):
-			print "encountered nan in ancestral inference in clade ", clade.name
+			print "encountered nan in ancestral inference in clade ", clade.taxon.label
 			print np.isnan(clade.prob).nonzero()
 			
 	def log_normalize(self, clade):
@@ -149,21 +148,21 @@ class ancestral_sequences:
 		recursively calculates the messages passed on the parents of each node
 		input: clade whose down_message is to be calculated
 		'''
-		if clade.is_terminal():
+		if clade.is_leaf():
 			# if clade is terminal, the sequence is fix and we can emit the state probabilities
-			clade.down_message = self.calc_state_probabilites(clade.prob, clade.branch_length)
-			#print "down clade", clade.name, 'min:', np.min(clade.down_message)
+			clade.down_message = self.calc_state_probabilites(clade.prob, clade.edge_length)
+			#print "down clade", clade.taxon.label, 'min:', np.min(clade.down_message)
 			clade.down_message[clade.down_message<1e-30] = 1e-30
 		else:
 			#otherwise, multiply all down messages from children, normalize and pass down
 			clade.prob[:]=0
-			for child in clade.clades:
+			for child in clade.child_nodes():
 				self.calc_down_messages(child)
 				clade.prob+=np.log(child.down_message)
 
 			self.log_normalize(clade)
-			clade.down_message = self.calc_state_probabilites(clade.prob, clade.branch_length)
-			#print "down clade", clade.name, 'min:', np.min(clade.down_message)
+			clade.down_message = self.calc_state_probabilites(clade.prob, clade.edge_length)
+			#print "down clade", clade.taxon.label, 'min:', np.min(clade.down_message)
 			clade.down_message[clade.down_message<1e-30] = 1e-30
 
 	def calc_up_messages(self,clade):
@@ -171,26 +170,26 @@ class ancestral_sequences:
 		calculate the messages that are passed on to the children
 		input calde for which these are to calculated
 		'''
-		if clade.is_terminal():
+		if clade.is_leaf():
 			#nothing to be done for terminal nodes
 			return
 		else:
 			#else, loop over children and calculate the message for each of the children
-			for child in clade.clades:
+			for child in clade.child_nodes():
 				# initialize with the message comming from the parent
 				clade.prob[:]=np.log(clade.up_message)
-				for child2  in clade.clades:
+				for child2  in clade.child_nodes():
 					if child2 != child:
 						#multiply with the down message from each of the children, but skip child 1
 						clade.prob+=np.log(child2.down_message)
 				
 				# normalize, adjust for modifications along the branch, and save.
 				self.log_normalize(clade)
-				child.up_message = self.calc_state_probabilites(clade.prob, child.branch_length)
-				#print "up clade", clade.name, 'min:', np.min(child.up_message)
+				child.up_message = self.calc_state_probabilites(clade.prob, child.edge_length)
+				#print "up clade", clade.taxon.label, 'min:', np.min(child.up_message)
 				child.up_message[child.up_message<1e-30] = 1e-30
 			# do recursively for all children
-			for child in clade.clades:
+			for child in clade.child_nodes():
 				self.calc_up_messages(child)
 
 	def calc_marginal_probabilities(self,clade):
@@ -198,13 +197,13 @@ class ancestral_sequences:
 		calculate the marginal probabilities by multiplying all incoming messages
 		'''
 		clade.prob[:]=np.log(clade.up_message)
-		for child in clade.clades:
+		for child in clade.child_nodes():
 			clade.prob+=np.log(child.down_message)
 			
 		# normalize and continue for all children
 		self.log_normalize(clade)
-		#print clade.name, np.max(1.0-np.max(clade.prob, axis=1))
-		for child in clade.clades:
+		#print clade.taxon.label, np.max(1.0-np.max(clade.prob, axis=1))
+		for child in clade.child_nodes():
 			self.calc_marginal_probabilities(child)
 			
 	def calc_most_likely_sequences(self, clade):
@@ -218,7 +217,7 @@ class ancestral_sequences:
 		setattr(clade, self.attrname, seq)
 
 		# repeat for all children
-		for child in clade.clades:
+		for child in clade.child_nodes():
 			self.calc_most_likely_sequences(child)
 
 
@@ -228,46 +227,35 @@ class ancestral_sequences:
 		and the marginal probabilities for each position at each internal node.
 		'''
 		print "--- Forward pass at " + time.strftime("%H:%M:%S") + " ---"
-		self.calc_down_messages(self.T.root)
+		self.calc_down_messages(self.T.seed_node)
 		print "--- Backward pass at " + time.strftime("%H:%M:%S") + " ---"
-		self.calc_up_messages(self.T.root)
+		self.calc_up_messages(self.T.seed_node)
 		print "--- Calculating marginals at " + time.strftime("%H:%M:%S") + " ---"
-		self.calc_marginal_probabilities(self.T.root)
+		self.calc_marginal_probabilities(self.T.seed_node)
 		print "--- Most likely nucleotides at " + time.strftime("%H:%M:%S") + " ---"
-		self.calc_most_likely_sequences(self.T.root)
-
+		self.calc_most_likely_sequences(self.T.seed_node)
+		self.cleanup_tree()
+		
 	
 	def cleanup_tree(self, attrnames=['prob', 'down_message', 'up_message']):
 		'''Clean up pollution attributes of leaves'''
-		nodes = self.T.get_terminals() + self.T.get_nonterminals()
+		nodes = self.T.postorder_node_iter()
 		for leaf in nodes:
 			for attrname in attrnames:
 				if hasattr(leaf, attrname):
 					delattr(leaf, attrname)
 
-def main(tree_fname='data/tree_infer.newick', virus_fname='data/virus_clean.json'):
+def main(tree, viruses):
+	from seq_util import json_to_Bio_alignment
+	from tree_util import json_to_dendropy
 	print "--- Ancestral inference at " + time.strftime("%H:%M:%S") + " ---"
-	from Bio import Phylo
-	viruses = read_json(virus_fname)
 	aln = json_to_Bio_alignment(viruses)
-	tree = Phylo.read(tree_fname, 'newick')
 	print "--- Set-up ancestral inference at " + time.strftime("%H:%M:%S") + " ---"
 	anc_seq = ancestral_sequences(tree, aln, seqtype='str')
 	anc_seq.calc_ancestral_sequences()
 	anc_seq.cleanup_tree()
 	out_fname = "data/tree_ancestral.json"
-	write_json(BioPhylo_to_json(anc_seq.T.root), out_fname)
-	return out_fname
-
-def test():
-	from Bio import Phylo, AlignIO
-	from StringIO import StringIO
-	tree = Phylo.read(StringIO('((A/Tbilisi/GNCDC0557/2012:0.00877583894583227123,((A/SHIMANE/194/2011:0.00400338899817878624,A/KUMAMOTO-C/36/2011:0.00088323906079086276):0.01868163425362149091,A/Kenya/222/2012:0.00506846715254004234):0.00000042200543794419):0.05229485694422789793,A/Beijing/32/1992:0.05229485694422789793);'), format = 'newick')
-	aln = AlignIO.read('../scratch/test_aln.phyx', 'phylip-relaxed')
-	anc_seq = ancestral_sequences(tree=tree, aln=aln, seqtype='str')
-	anc_seq.calc_ancestral_sequences()
-	write_json(BioPhylo_to_json(anc_seq.T.root), 'test.json')
-	return anc_seq.T
+	return json_to_dendropy(anc_seq.T.seed_node)
 
 if __name__=="__main__":
 	tree = main()
