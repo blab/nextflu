@@ -451,15 +451,15 @@ d3.json("data/tree.json", function(error, root) {
 	var colorBy = document.getElementById("coloring").value;
 	
 	var epitopeColorScale = d3.scale.linear().clamp([true])
-		.domain([0,1,2,3,4,5,6,7,8,9])
+		.domain([4,5,6,7,8,9,10,11,12,13])
 		.range(colors);		
 
 	var nonepitopeColorScale = d3.scale.linear().clamp([true])
-		.domain([0,1,2,3,4,5,6,7,8,9])
+		.domain([2,3,4,5,6,7,8,9,10,11])
 		.range(colors);
 
 	var receptorBindingColorScale = d3.scale.linear().clamp([true])
-		.domain([0,1,2, 3, 4,])
+		.domain([0,1,2,3,4])
 		.range(colors.filter( function(d,i){return i%2;}));
 
 	var lbiColorScale = d3.scale.linear()
