@@ -242,7 +242,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 		fitness_model.__init__(self,**kwargs)
 		self.verbose = verbose
 
-	def run(self, steps, years_back=3, viruses_per_month=50, raxml_time_limit = 1.0):
+	def run(self, steps, years_back=3, viruses_per_month=50, raxml_time_limit = 1.0, reg = 5):
 		if 'filter' in steps:
 			print "--- Virus filtering at " + time.strftime("%H:%M:%S") + " ---"
 			self.filter()
@@ -289,10 +289,10 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 		if 'export' in steps:
 			self.temporal_regional_statistics()
 			# exporting to json, including the H3N2 specific fields
-			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb'])
+			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'dHI', 'cHI', 'HI_titers', 'serum', 'HI_info'])
 
 if __name__=="__main__":
-	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies', 'export']
+	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies', 'HI', 'export']
 	parser = argparse.ArgumentParser(description='Process virus sequences, build tree, and prepare of web visualization')
 	parser.add_argument('-y', '--years_back', type = int, default=3, help='number of past years to sample sequences from')
 	parser.add_argument('-v', '--viruses_per_month', type = int, default = 50, help='number of viruses sampled per month')

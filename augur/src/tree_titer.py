@@ -4,6 +4,7 @@ import numpy as np
 import time
 from collections import defaultdict
 from matplotlib import pyplot as plt
+from itertools import izip
 
 class HI_tree(object):
 
@@ -25,7 +26,7 @@ class HI_tree(object):
 		return measurements, strains
 
 	def normalize_HI(self):
-		consensus_func = np.max
+		consensus_func = np.mean
 		self.HI_normalized = {}
 		sera = set()
 		HI_strains = set()
@@ -47,7 +48,7 @@ class HI_tree(object):
 		self.tree.seed_node.mutations= ''
 		for node in self.tree.postorder_node_iter():
 			if node is not self.tree.seed_node:
-				node.mutations = [a+str(pos-15)+b for pos, (a,b) in 
+				node.mutations = [a+str(pos+1)+b for pos, (a,b) in 
 								enumerate(izip(node.parent_node.aa_seq, node.aa_seq)) if a!=b]
 
 	def mark_HI_splits(self):
@@ -102,8 +103,7 @@ class HI_tree(object):
 		for (test, ref), val in self.train_HI.iteritems():
 			if not np.isnan(val):
 				try:
-					if test != ref  and ref in self.node_lookup \
-									and test in self.node_lookup:
+					if ref in self.node_lookup and test in self.node_lookup:
 						path = self.get_path_no_terminals(test, ref)
 						tmp = np.zeros(n_params)
 						branches = np.unique([c.HI_branch_index for c in path if hasattr(c, 'HI_branch_index')])
@@ -236,6 +236,11 @@ class HI_tree(object):
 			plt.xlabel("measured")
 			plt.title('reg='+str(self.lam)+', avg error '+str(round(np.mean(np.abs(a[:,0]-a[:,1])),3)))
 
+	def add_titers(self):
+		for ref in self.sera:
+			self.node_lookup[ref].HI_titers = {}
+		for (test, ref), val in self.HI_normalized.iteritems():
+			self.node_lookup[ref][self.node_lookup[test].clade] = val
 
 	def predict_HI(self, virus, serum):
 		path = self.get_path_no_terminals(virus,serum)
@@ -248,13 +253,13 @@ class HI_tree(object):
 ####  utility functions for reading and writing HI Tables, plotting trees, etc
 ######################################################################################
 
-	def plot_tree(tree):
-		from Bio import Phylo
-		from tree_util import to_Biopython, color_BioTree_by_attribute
-		btree = to_Biopython(tree)
-		color_BioTree_by_attribute(btree,"cHI", transform = lambda x:x)
-		Phylo.draw(btree, label_func = lambda  x: 'X' if x.serum else 'o' if x.HI_info else '', 
-			show_confidence= False) #, branch_labels = lambda x:x.mutations)
+def plot_tree(tree):
+	from Bio import Phylo
+	from tree_util import to_Biopython, color_BioTree_by_attribute
+	btree = to_Biopython(tree)
+	color_BioTree_by_attribute(btree,"cHI", transform = lambda x:x)
+	Phylo.draw(btree, label_func = lambda  x: 'X' if x.serum else '' if x.HI_info else '', 
+		show_confidence= False) #, branch_labels = lambda x:x.mutations)
 
 def plot_dHI_distribution(tree):
 	plt.figure()
@@ -373,12 +378,14 @@ def get_strains_with_HI_and_sequence():
 	from Bio import SeqIO
 	good_strains = set()
 	with open("data/strains_with_HI.fasta", 'w') as outfile, \
+		open("source-data/HI_strains.txt", 'w') as HI_strain_outfile, \
 		 open("data/20150222_all_H3N2_HA1.fasta", 'r') as infile:
 		for seq_rec in SeqIO.parse(infile, 'fasta'):
 			reduced_name = strain_name_fixing(seq_rec.name)
 			if reduced_name in names and (reduced_name not in good_strains):
 				SeqIO.write(seq_rec, outfile,'fasta')
 				good_strains.add(reduced_name)
+				HI_strain_outfile.write(seq_rec.name+'\n')
 				print seq_rec.name
 
 
