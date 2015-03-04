@@ -1046,6 +1046,12 @@ d3.json("data/tree.json", function(error, root) {
 d3.json("data/meta.json", function(error, json) {
 	if (error) return console.warn(error);
 	d3.select("#updated").text(json['updated']);
+	commit_id = json['commit'];
+	short_id = commit_id.substring(0, 6);	
+	d3.select("#commit")
+		.append("a")
+		.attr("href", "http://github.com/blab/nextflu/commit/" + commit_id)
+		.text(short_id);
 });
 
 d3.json("data/sequences.json", function(error, json) {
@@ -1078,8 +1084,14 @@ d3.json("data/frequencies.json", function(error, json){
 									if (tmp[i].length>0) positions.push(tmp[i]);
 								}
 							}
-							if (typeof region == "undefined") region="global"; 
-							return [region, positions];});
+							if (typeof region == "undefined") region="global";
+							// sort of this is a multi mutation genotype
+							if (positions.length>1){
+								positions.sort(function (a,b){
+									return parseInt(a.substring(0,a.length-1)) - parseInt(b.substring(0,b.length-1));
+								});
+							}
+							return [region, positions.join('/')];});
 		return mutations;
 	};
 
@@ -1088,20 +1100,22 @@ d3.json("data/frequencies.json", function(error, json){
 	of the genotype matches at the specified positions
 	**/
 	function get_frequencies(region, gt){
-		console.log("calculating frequencies for :"+gt);
 		var freq = [];
 		for (var pi=0; pi<pivots.length; pi++){freq[freq.length]=0;}
-		if (json["genotypes"][region][gt[0]]!=undefined) {
+		if (json["genotypes"][region][gt]!=undefined) {
+			console.log(gt+" found as genotype");
 			for (var pi=0; pi<freq.length; pi++){
-				freq[pi]+=json["genotypes"][region][gt[0]][pi];
+				freq[pi]+=json["genotypes"][region][gt][pi];
 			}
-		}else if (json["mutations"][region][gt[0]]!=undefined) {
+		}else if (json["mutations"][region][gt]!=undefined) {
+			console.log(gt+" found as mutation");
 			for (var pi=0; pi<freq.length; pi++){
-				freq[pi]+=json["mutations"][region][gt[0]][pi];
+				freq[pi]+=json["mutations"][region][gt][pi];
 			}
-		}else if (json["clades"][region][gt[0].toLowerCase()]!=undefined) {
+		}else if (json["clades"][region][gt.toLowerCase()]!=undefined) {
+			console.log(gt+" found as clade");
 			for (var pi=0; pi<freq.length; pi++){
-				freq[pi]+=json["clades"][region][gt[0].toLowerCase()][pi];
+				freq[pi]+=json["clades"][region][gt.toLowerCase()][pi];
 			}
 		}
 		return freq.map(function (d) {return Math.round(d*100)/100;});
