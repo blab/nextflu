@@ -9,7 +9,7 @@ from tree_titer import *
 
 min_freq = 0.1
 max_freq = 0.9
-min_tips = 100
+min_tips = 30
 pc=1e-2
 regularization = 1e-5
 
@@ -44,7 +44,7 @@ class fitness_model(object):
 		# count tips
 		leaf_count = 0
 		self.tip_aln = []
-		self.min_freq = 0.01
+		self.min_freq = 0.005
 		self.determine_variable_positions()
 		self.index_subset = self.variable_nucleotides[(self.variable_nucleotides<987+48)*(self.variable_nucleotides>47)]
 		for node in self.tree.postorder_node_iter():
@@ -213,9 +213,6 @@ class fitness_model(object):
 
 
 	def assign_fitness(self, season):
-		if self.verbose: print "calculating predictors for the last season"
-
-		#FIXME: standardize predictors
 		for node in self.tree.postorder_node_iter():
 			if node.predictors[season] is not None:
 				node.fitness = self.fitness(self.params, node.predictors[season])

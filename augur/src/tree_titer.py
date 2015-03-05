@@ -230,11 +230,14 @@ class HI_tree(object):
 			import matplotlib.pyplot as plt
 			a = np.array(self.validation.values())
 			plt.figure()
+			plt.plot([-1,6], [-1,6], 'k')
 			plt.scatter(a[:,0], a[:,1])
 			plt.xlabel("measured")
 			plt.ylabel("predicted")
 			plt.xlabel("measured")
-			plt.title('reg='+str(self.lam)+', avg error '+str(round(np.mean(np.abs(a[:,0]-a[:,1])),3)))
+			plt.title('reg='+str(self.lam)+', avg abs/squared error '\
+						+str(round(np.mean(np.abs(a[:,0]-a[:,1])),3))\
+					+'/'+str(round(np.sqrt(np.mean((a[:,0]-a[:,1])**2)),3)))
 
 	def add_titers(self):
 		for ref in self.sera:
