@@ -6,7 +6,6 @@ from date_util import numerical_date
 from datetime import date
 from itertools import izip
 from tree_titer import *
-#from fitness_predictors import *
 
 min_freq = 0.1
 max_freq = 0.9
@@ -19,7 +18,7 @@ class fitness_model(object):
 	def __init__(self, predictors = ['lb', 'ep', 'ne_star'], verbose=0,**kwargs):
 		'''
 		parameters:
-		tree -- tree of sequences for which a fitness model is to be determined
+		predictors  -- a list of quantities used in the fitness model. currently, lb, ep, ne, ne_star, HI and tol are available
 		'''
 		self.verbose=verbose
 		self.seasons = [ (numerical_date(date(year=y, month = 10, day = 1)), 

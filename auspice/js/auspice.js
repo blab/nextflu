@@ -81,6 +81,52 @@ function setNodeAlive(node){
 };
 
 /**
+ * for each node, accumulate HI difference along branches
+**/
+function calcHIsubclade(node){
+	node.HI_dist = node.parent.HI_dist+node.dHI;
+	if (typeof node.children != "undefined") {
+		for (var i=0; i<node.children.length; i++) {
+		calcHIsubclade(node.children[i]);
+		}
+	}else{
+		if (typeof node.avidity != "undefined" && correctVirus){
+			node.HI_dist+=node.avidity;
+		}
+	}
+};
+
+function calcHIpred(node, rootNode){
+	if (correctPotency){
+		node.HI_dist = 0;
+	}else{
+		node.HI_dist=node.potency;
+	}
+	if (typeof node.children != "undefined") {
+		for (var i=0; i<node.children.length; i++) {
+		calcHIsubclade(node.children[i]);
+		}
+	}
+	var tmp_node = node;
+	var pnode = tmp_node.parent;
+	while (tmp_node.clade != rootNode.clade){
+		pnode.HI_dist=tmp_node.HI_dist + tmp_node.dHI;
+		if (typeof pnode.children != "undefined") {
+			for (var i=0; i<pnode.children.length; i++) {
+				if (tmp_node.clade!=pnode.children[i].clade){
+					calcHIsubclade(pnode.children[i]);
+				}
+			}
+		}
+		tmp_node = pnode;
+		pnode = tmp_node.parent;
+	}
+	if (correctVirus==false){
+		node.HI_dist += node.avidity;
+	}
+};
+
+/**
  * for each node, calculate the exponentially attenuated tree length below the node
  * the polarizer is send "up", i.e. to parents
 **/
@@ -226,6 +272,10 @@ var ymd_format = d3.time.format("%Y-%m-%d");
 
 var LBItau = 0.0008,
 	time_window = 1.0;  // layer of one year that is considered current or active
+
+var correctPotency;
+var correctVirus;
+var HItype;
 
 var tree = d3.layout.tree()
 	.size([height, width]);
@@ -396,7 +446,10 @@ d3.json("data/tree.json", function(error, root) {
 	nodes.forEach(function (d) {d.dateval = new Date(d.date)});
 
 	var vaccines = getVaccines(tips);
-
+	var sera = tips.filter(function (d){
+		if (typeof d.serum == "undefined"){return false;}
+		else{return d.serum;}});
+	console.log(sera);
 	var xValues = nodes.map(function(d) {
 		return +d.xvalue;
 	});
@@ -455,11 +508,12 @@ d3.json("data/tree.json", function(error, root) {
 	
 	var epitopeColorScale = d3.scale.linear().clamp([true])
 		.domain([4,5,6,7,8,9,10,11,12,13])
+		.range(colors);
 
 	var HIColorScale = d3.scale.linear().clamp([true])
-		.domain([-2.5,-2, 1.5, -1, 0.5, 0,0.5 ,1,1.5, 2])
-		//.domain([0,1.5, 3, 4.5, 6, 7.5, 9, 10.5, 12, 13.5])
-		.range(colors);		
+		//.domain([-2.5,-2, 1.5, -1, 0.5, 0,0.5 ,1,1.5, 2])
+		.domain([0,0.5, 1, 1.5, 2,2.5, 3,3.5, 4, 4.5])
+		.range(colors);
 
 	var nonepitopeColorScale = d3.scale.linear().clamp([true])
 		.domain([2,3,4,5,6,7,8,9,10,11])
@@ -481,7 +535,7 @@ d3.json("data/tree.json", function(error, root) {
 
 	var regions = ["Africa", "SouthAmerica", "WestAsia", "Oceania", "Europe", "JapanKorea", "NorthAmerica", "SoutheastAsia", "India", "China"]
 	var regionColors = ["#5097BA", "#60AA9E", "#75B681", "#8EBC66", "#AABD52", "#C4B945", "#D9AD3D", "#E59637", "#E67030", "#DF4327"]
-
+	var serum;
 	var regionColorScale = d3.scale.ordinal()
 		.domain(regions)
 		.range(regionColors);
@@ -519,17 +573,17 @@ d3.json("data/tree.json", function(error, root) {
 		if (colorBy == "ep" || colorBy == "ne" || colorBy == "rb") {
 			var mean = getMeanColoring();
 			nodes.forEach(function (d) {
-				d.adj_coloring = d.coloring - mean;
+				d.adj_coloring = d.coloring;
 			});
 		}else if (colorBy == "lbi") {
 			calcLBI(rootNode, nodes, false);
 			nodes.forEach(function (d) {
 				d.adj_coloring = d.LBI;
 			});
-		}else if (colorBy=='HI'){
-						var mean = getMeanColoring();
+		}else if (colorBy=='HI' || colorBy=='HI_point'|| colorBy=='HI_point_pred'){
+			var mean = getMeanColoring();
 			nodes.forEach(function (d) {
-				d.adj_coloring = d.coloring - mean;
+				d.adj_coloring = d.coloring;
 			});
 		}
 	}
@@ -543,10 +597,13 @@ d3.json("data/tree.json", function(error, root) {
 		});
 	}	
 
-	function colorByTrait() {
-		
-		colorBy = document.getElementById("coloring").value;
-		console.log(colorBy);
+	function colorByTrait(cb) {
+		if (typeof cb =="undefined"){
+			colorBy = document.getElementById("coloring").value;
+			console.log(colorBy);
+		}else{
+			colorBy=cb;
+		}
 
 		if (colorBy == "ep") {
 			colorScale = epitopeColorScale;
@@ -555,6 +612,31 @@ d3.json("data/tree.json", function(error, root) {
 		if (colorBy == "HI") {
 			colorScale = HIColorScale;
 			nodes.map(function(d) { d.coloring = d.cHI; });
+		}
+		if (colorBy == "HI_point") {
+			colorScale = HIColorScale;
+			current_titers = serum.HI_titers;
+			nodes.map(function(d) { 
+				if (typeof current_titers[d.clade] == "undefined"){
+					d.coloring = "undefined";
+				}else{
+					d.coloring = current_titers[d.clade];
+					if (correctPotency){
+						d.coloring -= serum.potency;
+					}
+					if (correctVirus){
+						d.coloring -= d.avidity;
+					}
+				}
+			});
+		}
+		if (colorBy == "HI_point_pred") {
+			colorScale = HIColorScale;
+			calcHIpred(serum, rootNode);
+			console.log(colorBy);
+			nodes.map(function(d) { 
+				d.coloring = d.HI_dist;
+			});
 		}
 		if (colorBy == "ne") {
 			colorScale = nonepitopeColorScale;
@@ -587,7 +669,7 @@ d3.json("data/tree.json", function(error, root) {
 			
 		d3.selectAll(".tip")
 			.attr("r", function(d) {
-				return recencySizeScale(d.diff);
+				return recencySizeScale(d.diff)*(d.adj_coloring!="undefined");
 			})
 			.style("fill", function(d) {
 				if (colorScale != regionColorScale) {
@@ -773,6 +855,36 @@ d3.json("data/tree.json", function(error, root) {
 		})
 		.on('mouseout', virusTooltip.hide);
 
+
+	var serumCircles = treeplot.selectAll(".serum")
+		.data(sera)
+		.enter()
+		.append("text")
+		.attr("class", "serum")
+		.attr("x", function(d) {return d.x})
+		.attr("y", function(d) {return d.y})
+		.attr('text-anchor', 'middle')
+		.attr('dominant-baseline', 'central')
+		.style("font-size", "28px")
+		.style('font-family', 'FontAwesome')
+		.style("fill", "#555555")
+		.text(function(d) { return '\uf00d'; })
+		.style("cursor", "default")
+		.on('mouseover', function(d) {
+			virusTooltip.show(d, this);
+		})
+		.on('click', function(d) {
+			serum = d;
+			HItype = document.getElementById("HIprediction").checked;
+			correctPotency = document.getElementById("serum").checked;
+			correctVirus = document.getElementById("virus").checked;
+			if (HItype){
+				colorByTrait("HI_point_pred");
+			}else{
+				colorByTrait("HI_point");				
+			}
+		})
+		.on('mouseout', virusTooltip.hide);
 
 	var drag = d3.behavior.drag()
 		.origin(function(d) { return d; })
@@ -1046,6 +1158,12 @@ d3.json("data/tree.json", function(error, root) {
 d3.json("data/meta.json", function(error, json) {
 	if (error) return console.warn(error);
 	d3.select("#updated").text(json['updated']);
+	commit_id = json['commit'];
+	short_id = commit_id.substring(0, 6);	
+	d3.select("#commit")
+		.append("a")
+		.attr("href", "http://github.com/blab/nextflu/commit/" + commit_id)
+		.text(short_id);
 });
 
 d3.json("data/sequences.json", function(error, json) {
@@ -1078,8 +1196,14 @@ d3.json("data/frequencies.json", function(error, json){
 									if (tmp[i].length>0) positions.push(tmp[i]);
 								}
 							}
-							if (typeof region == "undefined") region="global"; 
-							return [region, positions];});
+							if (typeof region == "undefined") region="global";
+							// sort of this is a multi mutation genotype
+							if (positions.length>1){
+								positions.sort(function (a,b){
+									return parseInt(a.substring(0,a.length-1)) - parseInt(b.substring(0,b.length-1));
+								});
+							}
+							return [region, positions.join('/')];});
 		return mutations;
 	};
 
@@ -1088,20 +1212,22 @@ d3.json("data/frequencies.json", function(error, json){
 	of the genotype matches at the specified positions
 	**/
 	function get_frequencies(region, gt){
-		console.log("calculating frequencies for :"+gt);
 		var freq = [];
 		for (var pi=0; pi<pivots.length; pi++){freq[freq.length]=0;}
-		if (json["genotypes"][region][gt[0]]!=undefined) {
+		if (json["genotypes"][region][gt]!=undefined) {
+			console.log(gt+" found as genotype");
 			for (var pi=0; pi<freq.length; pi++){
-				freq[pi]+=json["genotypes"][region][gt[0]][pi];
+				freq[pi]+=json["genotypes"][region][gt][pi];
 			}
-		}else if (json["mutations"][region][gt[0]]!=undefined) {
+		}else if (json["mutations"][region][gt]!=undefined) {
+			console.log(gt+" found as mutation");
 			for (var pi=0; pi<freq.length; pi++){
-				freq[pi]+=json["mutations"][region][gt[0]][pi];
+				freq[pi]+=json["mutations"][region][gt][pi];
 			}
-		}else if (json["clades"][region][gt[0].toLowerCase()]!=undefined) {
+		}else if (json["clades"][region][gt.toLowerCase()]!=undefined) {
+			console.log(gt+" found as clade");
 			for (var pi=0; pi<freq.length; pi++){
-				freq[pi]+=json["clades"][region][gt[0].toLowerCase()][pi];
+				freq[pi]+=json["clades"][region][gt.toLowerCase()][pi];
 			}
 		}
 		return freq.map(function (d) {return Math.round(d*100)/100;});

@@ -28,6 +28,10 @@ RUN pip install DendroPy==3.12.0
 RUN pip install seqmagick==0.5.0
 RUN pip install schedule==0.3.0
 
+# libgit2 and python bindings
+RUN apt-get install -y libgit2
+RUN pip install pygit2==0.22.0
+
 # s3cmd
 RUN apt-get install -y s3cmd
 
