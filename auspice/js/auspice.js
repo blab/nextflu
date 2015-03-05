@@ -36,6 +36,9 @@ function getVaccines(tips) {
 		if (vaccineStrains.indexOf(tip.strain) != -1) {
 			tip.choice = vaccineChoice[tip.strain];
 			vaccines.push(tip);
+			if (vaccineStrains.indexOf(tip.strain)==6){
+				serum = tip;
+			}
 		}
 	})
 	return vaccines;
@@ -855,6 +858,16 @@ d3.json("data/tree.json", function(error, root) {
 		})
 		.on('mouseout', virusTooltip.hide);
 
+	function colorByHI(){
+		HItype = document.getElementById("HIprediction").checked;
+		correctPotency = document.getElementById("serum").checked;
+		correctVirus = document.getElementById("virus").checked;
+		if (HItype){
+			colorByTrait("HI_point_pred");
+		}else{
+			colorByTrait("HI_point");				
+		}
+	}
 
 	var serumCircles = treeplot.selectAll(".serum")
 		.data(sera)
@@ -875,16 +888,17 @@ d3.json("data/tree.json", function(error, root) {
 		})
 		.on('click', function(d) {
 			serum = d;
-			HItype = document.getElementById("HIprediction").checked;
-			correctPotency = document.getElementById("serum").checked;
-			correctVirus = document.getElementById("virus").checked;
-			if (HItype){
-				colorByTrait("HI_point_pred");
-			}else{
-				colorByTrait("HI_point");				
-			}
+			colorByHI();
 		})
 		.on('mouseout', virusTooltip.hide);
+
+	d3.select("#HIprediction")
+		.on("change", colorByHI);
+	d3.select("#serum")
+		.on("change", colorByHI);
+	d3.select("#virus")
+		.on("change", colorByHI);
+
 
 	var drag = d3.behavior.drag()
 		.origin(function(d) { return d; })
@@ -1145,7 +1159,6 @@ d3.json("data/tree.json", function(error, root) {
 		.height(500)
 		.onSelected(onSelect)
 		.render();
-
 
 
 	d3.select("#gt-color")
