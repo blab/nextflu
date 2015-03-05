@@ -37,7 +37,7 @@ class HI_tree(object):
 				if (ref,ref) in self.HI:
 					sera.add(ref)
 					normalized_val = consensus_func(np.log2(self.HI[(ref, ref)])) - consensus_func(np.log2(val))
-					self.HI_normalized[(test, ref)] = max(0,normalized_val)
+					self.HI_normalized[(test, ref)] = normalized_val
 		self.sera = list(sera)
 		self.HI_strains = list(HI_strains)
 
@@ -239,8 +239,13 @@ class HI_tree(object):
 	def add_titers(self):
 		for ref in self.sera:
 			self.node_lookup[ref].HI_titers = {}
+			self.node_lookup[ref].potency = self.serum_potency[ref]
 		for (test, ref), val in self.HI_normalized.iteritems():
-			self.node_lookup[ref][self.node_lookup[test].clade] = val
+			self.node_lookup[ref].HI_titers[self.node_lookup[test].clade] = val
+		for test in self.HI_strains:
+			self.node_lookup[test].avidity = self.virus_effect[test]
+
+
 
 	def predict_HI(self, virus, serum):
 		path = self.get_path_no_terminals(virus,serum)
