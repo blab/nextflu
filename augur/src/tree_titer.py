@@ -151,17 +151,23 @@ class HI_tree(object):
 		HI_sc = self.HI_split_count
 		n_sera = len(self.sera)
 		n_v = len(self.HI_strains)
+
+		# set up the quadratic matrix containing the deviation term (linear xterm below)
+		# and the l2-regulatization of the avidities and potencies
 		P1 = np.zeros((n_params+HI_sc,n_params+HI_sc))
 		P1[:n_params, :n_params] = np.dot(self.tree_graph.T, self.tree_graph)
 		for ii in xrange(HI_sc, n_params):
 			P1[ii,ii]+=self.lam
 		P = matrix(P1)
 
+		# set up cost for auxillary parameter and the linear cross-term
 		q1 = np.zeros(n_params+HI_sc)
 		q1[:n_params] = -np.dot( self.HI_dist, self.tree_graph)
 		q1[n_params:] = self.lam
 		q = matrix(q1)
 
+		# set up linear constraint matrix to enforce positivity of the
+		# dHIs and bounding of dHI by the auxillary parameter
 		h = matrix(np.zeros(2*HI_sc)) 	# Gw <=h
 		G1 = np.zeros((2*HI_sc,n_params+HI_sc))
 		G1[:HI_sc, :HI_sc] = -np.eye(HI_sc)
@@ -169,7 +175,16 @@ class HI_tree(object):
 		G1[HI_sc:, n_params:] = -np.eye(HI_sc)
 		G = matrix(G1)
 		W = solvers.qp(P,q,G,h)
-		return np.array([x for x in W['x']])[:n_params]
+		sol = np.array([x for x in W['x']])[:n_params]
+
+		# redo the linear cost relaxing terms that seem to be relevant to avoid 
+		# compression of the fit. 0.2 seems to be a good cut-off, linear tune to zero
+		q1[n_params:] = self.lam*(1-5.0*np.minimum(0.2,sol[:HI_sc]))
+		q = matrix(q1)
+		W = solvers.qp(P,q,G,h)
+		sol = np.array([x for x in W['x']])[:n_params]
+
+		return sol
 
 	def map_HI_to_tree(self, training_fraction = 1.0, method = 'nnls', lam=10, cutoff_date = None):
 		self.normalize_HI()
