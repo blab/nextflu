@@ -10,6 +10,7 @@ class HI_tree(object):
 
 	def __init__(self, HI_fname = 'source-data/HI_titers.txt',**kwargs):
 		self.HI, tmp = self.read_HI_titers(HI_fname)
+		self.tree_graph = None
 
 	def read_HI_titers(self, fname):
 		strains = set()
@@ -119,6 +120,7 @@ class HI_tree(object):
 
 		self.HI_dist =  np.array(HI_dist)
 		self.tree_graph= np.array(tree_graph)
+		self.TgT = np.dot(self.tree_graph.T, self.tree_graph)
 		print "Found", self.tree_graph.shape, "measurements x parameters"
 
 	def fit_func(self):
@@ -129,7 +131,7 @@ class HI_tree(object):
 		from l1regls import l1regls
 		A = matrix(self.tree_graph)
 		b = matrix(self.HI_dist)
-		return np.array([x for x in l1regls(A/np.sqrt(self.lam),b/np.sqrt(self.lam))])
+		return np.array([x for x in l1regls(A/np.sqrt(self.lam_HI),b/np.sqrt(self.lam_HI))])
 
 	def fit_nnls(self):
 		from scipy.optimize import nnls
@@ -138,7 +140,7 @@ class HI_tree(object):
 	def fit_nnl2reg(self):
 		from cvxopt import matrix, solvers
 		n_params = self.tree_graph.shape[1]
-		P = matrix(np.dot(self.tree_graph.T, self.tree_graph) + self.lam*np.eye(n_params))
+		P = matrix(np.dot(self.tree_graph.T, self.tree_graph) + self.lam_HI*np.eye(n_params))
 		q = matrix( -np.dot( self.HI_dist, self.tree_graph))
 		h = matrix(np.zeros(n_params)) # Gw <=h
 		G = matrix(-np.eye(n_params))
@@ -155,15 +157,17 @@ class HI_tree(object):
 		# set up the quadratic matrix containing the deviation term (linear xterm below)
 		# and the l2-regulatization of the avidities and potencies
 		P1 = np.zeros((n_params+HI_sc,n_params+HI_sc))
-		P1[:n_params, :n_params] = np.dot(self.tree_graph.T, self.tree_graph)
-		for ii in xrange(HI_sc, n_params):
-			P1[ii,ii]+=self.lam
+		P1[:n_params, :n_params] = self.TgT
+		for ii in xrange(HI_sc, HI_sc+n_sera):
+			P1[ii,ii]+=self.lam_pot*0.5
+		for ii in xrange(HI_sc+n_sera, n_params):
+			P1[ii,ii]+=self.lam_avi*0.5
 		P = matrix(P1)
 
 		# set up cost for auxillary parameter and the linear cross-term
 		q1 = np.zeros(n_params+HI_sc)
 		q1[:n_params] = -np.dot( self.HI_dist, self.tree_graph)
-		q1[n_params:] = self.lam
+		q1[n_params:] = self.lam_HI
 		q = matrix(q1)
 
 		# set up linear constraint matrix to enforce positivity of the
@@ -179,34 +183,44 @@ class HI_tree(object):
 
 		# redo the linear cost relaxing terms that seem to be relevant to avoid 
 		# compression of the fit. 0.2 seems to be a good cut-off, linear tune to zero
-		q1[n_params:] = self.lam*(1-5.0*np.minimum(0.2,sol[:HI_sc]))
+		q1[n_params:] = self.lam_HI*(1-5.0*np.minimum(0.2,sol[:HI_sc]))
 		q = matrix(q1)
 		W = solvers.qp(P,q,G,h)
 		sol = np.array([x for x in W['x']])[:n_params]
 
 		return sol
 
-	def map_HI_to_tree(self, training_fraction = 1.0, method = 'nnls', lam=10, cutoff_date = None):
+	def prepare_HI_map(self):
 		self.normalize_HI()
 		self.add_mutations()
 		self.mark_HI_splits()
-		self.lam = lam
-		if training_fraction<1.0:
+		if self.training_fraction<1.0:
 			self.test_HI, self.train_HI = {}, {}
 			for key, val in self.HI_normalized.iteritems():
-				if np.random.uniform()>training_fraction:
+				if np.random.uniform()>self.training_fraction:
 					self.test_HI[key]=val
 				else:
 					self.train_HI[key]=val
 		else:
 			self.train_HI = self.HI_normalized
 
-		if cutoff_date is not None:
+		if self.cutoff_date is not None:
 			self.train_HI = {key:val for key,val in self.train_HI.iteritems()
 							if self.node_lookup[key[0]].num_date<cutoff_date and 
 							   self.node_lookup[key[1]].num_date<cutoff_date}
 
-		self.make_treegraph()
+		self.make_treegraph()		
+
+	def map_HI_to_tree(self, training_fraction = 1.0, method = 'nnls', lam_HI=5, 
+						lam_pot = 5.0, lam_avi = 5.0, cutoff_date = None):
+		self.training_fraction = training_fraction
+		self.lam_pot = lam_pot
+		self.lam_avi = lam_avi
+		self.lam_HI = lam_HI
+		self.cutoff_date = cutoff_date
+		if self.tree_graph is None:
+			self.prepare_HI_map()
+
 		if method=='l1reg':  # l1 regularized fit, no constraint on sign of effect
 			self.params = self.fit_l1reg()
 		elif method=='nnls':  # non-negative least square, not regularized
@@ -216,7 +230,7 @@ class HI_tree(object):
 		elif method=='nnl1reg':  # non-negative fit, branch terms L1 regularized, avidity terms L2 regularized
 			self.params = self.fit_nnl1reg()
 
-		print "method",method, "regularized by", self.lam, "squared deviation=",self.fit_func()
+		print "method",method, "regularized by", self.lam_HI, "squared deviation=",self.fit_func()
 		# for each set of branches with HI constraints, pick the branch with most aa mutations
 		# and assign the dHI to that one, record the number of constraints
 		for node in self.tree.postorder_node_iter():
@@ -243,16 +257,22 @@ class HI_tree(object):
 				self.validation[key] = (val, pred_HI)
 		if plot:
 			import matplotlib.pyplot as plt
+			from scipy.stats import linregress, pearsonr
 			a = np.array(self.validation.values())
+			self.abs_error = np.mean(np.abs(a[:,0]-a[:,1]))
+			self.rms_error = np.sqrt(np.mean((a[:,0]-a[:,1])**2))
+			slope, intercept, tmpa, tmpb, tmpc = linregress(a[:,0], a[:,1])
+			print "error: ",self.abs_error, self.rms_error, slope, intercept
+			print pearsonr(a[:,0], a[:,1])
 			plt.figure()
 			plt.plot([-1,6], [-1,6], 'k')
 			plt.scatter(a[:,0], a[:,1])
 			plt.xlabel("measured")
 			plt.ylabel("predicted")
 			plt.xlabel("measured")
-			plt.title('reg='+str(self.lam)+', avg abs/squared error '\
-						+str(round(np.mean(np.abs(a[:,0]-a[:,1])),3))\
-					+'/'+str(round(np.sqrt(np.mean((a[:,0]-a[:,1])**2)),3)))
+			plt.title('reg HI/pot/avi ='+str(self.lam_HI)+'/'+str(self.lam_pot)+'/'+str(self.lam_avi)+', avg abs/rms '\
+						+str(round(self.abs_error, 3))\
+					+'/'+str(round(self.rms_error,3)))
 
 	def add_titers(self):
 		for ref in self.sera:
