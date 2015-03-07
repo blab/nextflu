@@ -214,10 +214,14 @@ function tipFillColor(col) {
 	return d3.rgb(col).brighter([0.65]).toString();
 }
 
+function treePlotHeight(width) {
+	return 400 + 0.35*width;
+}
+
 var containerWidth = parseInt(d3.select(".treeplot-container").style("width"), 10);
 
 var width = containerWidth,
-	height = 520 + 0.1 * containerWidth;
+	height = treePlotHeight(containerWidth);
 
 var cladeToSeq = {}
 
@@ -945,7 +949,11 @@ d3.json("data/tree.json", function(error, root) {
 	
 		var containerWidth = parseInt(d3.select(".treeplot-container").style("width"), 10);
 		var width = containerWidth,
-			height = 520 + 0.1 * containerWidth;
+			height = treePlotHeight(containerWidth);
+			
+		d3.select("#treeplot")
+			.attr("width", width)
+			.attr("height", height);			
 			
 		xScale.range([10, width-10]);
 		yScale.range([10, height-10]);
