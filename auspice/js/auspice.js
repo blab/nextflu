@@ -669,7 +669,16 @@ d3.json("data/tree.json", function(error, root) {
 				dMax = maximumAttribute(d.target, "xvalue", d.target.xvalue),
 				lMin = minimumAttribute(d.target, "yvalue", d.target.yvalue),
 				lMax = maximumAttribute(d.target, "yvalue", d.target.yvalue);
-			rescale(dMin, dMax, lMin, lMax);
+			if (dMax > dMin && lMax > lMin) {
+				rescale(dMin, dMax, lMin, lMax);
+			}
+			else {
+				dMin = minimumAttribute(d.source, "xvalue", d.source.xvalue),
+				dMax = maximumAttribute(d.source, "xvalue", d.source.xvalue),
+				lMin = minimumAttribute(d.source, "yvalue", d.source.yvalue),
+				lMax = maximumAttribute(d.source, "yvalue", d.source.yvalue);			
+				rescale(dMin, dMax, lMin, lMax);
+			}
 		});
 
 	var tipCircles = treeplot.selectAll(".tip")
