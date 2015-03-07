@@ -214,7 +214,7 @@ function tipFillColor(col) {
 	return d3.rgb(col).brighter([0.65]).toString();
 }
 
-var containerWidth = parseInt(d3.select(".plot-container").style("width"), 10);
+var containerWidth = parseInt(d3.select(".treeplot-container").style("width"), 10);
 
 var width = containerWidth,
 	height = 520 + 0.1 * containerWidth;
@@ -289,10 +289,16 @@ c3.chart.fn.update_tick_values = function(tick_values) {
     $$.redraw();
 }
 
+width = parseInt(d3.select(".freqplot-container").style("width"), 10);
+var position = "right";
+if (width < 600) {
+	position = "bottom";
+}
+
 var gt_chart = c3.generate({
 	bindto: '#gtchart',
-	size: {width:800, height: 350},
-	legend: {position: "right"},
+	size: {width: width, height: 350},
+	legend: {position: position},
   	color: {
         pattern: ["#60AA9E", "#D9AD3D", "#5097BA", "#E67030", "#8EBC66", "#E59637", "#AABD52", "#DF4327", "#C4B945", "#75B681"]
     },
@@ -937,7 +943,7 @@ d3.json("data/tree.json", function(error, root) {
 	
 	function resize() {
 	
-		var containerWidth = parseInt(d3.select(".plot-container").style("width"), 10);
+		var containerWidth = parseInt(d3.select(".treeplot-container").style("width"), 10);
 		var width = containerWidth,
 			height = 520 + 0.1 * containerWidth;
 			
