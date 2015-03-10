@@ -161,10 +161,14 @@ class fitness_model(object):
 	def fitness(self, params, pred):
 		return np.sum(params*pred, axis=-1)
 
-	def fitness_biased_af(self, params, season):
+	def fitness_biased_af(self, params, season, noise = None):
 		pred_af = np.zeros_like(self.season_af[season])
 		ind = self.tree.seed_node.tips_by_season[season]
-		pred_freq = np.exp(self.fitness(params, self.predictor_arrays[season][ind,:]))
+		if noise is None:
+			pred_freq = np.exp(self.fitness(params, self.predictor_arrays[season][ind,:]))
+		else:
+			pred_freq = np.exp(self.fitness(params, self.predictor_arrays[season][ind,:]
+								+noise*np.random.normal(size = self.predictor_arrays[season][ind,:].shape)))	
 		for ni, nuc in enumerate(self.nuc_alphabet):
 			pred_af[ni,:] = ((self.tip_aln[ind,:]==nuc).T*pred_freq).sum(axis=1)
 		pred_af/=pred_af.sum(axis=0)
@@ -224,6 +228,13 @@ class fitness_model(object):
 		self.calc_all_predictors()
 		self.standardize_predictors()
 		self.learn_parameters(niter = niter)
+		self.seasonal_susceptibility = []
+		for s,t in self.fit_test_season_pairs:		
+			tmp = []			
+			for ii in xrange(10):
+				tmp_af = self.fitness_biased_af(self.params, s, noise=2.5)
+				tmp.append(self.allele_frequency_distance(tmp_af, self.season_af[t]))
+			self.seasonal_susceptibility.append(np.std(tmp))
 		self.assign_fitness(self.seasons[-1])
 
 	######################################################################

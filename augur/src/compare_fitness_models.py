@@ -17,10 +17,11 @@ if __name__=="__main__":
 	### EVALUTE INDIVIDUAL PREDICTORS  ##########################################
 	avg_distance = None
 	pred_errors = {}
+	pred_suscept = {}
 	pred_params = {}
 	plt.figure()
 	plt.plot(virus_config["time_interval"], [1,1], c='k')
-	for pred_set in [['lb'], ['ep'], ['tol'], ['ne_star'], ['HI']]:
+	for pred_set in [['lb'], ['ep'], ['tol'], ['ne_star']]: #, ['HI']]:
 		myH3N2.predictors = pred_set
 		myH3N2.predict(niter=0)
 		if avg_distance is None:
@@ -28,10 +29,11 @@ if __name__=="__main__":
 							for s,t in myH3N2.fit_test_season_pairs])
 		pred_label = "/".join(pred_set)
 		pred_errors[pred_label] = np.array(myH3N2.seasonal_errors)
+		pred_suscept[pred_label] = np.array(myH3N2.seasonal_susceptibility)
 		pred_params[pred_label] = np.array(myH3N2.params)
 		plt.plot([x[0][0] for x in myH3N2.fit_test_season_pairs], pred_errors[pred_label]/avg_distance, 
 				label = pred_label+":"+", ".join(map(str,map(lambda x:round(x,3), pred_params[pred_label]))))
-
+		plt.plot([x[0][0] for x in myH3N2.fit_test_season_pairs], pred_suscept[pred_label]/avg_distance)
 	plt.legend()
 	plt.xlabel('year')
 	plt.ylabel('distance to next (rel. avg)')
@@ -40,7 +42,7 @@ if __name__=="__main__":
 	### EVALUTE PAIRS OF PREDICTORS  ##########################################
 	plt.figure()
 	plt.plot(virus_config["time_interval"], [1,1], c='k')
-	for pred_set in [['lb', 'tol'], ['lb', 'HI'], ['tol', 'HI']]:
+	for pred_set in [['lb', 'tol']]: #, ['lb', 'HI'], ['tol', 'HI']]:
 		myH3N2.predictors = pred_set
 		myH3N2.predict(niter=0)
 		if avg_distance is None:
