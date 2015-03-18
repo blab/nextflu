@@ -8,6 +8,7 @@ if __name__=="__main__":
 	parser = argparse.ArgumentParser(description='Process virus sequences, build tree, and prepare of web visualization')
 	parser.add_argument('--prefix', type = str, default = 'data/', help='path+prefix of file dumps')
 	parser.add_argument('--training', type = float, default = 0.8, help='fraction of data used for training')
+	parser.add_argument('--train_strains', default = False, action = 'store_true', help='subset measurements or strains to train')
 	parser.add_argument('--reg', type = float, default = 1.0, help='regularization parameter')
 	parser.add_argument('--avi', type = float, default = 1.0, help='regularization parameter')
 	parser.add_argument('--pot', type = float, default = 1.0, help='regularization parameter')
@@ -21,7 +22,7 @@ if __name__=="__main__":
 
 	####  FIT VALIDATION  #######################################################
 	myH3N2.map_HI_to_tree(training_fraction=params.training, method = 'nnl1reg', 
-		lam_HI=params.reg, lam_pot=params.pot, lam_avi=params.avi, subset_strains = False)
+		lam_HI=params.reg, lam_pot=params.pot, lam_avi=params.avi, subset_strains = params.train_strains)
 	myH3N2.validate(plot=True)
 	plt.savefig(fig_prefix+'HI_scatter.pdf')
 
