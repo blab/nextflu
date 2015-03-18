@@ -47,7 +47,7 @@ class process(virus_frequencies):
 				self.tree = cPickle.load(infile)
 				try:
 					self.node_lookup = {l.strain:l for l in self.tree.leaf_iter()}
-					self.node_lookup.update({node.strain.lower():node for node in self.tree.leaf_iter()})
+					self.node_lookup.update({node.strain.upper():node for node in self.tree.leaf_iter()})
 				except:
 					pass
 		if os.path.isfile(self.virus_fname):

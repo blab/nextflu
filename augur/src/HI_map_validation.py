@@ -21,7 +21,7 @@ if __name__=="__main__":
 
 	####  FIT VALIDATION  #######################################################
 	myH3N2.map_HI_to_tree(training_fraction=params.training, method = 'nnl1reg', 
-		lam_HI=params.reg, lam_pot=params.pot, lam_avi=params.avi)
+		lam_HI=params.reg, lam_pot=params.pot, lam_avi=params.avi, subset_strains = False)
 	myH3N2.validate(plot=True)
 	plt.savefig(fig_prefix+'HI_scatter.pdf')
 
@@ -43,18 +43,19 @@ if __name__=="__main__":
 	####  SERUM POTENCIES  #######################################################
 	with open(fig_prefix+'HI_potencies.txt','w') as outfile:
 		for serum, val in myH3N2.serum_potency.iteritems():
-			outfile.write(serum+'\t'+str(round(val,4))+'\n')
+			outfile.write(serum[0]+'\t'+serum[1]+'\t'+str(round(val,4))+'\n')
 
 
 	####  DISTANCE ASYMMETRIES #######################################################
 	reciprocal_measurements = []
 	for (testvir, serum) in myH3N2.HI_normalized:
-		if (serum, testvir) in myH3N2.HI_normalized:
+		tmp_recip = [v for v in myH3N2.HI_normalized if serum[0]==v[0] and testvir==v[1][0]]
+		for v in tmp_recip:
 			val_fwd = myH3N2.HI_normalized[(testvir,serum)]
-			val_bwd = myH3N2.HI_normalized[(serum, testvir)]
+			val_bwd = myH3N2.HI_normalized[v]
 			diff_uncorrected = val_fwd - val_bwd
 			diff_corrected = (val_fwd - myH3N2.serum_potency[serum] - myH3N2.virus_effect[testvir])\
-							-(val_bwd - myH3N2.serum_potency[testvir] - myH3N2.virus_effect[serum])
+							-(val_bwd - myH3N2.serum_potency[v[1]] - myH3N2.virus_effect[serum[0]])
 			reciprocal_measurements.append([testvir, serum, diff_uncorrected, diff_corrected])
 
 	plt.figure()
@@ -64,3 +65,10 @@ if __name__=="__main__":
 	plt.xlabel('distance asymmetry')
 	plt.legend()
 	plt.savefig(fig_prefix+'HI_titer_asymmetry.pdf')
+
+
+	#### titer effects ###############################################################
+	dHI_list = []
+	for node in myH3N2.tree.postorder_node_iter():
+		dHI_list.append((node.dHI, node.mutations, node))
+	dHI_list.sort()
