@@ -3,6 +3,7 @@ environment.sh
 environment-dev.sh
 ec2-startup.sh
 data
+augur/figures
 _site/
 
 # Tex # 
