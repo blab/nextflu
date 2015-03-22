@@ -272,16 +272,16 @@ class HI_tree(object):
 			pred_HI = self.predict_HI(key[0], key[1])
 			if pred_HI is not None:
 				self.validation[key] = (val, pred_HI)
+		from scipy.stats import linregress, pearsonr
+		a = np.array(self.validation.values())
+		self.abs_error = np.mean(np.abs(a[:,0]-a[:,1]))
+		self.rms_error = np.sqrt(np.mean((a[:,0]-a[:,1])**2))
+		self.slope, self.intercept, tmpa, tmpb, tmpc = linregress(a[:,0], a[:,1])
+		print "error (abs/rms): ",self.abs_error, self.rms_error
+		print "slope, intercept:", self.slope, self.intercept
+		print "pearson correlation:", pearsonr(a[:,0], a[:,1])
 		if plot:
 			import matplotlib.pyplot as plt
-			from scipy.stats import linregress, pearsonr
-			a = np.array(self.validation.values())
-			self.abs_error = np.mean(np.abs(a[:,0]-a[:,1]))
-			self.rms_error = np.sqrt(np.mean((a[:,0]-a[:,1])**2))
-			slope, intercept, tmpa, tmpb, tmpc = linregress(a[:,0], a[:,1])
-			print "error (abs/rms): ",self.abs_error, self.rms_error
-			print "slope, intercept:", slope, intercept
-			print "pearson correlation:", pearsonr(a[:,0], a[:,1])
 			plt.figure()
 			plt.plot([-1,6], [-1,6], 'k')
 			plt.scatter(a[:,0], a[:,1])
