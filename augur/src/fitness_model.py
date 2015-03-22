@@ -9,7 +9,7 @@ from tree_titer import *
 
 min_freq = 0.1
 max_freq = 0.9
-min_tips = 100
+min_tips = 30
 pc=1e-2
 regularization = 1e-5
 
@@ -44,7 +44,7 @@ class fitness_model(object):
 		# count tips
 		leaf_count = 0
 		self.tip_aln = []
-		self.min_freq = 0.01
+		self.min_freq = 0.005
 		self.determine_variable_positions()
 		self.index_subset = self.variable_nucleotides[(self.variable_nucleotides<987+48)*(self.variable_nucleotides>47)]
 		for node in self.tree.postorder_node_iter():
@@ -161,10 +161,14 @@ class fitness_model(object):
 	def fitness(self, params, pred):
 		return np.sum(params*pred, axis=-1)
 
-	def fitness_biased_af(self, params, season):
+	def fitness_biased_af(self, params, season, noise = None):
 		pred_af = np.zeros_like(self.season_af[season])
 		ind = self.tree.seed_node.tips_by_season[season]
-		pred_freq = np.exp(self.fitness(params, self.predictor_arrays[season][ind,:]))
+		if noise is None:
+			pred_freq = np.exp(self.fitness(params, self.predictor_arrays[season][ind,:]))
+		else:
+			pred_freq = np.exp(self.fitness(params, self.predictor_arrays[season][ind,:]
+								+noise*np.random.normal(size = self.predictor_arrays[season][ind,:].shape)))	
 		for ni, nuc in enumerate(self.nuc_alphabet):
 			pred_af[ni,:] = ((self.tip_aln[ind,:]==nuc).T*pred_freq).sum(axis=1)
 		pred_af/=pred_af.sum(axis=0)
@@ -213,9 +217,6 @@ class fitness_model(object):
 
 
 	def assign_fitness(self, season):
-		if self.verbose: print "calculating predictors for the last season"
-
-		#FIXME: standardize predictors
 		for node in self.tree.postorder_node_iter():
 			if node.predictors[season] is not None:
 				node.fitness = self.fitness(self.params, node.predictors[season])
@@ -227,6 +228,13 @@ class fitness_model(object):
 		self.calc_all_predictors()
 		self.standardize_predictors()
 		self.learn_parameters(niter = niter)
+		self.seasonal_susceptibility = []
+		for s,t in self.fit_test_season_pairs:		
+			tmp = []			
+			for ii in xrange(10):
+				tmp_af = self.fitness_biased_af(self.params, s, noise=2.5)
+				tmp.append(self.allele_frequency_distance(tmp_af, self.season_af[t]))
+			self.seasonal_susceptibility.append(np.std(tmp))
 		self.assign_fitness(self.seasons[-1])
 
 	######################################################################

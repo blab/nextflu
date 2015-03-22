@@ -171,7 +171,7 @@ def json_to_dendropy_sub(json, node, taxon_set):
 				else:
 					node.__setattr__(attr, val)
 	if len(node.child_nodes())==0:
-		node.taxon = dendropy.Taxon(label=json['strain'].lower())
+		node.taxon = dendropy.Taxon(label=json['strain'].upper())
 		node.strain = json['strain']
 		taxon_set.add_taxon(node.taxon)
 

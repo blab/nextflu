@@ -36,6 +36,9 @@ function getVaccines(tips) {
 		if (vaccineStrains.indexOf(tip.strain) != -1) {
 			tip.choice = vaccineChoice[tip.strain];
 			vaccines.push(tip);
+			if (vaccineStrains.indexOf(tip.strain)==6){
+				serum = tip;
+			}
 		}
 	})
 	return vaccines;
@@ -260,10 +263,14 @@ function tipFillColor(col) {
 	return d3.rgb(col).brighter([0.65]).toString();
 }
 
-var containerWidth = parseInt(d3.select(".plot-container").style("width"), 10);
+function treePlotHeight(width) {
+	return 400 + 0.35*width;
+}
+
+var containerWidth = parseInt(d3.select(".treeplot-container").style("width"), 10);
 
 var width = containerWidth,
-	height = 520 + 0.1 * containerWidth;
+	height = treePlotHeight(containerWidth);
 
 var cladeToSeq = {}
 
@@ -342,10 +349,16 @@ c3.chart.fn.update_tick_values = function(tick_values) {
     $$.redraw();
 }
 
+width = parseInt(d3.select(".freqplot-container").style("width"), 10);
+var position = "right";
+if (width < 600) {
+	position = "bottom";
+}
+
 var gt_chart = c3.generate({
 	bindto: '#gtchart',
-	size: {width:800, height: 350},
-	legend: {position: "right"},
+	size: {width: width, height: 350},
+	legend: {position: position},
   	color: {
         pattern: ["#60AA9E", "#D9AD3D", "#5097BA", "#E67030", "#8EBC66", "#E59637", "#AABD52", "#DF4327", "#C4B945", "#75B681"]
     },
@@ -379,56 +392,6 @@ var gt_chart = c3.generate({
 	}
 });
 
-
-function rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, internals, vaccines) {
-
-	var speed = 1500;
-	xScale.domain([dMin,dMax]);
-	yScale.domain([lMin,lMax]);
-
-	nodes.forEach(function (d) {
-		d.x = xScale(d.xvalue);
-		d.y = yScale(d.yvalue);
-	});
-
-	treeplot.selectAll(".tip").data(tips)
-		.transition().duration(speed)
-		.attr("cx", function(d) { return d.x; })
-		.attr("cy", function(d) { return d.y; });
-
-	treeplot.selectAll(".vaccine").data(vaccines)
-		.transition().duration(speed)
-		.attr("x", function(d) { return d.x; })
-		.attr("y", function(d) { return d.y; });
-
-	treeplot.selectAll(".internal").data(internals)
-		.transition().duration(speed)
-		.attr("x", function(d) {
-			if (typeof d.frequency != "undefined") {
-				return d.x - 5*Math.sqrt(d.frequency) - 0.5;
-			}
-			else {
-				return d.x - 1;
-			}
-		})
-		.attr("y", function(d) {
-			if (typeof d.frequency != "undefined") {
-				return d.y - 5*Math.sqrt(d.frequency) - 0.5;
-			}
-			else {
-				return d.y - 1;
-			}
-		});
-
-	treeplot.selectAll(".link").data(links)
-		.transition().duration(speed)
-		.attr("points", function(d) {
-			return (d.source.x).toString() + "," + d.source.y.toString() + " "
-			+ (d.source.x).toString() + "," + d.target.y.toString() + " "
-			+ (d.target.x).toString() + "," + d.target.y.toString()
-		});
-
-}
 
 d3.json("data/tree.json", function(error, root) {
 
@@ -809,7 +772,16 @@ d3.json("data/tree.json", function(error, root) {
 				dMax = maximumAttribute(d.target, "xvalue", d.target.xvalue),
 				lMin = minimumAttribute(d.target, "yvalue", d.target.yvalue),
 				lMax = maximumAttribute(d.target, "yvalue", d.target.yvalue);
-			rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, internals, vaccines);
+			if (dMax > dMin && lMax > lMin) {
+				rescale(dMin, dMax, lMin, lMax);
+			}
+			else {
+				dMin = minimumAttribute(d.source, "xvalue", d.source.xvalue),
+				dMax = maximumAttribute(d.source, "xvalue", d.source.xvalue),
+				lMin = minimumAttribute(d.source, "yvalue", d.source.yvalue),
+				lMax = maximumAttribute(d.source, "yvalue", d.source.yvalue);			
+				rescale(dMin, dMax, lMin, lMax);
+			}
 		});
 
 	var tipCircles = treeplot.selectAll(".tip")
@@ -855,6 +827,16 @@ d3.json("data/tree.json", function(error, root) {
 		})
 		.on('mouseout', virusTooltip.hide);
 
+	function colorByHI(){
+		HItype = document.getElementById("HIprediction").checked;
+		correctPotency = document.getElementById("serum").checked;
+		correctVirus = document.getElementById("virus").checked;
+		if (HItype){
+			colorByTrait("HI_point_pred");
+		}else{
+			colorByTrait("HI_point");				
+		}
+	}
 
 	var serumCircles = treeplot.selectAll(".serum")
 		.data(sera)
@@ -875,16 +857,17 @@ d3.json("data/tree.json", function(error, root) {
 		})
 		.on('click', function(d) {
 			serum = d;
-			HItype = document.getElementById("HIprediction").checked;
-			correctPotency = document.getElementById("serum").checked;
-			correctVirus = document.getElementById("virus").checked;
-			if (HItype){
-				colorByTrait("HI_point_pred");
-			}else{
-				colorByTrait("HI_point");				
-			}
+			colorByHI();
 		})
 		.on('mouseout', virusTooltip.hide);
+
+	d3.select("#HIprediction")
+		.on("change", colorByHI);
+	d3.select("#serum")
+		.on("change", colorByHI);
+	d3.select("#virus")
+		.on("change", colorByHI);
+
 
 	var drag = d3.behavior.drag()
 		.origin(function(d) { return d; })
@@ -1060,9 +1043,96 @@ d3.json("data/tree.json", function(error, root) {
 				dMax = d3.max(xValues),
 				lMin = d3.min(yValues),
 				lMax = d3.max(yValues);
-			rescale(dMin, dMax, lMin, lMax, xScale, yScale, nodes, links, tips, internals, vaccines);
+			rescale(dMin, dMax, lMin, lMax);
 		})
+
+	function rescale(dMin, dMax, lMin, lMax) {
+
+		var speed = 1500;
+		xScale.domain([dMin,dMax]);
+		yScale.domain([lMin,lMax]);
+
+		nodes.forEach(function (d) {
+			d.x = xScale(d.xvalue);
+			d.y = yScale(d.yvalue);
+		});
+
+		treeplot.selectAll(".tip").data(tips)
+			.transition().duration(speed)
+			.attr("cx", function(d) { return d.x; })
+			.attr("cy", function(d) { return d.y; });
+
+		treeplot.selectAll(".vaccine").data(vaccines)
+			.transition().duration(speed)
+			.attr("x", function(d) { return d.x; })
+			.attr("y", function(d) { return d.y; });
+
+		treeplot.selectAll(".internal").data(internals)
+			.transition().duration(speed)
+			.attr("x", function(d) {
+				if (typeof d.frequency != "undefined") {
+					return d.x - 5*Math.sqrt(d.frequency) - 0.5;
+				}
+				else {
+					return d.x - 1;
+				}
+			})
+			.attr("y", function(d) {
+				if (typeof d.frequency != "undefined") {
+					return d.y - 5*Math.sqrt(d.frequency) - 0.5;
+				}
+				else {
+					return d.y - 1;
+				}
+			});
+
+		treeplot.selectAll(".link").data(links)
+			.transition().duration(speed)
+			.attr("points", function(d) {
+				return (d.source.x).toString() + "," + d.source.y.toString() + " "
+				+ (d.source.x).toString() + "," + d.target.y.toString() + " "
+				+ (d.target.x).toString() + "," + d.target.y.toString()
+			});
+
+	}	
+
+	d3.select(window).on('resize', resize); 
+	
+	function resize() {
+	
+		var containerWidth = parseInt(d3.select(".treeplot-container").style("width"), 10);
+		var width = containerWidth,
+			height = treePlotHeight(containerWidth);
+			
+		d3.select("#treeplot")
+			.attr("width", width)
+			.attr("height", height);			
+			
+		xScale.range([10, width-10]);
+		yScale.range([10, height-10]);
 		
+		nodes.forEach(function (d) {
+			d.x = xScale(d.xvalue);
+			d.y = yScale(d.yvalue);
+		});		
+		
+		treeplot.selectAll(".tip").data(tips)
+			.attr("cx", function(d) { return d.x; })
+			.attr("cy", function(d) { return d.y; });
+
+		treeplot.selectAll(".vaccine").data(vaccines)
+			.attr("x", function(d) { return d.x; })
+			.attr("y", function(d) { return d.y; });
+			
+		treeplot.selectAll(".link").data(links)
+			.attr("points", function(d) {
+				return (d.source.x).toString() + "," + d.source.y.toString() + " "
+				+ (d.source.x).toString() + "," + d.target.y.toString() + " "
+				+ (d.target.x).toString() + "," + d.target.y.toString()
+			});			
+	
+	}
+	
 	function colorByGenotype() {
 		var positions_string = document.getElementById("gt-color").value.split(',');
 		var positions_list = []
@@ -1145,7 +1215,6 @@ d3.json("data/tree.json", function(error, root) {
 		.height(500)
 		.onSelected(onSelect)
 		.render();
-
 
 
 	d3.select("#gt-color")

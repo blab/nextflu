@@ -1,0 +1,4 @@
+exclude:
+  - "*.sh"
+  - "Gemfile"
+  - "Gemfile.lock"
