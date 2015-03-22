@@ -187,14 +187,16 @@ class HI_tree(object):
 		G = matrix(G1)
 		W = solvers.qp(P,q,G,h)
 		sol = np.array([x for x in W['x']])[:n_params]
-
+		self.params=sol
+		print "squared deviation prior to relax=",self.fit_func()
 		# redo the linear cost relaxing terms that seem to be relevant to avoid 
 		# compression of the fit. 0.2 seems to be a good cut-off, linear tune to zero
 		q1[n_params:] = self.lam_HI*(1-5.0*np.minimum(0.2,sol[:HI_sc]))
 		q = matrix(q1)
 		W = solvers.qp(P,q,G,h)
 		sol = np.array([x for x in W['x']])[:n_params]
-
+		self.params=sol
+		print "squared deviation after relax=",self.fit_func()
 		return sol
 
 	def prepare_HI_map(self):
@@ -206,6 +208,9 @@ class HI_tree(object):
 			self.test_HI, self.train_HI = {}, {}
 			if self.subset_strains:
 				training_strains = sample(self.HI_strains, int(self.training_fraction*len(self.HI_strains)))
+				for tmpstrain in self.ref_strains:
+					if tmpstrain not in training_strains:
+						training_strains.append(tmpstrain)
 				for key, val in self.HI_normalized.iteritems():
 					if key[0] in training_strains:
 						self.train_HI[key]=val
