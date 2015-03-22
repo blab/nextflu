@@ -272,16 +272,16 @@ class HI_tree(object):
 			pred_HI = self.predict_HI(key[0], key[1])
 			if pred_HI is not None:
 				self.validation[key] = (val, pred_HI)
+		from scipy.stats import linregress, pearsonr
+		a = np.array(self.validation.values())
+		self.abs_error = np.mean(np.abs(a[:,0]-a[:,1]))
+		self.rms_error = np.sqrt(np.mean((a[:,0]-a[:,1])**2))
+		self.slope, self.intercept, tmpa, tmpb, tmpc = linregress(a[:,0], a[:,1])
+		print "error (abs/rms): ",self.abs_error, self.rms_error
+		print "slope, intercept:", self.slope, self.intercept
+		print "pearson correlation:", pearsonr(a[:,0], a[:,1])
 		if plot:
 			import matplotlib.pyplot as plt
-			from scipy.stats import linregress, pearsonr
-			a = np.array(self.validation.values())
-			self.abs_error = np.mean(np.abs(a[:,0]-a[:,1]))
-			self.rms_error = np.sqrt(np.mean((a[:,0]-a[:,1])**2))
-			slope, intercept, tmpa, tmpb, tmpc = linregress(a[:,0], a[:,1])
-			print "error (abs/rms): ",self.abs_error, self.rms_error
-			print "slope, intercept:", slope, intercept
-			print "pearson correlation:", pearsonr(a[:,0], a[:,1])
 			plt.figure()
 			plt.plot([-1,6], [-1,6], 'k')
 			plt.scatter(a[:,0], a[:,1])
@@ -357,10 +357,12 @@ def parse_HI_matrix(fname):
 	from string import strip
 	import csv
 	name_abbrev = {'HK':"HONGKONG", 'SWITZ':"SWITZERLAND", 'VIC':"VICTORIA", 'STOCK':"STOCKHOLM",
-					'STHAFR':"SOUTHAFRICA", "ENG":"ENGLAND", "NIB-85":"A/ALMATY/2958/2013", 'NOR':'NORWAY',
+					'STHAFR':"SOUTHAFRICA", 'SAFRICA':"SOUTHAFRICA", "ENG":"ENGLAND", "NIB-85":"A/ALMATY/2958/2013", 'NOR':'NORWAY',
 					'NTHCAROL':"NORTHCAROLINA",'ALA':"ALABAMA", 'NY':"NEWYORK", "GLAS":"GLASGOW", "AL":"ALABAMA",
 					"NETH":"NETHERLANDS", "FIN":"FINLAND", "BRIS":"BRISBANE", "MARY":"MARYLAND",	
-					"ST.P'BURG":"ST.PETERSBURG"}
+					"ST.P'BURG":"ST.PETERSBURG", 'CAL':'CALIFORNIA', 'AUCK':'AUCKLAND', "C'CHURCH":'CHRISTCHURCH',
+					'CHCH':'CHRISTCHURCH', 'ASTR':'ASTRAKHAN', 'ASTRAK':'ASTRAKHAN', 'ST.P':"ST.PETERSBURG",
+					}
 	src_id = fname.split('/')[-1]
 	print fname
 	with open(fname) as infile:
