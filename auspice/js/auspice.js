@@ -280,7 +280,10 @@ var linkTooltip = d3.tip()
 	.html(function(d) {
 		string = ""
 		if (typeof d.frequency != "undefined") {
-			string += "Frequency: " + (100 * d.frequency).toFixed(1) + "%";
+			string += "Frequency: " + (100 * d.frequency).toFixed(1) + "%"
+			if (d.muts.length){
+				string+="<br>Mutations: "+d.muts;
+			}
 		}
 		return string;
 	});
