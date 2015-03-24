@@ -1093,6 +1093,20 @@ d3.json("data/meta.json", function(error, json) {
 		.append("a")
 		.attr("href", "http://github.com/blab/nextflu/commit/" + commit_id)
 		.text(short_id);
+
+	// add clade labels
+	clades = json["clades"];
+	console.log(clades);
+	var clade_annotations = treeplot.select('.annotation')
+		.data(clades)
+		.enter()
+		.append("text")
+		.attr("class", "annotation")
+		.attr("x", function(d) {return d[1]})
+		.attr("y", function(d) {return d[2]})
+		.style("font-size", "28px")
+		.text(function (d) {return d[0];});
+
 });
 
 d3.json("data/sequences.json", function(error, json) {

@@ -118,6 +118,19 @@ class process(virus_frequencies):
 			meta["regions"] = self.regions
 			meta["virus_stats"] = [ [str(y)+'-'+str(m)] + [self.date_region_count[(y,m)][reg] for reg in self.regions]
 									for y,m in sorted(self.date_region_count.keys()) ]
+		if hasattr(self,"clade_designations"):
+			from scipy.stats import scoreatpercentile
+			# calculate x and y value of each each (30% y, 95% x)
+			clade_xval = {clade: scoreatpercentile([x.xvalue for x in self.tree.leaf_iter()
+													if all([x.aa_seq[pos-1]==aa for pos, aa in gt])], per = 95)
+							for clade, gt in self.clade_designations.iteritems()}
+			clade_yval = {clade: scoreatpercentile([x.yvalue for x in self.tree.leaf_iter()
+													if all([x.aa_seq[pos-1]==aa for pos, aa in gt])], per = 30)
+							for clade, gt in self.clade_designations.iteritems()}
+			# append clades, coordinates and genotype to meta 
+			meta["clades"] = [(clade, clade_xval[clade],clade_yval[clade], 
+								"/".join([str(pos)+aa for pos, aa in gt]))
+							for clade, gt in self.clade_designations.iteritems()]
 		meta_fname = "../auspice/data/meta.json"
 		write_json(meta, meta_fname, indent=0)
 
