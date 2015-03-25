@@ -1090,10 +1090,9 @@ d3.json("data/tree.json", function(error, root) {
 		.enter()
 		.append("text")
 		.attr("class", "annotation")
-		.attr("x", function(d) {return xScale(d[1])+20})
-		.attr("y", function(d) {return yScale(d[2])+18})
-		.style("font-size", "18px")
-		.style('font-family', 'FontAwesome')
+		.attr("x", function(d) {return width;})
+		.attr("y", function(d) {return yScale(d[2])})
+		.style("text-anchor", "end")
 		.text(function (d) {return d[0];});
 
 

@@ -64,7 +64,7 @@ class process(virus_frequencies):
 			with open(self.aa_seq_fname, 'r') as infile:
 				self.aa_aln = cPickle.load(infile)
 
-	def export_to_auspice(self, tree_fields = [], tree_pop_list = []):
+	def export_to_auspice(self, tree_fields = [], tree_pop_list = [], annotations = []):
 		from tree_util import dendropy_to_json, all_descendants
 		from io_util import write_json, read_json
 		print "--- Streamline at " + time.strftime("%H:%M:%S") + " ---"
@@ -101,7 +101,8 @@ class process(virus_frequencies):
 			# append clades, coordinates and genotype to meta 
 			self.tree_json["clade_annotations"] = [(clade, clade_xval[clade],clade_yval[clade], 
 								"/".join([str(pos)+aa for pos, aa in gt]))
-							for clade, gt in self.clade_designations.iteritems()]
+							for clade, gt in self.clade_designations.iteritems() if clade in annotations
+							]
 		write_json(self.tree_json, self.auspice_tree_fname, indent=None)
 		try:
 			read_json(self.auspice_tree_fname)
