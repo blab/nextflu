@@ -50,7 +50,6 @@ class virus_clean(object):
 			v.num_date = numerical_date(v.date) + 1e-7*(ii+1)
 
 	def times_from_outgroup(self):
-		self.unique_date()
 		outgroup_date = self.sequence_lookup[self.outgroup['strain']].num_date
 		return np.array([x.num_date-outgroup_date for x in self.viruses  if x.strain])
 
@@ -82,6 +81,7 @@ class virus_clean(object):
 
 	def clean_generic(self):
 		print "Number of viruses before cleaning:",len(self.viruses)
+		self.unique_date()
 		self.remove_insertions()
 		self.clean_ambiguous()
 		self.clean_distances()
