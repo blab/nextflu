@@ -373,7 +373,7 @@ d3.json("data/tree.json", function(error, root) {
 
 	var xScale = d3.scale.linear()
 		.domain([d3.min(xValues), d3.max(xValues)])
-		.range([10, width-10]);
+		.range([10, width-50]);
 
 	var yScale = d3.scale.linear()
 		.domain([d3.min(yValues), d3.max(yValues)])
@@ -1082,6 +1082,21 @@ d3.json("data/tree.json", function(error, root) {
 
 	tree_legend = makeLegend();
 
+	// add clade labels
+	clades = rootNode["clade_annotations"];
+	console.log(clades);
+	var clade_annotations = treeplot.selectAll('.annotation')
+		.data(clades)
+		.enter()
+		.append("text")
+		.attr("class", "annotation")
+		.attr("x", function(d) {return xScale(d[1])+20})
+		.attr("y", function(d) {return yScale(d[2])+18})
+		.style("font-size", "18px")
+		.style('font-family', 'FontAwesome')
+		.text(function (d) {return d[0];});
+
+
 });
 
 d3.json("data/meta.json", function(error, json) {
@@ -1093,19 +1108,6 @@ d3.json("data/meta.json", function(error, json) {
 		.append("a")
 		.attr("href", "http://github.com/blab/nextflu/commit/" + commit_id)
 		.text(short_id);
-
-	// add clade labels
-	clades = json["clades"];
-	console.log(clades);
-	var clade_annotations = treeplot.select('.annotation')
-		.data(clades)
-		.enter()
-		.append("text")
-		.attr("class", "annotation")
-		.attr("x", function(d) {return d[1]})
-		.attr("y", function(d) {return d[2]})
-		.style("font-size", "28px")
-		.text(function (d) {return d[0];});
 
 });
 
