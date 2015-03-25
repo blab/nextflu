@@ -96,9 +96,16 @@ class tree_refine(object):
 	def add_aa_mutations(self):
 		for node in self.tree.postorder_internal_node_iter():
 			for child in node.child_nodes():
-				child.muts = ','.join([anc+str(pos)+der for pos,anc, der in 
+				child.aa_muts = ','.join([anc+str(pos)+der for pos,anc, der in 
 						zip(range(1,len(node.aa_seq)+1), node.aa_seq, child.aa_seq) if anc!=der])
-		self.tree.seed_node.muts=[]
+		self.tree.seed_node.aa_muts=""
+
+	def add_nuc_mutations(self):
+		for node in self.tree.postorder_internal_node_iter():
+			for child in node.child_nodes():
+				child.nuc_muts = ','.join([anc+str(pos)+der for pos,anc, der in 
+						zip(range(1,len(node.seq)+1), node.seq, child.seq) if anc!=der])
+		self.tree.seed_node.nuc_muts=""
 
 	def get_yvalue(self, node):
 		"""Return y location based on recursive mean of daughter locations"""

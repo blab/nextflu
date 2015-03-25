@@ -281,8 +281,8 @@ var linkTooltip = d3.tip()
 		string = ""
 		if (typeof d.frequency != "undefined") {
 			string += "Frequency: " + (100 * d.frequency).toFixed(1) + "%"
-			if (d.muts.length){
-				string+="<br>Mutations: "+d.muts;
+			if (d.aa_muts.length){
+				string+="<br>Mutations: "+d.aa_muts;
 			}
 		}
 		return string;
