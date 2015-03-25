@@ -151,6 +151,24 @@ function calcLBI(node, allnodes){
 };
 
 /**
+ * for each node, calculate the derivative of the frequency tranjectory. if none exists, copy parent
+**/
+function calcDfreq(node, freq_ii){
+	if (typeof node.children != "undefined") {
+		for (var i1=0; i1<node.children.length; i1++) {
+			if (node.children[i1].freq["global"] != "undefined"){
+				var tmp_freq = node.children[i1].freq["global"]
+				node.children[i1].dfreq = 0.5*(tmp_freq[freq_ii] - tmp_freq[freq_ii-1])/(tmp_freq[freq_ii] + tmp_freq[freq_ii-1] + 0.05);
+			}else{
+				node.children[i1].dfreq = node.dfreq;
+			}
+			calcDfreq(node.children[i1], freq_ii);
+		}
+	}
+};
+
+
+/**
  * for each node, calculate the number of tips in the currently selected time window. 
 **/
 function calcTipCounts(node){
@@ -429,6 +447,10 @@ d3.json("data/tree.json", function(error, root) {
 		.domain([0.0, 0.02, 0.04, 0.07, 0.1, 0.2, 0.4, 0.7, 0.9, 1.0])
 		.range(colors);
 
+	var dfreqColorScale = d3.scale.linear()
+		.domain([-0.2, -0.15, -0.1,-0.05, 0.0, 0.05,  0.1, 0.15, 0.2])
+		.range(colors);
+
 	var colorScale;
 	
 	var freqScale = d3.scale.linear()
@@ -478,10 +500,16 @@ d3.json("data/tree.json", function(error, root) {
 				d.adj_coloring = d.coloring; // - mean;
 			});
 		}
-		if (colorBy == "lbi") {
+		else if (colorBy == "lbi") {
 			calcLBI(rootNode, nodes, false);
 			nodes.forEach(function (d) {
 				d.adj_coloring = d.LBI;
+			});
+		}
+		else if (colorBy == "dfreq") {
+			calcDfreq(rootNode, freq_ii);
+			nodes.forEach(function (d) {
+				d.adj_coloring = d.dfreq;
 			});
 		}
 	}
@@ -504,19 +532,23 @@ d3.json("data/tree.json", function(error, root) {
 			colorScale = epitopeColorScale;
 			nodes.map(function(d) { d.coloring = d.ep; });
 		}
-		if (colorBy == "ne") {
+		else if (colorBy == "ne") {
 			colorScale = nonepitopeColorScale;
 			nodes.map(function(d) { d.coloring = d.ne; });
 		}
-		if (colorBy == "rb") {
+		else if (colorBy == "rb") {
 			colorScale = receptorBindingColorScale;
 			nodes.map(function(d) { d.coloring = d.rb; });
 		}
-		if (colorBy == "lbi") {
+		else if (colorBy == "lbi") {
 			colorScale = lbiColorScale;
 			nodes.map(function(d) { d.adj_coloring = d.LBI; });
 		}
-		if (colorBy == "region") {
+		else if (colorBy == "dfreq") {
+			colorScale = dfreqColorScale;
+			nodes.map(function(d) { d.adj_coloring = d.dfreq; });
+		}
+		else if (colorBy == "region") {
 			colorScale = regionColorScale;
 		}
 
@@ -628,6 +660,9 @@ d3.json("data/tree.json", function(error, root) {
 
 	calcNodeAges(time_window);
 	calcLBI(rootNode, nodes, false);
+	calcDfreq(rootNode, freq_ii);
+	var freq_ii = rootNode.pivots.length - 1;
+	console.log(freq_ii);
 	colorByTrait();
 	adjust_coloring_by_date();
 	adjust_freq_by_date();
@@ -752,8 +787,7 @@ d3.json("data/tree.json", function(error, root) {
 			.attr("cx", function(d) {return d.x})
 		globalDate = d.date;
 
-		calcNodeAges(time_window);			
-
+		calcNodeAges(time_window);
 		treeplot.selectAll(".link")
 			.style("stroke", function(d){return "#ccc";})
 
@@ -776,6 +810,13 @@ d3.json("data/tree.json", function(error, root) {
 	}
 
 	function dragend() {
+		var num_date = globalDate/1000/3600/24/365.25+1970;	
+		for (var ii=0; ii<rootNode.pivots.length-1; ii++){
+			if (rootNode.pivots[ii]<num_date && rootNode.pivots[ii+1]>=num_date){
+				freq_ii=ii+1;
+			}
+		}
+		console.log("changed frequency index to "+freq_ii+" date cut off is "+num_date);
 		console.log("recalculating node ages");
 		calcNodeAges(time_window);
 		console.log("adjusting node colors");
