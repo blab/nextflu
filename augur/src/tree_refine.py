@@ -28,6 +28,7 @@ class tree_refine(object):
 		self.ladderize()
 		self.collapse()
 		self.translate_all()
+		self.add_nuc_mutations()
 		self.add_aa_mutations()
 		self.add_node_attributes()
 		self.reduce()
@@ -94,11 +95,14 @@ class tree_refine(object):
 			node.aa_seq = translate(node.seq[self.cds[0]:self.cds[1]])
 
 	def add_aa_mutations(self):
-		for node in self.tree.postorder_internal_node_iter():
-			for child in node.child_nodes():
-				child.aa_muts = ','.join([anc+str(pos)+der for pos,anc, der in 
-						zip(range(1,len(node.aa_seq)+1), node.aa_seq, child.aa_seq) if anc!=der])
-		self.tree.seed_node.aa_muts=""
+		if hasattr(self.tree.seed_node, 'aa_seq'):
+			for node in self.tree.postorder_internal_node_iter():
+				for child in node.child_nodes():
+					child.aa_muts = ','.join([anc+str(pos)+der for pos,anc, der in 
+							zip(range(1,len(node.aa_seq)+1), node.aa_seq, child.aa_seq) if anc!=der])
+			self.tree.seed_node.aa_muts=""
+		else:
+			print "no translation available"
 
 	def add_nuc_mutations(self):
 		for node in self.tree.postorder_internal_node_iter():
