@@ -31,6 +31,8 @@ class virus_filter(object):
 		if hasattr(self, 'min_length'):
 			self.filter_length(self.min_length)
 			print len(self.viruses), "after filtering by length >=", self.min_length
+		self.filter_noncanoncial_nucleotides()
+		print len(self.viruses), "after filtering bad nucleotides"
 
 		self.filter_date()
 		print len(self.viruses), "after filtering for precise dates"
@@ -63,6 +65,9 @@ class virus_filter(object):
 
 	def filter_length(self, min_length):
 		self.viruses = filter(lambda v: len(v['seq']) >= min_length, self.viruses)
+
+	def filter_noncanoncial_nucleotides(self, max_bad_pos=3):
+		self.viruses = filter(lambda v: sum(v['seq'].count(nuc) for nuc in 'ACGTacgt') >= len(v['seq'])-max_bad_pos, self.viruses)
 
 	def filter_date(self):
 		if self.date_spec=='full':

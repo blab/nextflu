@@ -17,7 +17,7 @@ virus_config = {
 	'alignment_file':'data/H1N1pdm_gisaid_epiflu_sequence.fasta',
 	'fasta_fields':{0:'strain', 1:'accession', 3:'passage', 5:'date' },
 	'outgroup':'A/Swine/Indiana/P12439/00',
-	#'force_include':'source-data/HI_strains.txt',
+	'force_include':'source-data/H1N1pdm_HI_strains.txt',
 	'force_include_all':True,
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
 	'cds':[57,None], # define the HA1 start i n 0 numbering #CHECK
@@ -28,7 +28,7 @@ virus_config = {
 							("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ],
 	'frequency_stiffness':10.0,
 	'time_interval':(2009.0, 2015.3),
-	'pivots_per_year':6.0,
+	'pivots_per_year':3.0,
 	'min_freq':0.10,
 	# define relevant clades in canonical HA1 numbering (+1)
 	'clade_designations': {},
@@ -37,9 +37,9 @@ virus_config = {
 	'pc':1e-3, #pseudocount for frequencies 
 	'extra_pivots': 6,  # number of pivot point for or after the last observations of a mutations
 	'inertia':0.7,		# fraction of frequency change carry over in the stiffness term
-	'auspice_frequency_name'='../auspice/data/H1N1pdm_frequencies.json',
-	'auspice_sequences_name'='../auspice/data/H1N1pdm_sequences.json',
-	'auspice_tree_name'='../auspice/data/H1N1pdm_tree.json',
+	'auspice_frequency_name':'../auspice/data/H1N1pdm_frequencies.json',
+	'auspice_sequences_name':'../auspice/data/H1N1pdm_sequences.json',
+	'auspice_tree_name':'../auspice/data/H1N1pdm_tree.json',
 }
 
 
