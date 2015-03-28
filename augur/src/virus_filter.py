@@ -10,17 +10,41 @@ from Bio import SeqIO
 
 class virus_filter(object):
 
-	def __init__(self,viruses=None, date_spec='full', **kwargs):
+	def __init__(self, alignment_file='', fasta_fields=None, date_spec='full', **kwargs):
 		'''
 		parameters:
-		viruses    -- a list of virses. dict structures as of now
-		date_spec  -- if 'full', dates with day are required, if 'year', only year is accepted
+		alignment_file   -- a FASTA sequence file with all viruses included
+		fasta_fields     -- match between FASTA header index and virus dict field
+		date_spec        -- if 'full', dates with day are required, if 'year', only year is accepted
 		'''
-		if viruses is None: viruses=[]
-		self.viruses = viruses
+		if fasta_fields is None:
+			self.fasta_fields = {0:'strain', 1:'date' }
+		else:
+			self.fasta_fields = fasta_fields
+		self.alignment_file = alignment_file
+		self.viruses = self.parse_fasta(self.alignment_file)
 		self.strain_lookup = {}
 		self.outgroup = None
 		self.date_spec = date_spec
+		
+	def parse_fasta(self, fasta):
+		"""Parse FASTA file with default header formating"""
+		viruses = []
+		try:
+			handle = open(fasta, 'r')
+		except IOError:
+			print fasta, "not found"
+		else:
+			for record in SeqIO.parse(handle, "fasta"):
+				words = record.description.replace(">","").replace(" ","").split('|')
+				v = {key:words[ii] for ii, key in self.fasta_fields.iteritems()}
+				v['seq']= str(record.seq)
+				viruses.append(v)
+			handle.close()
+		return viruses		
+		
+	def filter(self):
+		self.filter_generic()			
 
 	def filter_generic(self, prepend_strains = None):
 		'''
@@ -173,34 +197,11 @@ class virus_filter(object):
 
 class flu_filter(virus_filter):
 
-	def __init__(self, alignment_file='', fasta_fields=None, **kwargs):
-		if fasta_fields is None:
-			self.fasta_fields = {0:'strain', 1:'accession', 3:'passage', 5:'date' }
-		else:
-			self.fasta_fields = fasta_fields
-		self.alignment_file = alignment_file
-		viruses = self.parse_gisaid(self.alignment_file)
-		virus_filter.__init__(self, viruses, **kwargs)
+	def __init__(self, alignment_file='', fasta_fields=None, **kwargs):	
+		virus_filter.__init__(self, alignment_file = alignment_file, fasta_fields = fasta_fields, **kwargs)
+		self.add_gisaid_metadata()
 		self.fix_strain_names()
 		self.vaccine_strains=[]
-
-	def parse_gisaid(self, fasta):
-		"""Parse FASTA file from GISAID with default header formating"""
-		viruses = []
-		try:
-			handle = open(fasta, 'r')
-		except IOError:
-			print fasta, "not found"
-		else:
-			for record in SeqIO.parse(handle, "fasta"):
-				words = record.description.replace(">","").replace(" ","").split('|')
-				v = {key:words[ii] for ii, key in self.fasta_fields.iteritems()}
-				v['db']="GISAID"
-				v['seq']= str(record.seq)
-				if 'passage' not in v: v['passage']=''
-				viruses.append(v)
-			handle.close()
-		return viruses
 
 	def filter(self):
 		self.filter_strain_names()
@@ -209,8 +210,11 @@ class flu_filter(virus_filter):
 		print len(self.viruses), "without egg passage"
 		self.filter_geo(prune_unknown=False)
 		print len(self.viruses), "with geographic information"
-		print [x for x in self.viruses if 'Africa/3626/2013' in x['strain']]
 		self.filter_generic(prepend_strains = self.vaccine_strains)	
+		
+	def add_gisaid_metadata(self):
+		for v in self.viruses:
+			v['db']="GISAID"
 
 	def filter_strain_names(self):
 		self.viruses = filter(lambda v: re.match(r'^A/', v['strain']) != None, self.viruses)

@@ -72,7 +72,7 @@ class process(virus_frequencies):
 		print "Writing sequences"
 		elems = {}
 		for node in self.tree:
-			if hasattr(node,"clade"):
+			if hasattr(node, "clade") and hasattr(node, "aa_seq"):
 				elems[node.clade] = node.aa_seq
 		write_json(elems, self.auspice_sequences_fname, indent=None)
 

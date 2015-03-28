@@ -63,9 +63,13 @@ class tree_refine(object):
 	def collapse(self):
 		"""Collapse edges without mutations to polytomies"""
 		for edge in self.tree.postorder_edge_iter():
-			if edge.tail_node is not None:
-				if edge.is_internal() and edge.head_node.seq==edge.tail_node.seq:
-					edge.collapse()
+			if edge.tail_node is not None and edge.is_internal():
+				if hasattr(edge.head_node, 'seq') and hasattr(edge.tail_node, 'seq'):
+					if edge.head_node.seq==edge.tail_node.seq:
+						edge.collapse()
+				else:
+					if edge.length < 0.00001:
+						edge.collapse()
 
 	def reduce(self):
 		"""
