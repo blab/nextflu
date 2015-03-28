@@ -205,7 +205,7 @@ class process(virus_frequencies):
 		out_fname = "data/tree_infer.newick"
 		os.rename('RAxML_result.branches', out_fname)
 		Phylo.write(Phylo.read(out_fname, 'newick'),'temp.newick','newick')
-		self.tree = self.tree = dendropy.Tree.get_from_string(delimit_newick(out_fname), 'newick', as_rooted=True)
+		self.tree = dendropy.Tree.get_from_string(delimit_newick(out_fname), 'newick', as_rooted=True)
 		cleanup()
 
 	def infer_ancestral(self):

@@ -57,7 +57,7 @@ class virus_filter(object):
 		'''	
 		filtered_viruses = []
 		for v in self.viruses:
-			label = v['strain'].lower() 
+			label = v['strain'].upper() 
 			if not label in self.strain_lookup:
 				filtered_viruses.append(v)
 				self.strain_lookup[label]=v
@@ -85,14 +85,14 @@ class virus_filter(object):
 		if prioritize is None:
 			prioritize=[]
 		else:
-			prioritize = [v.lower() for v in prioritize]
+			prioritize = [v.upper() for v in prioritize]
 		if region_specific:
 			select_func = self.select_viruses
 		else:
 			select_func = self.select_viruses_global
 
-		priority_viruses = self.viruses_by_date_region([v for v in self.viruses if v['strain'].lower() in prioritize]) 
-		other_viruses = self.viruses_by_date_region([v for v in self.viruses if v['strain'].lower() not in prioritize]) 
+		priority_viruses = self.viruses_by_date_region([v for v in self.viruses if v['strain'].upper() in prioritize]) 
+		other_viruses = self.viruses_by_date_region([v for v in self.viruses if v['strain'].upper() not in prioritize]) 
 
 		filtered_viruses = []
 		first_year = datetime.datetime.today().year - years_back
@@ -121,7 +121,13 @@ class virus_filter(object):
 		from collections import defaultdict
 		virus_tuples = defaultdict(list)
 		for v in tmp_viruses:
-			vdate = datetime.datetime.strptime(v['date'], '%Y-%m-%d').date()
+			try:
+				vdate = datetime.datetime.strptime(v['date'], '%Y-%m-%d').date()
+			except:
+				print "incomplete date!", v['strain'], v['date'], "adjusting to July 1st"
+				v['date']+='-07-01'	
+				vdate = datetime.datetime.strptime(v['date'], '%Y-%m-%d').date()
+
 			virus_tuples[(vdate.year, vdate.month, v['region'])].append(v)
 
 		return virus_tuples
@@ -197,13 +203,14 @@ class flu_filter(virus_filter):
 		return viruses
 
 	def filter(self):
-		self.filter_generic(prepend_strains = self.vaccine_strains)	
 		self.filter_strain_names()
 		print len(self.viruses), "with proper strain names"
 		self.filter_passage()
 		print len(self.viruses), "without egg passage"
-		self.filter_geo()
+		self.filter_geo(prune_unknown=False)
 		print len(self.viruses), "with geographic information"
+		print [x for x in self.viruses if 'Africa/3626/2013' in x['strain']]
+		self.filter_generic(prepend_strains = self.vaccine_strains)	
 
 	def filter_strain_names(self):
 		self.viruses = filter(lambda v: re.match(r'^A/', v['strain']) != None, self.viruses)
@@ -216,7 +223,7 @@ class flu_filter(virus_filter):
 		self.viruses = filter(lambda v: re.match(r'^E\d+', v.get('passage',''), re.I) == None, self.viruses)
 		self.viruses = filter(lambda v: re.match(r'^Egg', v.get('passage',''), re.I) == None, self.viruses)
 
-	def filter_geo(self):
+	def filter_geo(self, prune_unknown=True):
 		"""Label viruses with geographic location based on strain name"""
 		"""Location is to the level of country of administrative division when available"""
 		reader = csv.DictReader(open("source-data/geo_synonyms.tsv"), delimiter='\t')		# list of dicts
@@ -245,5 +252,6 @@ class flu_filter(virus_filter):
 			if v['country'] in country_to_region:
 				v['region'] = country_to_region[v['country']]
 		
-		self.viruses = filter(lambda v: v['region'] != 'Unknown', self.viruses)
+		if prune_unknown:
+			self.viruses = filter(lambda v: v['region'] != 'Unknown', self.viruses)
 

@@ -374,7 +374,7 @@ def parse_HI_matrix(fname):
 		row3 = csv_reader.next()
 		ref_sera = [[strain_name_fixing(e1+'/'+e2), e3.replace(' ','')] for e1,e2,e3 in zip(row1, row2, row3)[4:]]
 		for ri in xrange(len(ref_sera)):
-			abbr = ref_sera[ri][0].split('/')[1]			
+			abbr = ref_sera[ri][0].split('/')[1]	
 			if abbr in name_abbrev:
 				ref_sera[ri][0] = strain_name_fixing(ref_sera[ri][0].replace(abbr, name_abbrev[abbr]))
 			else:
@@ -413,7 +413,7 @@ def parse_HI_matrix(fname):
 				test_strains.append(strain_name_fixing(row[0].strip()))
 				test_matrix.append([src_id,'test']+map(strip,row[1:4])+map(titer_to_number, row[4:]))
 
-		print len(ref_sera)
+		print len(ref_sera), ref_sera
 		print len(ref_strains), len(test_strains)
 		HI_table  = pd.DataFrame(ref_matrix+test_matrix, index = ref_strains+test_strains, columns= fields)
 
@@ -468,15 +468,15 @@ def table_to_flat(HI_table):
 	print "NIMR total:", len(flat_measurements), "measurements"
 	return flat_measurements
 
-def get_all_titers_flat():
-	HI_titers = read_tables()
+def get_all_titers_flat(flutype='H3N2'):
+	HI_titers = read_tables(flutype)
 	HI_titers_flat = table_to_flat(HI_titers)
-	HI_trevor = read_trevor_table()[2]
+	HI_trevor = read_trevor_table(flutype)[2]
 	HI_titers_flat.update(HI_trevor)
 	return HI_titers_flat
 
 
-def get_strains_with_HI_and_sequence(flutype='H3N2'):
+def write_strains_with_HI_and_sequence(flutype='H3N2'):
 	HI_titers = read_tables(flutype)
 	HI_trevor = read_trevor_table(flutype)
 	HI_strains = set(HI_titers.index)
@@ -484,18 +484,20 @@ def get_strains_with_HI_and_sequence(flutype='H3N2'):
 	from Bio import SeqIO
 	good_strains = set()
 	with open("data/"+flutype+"_strains_with_HI.fasta", 'w') as outfile, \
-		open("source-data/"+flutype+"_HI_strains.txt", 'w') as HI_strain_outfile, \
+		 open("source-data/"+flutype+"_HI_strains.txt", 'w') as HI_strain_outfile, \
 		 open("data/"+flutype+"_gisaid_epiflu_sequence.fasta", 'r') as infile:
 		for seq_rec in SeqIO.parse(infile, 'fasta'):
-			reduced_name = strain_name_fixing(seq_rec.name)
+			tmp_name = seq_rec.description.split('|')[0].strip()
+			reduced_name = strain_name_fixing(tmp_name)
 			if reduced_name in HI_strains and (reduced_name not in good_strains):
 				SeqIO.write(seq_rec, outfile,'fasta')
 				good_strains.add(reduced_name)
-				HI_strain_outfile.write(seq_rec.name+'\n')
-				print seq_rec.name
+				HI_strain_outfile.write(tmp_name+'\n')
+				#print seq_rec.name
 
 
-def flat_HI_titers(measurements, flutype = 'H3N2', fname = None):
+def write_flat_HI_titers(flutype = 'H3N2', fname = None):
+	measurements = get_all_titers_flat(flutype)
 	with open('source-data/'+flutype+'_HI_strains.txt') as infile:
 		strains = [strain_name_fixing(line.strip()) for line in infile]	
 	if fname is None:

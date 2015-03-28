@@ -2,6 +2,8 @@ import time, argparse,re,os
 from virus_filter import flu_filter
 from virus_clean import virus_clean
 from tree_refine import tree_refine
+from tree_titer import HI_tree
+from fitness_model import fitness_model
 from process import process
 from Bio import SeqIO
 from Bio.Seq import Seq
@@ -19,8 +21,9 @@ virus_config = {
 	'outgroup':'A/Swine/Indiana/P12439/00',
 	'force_include':'source-data/H1N1pdm_HI_strains.txt',
 	'force_include_all':True,
+	'date_spec':'year',
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
-	'cds':[57,None], # define the HA1 start i n 0 numbering #CHECK
+	'cds':[78,None], # define the HA1 start i n 0 numbering #CHECK
 	'n_iqd':3,     # standard deviations from clock
 
 	# frequency estimation parameters
@@ -40,6 +43,7 @@ virus_config = {
 	'auspice_frequency_name':'../auspice/data/H1N1pdm_frequencies.json',
 	'auspice_sequences_name':'../auspice/data/H1N1pdm_sequences.json',
 	'auspice_tree_name':'../auspice/data/H1N1pdm_tree.json',
+	'HI_fname':'source-data/H1N1pdm_HI_titers.txt',
 }
 
 
@@ -106,7 +110,7 @@ class H1N1pdm_refine(tree_refine):
 				except:
 					pass
 
-class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine):
+class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine, HI_tree, fitness_model):
 	"""docstring for H1N1pdm_process, H1N1pdm_filter"""
 	def __init__(self,verbose = 0, force_include = None, 
 				force_include_all = False, max_global= True, **kwargs):
@@ -117,15 +121,17 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine):
 		H1N1pdm_filter.__init__(self,**kwargs)
 		H1N1pdm_clean.__init__(self,**kwargs)
 		H1N1pdm_refine.__init__(self,**kwargs)
+		HI_tree.__init__(self,**kwargs)
+		fitness_model.__init__(self,**kwargs)
 		self.verbose = verbose
 
-	def run(self, steps, years_back=3, viruses_per_month=50, raxml_time_limit = 1.0):
+	def run(self, steps, years_back=3, viruses_per_month=50, raxml_time_limit = 1.0, reg=2):
 		if 'filter' in steps:
 			print "--- Virus filtering at " + time.strftime("%H:%M:%S") + " ---"
 			self.filter()
 			if self.force_include is not None and os.path.isfile(self.force_include):
 				with open(self.force_include) as infile:
-					forced_strains = [line.strip().lower() for line in infile]
+					forced_strains = [line.strip().upper() for line in infile]
 			else:
 				forced_strains = []
 			self.subsample(years_back, viruses_per_month, 
@@ -156,13 +162,19 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine):
 			self.determine_variable_positions()
 			self.estimate_frequencies(tasks = ['mutations', 'tree'])
 			self.dump()
+		if 'HI' in steps:
+			print "--- Adding HI titers to the tree " + time.strftime("%H:%M:%S") + " ---"
+			self.map_HI_to_tree(training_fraction=0.9, method = 'nnl1reg', lam_HI=reg, lam_avi=reg, lam_pot = reg)
+			self.add_titers()
+			self.dump()
 		if 'export' in steps:
 			self.temporal_regional_statistics()
 			# exporting to json, including the H1N1pdm specific fields
-			self.export_to_auspice(tree_fields = ['muts'])
+			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'dHI', 'cHI', 'HI_titers', 'serum', 
+				'HI_info', 'avidity', 'potency', 'aa_muts'], annotations = ['3c3.a', '3c2.a'])
 
 if __name__=="__main__":
-	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies', 'export']
+	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies', 'HI', 'export']
 	parser = argparse.ArgumentParser(description='Process virus sequences, build tree, and prepare of web visualization')
 	parser.add_argument('-y', '--years_back', type = int, default=3, help='number of past years to sample sequences from')
 	parser.add_argument('-v', '--viruses_per_month', type = int, default = 50, help='number of viruses sampled per month')
