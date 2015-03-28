@@ -1343,17 +1343,17 @@ d3.json("data/frequencies.json", function(error, json){
 	function get_frequencies(region, gt){
 		var freq = [];
 		for (var pi=0; pi<pivots.length; pi++){freq[freq.length]=0;}
-		if (json["genotypes"][region][gt]!=undefined) {
+		if ((json["genotypes"]!=undefined) && (json["genotypes"][region][gt]!=undefined)) {
 			console.log(gt+" found as genotype");
 			for (var pi=0; pi<freq.length; pi++){
 				freq[pi]+=json["genotypes"][region][gt][pi];
 			}
-		}else if (json["mutations"][region][gt]!=undefined) {
+		}else if ((json["mutations"]!=undefined) && (json["mutations"][region][gt]!=undefined)) {
 			console.log(gt+" found as mutation");
 			for (var pi=0; pi<freq.length; pi++){
 				freq[pi]+=json["mutations"][region][gt][pi];
 			}
-		}else if (json["clades"][region][gt.toLowerCase()]!=undefined) {
+		}else if ((json["clades"]!=undefined) && (json["clades"][region][gt.toLowerCase()]!=undefined)) {
 			console.log(gt+" found as clade");
 			for (var pi=0; pi<freq.length; pi++){
 				freq[pi]+=json["clades"][region][gt.toLowerCase()][pi];

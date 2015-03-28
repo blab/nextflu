@@ -62,7 +62,7 @@ def validation_figures(params):
 	for node in myflu.tree.postorder_node_iter():
 		dHI_list.append((node.dHI, node.mutations, node))
 	dHI_list.sort()
-
+	return dHI_list
 
 def scan_regularization(params, grid):
 	virus_config.update(params.__dict__)
@@ -113,8 +113,12 @@ if __name__=="__main__":
 		from H1N1pdm_process import *
 		flu_process = H1N1pdm_process
 		params.__dict__['HI_fname']='source-data/H1N1pdm_HI_titers.txt'	
+	elif params.flutype=='H1N1':
+		from H1N1_process import *
+		flu_process = H1N1_process
+		params.__dict__['HI_fname']='source-data/H1N1_HI_titers.txt'	
 
-	validation_figures(params)
+	dHI_list = validation_figures(params)
 	#grid = [0.1, 0.3, 1, 3, 10]
 	#accuracy = scan_regularization(params, grid)
 #

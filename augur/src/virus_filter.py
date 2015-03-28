@@ -95,9 +95,12 @@ class virus_filter(object):
 
 	def filter_date(self):
 		if self.date_spec=='full':
-			self.viruses = filter(lambda v: re.match(r'\d\d\d\d-\d\d-\d\d', v['date']) != None, self.viruses)
+			self.viruses = filter(lambda v: re.match(r'\d\d\d\d-\d\d-\d\d', v['date']) is not None, self.viruses)
 		elif self.date_spec=='year':
-			self.viruses = filter(lambda v: re.match(r'\d\d\d\d', v['date']) != None, self.viruses)
+			self.viruses = filter(lambda v: re.match(r'\d\d\d\d', v['date']) is not None, self.viruses)
+			for v in self.viruses:
+				if re.match(r'\d\d\d\d-\d\d-\d\d', v['date']) is None:
+					v['date'] = v['date'][:4]
 
 	def subsample(self, years_back, viruses_per_month, prioritize = None, all_priority=False, region_specific = True):
 		'''

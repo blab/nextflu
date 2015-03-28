@@ -1,0 +1,94 @@
+A/New Caledonia/20/1999
+A/Madagascar/57794/2000
+A/USSR/92/1977
+A/Florida/4/2004
+A/Arizona/14/1978
+A/Lackland/3/1978
+A/Lackland/7/1978
+A/Chile/1/1983
+A/India/6263/1980
+A/Singapore/6/1986
+A/California/45/1978
+A/Poitiers/2168/2003
+A/Solomon Islands/3/2006
+A/Hong Kong/948/2006
+A/England/333/1980
+A/Denmark/3/2005
+A/Denmark/22/2005
+A/Finland/4/2007
+A/Madagascar/2121/2007
+A/Hong Kong/2652/2006
+A/Johannesburg/67/2007
+A/Fukushima/141/2006
+A/Ulaanbaatar/116/2007
+A/Ulaanbaatar/2212/2007
+A/Peru/1169/2007
+A/Incheon/2647/2007
+A/Johannesburg/141/2007
+A/Hong Kong/2387/2007
+A/Hong Kong/2613/2007
+A/Bangkok/1544/2004
+A/Hong Kong/35/2006
+A/Hong Kong/4580/2004
+A/Hong Kong/4596/2004
+A/Hong Kong/4922/2005
+A/St Petersburg/49/2003
+A/Beijing/262/1995
+A/Paris/577/2007
+A/Perth/200/2008
+A/Brisbane/59/2007
+A/Hong Kong/1870/2008
+A/Siena/10/1989
+A/Siena/9/1989
+A/Wisconsin/13/2009
+A/Paraguay/61/2009
+A/Hong Kong/1988/2009
+A/Moscow/2/2009
+A/Ghana/FS-09-791/2009
+A/Ghana/FS-09-718/2009
+A/Marseille/1148/2009
+A/Menya/1386/2009
+A/Singapore/10/2009
+A/Seychelles/2239/2008
+A/Netherlands/345/2007
+A/Hong Kong/1856/2008
+A/Zagreb/1982/2008
+A/Minsk/179/2008
+A/Mauritius/403/2008
+A/Ghana/152/2008
+A/Ghana/163/2008
+A/Hong Kong/3176/2008
+A/Paris/781/2008
+A/Rabat/109/2009
+A/Marrakech/510/2009
+A/Gyeonggibuk/4500/2008
+A/Incheon/4532/2008
+A/Berlin/59/2008
+A/Iceland/8064/2009
+A/Iceland/8599/2009
+A/Hong Kong/18106/2009
+A/USSR/90/1977
+A/Hong Kong/33597/2009
+A/Annecy/2013/2009
+A/Hong Kong/34079/2009
+A/Montpellier/2051/2009
+A/Madagascar/6054/2009
+A/Madagascar/6081/2009
+A/Mauritius/543/2007
+A/Johannesburg/452/2005
+A/Egypt/136/2005
+A/Thessaloniki/24/2005
+A/Netherlands/128/2004
+A/Reunion/1409/2003
+A/Morocco/275/2004
+A/Hungary/2/2003
+A/Dakar/88/2003
+A/Iceland/123/2003
+A/England/2/2002
+A/Johannesburg/5/2002
+A/Egypt/96/2002
+A/Hong Kong/1252/2000
+A/Egypt/10/2007
+A/Denmark/56/2003
+A/Latvia/686/2002
+A/Stockholm/13/2002
