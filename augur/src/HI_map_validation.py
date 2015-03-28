@@ -108,15 +108,13 @@ if __name__=="__main__":
 	if params.flutype=='H3N2':
 		from H3N2_process import *
 		flu_process = H3N2_process
-		params.__dict__['HI_fname']='source-data/HI_titers.txt'	
 	elif params.flutype=='H1N1pdm':
 		from H1N1pdm_process import *
 		flu_process = H1N1pdm_process
-		params.__dict__['HI_fname']='source-data/H1N1pdm_HI_titers.txt'	
 	elif params.flutype=='H1N1':
 		from H1N1_process import *
 		flu_process = H1N1_process
-		params.__dict__['HI_fname']='source-data/H1N1_HI_titers.txt'	
+	params.__dict__['HI_fname']='source-data/'+params.flutype+'_HI_titers.txt'	
 
 	dHI_list = validation_figures(params)
 	#grid = [0.1, 0.3, 1, 3, 10]

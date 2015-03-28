@@ -19,7 +19,7 @@ virus_config = {
 	'alignment_file':'data/gisaid_epiflu_sequence.fasta',
 	'fasta_fields':{0:'strain', 1:'accession', 3:'passage', 5:'date' },
 	'outgroup':'A/Beijing/32/1992',
-	'force_include':'source-data/HI_strains.txt',
+	'force_include':'source-data/H3N2_HI_strains.txt',
 	'force_include_all':True,
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
 	'cds':[48,None], # define the HA1 start i n 0 numbering
@@ -43,6 +43,7 @@ virus_config = {
 	'pc':1e-3, #pseudocount for frequencies 
 	'extra_pivots': 6,  # number of pivot point for or after the last observations of a mutations
 	'inertia':0.7,		# fraction of frequency change carry over in the stiffness term
+	'HI_fname':'source-data/H1N1_HI_titers.txt',
 }
 
 

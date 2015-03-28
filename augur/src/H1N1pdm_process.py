@@ -40,9 +40,9 @@ virus_config = {
 	'pc':1e-3, #pseudocount for frequencies 
 	'extra_pivots': 6,  # number of pivot point for or after the last observations of a mutations
 	'inertia':0.7,		# fraction of frequency change carry over in the stiffness term
-	'auspice_frequency_name':'../auspice/data/H1N1pdm_frequencies.json',
-	'auspice_sequences_name':'../auspice/data/H1N1pdm_sequences.json',
-	'auspice_tree_name':'../auspice/data/H1N1pdm_tree.json',
+	'auspice_frequency_fname':'../auspice/data/H1N1pdm_frequencies.json',
+	'auspice_sequences_fname':'../auspice/data/H1N1pdm_sequences.json',
+	'auspice_tree_fname':'../auspice/data/H1N1pdm_tree.json',
 	'HI_fname':'source-data/H1N1pdm_HI_titers.txt',
 }
 
