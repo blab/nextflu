@@ -258,8 +258,7 @@ class virus_frequencies(object):
 
 	def determine_mutation_frequencies(self, regions=None, threshold=0.01):
 		'''
-		determine the abundance of all single nucleotide variants and estimate the 
-		frequency trajectory of the top 10, plot those optionally
+		determine the abundance of all single position variants  
 		'''
 		sub_aln = self.get_sub_alignment(regions)
 		mutation_frequencies = {"pivots":list(self.pivots)}
@@ -275,8 +274,7 @@ class virus_frequencies(object):
 
 	def determine_genotype_frequencies(self, regions=None, threshold=0.1):
 		'''
-		determine the abundance of all single nucleotide variants and estimate the 
-		frequency trajectory of the top 10, plot those optionally
+		determine the abundance of all two mutation combinations 
 		'''
 		sub_aln = self.get_sub_alignment(regions)
 		genotype_frequencies = {"pivots":list(self.pivots)}

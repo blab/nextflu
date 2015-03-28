@@ -19,7 +19,7 @@ virus_config = {
 	'alignment_file':'data/gisaid_epiflu_sequence.fasta',
 	'fasta_fields':{0:'strain', 1:'accession', 3:'passage', 5:'date' },
 	'outgroup':'A/Beijing/32/1992',
-	'force_include':'source-data/HI_strains.txt',
+	'force_include':'source-data/H3N2_HI_strains.txt',
 	'force_include_all':True,
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
 	'cds':[48,None], # define the HA1 start i n 0 numbering
@@ -43,6 +43,7 @@ virus_config = {
 	'pc':1e-3, #pseudocount for frequencies 
 	'extra_pivots': 6,  # number of pivot point for or after the last observations of a mutations
 	'inertia':0.7,		# fraction of frequency change carry over in the stiffness term
+	'HI_fname':'source-data/H1N1_HI_titers.txt',
 }
 
 
@@ -248,7 +249,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 			self.filter()
 			if self.force_include is not None and os.path.isfile(self.force_include):
 				with open(self.force_include) as infile:
-					forced_strains = [line.strip().lower() for line in infile]
+					forced_strains = [line.strip().upper() for line in infile]
 			else:
 				forced_strains = []
 			self.subsample(years_back, viruses_per_month, 
@@ -290,7 +291,8 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 		if 'export' in steps:
 			self.temporal_regional_statistics()
 			# exporting to json, including the H3N2 specific fields
-			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'dHI', 'cHI', 'HI_titers', 'serum', 'HI_info', 'avidity', 'potency'])
+			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'dHI', 'cHI', 'HI_titers', 'serum', 
+				'HI_info', 'avidity', 'potency', 'aa_muts'], annotations = ['3c3.a', '3c2.a'])
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies', 'HI', 'export']

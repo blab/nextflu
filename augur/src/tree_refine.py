@@ -25,10 +25,13 @@ class tree_refine(object):
 		'''
 		self.node_lookup = {node.taxon.label:node for node in self.tree.leaf_iter()}
 		self.node_lookup.update({node.taxon.label.lower():node for node in self.tree.leaf_iter()})
-		self.remove_outgroup()
+		self.node_lookup.update({node.taxon.label.upper():node for node in self.tree.leaf_iter()})
 		self.ladderize()
 		self.collapse()
+		self.remove_outgroup()
 		self.translate_all()
+		self.add_nuc_mutations()
+		self.add_aa_mutations()
 		self.add_node_attributes()
 		self.reduce()
 		self.layout()
@@ -60,9 +63,13 @@ class tree_refine(object):
 	def collapse(self):
 		"""Collapse edges without mutations to polytomies"""
 		for edge in self.tree.postorder_edge_iter():
-			if edge.tail_node is not None:
-				if edge.is_internal() and edge.head_node.seq==edge.tail_node.seq:
-					edge.collapse()
+			if edge.tail_node is not None and edge.is_internal():
+				if hasattr(edge.head_node, 'seq') and hasattr(edge.tail_node, 'seq'):
+					if edge.head_node.seq==edge.tail_node.seq:
+						edge.collapse()
+				else:
+					if edge.length < 0.00001:
+						edge.collapse()
 
 	def reduce(self):
 		"""
@@ -93,6 +100,22 @@ class tree_refine(object):
 		for node in self.tree.postorder_node_iter():
 			node.aa_seq = translate(node.seq[self.cds[0]:self.cds[1]])
 
+	def add_aa_mutations(self):
+		if hasattr(self.tree.seed_node, 'aa_seq'):
+			for node in self.tree.postorder_internal_node_iter():
+				for child in node.child_nodes():
+					child.aa_muts = ','.join([anc+str(pos)+der for pos,anc, der in 
+							zip(range(1,len(node.aa_seq)+1), node.aa_seq, child.aa_seq) if anc!=der])
+			self.tree.seed_node.aa_muts=""
+		else:
+			print "no translation available"
+
+	def add_nuc_mutations(self):
+		for node in self.tree.postorder_internal_node_iter():
+			for child in node.child_nodes():
+				child.nuc_muts = ','.join([anc+str(pos)+der for pos,anc, der in 
+						zip(range(1,len(node.seq)+1), node.seq, child.seq) if anc!=der])
+		self.tree.seed_node.nuc_muts=""
 
 	def get_yvalue(self, node):
 		"""Return y location based on recursive mean of daughter locations"""
