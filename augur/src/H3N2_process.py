@@ -29,9 +29,9 @@ virus_config = {
 	'aggregate_regions': [  ("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
 							("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ],
 	'frequency_stiffness':10.0,
-	'time_interval':(2005.0, 2015.1),
-	'pivots_per_year':12.0,
-	'min_freq':0.01,
+	'time_interval':(1990.0, 2015.1),
+	'pivots_per_year':3.0,
+	'min_freq':0.05,
 	# define relevant clades in canonical HA1 numbering (+1)
 	'clade_designations': { "3c3.a":[(128,'A'), (142,'G'), (159,'S')],
 						   "3c3":  [(128,'A'), (142,'G'), (159,'F')],
@@ -43,7 +43,7 @@ virus_config = {
 	'pc':1e-3, #pseudocount for frequencies 
 	'extra_pivots': 6,  # number of pivot point for or after the last observations of a mutations
 	'inertia':0.7,		# fraction of frequency change carry over in the stiffness term
-	'HI_fname':'source-data/H1N1_HI_titers.txt',
+	'HI_fname':'source-data/H3N2_HI_titers.txt',
 }
 
 
