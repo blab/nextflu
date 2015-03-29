@@ -11,19 +11,20 @@ import numpy as np
 
 class process(virus_frequencies):
 	"""generic template class for processing virus sequences into trees"""
-	def __init__(self, prefix = 'data/', auspice_frequency_fname ='../auspice/data/frequencies.json',
+	def __init__(self, prefix = 'data/', time_interval = (2012.0, 2015.0), auspice_frequency_fname ='../auspice/data/frequencies.json', 
 				auspice_sequences_fname='../auspice/data/sequences.json', auspice_tree_fname='../auspice/data/tree.json', min_freq = 0.01, **kwargs):
-		virus_frequencies.__init__(self, **kwargs)
 		self.tree_fname = prefix+'tree.pkl'
 		self.virus_fname = prefix+'virus.pkl'
 		self.frequency_fname = prefix+'frequencies.pkl'
 		self.aa_seq_fname = prefix+'aa_seq.pkl'
 		self.min_freq = min_freq
+		self.time_interval = tuple(time_interval)
 		self.auspice_tree_fname = auspice_tree_fname
 		self.auspice_sequences_fname = auspice_sequences_fname
 		self.auspice_frequency_fname = auspice_frequency_fname
 		self.nuc_alphabet = 'ACGT-N'
 		self.aa_alphabet = 'ACDEFGHIKLMNPQRSTVWY*X'
+		virus_frequencies.__init__(self, **kwargs)
 
 	def dump(self):
 		import cPickle

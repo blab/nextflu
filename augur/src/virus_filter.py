@@ -7,6 +7,7 @@
 import os, re, time, datetime, csv, sys
 from collections import defaultdict
 from Bio import SeqIO
+import numpy as np
 
 class virus_filter(object):
 
@@ -70,7 +71,7 @@ class virus_filter(object):
 		elif self.date_spec=='year':
 			self.viruses = filter(lambda v: re.match(r'\d\d\d\d', v['date']) != None, self.viruses)
 
-	def subsample(self, years_back, viruses_per_month, prioritize = None, all_priority=False, region_specific = True):
+	def subsample(self, viruses_per_month, prioritize = None, all_priority=False, region_specific = True):
 		'''
 		Subsample x viruses per month
 		Take from beginning of list - this will prefer longer sequences
@@ -90,8 +91,8 @@ class virus_filter(object):
 		other_viruses = self.viruses_by_date_region([v for v in self.viruses if v['strain'].lower() not in prioritize]) 
 
 		filtered_viruses = []
-		first_year = datetime.datetime.today().year - years_back
-		first_month = datetime.datetime.today().month
+		first_year = int(np.floor(self.time_interval[0]))
+		first_month = int((self.time_interval[0]-first_year)*12)
 		regions = list(set([v['region'] for v in self.viruses]))
 
 		print "Filtering between " + str(first_month) + "/" + str(first_year), "and today"
@@ -100,10 +101,12 @@ class virus_filter(object):
 		for m in range(first_month,13):
 			filtered_viruses.extend(select_func(priority_viruses,other_viruses, 
 												y, m, viruses_per_month, regions, all_priority=all_priority))
-		for y in range(first_year+1,datetime.datetime.today().year+1):
+		for y in range(first_year+1,int(np.floor(self.time_interval[1]))+1):
 			for m in range(1,13):
 				filtered_viruses.extend(select_func(priority_viruses,other_viruses, 
 												y, m, viruses_per_month, regions, all_priority=all_priority))
+				if y+float(m)/12.0>self.time_interval[1]:
+					break
 		if self.outgroup is not None:
 			filtered_viruses.append(self.outgroup)
 			print len(filtered_viruses), "with outgroup"
