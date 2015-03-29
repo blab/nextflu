@@ -211,9 +211,9 @@ class flu_filter(virus_filter):
 		print len(self.viruses), "with proper strain names"
 		self.filter_passage()
 		print len(self.viruses), "without egg passage"
+		self.filter_generic(prepend_strains = self.vaccine_strains)	
 		self.filter_geo(prune_unknown=False)
 		print len(self.viruses), "with geographic information"
-		self.filter_generic(prepend_strains = self.vaccine_strains)	
 		
 	def add_gisaid_metadata(self):
 		for v in self.viruses:
@@ -258,7 +258,7 @@ class flu_filter(virus_filter):
 			v['region'] = 'Unknown'
 			if v['country'] in country_to_region:
 				v['region'] = country_to_region[v['country']]
-		
+
 		if prune_unknown:
 			self.viruses = filter(lambda v: v['region'] != 'Unknown', self.viruses)
 
