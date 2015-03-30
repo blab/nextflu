@@ -177,6 +177,7 @@ if __name__=="__main__":
 	parser.add_argument('-y', '--years_back', type = int, default=3, help='number of past years to sample sequences from')
 	parser.add_argument('-v', '--viruses_per_month', type = int, default = 50, help='number of viruses sampled per month')
 	parser.add_argument('-r', '--raxml_time_limit', type = float, default = 1.0, help='number of hours raxml is run')
+	parser.add_argument('--interval', nargs = '+', type = float, default = None, help='interval from which to pull sequences')
 	parser.add_argument('--prefix', type = str, default = 'data/H1N1_', help='path+prefix of file dumps')
 	parser.add_argument('--test', default = False, action="store_true",  help ="don't run the pipeline")
 	parser.add_argument('--start', default = 'filter', type = str,  help ="start pipeline at virus selection")
