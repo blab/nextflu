@@ -132,7 +132,7 @@ class H1N1_process(process, H1N1_filter, H1N1_clean, H1N1_refine, HI_tree, fitne
 					forced_strains = [line.strip().upper() for line in infile]
 			else:
 				forced_strains = []
-			self.subsample(years_back, viruses_per_month, 
+			self.subsample(viruses_per_month, 
 				prioritize=forced_strains, all_priority=self.force_include_all, 
 				region_specific = self.max_global)
 			self.dump()
