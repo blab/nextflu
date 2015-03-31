@@ -15,17 +15,13 @@ class process(virus_frequencies):
 				auspice_sequences_fname='../auspice/data/sequences.json', 
 				auspice_tree_fname='../auspice/data/tree.json', 
 				min_freq = 0.01, 
-				mutation_threshold = 0.01,
-				genotype_threshold = 0.1,
 				**kwargs):
 		virus_frequencies.__init__(self, **kwargs)
 		self.tree_fname = prefix+'tree.pkl'
 		self.virus_fname = prefix+'virus.pkl'
 		self.frequency_fname = prefix+'frequencies.pkl'
 		self.aa_seq_fname = prefix+'aa_seq.pkl'
-		self.min_freq = min_freq
-		self.mutation_threshold = mutation_threshold
-		self.genotype_threshold = genotype_threshold		
+		self.min_freq = min_freq		
 		self.auspice_tree_fname = auspice_tree_fname
 		self.auspice_sequences_fname = auspice_sequences_fname
 		self.auspice_frequency_fname = auspice_frequency_fname
@@ -273,7 +269,7 @@ class process(virus_frequencies):
 
 	def estimate_frequencies(self, tasks = ['mutations','genotypes', 'clades', 'tree']):
 		if 'mutations' in tasks:
-			self.all_mutation_frequencies(threshold = self.mutation_threshold) 
+			self.all_mutation_frequencies() 
 		if 'genotypes' in tasks:
 			self.all_genotypes_frequencies(threshold = self.genotype_threshold) 
 		if 'clades' in tasks:

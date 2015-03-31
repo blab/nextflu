@@ -286,17 +286,18 @@ if __name__=="__main__":
 	parser = argparse.ArgumentParser(description='Process virus sequences, build tree, and prepare of web visualization')
 	parser.add_argument('-y', '--years_back', type = int, default=3, help='number of past years to sample sequences from')
 	parser.add_argument('-v', '--viruses_per_month', type = int, default = 50, help='number of viruses sampled per month')
-	parser.add_argument('-r', '--raxml_time_limit', type = float, default = 1.0, help='number of hours raxml is run')
-	parser.add_argument('--mutation_threshold', type = float, default = 0.01, help='threshold for mutation frequencies')
-	parser.add_argument('--genotype_threshold', type = float, default = 0.1, help='threshold for genotype frequencies')		
+	parser.add_argument('-r', '--raxml_time_limit', type = float, default = 1.0, help='number of hours raxml is run')	
 	parser.add_argument('--prefix', type = str, default = 'data/', help='path+prefix of file dumps')
 	parser.add_argument('--test', default = False, action="store_true",  help ="don't run the pipeline")
 	parser.add_argument('--start', default = 'filter', type = str,  help ="start pipeline at virus selection")
 	parser.add_argument('--stop', default = 'export', type=str,  help ="run to end")
+	parser.add_argument('--skip_frequencies', default = False, action="store_true",  help ="don't run frequency estimation")	
 	params = parser.parse_args()
 	params.cds = (48,None)
 
 	steps = all_steps[all_steps.index(params.start):(all_steps.index(params.stop)+1)]
+	if params.skip_frequencies:
+		steps.remove("frequencies")
 	# add all arguments to virus_config (possibly overriding)
 	virus_config.update(params.__dict__)
 	# pass all these arguments to the processor: will be passed down as kwargs through all classes
