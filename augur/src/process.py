@@ -271,7 +271,7 @@ class process(virus_frequencies):
 		if 'mutations' in tasks:
 			self.all_mutation_frequencies() 
 		if 'genotypes' in tasks:
-			self.all_genotypes_frequencies(threshold = self.genotype_threshold) 
+			self.all_genotypes_frequencies() 
 		if 'clades' in tasks:
 			self.all_clade_frequencies() 
 		if 'tree' in tasks:
