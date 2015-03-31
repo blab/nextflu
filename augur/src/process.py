@@ -98,13 +98,13 @@ class process(virus_frequencies):
 
 		if hasattr(self,"clade_designations"):
 			from scipy.stats import scoreatpercentile
-			# calculate x and y value of each each (30% y, 95% x)
-			clade_xval = {clade: scoreatpercentile([x.xvalue for x in self.tree.leaf_iter()
-													if all([x.aa_seq[pos-1]==aa for pos, aa in gt])], per = 99)
-							for clade, gt in self.clade_designations.iteritems()}
-			clade_yval = {clade: scoreatpercentile([x.yvalue for x in self.tree.leaf_iter()
-													if all([x.aa_seq[pos-1]==aa for pos, aa in gt])], per = 40)
-							for clade, gt in self.clade_designations.iteritems()}
+			# find basal node of clade and assign clade x and y values based on this basal node
+			clade_xval = {}
+			clade_yval = {}
+			for clade, gt in self.clade_designations.iteritems():
+				base_node = sorted((x for x in self.tree.postorder_node_iter() if all([x.aa_seq[pos-1]==aa for pos, aa in gt])), key=lambda x: x.xvalue)[0]
+				clade_xval[clade] = base_node.xvalue
+				clade_yval[clade] = base_node.yvalue
 			# append clades, coordinates and genotype to meta 
 			self.tree_json["clade_annotations"] = [(clade, clade_xval[clade],clade_yval[clade], 
 								"/".join([str(pos)+aa for pos, aa in gt]))

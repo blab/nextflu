@@ -373,7 +373,7 @@ d3.json("data/tree.json", function(error, root) {
 
 	var xScale = d3.scale.linear()
 		.domain([d3.min(xValues), d3.max(xValues)])
-		.range([10, width-50]);
+		.range([10, width-10]);
 
 	var yScale = d3.scale.linear()
 		.domain([d3.min(yValues), d3.max(yValues)])
@@ -988,8 +988,16 @@ d3.json("data/tree.json", function(error, root) {
 				return (d.source.x).toString() + "," + d.source.y.toString() + " "
 				+ (d.source.x).toString() + "," + d.target.y.toString() + " "
 				+ (d.target.x).toString() + "," + d.target.y.toString()
-			});			
-	
+			});
+			
+		treeplot.selectAll(".annotation").data(clades)
+			.attr("x", function(d) {
+				return xScale(d[1]) - 8;
+			})
+			.attr("y", function(d) {
+				return yScale(d[2]) - 8;
+			});
+
 	}
 	
 	function colorByGenotype() {
@@ -1090,10 +1098,16 @@ d3.json("data/tree.json", function(error, root) {
 		.enter()
 		.append("text")
 		.attr("class", "annotation")
-		.attr("x", function(d) {return width;})
-		.attr("y", function(d) {return yScale(d[2])})
+		.attr("x", function(d) {
+			return xScale(d[1]) - 8;
+		})
+		.attr("y", function(d) {
+			return yScale(d[2]) - 8;
+		})
 		.style("text-anchor", "end")
-		.text(function (d) {return d[0];});
+		.text(function (d) {
+			return d[0];
+		});
 
 
 });
