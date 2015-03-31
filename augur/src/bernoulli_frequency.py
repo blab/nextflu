@@ -203,7 +203,7 @@ class frequency_estimator(object):
 
 
 class virus_frequencies(object):
-	def __init__(self, time_interval = (2012.0, 2015.1) ,
+	def __init__(self, time_interval = (2012.0, 2015.1),
 				stiffness = 10.0, pivots_per_year = 12.0, 
 				clade_designations={}, aggregate_regions = None,
 				extra_pivots = 5, **kwarks):
