@@ -276,7 +276,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 		if 'frequencies' in steps:
 			print "--- Estimating frequencies at " + time.strftime("%H:%M:%S") + " ---"
 			self.determine_variable_positions()
-			self.estimate_frequencies()
+			self.estimate_frequencies(tasks = ['mutations', 'tree'])
 			self.dump()
 		if 'HI' in steps:
 			print "--- Adding HI titers to the tree " + time.strftime("%H:%M:%S") + " ---"
