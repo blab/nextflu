@@ -83,7 +83,7 @@ class process(virus_frequencies):
 				elems[node.clade] = node.aa_seq
 		write_json(elems, self.auspice_sequences_fname, indent=None)
 
-		print "writing tree"
+		print "Writing tree"
 		self.tree_json = dendropy_to_json(self.tree.seed_node, tree_fields)
 		for node in all_descendants(self.tree_json):
 			for attr in tree_pop_list:
@@ -97,15 +97,15 @@ class process(virus_frequencies):
 						node["freq"][reg] = "undefined"				
 
 		if hasattr(self,"clade_designations"):
-			from scipy.stats import scoreatpercentile
 			# find basal node of clade and assign clade x and y values based on this basal node
 			clade_xval = {}
 			clade_yval = {}
 			for clade, gt in self.clade_designations.iteritems():
+				print "Annotating clade", clade
 				base_node = sorted((x for x in self.tree.postorder_node_iter() if all([x.aa_seq[pos-1]==aa for pos, aa in gt])), key=lambda x: x.xvalue)[0]
 				clade_xval[clade] = base_node.xvalue
 				clade_yval[clade] = base_node.yvalue
-			# append clades, coordinates and genotype to meta 
+			# append clades, coordinates and genotype to meta
 			self.tree_json["clade_annotations"] = [(clade, clade_xval[clade],clade_yval[clade], 
 								"/".join([str(pos)+aa for pos, aa in gt]))
 							for clade, gt in self.clade_designations.iteritems() if clade in annotations
