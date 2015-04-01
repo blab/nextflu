@@ -40,9 +40,7 @@ virus_config = {
 class process(virus_frequencies):
 	"""generic template class for processing virus sequences into trees"""
 	def __init__(self, prefix = 'data/', time_interval = (2012.0, 2015.0), 
-	             auspice_frequency_fname ='../auspice/data/frequencies.json', 
-				 auspice_sequences_fname='../auspice/data/sequences.json', 
-				 auspice_tree_fname='../auspice/data/tree.json', 
+	             auspice_prefix = '', 
 				 min_mutation_frequency = 0.01, min_genotype_frequency = 0.1, **kwargs):
 		self.tree_fname = prefix+'tree.pkl'
 		self.virus_fname = prefix+'virus.pkl'
@@ -52,9 +50,10 @@ class process(virus_frequencies):
 		self.min_genotype_frequency = min_genotype_frequency
 		self.time_interval = tuple(time_interval)
 
-		self.auspice_tree_fname = auspice_tree_fname
-		self.auspice_sequences_fname = auspice_sequences_fname
-		self.auspice_frequency_fname = auspice_frequency_fname
+		self.auspice_tree_fname = auspice_prefix + 'tree.json'
+		self.auspice_sequences_fname = auspice_prefix + 'sequences.json'
+		self.auspice_frequency_fname = auspice_prefix + 'frequencies.json'
+		self.auspice_meta_fname = auspice_prefix + 'meta.json'
 		self.nuc_alphabet = 'ACGT-N'
 		self.aa_alphabet = 'ACDEFGHIKLMNPQRSTVWY*X'
 		virus_frequencies.__init__(self, **kwargs)
@@ -167,8 +166,7 @@ class process(virus_frequencies):
 			meta["regions"] = self.regions
 			meta["virus_stats"] = [ [str(y)+'-'+str(m)] + [self.date_region_count[(y,m)][reg] for reg in self.regions]
 									for y,m in sorted(self.date_region_count.keys()) ]
-		meta_fname = "../auspice/data/meta.json"
-		write_json(meta, meta_fname, indent=0)
+		write_json(meta, self.auspice_meta_fname, indent=0)
 
 	def align(self):
 		'''
