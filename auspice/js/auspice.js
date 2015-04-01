@@ -272,8 +272,8 @@ var virusTooltip = d3.tip()
 		if (typeof d.date != "undefined") {
 			string += "<br>Date: " + d.date;
 		}
-		if (typeof d.accession != "undefined") {
-			string += "<br>Isolate ID: " + d.accession;
+		if (typeof d.isolate_id != "undefined") {
+			string += "<br>Isolate ID: " + d.isolate_id;
 		}
 		if (typeof d.lab != "undefined") {
 			string += "<br>Orig. lab: " + d.lab;
@@ -742,7 +742,7 @@ d3.json("data/tree.json", function(error, root) {
 		})
 		.on('click', function(d) {
 			if ((typeof d.db != "undefined") && (d.db == "GISAID") && (typeof d.accession != "undefined")) {
-				var url = "http://gisaid.org/EPI/"+d.accession.substring(3);
+				var url = "http://gisaid.org/EPI/"+d.accession;
 				console.log("opening url "+url);
 				var win = window.open(url, '_blank');
   				win.focus();

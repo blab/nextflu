@@ -37,7 +37,7 @@ class virus_filter(object):
 			print fasta, "not found"
 		else:
 			for record in SeqIO.parse(handle, "fasta"):
-				words = record.description.replace(">","").replace(" ","").split('|')
+				words = map(lambda x:x.strip(),record.description.replace(">","").split('|'))
 				v = {key:words[ii] for ii, key in self.fasta_fields.iteritems()}
 				v['seq']= str(record.seq)
 				viruses.append(v)
