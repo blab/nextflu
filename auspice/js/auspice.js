@@ -278,7 +278,7 @@ var virusTooltip = d3.tip()
 		}
 		if (typeof d.lab != "undefined") {
 			string += "<br>Orig. lab: " + d.lab.substring(0,30);
-			if (d.lab.substring.length>30) string+='...';
+			if (d.lab.length>30) string+='...';
 		}
 		if (typeof d.region != "undefined") {
 			string += "<br>Region: " + d.region.replace(/([A-Z])/g, ' $1');
