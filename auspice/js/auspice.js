@@ -275,6 +275,9 @@ var virusTooltip = d3.tip()
 		if (typeof d.accession != "undefined") {
 			string += "<br>Isolate ID: " + d.accession;
 		}
+		if (typeof d.lab != "undefined") {
+			string += "<br>Orig. lab: " + d.lab;
+		}
 		if (typeof d.region != "undefined") {
 			string += "<br>Region: " + d.region.replace(/([A-Z])/g, ' $1');
 		}
@@ -287,7 +290,7 @@ var virusTooltip = d3.tip()
 		if (typeof d.rb != "undefined") {
 			string += "<br>Receptor binding distance: " + d.rb;
 		}
-		if (typeof d.rb != "undefined") {
+		if (typeof d.LBI != "undefined") {
 			string += "<br>Local branching index: " + d.LBI.toFixed(3);
 		}
 		return string;
@@ -737,6 +740,14 @@ d3.json("data/tree.json", function(error, root) {
 		.on('mouseover', function(d) {
 			virusTooltip.show(d, this);
 		})
+		.on('click', function(d) {
+			if ((typeof d.db != "undefined") && (d.db == "GISAID") && (typeof d.accession != "undefined")) {
+				var url = "http://gisaid.org/EPI/"+d.accession.substring(3);
+				console.log("opening url "+url);
+				var win = window.open(url, '_blank');
+  				win.focus();
+  			}	
+  		})		
 		.on('mouseout', virusTooltip.hide);
 
 	var vaccineCircles = treeplot.selectAll(".vaccine")
