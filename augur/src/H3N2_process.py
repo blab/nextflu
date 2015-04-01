@@ -32,7 +32,7 @@ virus_config = {
 	'clade_designations': { "3c3.a":[(128,'A'), (142,'G'), (159,'S')],
 						   "3c3":  [(128,'A'), (142,'G'), (159,'F')],
 						   "3c2.a":[(144,'S'), (159,'Y'), (225,'D'), (311,'H'),(489,'N')],
-						   "3c2":  [(144,'N'), (159,'F'),(225,'N'), (489,'N')]
+						   "3c2":  [(144,'N'), (159,'F'),(225,'N'), (489,'N'), (142, 'R')]
 							},
 	'verbose':2, 
 	'tol':1e-4, #tolerance for frequency optimization
@@ -277,7 +277,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 		if 'export' in steps:
 			self.temporal_regional_statistics()
 			# exporting to json, including the H3N2 specific fields
-			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts'], annotations = ['3c3.a', '3c2.a'])
+			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession'], annotations = ['3c3.a', '3c2.a'])
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies', 'export']
@@ -290,6 +290,7 @@ if __name__=="__main__":
 	parser.add_argument('--test', default = False, action="store_true",  help ="don't run the pipeline")
 	parser.add_argument('--start', default = 'filter', type = str,  help ="start pipeline at specified step")
 	parser.add_argument('--stop', default = 'export', type=str,  help ="run to end")
+	parser.add_argument('--skip_frequencies', default = False, action="store_true",  help ="don't run frequency estimation")	
 	params = parser.parse_args()
 	lt = time.localtime()
 	num_date = round(lt.tm_year+(lt.tm_yday-1.0)/365.0,2)
@@ -299,6 +300,8 @@ if __name__=="__main__":
 	dt= params.time_interval[1]-params.time_interval[0]
 	params.pivots_per_year = 12.0 if dt<5 else 6.0 if dt<10 else 3.0
 	steps = all_steps[all_steps.index(params.start):(all_steps.index(params.stop)+1)]
+	if params.skip_frequencies and "frequencies" in steps:
+		steps.remove("frequencies")
 	# add all arguments to virus_config (possibly overriding)
 	virus_config.update(params.__dict__)
 	# pass all these arguments to the processor: will be passed down as kwargs through all classes
