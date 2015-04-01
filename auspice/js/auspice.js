@@ -158,7 +158,7 @@ function calcDfreq(node, freq_ii){
 		for (var i1=0; i1<node.children.length; i1++) {
 			if (node.children[i1].freq["global"] != "undefined"){
 				var tmp_freq = node.children[i1].freq["global"]
-				node.children[i1].dfreq = 0.5*(tmp_freq[freq_ii] - tmp_freq[freq_ii-1])/(tmp_freq[freq_ii] + tmp_freq[freq_ii-1] + 0.05);
+				node.children[i1].dfreq = 0.5*(tmp_freq[freq_ii] - tmp_freq[freq_ii-1])/(tmp_freq[freq_ii] + tmp_freq[freq_ii-1] + 0.1);
 			}else{
 				node.children[i1].dfreq = node.dfreq;
 			}
@@ -272,6 +272,12 @@ var virusTooltip = d3.tip()
 		if (typeof d.date != "undefined") {
 			string += "<br>Date: " + d.date;
 		}
+		if (typeof d.accession != "undefined") {
+			string += "<br>Isolate ID: " + d.accession;
+		}
+		if (typeof d.region != "undefined") {
+			string += "<br>Region: " + d.region.replace(/([A-Z])/g, ' $1');
+		}
 		if (typeof d.ep != "undefined") {
 			string += "<br>Epitope distance: " + d.ep;
 		}
@@ -283,9 +289,6 @@ var virusTooltip = d3.tip()
 		}
 		if (typeof d.rb != "undefined") {
 			string += "<br>Local branching index: " + d.LBI.toFixed(3);
-		}
-		if (typeof d.region != "undefined") {
-			string += "<br>Region: " + d.region.replace(/([A-Z])/g, ' $1');
 		}
 		return string;
 	});
@@ -300,19 +303,12 @@ var linkTooltip = d3.tip()
 		if (typeof d.frequency != "undefined") {
 			string += "Frequency: " + (100 * d.frequency).toFixed(1) + "%"
 			if (d.aa_muts.length){
-				string+="<br>Mutations: "+d.aa_muts;
+				string+="<br>Mutations: "+d.aa_muts.replace(/,/g, ', ');
 			}
 		}
 		return string;
 	});
 treeplot.call(linkTooltip);
-
-//from http://jsfiddle.net/agcsi/w6g5pths/
-c3.chart.fn.update_tick_values = function(tick_values) {
-    var $$ = this.internal, config = $$.config;    
-    config.axis_x_tick_values = tick_values;                            
-    $$.redraw();
-}
 
 width = parseInt(d3.select(".freqplot-container").style("width"), 10);
 var position = "right";
@@ -365,8 +361,12 @@ d3.json("data/tree.json", function(error, root) {
 	var nodes = tree.nodes(root),
 		links = tree.links(nodes);
 	var tree_legend;
-
 	var rootNode = nodes[0];
+	if (typeof rootNode.pivots != "undefined"){
+		var dt = rootNode.pivots[1]-rootNode.pivots[0];		
+	}else{
+		var dt = 1.0/12;
+	}
 	var tips = gatherTips(rootNode, []);
 	var internals = gatherInternals(rootNode, []);
 	calcBranchLength(rootNode);
@@ -391,7 +391,7 @@ d3.json("data/tree.json", function(error, root) {
 
 	var xScale = d3.scale.linear()
 		.domain([d3.min(xValues), d3.max(xValues)])
-		.range([10, width-50]);
+		.range([10, width-10]);
 
 	var yScale = d3.scale.linear()
 		.domain([d3.min(yValues), d3.max(yValues)])
@@ -448,7 +448,7 @@ d3.json("data/tree.json", function(error, root) {
 		.range(colors);
 
 	var dfreqColorScale = d3.scale.linear()
-		.domain([-0.2, -0.15, -0.1,-0.05, 0.0, 0.05,  0.1, 0.15, 0.2])
+		.domain(([-1.0, -0.8, -0.6,-0.4, -0.2, 0, 0.2, 0.4, 0.6, 0.8]).map(function(d){return Math.round(d*dt*100)/100;}))
 		.range(colors);
 
 	var colorScale;
@@ -616,7 +616,10 @@ d3.json("data/tree.json", function(error, root) {
     		}
    			if (colorBy == "genotype") {
     			return "Genotype"
-    		}        			
+    		}
+   			if (colorBy == "dfreq") {
+    			return "Frequency change (per "+Math.round(12*dt)+" month)";
+    		}
     	});
     
 		var tmp_leg = legend.selectAll(".legend")
@@ -993,6 +996,15 @@ d3.json("data/tree.json", function(error, root) {
 				+ (d.source.x).toString() + "," + d.target.y.toString() + " "
 				+ (d.target.x).toString() + "," + d.target.y.toString()
 			});
+			
+		treeplot.selectAll(".annotation").data(clades)
+			.transition().duration(speed)
+			.attr("x", function(d) {
+				return xScale(d[1]) - 8;
+			})
+			.attr("y", function(d) {
+				return yScale(d[2]) - 8;
+			});			
 
 	}	
 
@@ -1029,8 +1041,16 @@ d3.json("data/tree.json", function(error, root) {
 				return (d.source.x).toString() + "," + d.source.y.toString() + " "
 				+ (d.source.x).toString() + "," + d.target.y.toString() + " "
 				+ (d.target.x).toString() + "," + d.target.y.toString()
-			});			
-	
+			});
+			
+		treeplot.selectAll(".annotation").data(clades)
+			.attr("x", function(d) {
+				return xScale(d[1]) - 8;
+			})
+			.attr("y", function(d) {
+				return yScale(d[2]) - 8;
+			});
+
 	}
 	
 	function colorByGenotype() {
@@ -1131,10 +1151,16 @@ d3.json("data/tree.json", function(error, root) {
 		.enter()
 		.append("text")
 		.attr("class", "annotation")
-		.attr("x", function(d) {return width;})
-		.attr("y", function(d) {return yScale(d[2])})
+		.attr("x", function(d) {
+			return xScale(d[1]) - 8;
+		})
+		.attr("y", function(d) {
+			return yScale(d[2]) - 8;
+		})
 		.style("text-anchor", "end")
-		.text(function (d) {return d[0];});
+		.text(function (d) {
+			return d[0];
+		});
 
 
 });
@@ -1164,7 +1190,6 @@ d3.json("data/frequencies.json", function(error, json){
 	while (ticks[ticks.length-1]<pivots[pivots.length-1]){
 		ticks.push(Math.round((ticks[ticks.length-1]+step)*10)/10);
 	}	
-	gt_chart.update_tick_values(ticks);
 	/**
 		parses a genotype string into region and positions
 	**/

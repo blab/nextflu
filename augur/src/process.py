@@ -11,19 +11,23 @@ import numpy as np
 
 class process(virus_frequencies):
 	"""generic template class for processing virus sequences into trees"""
-	def __init__(self, prefix = 'data/', auspice_frequency_fname ='../auspice/data/frequencies.json',
-				auspice_sequences_fname='../auspice/data/sequences.json', auspice_tree_fname='../auspice/data/tree.json', min_freq = 0.01, **kwargs):
-		virus_frequencies.__init__(self, **kwargs)
+	def __init__(self, prefix = 'data/', time_interval = (2012.0, 2015.0), 
+	             auspice_frequency_fname ='../auspice/data/frequencies.json', 
+				 auspice_sequences_fname='../auspice/data/sequences.json', 
+				 auspice_tree_fname='../auspice/data/tree.json', min_freq = 0.01, **kwargs):
 		self.tree_fname = prefix+'tree.pkl'
 		self.virus_fname = prefix+'virus.pkl'
 		self.frequency_fname = prefix+'frequencies.pkl'
 		self.aa_seq_fname = prefix+'aa_seq.pkl'
 		self.min_freq = min_freq
+		self.time_interval = tuple(time_interval)
+
 		self.auspice_tree_fname = auspice_tree_fname
 		self.auspice_sequences_fname = auspice_sequences_fname
 		self.auspice_frequency_fname = auspice_frequency_fname
 		self.nuc_alphabet = 'ACGT-N'
 		self.aa_alphabet = 'ACDEFGHIKLMNPQRSTVWY*X'
+		virus_frequencies.__init__(self, **kwargs)
 
 	def dump(self):
 		import cPickle
@@ -76,7 +80,7 @@ class process(virus_frequencies):
 				elems[node.clade] = node.aa_seq
 		write_json(elems, self.auspice_sequences_fname, indent=None)
 
-		print "writing tree"
+		print "Writing tree"
 		self.tree_json = dendropy_to_json(self.tree.seed_node, tree_fields)
 		for node in all_descendants(self.tree_json):
 			for attr in tree_pop_list:
@@ -90,15 +94,16 @@ class process(virus_frequencies):
 						node["freq"][reg] = "undefined"				
 
 		if hasattr(self,"clade_designations"):
-			from scipy.stats import scoreatpercentile
-			# calculate x and y value of each each (30% y, 95% x)
-			clade_xval = {clade: scoreatpercentile([x.xvalue for x in self.tree.leaf_iter()
-													if all([x.aa_seq[pos-1]==aa for pos, aa in gt])], per = 99)
-							for clade, gt in self.clade_designations.iteritems()}
-			clade_yval = {clade: scoreatpercentile([x.yvalue for x in self.tree.leaf_iter()
-													if all([x.aa_seq[pos-1]==aa for pos, aa in gt])], per = 40)
-							for clade, gt in self.clade_designations.iteritems()}
-			# append clades, coordinates and genotype to meta 
+			# find basal node of clade and assign clade x and y values based on this basal node
+			clade_xval = {}
+			clade_yval = {}
+			for clade, gt in self.clade_designations.iteritems():
+				if clade in annotations:
+					print "Annotating clade", clade
+					base_node = sorted((x for x in self.tree.postorder_node_iter() if all([x.aa_seq[pos-1]==aa for pos, aa in gt])), key=lambda x: x.xvalue)[0]
+					clade_xval[clade] = base_node.xvalue
+					clade_yval[clade] = base_node.yvalue
+			# append clades, coordinates and genotype to meta
 			self.tree_json["clade_annotations"] = [(clade, clade_xval[clade],clade_yval[clade], 
 								"/".join([str(pos)+aa for pos, aa in gt]))
 							for clade, gt in self.clade_designations.iteritems() if clade in annotations

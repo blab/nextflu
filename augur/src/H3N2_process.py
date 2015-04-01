@@ -27,14 +27,12 @@ virus_config = {
 	'aggregate_regions': [  ("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
 							("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ],
 	'frequency_stiffness':10.0,
-	'time_interval':(2012.0, 2015.1),
-	'pivots_per_year':12.0,
 	'min_freq':0.01,
 	# define relevant clades in canonical HA1 numbering (+1)
 	'clade_designations': { "3c3.a":[(128,'A'), (142,'G'), (159,'S')],
 						   "3c3":  [(128,'A'), (142,'G'), (159,'F')],
 						   "3c2.a":[(144,'S'), (159,'Y'), (225,'D'), (311,'H'),(489,'N')],
-						   "3c2":  [(144,'N'), (159,'F'),(225,'N'), (489,'N')]
+						   "3c2":  [(144,'N'), (159,'F'),(225,'N'), (489,'N'), (142, 'R')]
 							},
 	'verbose':2, 
 	'tol':1e-4, #tolerance for frequency optimization
@@ -239,7 +237,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 		H3N2_refine.__init__(self,**kwargs)
 		self.verbose = verbose
 
-	def run(self, steps, years_back=3, viruses_per_month=50, raxml_time_limit = 1.0):
+	def run(self, steps, viruses_per_month=50, raxml_time_limit = 1.0):
 		if 'filter' in steps:
 			print "--- Virus filtering at " + time.strftime("%H:%M:%S") + " ---"
 			self.filter()
@@ -248,7 +246,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 					forced_strains = [line.strip().lower() for line in infile]
 			else:
 				forced_strains = []
-			self.subsample(years_back, viruses_per_month, 
+			self.subsample(viruses_per_month, 
 				prioritize=forced_strains, all_priority=self.force_include_all, 
 				region_specific = self.max_global)
 			self.dump()
@@ -279,7 +277,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 		if 'export' in steps:
 			self.temporal_regional_statistics()
 			# exporting to json, including the H3N2 specific fields
-			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts'], annotations = ['3c3.a', '3c2.a'])
+			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession'], annotations = ['3c3.a', '3c2.a'])
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies', 'export']
@@ -287,14 +285,23 @@ if __name__=="__main__":
 	parser.add_argument('-y', '--years_back', type = int, default=3, help='number of past years to sample sequences from')
 	parser.add_argument('-v', '--viruses_per_month', type = int, default = 50, help='number of viruses sampled per month')
 	parser.add_argument('-r', '--raxml_time_limit', type = float, default = 1.0, help='number of hours raxml is run')
+	parser.add_argument('--interval', nargs = '+', type = float, default = None, help='interval from which to pull sequences')
 	parser.add_argument('--prefix', type = str, default = 'data/', help='path+prefix of file dumps')
 	parser.add_argument('--test', default = False, action="store_true",  help ="don't run the pipeline")
-	parser.add_argument('--start', default = 'filter', type = str,  help ="start pipeline at virus selection")
+	parser.add_argument('--start', default = 'filter', type = str,  help ="start pipeline at specified step")
 	parser.add_argument('--stop', default = 'export', type=str,  help ="run to end")
+	parser.add_argument('--skip_frequencies', default = False, action="store_true",  help ="don't run frequency estimation")	
 	params = parser.parse_args()
-	params.cds = (48,None)
-
+	lt = time.localtime()
+	num_date = round(lt.tm_year+(lt.tm_yday-1.0)/365.0,2)
+	params.time_interval = (num_date-params.years_back, num_date) 
+	if params.interval is not None and len(params.interval)==2 and params.interval[0]<params.interval[1]:
+		params.time_interval = (params.interval[0], params.interval[1])
+	dt= params.time_interval[1]-params.time_interval[0]
+	params.pivots_per_year = 12.0 if dt<5 else 6.0 if dt<10 else 3.0
 	steps = all_steps[all_steps.index(params.start):(all_steps.index(params.stop)+1)]
+	if params.skip_frequencies and "frequencies" in steps:
+		steps.remove("frequencies")
 	# add all arguments to virus_config (possibly overriding)
 	virus_config.update(params.__dict__)
 	# pass all these arguments to the processor: will be passed down as kwargs through all classes
@@ -302,6 +309,5 @@ if __name__=="__main__":
 	if params.test:
 		myH3N2.load()
 	else:
-		myH3N2.run(steps, years_back=virus_config['years_back'], 
-			viruses_per_month = virus_config['viruses_per_month'], 
+		myH3N2.run(steps, viruses_per_month = virus_config['viruses_per_month'], 
 			raxml_time_limit = virus_config['raxml_time_limit'])

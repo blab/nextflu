@@ -203,11 +203,10 @@ class frequency_estimator(object):
 
 
 class virus_frequencies(object):
-	def __init__(self, time_interval = (2012.0, 2015.1) ,
+	def __init__(self, time_interval = (2012.0, 2015.1),
 				stiffness = 10.0, pivots_per_year = 12.0, 
 				clade_designations={}, aggregate_regions = None,
 				extra_pivots = 5, **kwarks):
-		self.time_interval = time_interval
 		self.stiffness = stiffness
 		self.pivots_per_year = pivots_per_year
 		self.clade_designations=clade_designations
@@ -216,6 +215,8 @@ class virus_frequencies(object):
 		self.kwarks = kwarks
 		if not hasattr(self, "frequencies"):
 			self.frequencies = {}
+		if not hasattr(self, "time_interval"):
+			self.time_interval = tuple(time_interval)
 
 	def estimate_genotype_frequency(self, aln, gt, threshold = 10, min_observations = -1):
 		'''
