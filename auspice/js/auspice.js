@@ -289,13 +289,6 @@ var linkTooltip = d3.tip()
 	});
 treeplot.call(linkTooltip);
 
-//from http://jsfiddle.net/agcsi/w6g5pths/
-c3.chart.fn.update_tick_values = function(tick_values) {
-    var $$ = this.internal, config = $$.config;    
-    config.axis_x_tick_values = tick_values;                            
-    $$.redraw();
-}
-
 width = parseInt(d3.select(".freqplot-container").style("width"), 10);
 var position = "right";
 if (width < 600) {
@@ -1146,7 +1139,6 @@ d3.json("data/frequencies.json", function(error, json){
 	while (ticks[ticks.length-1]<pivots[pivots.length-1]){
 		ticks.push(Math.round((ticks[ticks.length-1]+step)*10)/10);
 	}	
-	gt_chart.update_tick_values(ticks);
 	/**
 		parses a genotype string into region and positions
 	**/
