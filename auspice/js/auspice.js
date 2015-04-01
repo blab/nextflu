@@ -254,6 +254,12 @@ var virusTooltip = d3.tip()
 		if (typeof d.date != "undefined") {
 			string += "<br>Date: " + d.date;
 		}
+		if (typeof d.accession != "undefined") {
+			string += "<br>Isolate ID: " + d.accession;
+		}
+		if (typeof d.region != "undefined") {
+			string += "<br>Region: " + d.region.replace(/([A-Z])/g, ' $1');
+		}
 		if (typeof d.ep != "undefined") {
 			string += "<br>Epitope distance: " + d.ep;
 		}
@@ -265,9 +271,6 @@ var virusTooltip = d3.tip()
 		}
 		if (typeof d.rb != "undefined") {
 			string += "<br>Local branching index: " + d.LBI.toFixed(3);
-		}
-		if (typeof d.region != "undefined") {
-			string += "<br>Region: " + d.region.replace(/([A-Z])/g, ' $1');
 		}
 		return string;
 	});
