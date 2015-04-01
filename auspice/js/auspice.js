@@ -282,7 +282,7 @@ var linkTooltip = d3.tip()
 		if (typeof d.frequency != "undefined") {
 			string += "Frequency: " + (100 * d.frequency).toFixed(1) + "%"
 			if (d.aa_muts.length){
-				string+="<br>Mutations: "+d.aa_muts;
+				string+="<br>Mutations: "+d.aa_muts.replace(/,/g, ', ');
 			}
 		}
 		return string;
@@ -952,6 +952,15 @@ d3.json("data/tree.json", function(error, root) {
 				+ (d.source.x).toString() + "," + d.target.y.toString() + " "
 				+ (d.target.x).toString() + "," + d.target.y.toString()
 			});
+			
+		treeplot.selectAll(".annotation").data(clades)
+			.transition().duration(speed)
+			.attr("x", function(d) {
+				return xScale(d[1]) - 8;
+			})
+			.attr("y", function(d) {
+				return yScale(d[2]) - 8;
+			});			
 
 	}	
 

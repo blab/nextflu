@@ -97,10 +97,11 @@ class process(virus_frequencies):
 			clade_xval = {}
 			clade_yval = {}
 			for clade, gt in self.clade_designations.iteritems():
-				print "Annotating clade", clade
-				base_node = sorted((x for x in self.tree.postorder_node_iter() if all([x.aa_seq[pos-1]==aa for pos, aa in gt])), key=lambda x: x.xvalue)[0]
-				clade_xval[clade] = base_node.xvalue
-				clade_yval[clade] = base_node.yvalue
+				if clade in annotations:
+					print "Annotating clade", clade
+					base_node = sorted((x for x in self.tree.postorder_node_iter() if all([x.aa_seq[pos-1]==aa for pos, aa in gt])), key=lambda x: x.xvalue)[0]
+					clade_xval[clade] = base_node.xvalue
+					clade_yval[clade] = base_node.yvalue
 			# append clades, coordinates and genotype to meta
 			self.tree_json["clade_annotations"] = [(clade, clade_xval[clade],clade_yval[clade], 
 								"/".join([str(pos)+aa for pos, aa in gt]))
