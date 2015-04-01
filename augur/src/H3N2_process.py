@@ -296,7 +296,7 @@ if __name__=="__main__":
 	params.cds = (48,None)
 
 	steps = all_steps[all_steps.index(params.start):(all_steps.index(params.stop)+1)]
-	if params.skip_frequencies:
+	if params.skip_frequencies and "frequencies" in steps:
 		steps.remove("frequencies")
 	# add all arguments to virus_config (possibly overriding)
 	virus_config.update(params.__dict__)
