@@ -158,7 +158,7 @@ function calcDfreq(node, freq_ii){
 		for (var i1=0; i1<node.children.length; i1++) {
 			if (node.children[i1].freq["global"] != "undefined"){
 				var tmp_freq = node.children[i1].freq["global"]
-				node.children[i1].dfreq = 0.5*(tmp_freq[freq_ii] - tmp_freq[freq_ii-1])/(tmp_freq[freq_ii] + tmp_freq[freq_ii-1] + 0.05);
+				node.children[i1].dfreq = 0.5*(tmp_freq[freq_ii] - tmp_freq[freq_ii-1])/(tmp_freq[freq_ii] + tmp_freq[freq_ii-1] + 0.1);
 			}else{
 				node.children[i1].dfreq = node.dfreq;
 			}
@@ -361,8 +361,12 @@ d3.json("data/tree.json", function(error, root) {
 	var nodes = tree.nodes(root),
 		links = tree.links(nodes);
 	var tree_legend;
-
 	var rootNode = nodes[0];
+	if (typeof rootNode.pivots != "undefined"){
+		var dt = rootNode.pivots[1]-rootNode.pivots[0];		
+	}else{
+		var dt = 1.0/12;
+	}
 	var tips = gatherTips(rootNode, []);
 	var internals = gatherInternals(rootNode, []);
 	calcBranchLength(rootNode);
@@ -444,7 +448,7 @@ d3.json("data/tree.json", function(error, root) {
 		.range(colors);
 
 	var dfreqColorScale = d3.scale.linear()
-		.domain([-0.2, -0.15, -0.1,-0.05, 0.0, 0.05,  0.1, 0.15, 0.2])
+		.domain(([-1.0, -0.8, -0.6,-0.4, -0.2, 0, 0.2, 0.4, 0.6, 0.8]).map(function(d){return Math.round(d*dt*100)/100;}))
 		.range(colors);
 
 	var colorScale;
