@@ -1,3 +1,5 @@
+var file_prefix = 'H1N1pdm_';
+
 function gatherTips(node, tips) {
 	if (typeof node.children != "undefined") {
 		for (var i=0, c=node.children.length; i<c; i++) {
@@ -22,6 +24,7 @@ function gatherInternals(node, internals) {
 
 function getVaccines(tips) {
 	vaccineChoice = {};
+	vaccineChoice['A/California/07/1999'] = "2009-09-25"; //H1N1pdm CHECK
 	vaccineChoice['A/Fujian/411/2002'] = "2003-09-25";
 	vaccineChoice['A/California/7/2004'] = "2005-02-21";
 	vaccineChoice['A/Wisconsin/67/2005'] = "2006-02-21";
@@ -359,7 +362,7 @@ var gt_chart = c3.generate({
 });
 
 
-d3.json("data/tree.json", function(error, root) {
+d3.json("data/"+file_prefix+"tree.json", function(error, root) {
 
 	if (error) return console.warn(error);
 
@@ -1178,7 +1181,7 @@ d3.json("data/tree.json", function(error, root) {
 
 });
 
-d3.json("data/meta.json", function(error, json) {
+d3.json("data/"+file_prefix+"meta.json", function(error, json) {
 	if (error) return console.warn(error);
 	d3.select("#updated").text(json['updated']);
 	commit_id = json['commit'];
@@ -1190,12 +1193,12 @@ d3.json("data/meta.json", function(error, json) {
 
 });
 
-d3.json("data/sequences.json", function(error, json) {
+d3.json("data/"+file_prefix+"sequences.json", function(error, json) {
 	if (error) return console.warn(error);
 	cladeToSeq=json;
 });
 
-d3.json("data/frequencies.json", function(error, json){
+d3.json("data/"+file_prefix+"frequencies.json", function(error, json){
 	console.log(error);
 	var pivots= json["mutations"]["global"]["pivots"].map(function (d) {return Math.round(parseFloat(d)*100)/100;});
 	var ticks = [Math.round(pivots[0])];

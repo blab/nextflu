@@ -10,7 +10,7 @@ from tree_util import delimit_newick
 import numpy as np
 
 parser = argparse.ArgumentParser(description='Process virus sequences, build tree, and prepare of web visualization')
-parser.add_argument('-y', '--years_back', type = int, default=3, help='number of past years to sample sequences from')
+parser.add_argument('-y', '--years_back', type = float, default=3, help='number of past years to sample sequences from')
 parser.add_argument('-v', '--viruses_per_month', type = int, default = 50, help='number of viruses sampled per month')
 parser.add_argument('-r', '--raxml_time_limit', type = float, default = 1.0, help='number of hours raxml is run')
 parser.add_argument('--interval', nargs = '+', type = float, default = None, help='interval from which to pull sequences')
