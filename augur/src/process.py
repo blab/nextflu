@@ -50,10 +50,10 @@ class process(virus_frequencies):
 		self.min_genotype_frequency = min_genotype_frequency
 		self.time_interval = tuple(time_interval)
 
-		self.auspice_tree_fname = auspice_prefix + 'tree.json'
-		self.auspice_sequences_fname = auspice_prefix + 'sequences.json'
-		self.auspice_frequency_fname = auspice_prefix + 'frequencies.json'
-		self.auspice_meta_fname = auspice_prefix + 'meta.json'
+		self.auspice_tree_fname = 		'../auspice/data/' + auspice_prefix + 'tree.json'
+		self.auspice_sequences_fname = 	'../auspice/data/' + auspice_prefix + 'sequences.json'
+		self.auspice_frequency_fname = 	'../auspice/data/' + auspice_prefix + 'frequencies.json'
+		self.auspice_meta_fname = 		'../auspice/data/' + auspice_prefix + 'meta.json'
 		self.nuc_alphabet = 'ACGT-N'
 		self.aa_alphabet = 'ACDEFGHIKLMNPQRSTVWY*X'
 		virus_frequencies.__init__(self, **kwargs)

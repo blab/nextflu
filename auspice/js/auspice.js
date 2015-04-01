@@ -24,7 +24,7 @@ function gatherInternals(node, internals) {
 
 function getVaccines(tips) {
 	vaccineChoice = {};
-	vaccineChoice['A/California/07/1999'] = "2009-09-25"; //H1N1pdm CHECK
+	vaccineChoice['A/California/07/2009'] = "2009-09-25"; //H1N1pdm CHECK
 	vaccineChoice['A/Fujian/411/2002'] = "2003-09-25";
 	vaccineChoice['A/California/7/2004'] = "2005-02-21";
 	vaccineChoice['A/Wisconsin/67/2005'] = "2006-02-21";
@@ -1240,7 +1240,7 @@ d3.json("data/"+file_prefix+"frequencies.json", function(error, json){
 	function get_frequencies(region, gt){
 		var freq = [];
 		for (var pi=0; pi<pivots.length; pi++){freq[freq.length]=0;}
-		if (json["genotypes"][region][gt]!=undefined) {
+		if ((typeof json["genotypes"] !="undefined") && (json["genotypes"][region][gt]!=undefined)) {
 			console.log(gt+" found as genotype");
 			for (var pi=0; pi<freq.length; pi++){
 				freq[pi]+=json["genotypes"][region][gt][pi];
