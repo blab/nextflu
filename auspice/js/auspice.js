@@ -153,12 +153,13 @@ function calcLBI(node, allnodes){
 /**
  * for each node, calculate the derivative of the frequency tranjectory. if none exists, copy parent
 **/
+var dfreq_dn = 2;
 function calcDfreq(node, freq_ii){
 	if (typeof node.children != "undefined") {
 		for (var i1=0; i1<node.children.length; i1++) {
 			if (node.children[i1].freq["global"] != "undefined"){
 				var tmp_freq = node.children[i1].freq["global"]
-				node.children[i1].dfreq = 0.5*(tmp_freq[freq_ii] - tmp_freq[freq_ii-1])/(tmp_freq[freq_ii] + tmp_freq[freq_ii-1] + 0.1);
+				node.children[i1].dfreq = 0.5*(tmp_freq[freq_ii] - tmp_freq[freq_ii-dfreq_dn])/(tmp_freq[freq_ii] + tmp_freq[freq_ii-dfreq_dn] + 0.1);
 			}else{
 				node.children[i1].dfreq = node.dfreq;
 			}
@@ -448,7 +449,7 @@ d3.json("data/tree.json", function(error, root) {
 		.range(colors);
 
 	var dfreqColorScale = d3.scale.linear()
-		.domain(([-1.0, -0.8, -0.6,-0.4, -0.2, 0, 0.2, 0.4, 0.6, 0.8]).map(function(d){return Math.round(d*dt*100)/100;}))
+		.domain(([-1.0, -0.8, -0.6,-0.4, -0.2, 0, 0.2, 0.4, 0.6, 0.8]).map(function(d){return Math.round(d*dt*dfreq_dn*100)/100;}))
 		.range(colors);
 
 	var colorScale;
@@ -618,7 +619,7 @@ d3.json("data/tree.json", function(error, root) {
     			return "Genotype"
     		}
    			if (colorBy == "dfreq") {
-    			return "Frequency change (per "+Math.round(12*dt)+" month)";
+    			return "Frequency change (per "+Math.round(12*dfreq_dn*dt)+" month)";
     		}
     	});
     
@@ -816,7 +817,7 @@ d3.json("data/tree.json", function(error, root) {
 		var num_date = globalDate/1000/3600/24/365.25+1970;	
 		for (var ii=0; ii<rootNode.pivots.length-1; ii++){
 			if (rootNode.pivots[ii]<num_date && rootNode.pivots[ii+1]>=num_date){
-				freq_ii=ii+1;
+				freq_ii=Math.max(dfreq_dn,ii+1);
 			}
 		}
 		console.log("changed frequency index to "+freq_ii+" date cut off is "+num_date);
