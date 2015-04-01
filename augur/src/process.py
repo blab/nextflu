@@ -9,6 +9,34 @@ from bernoulli_frequency import virus_frequencies
 from tree_util import delimit_newick
 import numpy as np
 
+parser = argparse.ArgumentParser(description='Process virus sequences, build tree, and prepare of web visualization')
+parser.add_argument('-y', '--years_back', type = int, default=3, help='number of past years to sample sequences from')
+parser.add_argument('-v', '--viruses_per_month', type = int, default = 50, help='number of viruses sampled per month')
+parser.add_argument('-r', '--raxml_time_limit', type = float, default = 1.0, help='number of hours raxml is run')
+parser.add_argument('--interval', nargs = '+', type = float, default = None, help='interval from which to pull sequences')
+parser.add_argument('--prefix', type = str, default = 'data/', help='path+prefix of file dumps')
+parser.add_argument('--test', default = False, action="store_true",  help ="don't run the pipeline")
+parser.add_argument('--start', default = 'filter', type = str,  help ="start pipeline at specified step")
+parser.add_argument('--stop', default = 'export', type=str,  help ="run to end")
+parser.add_argument('--skip', nargs='+', type = str,  help ="analysis steps to skip")	
+
+
+virus_config = {
+	'fasta_fields':{0:'strain', 1:'isolate_id', 3:'passage', 5:'date', 7:'lab', 8:"accession"},
+	# frequency estimation parameters
+	'aggregate_regions': [  ("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
+							("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ],
+	'frequency_stiffness':10.0,
+	'verbose':2, 
+	'tol':1e-4, #tolerance for frequency optimization
+	'pc':1e-3, #pseudocount for frequencies 
+	'extra_pivots': 6,  # number of pivot point for or after the last observations of a mutations
+	'inertia':0.7,		# fraction of frequency change carry over in the stiffness term
+	'n_iqd':3,     # standard deviations from clock
+}
+
+
+
 class process(virus_frequencies):
 	"""generic template class for processing virus sequences into trees"""
 	def __init__(self, prefix = 'data/', time_interval = (2012.0, 2015.0), 
