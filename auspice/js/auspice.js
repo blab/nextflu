@@ -273,11 +273,12 @@ var virusTooltip = d3.tip()
 		if (typeof d.date != "undefined") {
 			string += "<br>Date: " + d.date;
 		}
-		if (typeof d.isolate_id != "undefined") {
-			string += "<br>Isolate ID: " + d.isolate_id;
+		if ((typeof d.db != "undefined") && (typeof d.accession != "undefined") && (typeof d.db=='GISAID')) {
+			string += "<br>GISAID ID: EPI" + d.accession;
 		}
 		if (typeof d.lab != "undefined") {
-			string += "<br>Orig. lab: " + d.lab;
+			string += "<br>Orig. lab: " + d.lab.substring(0,30);
+			if (d.lab.substring.length>30) string+='...';
 		}
 		if (typeof d.region != "undefined") {
 			string += "<br>Region: " + d.region.replace(/([A-Z])/g, ' $1');
