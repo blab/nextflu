@@ -280,18 +280,14 @@ var linkTooltip = d3.tip()
 	.html(function(d) {
 		string = ""
 		if (typeof d.frequency != "undefined") {
-			string += "Frequency: " + (100 * d.frequency).toFixed(1) + "%";
+			string += "Frequency: " + (100 * d.frequency).toFixed(1) + "%"
+			if (d.aa_muts.length){
+				string+="<br>Mutations: "+d.aa_muts.replace(/,/g, ', ');
+			}
 		}
 		return string;
 	});
 treeplot.call(linkTooltip);
-
-//from http://jsfiddle.net/agcsi/w6g5pths/
-c3.chart.fn.update_tick_values = function(tick_values) {
-    var $$ = this.internal, config = $$.config;    
-    config.axis_x_tick_values = tick_values;                            
-    $$.redraw();
-}
 
 width = parseInt(d3.select(".freqplot-container").style("width"), 10);
 var position = "right";
@@ -949,6 +945,15 @@ d3.json("data/tree.json", function(error, root) {
 				+ (d.source.x).toString() + "," + d.target.y.toString() + " "
 				+ (d.target.x).toString() + "," + d.target.y.toString()
 			});
+			
+		treeplot.selectAll(".annotation").data(clades)
+			.transition().duration(speed)
+			.attr("x", function(d) {
+				return xScale(d[1]) - 8;
+			})
+			.attr("y", function(d) {
+				return yScale(d[2]) - 8;
+			});			
 
 	}	
 
@@ -985,8 +990,16 @@ d3.json("data/tree.json", function(error, root) {
 				return (d.source.x).toString() + "," + d.source.y.toString() + " "
 				+ (d.source.x).toString() + "," + d.target.y.toString() + " "
 				+ (d.target.x).toString() + "," + d.target.y.toString()
-			});			
-	
+			});
+			
+		treeplot.selectAll(".annotation").data(clades)
+			.attr("x", function(d) {
+				return xScale(d[1]) - 8;
+			})
+			.attr("y", function(d) {
+				return yScale(d[2]) - 8;
+			});
+
 	}
 	
 	function colorByGenotype() {
@@ -1079,6 +1092,26 @@ d3.json("data/tree.json", function(error, root) {
 
 	tree_legend = makeLegend();
 
+	// add clade labels
+	clades = rootNode["clade_annotations"];
+	console.log(clades);
+	var clade_annotations = treeplot.selectAll('.annotation')
+		.data(clades)
+		.enter()
+		.append("text")
+		.attr("class", "annotation")
+		.attr("x", function(d) {
+			return xScale(d[1]) - 8;
+		})
+		.attr("y", function(d) {
+			return yScale(d[2]) - 8;
+		})
+		.style("text-anchor", "end")
+		.text(function (d) {
+			return d[0];
+		});
+
+
 });
 
 d3.json("data/meta.json", function(error, json) {
@@ -1090,6 +1123,7 @@ d3.json("data/meta.json", function(error, json) {
 		.append("a")
 		.attr("href", "http://github.com/blab/nextflu/commit/" + commit_id)
 		.text(short_id);
+
 });
 
 d3.json("data/sequences.json", function(error, json) {
@@ -1105,7 +1139,6 @@ d3.json("data/frequencies.json", function(error, json){
 	while (ticks[ticks.length-1]<pivots[pivots.length-1]){
 		ticks.push(Math.round((ticks[ticks.length-1]+step)*10)/10);
 	}	
-	gt_chart.update_tick_values(ticks);
 	/**
 		parses a genotype string into region and positions
 	**/
