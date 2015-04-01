@@ -616,7 +616,10 @@ d3.json("data/tree.json", function(error, root) {
     		}
    			if (colorBy == "genotype") {
     			return "Genotype"
-    		}        			
+    		}
+   			if (colorBy == "dfreq") {
+    			return "Frequency change (per "+Math.round(12*dt)+" month)";
+    		}
     	});
     
 		var tmp_leg = legend.selectAll(".legend")
