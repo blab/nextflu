@@ -204,13 +204,14 @@ class frequency_estimator(object):
 
 class virus_frequencies(object):
 	def __init__(self, time_interval = (2012.0, 2015.1),
-				stiffness = 10.0, pivots_per_year = 12.0, 
+				frequency_stiffness = 10.0, pivots_per_year = 12.0, 
 				clade_designations={}, aggregate_regions = None,
 				extra_pivots = 5, **kwarks):
-		self.stiffness = stiffness
+		self.stiffness = frequency_stiffness
 		self.pivots_per_year = pivots_per_year
 		self.clade_designations=clade_designations
 		self.aggregate_regions = aggregate_regions
+		self.extra_pivots = extra_pivots
 		self.pivots = get_pivots(self.time_interval[0], self.time_interval[1], self.pivots_per_year)
 		self.kwarks = kwarks
 		if not hasattr(self, "frequencies"):
@@ -236,7 +237,7 @@ class virus_frequencies(object):
 		if len(tps)>threshold and np.sum(obs)>min_observations:
 			if self.verbose: 
 				print "# of time points",len(tps), "# observations",sum(obs) 
-			fe = frequency_estimator(zip(tps, obs), pivots=self.pivots,
+			fe = frequency_estimator(zip(tps, obs), pivots=self.pivots, extra_pivots = self.extra_pivots,
 			               stiffness=self.stiffness*float(len(observations))/len(self.viruses), 
 		                   logit=True, **self.kwarks)
 			fe.learn()
@@ -325,23 +326,23 @@ class virus_frequencies(object):
 		ci=0
 		# need to resort, since the clade size order might differs after subsetting to regions
 		children_by_size = sorted(node.child_nodes(), key = lambda x:len(x.tips), reverse=True)
+		if debug: print '###',len(node.tips), frequency_left[-5:]
 		for child in children_by_size[:-1]: # clades are ordered by decreasing size
 			if len(child.tips)<threshold: # skip tiny clades
 				break
 			else:
-				if debug: print child.num_date, len(child.tips)
-
 				obs = np.in1d(tps, all_dates[tip_to_date_index[child.tips]])
 
 				# make n pivots a year, interpolate frequencies
 				# FIXME: adjust stiffness to total number of observations in a more robust manner
 				fe = frequency_estimator(zip(tps, obs), pivots=self.pivots, stiffness=self.stiffness*len(all_dates)/2000.0, 
-										logit=True, **self.kwarks)
+										logit=True, extra_pivots = self.extra_pivots, **self.kwarks)
 				fe.learn()
 
 				# assign the frequency vector to the node
 				child.freq[region_name] = frequency_left * logit_inv(fe.final_pivot_freq)
 				child.logit_freq[region_name] = logit_transform(child.freq[region_name])
+				if debug: print len(child.tips), child.freq[region_name][-5:]
 
 				# update the frequency remaining to be explained and prune explained observations
 				frequency_left *= (1.0-logit_inv(fe.final_pivot_freq))
@@ -353,7 +354,7 @@ class virus_frequencies(object):
 		# if the above loop finished assign the frequency of the remaining clade to the frequency_left
 		if ci==len(node.child_nodes())-1 and frequency_left is not None:
 			last_child = children_by_size[-1]
-			last_child.freq[region_name] = frequency_left
+			last_child.freq[region_name] = np.array(frequency_left)
 			last_child.logit_freq[region_name] = logit_transform(last_child.freq[region_name])
 		else:  # broke out of loop because clades too small. 
 			for child in children_by_size[ci:]: # assign freqs of all remaining clades to None.
