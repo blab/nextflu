@@ -7,20 +7,45 @@
 import os, re, time, datetime, csv, sys
 from collections import defaultdict
 from Bio import SeqIO
+import numpy as np
 
 class virus_filter(object):
 
-	def __init__(self,viruses=None, date_spec='full', **kwargs):
+	def __init__(self, alignment_file='', fasta_fields=None, date_spec='full', **kwargs):
 		'''
 		parameters:
-		viruses    -- a list of virses. dict structures as of now
-		date_spec  -- if 'full', dates with day are required, if 'year', only year is accepted
+		alignment_file   -- a FASTA sequence file with all viruses included
+		fasta_fields     -- match between FASTA header index and virus dict field
+		date_spec        -- if 'full', dates with day are required, if 'year', only year is accepted
 		'''
-		if viruses is None: viruses=[]
-		self.viruses = viruses
+		if fasta_fields is None:
+			self.fasta_fields = {0:'strain', 1:'date' }
+		else:
+			self.fasta_fields = fasta_fields
+		self.alignment_file = alignment_file
+		self.viruses = self.parse_fasta(self.alignment_file)
 		self.strain_lookup = {}
 		self.outgroup = None
 		self.date_spec = date_spec
+		
+	def parse_fasta(self, fasta):
+		"""Parse FASTA file with default header formating"""
+		viruses = []
+		try:
+			handle = open(fasta, 'r')
+		except IOError:
+			print fasta, "not found"
+		else:
+			for record in SeqIO.parse(handle, "fasta"):
+				words = map(lambda x:x.strip(),record.description.replace(">","").split('|'))
+				v = {key:words[ii] for ii, key in self.fasta_fields.iteritems()}
+				v['seq']= str(record.seq)
+				viruses.append(v)
+			handle.close()
+		return viruses		
+		
+	def filter(self):
+		self.filter_generic()			
 
 	def filter_generic(self, prepend_strains = None):
 		'''
@@ -70,7 +95,7 @@ class virus_filter(object):
 		elif self.date_spec=='year':
 			self.viruses = filter(lambda v: re.match(r'\d\d\d\d', v['date']) != None, self.viruses)
 
-	def subsample(self, years_back, viruses_per_month, prioritize = None, all_priority=False, region_specific = True):
+	def subsample(self, viruses_per_month, prioritize = None, all_priority=False, region_specific = True):
 		'''
 		Subsample x viruses per month
 		Take from beginning of list - this will prefer longer sequences
@@ -90,8 +115,8 @@ class virus_filter(object):
 		other_viruses = self.viruses_by_date_region([v for v in self.viruses if v['strain'].lower() not in prioritize]) 
 
 		filtered_viruses = []
-		first_year = datetime.datetime.today().year - years_back
-		first_month = datetime.datetime.today().month
+		first_year = int(np.floor(self.time_interval[0]))
+		first_month = int((self.time_interval[0]-first_year)*12)
 		regions = list(set([v['region'] for v in self.viruses]))
 
 		print "Filtering between " + str(first_month) + "/" + str(first_year), "and today"
@@ -100,10 +125,12 @@ class virus_filter(object):
 		for m in range(first_month,13):
 			filtered_viruses.extend(select_func(priority_viruses,other_viruses, 
 												y, m, viruses_per_month, regions, all_priority=all_priority))
-		for y in range(first_year+1,datetime.datetime.today().year+1):
+		for y in range(first_year+1,int(np.floor(self.time_interval[1]))+1):
 			for m in range(1,13):
 				filtered_viruses.extend(select_func(priority_viruses,other_viruses, 
 												y, m, viruses_per_month, regions, all_priority=all_priority))
+				if y+float(m)/12.0>self.time_interval[1]:
+					break
 		if self.outgroup is not None:
 			filtered_viruses.append(self.outgroup)
 			print len(filtered_viruses), "with outgroup"
@@ -162,34 +189,11 @@ class virus_filter(object):
 
 class flu_filter(virus_filter):
 
-	def __init__(self, alignment_file='', fasta_fields=None, **kwargs):
-		if fasta_fields is None:
-			self.fasta_fields = {0:'strain', 1:'accession', 3:'passage', 5:'date' }
-		else:
-			self.fasta_fields = fasta_fields
-		self.alignment_file = alignment_file
-		viruses = self.parse_gisaid(self.alignment_file)
-		virus_filter.__init__(self, viruses, **kwargs)
+	def __init__(self, alignment_file='', fasta_fields=None, **kwargs):	
+		virus_filter.__init__(self, alignment_file = alignment_file, fasta_fields = fasta_fields, **kwargs)
+		self.add_gisaid_metadata()
 		self.fix_strain_names()
 		self.vaccine_strains=[]
-
-	def parse_gisaid(self, fasta):
-		"""Parse FASTA file from GISAID with default header formating"""
-		viruses = []
-		try:
-			handle = open(fasta, 'r')
-		except IOError:
-			print fasta, "not found"
-		else:
-			for record in SeqIO.parse(handle, "fasta"):
-				words = record.description.replace(">","").replace(" ","").split('|')
-				v = {key:words[ii] for ii, key in self.fasta_fields.iteritems()}
-				v['db']="GISAID"
-				v['seq']= str(record.seq)
-				if 'passage' not in v: v['passage']=''
-				viruses.append(v)
-			handle.close()
-		return viruses
 
 	def filter(self):
 		self.filter_generic(prepend_strains = self.vaccine_strains)	
@@ -199,13 +203,17 @@ class flu_filter(virus_filter):
 		print len(self.viruses), "without egg passage"
 		self.filter_geo()
 		print len(self.viruses), "with geographic information"
+		
+	def add_gisaid_metadata(self):
+		for v in self.viruses:
+			v['db']="GISAID"
 
 	def filter_strain_names(self):
 		self.viruses = filter(lambda v: re.match(r'^A/', v['strain']) != None, self.viruses)
 
 	def fix_strain_names(self):
 		for v in self.viruses:
-			v['strain'] = v['strain'].replace('\'','').replace('(','').replace(')','').replace('H3N2','').replace('Human','').replace('human','').replace('//','/')
+			v['strain'] = v['strain'].replace(' ', '').replace('\'','').replace('(','').replace(')','').replace('H3N2','').replace('Human','').replace('human','').replace('//','/')
 
 	def filter_passage(self):
 		self.viruses = filter(lambda v: re.match(r'^E\d+', v.get('passage',''), re.I) == None, self.viruses)

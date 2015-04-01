@@ -28,6 +28,7 @@ class tree_refine(object):
 		self.ladderize()
 		self.collapse()
 		self.translate_all()
+		self.add_nuc_mutations()
 		self.add_aa_mutations()
 		self.add_node_attributes()
 		self.reduce()
@@ -60,9 +61,13 @@ class tree_refine(object):
 	def collapse(self):
 		"""Collapse edges without mutations to polytomies"""
 		for edge in self.tree.postorder_edge_iter():
-			if edge.tail_node is not None:
-				if edge.is_internal() and edge.head_node.seq==edge.tail_node.seq:
-					edge.collapse()
+			if edge.tail_node is not None and edge.is_internal():
+				if hasattr(edge.head_node, 'seq') and hasattr(edge.tail_node, 'seq'):
+					if edge.head_node.seq==edge.tail_node.seq:
+						edge.collapse()
+				else:
+					if edge.length < 0.00001:
+						edge.collapse()
 
 	def reduce(self):
 		"""
@@ -94,11 +99,21 @@ class tree_refine(object):
 			node.aa_seq = translate(node.seq[self.cds[0]:self.cds[1]])
 
 	def add_aa_mutations(self):
+		if hasattr(self.tree.seed_node, 'aa_seq'):
+			for node in self.tree.postorder_internal_node_iter():
+				for child in node.child_nodes():
+					child.aa_muts = ','.join([anc+str(pos)+der for pos,anc, der in 
+							zip(range(1,len(node.aa_seq)+1), node.aa_seq, child.aa_seq) if anc!=der])
+			self.tree.seed_node.aa_muts=""
+		else:
+			print "no translation available"
+
+	def add_nuc_mutations(self):
 		for node in self.tree.postorder_internal_node_iter():
 			for child in node.child_nodes():
-				child.muts = ','.join([anc+str(pos)+der for pos,anc, der in 
-						zip(range(1,len(node.aa_seq)+1), node.aa_seq, child.aa_seq) if anc!=der])
-		self.tree.seed_node.muts=[]
+				child.nuc_muts = ','.join([anc+str(pos)+der for pos,anc, der in 
+						zip(range(1,len(node.seq)+1), node.seq, child.seq) if anc!=der])
+		self.tree.seed_node.nuc_muts=""
 
 	def get_yvalue(self, node):
 		"""Return y location based on recursive mean of daughter locations"""
@@ -126,8 +141,11 @@ class tree_refine(object):
 		for v in self.viruses:
 			if v.strain in self.node_lookup:
 				node = self.node_lookup[v.strain]
-				for attr in ['strain', 'date', 'accession', 'num_date', 'db', 'region', 'country']:
-					node.__setattr__(attr, v.__getattribute__(attr))
+				for attr in self.fasta_fields.values() + ['num_date', 'db', 'region', 'country']:
+					try:
+						node.__setattr__(attr, v.__getattribute__(attr))
+					except:
+						pass
 
 	def define_trunk(self, dt = None):
 		"""Trace current lineages backward to define trunk"""

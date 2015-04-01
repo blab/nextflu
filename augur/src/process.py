@@ -9,21 +9,55 @@ from bernoulli_frequency import virus_frequencies
 from tree_util import delimit_newick
 import numpy as np
 
+parser = argparse.ArgumentParser(description='Process virus sequences, build tree, and prepare of web visualization')
+parser.add_argument('-y', '--years_back', type = int, default=3, help='number of past years to sample sequences from')
+parser.add_argument('-v', '--viruses_per_month', type = int, default = 50, help='number of viruses sampled per month')
+parser.add_argument('-r', '--raxml_time_limit', type = float, default = 1.0, help='number of hours raxml is run')
+parser.add_argument('--interval', nargs = '+', type = float, default = None, help='interval from which to pull sequences')
+parser.add_argument('--prefix', type = str, default = 'data/', help='path+prefix of file dumps')
+parser.add_argument('--test', default = False, action="store_true",  help ="don't run the pipeline")
+parser.add_argument('--start', default = 'filter', type = str,  help ="start pipeline at specified step")
+parser.add_argument('--stop', default = 'export', type=str,  help ="run to end")
+parser.add_argument('--skip', nargs='+', type = str,  help ="analysis steps to skip")	
+
+
+virus_config = {
+	'fasta_fields':{0:'strain', 1:'isolate_id', 3:'passage', 5:'date', 7:'lab', 8:"accession"},
+	# frequency estimation parameters
+	'aggregate_regions': [  ("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
+							("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ],
+	'frequency_stiffness':10.0,
+	'verbose':2, 
+	'tol':1e-4, #tolerance for frequency optimization
+	'pc':1e-3, #pseudocount for frequencies 
+	'extra_pivots': 6,  # number of pivot point for or after the last observations of a mutations
+	'inertia':0.7,		# fraction of frequency change carry over in the stiffness term
+	'n_iqd':3,     # standard deviations from clock
+}
+
+
+
 class process(virus_frequencies):
 	"""generic template class for processing virus sequences into trees"""
-	def __init__(self, prefix = 'data/', auspice_frequency_fname ='../auspice/data/frequencies.json',
-				auspice_sequences_fname='../auspice/data/sequences.json', auspice_tree_fname='../auspice/data/tree.json', min_freq = 0.01, **kwargs):
-		virus_frequencies.__init__(self, **kwargs)
+	def __init__(self, prefix = 'data/', time_interval = (2012.0, 2015.0), 
+	             auspice_frequency_fname ='../auspice/data/frequencies.json', 
+				 auspice_sequences_fname='../auspice/data/sequences.json', 
+				 auspice_tree_fname='../auspice/data/tree.json', 
+				 min_mutation_frequency = 0.01, min_genotype_frequency = 0.1, **kwargs):
 		self.tree_fname = prefix+'tree.pkl'
 		self.virus_fname = prefix+'virus.pkl'
 		self.frequency_fname = prefix+'frequencies.pkl'
 		self.aa_seq_fname = prefix+'aa_seq.pkl'
-		self.min_freq = min_freq
+		self.min_mutation_frequency = min_mutation_frequency
+		self.min_genotype_frequency = min_genotype_frequency
+		self.time_interval = tuple(time_interval)
+
 		self.auspice_tree_fname = auspice_tree_fname
 		self.auspice_sequences_fname = auspice_sequences_fname
 		self.auspice_frequency_fname = auspice_frequency_fname
 		self.nuc_alphabet = 'ACGT-N'
 		self.aa_alphabet = 'ACDEFGHIKLMNPQRSTVWY*X'
+		virus_frequencies.__init__(self, **kwargs)
 
 	def dump(self):
 		import cPickle
@@ -64,7 +98,7 @@ class process(virus_frequencies):
 			with open(self.aa_seq_fname, 'r') as infile:
 				self.aa_aln = cPickle.load(infile)
 
-	def export_to_auspice(self, tree_fields = [], tree_pop_list = []):
+	def export_to_auspice(self, tree_fields = [], tree_pop_list = [], annotations = []):
 		from tree_util import dendropy_to_json, all_descendants
 		from io_util import write_json, read_json
 		print "--- Streamline at " + time.strftime("%H:%M:%S") + " ---"
@@ -72,11 +106,11 @@ class process(virus_frequencies):
 		print "Writing sequences"
 		elems = {}
 		for node in self.tree:
-			if hasattr(node,"clade"):
+			if hasattr(node, "clade") and hasattr(node, "aa_seq"):
 				elems[node.clade] = node.aa_seq
 		write_json(elems, self.auspice_sequences_fname, indent=None)
 
-		print "writing tree"
+		print "Writing tree"
 		self.tree_json = dendropy_to_json(self.tree.seed_node, tree_fields)
 		for node in all_descendants(self.tree_json):
 			for attr in tree_pop_list:
@@ -89,6 +123,21 @@ class process(virus_frequencies):
 					except:
 						node["freq"][reg] = "undefined"				
 
+		if hasattr(self,"clade_designations"):
+			# find basal node of clade and assign clade x and y values based on this basal node
+			clade_xval = {}
+			clade_yval = {}
+			for clade, gt in self.clade_designations.iteritems():
+				if clade in annotations:
+					print "Annotating clade", clade
+					base_node = sorted((x for x in self.tree.postorder_node_iter() if all([x.aa_seq[pos-1]==aa for pos, aa in gt])), key=lambda x: x.xvalue)[0]
+					clade_xval[clade] = base_node.xvalue
+					clade_yval[clade] = base_node.yvalue
+			# append clades, coordinates and genotype to meta
+			self.tree_json["clade_annotations"] = [(clade, clade_xval[clade],clade_yval[clade], 
+								"/".join([str(pos)+aa for pos, aa in gt]))
+							for clade, gt in self.clade_designations.iteritems() if clade in annotations
+							]
 		write_json(self.tree_json, self.auspice_tree_fname, indent=None)
 		try:
 			read_json(self.auspice_tree_fname)
@@ -226,7 +275,7 @@ class process(virus_frequencies):
 	def determine_variable_positions(self):
 		'''
 		calculates nucleoties_frequencies and aa_frequencies at each position of the alignment
-		also computes consensus sequences and position at which the major allele is at less than 1-min_freq
+		also computes consensus sequences and position at which the major allele is at less than 1-min_mutation_frequency
 		results are stored as
 		self.nucleoties_frequencies
 		self.aa_frequencies
@@ -238,7 +287,7 @@ class process(virus_frequencies):
 		for ni,nuc in enumerate(self.nuc_alphabet):
 			self.nucleoties_frequencies[ni,:]=(aln_array==nuc).mean(axis=0)
 
-		self.variable_nucleotides = np.where(np.max(self.nucleoties_frequencies,axis=0)<1.0-self.min_freq)[0]
+		self.variable_nucleotides = np.where(np.max(self.nucleoties_frequencies,axis=0)<1.0-self.min_mutation_frequency)[0]
 		self.consensus_nucleotides = "".join(np.fromstring(self.nuc_alphabet, 'S1')[np.argmax(self.nucleoties_frequencies,axis=0)])
 
 		if hasattr(self, 'aa_aln'):
@@ -247,14 +296,14 @@ class process(virus_frequencies):
 			for ai,aa in enumerate(self.aa_alphabet):
 				self.aa_frequencies[ai,:]=(aln_array==aa).mean(axis=0)
 
-			self.variable_aa = np.where(np.max(self.aa_frequencies,axis=0)<1.0-self.min_freq)[0]
+			self.variable_aa = np.where(np.max(self.aa_frequencies,axis=0)<1.0-self.min_mutation_frequency)[0]
 			self.consensus_aa = "".join(np.fromstring(self.aa_alphabet, 'S1')[np.argmax(self.aa_frequencies,axis=0)])
 
 	def estimate_frequencies(self, tasks = ['mutations','genotypes', 'clades', 'tree']):
 		if 'mutations' in tasks:
-			self.all_mutation_frequencies() 
+			self.all_mutation_frequencies(threshold = self.min_mutation_frequency) 
 		if 'genotypes' in tasks:
-			self.all_genotypes_frequencies() 
+			self.all_genotypes_frequencies(threshold = self.min_genotype_frequency) 
 		if 'clades' in tasks:
 			self.all_clade_frequencies() 
 		if 'tree' in tasks:

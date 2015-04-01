@@ -151,6 +151,25 @@ function calcLBI(node, allnodes){
 };
 
 /**
+ * for each node, calculate the derivative of the frequency tranjectory. if none exists, copy parent
+**/
+var dfreq_dn = 2;
+function calcDfreq(node, freq_ii){
+	if (typeof node.children != "undefined") {
+		for (var i1=0; i1<node.children.length; i1++) {
+			if (node.children[i1].freq["global"] != "undefined"){
+				var tmp_freq = node.children[i1].freq["global"]
+				node.children[i1].dfreq = 0.5*(tmp_freq[freq_ii] - tmp_freq[freq_ii-dfreq_dn])/(tmp_freq[freq_ii] + tmp_freq[freq_ii-dfreq_dn] + 0.1);
+			}else{
+				node.children[i1].dfreq = node.dfreq;
+			}
+			calcDfreq(node.children[i1], freq_ii);
+		}
+	}
+};
+
+
+/**
  * for each node, calculate the number of tips in the currently selected time window. 
 **/
 function calcTipCounts(node){
@@ -254,6 +273,16 @@ var virusTooltip = d3.tip()
 		if (typeof d.date != "undefined") {
 			string += "<br>Date: " + d.date;
 		}
+		if ((typeof d.db != "undefined") && (typeof d.accession != "undefined") && (typeof d.db=='GISAID')) {
+			string += "<br>GISAID ID: EPI" + d.accession;
+		}
+		if (typeof d.lab != "undefined") {
+			string += "<br>Orig. lab: " + d.lab.substring(0,30);
+			if (d.lab.length>30) string+='...';
+		}
+		if (typeof d.region != "undefined") {
+			string += "<br>Region: " + d.region.replace(/([A-Z])/g, ' $1');
+		}
 		if (typeof d.ep != "undefined") {
 			string += "<br>Epitope distance: " + d.ep;
 		}
@@ -263,11 +292,8 @@ var virusTooltip = d3.tip()
 		if (typeof d.rb != "undefined") {
 			string += "<br>Receptor binding distance: " + d.rb;
 		}
-		if (typeof d.rb != "undefined") {
+		if (typeof d.LBI != "undefined") {
 			string += "<br>Local branching index: " + d.LBI.toFixed(3);
-		}
-		if (typeof d.region != "undefined") {
-			string += "<br>Region: " + d.region.replace(/([A-Z])/g, ' $1');
 		}
 		return string;
 	});
@@ -281,20 +307,13 @@ var linkTooltip = d3.tip()
 		string = ""
 		if (typeof d.frequency != "undefined") {
 			string += "Frequency: " + (100 * d.frequency).toFixed(1) + "%"
-			if (d.muts.length){
-				string+="<br>Mutations: "+d.muts;
+			if (d.aa_muts.length){
+				string+="<br>Mutations: "+d.aa_muts.replace(/,/g, ', ');
 			}
 		}
 		return string;
 	});
 treeplot.call(linkTooltip);
-
-//from http://jsfiddle.net/agcsi/w6g5pths/
-c3.chart.fn.update_tick_values = function(tick_values) {
-    var $$ = this.internal, config = $$.config;    
-    config.axis_x_tick_values = tick_values;                            
-    $$.redraw();
-}
 
 width = parseInt(d3.select(".freqplot-container").style("width"), 10);
 var position = "right";
@@ -347,8 +366,12 @@ d3.json("data/tree.json", function(error, root) {
 	var nodes = tree.nodes(root),
 		links = tree.links(nodes);
 	var tree_legend;
-
 	var rootNode = nodes[0];
+	if (typeof rootNode.pivots != "undefined"){
+		var dt = rootNode.pivots[1]-rootNode.pivots[0];		
+	}else{
+		var dt = 1.0/12;
+	}
 	var tips = gatherTips(rootNode, []);
 	var internals = gatherInternals(rootNode, []);
 	calcBranchLength(rootNode);
@@ -429,6 +452,10 @@ d3.json("data/tree.json", function(error, root) {
 		.domain([0.0, 0.02, 0.04, 0.07, 0.1, 0.2, 0.4, 0.7, 0.9, 1.0])
 		.range(colors);
 
+	var dfreqColorScale = d3.scale.linear()
+		.domain(([-1.0, -0.8, -0.6,-0.4, -0.2, 0, 0.2, 0.4, 0.6, 0.8]).map(function(d){return Math.round(d*dt*dfreq_dn*100)/100;}))
+		.range(colors);
+
 	var colorScale;
 	
 	var freqScale = d3.scale.linear()
@@ -478,10 +505,16 @@ d3.json("data/tree.json", function(error, root) {
 				d.adj_coloring = d.coloring; // - mean;
 			});
 		}
-		if (colorBy == "lbi") {
+		else if (colorBy == "lbi") {
 			calcLBI(rootNode, nodes, false);
 			nodes.forEach(function (d) {
 				d.adj_coloring = d.LBI;
+			});
+		}
+		else if (colorBy == "dfreq") {
+			calcDfreq(rootNode, freq_ii);
+			nodes.forEach(function (d) {
+				d.adj_coloring = d.dfreq;
 			});
 		}
 	}
@@ -504,19 +537,23 @@ d3.json("data/tree.json", function(error, root) {
 			colorScale = epitopeColorScale;
 			nodes.map(function(d) { d.coloring = d.ep; });
 		}
-		if (colorBy == "ne") {
+		else if (colorBy == "ne") {
 			colorScale = nonepitopeColorScale;
 			nodes.map(function(d) { d.coloring = d.ne; });
 		}
-		if (colorBy == "rb") {
+		else if (colorBy == "rb") {
 			colorScale = receptorBindingColorScale;
 			nodes.map(function(d) { d.coloring = d.rb; });
 		}
-		if (colorBy == "lbi") {
+		else if (colorBy == "lbi") {
 			colorScale = lbiColorScale;
 			nodes.map(function(d) { d.adj_coloring = d.LBI; });
 		}
-		if (colorBy == "region") {
+		else if (colorBy == "dfreq") {
+			colorScale = dfreqColorScale;
+			nodes.map(function(d) { d.adj_coloring = d.dfreq; });
+		}
+		else if (colorBy == "region") {
 			colorScale = regionColorScale;
 		}
 
@@ -584,7 +621,10 @@ d3.json("data/tree.json", function(error, root) {
     		}
    			if (colorBy == "genotype") {
     			return "Genotype"
-    		}        			
+    		}
+   			if (colorBy == "dfreq") {
+    			return "Frequency change (per "+Math.round(12*dfreq_dn*dt)+" month)";
+    		}
     	});
     
 		var tmp_leg = legend.selectAll(".legend")
@@ -628,6 +668,9 @@ d3.json("data/tree.json", function(error, root) {
 
 	calcNodeAges(time_window);
 	calcLBI(rootNode, nodes, false);
+	calcDfreq(rootNode, freq_ii);
+	var freq_ii = rootNode.pivots.length - 1;
+	console.log(freq_ii);
 	colorByTrait();
 	adjust_coloring_by_date();
 	adjust_freq_by_date();
@@ -706,6 +749,14 @@ d3.json("data/tree.json", function(error, root) {
 		.on('mouseover', function(d) {
 			virusTooltip.show(d, this);
 		})
+		.on('click', function(d) {
+			if ((typeof d.db != "undefined") && (d.db == "GISAID") && (typeof d.accession != "undefined")) {
+				var url = "http://gisaid.org/EPI/"+d.accession;
+				console.log("opening url "+url);
+				var win = window.open(url, '_blank');
+  				win.focus();
+  			}	
+  		})		
 		.on('mouseout', virusTooltip.hide);
 
 	var vaccineCircles = treeplot.selectAll(".vaccine")
@@ -752,8 +803,7 @@ d3.json("data/tree.json", function(error, root) {
 			.attr("cx", function(d) {return d.x})
 		globalDate = d.date;
 
-		calcNodeAges(time_window);			
-
+		calcNodeAges(time_window);
 		treeplot.selectAll(".link")
 			.style("stroke", function(d){return "#ccc";})
 
@@ -776,6 +826,13 @@ d3.json("data/tree.json", function(error, root) {
 	}
 
 	function dragend() {
+		var num_date = globalDate/1000/3600/24/365.25+1970;	
+		for (var ii=0; ii<rootNode.pivots.length-1; ii++){
+			if (rootNode.pivots[ii]<num_date && rootNode.pivots[ii+1]>=num_date){
+				freq_ii=Math.max(dfreq_dn,ii+1);
+			}
+		}
+		console.log("changed frequency index to "+freq_ii+" date cut off is "+num_date);
 		console.log("recalculating node ages");
 		calcNodeAges(time_window);
 		console.log("adjusting node colors");
@@ -952,6 +1009,15 @@ d3.json("data/tree.json", function(error, root) {
 				+ (d.source.x).toString() + "," + d.target.y.toString() + " "
 				+ (d.target.x).toString() + "," + d.target.y.toString()
 			});
+			
+		treeplot.selectAll(".annotation").data(clades)
+			.transition().duration(speed)
+			.attr("x", function(d) {
+				return xScale(d[1]) - 8;
+			})
+			.attr("y", function(d) {
+				return yScale(d[2]) - 8;
+			});			
 
 	}	
 
@@ -988,8 +1054,16 @@ d3.json("data/tree.json", function(error, root) {
 				return (d.source.x).toString() + "," + d.source.y.toString() + " "
 				+ (d.source.x).toString() + "," + d.target.y.toString() + " "
 				+ (d.target.x).toString() + "," + d.target.y.toString()
-			});			
-	
+			});
+			
+		treeplot.selectAll(".annotation").data(clades)
+			.attr("x", function(d) {
+				return xScale(d[1]) - 8;
+			})
+			.attr("y", function(d) {
+				return yScale(d[2]) - 8;
+			});
+
 	}
 	
 	function colorByGenotype() {
@@ -1082,6 +1156,26 @@ d3.json("data/tree.json", function(error, root) {
 
 	tree_legend = makeLegend();
 
+	// add clade labels
+	clades = rootNode["clade_annotations"];
+	console.log(clades);
+	var clade_annotations = treeplot.selectAll('.annotation')
+		.data(clades)
+		.enter()
+		.append("text")
+		.attr("class", "annotation")
+		.attr("x", function(d) {
+			return xScale(d[1]) - 8;
+		})
+		.attr("y", function(d) {
+			return yScale(d[2]) - 8;
+		})
+		.style("text-anchor", "end")
+		.text(function (d) {
+			return d[0];
+		});
+
+
 });
 
 d3.json("data/meta.json", function(error, json) {
@@ -1093,6 +1187,7 @@ d3.json("data/meta.json", function(error, json) {
 		.append("a")
 		.attr("href", "http://github.com/blab/nextflu/commit/" + commit_id)
 		.text(short_id);
+
 });
 
 d3.json("data/sequences.json", function(error, json) {
@@ -1108,7 +1203,6 @@ d3.json("data/frequencies.json", function(error, json){
 	while (ticks[ticks.length-1]<pivots[pivots.length-1]){
 		ticks.push(Math.round((ticks[ticks.length-1]+step)*10)/10);
 	}	
-	gt_chart.update_tick_values(ticks);
 	/**
 		parses a genotype string into region and positions
 	**/

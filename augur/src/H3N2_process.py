@@ -2,7 +2,7 @@ import time, argparse,re,os
 from virus_filter import flu_filter
 from virus_clean import virus_clean
 from tree_refine import tree_refine
-from process import process
+from process import process, virus_config
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.Align import MultipleSeqAlignment
@@ -10,38 +10,25 @@ import numpy as np
 from itertools import izip
 
 epitope_mask = np.fromstring("0000000000000000000000000000000000000000000011111011011001010011000100000001001011110011100110101000001100000100000001000110101011111101011010111110001010011111000101011011111111010010001111101110111001010001110011111111000000111110000000101010101110000000000011100100000001011011100000000000001001011000110111111000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", dtype='S1')
-	
-virus_config = {
+receptor_binding_sites = [144, 154, 155, 157, 158, 188, 192]
+
+
+virus_config.update({
 	# data source and sequence parsing/cleaning/processing
 	'virus':'H3N2',
 	'alignment_file':'data/gisaid_epiflu_sequence.fasta',
-	'fasta_fields':{0:'strain', 1:'accession', 3:'passage', 5:'date' },
 	'outgroup':'A/Beijing/32/1992',
 	#'force_include':'source-data/HI_strains.txt',
 	'force_include_all':False,
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
 	'cds':[48,None], # define the HA1 start i n 0 numbering
-	'n_iqd':3,     # standard deviations from clock
-
-	# frequency estimation parameters
-	'aggregate_regions': [  ("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
-							("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ],
-	'frequency_stiffness':10.0,
-	'time_interval':(2012.0, 2015.1),
-	'pivots_per_year':12.0,
-	'min_freq':0.01,
 	# define relevant clades in canonical HA1 numbering (+1)
 	'clade_designations': { "3c3.a":[(128,'A'), (142,'G'), (159,'S')],
 						   "3c3":  [(128,'A'), (142,'G'), (159,'F')],
 						   "3c2.a":[(144,'S'), (159,'Y'), (225,'D'), (311,'H'),(489,'N')],
-						   "3c2":  [(144,'N'), (159,'F'),(225,'N'), (489,'N')]
-							},
-	'verbose':2, 
-	'tol':1e-4, #tolerance for frequency optimization
-	'pc':1e-3, #pseudocount for frequencies 
-	'extra_pivots': 6,  # number of pivot point for or after the last observations of a mutations
-	'inertia':0.7,		# fraction of frequency change carry over in the stiffness term
-}
+						   "3c2":  [(144,'N'), (159,'F'),(225,'N'), (489,'N'), (142, 'R')]
+							}
+	})
 
 
 class H3N2_filter(flu_filter):
@@ -80,13 +67,13 @@ class H3N2_filter(flu_filter):
 				},	{
 					"strain": "A/Texas/50/2012",
 					"db": "GISAID",
-					"accession": "EPI_ISL_129858",
+					"isolate_id": "EPI_ISL_129858",
 					"date": "2012-04-15",
 					"seq": "ATGAAGACTATCATTGCTTTGAGCTACATTCTATGTCTGGTTTTCGCTCAAAAACTTCCTGGAAATGACAATAGCACGGCAACGCTGTGCCTTGGGCACCATGCAGTACCAAACGGAACGATAGTGAAAACAATCACGAATGACCGAATTGAAGTTACTAATGCTACTGAACTGGTTCAGAATTCCTCAATAGGTGAAATATGCGACAGTCCTCATCAGATCCTTGATGGAGAAAACTGCACACTAATAGATGCTCTATTGGGAGACCCTCAGTGTGATGGCTTCCAAAATAAGAAATGGGACCTTTTTGTTGAACGAAGCAAAGCCTACAGCAACTGTTACCCTTATGATGTGCCGGATTATGCCTCCCTTAGGTCACTAGTTGCCTCATCCGGCACACTGGAGTTTAACAATGAAAGCTTCAATTGGAATGGAGTCACTCAAAACGGAACAAGTTCTGCTTGCATAAGGAGATCTAATAATAGTTTCTTTAGTAGATTAAATTGGTTGACCCACTTAAACTTCAAATACCCAGCATTGAACGTGACTATGCCAAACAATGAACAATTTGACAAATTGTACATTTGGGGGGTTCACCACCCGGGTACGGACAAGGACCAAATCTTCCTGTATGCTCAACCATCAGGAAGAATCACAGTATCTACCAAAAGAAGCCAACAAGCTGTAATCCCGAATATCGGATCTAGACCCAGAATAAGGAATATCCCTAGCAGAATAAGCATCTATTGGACAATAGTAAAACCGGGAGACATACTTTTGATTAACAGCACAGGGAATCTAATTGCTCCTAGGGGTTACTTCAAAATACGAAGTGGGAAAAGCTCAATAATGAGATCAGATGCACCCATTGGCAAATGCAAGTCTGAATGCATCACTCCAAATGGAAGCATTCCCAATGACAAACCATTCCAAAATGTAAACAGGATCACATACGGGGCCTGTCCCAGATATGTTAAGCAAAGCACTCTGAAATTGGCAACAGGAATGCGGAATGTACCAGAGAAACAAACTAGAGGCATATTTGGCGCAATAGCGGGTTTCATAGAAAATGGTTGGGAGGGAATGGTGGATGGTTGGTACGGTTTCAGGCATCAAAATTCTGAGGGAAGAGGACAAGCAGCAGATCTCAAAAGCACTCAAGCAGCAATCGATCAAATCAATGGGAAGCTGAATCGATTGATCGGGAAAACCAACGAGAAATTCCATCAGATTGAAAAAGAATTCTCAGAAGTAGAAGGGAGAATTCAGGACCTTGAGAAATATGTTGAGGACACTAAAATAGATCTCTGGTCATACAACGCGGAGCTTCTTGTTGCCCTGGAGAACCAACATACAATTGATCTAACTGACTCAGAAATGAACAAACTGTTTGAAAAAACAAAGAAGCAACTGAGGGAAAATGCTGAGGATATGGGCAATGGTTGTTTCAAAATATACCACAAATGTGACAATGCCTGCATAGGATCAATCAGAAATGGAACTTATGACCACGATGTATACAGAGATGAAGCATTAAACAACCGGTTCCAGATCAAGGGAGTTGAGCTGAAGTCAGGGTACAAAGATTGGATCCTATGGATTTCCTTTGCCATATCATGTTTTTTGCTTTGTGTTGCTTTGTTGGGGTTCATCATGTGGGCCTGCCAAAAGGGCAACATTAGGTGCAACATTTGCATTTGA",
 				},	{
 					"strain": "A/Switzerland/9715293/2013",
 					"db": "GISAID",
-					"accession": "EPI_ISL_162149",
+					"isolate_id": "EPI_ISL_162149",
 					"date": "2013-12-06",
 					"seq": "ATGAAGACTATCATTGCTTTGAGCTACATTCTATGTCTGGTTTTCGCTCAAAAACTTCCTGGAAATGACAATAGCACGGCAACGCTGTGCCTTGGGCACCATGCAGTACCAAACGGAACGATAGTGAAAACAATCACGAATGACCGAATTGAAGTTACTAATGCTACTGAGCTGGTTCAGAATTCCTCAATAGGTGAAATATGCGACAGTCCTCATCAGATCCTTGATGGAGAAAACTGCACACTAATAGATGCTCTATTGGGAGACCCTCAGTGTGATGGCTTTCAAAATAAGAAATGGGACCTTTTTGTTGAACGAAGCAAAGCCTACAGCAACTGTTACCCTTATGATGTGCCGGATTATGCCTCCCTTAGGTCACTAGTTGCCTCATCCGGCACACTGGAGTTTAACAATGAAAGCTTCAATTGGGCTGGAGTCACTCAAAACGGAACAAGTTCTTCTTGCATAAGGGGATCTAATAGTAGTTTCTTTAGTAGATTAAATTGGTTGACCCACTTAAACTCCAAATACCCAGCATTAAACGTGACTATGCCAAACAATGAACAATTTGACAAATTGTACATTTGGGGGGTTCACCACCCGGGTACGGACAAGGACCAAATCTTCCTGTATGCACAATCATCAGGAAGAATCACAGTATCTACCAAAAGAAGCCAACAAGCTGTAATCCCGAATATCGGATCTAGACCCAGAATAAGGGATATCCCTAGCAGAATAAGCATCTATTGGACAATAGTAAAACCGGGAGACATACTTTTGATTAACAGCACAGGGAATCTAATTGCTCCTAGGGGTTACTTCAAAATACGAAGTGGGAAAAGCTCAATAATGAGATCAGATGCACCCATTGGCAAATGCAAGTCTGAATGCATCACTCCAAATGGAAGCATTCCCAATGACAAACCATTCCAAAATGTAAACAGGATCACATACGGGGCCTGTCCCAGATATGTTAAGCAAAGCACTCTGAAATTGGCAACAGGAATGCGAAATGTACCAGAGAGACAAACTAGAGGCATATTTGGCGCAATAGCGGGTTTCATAGAAAATGGTTGGGAGGGAATGGTGGATGGTTGGTACGGCTTCAGGCATCAAAATTCTGAGGGAAGAGGACAAGCAGCAGATCTCAAAAGCACTCAAGCAGCAATCGATCAAATCAATGGGAAGCTGAATCGATTGATCGGGAAAACCAACGAGAAATTCCATCAGATTGAAAAAGAATTCTCAGAAGTAGAAGGGAGAATTCAGGACCTTGAGAAATATGTTGAGGACACAAAAATAGATCTCTGGTCATACAACGCGGAGCTTCTTGTTGCCCTGGAGAACCAACATACAATTGATCTAACTGACTCAGAAATGAACAAACTGTTTGAAAAAACAAAGAAGCAACTGAGGGAAAATGCTGAGGATATGGGCAATGGTTGTTTCAAAATATACCACAAATGTGACAATGCCTGCATAGGATCAATCAGAAATGGAACTTATGACCACGATGTATACAGGGATGAAGCATTAAACAACCGGTTCCAGATCAAGGGAGTTGAGCTGAAGTCAGGGTACAAAGATTGGATCCTATGGATTTCCTTTGCCATATCATGTTTTTTGCTTTGTGTTGCTTTGTTGGGGTTCATCATGTGGGCCTGCCAAAAGGGCAACATTAGGTGCAACATTTGCATTTGA",
 				}
@@ -181,8 +168,7 @@ class H3N2_refine(tree_refine):
 		These are (145, 155, 156, 158, 159, 189, 193) in canonical HA numbering
 		need to subtract one since python arrays start at 0
 		'''
-		sites = [144, 154, 155, 157, 158, 188, 192]
-		return ''.join([aa[pos] for pos in sites])
+		return ''.join([aa[pos] for pos in receptor_binding_sites])
 
 	def get_HA1(self, aa):
 		'''
@@ -218,14 +204,6 @@ class H3N2_refine(tree_refine):
 			node.ne = self.nonepitope_distance(node.aa_seq, root.aa_seq)
 			node.rb = self.receptor_binding_distance(node.aa_seq, root.aa_seq)
 
-		for v in self.viruses:
-			if v.strain in self.node_lookup:
-				node = self.node_lookup[v.strain]
-				try:
-					node.passage=v.passage
-				except:
-					pass
-
 class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 	"""docstring for H3N2_process, H3N2_filter"""
 	def __init__(self,verbose = 0, force_include = None, 
@@ -239,7 +217,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 		H3N2_refine.__init__(self,**kwargs)
 		self.verbose = verbose
 
-	def run(self, steps, years_back=3, viruses_per_month=50, raxml_time_limit = 1.0):
+	def run(self, steps, viruses_per_month=50, raxml_time_limit = 1.0):
 		if 'filter' in steps:
 			print "--- Virus filtering at " + time.strftime("%H:%M:%S") + " ---"
 			self.filter()
@@ -248,7 +226,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 					forced_strains = [line.strip().lower() for line in infile]
 			else:
 				forced_strains = []
-			self.subsample(years_back, viruses_per_month, 
+			self.subsample(viruses_per_month, 
 				prioritize=forced_strains, all_priority=self.force_include_all, 
 				region_specific = self.max_global)
 			self.dump()
@@ -274,27 +252,34 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 		if 'frequencies' in steps:
 			print "--- Estimating frequencies at " + time.strftime("%H:%M:%S") + " ---"
 			self.determine_variable_positions()
-			self.estimate_frequencies()
+			self.estimate_frequencies(tasks = ["mutations", "clades", "tree"])
+			if 'genotype_frequencies' in steps: 
+					self.estimate_frequencies(tasks = ["genotypes"])
 			self.dump()
 		if 'export' in steps:
 			self.temporal_regional_statistics()
 			# exporting to json, including the H3N2 specific fields
-			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'muts'])
+			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db'], 
+			                       annotations = ['3c3.a', '3c2.a'])
 
 if __name__=="__main__":
-	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies', 'export']
-	parser = argparse.ArgumentParser(description='Process virus sequences, build tree, and prepare of web visualization')
-	parser.add_argument('-y', '--years_back', type = int, default=3, help='number of past years to sample sequences from')
-	parser.add_argument('-v', '--viruses_per_month', type = int, default = 50, help='number of viruses sampled per month')
-	parser.add_argument('-r', '--raxml_time_limit', type = float, default = 1.0, help='number of hours raxml is run')
-	parser.add_argument('--prefix', type = str, default = 'data/', help='path+prefix of file dumps')
-	parser.add_argument('--test', default = False, action="store_true",  help ="don't run the pipeline")
-	parser.add_argument('--start', default = 'filter', type = str,  help ="start pipeline at virus selection")
-	parser.add_argument('--stop', default = 'export', type=str,  help ="run to end")
+	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies', 'export']
+	from process import parser
 	params = parser.parse_args()
-	params.cds = (48,None)
 
+	lt = time.localtime()
+	num_date = round(lt.tm_year+(lt.tm_yday-1.0)/365.0,2)
+	params.time_interval = (num_date-params.years_back, num_date) 
+	if params.interval is not None and len(params.interval)==2 and params.interval[0]<params.interval[1]:
+		params.time_interval = (params.interval[0], params.interval[1])
+	dt= params.time_interval[1]-params.time_interval[0]
+	params.pivots_per_year = 12.0 if dt<5 else 6.0 if dt<10 else 3.0
 	steps = all_steps[all_steps.index(params.start):(all_steps.index(params.stop)+1)]
+	for tmp_step in params.skip:
+		if tmp_step in steps:
+			print "skipping",tmp_step
+			steps.remove(tmp_step)
+
 	# add all arguments to virus_config (possibly overriding)
 	virus_config.update(params.__dict__)
 	# pass all these arguments to the processor: will be passed down as kwargs through all classes
@@ -302,6 +287,5 @@ if __name__=="__main__":
 	if params.test:
 		myH3N2.load()
 	else:
-		myH3N2.run(steps, years_back=virus_config['years_back'], 
-			viruses_per_month = virus_config['viruses_per_month'], 
+		myH3N2.run(steps, viruses_per_month = virus_config['viruses_per_month'], 
 			raxml_time_limit = virus_config['raxml_time_limit'])
