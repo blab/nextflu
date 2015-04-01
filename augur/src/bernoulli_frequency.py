@@ -286,8 +286,8 @@ class virus_frequencies(object):
 			for pos2 in relevant_pos[i1+1:]:
 				for ai1, aa1 in enumerate(self.aa_alphabet):
 					for ai2, aa2 in enumerate(self.aa_alphabet):
-						if self.aa_frequencies[ai1,pos1]>0.3*threshold \
-						and self.aa_frequencies[ai2,pos2]>0.3*threshold:
+						if self.aa_frequencies[ai1,pos1]>threshold \
+						and self.aa_frequencies[ai2,pos2]>threshold:
 							gt = [(pos1,aa1),(pos2,aa2)]
 							if self.verbose: print "estimating freq of ", gt
 							freq, (tps, obs) = self.estimate_genotype_frequency(sub_aln, gt, min_observations = 10)

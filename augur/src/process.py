@@ -14,12 +14,14 @@ class process(virus_frequencies):
 	def __init__(self, prefix = 'data/', time_interval = (2012.0, 2015.0), 
 	             auspice_frequency_fname ='../auspice/data/frequencies.json', 
 				 auspice_sequences_fname='../auspice/data/sequences.json', 
-				 auspice_tree_fname='../auspice/data/tree.json', min_freq = 0.01, **kwargs):
+				 auspice_tree_fname='../auspice/data/tree.json', 
+				 min_mutation_frequency = 0.01, min_genotype_frequency = 0.1, **kwargs):
 		self.tree_fname = prefix+'tree.pkl'
 		self.virus_fname = prefix+'virus.pkl'
 		self.frequency_fname = prefix+'frequencies.pkl'
 		self.aa_seq_fname = prefix+'aa_seq.pkl'
-		self.min_freq = min_freq
+		self.min_mutation_frequency = min_mutation_frequency
+		self.min_genotype_frequency = min_genotype_frequency
 		self.time_interval = tuple(time_interval)
 
 		self.auspice_tree_fname = auspice_tree_fname
@@ -245,7 +247,7 @@ class process(virus_frequencies):
 	def determine_variable_positions(self):
 		'''
 		calculates nucleoties_frequencies and aa_frequencies at each position of the alignment
-		also computes consensus sequences and position at which the major allele is at less than 1-min_freq
+		also computes consensus sequences and position at which the major allele is at less than 1-min_mutation_frequency
 		results are stored as
 		self.nucleoties_frequencies
 		self.aa_frequencies
@@ -257,7 +259,7 @@ class process(virus_frequencies):
 		for ni,nuc in enumerate(self.nuc_alphabet):
 			self.nucleoties_frequencies[ni,:]=(aln_array==nuc).mean(axis=0)
 
-		self.variable_nucleotides = np.where(np.max(self.nucleoties_frequencies,axis=0)<1.0-self.min_freq)[0]
+		self.variable_nucleotides = np.where(np.max(self.nucleoties_frequencies,axis=0)<1.0-self.min_mutation_frequency)[0]
 		self.consensus_nucleotides = "".join(np.fromstring(self.nuc_alphabet, 'S1')[np.argmax(self.nucleoties_frequencies,axis=0)])
 
 		if hasattr(self, 'aa_aln'):
@@ -266,14 +268,14 @@ class process(virus_frequencies):
 			for ai,aa in enumerate(self.aa_alphabet):
 				self.aa_frequencies[ai,:]=(aln_array==aa).mean(axis=0)
 
-			self.variable_aa = np.where(np.max(self.aa_frequencies,axis=0)<1.0-self.min_freq)[0]
+			self.variable_aa = np.where(np.max(self.aa_frequencies,axis=0)<1.0-self.min_mutation_frequency)[0]
 			self.consensus_aa = "".join(np.fromstring(self.aa_alphabet, 'S1')[np.argmax(self.aa_frequencies,axis=0)])
 
 	def estimate_frequencies(self, tasks = ['mutations','genotypes', 'clades', 'tree']):
 		if 'mutations' in tasks:
-			self.all_mutation_frequencies() 
+			self.all_mutation_frequencies(threshold = self.min_mutation_frequency) 
 		if 'genotypes' in tasks:
-			self.all_genotypes_frequencies() 
+			self.all_genotypes_frequencies(threshold = self.min_genotype_frequency) 
 		if 'clades' in tasks:
 			self.all_clade_frequencies() 
 		if 'tree' in tasks:
