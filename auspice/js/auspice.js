@@ -304,7 +304,8 @@ var virusTooltip = d3.tip()
 				string += "<br>"
 			}
 		}
-		if ((typeof d.db != "undefined") && (typeof d.accession != "undefined") && (typeof d.db == "GISAID")) {
+		if ((typeof d.db != "undefined") && (typeof d.accession != "undefined") && (d.db == "GISAID")) {
+			console.log(d.accession);
 			string += "GISAID ID: EPI" + d.accession + "<br>";
 		}		
 		string += "</div>";
