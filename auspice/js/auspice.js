@@ -280,8 +280,10 @@ var virusTooltip = d3.tip()
 			string += "<br>GISAID ID: EPI" + d.accession;
 		}
 		if (typeof d.lab != "undefined") {
-			string += "<br>Orig. lab: " + d.lab.substring(0,30);
-			if (d.lab.length>30) string+='...';
+			if (d.lab != "") {
+				var abbr = d.lab.match(/[A-Z]/g).join('')
+				string += "<br>Orig. lab: " + abbr;
+			}
 		}
 		if (typeof d.region != "undefined") {
 			string += "<br>Region: " + d.region.replace(/([A-Z])/g, ' $1');
