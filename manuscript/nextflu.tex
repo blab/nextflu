@@ -28,7 +28,7 @@
 
 %\date{\today}
 \maketitle
-\bibliographystyle{plain}
+\bibliographystyle{bioinformatics}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -37,7 +37,7 @@ This allows the virus population to evade immunity in their human hosts and rein
 Similarly, vaccines against seasonal influenza need to be updated frequently to protect against an evolving virus population.
 We have thus developed a processing pipeline and web-browser based visualization that allows convenient exploration and analysis of the most recent influenza virus sequence data.
 This web-application displays a phylogenetic tree that can be decorated with additional information such the viral genotype at specific sites, sampling location, and sequence or tree based statistics that have been shown to predictive of future virus dynamics.
-Additionally, mutation frequency trajectories are calculated and displayed.
+Additionally, mutation, genotype and clade frequency trajectories are calculated and displayed.
 
 \section{Availability and implementation:} Python and Javascript source code is freely available from \url{https://github.com/blab/nextflu}, while the web-application is live at \url{http://nextflu.org}.
 
@@ -49,38 +49,37 @@ Additionally, mutation frequency trajectories are calculated and displayed.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section*{Introduction}
 
-\begin{itemize}
-	\item Motivation
-	\item data sources
-	\item pipe line and design
-	\item frequency estimation details
-	\item genotype and trait coloring
-	\item generalizability
-\end{itemize}
-
-nextflu consists of a processing pipeline writtin in python and a javascript based visualization called auspice.
-As input, augur requires a fasta file of sequences of the HA segment with fasta labels containing relevant information such as the strain name, the sampling date and passage history.
-In a first step, viruses without complete date  or geographic information and viruses passaged in eggs are removed.
-In addition, local outbreaks are filtered by keeping only one instance of identical sequences sampled at the same location on the same day.
-Following filtering, the viruses are subsampled to achieve an appoximately even temporal and global distribution (typically 50 viruses per month).
-For our standard display period of 3 years, this typically results in \~1800 viruses, which we align us \texttt{mafft} \citep{mafft}.
-
-Once aligned, the set of virus sequences is further cleaned by removing insertions relative to the outgroup and by removing sequences that are either much closer or further from the outgroup then expected given their date of sampling (filtering viruses that don't follow an approximate molecular clock).
-REASSORTANTS.
-
-From the filtered and cleaned alignment, augur builds a phylogenetic tree using \texttt{fasttree} \citep{Price:2009p47657} which is further refined by one hour of RAxML optimization \citep{RAxml}.
-Next, the state of every internal node of the tree is inferred using marginal maximum likelihood method and missing sequence is filled with the nearest ancestral sequence.
-Internal branches without mutations are collapsed into polytomies.
-The final tree is decorated with the attributes to be displayed in the browser, see below.  
+Every year, seasonal influenza infects between 10\% and 20\% of the global population and influenza subtype A/H3N2 is responsible for the bulk of human morbidity and mortality \citep{flufactsheet}.
+Vaccination remains the most effective public health measure to combat seasonal epidemics.
+However, influenza viruses constantly evolve and thereby undergo antigenic drift, allowing drifted viruses to reinfect those in the human population with acquired immunity to previously circulating strains.
+Owing to antigenic drift, the seasonal influenza vaccine needs frequent updating to remain effective.
+In any given year, the particular choice of vaccine strain plays a major role in determining vaccine efficacy and so it is of critical importance to develop tools to analyze the ongoing evolution of the influenza virus population in order to aid vaccine strain selection.
+The program nextflu presents a near real-time display of genetic relationships among influenza H3N2 viruses and allows investigation of currently available sequence data.
 
 \begin{figure}[t!]
 	\begin{center}
-	\includegraphics[width=0.99\columnwidth]{figures/tree_screenshot}
+	\includegraphics[width=0.99\columnwidth]{figures/tree}
 \caption[]{The \texttt{nextflu} website with the user interface on the left and
 the tree on the right.}
 \label{fig:tree}
 \end{center}
 \end{figure}
+
+In implementation, nextflu consists of a processing pipeline written in Python called \textit{augur} that takes sequence data and infers evolutionary information and a JavaScript-based browser visualization called \textit{auspice} that displays this processed information.
+As input, \textit{augur} requires a FASTA file of sequences with FASTA header labels containing relevant information such as the strain name, the sampling date and passage history.
+For this purpose, influenza H3N2 sequence data for the hemagglutinin (HA) gene is downloaded from the GISAID EpiFlu database \citep{GISAID}, which contains the most up-to-date collection of seasonal influenza viruses.
+The first step in the processing pipeline is to automatically select a subset of representative H3N2 viruses.
+Here, viruses without complete date or geographic information, viruses passaged in eggs and sequences less than 987 bases are removed.
+In addition, local outbreaks are filtered by keeping only one instance of identical sequences sampled at the same location on the same day.
+Following filtering, the viruses are subsampled to achieve a more equitable temporal and geographic distribution.
+For our standard display period of 3 years and 50 viruses per month, this typically results in $\sim$1800 viruses, which we align using MAFFT \citep{katoh_mafft_2013}.
+Once aligned, the set of virus sequences is further cleaned by removing insertions relative to the outgroup to enforce canonical HA site numbering and by removing sequences that show either too much or too little divergence relative to the expectation given data of sampling.
+Additionally, known reassortant clusters are removed, including the triple-reassortant influenza viruses sporadically sampled in humans throughout North America \citep{bastien_human_2010}.
+
+From the filtered and cleaned alignment, \textit{augur} builds a phylogenetic tree using FastTree \citep{price_fasttree_2009}, which is then further refined using RAxML \citep{stamatakis_raxml_2014}.
+Next, the state of every internal node of the tree is inferred using marginal maximum likelihood method and missing sequence is filled with the nearest ancestral sequence.
+Internal branches without mutations are collapsed into polytomies.
+The final tree is decorated with the attributes to be displayed in the browser, see below.  
 
 In addition to the phylogenetic tree, augur estimates the frequency trajectories of mutations, genotypes and clades in the tree. 
 Frequency trajectories are represented as a linear interpolation $x(t)$ of values $x_i$ at time points  $t_i$ spaced one month apart. 
@@ -105,7 +104,7 @@ PUT IN DETAILS ON HOW WE ESTIMATE FREQUENCIES ON THE TREE?
 The tree decorated with attributes and clade frequencies is written to file in a nested json format for display in the browser by auspice.
 In addition to the tree, json files containing the sequences, frequencies of mutations and genotypes, as well as meta information are exported.
 
-The tree is visualized by auspice using d3 \citep{d3}.
+The tree is visualized by auspice using d3 \citep{bostock_d3_2011}.
 The user can explore the data interactively by selecting viruses from different dates (moving the date slider, top right corner in \FIG{tree}) or by coloring the tree by the following attributes:
 \begin{itemize}
 	\item epitope mutations: each tip is colored by the number of aminoacid mutations at \~50 positions relative to the root of the tree.
