@@ -350,7 +350,7 @@ var gt_chart = c3.generate({
 				position: 'outer-center'	
 			},
 			tick: {
-				values: [2012,2012.5,2013,2013.5,2014,2014.5,2015],
+				//values: [2012,2012.5,2013,2013.5,2014,2014.5,2015],
 				outer: false				
 			}
 		}
@@ -1205,7 +1205,8 @@ d3.json("data/"+file_prefix+"frequencies.json", function(error, json){
 	var step = Math.round((pivots[pivots.length-1]-pivots[0])/6*10)/10;
 	while (ticks[ticks.length-1]<pivots[pivots.length-1]){
 		ticks.push(Math.round((ticks[ticks.length-1]+step)*10)/10);
-	}	
+	}
+	//gt_chart.axis.x.values = ticks;
 	/**
 		parses a genotype string into region and positions
 	**/
