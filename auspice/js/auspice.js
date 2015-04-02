@@ -269,16 +269,28 @@ var virusTooltip = d3.tip()
 		string = ""
 		
 		// safe to assume the following attributes
-		string += "<div class=\"center\">";
+		string += "<div class=\"left\">";
 		if (typeof d.strain != "undefined") {
 			string += d.strain;
 		}
+		string +="</div>";
+		string += "<div class=\"smallspacer\"></div>";
+		string += "<div class=\"smallnote\">";
 		if (typeof d.region != "undefined") {
-			string += "<br>" + d.region.replace(/([A-Z])/g, ' $1');
+			string += d.region.replace(/([A-Z])/g, ' $1');
 		}
 		if (typeof d.date != "undefined") {
 			string += ", " + d.date;
 		}
+		if (typeof d.lab != "undefined") {
+			if (d.lab != "") {
+				string += "<br>" + d.lab.substring(0,30);
+				if (d.lab.length>30) string += '...';
+			}
+		}
+		if ((typeof d.db != "undefined") && (typeof d.accession != "undefined") && (d.db == "GISAID")) {
+			string += "<br>GISAID ID: EPI" + d.accession;
+		}		
 		string += "</div>";
 		
 		string += "<div class=\"smallspacer\"></div>";
@@ -297,17 +309,6 @@ var virusTooltip = d3.tip()
 		if (typeof d.LBI != "undefined") {
 			string += "Local branching index: " + d.LBI.toFixed(3) + "<br>";
 		}
-		if (typeof d.lab != "undefined") {
-			if (d.lab != "") {
-				string += "Orig. lab: " + d.lab.substring(0,20);
-				if (d.lab.length>20) string += '...';
-				string += "<br>"
-			}
-		}
-		if ((typeof d.db != "undefined") && (typeof d.accession != "undefined") && (d.db == "GISAID")) {
-			console.log(d.accession);
-			string += "GISAID ID: EPI" + d.accession + "<br>";
-		}		
 		string += "</div>";
 		return string;
 	});
