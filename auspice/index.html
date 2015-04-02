@@ -14,9 +14,10 @@ title: nextflu
 			</div>
 			<div class="bigspacer"></div>		
 		</div>
-		<div class="io-container">
-			<h4>Phylogenetic tree</h4>	
-		</div>			
+		<div class="io-container title">
+			Phylogenetic tree
+		</div>
+		<div class="spacer"></div>		
 		<div class="row">
 			<div class="col-xs-6 io-container">
 				<div>
@@ -76,9 +77,10 @@ title: nextflu
 
 <div class="row">
 	<div class="col-md-3">
-		<div class="io-container">
-			<h4>Frequency trajectories</h4>	
-		</div>	
+		<div class="io-container title">
+			Frequencies
+		</div>
+		<div class="spacer"></div>
 		<div class="row">			
 			<div class="col-xs-6 io-container">	
 				<form class="form-horizontal form-small">
@@ -95,6 +97,7 @@ title: nextflu
 				</div>
 			</div>
 		</div>
+		<div class="spacer"></div>
 		Input mutations as position+amino acid, i.e. <span class="highlight">159Y</span>, clades as clade name, 
 		i.e. <span class="highlight">3c2.a</span> and add locations as <span class="highlight">/AS</span>, 
 		<span class="highlight">/NA</span>, <span class="highlight">/EU</span>, <span class="highlight">/OC</span>, 
@@ -114,9 +117,12 @@ title: nextflu
 </div>
 
 <div class="row">
-	<div class="col-md-3"></div>
+	<div class="col-md-3">
+		<div class="io-container title">
+			Feature explanation
+		</div>	
+	</div>
 	<div class="col-md-9">
-		<h3>Feature explanation</h3>
 		<h4>Phylogenetic tree</h4>
 		<p> Use the <a href="/help/#date_slider"><b>date slider</b></a> to highlight viruses sampled within 12 month of the date displayed.
 		<p> Use the <a href="/help/#epitope_mutations"><b>drop down menu</b></a> to color viruses by number of <span class="highlight"><a href="/help/#epitope_mutations">epitope mutations</a></span>, 
@@ -129,7 +135,7 @@ title: nextflu
 		<p> <a href="/help/#mouse_tip"><b>Mouse over</b></a> a tip to show virus name, location and features.
 		<p> <a href="/help/#mouse_branch"><b>Mouse over</b></a> a branch to graph the frequency of the correponding clade trajectory below or <b>click</b>
 		on a branch to zoom into its descendent clade.
-		<h4>Frequency trajectories</h4>
+		<h4>Frequencies</h4>
 		Enter a mutation or genotype above (e.g. <span class="highlight">225D</span>) and click 
 		<b>plot frequencies</b> to show estimated frequency of this mutation through time. Complex genotypes can be specified by combining mutations as 
 		<span class="highlight">159Y/225D</span>. In addition, geographic regions can be specified by adding AS 
@@ -142,9 +148,18 @@ title: nextflu
 </div>
 
 <div class="row">
-	<div class="col-md-3"></div>
+	<div class="col-md-12">
+		<div class="bigspacer"></div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-3">
+		<div class="io-container title">
+			Rationale and details
+		</div>		
+	</div>
 	<div class="col-md-9">
-		<h3>Rationale and details</h3>
 		<p> <b>Epitope mutations</b> are based on 
 		<a href="http://www.nature.com/nature/journal/v289/n5796/abs/289366a0.html">HA structure and exposed residues</a>. 
 		Multiple recent mutations at epitope
