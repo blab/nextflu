@@ -282,15 +282,15 @@ var virusTooltip = d3.tip()
 		if (typeof d.date != "undefined") {
 			string += ", " + d.date;
 		}
-		if (typeof d.lab != "undefined") {
-			if (d.lab != "") {
-				string += "<br>" + d.lab.substring(0,30);
-				if (d.lab.length>30) string += '...';
-			}
-		}
 		if ((typeof d.db != "undefined") && (typeof d.accession != "undefined") && (d.db == "GISAID")) {
 			string += "<br>GISAID ID: EPI" + d.accession;
-		}		
+		}
+		if (typeof d.lab != "undefined") {
+			if (d.lab != "") {
+				string += "<br>Source: " + d.lab.substring(0,25);
+				if (d.lab.length>25) string += '...';
+			}
+		}			
 		string += "</div>";
 		
 		string += "<div class=\"smallspacer\"></div>";
