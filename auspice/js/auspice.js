@@ -267,36 +267,47 @@ var virusTooltip = d3.tip()
 	.offset([0, 12])
 	.html(function(d) {
 		string = ""
+		
+		// safe to assume the following attributes
+		string += "<div class=\"center\">";
 		if (typeof d.strain != "undefined") {
-			string += "Strain: " + d.strain;
+			string += d.strain;
+		}
+		if (typeof d.region != "undefined") {
+			string += "<br>" + d.region.replace(/([A-Z])/g, ' $1');
 		}
 		if (typeof d.date != "undefined") {
-			string += "<br>Date: " + d.date;
+			string += ", " + d.date;
 		}
-		if ((typeof d.db != "undefined") && (typeof d.accession != "undefined") && (typeof d.db=='GISAID')) {
-			string += "<br>GISAID ID: EPI" + d.accession;
+		string += "</div>";
+		
+		string += "<div class=\"smallspacer\"></div>";
+		
+		// following may or may not be present
+		string += "<div class=\"smallnote\">";
+		if (typeof d.ep != "undefined") {
+			string += "Epitope distance: " + d.ep + "<br>";
+		}
+		if (typeof d.ne != "undefined") {
+			string += "Non-epitope distance: " + d.ne + "<br>";
+		}
+		if (typeof d.rb != "undefined") {
+			string += "Receptor binding distance: " + d.rb + "<br>";
+		}
+		if (typeof d.LBI != "undefined") {
+			string += "Local branching index: " + d.LBI.toFixed(3) + "<br>";
 		}
 		if (typeof d.lab != "undefined") {
 			if (d.lab != "") {
-				var abbr = d.lab.match(/[A-Z]/g).join('')
-				string += "<br>Orig. lab: " + abbr;
+				string += "Orig. lab: " + d.lab.substring(0,20);
+				if (d.lab.length>20) string += '...';
+				string += "<br>"
 			}
 		}
-		if (typeof d.region != "undefined") {
-			string += "<br>Region: " + d.region.replace(/([A-Z])/g, ' $1');
-		}
-		if (typeof d.ep != "undefined") {
-			string += "<br>Epitope distance: " + d.ep;
-		}
-		if (typeof d.ne != "undefined") {
-			string += "<br>Non-epitope distance: " + d.ne;
-		}
-		if (typeof d.rb != "undefined") {
-			string += "<br>Receptor binding distance: " + d.rb;
-		}
-		if (typeof d.LBI != "undefined") {
-			string += "<br>Local branching index: " + d.LBI.toFixed(3);
-		}
+		if ((typeof d.db != "undefined") && (typeof d.accession != "undefined") && (typeof d.db == "GISAID")) {
+			string += "GISAID ID: EPI" + d.accession + "<br>";
+		}		
+		string += "</div>";
 		return string;
 	});
 treeplot.call(virusTooltip);
