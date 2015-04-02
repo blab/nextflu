@@ -270,36 +270,49 @@ var virusTooltip = d3.tip()
 	.offset([0, 12])
 	.html(function(d) {
 		string = ""
+		
+		// safe to assume the following attributes
+		string += "<div class=\"left\">";
 		if (typeof d.strain != "undefined") {
-			string += "Strain: " + d.strain;
+			string += d.strain;
+		}
+		string +="</div>";
+		string += "<div class=\"smallspacer\"></div>";
+		string += "<div class=\"smallnote\">";
+		if (typeof d.region != "undefined") {
+			string += d.region.replace(/([A-Z])/g, ' $1');
 		}
 		if (typeof d.date != "undefined") {
-			string += "<br>Date: " + d.date;
+			string += ", " + d.date;
 		}
-		if ((typeof d.db != "undefined") && (typeof d.accession != "undefined") && (typeof d.db=='GISAID')) {
+		if ((typeof d.db != "undefined") && (typeof d.accession != "undefined") && (d.db == "GISAID")) {
 			string += "<br>GISAID ID: EPI" + d.accession;
 		}
 		if (typeof d.lab != "undefined") {
 			if (d.lab != "") {
-				var abbr = d.lab.match(/[A-Z]/g).join('')
-				string += "<br>Orig. lab: " + abbr;
+				string += "<br>Source: " + d.lab.substring(0,25);
+				if (d.lab.length>25) string += '...';
 			}
-		}
-		if (typeof d.region != "undefined") {
-			string += "<br>Region: " + d.region.replace(/([A-Z])/g, ' $1');
-		}
+		}			
+		string += "</div>";
+		
+		string += "<div class=\"smallspacer\"></div>";
+		
+		// following may or may not be present
+		string += "<div class=\"smallnote\">";
 		if (typeof d.ep != "undefined") {
-			string += "<br>Epitope distance: " + d.ep;
+			string += "Epitope distance: " + d.ep + "<br>";
 		}
 		if (typeof d.ne != "undefined") {
-			string += "<br>Non-epitope distance: " + d.ne;
+			string += "Non-epitope distance: " + d.ne + "<br>";
 		}
 		if (typeof d.rb != "undefined") {
-			string += "<br>Receptor binding distance: " + d.rb;
+			string += "Receptor binding distance: " + d.rb + "<br>";
 		}
 		if (typeof d.LBI != "undefined") {
-			string += "<br>Local branching index: " + d.LBI.toFixed(3);
+			string += "Local branching index: " + d.LBI.toFixed(3) + "<br>";
 		}
+		string += "</div>";
 		return string;
 	});
 treeplot.call(virusTooltip);
