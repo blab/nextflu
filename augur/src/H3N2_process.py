@@ -16,7 +16,7 @@ receptor_binding_sites = [144, 154, 155, 157, 158, 188, 192]
 virus_config.update({
 	# data source and sequence parsing/cleaning/processing
 	'virus':'H3N2',
-	'alignment_file':'data/gisaid_epiflu_sequence.fasta',
+	'alignment_file':'data/H3N2_gisaid_epiflu_sequence.fasta',
 	'outgroup':'A/Beijing/32/1992',
 	#'force_include':'source-data/HI_strains.txt',
 	'force_include_all':False,
@@ -27,7 +27,8 @@ virus_config.update({
 						   "3c3":  [(128,'A'), (142,'G'), (159,'F')],
 						   "3c2.a":[(144,'S'), (159,'Y'), (225,'D'), (311,'H'),(489,'N')],
 						   "3c2":  [(144,'N'), (159,'F'),(225,'N'), (489,'N'), (142, 'R')]
-							}
+							},
+	'auspice_prefix':'H3N2_'							
 	})
 
 
@@ -259,7 +260,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 		if 'export' in steps:
 			self.temporal_regional_statistics()
 			# exporting to json, including the H3N2 specific fields
-			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db'], 
+			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country'], 
 			                       annotations = ['3c3.a', '3c2.a'])
 
 if __name__=="__main__":

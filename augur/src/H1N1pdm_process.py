@@ -31,8 +31,18 @@ virus_config.update({
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
 	'cds':[0,None], # define the HA1 start i n 0 numbering
 	# define relevant clades in canonical HA1 numbering (+1)
-	'clade_designations': {},
-	'auspice_prefix':'H1N1pdm_',
+	'clade_designations': {
+		'2':[(142, 'N'), (151 ,'A'), (200, 'S'), (48,'D'), (189,'N'), (203,'T')],
+		'3':[(151 ,'T'), (200, 'P')],
+		'4':[(142, 'D'), (151 ,'A'), (200, 'S')],
+		'5':[(104, 'N'), (222, 'K'), (233, 'V'), (266, 'L')],
+		'6':[(202,'T'),  (114, 'N'), (214, 'A')],
+		'6c':[(251,'I'), (114, 'N'), (214, 'A')],
+		'6b':[(180,'Q'), (273,'T'), (214, 'A')],
+		'7':[(202,'T'),  (114, 'N'), (214, 'T')],
+		'8':[(203,'T'), (289,'A')],
+		},
+	'auspice_prefix':'H1N1pdm_'
 	})
 
 
@@ -143,8 +153,8 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine):
 		if 'export' in steps:
 			self.temporal_regional_statistics()
 			# exporting to json, including the H1N1pdm specific fields
-			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db'], 
-			                       annotations = ['3c3.a', '3c2.a'])
+			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country'], 
+			                       annotations = ['6b', '6c'])
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies', 'export']

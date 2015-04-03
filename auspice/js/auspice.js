@@ -1,5 +1,3 @@
-var file_prefix = 'H1N1pdm_';
-
 function gatherTips(node, tips) {
 	if (typeof node.children != "undefined") {
 		for (var i=0, c=node.children.length; i<c; i++) {
@@ -23,17 +21,7 @@ function gatherInternals(node, internals) {
 }
 
 function getVaccines(tips) {
-	vaccineChoice = {};
-	vaccineChoice['A/California/07/2009'] = "2009-09-25"; //H1N1pdm CHECK
-	vaccineChoice['A/Fujian/411/2002'] = "2003-09-25";
-	vaccineChoice['A/California/7/2004'] = "2005-02-21";
-	vaccineChoice['A/Wisconsin/67/2005'] = "2006-02-21";
-	vaccineChoice['A/Brisbane/10/2007'] = "2007-09-25";
-	vaccineChoice['A/Perth/16/2009'] = "2009-09-25";
-	vaccineChoice['A/Victoria/361/2011'] = "2012-02-21";
-	vaccineChoice['A/Texas/50/2012'] = "2013-09-25";
-	vaccineChoice['A/Switzerland/9715293/2013'] = "2014-09-25";
-	vaccineStrains = Object.keys(vaccineChoice);
+	var vaccineStrains = Object.keys(vaccineChoice);
 	vaccines = [];
 	tips.forEach(function (tip) {
 		if (vaccineStrains.indexOf(tip.strain) != -1) {
@@ -156,7 +144,6 @@ function calcLBI(node, allnodes){
 /**
  * for each node, calculate the derivative of the frequency tranjectory. if none exists, copy parent
 **/
-var dfreq_dn = 2;
 function calcDfreq(node, freq_ii){
 	if (typeof node.children != "undefined") {
 		for (var i1=0; i1<node.children.length; i1++) {
@@ -377,7 +364,7 @@ var gt_chart = c3.generate({
 });
 
 
-d3.json("data/"+file_prefix+"tree.json", function(error, root) {
+d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 
 	if (error) return console.warn(error);
 
@@ -455,15 +442,15 @@ d3.json("data/"+file_prefix+"tree.json", function(error, root) {
 	var colorBy = document.getElementById("coloring").value;
 	
 	var epitopeColorScale = d3.scale.linear().clamp([true])
-		.domain([4,5,6,7,8,9,10,11,12,13])
+		.domain(epiColorDomain)
 		.range(colors);		
 
 	var nonepitopeColorScale = d3.scale.linear().clamp([true])
-		.domain([2,3,4,5,6,7,8,9,10,11])
+		.domain(nonEpiColorDomain)
 		.range(colors);
 
 	var receptorBindingColorScale = d3.scale.linear().clamp([true])
-		.domain([0,1,2,3,4])
+		.domain(rbsColorDomain)
 		.range(colors.filter( function(d,i){return i%2;}));
 
 	var lbiColorScale = d3.scale.linear()
@@ -641,7 +628,7 @@ d3.json("data/"+file_prefix+"tree.json", function(error, root) {
     			return "Genotype"
     		}
    			if (colorBy == "dfreq") {
-    			return "Frequency change (per "+Math.round(12*dfreq_dn*dt)+" month)";
+    			return "Frequency change (prev. "+Math.round(12*dfreq_dn*dt)+" month)";
     		}
     	});
     
@@ -1196,7 +1183,7 @@ d3.json("data/"+file_prefix+"tree.json", function(error, root) {
 
 });
 
-d3.json("data/"+file_prefix+"meta.json", function(error, json) {
+d3.json("/data/" + file_prefix + "meta.json", function(error, json) {
 	if (error) return console.warn(error);
 	d3.select("#updated").text(json['updated']);
 	commit_id = json['commit'];
@@ -1208,12 +1195,12 @@ d3.json("data/"+file_prefix+"meta.json", function(error, json) {
 
 });
 
-d3.json("data/"+file_prefix+"sequences.json", function(error, json) {
+d3.json("/data/" + file_prefix + "sequences.json", function(error, json) {
 	if (error) return console.warn(error);
 	cladeToSeq=json;
 });
 
-d3.json("data/"+file_prefix+"frequencies.json", function(error, json){
+d3.json("/data/" + file_prefix + "frequencies.json", function(error, json){
 	console.log(error);
 	var pivots= json["mutations"]["global"]["pivots"].map(function (d) {return Math.round(parseFloat(d)*100)/100;});
 	var ticks = [Math.round(pivots[0])];
