@@ -31,7 +31,10 @@ virus_config.update({
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
 	'cds':[0,None], # define the HA1 start i n 0 numbering
 	# define relevant clades in canonical HA1 numbering (+1)
-	'clade_designations': {},
+	'clade_designations': {
+		'1A': [(101,'K'), (84, 'L'), (191, 'K')],
+		'1B': [(101,'K'), (84, 'P'), (191, 'K')]
+	},
 	'auspice_prefix':'Vic_',
 	})
 
@@ -165,7 +168,8 @@ class BVic_process(process, BVic_filter, BVic_clean, BVic_refine):
 		if 'export' in steps:
 			self.temporal_regional_statistics()
 			# exporting to json, including the BVic specific fields
-			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country'])
+			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country'],
+									annotations = ['1A', '1B'])
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies', 'export']

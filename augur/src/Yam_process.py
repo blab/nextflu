@@ -31,7 +31,10 @@ virus_config.update({
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
 	'cds':[0,None], # define the HA1 start i n 0 numbering
 	# define relevant clades in canonical HA1 numbering (+1)
-	'clade_designations': {},
+	'clade_designations': {
+		'2': [(74,'K'), (134, 'A'), (176, 'S')],
+		'3': [(74,'R'), (134, 'P'), (176, 'I')],
+	},
 	'auspice_prefix':'Yam_',
 	})
 
@@ -169,7 +172,8 @@ class BYam_process(process, BYam_filter, BYam_clean, BYam_refine):
 		if 'export' in steps:
 			self.temporal_regional_statistics()
 			# exporting to json, including the BYam specific fields
-			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db','country'])
+			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db','country'],
+									annotations = ['2', '3'])
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies', 'export']
