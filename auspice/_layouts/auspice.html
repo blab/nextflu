@@ -4,6 +4,12 @@ title: nextflu
 ---
 
 <div class="row">
+	<div align="right">
+	<div class="btn-group" role="group" aria-label="...">
+	  <a href="/H3N2/" role="button" class="btn btn-default {% if page.virus == "H3N2" %} active {% endif %}">A/H3N2</a>
+	  <a href="/H1N1pdm/" role="button" class="btn btn-default {% if page.virus == "H1N1pdm" %} active {% endif %}">A/H1N1pdm</a>
+	</div>
+	</div>
 	<div class="col-md-3">
 		<div class="logo-container">
 			<div class="bigtitle">
@@ -59,7 +65,7 @@ title: nextflu
 					<div class="form-group">
 						<label class="col-xs-4 control-label">Or</label>
 						<div class="col-xs-8 controls">
-							<input id="gt-color" type="search" placeholder="HA1 positions..." class="form-control">
+							<input id="gt-color" type="search" placeholder= "{{ page.gtplaceholder }}"  class="form-control">
 						</div>
 					</div>		
 				</form>
@@ -77,7 +83,7 @@ title: nextflu
 		<div class="treeplot-container">
 			<svg id="treeplot"></svg>
 		</div>
-	</div>	
+	</div>
 </div>
 
 <div class="row">
@@ -98,7 +104,7 @@ title: nextflu
 				<form class="form-horizontal form-small">
 					<div class="form-group">
 						<div class="col-xs-12">
-							<input id="gtspec" type="search" class="form-control" value="3c2.a, 3c3.a">
+							<input id="gtspec" type="search" class="form-control" value="{{ page.freqdefault }}">
 						</div>
 					</div>
 				</form>	

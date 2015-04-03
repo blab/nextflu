@@ -144,7 +144,6 @@ function calcLBI(node, allnodes){
 /**
  * for each node, calculate the derivative of the frequency tranjectory. if none exists, copy parent
 **/
-var dfreq_dn = 2;
 function calcDfreq(node, freq_ii){
 	if (typeof node.children != "undefined") {
 		for (var i1=0; i1<node.children.length; i1++) {
@@ -443,15 +442,15 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 	var colorBy = document.getElementById("coloring").value;
 	
 	var epitopeColorScale = d3.scale.linear().clamp([true])
-		.domain([4,5,6,7,8,9,10,11,12,13])
+		.domain(epiColorDomain)
 		.range(colors);		
 
 	var nonepitopeColorScale = d3.scale.linear().clamp([true])
-		.domain([2,3,4,5,6,7,8,9,10,11])
+		.domain(nonEpiColorDomain)
 		.range(colors);
 
 	var receptorBindingColorScale = d3.scale.linear().clamp([true])
-		.domain([0,1,2,3,4])
+		.domain(rbsColorDomain)
 		.range(colors.filter( function(d,i){return i%2;}));
 
 	var lbiColorScale = d3.scale.linear()
@@ -629,7 +628,7 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
     			return "Genotype"
     		}
    			if (colorBy == "dfreq") {
-    			return "Frequency change (per "+Math.round(12*dfreq_dn*dt)+" month)";
+    			return "Frequency change (prev. "+Math.round(12*dfreq_dn*dt)+" month)";
     		}
     	});
     
