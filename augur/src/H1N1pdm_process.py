@@ -32,7 +32,7 @@ virus_config.update({
 	'cds':[0,None], # define the HA1 start i n 0 numbering
 	# define relevant clades in canonical HA1 numbering (+1)
 	'clade_designations': {},
-	'auspice_prefix':'H1N1pdm_',
+	'auspice_prefix':'H1N1pdm_'
 	})
 
 

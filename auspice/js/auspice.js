@@ -1,5 +1,3 @@
-var file_prefix = 'H1N1pdm_';
-
 function gatherTips(node, tips) {
 	if (typeof node.children != "undefined") {
 		for (var i=0, c=node.children.length; i<c; i++) {
@@ -23,17 +21,7 @@ function gatherInternals(node, internals) {
 }
 
 function getVaccines(tips) {
-	vaccineChoice = {};
-	vaccineChoice['A/California/07/2009'] = "2009-09-25"; //H1N1pdm CHECK
-	vaccineChoice['A/Fujian/411/2002'] = "2003-09-25";
-	vaccineChoice['A/California/7/2004'] = "2005-02-21";
-	vaccineChoice['A/Wisconsin/67/2005'] = "2006-02-21";
-	vaccineChoice['A/Brisbane/10/2007'] = "2007-09-25";
-	vaccineChoice['A/Perth/16/2009'] = "2009-09-25";
-	vaccineChoice['A/Victoria/361/2011'] = "2012-02-21";
-	vaccineChoice['A/Texas/50/2012'] = "2013-09-25";
-	vaccineChoice['A/Switzerland/9715293/2013'] = "2014-09-25";
-	vaccineStrains = Object.keys(vaccineChoice);
+	var vaccineStrains = Object.keys(vaccineChoice);
 	vaccines = [];
 	tips.forEach(function (tip) {
 		if (vaccineStrains.indexOf(tip.strain) != -1) {
@@ -270,34 +258,49 @@ var virusTooltip = d3.tip()
 	.offset([0, 12])
 	.html(function(d) {
 		string = ""
+		
+		// safe to assume the following attributes
+		string += "<div class=\"left\">";
 		if (typeof d.strain != "undefined") {
-			string += "Strain: " + d.strain;
+			string += d.strain;
+		}
+		string +="</div>";
+		string += "<div class=\"smallspacer\"></div>";
+		string += "<div class=\"smallnote\">";
+		if (typeof d.region != "undefined") {
+			string += d.region.replace(/([A-Z])/g, ' $1');
 		}
 		if (typeof d.date != "undefined") {
-			string += "<br>Date: " + d.date;
+			string += ", " + d.date;
 		}
-		if ((typeof d.db != "undefined") && (typeof d.accession != "undefined") && (typeof d.db=='GISAID')) {
+		if ((typeof d.db != "undefined") && (typeof d.accession != "undefined") && (d.db == "GISAID")) {
 			string += "<br>GISAID ID: EPI" + d.accession;
 		}
 		if (typeof d.lab != "undefined") {
-			string += "<br>Orig. lab: " + d.lab.substring(0,30);
-			if (d.lab.length>30) string+='...';
-		}
-		if (typeof d.region != "undefined") {
-			string += "<br>Region: " + d.region.replace(/([A-Z])/g, ' $1');
-		}
+			if (d.lab != "") {
+				string += "<br>Source: " + d.lab.substring(0,25);
+				if (d.lab.length>25) string += '...';
+			}
+		}			
+		string += "</div>";
+		
+		string += "<div class=\"smallspacer\"></div>";
+		
+		// following may or may not be present
+		string += "<div class=\"smallnote\">";
 		if (typeof d.ep != "undefined") {
-			string += "<br>Epitope distance: " + d.ep;
+			string += "Epitope distance: " + d.ep + "<br>";
 		}
 		if (typeof d.ne != "undefined") {
-			string += "<br>Non-epitope distance: " + d.ne;
+			string += "Non-epitope distance: " + d.ne + "<br>";
 		}
 		if (typeof d.rb != "undefined") {
-			string += "<br>Receptor binding distance: " + d.rb;
+			string += "Receptor binding distance: " + d.rb + "<br>";
 		}
 		if (typeof d.LBI != "undefined") {
-			string += "<br>Local branching index: " + d.LBI.toFixed(3);
+			string += "Local branching index: " + d.LBI.toFixed(3) + "<br>";
 		}
+		string += "</div>";
 		return string;
 	});
 treeplot.call(virusTooltip);
@@ -362,7 +365,7 @@ var gt_chart = c3.generate({
 });
 
 
-d3.json("data/"+file_prefix+"tree.json", function(error, root) {
+d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 
 	if (error) return console.warn(error);
 
@@ -1181,7 +1184,7 @@ d3.json("data/"+file_prefix+"tree.json", function(error, root) {
 
 });
 
-d3.json("data/"+file_prefix+"meta.json", function(error, json) {
+d3.json("/data/" + file_prefix + "meta.json", function(error, json) {
 	if (error) return console.warn(error);
 	d3.select("#updated").text(json['updated']);
 	commit_id = json['commit'];
@@ -1193,12 +1196,12 @@ d3.json("data/"+file_prefix+"meta.json", function(error, json) {
 
 });
 
-d3.json("data/"+file_prefix+"sequences.json", function(error, json) {
+d3.json("/data/" + file_prefix + "sequences.json", function(error, json) {
 	if (error) return console.warn(error);
 	cladeToSeq=json;
 });
 
-d3.json("data/"+file_prefix+"frequencies.json", function(error, json){
+d3.json("/data/" + file_prefix + "frequencies.json", function(error, json){
 	console.log(error);
 	var pivots= json["mutations"]["global"]["pivots"].map(function (d) {return Math.round(parseFloat(d)*100)/100;});
 	var ticks = [Math.round(pivots[0])];
