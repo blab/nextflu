@@ -628,7 +628,12 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
     			return "Genotype"
     		}
    			if (colorBy == "dfreq") {
-    			return "Frequency change (prev. "+Math.round(12*dfreq_dn*dt)+" month)";
+   				var tmp_nmonth = Math.round(12*dfreq_dn*dt);
+   				var tmp_text = "Freq. change ("+tmp_nmonth+" month";
+   				if (tmp_nmonth>1){
+   					tmp_text+='s';
+   				}
+    			return tmp_text+')';
     		}
     	});
     
