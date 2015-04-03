@@ -352,7 +352,7 @@ var gt_chart = c3.generate({
 				position: 'outer-center'	
 			},
 			tick: {
-				//values: [2012,2012.5,2013,2013.5,2014,2014.5,2015],
+				values: time_ticks,
 				outer: false				
 			}
 		}
