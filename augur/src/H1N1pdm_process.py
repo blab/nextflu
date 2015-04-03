@@ -153,8 +153,8 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine):
 		if 'export' in steps:
 			self.temporal_regional_statistics()
 			# exporting to json, including the H1N1pdm specific fields
-			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db'], 
-			                       annotations = ['3c3.a', '3c2.a'])
+			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country'], 
+			                       annotations = ['6b', '6c'])
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies', 'export']

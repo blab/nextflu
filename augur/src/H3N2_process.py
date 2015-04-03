@@ -260,7 +260,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 		if 'export' in steps:
 			self.temporal_regional_statistics()
 			# exporting to json, including the H3N2 specific fields
-			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db'], 
+			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country'], 
 			                       annotations = ['3c3.a', '3c2.a'])
 
 if __name__=="__main__":
