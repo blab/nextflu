@@ -1,4 +1,4 @@
-var file_prefix = 'BYam_';
+var file_prefix = 'Yam_';
 var dfreq_dn = 2;
 
 var	vaccineChoice = {};

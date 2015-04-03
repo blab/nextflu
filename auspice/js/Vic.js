@@ -1,4 +1,4 @@
-var file_prefix = 'BVic_';
+var file_prefix = 'Vic_';
 var dfreq_dn = 2;
 
 var	vaccineChoice = {};
