@@ -4,24 +4,40 @@ title: nextflu
 ---
 
 <div class="row">
-	<div align="right">
-	<div class="btn-group" role="group" aria-label="...">
-	  <a href="/H3N2/" role="button" class="btn btn-default {% if page.virus == "H3N2" %} active {% endif %}">A/H3N2</a>
-	  <a href="/H1N1pdm/" role="button" class="btn btn-default {% if page.virus == "H1N1pdm" %} active {% endif %}">A/H1N1pdm</a>
-	  <a href="/Yam/" role="button" class="btn btn-default {% if page.virus == "Yam" %} active {% endif %}">B/Yam</a>
-	  <a href="/Vic/" role="button" class="btn btn-default {% if page.virus == "Vic" %} active {% endif %}">B/Vic</a>
-	</div>
-	</div>
 	<div class="col-md-3">
 		<div class="logo-container">
 			<div class="bigtitle">
 				<span class="c2">n</span><span class="c3">e</span><span class="c4">x</span><span class="c5">t</span><span class="c6">f</span><span class="c7">l</span><span class="c8">u</span>
 			</div>
 			<div class="subtitle-box">
-				Real-time tracking of seasonal influenza {{ page.virus }} virus evolution in humans
+				Real-time tracking of seasonal influenza virus evolution in humans
 			</div>
-			<div class="bigspacer"></div>		
+			<div class="spacer"></div>		
 		</div>
+		<div class="io-container">
+
+			<form class="form-inline form-small">
+				<div class="form-group">
+					<label class="control-label">Virus</label>
+					<select id="virus_select" class="form-control" onChange="document.location = this.value" value="GO">
+						<option value="/H3N2/" 
+							{% if page.virus == "H3N2" %}selected="selected"{% endif %}
+							>A/H3N2</option>
+						<option value="/H1N1pdm/"
+							{% if page.virus == "H1N1pdm" %}selected="selected"{% endif %}
+							>A/H1N1pdm</option>
+						<option value="/Vic/"
+							{% if page.virus == "Vic" %}selected="selected"{% endif %}
+							>B/Vic</option>
+						<option value="/Yam/"
+							{% if page.virus == "Yam" %}selected="selected"{% endif %}
+							>B/Yam</option>
+					</select>
+				</div>
+			</form>		
+					
+		</div>
+		<div class="bigspacer"></div>	
 		<div class="io-container title">
 			Phylogenetic tree
 		</div>
