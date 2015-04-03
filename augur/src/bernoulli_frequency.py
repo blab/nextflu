@@ -307,7 +307,7 @@ class virus_frequencies(object):
 			print "estimating frequency of clade", clade_name, clade_gt
 			freq, (tps, obs) = self.estimate_genotype_frequency(sub_aln, [(pos-1, aa) for pos, aa in clade_gt])
 			if freq is not None:
-				clade_frequencies[clade_name] = list(np.round(logit_inv(freq.y),3))
+				clade_frequencies[clade_name.lower()] = list(np.round(logit_inv(freq.y),3))
 		return clade_frequencies
 
 	def estimate_sub_frequencies(self, node, all_dates, tip_to_date_index, threshold=50, region_name="global"):

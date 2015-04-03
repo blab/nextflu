@@ -1243,7 +1243,13 @@ d3.json("/data/" + file_prefix + "frequencies.json", function(error, json){
 	function get_frequencies(region, gt){
 		var freq = [];
 		for (var pi=0; pi<pivots.length; pi++){freq[freq.length]=0;}
-		if ((typeof json["genotypes"] !="undefined") && (json["genotypes"][region][gt]!=undefined)) {
+		if (json["clades"][region][gt.toLowerCase()]!=undefined) {
+			console.log(gt+" found as clade");
+			for (var pi=0; pi<freq.length; pi++){
+				freq[pi]+=json["clades"][region][gt.toLowerCase()][pi];
+			}
+		}
+		else if ((typeof json["genotypes"] !="undefined") && (json["genotypes"][region][gt]!=undefined)) {
 			console.log(gt+" found as genotype");
 			for (var pi=0; pi<freq.length; pi++){
 				freq[pi]+=json["genotypes"][region][gt][pi];
@@ -1252,11 +1258,6 @@ d3.json("/data/" + file_prefix + "frequencies.json", function(error, json){
 			console.log(gt+" found as mutation");
 			for (var pi=0; pi<freq.length; pi++){
 				freq[pi]+=json["mutations"][region][gt][pi];
-			}
-		}else if (json["clades"][region][gt.toLowerCase()]!=undefined) {
-			console.log(gt+" found as clade");
-			for (var pi=0; pi<freq.length; pi++){
-				freq[pi]+=json["clades"][region][gt.toLowerCase()][pi];
 			}
 		}
 		return freq.map(function (d) {return Math.round(d*100)/100;});
