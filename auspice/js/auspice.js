@@ -417,12 +417,12 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 
 	var dateScale = d3.time.scale()
 		.domain([earliestDate, globalDate])
-		.range([5, 240])
+		.range([5, 205])
 		.clamp([true]);	
 
 	var niceDateScale = d3.time.scale()
 		.domain([earliestDate, globalDate])
-		.range([5, 240])
+		.range([5, 205])
 		.clamp([true])
 		.nice(d3.time.month);
 
@@ -789,9 +789,11 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 		.on("drag", dragged)
 		.on("dragstart", function() {
 			d3.selectAll(".date-input-text").style("fill", "#5DA8A3");
+			d3.selectAll(".date-input-marker").style("fill", "#5DA8A3");
 		})
 		.on("dragend", function() {
-			d3.selectAll(".date-input-text").style("fill", "#CCCCCC");
+			d3.selectAll(".date-input-text").style("fill", "#CCC");
+			d3.selectAll(".date-input-marker").style("fill", "#CCC");
 			dragend();
 		});
 
@@ -800,12 +802,13 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 		d.date = dateScale.invert(d3.event.x);
 		d.x = dateScale(d.date);
 		d3.selectAll(".date-input-text")
+			.attr("dx", function(d) {return 0.5*d.x})
 			.text(function(d) {
 				var format = d3.time.format("%Y %b %-d");
 				return format(d.date)
 			});
 		d3.selectAll(".date-input-marker")
-			.attr("cx", function(d) {return d.x})
+			.attr("cx", function(d) {return d.x});
 		globalDate = d.date;
 
 		calcNodeAges(time_window);
@@ -902,7 +905,7 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 	counterData['x'] = dateScale(globalDate)
 
 	d3.select("#date-input")
-		.attr("width", 260)
+		.attr("width", 240)
 		.attr("height", 65);
 
 	var counter = d3.select("#date-input").selectAll(".date-input-text")
@@ -911,7 +914,8 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 		.append("text")
 		.attr("class", "date-input-text")
 		.attr("text-anchor", "left")
-		.attr("dy", "0.75em")
+		.attr("dx", function(d) {return 0.5*d.x})		
+		.attr("dy", "1.0em")
 		.text(function(d) {
 			var format = d3.time.format("%Y %b %-d");
 			return format(d.date)
@@ -954,7 +958,8 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 		.attr("cx", function(d) {return d.x})
 		.attr("cy", 35)
 		.attr("r", 5)
-		.style("fill", "#5DA8A3")
+		.style("fill", "#CCC")
+		.style("stroke", "#777")		
 		.style("cursor", "pointer")
 		.call(drag);
 
