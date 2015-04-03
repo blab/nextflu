@@ -18,7 +18,7 @@ epitope_mask = np.array(['1' if pos in [141,142,145,146,172,176,178,179,180,181,
 									   ]
 						else '0' for pos in xrange(1,1725)])
 
-receptor_binding_sites = [159,169,170,172,173,203,207]
+receptor_binding_sites = [x-1 for x in [159,169,170,172,173,203,207]]
 
 
 virus_config.update({
