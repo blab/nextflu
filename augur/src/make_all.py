@@ -29,6 +29,6 @@ if 'Vic' in run_pipeline:
 	print call
 	subprocess.call(call)
 if 'Yam' in run_pipeline:
-	call = map(str, [python_binary, 'src/Vic_process.py', '-v', 30, '-y', 6, '--skip', 'genotype_frequencies', '-r', 1.0, '--prefix', 'data/Yam_'])
+	call = map(str, [python_binary, 'src/Yam_process.py', '-v', 30, '-y', 6, '--skip', 'genotype_frequencies', '-r', 1.0, '--prefix', 'data/Yam_'])
 	print call
 	subprocess.call(call)
