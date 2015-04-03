@@ -266,8 +266,8 @@ var virusTooltip = d3.tip()
 		string +="</div>";
 		string += "<div class=\"smallspacer\"></div>";
 		string += "<div class=\"smallnote\">";
-		if (typeof d.region != "undefined") {
-			string += d.region.replace(/([A-Z])/g, ' $1');
+		if (typeof d.country != "undefined") {
+			string += d.country.replace(/([A-Z])/g, ' $1');
 		}
 		if (typeof d.date != "undefined") {
 			string += ", " + d.date;
