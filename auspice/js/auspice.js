@@ -374,7 +374,7 @@ var gt_chart = c3.generate({
 });
 
 
-d3.json("data/tree.json", function(error, root) {
+d3.json("data/" + file_prefix + "tree.json", function(error, root) {
 
 	if (error) return console.warn(error);
 
@@ -1193,7 +1193,7 @@ d3.json("data/tree.json", function(error, root) {
 
 });
 
-d3.json("data/meta.json", function(error, json) {
+d3.json("data/" + file_prefix + "meta.json", function(error, json) {
 	if (error) return console.warn(error);
 	d3.select("#updated").text(json['updated']);
 	commit_id = json['commit'];
@@ -1205,12 +1205,12 @@ d3.json("data/meta.json", function(error, json) {
 
 });
 
-d3.json("data/sequences.json", function(error, json) {
+d3.json("data/" + file_prefix + "sequences.json", function(error, json) {
 	if (error) return console.warn(error);
 	cladeToSeq=json;
 });
 
-d3.json("data/frequencies.json", function(error, json){
+d3.json("data/" + file_prefix + "frequencies.json", function(error, json){
 	console.log(error);
 	var pivots= json["mutations"]["global"]["pivots"].map(function (d) {return Math.round(parseFloat(d)*100)/100;});
 	var ticks = [Math.round(pivots[0])];
