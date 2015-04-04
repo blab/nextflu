@@ -9,25 +9,27 @@ from Bio.Align import MultipleSeqAlignment
 import numpy as np
 from itertools import izip
 
-epitope_mask = np.fromstring("0000000000000000000000000000000000000000000011111011011001010011000100000001001011110011100110101000001100000100000001000110101011111101011010111110001010011111000101011011111111010010001111101110111001010001110011111111000000111110000000101010101110000000000011100100000001011011100000000000001001011000110111111000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", dtype='S1')
-receptor_binding_sites = [144, 154, 155, 157, 158, 188, 192]
+sp = 16
+epitope_mask = np.fromstring(sp*"0"+"0000000000000000000000000000000000000000000011111011011001010011000100000001001011110011100110101000001100000100000001000110101011111101011010111110001010011111000101011011111111010010001111101110111001010001110011111111000000111110000000101010101110000000000011100100000001011011100000000000001001011000110111111000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", dtype='S1')
+receptor_binding_sites = map(lambda x:x+sp-1, [145, 155, 156, 158, 159, 189, 193])
 
 
 virus_config.update({
 	# data source and sequence parsing/cleaning/processing
 	'virus':'H3N2',
-	'alignment_file':'data/gisaid_epiflu_sequence.fasta',
+	'alignment_file':'data/H3N2_gisaid_epiflu_sequence.fasta',
 	'outgroup':'A/Beijing/32/1992',
 	#'force_include':'source-data/HI_strains.txt',
 	'force_include_all':False,
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
-	'cds':[48,None], # define the HA1 start i n 0 numbering
+	'cds':[0,None], # define the HA1 start i n 0 numbering
 	# define relevant clades in canonical HA1 numbering (+1)
-	'clade_designations': { "3c3.a":[(128,'A'), (142,'G'), (159,'S')],
-						   "3c3":  [(128,'A'), (142,'G'), (159,'F')],
-						   "3c2.a":[(144,'S'), (159,'Y'), (225,'D'), (311,'H'),(489,'N')],
-						   "3c2":  [(144,'N'), (159,'F'),(225,'N'), (489,'N'), (142, 'R')]
-							}
+	'clade_designations': { "3c3.a":[(128+sp,'A'), (142+sp,'G'), (159+sp,'S')],
+						   "3c3":   [(128+sp,'A'), (142+sp,'G'), (159+sp,'F')],
+						   "3c2.a": [(144+sp,'S'), (159+sp,'Y'), (225+sp,'D'), (311+sp,'H'), (489+sp,'N')],
+						   "3c2":   [(144+sp,'N'), (159+sp,'F'), (225+sp,'N'), (489+sp,'N'), (142+sp, 'R')]
+							},
+	'auspice_prefix':'H3N2_'							
 	})
 
 
@@ -259,12 +261,12 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 		if 'export' in steps:
 			self.temporal_regional_statistics()
 			# exporting to json, including the H3N2 specific fields
-			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db'], 
+			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country'], 
 			                       annotations = ['3c3.a', '3c2.a'])
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies', 'export']
-	from process import parser
+	from process import parser, shift_cds
 	params = parser.parse_args()
 
 	lt = time.localtime()
@@ -280,6 +282,9 @@ if __name__=="__main__":
 			if tmp_step in steps:
 				print "skipping",tmp_step
 				steps.remove(tmp_step)
+	if params.HA1:
+		signal_peptide = 16
+		virus_config, epitope_mask, receptor_binding_sites = shift_cds(3*signal_peptide, virus_config, epitope_mask, receptor_binding_sites)
 
 	# add all arguments to virus_config (possibly overriding)
 	virus_config.update(params.__dict__)

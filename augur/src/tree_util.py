@@ -2,13 +2,17 @@ import dendropy
 import numpy as np
 from io_util import *
 
-# FIXME: make flu unspecific
 def delimit_newick(infile_name):
-	import re
-	with open(infile_name, 'r') as file:
-		newick = file.read().replace('\n', '')
-		newick = re.sub(r'(A/[^\:^,]+)', r"'\1'", newick)
-	return newick
+	from Bio import Phylo
+	from cStringIO import StringIO
+	tmp_tree = Phylo.read(infile_name, 'newick')
+	for t in tmp_tree.get_terminals():
+	    t.name = "'"+t.name+"'"
+	tree_string = StringIO()
+	Phylo.write(tmp_tree, tree_string, format="newick")
+	delimited_tree = tree_string.getvalue().replace("\\'","")
+	tree_string.close()
+	return delimited_tree
 
 
 def color_BioTree_by_attribute(T,attribute, vmin=None, vmax = None, missing_val='min', transform = lambda x:x, cmap=None):

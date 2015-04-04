@@ -161,8 +161,8 @@ class virus_filter(object):
 				tmp = [v for v in representative if v is not None]
 				shuffle(tmp)
 				select_set[-1].extend(tmp)
-			if self.verbose>1:
-				print "\t\tfound",len(select_set[-1]), 'in year',y,'month',m
+		if self.verbose>1:
+			print "\tfound",len(select_set[-1]), 'in year',y,'month',m
 		if all_priority:
 			n_other = max(0,viruses_per_month-len(select_set[0]))
 			return select_set[0] + select_set[1][:n_other]
@@ -209,7 +209,7 @@ class flu_filter(virus_filter):
 			v['db']="GISAID"
 
 	def filter_strain_names(self):
-		self.viruses = filter(lambda v: re.match(r'^A/', v['strain']) != None, self.viruses)
+		self.viruses = filter(lambda v: re.match(r'^[AB]/', v['strain']) != None, self.viruses)
 
 	def fix_strain_names(self):
 		for v in self.viruses:
@@ -229,13 +229,15 @@ class flu_filter(virus_filter):
 		for v in self.viruses:
 			v['country'] = 'Unknown'
 			try:
-				label = re.match(r'^A/([^/]+)/', v['strain']).group(1).lower()	# check first for whole geo match
+				label = re.match(r'^[AB]/([^/]+)/', v['strain']).group(1).lower()	# check first for whole geo match
 				if label in label_to_country:
 					v['country'] = label_to_country[label]
 				else:
-						label = re.match(r'^A/([^\-^\/]+)[\-\/]', v['strain']).group(1).lower()		# check for partial geo match
-						if label in label_to_country:
-							v['country'] = label_to_country[label]
+					label = re.match(r'^[AB]/([^\-^\/]+)[\-\/]', v['strain']).group(1).lower()		# check for partial geo match
+					if label in label_to_country:
+						v['country'] = label_to_country[label]
+				if v['country'] == 'Unknown':
+					print "couldn't parse location for", v['strain']
 			except:
 				print "couldn't parse", v['strain']
 
@@ -247,6 +249,8 @@ class flu_filter(virus_filter):
 			v['region'] = 'Unknown'
 			if v['country'] in country_to_region:
 				v['region'] = country_to_region[v['country']]
+			if v['country'] != 'Unknown' and v['region'] == 'Unknown':
+				print "couldn't parse region for", v['strain']				
 		
 		self.viruses = filter(lambda v: v['region'] != 'Unknown', self.viruses)
 

@@ -21,16 +21,6 @@ function gatherInternals(node, internals) {
 }
 
 function getVaccines(tips) {
-	vaccineChoice = {};
-	vaccineChoice['A/Fujian/411/2002'] = "2003-09-25";
-	vaccineChoice['A/California/7/2004'] = "2005-02-21";
-	vaccineChoice['A/Wisconsin/67/2005'] = "2006-02-21";
-	vaccineChoice['A/Brisbane/10/2007'] = "2007-09-25";
-	vaccineChoice['A/Perth/16/2009'] = "2009-09-25";
-	vaccineChoice['A/Victoria/361/2011'] = "2012-02-21";
-	vaccineChoice['A/Texas/50/2012'] = "2013-09-25";
-	vaccineChoice['A/Switzerland/9715293/2013'] = "2014-09-25";
-	vaccineStrains = Object.keys(vaccineChoice);
 	vaccines = [];
 	tips.forEach(function (tip) {
 		if (vaccineStrains.indexOf(tip.strain) != -1) {
@@ -153,7 +143,6 @@ function calcLBI(node, allnodes){
 /**
  * for each node, calculate the derivative of the frequency tranjectory. if none exists, copy parent
 **/
-var dfreq_dn = 2;
 function calcDfreq(node, freq_ii){
 	if (typeof node.children != "undefined") {
 		for (var i1=0; i1<node.children.length; i1++) {
@@ -266,18 +255,28 @@ var virusTooltip = d3.tip()
 	.attr('class', 'd3-tip')
 	.offset([0, 12])
 	.html(function(d) {
-		string = ""
-		
+	
+		string = "";
+				
 		// safe to assume the following attributes
-		string += "<div class=\"left\">";
 		if (typeof d.strain != "undefined") {
 			string += d.strain;
 		}
-		string +="</div>";
 		string += "<div class=\"smallspacer\"></div>";
-		string += "<div class=\"smallnote\">";
-		if (typeof d.region != "undefined") {
-			string += d.region.replace(/([A-Z])/g, ' $1');
+		
+		string += "<div class=\"smallnote\">";		
+		
+		// check if vaccine strain
+		if (vaccineStrains.indexOf(d.strain) != -1) {
+			string += "Vaccine strain<br>";
+			var vaccine_date = new Date(vaccineChoice[d.strain]);
+
+			string += "First chosen " + vaccine_date.toLocaleString("en-us", { month: "short" }) + " " + vaccine_date.getFullYear() + "<br>";
+			string += "<div class=\"smallspacer\"></div>";
+		}			
+		
+		if (typeof d.country != "undefined") {
+			string += d.country.replace(/([A-Z])/g, ' $1');
 		}
 		if (typeof d.date != "undefined") {
 			string += ", " + d.date;
@@ -294,7 +293,7 @@ var virusTooltip = d3.tip()
 		string += "</div>";
 		
 		string += "<div class=\"smallspacer\"></div>";
-		
+				
 		// following may or may not be present
 		string += "<div class=\"smallnote\">";
 		if (typeof d.ep != "undefined") {
@@ -362,7 +361,7 @@ var gt_chart = c3.generate({
 				position: 'outer-center'	
 			},
 			tick: {
-				values: [2012,2012.5,2013,2013.5,2014,2014.5,2015],
+				values: time_ticks,
 				outer: false				
 			}
 		}
@@ -374,7 +373,7 @@ var gt_chart = c3.generate({
 });
 
 
-d3.json("data/tree.json", function(error, root) {
+d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 
 	if (error) return console.warn(error);
 
@@ -452,15 +451,15 @@ d3.json("data/tree.json", function(error, root) {
 	var colorBy = document.getElementById("coloring").value;
 	
 	var epitopeColorScale = d3.scale.linear().clamp([true])
-		.domain([4,5,6,7,8,9,10,11,12,13])
+		.domain(epiColorDomain)
 		.range(colors);		
 
 	var nonepitopeColorScale = d3.scale.linear().clamp([true])
-		.domain([2,3,4,5,6,7,8,9,10,11])
+		.domain(nonEpiColorDomain)
 		.range(colors);
 
 	var receptorBindingColorScale = d3.scale.linear().clamp([true])
-		.domain([0,1,2,3,4])
+		.domain(rbsColorDomain)
 		.range(colors.filter( function(d,i){return i%2;}));
 
 	var lbiColorScale = d3.scale.linear()
@@ -638,7 +637,12 @@ d3.json("data/tree.json", function(error, root) {
     			return "Genotype"
     		}
    			if (colorBy == "dfreq") {
-    			return "Frequency change (per "+Math.round(12*dfreq_dn*dt)+" month)";
+   				var tmp_nmonth = Math.round(12*dfreq_dn*dt);
+   				var tmp_text = "Freq. change ("+tmp_nmonth+" month";
+   				if (tmp_nmonth>1){
+   					tmp_text+='s';
+   				}
+    			return tmp_text+')';
     		}
     	});
     
@@ -1198,7 +1202,7 @@ d3.json("data/tree.json", function(error, root) {
 
 });
 
-d3.json("data/meta.json", function(error, json) {
+d3.json("/data/" + file_prefix + "meta.json", function(error, json) {
 	if (error) return console.warn(error);
 	d3.select("#updated").text(json['updated']);
 	commit_id = json['commit'];
@@ -1210,19 +1214,20 @@ d3.json("data/meta.json", function(error, json) {
 
 });
 
-d3.json("data/sequences.json", function(error, json) {
+d3.json("/data/" + file_prefix + "sequences.json", function(error, json) {
 	if (error) return console.warn(error);
 	cladeToSeq=json;
 });
 
-d3.json("data/frequencies.json", function(error, json){
+d3.json("/data/" + file_prefix + "frequencies.json", function(error, json){
 	console.log(error);
 	var pivots= json["mutations"]["global"]["pivots"].map(function (d) {return Math.round(parseFloat(d)*100)/100;});
 	var ticks = [Math.round(pivots[0])];
 	var step = Math.round((pivots[pivots.length-1]-pivots[0])/6*10)/10;
 	while (ticks[ticks.length-1]<pivots[pivots.length-1]){
 		ticks.push(Math.round((ticks[ticks.length-1]+step)*10)/10);
-	}	
+	}
+	//gt_chart.axis.x.values = ticks;
 	/**
 		parses a genotype string into region and positions
 	**/
@@ -1257,7 +1262,13 @@ d3.json("data/frequencies.json", function(error, json){
 	function get_frequencies(region, gt){
 		var freq = [];
 		for (var pi=0; pi<pivots.length; pi++){freq[freq.length]=0;}
-		if (json["genotypes"][region][gt]!=undefined) {
+		if (json["clades"][region][gt.toLowerCase()]!=undefined) {
+			console.log(gt+" found as clade");
+			for (var pi=0; pi<freq.length; pi++){
+				freq[pi]+=json["clades"][region][gt.toLowerCase()][pi];
+			}
+		}
+		else if ((typeof json["genotypes"] !="undefined") && (json["genotypes"][region][gt]!=undefined)) {
 			console.log(gt+" found as genotype");
 			for (var pi=0; pi<freq.length; pi++){
 				freq[pi]+=json["genotypes"][region][gt][pi];
@@ -1266,11 +1277,6 @@ d3.json("data/frequencies.json", function(error, json){
 			console.log(gt+" found as mutation");
 			for (var pi=0; pi<freq.length; pi++){
 				freq[pi]+=json["mutations"][region][gt][pi];
-			}
-		}else if (json["clades"][region][gt.toLowerCase()]!=undefined) {
-			console.log(gt+" found as clade");
-			for (var pi=0; pi<freq.length; pi++){
-				freq[pi]+=json["clades"][region][gt.toLowerCase()][pi];
 			}
 		}
 		return freq.map(function (d) {return Math.round(d*100)/100;});
