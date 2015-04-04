@@ -62,7 +62,7 @@ if __name__=="__main__":
 	params = parser.parse_args()
 
 	if params.all:	
-		run_pipeline = ammend_files(params.infile, lineages = ['H3N2', 'H1N1pdm', 'Vic', 'Yam'], threshold = 1, directory = 'data/')
+		run_pipeline = ammend_files(params.infile, lineages = ['H3N2', 'H1N1pdm', 'Vic', 'Yam'], threshold = 0, directory = 'data/')
 		run_pipeline = ['H3N2', 'H1N1pdm', 'Vic', 'Yam']
 	else:
 		run_pipeline = ammend_files(params.infile, lineages = ['H3N2', 'H1N1pdm', 'Vic', 'Yam'], threshold = 10, directory = 'data/')

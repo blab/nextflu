@@ -158,7 +158,7 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine):
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies', 'export']
-	from process import parser
+	from process import parser. shift_cds
 	params = parser.parse_args()
 
 	lt = time.localtime()
