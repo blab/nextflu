@@ -29,7 +29,7 @@ virus_config.update({
 	#'force_include':'source-data/HI_strains.txt',
 	'force_include_all':False,
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
-	'cds':[0,None], # define the HA1 start i n 0 numbering
+	'cds':[0,None], # define the HA start i n 0 numbering
 	# define relevant clades in canonical HA1 numbering (+1)
 	'clade_designations': {
 		'2':[(142, 'N'), (151 ,'A'), (200, 'S'), (48,'D'), (189,'N'), (203,'T')],

@@ -29,7 +29,7 @@ virus_config.update({
 	#'force_include':'source-data/HI_strains.txt',
 	'force_include_all':False,
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
-	'cds':[0,None], # define the HA1 start i n 0 numbering
+	'cds':[0,None], # define the HA start i n 0 numbering
 	# define relevant clades in canonical HA1 numbering (+1)
 	'clade_designations': {},
 	'auspice_prefix':'H1N1_',
@@ -181,6 +181,9 @@ if __name__=="__main__":
 			if tmp_step in steps:
 				print "skipping",tmp_step
 				steps.remove(tmp_step)
+	if params.HA1:
+		signal_peptide = 17
+		virus_config, epitope_mask, receptor_binding_sites = shift_cds(signal_peptide, virus_config, epitope_mask, receptor_binding_sites)
 
 	# add all arguments to virus_config (possibly overriding)
 	virus_config.update(params.__dict__)
