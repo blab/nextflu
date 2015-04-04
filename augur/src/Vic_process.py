@@ -33,7 +33,7 @@ virus_config.update({
 	# define relevant clades in canonical HA1 numbering (+1)
 	# numbering starting at methionine including the signal peptide
 	'clade_designations': {
-		'1A': [(90,'K'), (73, 'L'), (180, 'K'), (602,'S')],
+		'1A': [(90,'K'), (73, 'L'), (180, 'K')],
 		'1B': [(90,'K'), (73, 'P'), (180, 'K')]
 	},
 	'auspice_prefix':'Vic_',
