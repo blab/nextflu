@@ -32,8 +32,8 @@ virus_config.update({
 	'cds':[33,None], # define the translation start in 0 numbering
 	# define relevant clades in canonical HA1 numbering (+1)
 	'clade_designations': {
-		'1A': [(90,'K'), 73, 'L'), (180, 'K'), (602,'S')],
-		'1B': [(90,'K'), 73, 'P'), (180, 'K')]
+		'1A': [(90,'K'), (73, 'L'), (180, 'K'), (602,'S')],
+		'1B': [(90,'K'), (73, 'P'), (180, 'K')]
 	},
 	'auspice_prefix':'Vic_',
 	})

@@ -71,22 +71,22 @@ if __name__=="__main__":
 	if params.HA1: common_args.append('--HA1')
 
 	if 'H3N2' in run_pipeline:
-		call = map(str, [params.bin, 'src/H3N2_process.py', '-v', 50, '-y', 3,  '--prefix', 'data/H3N2_'])
+		call = map(str, [params.bin, 'src/H3N2_process.py', '-v', 50, '-y', 3,  '--prefix', 'data/H3N2_'] + common_args)
 		print call
 		subprocess.call(call)
 	if 'H1N1' in run_pipeline:
-		call = map(str, [params.bin, 'src/H1N1historical_process.py', '-v', 20, '--interval', 1990, 2010, '--prefix', 'data/H1N1_'])
+		call = map(str, [params.bin, 'src/H1N1historical_process.py', '-v', 20, '--interval', 1990, 2010, '--prefix', 'data/H1N1_']+ common_args)
 		print call
 		subprocess.call(call)
 	if 'H1N1pdm' in run_pipeline:
-		call = map(str, [params.bin, 'src/H1N1pdm_process.py', '-v', 30, '-y', 6, '--prefix', 'data/H1N1pdm_'])
+		call = map(str, [params.bin, 'src/H1N1pdm_process.py', '-v', 30, '-y', 6, '--prefix', 'data/H1N1pdm_']+ common_args)
 		print call
 		subprocess.call(call)
 	if 'Vic' in run_pipeline:
-		call = map(str, [params.bin, 'src/Vic_process.py', '-v', 30, '-y', 6, '--prefix', 'data/Vic_'])
+		call = map(str, [params.bin, 'src/Vic_process.py', '-v', 30, '-y', 6, '--prefix', 'data/Vic_'] + common_args)
 		print call
 		subprocess.call(call)
 	if 'Yam' in run_pipeline:
-		call = map(str, [params.bin, 'src/Yam_process.py', '-v', 30, '-y', 6, '--prefix', 'data/Yam_'])
+		call = map(str, [params.bin, 'src/Yam_process.py', '-v', 30, '-y', 6, '--prefix', 'data/Yam_'] + common_args)
 		print call
 		subprocess.call(call)
