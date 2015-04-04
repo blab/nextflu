@@ -29,11 +29,11 @@ virus_config.update({
 	#'force_include':'source-data/HI_strains.txt',
 	'force_include_all':False,
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
-	'cds':[0,None], # define the HA1 start i n 0 numbering
+	'cds':[33,None], # define the translation start in 0 numbering
 	# define relevant clades in canonical HA1 numbering (+1)
 	'clade_designations': {
-		'1A': [(101,'K'), (84, 'L'), (191, 'K'), (613,'S')],
-		'1B': [(101,'K'), (84, 'P'), (191, 'K')]
+		'1A': [(90,'K'), 73, 'L'), (180, 'K'), (602,'S')],
+		'1B': [(90,'K'), 73, 'P'), (180, 'K')]
 	},
 	'auspice_prefix':'Vic_',
 	})
@@ -173,7 +173,7 @@ class BVic_process(process, BVic_filter, BVic_clean, BVic_refine):
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies', 'export']
-	from process import parser
+	from process import parser, shift_cds
 	params = parser.parse_args()
 
 	lt = time.localtime()
@@ -189,6 +189,10 @@ if __name__=="__main__":
 			if tmp_step in steps:
 				print "skipping",tmp_step
 				steps.remove(tmp_step)
+	# modify clade designations
+	if params.HA1:
+		signal_peptide = 15
+		virus_config, epitope_mask, receptor_binding_sites = shift_cds(signal_peptide, virus_config, epitope_mask, receptor_binding_sites)
 
 	# add all arguments to virus_config (possibly overriding)
 	virus_config.update(params.__dict__)

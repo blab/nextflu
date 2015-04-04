@@ -19,6 +19,7 @@ parser.add_argument('--test', default = False, action="store_true",  help ="don'
 parser.add_argument('--start', default = 'filter', type = str,  help ="start pipeline at specified step")
 parser.add_argument('--stop', default = 'export', type=str,  help ="run to end")
 parser.add_argument('--skip', nargs='+', type = str,  help ="analysis steps to skip")	
+parser.add_argument('--HA1', action="store_true", default=False, help ="clip signal peptide")	
 
 
 virus_config = {
@@ -35,7 +36,11 @@ virus_config = {
 	'n_iqd':3,     # standard deviations from clock
 }
 
-
+def shift_cds(shift, vc, epi_mask, rbs):
+	vc['cds'] = (vc['cds'][0]+15*3,vc['cds'][1])
+	vc['clade_designations'] = {cl:[(pos-signal_peptide, aa) for pos, aa in gt]
+											for cl, gt in vc['clade_designations'].iteritems()}
+	return vc, epi_mask[shift:], [pos-shift for pos in rbs]
 
 class process(virus_frequencies):
 	"""generic template class for processing virus sequences into trees"""
