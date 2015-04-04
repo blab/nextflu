@@ -21,16 +21,6 @@ function gatherInternals(node, internals) {
 }
 
 function getVaccines(tips) {
-	vaccineChoice = {};
-	vaccineChoice['A/Fujian/411/2002'] = "2003-09-25";
-	vaccineChoice['A/California/7/2004'] = "2005-02-21";
-	vaccineChoice['A/Wisconsin/67/2005'] = "2006-02-21";
-	vaccineChoice['A/Brisbane/10/2007'] = "2007-09-25";
-	vaccineChoice['A/Perth/16/2009'] = "2009-09-25";
-	vaccineChoice['A/Victoria/361/2011'] = "2012-02-21";
-	vaccineChoice['A/Texas/50/2012'] = "2013-09-25";
-	vaccineChoice['A/Switzerland/9715293/2013'] = "2014-09-25";
-	vaccineStrains = Object.keys(vaccineChoice);
 	vaccines = [];
 	tips.forEach(function (tip) {
 		if (vaccineStrains.indexOf(tip.strain) != -1) {
@@ -207,7 +197,7 @@ function calcDfreq(node, freq_ii){
 		for (var i1=0; i1<node.children.length; i1++) {
 			if (node.children[i1].freq["global"] != "undefined"){
 				var tmp_freq = node.children[i1].freq["global"]
-				node.children[i1].dfreq = 0.5*(tmp_freq[freq_ii] - tmp_freq[freq_ii-1])/(tmp_freq[freq_ii] + tmp_freq[freq_ii-1] + 0.05);
+				node.children[i1].dfreq = 0.5*(tmp_freq[freq_ii] - tmp_freq[freq_ii-dfreq_dn])/(tmp_freq[freq_ii] + tmp_freq[freq_ii-dfreq_dn] + 0.1);
 			}else{
 				node.children[i1].dfreq = node.dfreq;
 			}
@@ -318,31 +308,63 @@ var virusTooltip = d3.tip()
 	.attr('class', 'd3-tip')
 	.offset([0, 12])
 	.html(function(d) {
-		string = ""
+	
+		string = "";
+				
+		// safe to assume the following attributes
 		if (typeof d.strain != "undefined") {
-			string += "Strain: " + d.strain;
+			string += d.strain;
+		}
+		string += "<div class=\"smallspacer\"></div>";
+		
+		string += "<div class=\"smallnote\">";		
+		
+		// check if vaccine strain
+		if (vaccineStrains.indexOf(d.strain) != -1) {
+			string += "Vaccine strain<br>";
+			var vaccine_date = new Date(vaccineChoice[d.strain]);
+
+			string += "First chosen " + vaccine_date.toLocaleString("en-us", { month: "short" }) + " " + vaccine_date.getFullYear() + "<br>";
+			string += "<div class=\"smallspacer\"></div>";
+		}			
+		
+		if (typeof d.country != "undefined") {
+			string += d.country.replace(/([A-Z])/g, ' $1');
 		}
 		if (typeof d.date != "undefined") {
-			string += "<br>Date: " + d.date;
+			string += ", " + d.date;
 		}
+		if ((typeof d.db != "undefined") && (typeof d.accession != "undefined") && (d.db == "GISAID")) {
+			string += "<br>GISAID ID: EPI" + d.accession;
+		}
+		if (typeof d.lab != "undefined") {
+			if (d.lab != "") {
+				string += "<br>Source: " + d.lab.substring(0,25);
+				if (d.lab.length>25) string += '...';
+			}
+		}			
+		string += "</div>";
+		
+		string += "<div class=\"smallspacer\"></div>";
+				
+		// following may or may not be present
+		string += "<div class=\"smallnote\">";
 		if (typeof d.ep != "undefined") {
-			string += "<br>Epitope distance: " + d.ep;
+			string += "Epitope distance: " + d.ep + "<br>";
 		}
 		if (typeof d.ne != "undefined") {
-			string += "<br>Non-epitope distance: " + d.ne;
+			string += "Non-epitope distance: " + d.ne + "<br>";
 		}
 		if (typeof d.rb != "undefined") {
-			string += "<br>Receptor binding distance: " + d.rb;
-		}
-		if (typeof d.rb != "undefined") {
-			string += "<br>Local branching index: " + d.LBI.toFixed(3);
+			string += "Receptor binding distance: " + d.rb + "<br>";
 		}
 		if (typeof d.cHI != "undefined") {
 			string += "<br>Antigenic advance: " + d.cHI.toFixed(3);
 		}
-		if (typeof d.region != "undefined") {
-			string += "<br>Region: " + d.region.replace(/([A-Z])/g, ' $1');
+		if (typeof d.LBI != "undefined") {
+			string += "Local branching index: " + d.LBI.toFixed(3) + "<br>";
 		}
+		string += "</div>";
 		return string;
 	});
 treeplot.call(virusTooltip);
@@ -356,19 +378,12 @@ var linkTooltip = d3.tip()
 		if (typeof d.frequency != "undefined") {
 			string += "Frequency: " + (100 * d.frequency).toFixed(1) + "%"
 			if (d.aa_muts.length){
-				string+="<br>Mutations: "+d.aa_muts;
+				string+="<br>Mutations: "+d.aa_muts.replace(/,/g, ', ');
 			}
 		}
 		return string;
 	});
 treeplot.call(linkTooltip);
-
-//from http://jsfiddle.net/agcsi/w6g5pths/
-c3.chart.fn.update_tick_values = function(tick_values) {
-    var $$ = this.internal, config = $$.config;    
-    config.axis_x_tick_values = tick_values;                            
-    $$.redraw();
-}
 
 width = parseInt(d3.select(".freqplot-container").style("width"), 10);
 var position = "right";
@@ -402,7 +417,7 @@ var gt_chart = c3.generate({
 				position: 'outer-center'	
 			},
 			tick: {
-				values: [2012,2012.5,2013,2013.5,2014,2014.5,2015],
+				values: time_ticks,
 				outer: false				
 			}
 		}
@@ -414,15 +429,19 @@ var gt_chart = c3.generate({
 });
 
 
-d3.json("data/tree.json", function(error, root) {
+d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 
 	if (error) return console.warn(error);
 
 	var nodes = tree.nodes(root),
 		links = tree.links(nodes);
 	var tree_legend;
-
 	var rootNode = nodes[0];
+	if (typeof rootNode.pivots != "undefined"){
+		var dt = rootNode.pivots[1]-rootNode.pivots[0];		
+	}else{
+		var dt = 1.0/12;
+	}
 	var tips = gatherTips(rootNode, []);
 	var internals = gatherInternals(rootNode, []);
 	calcBranchLength(rootNode);
@@ -450,7 +469,7 @@ d3.json("data/tree.json", function(error, root) {
 
 	var xScale = d3.scale.linear()
 		.domain([d3.min(xValues), d3.max(xValues)])
-		.range([10, width-50]);
+		.range([10, width-10]);
 
 	var yScale = d3.scale.linear()
 		.domain([d3.min(yValues), d3.max(yValues)])
@@ -466,12 +485,12 @@ d3.json("data/tree.json", function(error, root) {
 
 	var dateScale = d3.time.scale()
 		.domain([earliestDate, globalDate])
-		.range([5, 240])
+		.range([5, 205])
 		.clamp([true]);	
 
 	var niceDateScale = d3.time.scale()
 		.domain([earliestDate, globalDate])
-		.range([5, 240])
+		.range([5, 205])
 		.clamp([true])
 		.nice(d3.time.month);
 
@@ -490,21 +509,20 @@ d3.json("data/tree.json", function(error, root) {
 	var colors = ["#5097BA", "#60AA9E", "#75B681", "#8EBC66", "#AABD52", "#C4B945", "#D9AD3D", "#E59637", "#E67030", "#DF4327"];
 	var colorBy = document.getElementById("coloring").value;
 	
-	var epitopeColorScale = d3.scale.linear().clamp([true])
-		.domain([4,5,6,7,8,9,10,11,12,13])
-		.range(colors);
-
 	var HIColorScale = d3.scale.linear().clamp([true])
 		//.domain([-2.5,-2, 1.5, -1, 0.5, 0,0.5 ,1,1.5, 2])
 		.domain([0,0.5, 1, 1.5, 2,2.5, 3,3.5, 4, 4.5])
 		.range(colors);
 
+		.domain(epiColorDomain)
+		.range(colors);		
+
 	var nonepitopeColorScale = d3.scale.linear().clamp([true])
-		.domain([2,3,4,5,6,7,8,9,10,11])
+		.domain(nonEpiColorDomain)
 		.range(colors);
 
 	var receptorBindingColorScale = d3.scale.linear().clamp([true])
-		.domain([0,1,2,3,4])
+		.domain(rbsColorDomain)
 		.range(colors.filter( function(d,i){return i%2;}));
 
 	var lbiColorScale = d3.scale.linear()
@@ -512,7 +530,7 @@ d3.json("data/tree.json", function(error, root) {
 		.range(colors);
 
 	var dfreqColorScale = d3.scale.linear()
-		.domain([-0.2, -0.15, -0.1,-0.05, 0.0, 0.05,  0.1, 0.15, 0.2])
+		.domain(([-1.0, -0.8, -0.6,-0.4, -0.2, 0, 0.2, 0.4, 0.6, 0.8]).map(function(d){return Math.round(d*dt*dfreq_dn*100)/100;}))
 		.range(colors);
 
 	var colorScale;
@@ -720,7 +738,15 @@ d3.json("data/tree.json", function(error, root) {
     		}
    			if (colorBy == "genotype") {
     			return "Genotype"
-    		}        			
+    		}
+   			if (colorBy == "dfreq") {
+   				var tmp_nmonth = Math.round(12*dfreq_dn*dt);
+   				var tmp_text = "Freq. change ("+tmp_nmonth+" month";
+   				if (tmp_nmonth>1){
+   					tmp_text+='s';
+   				}
+    			return tmp_text+')';
+    		}
     	});
     
 		var tmp_leg = legend.selectAll(".legend")
@@ -845,6 +871,14 @@ d3.json("data/tree.json", function(error, root) {
 		.on('mouseover', function(d) {
 			virusTooltip.show(d, this);
 		})
+		.on('click', function(d) {
+			if ((typeof d.db != "undefined") && (d.db == "GISAID") && (typeof d.accession != "undefined")) {
+				var url = "http://gisaid.org/EPI/"+d.accession;
+				console.log("opening url "+url);
+				var win = window.open(url, '_blank');
+  				win.focus();
+  			}	
+  		})		
 		.on('mouseout', virusTooltip.hide);
 
 	var vaccineCircles = treeplot.selectAll(".vaccine")
@@ -913,9 +947,11 @@ d3.json("data/tree.json", function(error, root) {
 		.on("drag", dragged)
 		.on("dragstart", function() {
 			d3.selectAll(".date-input-text").style("fill", "#5DA8A3");
+			d3.selectAll(".date-input-marker").style("fill", "#5DA8A3");
 		})
 		.on("dragend", function() {
-			d3.selectAll(".date-input-text").style("fill", "#CCCCCC");
+			d3.selectAll(".date-input-text").style("fill", "#CCC");
+			d3.selectAll(".date-input-marker").style("fill", "#CCC");
 			dragend();
 		});
 
@@ -924,12 +960,13 @@ d3.json("data/tree.json", function(error, root) {
 		d.date = dateScale.invert(d3.event.x);
 		d.x = dateScale(d.date);
 		d3.selectAll(".date-input-text")
+			.attr("dx", function(d) {return 0.5*d.x})
 			.text(function(d) {
 				var format = d3.time.format("%Y %b %-d");
 				return format(d.date)
 			});
 		d3.selectAll(".date-input-marker")
-			.attr("cx", function(d) {return d.x})
+			.attr("cx", function(d) {return d.x});
 		globalDate = d.date;
 
 		calcNodeAges(time_window);
@@ -958,7 +995,7 @@ d3.json("data/tree.json", function(error, root) {
 		var num_date = globalDate/1000/3600/24/365.25+1970;	
 		for (var ii=0; ii<rootNode.pivots.length-1; ii++){
 			if (rootNode.pivots[ii]<num_date && rootNode.pivots[ii+1]>=num_date){
-				freq_ii=ii+1;
+				freq_ii=Math.max(dfreq_dn,ii+1);
 			}
 		}
 		console.log("changed frequency index to "+freq_ii+" date cut off is "+num_date);
@@ -1026,7 +1063,7 @@ d3.json("data/tree.json", function(error, root) {
 	counterData['x'] = dateScale(globalDate)
 
 	d3.select("#date-input")
-		.attr("width", 260)
+		.attr("width", 240)
 		.attr("height", 65);
 
 	var counter = d3.select("#date-input").selectAll(".date-input-text")
@@ -1035,7 +1072,8 @@ d3.json("data/tree.json", function(error, root) {
 		.append("text")
 		.attr("class", "date-input-text")
 		.attr("text-anchor", "left")
-		.attr("dy", "0.75em")
+		.attr("dx", function(d) {return 0.5*d.x})		
+		.attr("dy", "1.0em")
 		.text(function(d) {
 			var format = d3.time.format("%Y %b %-d");
 			return format(d.date)
@@ -1078,7 +1116,8 @@ d3.json("data/tree.json", function(error, root) {
 		.attr("cx", function(d) {return d.x})
 		.attr("cy", 35)
 		.attr("r", 5)
-		.style("fill", "#5DA8A3")
+		.style("fill", "#CCC")
+		.style("stroke", "#777")		
 		.style("cursor", "pointer")
 		.call(drag);
 
@@ -1138,6 +1177,15 @@ d3.json("data/tree.json", function(error, root) {
 				+ (d.source.x).toString() + "," + d.target.y.toString() + " "
 				+ (d.target.x).toString() + "," + d.target.y.toString()
 			});
+			
+		treeplot.selectAll(".annotation").data(clades)
+			.transition().duration(speed)
+			.attr("x", function(d) {
+				return xScale(d[1]) - 8;
+			})
+			.attr("y", function(d) {
+				return yScale(d[2]) - 8;
+			});			
 
 	}	
 
@@ -1174,8 +1222,16 @@ d3.json("data/tree.json", function(error, root) {
 				return (d.source.x).toString() + "," + d.source.y.toString() + " "
 				+ (d.source.x).toString() + "," + d.target.y.toString() + " "
 				+ (d.target.x).toString() + "," + d.target.y.toString()
-			});			
-	
+			});
+			
+		treeplot.selectAll(".annotation").data(clades)
+			.attr("x", function(d) {
+				return xScale(d[1]) - 8;
+			})
+			.attr("y", function(d) {
+				return yScale(d[2]) - 8;
+			});
+
 	}
 	
 	function colorByGenotype() {
@@ -1275,15 +1331,21 @@ d3.json("data/tree.json", function(error, root) {
 		.enter()
 		.append("text")
 		.attr("class", "annotation")
-		.attr("x", function(d) {return width;})
-		.attr("y", function(d) {return yScale(d[2])})
+		.attr("x", function(d) {
+			return xScale(d[1]) - 8;
+		})
+		.attr("y", function(d) {
+			return yScale(d[2]) - 8;
+		})
 		.style("text-anchor", "end")
-		.text(function (d) {return d[0];});
+		.text(function (d) {
+			return d[0];
+		});
 
 
 });
 
-d3.json("data/meta.json", function(error, json) {
+d3.json("/data/" + file_prefix + "meta.json", function(error, json) {
 	if (error) return console.warn(error);
 	d3.select("#updated").text(json['updated']);
 	commit_id = json['commit'];
@@ -1295,20 +1357,20 @@ d3.json("data/meta.json", function(error, json) {
 
 });
 
-d3.json("data/sequences.json", function(error, json) {
+d3.json("/data/" + file_prefix + "sequences.json", function(error, json) {
 	if (error) return console.warn(error);
 	cladeToSeq=json;
 });
 
-d3.json("data/frequencies.json", function(error, json){
+d3.json("/data/" + file_prefix + "frequencies.json", function(error, json){
 	console.log(error);
 	var pivots= json["mutations"]["global"]["pivots"].map(function (d) {return Math.round(parseFloat(d)*100)/100;});
 	var ticks = [Math.round(pivots[0])];
 	var step = Math.round((pivots[pivots.length-1]-pivots[0])/6*10)/10;
 	while (ticks[ticks.length-1]<pivots[pivots.length-1]){
 		ticks.push(Math.round((ticks[ticks.length-1]+step)*10)/10);
-	}	
-	gt_chart.update_tick_values(ticks);
+	}
+	//gt_chart.axis.x.values = ticks;
 	/**
 		parses a genotype string into region and positions
 	**/
@@ -1343,7 +1405,13 @@ d3.json("data/frequencies.json", function(error, json){
 	function get_frequencies(region, gt){
 		var freq = [];
 		for (var pi=0; pi<pivots.length; pi++){freq[freq.length]=0;}
-		if ((json["genotypes"]!=undefined) && (json["genotypes"][region][gt]!=undefined)) {
+		if (json["clades"][region][gt.toLowerCase()]!=undefined) {
+			console.log(gt+" found as clade");
+			for (var pi=0; pi<freq.length; pi++){
+				freq[pi]+=json["clades"][region][gt.toLowerCase()][pi];
+			}
+		}
+		else if ((typeof json["genotypes"] !="undefined") && (json["genotypes"][region][gt]!=undefined)) {
 			console.log(gt+" found as genotype");
 			for (var pi=0; pi<freq.length; pi++){
 				freq[pi]+=json["genotypes"][region][gt][pi];
@@ -1352,11 +1420,6 @@ d3.json("data/frequencies.json", function(error, json){
 			console.log(gt+" found as mutation");
 			for (var pi=0; pi<freq.length; pi++){
 				freq[pi]+=json["mutations"][region][gt][pi];
-			}
-		}else if ((json["clades"]!=undefined) && (json["clades"][region][gt.toLowerCase()]!=undefined)) {
-			console.log(gt+" found as clade");
-			for (var pi=0; pi<freq.length; pi++){
-				freq[pi]+=json["clades"][region][gt.toLowerCase()][pi];
 			}
 		}
 		return freq.map(function (d) {return Math.round(d*100)/100;});

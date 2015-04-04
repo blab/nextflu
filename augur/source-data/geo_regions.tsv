@@ -27,6 +27,7 @@ Tunisia	Africa
 Uganda	Africa
 Zambia	Africa
 Zimbabwe	Africa
+Mauritania	Africa
 Taiwan	China
 China	China
 HongKong	China
@@ -99,6 +100,8 @@ Mexico	NorthAmerica
 Montserrat	NorthAmerica
 Nicaragua	NorthAmerica
 Panama	NorthAmerica
+SaintKitts	NorthAmerica
+StVincentAndGrenadines	NorthAmerica
 PuertoRico	NorthAmerica
 SaintLucia	NorthAmerica
 TrinidadTobago	NorthAmerica
@@ -173,3 +176,6 @@ Russia	WestAsia
 Mongolia	WestAsia
 Kyrgyzstan	WestAsia
 Kazakhstan	WestAsia
+Tajikistan	WestAsia
+UnitedArabEmirates	WestAsia
+Uzbekistan	WestAsia

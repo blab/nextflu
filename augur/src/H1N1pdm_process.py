@@ -1,48 +1,53 @@
-import time, argparse,re,os
+import time, re, os
 from virus_filter import flu_filter
 from virus_clean import virus_clean
 from tree_refine import tree_refine
 from tree_titer import HI_tree
 from fitness_model import fitness_model
-from process import process
+from H3N2_process import H3N2_refine as H1N1pdm_refine
+from process import process, virus_config
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.Align import MultipleSeqAlignment
 import numpy as np
 from itertools import izip
 
-epitope_mask = np.fromstring("0000000000000000000000000000000000000000000011111011011001010011000100000001001011110011100110101000001100000100000001000110101011111101011010111110001010011111000101011011111111010010001111101110111001010001110011111111000000111110000000101010101110000000000011100100000001011011100000000000001001011000110111111000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", dtype='S1')
-	
-virus_config = {
+epitope_mask = np.array(['1' if pos in [141,142,145,146,172,176,178,179,180,181,183,184,185, #Sa
+										170,173,174,177,206,207,210,211,212,214,216,		 #Sb
+										183,187,191,196,221,225,254,258,288,				 #Ca1
+										154,157,158,159,161,163,238,239,242,243,			 #Ca2
+										87, 88, 90, 91, 92, 95, 96, 98, 99, 100, 132, 139	 #Cb
+									   ]
+						else '0' for pos in xrange(1,1725)])
+
+receptor_binding_sites = [x-1 for x in [159,169,170,172,173,203,207]]
+
+
+virus_config.update({
 	# data source and sequence parsing/cleaning/processing
 	'virus':'H1N1pdm',
 	'alignment_file':'data/H1N1pdm_gisaid_epiflu_sequence.fasta',
-	'fasta_fields':{0:'strain', 1:'accession', 3:'passage', 5:'date' },
 	'outgroup':'A/Swine/Indiana/P12439/00',
 	'force_include':'source-data/H1N1pdm_HI_strains.txt',
 	'force_include_all':True,
 	'date_spec':'year',
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
-	'cds':[30,None], # define the HA1 start i n 0 numbering #CHECK
-	'n_iqd':3,     # standard deviations from clock
 
-	# frequency estimation parameters
-	'aggregate_regions': [  ("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
-							("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ],
-	'frequency_stiffness':10.0,
-	'min_freq':0.10,
+	'cds':[0,None], # define the HA1 start i n 0 numbering
 	# define relevant clades in canonical HA1 numbering (+1)
-	'clade_designations': {},
-	'verbose':2, 
-	'tol':1e-4, #tolerance for frequency optimization
-	'pc':1e-3, #pseudocount for frequencies 
-	'extra_pivots': 6,  # number of pivot point for or after the last observations of a mutations
-	'inertia':0.7,		# fraction of frequency change carry over in the stiffness term
-	'auspice_frequency_fname':'../auspice/data/H1N1pdm_frequencies.json',
-	'auspice_sequences_fname':'../auspice/data/H1N1pdm_sequences.json',
-	'auspice_tree_fname':'../auspice/data/H1N1pdm_tree.json',
-	'HI_fname':'source-data/H1N1pdm_HI_titers.txt',
-}
+	'clade_designations': {
+		'2':[(142, 'N'), (151 ,'A'), (200, 'S'), (48,'D'), (189,'N'), (203,'T')],
+		'3':[(151 ,'T'), (200, 'P')],
+		'4':[(142, 'D'), (151 ,'A'), (200, 'S')],
+		'5':[(104, 'N'), (222, 'K'), (233, 'V'), (266, 'L')],
+		'6':[(202,'T'),  (114, 'N'), (214, 'A')],
+		'6c':[(251,'I'), (114, 'N'), (214, 'A'), (300,'E')],
+		'6b':[(180,'Q'), (273, 'T'), (214, 'A'), (300,'E')],
+		'7':[(202,'T'),  (114, 'N'), (214, 'T')],
+		'8':[(203,'T'), (289,'A')],
+		},
+	'auspice_prefix':'H1N1pdm_'
+	})
 
 
 class H1N1pdm_filter(flu_filter):
@@ -53,8 +58,15 @@ class H1N1pdm_filter(flu_filter):
 		'''
 		flu_filter.__init__(self, **kwargs)
 		self.min_length = min_length
-		self.vaccine_strains =[
-			]
+		self.vaccine_strains =[{
+			'strain':'A/California/07/2009',
+			'isolate_id':'EPI_ISL_31553',
+			'date':'2009-04-09',
+			'lab':'Naval Health Research Center',
+			'country':'USA',
+			'region':'NorthAmerica',
+			'seq':'ATGAAGGCAATACTAGTAGTTCTGCTATATACATTTGCAACCGCAAATGCAGACACATTATGTATAGGTTATCATGCGAACAATTCAACAGACACTGTAGACACAGTACTAGAAAAGAATGTAACAGTAACACACTCTGTTAACCTTCTAGAAGACAAGCATAACGGGAAACTATGCAAACTAAGAGGGGTAGCCCCATTGCATTTGGGTAAATGTAACATTGCTGGCTGGATCCTGGGAAATCCAGAGTGTGAATCACTCTCCACAGCAAGCTCATGGTCCTACATTGTGGAAACACCTAGTTCAGACAATGGAACGTGTTACCCAGGAGATTTCATCGATTATGAGGAGCTAAGAGAGCAATTGAGCTCAGTGTCATCATTTGAAAGGTTTGAGATATTCCCCAAGACAAGTTCATGGCCCAATCATGACTCGAACAAAGGTGTAACGGCAGCATGTCCTCATGCTGGAGCAAAAAGCTTCTACAAAAATTTAATATGGCTAGTTAAAAAAGGAAATTCATACCCAAAGCTCAGCAAATCCTACATTAATGATAAAGGGAAAGAAGTCCTCGTGCTATGGGGCATTCACCATCCATCTACTAGTGCTGACCAACAAAGTCTCTATCAGAATGCAGATGCATATGTTTTTGTGGGGTCATCAAGATACAGCAAGAAGTTCAAGCCGGAAATAGCAATAAGACCCAAAGTGAGGGATCAAGAAGGGAGAATGAACTATTACTGGACACTAGTAGAGCCGGGAGACAAAATAACATTCGAAGCAACTGGAAATCTAGTGGTACCGAGATATGCATTCGCAATGGAAAGAAATGCTGGATCTGGTATTATCATTTCAGATACACCAGTCCACGATTGCAATACAACTTGTCAAACACCCAAGGGTGCTATAAACACCAGCCTCCCATTTCAGAATATACATCCGATCACAATTGGAAAATGTCCAAAATATGTAAAAAGCACAAAATTGAGACTGGCCACAGGATTGAGGAATATCCCGTCTATTCAATCTAGAGGCCTATTTGGGGCCATTGCCGGTTTCATTGAAGGGGGGTGGACAGGGATGGTAGATGGATGGTACGGTTATCACCATCAAAATGAGCAGGGGTCAGGATATGCAGCCGACCTGAAGAGCACACAGAATGCCATTGACGAGATTACTAACAAAGTAAATTCTGTTATTGAAAAGATGAATACACAGTTCACAGCAGTAGGTAAAGAGTTCAACCACCTGGAAAAAAGAATAGAGAATTTAAATAAAAAAGTTGATGATGGTTTCCTGGACATTTGGACTTACAATGCCGAACTGTTGGTTCTATTGGAAAATGAAAGAACTTTGGACTACCACGATTCAAATGTGAAGAACTTATATGAAAAGGTAAGAAGCCAGCTAAAAAACAATGCCAAGGAAATTGGAAACGGCTGCTTTGAATTTTACCACAAATGCGATAACACGTGCATGGAAAGTGTCAAAAATGGGACTTATGACTACCCAAAATACTCAGAGGAAGCAAAATTAAACAGAGAAGAAATAGATGGGGTAAAGCTGGAATCAACAAGGATTTACCAGATTTTGGCGATCTATTCAACTGTCGCCAGTTCATTGGTACTGGTAGTCTCCCTGGGGGCAATCAGTTTCTGGATGTGCTCTAATGGGTCTCTACAGTGTAGAATATGTATTTAA',
+		}]
 		self.outgroup = {
 			'strain': 'A/Swine/Indiana/P12439/00',
 			'db': 'IRD',
@@ -90,24 +102,6 @@ class H1N1pdm_clean(virus_clean):
 		self.clean_outbreaks()
 		print "Number of viruses after outbreak filtering:",len(self.viruses)
 
-
-class H1N1pdm_refine(tree_refine):
-	def __init__(self, **kwargs):
-		tree_refine.__init__(self, **kwargs)
-
-	def refine(self):
-		self.refine_generic()  # -> all nodes now have aa_seq, xvalue, yvalue, trunk, and basic virus properties
-		self.add_H1N1pdm_attributes()
-
-	def add_H1N1pdm_attributes(self):
-		for v in self.viruses:
-			if v.strain in self.node_lookup:
-				node = self.node_lookup[v.strain]
-				try:
-					node.passage=v.passage
-				except:
-					pass
-
 class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine, HI_tree, fitness_model):
 	"""docstring for H1N1pdm_process, H1N1pdm_filter"""
 	def __init__(self,verbose = 0, force_include = None, 
@@ -123,7 +117,7 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine, HI
 		fitness_model.__init__(self,**kwargs)
 		self.verbose = verbose
 
-	def run(self, steps, years_back=3, viruses_per_month=50, raxml_time_limit = 1.0, reg=2):
+	def run(self, steps, viruses_per_month=50, raxml_time_limit = 1.0, reg=0.2):
 		if 'filter' in steps:
 			print "--- Virus filtering at " + time.strftime("%H:%M:%S") + " ---"
 			self.filter()
@@ -158,7 +152,9 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine, HI
 		if 'frequencies' in steps:
 			print "--- Estimating frequencies at " + time.strftime("%H:%M:%S") + " ---"
 			self.determine_variable_positions()
-			self.estimate_frequencies(tasks = ['mutations', 'tree'])
+			self.estimate_frequencies(tasks = ["mutations", "clades", "tree"])
+			if 'genotype_frequencies' in steps: 
+					self.estimate_frequencies(tasks = ["genotypes"])
 			self.dump()
 		if 'HI' in steps:
 			print "--- Adding HI titers to the tree " + time.strftime("%H:%M:%S") + " ---"
@@ -168,21 +164,15 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine, HI
 		if 'export' in steps:
 			self.temporal_regional_statistics()
 			# exporting to json, including the H1N1pdm specific fields
-			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'dHI', 'cHI', 'HI_titers', 'serum', 
-				'HI_info', 'avidity', 'potency', 'aa_muts'], annotations = ['3c3.a', '3c2.a'])
+			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country',
+									'dHI', 'cHI', 'HI_titers', 'serum', 'HI_info', 'avidity', 'potency'], 
+			                       annotations = ['6b', '6c'])
 
 if __name__=="__main__":
-	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies', 'HI', 'export']
-	parser = argparse.ArgumentParser(description='Process virus sequences, build tree, and prepare of web visualization')
-	parser.add_argument('-y', '--years_back', type = int, default=3, help='number of past years to sample sequences from')
-	parser.add_argument('-v', '--viruses_per_month', type = int, default = 50, help='number of viruses sampled per month')
-	parser.add_argument('-r', '--raxml_time_limit', type = float, default = 1.0, help='number of hours raxml is run')
-	parser.add_argument('--prefix', type = str, default = 'data/H1N1pdm_', help='path+prefix of file dumps')
-	parser.add_argument('--interval', nargs = '+', type = float, default = None, help='interval from which to pull sequences')
-	parser.add_argument('--test', default = False, action="store_true",  help ="don't run the pipeline")
-	parser.add_argument('--start', default = 'filter', type = str,  help ="start pipeline at virus selection")
-	parser.add_argument('--stop', default = 'export', type=str,  help ="run to end")
+	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies', 'export']
+	from process import parser
 	params = parser.parse_args()
+
 	lt = time.localtime()
 	num_date = round(lt.tm_year+(lt.tm_yday-1.0)/365.0,2)
 	params.time_interval = (num_date-params.years_back, num_date) 
@@ -190,9 +180,13 @@ if __name__=="__main__":
 		params.time_interval = (params.interval[0], params.interval[1])
 	dt= params.time_interval[1]-params.time_interval[0]
 	params.pivots_per_year = 12.0 if dt<5 else 6.0 if dt<10 else 3.0
-
-
 	steps = all_steps[all_steps.index(params.start):(all_steps.index(params.stop)+1)]
+	if params.skip is not None:
+		for tmp_step in params.skip:
+			if tmp_step in steps:
+				print "skipping",tmp_step
+				steps.remove(tmp_step)
+
 	# add all arguments to virus_config (possibly overriding)
 	virus_config.update(params.__dict__)
 	# pass all these arguments to the processor: will be passed down as kwargs through all classes
@@ -201,4 +195,4 @@ if __name__=="__main__":
 		myH1N1pdm.load()
 	else:
 		myH1N1pdm.run(steps, viruses_per_month = virus_config['viruses_per_month'], 
-			raxml_time_limit = virus_config['raxml_time_limit'])
+				raxml_time_limit = virus_config['raxml_time_limit'])
