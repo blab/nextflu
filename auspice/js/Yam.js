@@ -9,6 +9,7 @@ vaccineChoice['B/Florida/4/2006'] = "2008-09-25";
 vaccineChoice['B/Wisconsin/01/2010'] = "2012-02-25";
 vaccineChoice['B/Massachusetts/02/2012'] = "2013-02-25";
 vaccineChoice['B/PHUKET/3073/2013'] = "2014-09-25";
+var vaccineStrains = Object.keys(vaccineChoice);
 
 var epiColorDomain = [0,1,2,3, 4,5,6,7,8,9,10];
 var nonEpiColorDomain = [0,1,2,3,4,5,6,7,8,9,10,11];

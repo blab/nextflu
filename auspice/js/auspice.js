@@ -21,7 +21,6 @@ function gatherInternals(node, internals) {
 }
 
 function getVaccines(tips) {
-	var vaccineStrains = Object.keys(vaccineChoice);
 	vaccines = [];
 	tips.forEach(function (tip) {
 		if (vaccineStrains.indexOf(tip.strain) != -1) {
@@ -256,16 +255,26 @@ var virusTooltip = d3.tip()
 	.attr('class', 'd3-tip')
 	.offset([0, 12])
 	.html(function(d) {
-		string = ""
-		
+	
+		string = "";
+				
 		// safe to assume the following attributes
-		string += "<div class=\"left\">";
 		if (typeof d.strain != "undefined") {
 			string += d.strain;
 		}
-		string +="</div>";
 		string += "<div class=\"smallspacer\"></div>";
-		string += "<div class=\"smallnote\">";
+		
+		string += "<div class=\"smallnote\">";		
+		
+		// check if vaccine strain
+		if (vaccineStrains.indexOf(d.strain) != -1) {
+			string += "Vaccine strain<br>";
+			var vaccine_date = new Date(vaccineChoice[d.strain]);
+
+			string += "First chosen " + vaccine_date.toLocaleString("en-us", { month: "short" }) + " " + vaccine_date.getFullYear() + "<br>";
+			string += "<div class=\"smallspacer\"></div>";
+		}			
+		
 		if (typeof d.country != "undefined") {
 			string += d.country.replace(/([A-Z])/g, ' $1');
 		}
@@ -284,7 +293,7 @@ var virusTooltip = d3.tip()
 		string += "</div>";
 		
 		string += "<div class=\"smallspacer\"></div>";
-		
+				
 		// following may or may not be present
 		string += "<div class=\"smallnote\">";
 		if (typeof d.ep != "undefined") {
