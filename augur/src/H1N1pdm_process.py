@@ -10,6 +10,7 @@ from Bio.Align import MultipleSeqAlignment
 import numpy as np
 from itertools import izip
 
+# numbering starting at methionine including the signal peptide
 epitope_mask = np.array(['1' if pos in [141,142,145,146,172,176,178,179,180,181,183,184,185, #Sa
 										170,173,174,177,206,207,210,211,212,214,216,		 #Sb
 										183,187,191,196,221,225,254,258,288,				 #Ca1
@@ -29,8 +30,9 @@ virus_config.update({
 	#'force_include':'source-data/HI_strains.txt',
 	'force_include_all':False,
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
-	'cds':[0,None], # define the HA1 start i n 0 numbering
+	'cds':[0,None], # define the HA start i n 0 numbering
 	# define relevant clades in canonical HA1 numbering (+1)
+	# numbering starting at methionine including the signal peptide
 	'clade_designations': {
 		'2':[(142, 'N'), (151 ,'A'), (200, 'S'), (48,'D'), (189,'N'), (203,'T')],
 		'3':[(151 ,'T'), (200, 'P')],
@@ -158,7 +160,7 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine):
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies', 'export']
-	from process import parser
+	from process import parser, shift_cds
 	params = parser.parse_args()
 
 	lt = time.localtime()
@@ -174,6 +176,10 @@ if __name__=="__main__":
 			if tmp_step in steps:
 				print "skipping",tmp_step
 				steps.remove(tmp_step)
+
+	if params.HA1:
+		signal_peptide = 17
+		virus_config, epitope_mask, receptor_binding_sites = shift_cds(3*signal_peptide, virus_config, epitope_mask, receptor_binding_sites)
 
 	# add all arguments to virus_config (possibly overriding)
 	virus_config.update(params.__dict__)

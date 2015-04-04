@@ -29,7 +29,7 @@ virus_config.update({
 	#'force_include':'source-data/HI_strains.txt',
 	'force_include_all':False,
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
-	'cds':[0,None], # define the HA1 start i n 0 numbering
+	'cds':[0,None], # define the HA start i n 0 numbering
 	# define relevant clades in canonical HA1 numbering (+1)
 	'clade_designations': {},
 	'auspice_prefix':'H1N1_',
@@ -166,7 +166,7 @@ class H1N1_process(process, H1N1_filter, H1N1_clean, H1N1_refine):
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies', 'export']
-	from process import parser
+	from process import parser,shift_cds
 	params = parser.parse_args()
 
 	lt = time.localtime()
@@ -181,6 +181,9 @@ if __name__=="__main__":
 			if tmp_step in steps:
 				print "skipping",tmp_step
 				steps.remove(tmp_step)
+	if params.HA1:
+		signal_peptide = 17
+		virus_config, epitope_mask, receptor_binding_sites = shift_cds(3*signal_peptide, virus_config, epitope_mask, receptor_binding_sites)
 
 	# add all arguments to virus_config (possibly overriding)
 	virus_config.update(params.__dict__)
