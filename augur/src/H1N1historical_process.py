@@ -183,7 +183,7 @@ if __name__=="__main__":
 				steps.remove(tmp_step)
 	if params.HA1:
 		signal_peptide = 17
-		virus_config, epitope_mask, receptor_binding_sites = shift_cds(signal_peptide, virus_config, epitope_mask, receptor_binding_sites)
+		virus_config, epitope_mask, receptor_binding_sites = shift_cds(3*signal_peptide, virus_config, epitope_mask, receptor_binding_sites)
 
 	# add all arguments to virus_config (possibly overriding)
 	virus_config.update(params.__dict__)

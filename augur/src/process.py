@@ -37,10 +37,11 @@ virus_config = {
 }
 
 def shift_cds(shift, vc, epi_mask, rbs):
-	vc['cds'] = (vc['cds'][0]+15*3,vc['cds'][1])
-	vc['clade_designations'] = {cl:[(pos-signal_peptide, aa) for pos, aa in gt]
+	vc['cds'] = (vc['cds'][0]+shift,vc['cds'][1])
+    aashift = shift//3
+	vc['clade_designations'] = {cl:[(pos-aashift, aa) for pos, aa in gt]
 											for cl, gt in vc['clade_designations'].iteritems()}
-	return vc, epi_mask[shift:], [pos-shift for pos in rbs]
+	return vc, epi_mask[aashift:], [pos-aashift for pos in rbs]
 
 class process(virus_frequencies):
 	"""generic template class for processing virus sequences into trees"""
