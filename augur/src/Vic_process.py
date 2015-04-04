@@ -29,7 +29,7 @@ virus_config.update({
 	#'force_include':'source-data/HI_strains.txt',
 	'force_include_all':False,
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
-	'cds':[12,None], # define the translation start in 0 numbering
+	'cds':[11,None], # define the translation start in 0 numbering
 	# define relevant clades in canonical HA1 numbering (+1)
 	# numbering starting at methionine including the signal peptide
 	'clade_designations': {
