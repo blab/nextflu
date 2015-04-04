@@ -10,6 +10,7 @@ from Bio.Align import MultipleSeqAlignment
 import numpy as np
 from itertools import izip
 
+# numbering starting at methionine including the signal peptide
 epitope_mask = np.array(['1' if pos in [141,142,145,146,172,176,178,179,180,181,183,184,185, #Sa
 										170,173,174,177,206,207,210,211,212,214,216,		 #Sb
 										183,187,191,196,221,225,254,258,288,				 #Ca1
@@ -31,6 +32,7 @@ virus_config.update({
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
 	'cds':[0,None], # define the HA start i n 0 numbering
 	# define relevant clades in canonical HA1 numbering (+1)
+	# numbering starting at methionine including the signal peptide
 	'clade_designations': {
 		'2':[(142, 'N'), (151 ,'A'), (200, 'S'), (48,'D'), (189,'N'), (203,'T')],
 		'3':[(151 ,'T'), (200, 'P')],

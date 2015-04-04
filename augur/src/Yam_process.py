@@ -31,6 +31,7 @@ virus_config.update({
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
 	'cds':[33,None], # define the translation start i n 0 numbering
 	# define relevant clades in canonical HA1 numbering (+1)
+	# numbering starting at methionine including the signal peptide
 	'clade_designations': {
 		'2': [(63,'K'), (123, 'A'), (165, 'S')],
 		'3': [(63,'R'), (123, 'P'), (165, 'I')],
