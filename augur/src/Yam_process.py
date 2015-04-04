@@ -36,6 +36,7 @@ virus_config.update({
 		'2': [(63,'K'), (123, 'A'), (165, 'S')],
 		'3': [(63,'R'), (123, 'P'), (165, 'I')],
 	},
+	'min_length':1700,
 	'auspice_prefix':'Yam_',
 	})
 
