@@ -56,7 +56,7 @@ if __name__=="__main__":
 	parser = argparse.ArgumentParser(description = "ammend existing files with downloaded viruses, rerun")
 	parser.add_argument('--infile', type = str, default = "gisaid_epiflu_sequence.fasta")
 	parser.add_argument('--bin', type = str, default = "python")
-	parser.add_argument('--HA1', action = "store_true", default = False)
+	parser.add_argument('--ATG', action = "store_true", default = False, help ="include full HA sequence starting at ATG")
 	parser.add_argument('--all', action = "store_true", default = False)
 	parser.add_argument('-r', type = float, default = 1.0)
 	params = parser.parse_args()
@@ -68,7 +68,7 @@ if __name__=="__main__":
 		run_pipeline = ammend_files(params.infile, lineages = ['H3N2', 'H1N1pdm', 'Vic', 'Yam'], threshold = 10, directory = 'data/')
 
 	common_args = ['--skip', 'genotype_frequencies','-r', params.r]
-	if params.HA1: common_args.append('--HA1')
+	if params.ATG: common_args.append('--ATG')
 
 	if 'H3N2' in run_pipeline:
 		call = map(str, [params.bin, 'src/H3N2_process.py', '-v', 50, '-y', 3,  '--prefix', 'data/H3N2_'] + common_args)
