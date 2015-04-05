@@ -146,11 +146,13 @@ function calcLBI(node, allnodes){
 function calcDfreq(node, freq_ii){
 	if (typeof node.children != "undefined") {
 		for (var i1=0; i1<node.children.length; i1++) {
-			if (node.children[i1].freq["global"] != "undefined"){
-				var tmp_freq = node.children[i1].freq["global"]
-				node.children[i1].dfreq = 0.5*(tmp_freq[freq_ii] - tmp_freq[freq_ii-dfreq_dn])/(tmp_freq[freq_ii] + tmp_freq[freq_ii-dfreq_dn] + 0.1);
-			}else{
-				node.children[i1].dfreq = node.dfreq;
+			if (typeof node.children[i1].freq != "undefined") {
+				if (typeof node.children[i1].freq["global"] != "undefined"){
+					var tmp_freq = node.children[i1].freq["global"]
+					node.children[i1].dfreq = 0.5*(tmp_freq[freq_ii] - tmp_freq[freq_ii-dfreq_dn])/(tmp_freq[freq_ii] + tmp_freq[freq_ii-dfreq_dn] + 0.1);
+				} else {
+					node.children[i1].dfreq = node.dfreq;
+				}
 			}
 			calcDfreq(node.children[i1], freq_ii);
 		}
@@ -688,7 +690,12 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 	calcNodeAges(time_window);
 	calcLBI(rootNode, nodes, false);
 	calcDfreq(rootNode, freq_ii);
-	var freq_ii = rootNode.pivots.length - 1;
+	var freq_ii = 1;
+	if (typeof rootNode.pivots != "undefined") {
+		if (typeof rootNode.pivots.length != "undefined") {
+			freq_ii = rootNode.pivots.length - 1;
+		}
+	}
 	console.log(freq_ii);
 	colorByTrait();
 	adjust_coloring_by_date();
