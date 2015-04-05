@@ -1054,10 +1054,10 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 		treeplot.selectAll(".annotation").data(clades)
 			.transition().duration(speed)
 			.attr("x", function(d) {
-				return xScale(d[1]) - 8;
+				return xScale(d[1]) - 6;
 			})
 			.attr("y", function(d) {
-				return yScale(d[2]) - 8;
+				return yScale(d[2]) - 6;
 			});			
 
 	}	
@@ -1099,10 +1099,10 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 			
 		treeplot.selectAll(".annotation").data(clades)
 			.attr("x", function(d) {
-				return xScale(d[1]) - 8;
+				return xScale(d[1]) - 6;
 			})
 			.attr("y", function(d) {
-				return yScale(d[2]) - 8;
+				return yScale(d[2]) - 6;
 			});
 
 	}
@@ -1210,10 +1210,10 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 		.append("text")
 		.attr("class", "annotation")
 		.attr("x", function(d) {
-			return xScale(d[1]) - 8;
+			return xScale(d[1]) - 6;
 		})
 		.attr("y", function(d) {
-			return yScale(d[2]) - 8;
+			return yScale(d[2]) - 6;
 		})
 		.style("text-anchor", "end")
 		.text(function (d) {
