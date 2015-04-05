@@ -146,11 +146,13 @@ function calcLBI(node, allnodes){
 function calcDfreq(node, freq_ii){
 	if (typeof node.children != "undefined") {
 		for (var i1=0; i1<node.children.length; i1++) {
-			if (node.children[i1].freq["global"] != "undefined"){
-				var tmp_freq = node.children[i1].freq["global"]
-				node.children[i1].dfreq = 0.5*(tmp_freq[freq_ii] - tmp_freq[freq_ii-dfreq_dn])/(tmp_freq[freq_ii] + tmp_freq[freq_ii-dfreq_dn] + 0.1);
-			}else{
-				node.children[i1].dfreq = node.dfreq;
+			if (typeof node.children[i1].freq != "undefined") {
+				if (node.children[i1].freq["global"] != "undefined"){
+					var tmp_freq = node.children[i1].freq["global"]
+					node.children[i1].dfreq = 0.5*(tmp_freq[freq_ii] - tmp_freq[freq_ii-dfreq_dn])/(tmp_freq[freq_ii] + tmp_freq[freq_ii-dfreq_dn] + 0.1);
+				} else {
+					node.children[i1].dfreq = node.dfreq;
+				}
 			}
 			calcDfreq(node.children[i1], freq_ii);
 		}
@@ -208,6 +210,22 @@ function contains(arr, obj) {
     }
 }
 
+var restrictTo = "all";
+
+var recencySizeScale = d3.scale.threshold()
+	.domain([0.0, time_window])
+	.range([0, 4, 0]);
+
+function tipRadius(d) {
+	var radius = 0;
+	if (d.region == restrictTo || restrictTo == "all") {
+		radius = recencySizeScale(d.diff);
+	}
+	else {
+		radius = 0;
+	}
+	return radius;
+}
 
 function branchStrokeColor(col) {
 	var modCol = d3.interpolateRgb(col, "#BBB")(0.6);
@@ -236,8 +254,7 @@ var cladeToSeq = {}
 var globalDate = new Date();
 var ymd_format = d3.time.format("%Y-%m-%d");
 
-var LBItau = 0.0008,
-	time_window = 1.0;  // layer of one year that is considered current or active
+var LBItau = 0.0008;
 
 var tree = d3.layout.tree()
 	.size([height, width]);
@@ -435,10 +452,6 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 		.clamp([true])
 		.nice(d3.time.month);
 
-	var recencySizeScale = d3.scale.threshold()
-		.domain([0.0, 1.0])
-		.range([0, 4, 0]);
-
 	var recencyVaccineSizeScale = d3.scale.threshold()
 		.domain([0.0])
 		.range([0, 8]);
@@ -446,6 +459,8 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 	var recencyLinksSizeScale = d3.scale.threshold()
 		.domain([0.0])
 		.range([0, 2]);
+
+	restrictTo = document.getElementById("region").value;
 
 	var colors = ["#5097BA", "#60AA9E", "#75B681", "#8EBC66", "#AABD52", "#C4B945", "#D9AD3D", "#E59637", "#E67030", "#DF4327"];
 	var colorBy = document.getElementById("coloring").value;
@@ -476,7 +491,7 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 		.domain([0, 1])
 		.range([1.5, 4.5]);
 
-	var regions = ["Africa", "SouthAmerica", "WestAsia", "Oceania", "Europe", "JapanKorea", "NorthAmerica", "SoutheastAsia", "India", "China"]
+	var regions = ["Africa", "SouthAmerica", "WestAsia", "Oceania", "Europe", "JapanKorea", "NorthAmerica", "SoutheastAsia", "SouthAsia", "China"]
 	var regionColors = ["#5097BA", "#60AA9E", "#75B681", "#8EBC66", "#AABD52", "#C4B945", "#D9AD3D", "#E59637", "#E67030", "#DF4327"]
 
 	var regionColorScale = d3.scale.ordinal()
@@ -585,9 +600,7 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 				});
 			
 		d3.selectAll(".tip")
-			.attr("r", function(d) {
-				return recencySizeScale(d.diff);
-			})
+			.attr("r", function(d) { return tipRadius(d); })
 			.style("fill", function(d) {
 				if (colorScale != regionColorScale) {
 					var col = colorScale(d.adj_coloring);
@@ -611,6 +624,13 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 			removeLegend();
 		}
 		tree_legend = makeLegend();	 				
+	}
+
+	function restrictToRegion() {
+		restrictTo = document.getElementById("region").value;
+		console.log(restrictTo);	
+		d3.selectAll(".tip")
+			.attr("r", function(d) { return tipRadius(d); });			
 	}
 
     var legendRectSize = 15;
@@ -759,9 +779,7 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 		.attr("id", function(d) { return (d.strain).replace(/\//g, ""); })
 		.attr("cx", function(d) { return d.x; })
 		.attr("cy", function(d) { return d.y; })
-		.attr("r", function(d) {
-			return recencySizeScale(d.diff);
-		})
+		.attr("r", function(d) { return tipRadius(d); })
 		.style("fill", function(d) {
 			var col = colorScale(d.adj_coloring);
 			return tipFillColor(col);
@@ -835,9 +853,7 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 			.style("stroke", function(d){return "#ccc";})
 
 		treeplot.selectAll(".tip")
-			.attr("r", function(d) {
-				return recencySizeScale(d.diff);
-			})
+			.attr("r", function(d) { return tipRadius(d); })
 			.style("fill", "#CCC")
 			.style("stroke", "#AAA");
 
@@ -895,9 +911,7 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 				
 			d3.selectAll(".tip")
 				.transition().duration(500)
-				.attr("r", function(d) {
-					return recencySizeScale(d.diff);
-				})
+				.attr("r", function(d) { return tipRadius(d); })
 				.style("fill", function(d) {
 					if (colorScale != regionColorScale) {
 						var col = colorScale(d.adj_coloring);
@@ -1161,6 +1175,10 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 	d3.select("#coloring")
 		.style("cursor", "pointer")
 		.on("change", colorByTrait);
+		
+	d3.select("#region")
+		.style("cursor", "pointer")
+		.on("change", restrictToRegion);		
 
 	function onSelect(tip) {
 		d3.select("#"+(tip.strain).replace(/\//g, ""))

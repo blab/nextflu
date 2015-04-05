@@ -33,8 +33,9 @@ virus_config.update({
 	# define relevant clades in canonical HA1 numbering (+1)
 	# numbering starting at methionine including the signal peptide
 	'clade_designations': {
-		'2': [(63,'K'), (123, 'A'), (165, 'S')],
-		'3': [(63,'R'), (123, 'P'), (165, 'I')],
+		'2':  [(63,'K'), (123, 'A'), (165, 'S')],
+		'3':  [(63,'R'), (123, 'P'), (165, 'I')],
+		'3a': [(52,'A'), (313, 'E'), (63,'R'), (123, 'P'), (165, 'I')],
 	},
 	'auspice_prefix':'Yam_',
 	})
@@ -189,7 +190,7 @@ class BYam_process(process, BYam_filter, BYam_clean, BYam_refine):
 			self.temporal_regional_statistics()
 			# exporting to json, including the BYam specific fields
 			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db','country'],
-									annotations = ['2', '3'])
+									annotations = ['2', '3', '3a'])
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies', 'export']

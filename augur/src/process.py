@@ -135,9 +135,13 @@ class process(virus_frequencies):
 			for clade, gt in self.clade_designations.iteritems():
 				if clade in annotations:
 					print "Annotating clade", clade
-					base_node = sorted((x for x in self.tree.postorder_node_iter() if all([x.aa_seq[pos-1]==aa for pos, aa in gt])), key=lambda x: x.xvalue)[0]
-					clade_xval[clade] = base_node.xvalue
-					clade_yval[clade] = base_node.yvalue
+					tmp_nodes = sorted((x for x in self.tree.postorder_node_iter() if all([x.aa_seq[pos-1]==aa for pos, aa in gt])), key=lambda x: x.xvalue)
+					if len(tmp_nodes):
+						base_node = tmp_nodes[0]
+						clade_xval[clade] = base_node.xvalue
+						clade_yval[clade] = base_node.yvalue
+					else:
+						print "clade",clade, gt, "not in tree"
 			# append clades, coordinates and genotype to meta
 			self.tree_json["clade_annotations"] = [(clade, clade_xval[clade],clade_yval[clade], 
 								"/".join([str(pos)+aa for pos, aa in gt]))
