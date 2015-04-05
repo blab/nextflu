@@ -492,7 +492,7 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 		.domain([0, 1])
 		.range([1.5, 4.5]);
 
-	var regions = ["Africa", "SouthAmerica", "WestAsia", "Oceania", "Europe", "JapanKorea", "NorthAmerica", "SoutheastAsia", "India", "China"]
+	var regions = ["Africa", "SouthAmerica", "WestAsia", "Oceania", "Europe", "JapanKorea", "NorthAmerica", "SoutheastAsia", "SouthAsia", "China"]
 	var regionColors = ["#5097BA", "#60AA9E", "#75B681", "#8EBC66", "#AABD52", "#C4B945", "#D9AD3D", "#E59637", "#E67030", "#DF4327"]
 
 	var regionColorScale = d3.scale.ordinal()
