@@ -135,7 +135,9 @@ class process(virus_frequencies):
 			for clade, gt in self.clade_designations.iteritems():
 				if clade in annotations:
 					print "Annotating clade", clade
-					tmp_nodes = sorted((x for x in self.tree.postorder_node_iter() if all([x.aa_seq[pos-1]==aa for pos, aa in gt])), key=lambda x: x.xvalue)
+					tmp_nodes = sorted((node for node in self.tree.postorder_node_iter()
+						if not node.is_leaf() and all([node.aa_seq[pos-1]==aa for pos, aa in gt])),
+						key=lambda node: node.xvalue)
 					if len(tmp_nodes):
 						base_node = tmp_nodes[0]
 						clade_xval[clade] = base_node.xvalue
