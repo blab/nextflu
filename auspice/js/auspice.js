@@ -254,8 +254,6 @@ var cladeToSeq = {}
 var globalDate = new Date();
 var ymd_format = d3.time.format("%Y-%m-%d");
 
-var LBItau = 0.0008;
-
 var tree = d3.layout.tree()
 	.size([height, width]);
 

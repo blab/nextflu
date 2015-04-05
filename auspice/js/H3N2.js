@@ -18,3 +18,4 @@ var rbsColorDomain = [0,1,2,3,4];
 
 var time_ticks = [2012.5, 2013, 2013.5, 2014, 2014.5, 2015];
 var	time_window = 1.0;  // layer of one year that is considered current or active
+var LBItau = 0.0008;
