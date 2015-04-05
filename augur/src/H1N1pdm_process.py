@@ -11,6 +11,7 @@ import numpy as np
 from itertools import izip
 
 # numbering starting at methionine including the signal peptide
+sp = 17
 epitope_mask = np.array(['1' if pos in [141,142,145,146,172,176,178,179,180,181,183,184,185, #Sa
 										170,173,174,177,206,207,210,211,212,214,216,		 #Sb
 										183,187,191,196,221,225,254,258,288,				 #Ca1
@@ -41,7 +42,7 @@ virus_config.update({
 		'6':[(202,'T'),  (114, 'N'), (214, 'A')],
 		'6c':[(251,'I'), (114, 'N'), (214, 'A'), (300,'E')],
 		'6b':[(180,'Q'), (273, 'T'), (214, 'A'), (300,'E')],
-		'7':[(202,'T'),  (114, 'N'), (214, 'T')],
+		'7':[(160,'G'),  (114, 'D'), (214, 'T')],
 		'8':[(203,'T'), (289,'A')],
 		},
 	'auspice_prefix':'H1N1pdm_'
@@ -156,7 +157,7 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine):
 			self.temporal_regional_statistics()
 			# exporting to json, including the H1N1pdm specific fields
 			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country'], 
-			                       annotations = ['6b', '6c'])
+			                       annotations = ['5','6','6b', '6c','7'])
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies', 'export']
@@ -177,9 +178,9 @@ if __name__=="__main__":
 				print "skipping",tmp_step
 				steps.remove(tmp_step)
 
-	if params.HA1:
-		signal_peptide = 17
-		virus_config, epitope_mask, receptor_binding_sites = shift_cds(3*signal_peptide, virus_config, epitope_mask, receptor_binding_sites)
+	# modify clade designations
+	if not params.ATG:
+		virus_config, epitope_mask, receptor_binding_sites = shift_cds(3*sp, virus_config, epitope_mask, receptor_binding_sites)
 
 	# add all arguments to virus_config (possibly overriding)
 	virus_config.update(params.__dict__)
