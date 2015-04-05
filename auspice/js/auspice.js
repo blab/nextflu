@@ -213,7 +213,7 @@ function contains(arr, obj) {
 var restrictTo = "all";
 
 var recencySizeScale = d3.scale.threshold()
-	.domain([0.0, 1.0])
+	.domain([0.0, time_window])
 	.range([0, 4, 0]);
 
 function tipRadius(d) {
@@ -254,8 +254,7 @@ var cladeToSeq = {}
 var globalDate = new Date();
 var ymd_format = d3.time.format("%Y-%m-%d");
 
-var LBItau = 0.0008,
-	time_window = 1.0;  // layer of one year that is considered current or active
+var LBItau = 0.0008;
 
 var tree = d3.layout.tree()
 	.size([height, width]);

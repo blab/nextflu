@@ -13,3 +13,4 @@ var nonEpiColorDomain = [0,1,2,3,4,5,6,7,8,9,10,11];
 var rbsColorDomain = [0,0.5, 1,1.5, 2];
 
 var time_ticks = [2010, 2011, 2012, 2013, 2014, 2015];
+var	time_window = 2.0;  // layer of one year that is considered current or active
