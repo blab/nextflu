@@ -753,7 +753,7 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 		})
 		.on('mouseout', linkTooltip.hide)		
 		.on('click', function(d) {
-			var dMin = minimumAttribute(d.target, "xvalue", d.target.xvalue),
+			var dMin = 0.5 * (minimumAttribute(d.target, "xvalue", d.target.xvalue) + minimumAttribute(d.source, "xvalue", d.source.xvalue)),
 				dMax = maximumAttribute(d.target, "xvalue", d.target.xvalue),
 				lMin = minimumAttribute(d.target, "yvalue", d.target.yvalue),
 				lMax = maximumAttribute(d.target, "yvalue", d.target.yvalue);
