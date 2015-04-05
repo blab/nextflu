@@ -147,7 +147,7 @@ function calcDfreq(node, freq_ii){
 	if (typeof node.children != "undefined") {
 		for (var i1=0; i1<node.children.length; i1++) {
 			if (typeof node.children[i1].freq != "undefined") {
-				if (typeof node.children[i1].freq["global"] != "undefined"){
+				if (node.children[i1].freq["global"] != "undefined"){
 					var tmp_freq = node.children[i1].freq["global"]
 					node.children[i1].dfreq = 0.5*(tmp_freq[freq_ii] - tmp_freq[freq_ii-dfreq_dn])/(tmp_freq[freq_ii] + tmp_freq[freq_ii-dfreq_dn] + 0.1);
 				} else {
