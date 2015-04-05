@@ -290,9 +290,10 @@ if __name__=="__main__":
 			if tmp_step in steps:
 				print "skipping",tmp_step
 				steps.remove(tmp_step)
-	if params.HA1:
-		signal_peptide = 16
-		virus_config, epitope_mask, receptor_binding_sites = shift_cds(3*signal_peptide, virus_config, epitope_mask, receptor_binding_sites)
+
+	# modify clade designations
+	if not params.ATG:
+		virus_config, epitope_mask, receptor_binding_sites = shift_cds(3*sp, virus_config, epitope_mask, receptor_binding_sites)
 
 	# add all arguments to virus_config (possibly overriding)
 	virus_config.update(params.__dict__)

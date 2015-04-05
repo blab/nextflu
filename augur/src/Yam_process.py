@@ -10,6 +10,7 @@ from Bio.Align import MultipleSeqAlignment
 import numpy as np
 from itertools import izip
 
+sp = 15
 epitope_mask = np.array(['1' if pos in [141,142,145,146,172,176,178,179,180,181,183,184,185, #Sa
 										170,173,174,177,206,207,210,211,212,214,216,		 #Sb
 										183,187,191,196,221,225,254,258,288,				 #Ca1
@@ -210,9 +211,10 @@ if __name__=="__main__":
 			if tmp_step in steps:
 				print "skipping",tmp_step
 				steps.remove(tmp_step)
-	if params.HA1:
-		signal_peptide = 15
-		virus_config, epitope_mask, receptor_binding_sites = shift_cds(3*signal_peptide, virus_config, epitope_mask, receptor_binding_sites)
+
+	# modify clade designations
+	if not params.ATG:
+		virus_config, epitope_mask, receptor_binding_sites = shift_cds(3*sp, virus_config, epitope_mask, receptor_binding_sites)
 
 	# add all arguments to virus_config (possibly overriding)
 	virus_config.update(params.__dict__)
