@@ -143,8 +143,11 @@ class tree_refine(object):
 		for v in self.viruses:
 			if v.strain in self.node_lookup:
 				node = self.node_lookup[v.strain]
-				for attr in ['strain', 'date', 'accession', 'num_date', 'db', 'region', 'country']:
-					node.__setattr__(attr, v.__getattribute__(attr))
+				for attr in self.fasta_fields.values() + ['num_date', 'db', 'region', 'country']:
+					try:
+						node.__setattr__(attr, v.__getattribute__(attr))
+					except:
+						pass
 
 	def define_trunk(self, dt = None):
 		"""Trace current lineages backward to define trunk"""
