@@ -7,6 +7,7 @@ BurkinaFaso	Africa
 Cameroon	Africa
 CanaryIslands	Africa
 CentralAfricanRepublic	Africa
+Congo	Africa
 Djibouti	Africa
 Egypt	Africa
 Ethiopia	Africa
@@ -27,6 +28,7 @@ Tunisia	Africa
 Uganda	Africa
 Zambia	Africa
 Zimbabwe	Africa
+Mauritania	Africa
 Taiwan	China
 China	China
 HongKong	China
@@ -71,11 +73,11 @@ Sweden	Europe
 Switzerland	Europe
 Ukraine	Europe
 UnitedKingdom	Europe
-Bangladesh	India
-Bhutan	India
-India	India
-Nepal	India
-SriLanka	India
+Bangladesh	SouthAsia
+Bhutan	SouthAsia
+India	SouthAsia
+Nepal	SouthAsia
+SriLanka	SouthAsia
 Japan	JapanKorea
 SouthKorea	JapanKorea
 Anguilla	NorthAmerica
@@ -99,6 +101,8 @@ Mexico	NorthAmerica
 Montserrat	NorthAmerica
 Nicaragua	NorthAmerica
 Panama	NorthAmerica
+SaintKitts	NorthAmerica
+StVincentAndGrenadines	NorthAmerica
 PuertoRico	NorthAmerica
 SaintLucia	NorthAmerica
 TrinidadTobago	NorthAmerica
@@ -173,3 +177,6 @@ Russia	WestAsia
 Mongolia	WestAsia
 Kyrgyzstan	WestAsia
 Kazakhstan	WestAsia
+Tajikistan	WestAsia
+UnitedArabEmirates	WestAsia
+Uzbekistan	WestAsia

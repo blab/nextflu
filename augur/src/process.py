@@ -10,7 +10,7 @@ from tree_util import delimit_newick
 import numpy as np
 
 parser = argparse.ArgumentParser(description='Process virus sequences, build tree, and prepare of web visualization')
-parser.add_argument('-y', '--years_back', type = int, default=3, help='number of past years to sample sequences from')
+parser.add_argument('-y', '--years_back', type = float, default=3, help='number of past years to sample sequences from')
 parser.add_argument('-v', '--viruses_per_month', type = int, default = 50, help='number of viruses sampled per month')
 parser.add_argument('-r', '--raxml_time_limit', type = float, default = 1.0, help='number of hours raxml is run')
 parser.add_argument('--interval', nargs = '+', type = float, default = None, help='interval from which to pull sequences')
@@ -19,6 +19,7 @@ parser.add_argument('--test', default = False, action="store_true",  help ="don'
 parser.add_argument('--start', default = 'filter', type = str,  help ="start pipeline at specified step")
 parser.add_argument('--stop', default = 'export', type=str,  help ="run to end")
 parser.add_argument('--skip', nargs='+', type = str,  help ="analysis steps to skip")	
+parser.add_argument('--ATG', action="store_true", default=False, help ="include full HA sequence starting at ATG")	
 
 
 virus_config = {
@@ -26,23 +27,26 @@ virus_config = {
 	# frequency estimation parameters
 	'aggregate_regions': [  ("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
 							("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ],
-	'frequency_stiffness':10.0,
+	'frequency_stiffness':5.0,
 	'verbose':2, 
 	'tol':1e-4, #tolerance for frequency optimization
 	'pc':1e-3, #pseudocount for frequencies 
-	'extra_pivots': 6,  # number of pivot point for or after the last observations of a mutations
+	'extra_pivots': 12,  # number of pivot point for or after the last observations of a mutations
 	'inertia':0.7,		# fraction of frequency change carry over in the stiffness term
 	'n_iqd':3,     # standard deviations from clock
 }
 
-
+def shift_cds(shift, vc, epi_mask, rbs):
+	vc['cds'] = (vc['cds'][0]+shift,vc['cds'][1])
+	aashift = shift//3
+	vc['clade_designations'] = {cl:[(pos-aashift, aa) for pos, aa in gt]
+								for cl, gt in vc['clade_designations'].iteritems()}
+	return vc, epi_mask[aashift:], [pos-aashift for pos in rbs]
 
 class process(virus_frequencies):
 	"""generic template class for processing virus sequences into trees"""
 	def __init__(self, prefix = 'data/', time_interval = (2012.0, 2015.0), 
-	             auspice_frequency_fname ='../auspice/data/frequencies.json', 
-				 auspice_sequences_fname='../auspice/data/sequences.json', 
-				 auspice_tree_fname='../auspice/data/tree.json', 
+	             auspice_prefix = '', 
 				 min_mutation_frequency = 0.01, min_genotype_frequency = 0.1, **kwargs):
 		self.tree_fname = prefix+'tree.pkl'
 		self.virus_fname = prefix+'virus.pkl'
@@ -52,9 +56,10 @@ class process(virus_frequencies):
 		self.min_genotype_frequency = min_genotype_frequency
 		self.time_interval = tuple(time_interval)
 
-		self.auspice_tree_fname = auspice_tree_fname
-		self.auspice_sequences_fname = auspice_sequences_fname
-		self.auspice_frequency_fname = auspice_frequency_fname
+		self.auspice_tree_fname = 		'../auspice/data/' + auspice_prefix + 'tree.json'
+		self.auspice_sequences_fname = 	'../auspice/data/' + auspice_prefix + 'sequences.json'
+		self.auspice_frequency_fname = 	'../auspice/data/' + auspice_prefix + 'frequencies.json'
+		self.auspice_meta_fname = 		'../auspice/data/' + auspice_prefix + 'meta.json'
 		self.nuc_alphabet = 'ACGT-N'
 		self.aa_alphabet = 'ACDEFGHIKLMNPQRSTVWY*X'
 		virus_frequencies.__init__(self, **kwargs)
@@ -130,9 +135,15 @@ class process(virus_frequencies):
 			for clade, gt in self.clade_designations.iteritems():
 				if clade in annotations:
 					print "Annotating clade", clade
-					base_node = sorted((x for x in self.tree.postorder_node_iter() if all([x.aa_seq[pos-1]==aa for pos, aa in gt])), key=lambda x: x.xvalue)[0]
-					clade_xval[clade] = base_node.xvalue
-					clade_yval[clade] = base_node.yvalue
+					tmp_nodes = sorted((node for node in self.tree.postorder_node_iter()
+						if not node.is_leaf() and all([node.aa_seq[pos-1]==aa for pos, aa in gt])),
+						key=lambda node: node.xvalue)
+					if len(tmp_nodes):
+						base_node = tmp_nodes[0]
+						clade_xval[clade] = base_node.xvalue
+						clade_yval[clade] = base_node.yvalue
+					else:
+						print "clade",clade, gt, "not in tree"
 			# append clades, coordinates and genotype to meta
 			self.tree_json["clade_annotations"] = [(clade, clade_xval[clade],clade_yval[clade], 
 								"/".join([str(pos)+aa for pos, aa in gt]))
@@ -167,8 +178,7 @@ class process(virus_frequencies):
 			meta["regions"] = self.regions
 			meta["virus_stats"] = [ [str(y)+'-'+str(m)] + [self.date_region_count[(y,m)][reg] for reg in self.regions]
 									for y,m in sorted(self.date_region_count.keys()) ]
-		meta_fname = "../auspice/data/meta.json"
-		write_json(meta, meta_fname, indent=0)
+		write_json(meta, self.auspice_meta_fname, indent=0)
 
 	def align(self):
 		'''
