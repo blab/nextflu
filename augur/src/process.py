@@ -19,6 +19,7 @@ parser.add_argument('--test', default = False, action="store_true",  help ="don'
 parser.add_argument('--start', default = 'filter', type = str,  help ="start pipeline at specified step")
 parser.add_argument('--stop', default = 'export', type=str,  help ="run to end")
 parser.add_argument('--skip', nargs='+', type = str,  help ="analysis steps to skip")	
+parser.add_argument('--ATG', action="store_true", default=False, help ="include full HA sequence starting at ATG")	
 
 
 virus_config = {
@@ -35,7 +36,12 @@ virus_config = {
 	'n_iqd':3,     # standard deviations from clock
 }
 
-
+def shift_cds(shift, vc, epi_mask, rbs):
+	vc['cds'] = (vc['cds'][0]+shift,vc['cds'][1])
+	aashift = shift//3
+	vc['clade_designations'] = {cl:[(pos-aashift, aa) for pos, aa in gt]
+								for cl, gt in vc['clade_designations'].iteritems()}
+	return vc, epi_mask[aashift:], [pos-aashift for pos in rbs]
 
 class process(virus_frequencies):
 	"""generic template class for processing virus sequences into trees"""
@@ -129,9 +135,15 @@ class process(virus_frequencies):
 			for clade, gt in self.clade_designations.iteritems():
 				if clade in annotations:
 					print "Annotating clade", clade
-					base_node = sorted((x for x in self.tree.postorder_node_iter() if all([x.aa_seq[pos-1]==aa for pos, aa in gt])), key=lambda x: x.xvalue)[0]
-					clade_xval[clade] = base_node.xvalue
-					clade_yval[clade] = base_node.yvalue
+					tmp_nodes = sorted((node for node in self.tree.postorder_node_iter()
+						if not node.is_leaf() and all([node.aa_seq[pos-1]==aa for pos, aa in gt])),
+						key=lambda node: node.xvalue)
+					if len(tmp_nodes):
+						base_node = tmp_nodes[0]
+						clade_xval[clade] = base_node.xvalue
+						clade_yval[clade] = base_node.yvalue
+					else:
+						print "clade",clade, gt, "not in tree"
 			# append clades, coordinates and genotype to meta
 			self.tree_json["clade_annotations"] = [(clade, clade_xval[clade],clade_yval[clade], 
 								"/".join([str(pos)+aa for pos, aa in gt]))
