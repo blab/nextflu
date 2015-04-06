@@ -705,6 +705,7 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 
 	calcNodeAges(time_window);
 	calcLBI(rootNode, nodes, false);
+	rootNode.dfreq = 0.0;
 	calcDfreq(rootNode, freq_ii);
 	var freq_ii = 1;
 	if (typeof rootNode.pivots != "undefined") {
