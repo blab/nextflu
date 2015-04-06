@@ -1330,3 +1330,31 @@ d3.json("/data/" + file_prefix + "frequencies.json", function(error, json){
 		});
 	make_gt_chart(parse_gt_string(document.getElementById("gtspec").value));
 });
+
+
+// inspired by http://d3export.housegordon.org/ and http://jsfiddle.net/oqskpydg/
+d3.select("#export")
+	.on("click", function(){
+		console.log('clicked export');
+		var svg_xml = (new XMLSerializer).serializeToString(document.getElementById('treeplot'));
+		var MIME_TYPE, theBlob, a;
+
+		// The file type
+		MIME_TYPE = "image/svg+xml";
+		// Basically, the file itself
+		theBlob = new Blob([svg_xml], {type: MIME_TYPE});
+		// The anchor element
+		a = document.createElement("a");
+		// Set the name of the file that will be downloaded
+		a.download = file_prefix+"tree.svg";
+		// Set the contents to be downloaded
+		a.href = window.URL.createObjectURL(theBlob);
+		// Anchor's text
+		a.textContent = "Download";
+
+		// What's displayed as the URL of the anchor (when hovered, copied, etc.)
+		a.dataset.downloadurl = [MIME_TYPE, a.download, a.href].join(":");
+
+		// Add the anchor to the page
+		document.getElementById('download').appendChild(a);
+	});
