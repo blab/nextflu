@@ -58,12 +58,10 @@ In any given year, the particular choice of vaccine strain plays a major role in
 The program \nextflu{} presents a near real-time display of genetic relationships among influenza viruses and allows investigation of currently available sequence data.
 
 \begin{figure}[t!]
-	\begin{center}
+	\centering
 	\includegraphics[width=0.99\columnwidth]{figures/tree}
-\caption[]{The \nextflu{} website with the user interface on the left and
-the phylogenetic tree on the right.}
-\label{fig:tree}
-\end{center}
+	\caption[]{The \nextflu{} website with the user interface on the left and the phylogenetic tree on the right.}
+	\label{fig:tree}
 \end{figure}
 
 In implementation, \nextflu{} consists of a processing pipeline written in Python called \augur{} that analyzes virus sequence data and a JavaScript-based browser visualization called \auspice{} that displays this processed information.
@@ -119,11 +117,10 @@ The frequency plot below the tree (\FIG{freq}) displays the frequency trajectory
 Furthermore, trajectories of individual mutations, combinations of two mutations, and predefined clades such as 3c3.a can be plotted.
 
 \begin{figure}[t]
-	\begin{center}
+	\centering
 	\includegraphics[width=0.99\columnwidth]{figures/frequencies}
-\caption[]{The frequency diagram allows geography-specific plotting of frequencies of individual mutations, pairs of mutations and clades in the tree.}
-\label{fig:freq}
-\end{center}
+	\caption[]{The frequency diagram allows geography-specific plotting of frequencies of individual mutations, pairs of mutations and clades in the tree.}
+	\label{fig:freq}
 \end{figure}
 
 %\section{Conclusion}
@@ -134,7 +131,65 @@ By using the most recent data and integrating phylogenies with frequency traject
 \paragraph{Funding\textcolon}This work is supported by the ERC though Stg-260686 and by the NIH through U54 GM111274.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibliography{nextflu}
+\begin{thebibliography}{}
+
+\bibitem[Bastien {\em et~al.}, 2010]{bastien_human_2010}
+Bastien,N. {\em et~al.} (2010{\em{}})
+  Human infection with a triple-reassortant swine influenza {A (H1N1)} virus
+  containing the hemagglutinin and neuraminidase genes of seasonal influenza
+  virus.
+\newblock {\em J Infect Dis, } {\bf 201} (8), 1178--1182.
+
+\bibitem[Bogner {\em et~al.}, 2006]{GISAID}
+Bogner,P. {\em et~al.} (2006{\em{}}) A global
+  initiative on sharing avian flu data.
+\newblock {\em Nature, } {\bf 442} (7106), 981--981.
+
+\bibitem[Bostock {\em et~al.}, 2011]{bostock_d3_2011}
+Bostock,M. {\em et~al.} (2011{\em{}}) D$^3$: data-driven
+  documents.
+\newblock {\em IEEE Trans Vis Comput Graphics, } {\bf 17} (12), 2301--2309.
+
+\bibitem[Katoh and Standley, 2013]{katoh_mafft_2013}
+Katoh,K. and Standley,D.M. (2013{\em{}}) {MAFFT} multiple sequence alignment
+  software version 7: improvements in performance and usability.
+\newblock {\em Mol Biol Evol, } {\bf 30}, 772--780.
+
+\bibitem[Koel {\em et~al.}, 2013]{koel_substitutions_2013}
+Koel,B.F. {\em et~al.} (2013{\em{}})
+  Substitutions near the receptor binding site determine major antigenic change
+  during influenza virus evolution.
+\newblock {\em Science, } {\bf 342} (6161), 976--979.
+
+\bibitem[\L{}uksza and L\"a{}ssig, 2014]{luksza_predictive_2014}
+\L{}uksza,M. and L\"a{}ssig,M. (2014{\em{}}) A predictive fitness model for
+  influenza.
+\newblock {\em Nature, } {\bf 507} (7490), 57--61.
+
+\bibitem[Neher {\em et~al.}, 2014]{neher_predicting_2014}
+Neher,R.A. {\em et~al.} (2014{\em{}}) Predicting evolution
+  from the shape of genealogical trees.
+\newblock {\em eLife Sciences, } {\bf 3}, e03568.
+
+\bibitem[Oliphant, 2007]{oliphant_python_2007}
+Oliphant,T. (2007{\em{}}) Python for scientific computing.
+\newblock {\em Comput Sci Eng, } {\bf 9} (3), 10--20.
+
+\bibitem[Price {\em et~al.}, 2009]{price_fasttree_2009}
+Price,M.N. {\em et~al.} (2009{\em{}}) {FastTree:} computing
+  large minimum evolution trees with profiles instead of a distance matrix.
+\newblock {\em Mol Biol Evol, } {\bf 26} (7), 1641--50.
+
+\bibitem[Stamatakis, 2014]{stamatakis_raxml_2014}
+Stamatakis,A. (2014{\em{}}) {RAxML} version 8: a tool for phylogenetic analysis
+  and post-analysis of large phylogenies.
+\newblock {\em Bioinformatics, } {\bf 30} (9), 1312--1313.
+
+\bibitem[{World Health Organization}, 2009]{flufactsheet}
+{World Health Organization} (2009{\em{}}) {\em {Influenza Fact sheet}}.
+\newblock Available at http://www.who.int/mediacentre/factsheets/fs211/en/.
+
+\end{thebibliography}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \end{document}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
