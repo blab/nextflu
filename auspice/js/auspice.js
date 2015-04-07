@@ -703,7 +703,7 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
     		.remove();
     }
 
-	calcNodeAges(time_window);
+	calcNodeAges(LBItime_window);
 	calcLBI(rootNode, nodes, false);
 	rootNode.dfreq = 0.0;
 	calcDfreq(rootNode, freq_ii);
@@ -847,7 +847,7 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 			.attr("cx", function(d) {return d.x});
 		globalDate = d.date;
 
-		calcNodeAges(time_window);
+		calcNodeAges(LBItime_window);
 		treeplot.selectAll(".link")
 			.style("stroke", function(d){return "#ccc";})
 
@@ -876,7 +876,7 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 		}
 		console.log("changed frequency index to "+freq_ii+" date cut off is "+num_date);
 		console.log("recalculating node ages");
-		calcNodeAges(time_window);
+		calcNodeAges(LBItime_window);
 		console.log("adjusting node colors");
 		adjust_coloring_by_date();
 		console.log("updating frequencies");
