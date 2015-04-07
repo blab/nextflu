@@ -13,9 +13,9 @@
 \newcommand{\FIG}[1]{Fig.~\ref{fig:#1}}
 \newcommand{\TAB}[1]{Tab.~\ref{tab:#1}}
 \newcommand{\REF}[1]{ref.~\citep{#1}}
-\newcommand{\augur}{\textit{augur}}
-\newcommand{\auspice}{\textit{auspice}}
-\newcommand{\nextflu}{\textit{nextflu}}
+\newcommand{\augur}{\textbf{augur}}
+\newcommand{\auspice}{\textbf{auspice}}
+\newcommand{\nextflu}{\textbf{nextflu}}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -34,10 +34,10 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{abstract} \section{Summary:} Seasonal influenza viruses evolve rapidly, which allows the virus population to evade immunity in their human hosts and reinfect previously infected individuals.
+\begin{abstract} \section{Summary:} Seasonal influenza viruses evolve rapidly, allowing them to evade immunity in their human hosts and reinfect previously infected individuals.
 Similarly, vaccines against seasonal influenza need to be updated frequently to protect against an evolving virus population.
-We have thus developed a processing pipeline and web-browser based visualization that allows convenient exploration and analysis of the most recent influenza virus sequence data.
-This web-application displays a phylogenetic tree that can be decorated with additional information such the viral genotype at specific sites, sampling location, and sequence or tree based statistics that have been shown to predictive of future virus dynamics.
+We have thus developed a processing pipeline and browser-based visualization that allows convenient exploration and analysis of the most recent influenza virus sequence data.
+This web-application displays a phylogenetic tree that can be decorated with additional information such the viral genotype at specific sites, sampling location, and derived statistics that have been shown to predictive of future virus dynamics.
 Additionally, mutation, genotype and clade frequency trajectories are calculated and displayed.
 
 \section{Availability and implementation:} Python and Javascript source code is freely available from \url{https://github.com/blab/nextflu}, while the web-application is live at \url{http://nextflu.org}.
@@ -61,7 +61,7 @@ The program \nextflu{} presents a near real-time display of genetic relationship
 	\begin{center}
 	\includegraphics[width=0.99\columnwidth]{figures/tree}
 \caption[]{The \nextflu{} website with the user interface on the left and
-the tree on the right.}
+the phylogenetic tree on the right.}
 \label{fig:tree}
 \end{center}
 \end{figure}
@@ -74,65 +74,64 @@ Here, viruses without complete date or geographic information, viruses passaged 
 In addition, local outbreaks are filtered by keeping only one instance of identical sequences sampled at the same location on the same day.
 Following filtering, the viruses are subsampled to achieve a more equitable temporal and geographic distribution.
 For our standard display period of 3 years and 50 viruses per month, this typically results in $\sim$1800 viruses, which we align using MAFFT \citep{katoh_mafft_2013}.
-Once aligned, the set of virus sequences is further cleaned by removing insertions relative to the outgroup to enforce canonical HA site numbering and by removing sequences that show either too much or too little divergence relative to the expectation given data of sampling.
+Once aligned, the set of virus sequences is further cleaned by removing insertions relative to the outgroup to enforce canonical HA site numbering and by removing sequences that show either too much or too little divergence relative to the expectation given sampling date.
 Additionally, known reassortant clusters are removed, including the triple-reassortant influenza viruses sporadically sampled in humans throughout North America \citep{bastien_human_2010}.
 
 From the filtered and cleaned alignment, \augur{} builds a phylogenetic tree using FastTree \citep{price_fasttree_2009}, which is then further refined using RAxML \citep{stamatakis_raxml_2014}.
-Next, the state of every internal node of the tree is inferred using marginal maximum likelihood method and missing sequence is filled with the nearest ancestral sequence.
+Next, the state of every internal node of the tree is inferred using a marginal maximum likelihood method and missing sequence data at phylogeny tips is filled with the nearest ancestral sequence at these sites.
 Internal branches without mutations are collapsed into polytomies.
-The final tree is decorated with the attributes to be displayed in the browser, see below.  
+The final tree is decorated with the attributes to be displayed in the browser, as described below.  
 
-In addition to the phylogenetic tree, augur estimates the frequency trajectories of mutations, genotypes and clades in the tree. 
-Frequency trajectories are represented as a linear interpolation $x(t)$ of values $x_i$ at time points $t_i$ spaced one month apart. 
-The pivot frequencies corresponding to a feature $\phi$ (e.g. mutation) are estimated by maximizing
+In addition to the phylogenetic tree, \augur{} estimates the frequency trajectories of mutations, genotypes and clades in the tree. 
+Frequency trajectories are represented as a linear interpolation $x(t)$ of pivot frequencies $x_i$ at time points $t_i$ spaced one month apart. 
+The frequencies $x_i$ corresponding to a feature $\phi$ (e.g. mutation) are estimated by simultaneously maximizing the Bernoulli observation model 
 \begin{equation}
-\label{eq:freq}
-	\begin{split}
-	\prod_{v\in V_\phi}x(t_v)\prod_{v\notin V_{\phi}}(1-x(t_v))\times e^{ 
-			-\sum_i \frac{(\Delta x_i - \epsilon\Delta x_{i-1})^2}{2\gamma \delta t_i}
-			}
-\end{split}
+	\label{eq:obs}
+	f(\mathbf{x}) = \prod_{v\in V_\phi} x(t_v) \prod_{v\notin V_{\phi}} (1-x(t_v))
 \end{equation}
-where $V_{\phi}$ is the set of viruses carring attribute $\phi$, $\Delta x_i = x_i-x_{i-1}$, $\Delta t_i = t_i-t_{i-1}$, $\gamma$ parameterizes the smoothing imposed on the frequency estimate and $\epsilon$ parameterizes our expectation of frequency changes in interval $i$ based on the observed change in interval $i-1$.
+where $V_{\phi}$ is the set of viruses carring attribute $\phi$ and $x(t_v)$ is the sampling timepoint of virus $v$, and the process noise model
+\begin{equation}
+	\label{eq:freq}
+	g(\mathbf{x}) = \mathrm{exp}\left(
+		-\sum_i \frac{(\Delta x_i - \epsilon\Delta x_{i-1})^2}{2\gamma \delta t_i}
+	\right)
+\end{equation}
+where $\Delta x_i = x_i-x_{i-1}$, $\Delta t_i = t_i-t_{i-1}$, $\gamma$ parameterizes the smoothing imposed on the frequency estimate and $\epsilon$ parameterizes our expectation of frequency changes in interval $i$ based on the observed change in interval $i-1$.
 $\epsilon=0$ implies that frequency changes are uncorrelated from one interval to the next, while $\epsilon=1$ implies that the most likely $\Delta x_i$ is $\Delta x_{i-1}$.
 We typically use $\epsilon = 0.7$.
-The logarithm of \EQ{freq} is maximized using SciPy's implementation of a downhill simplex algorithm \citep{Oliphant:2007p25672}.
+Here, the objective function $\mathrm{log}(f) + \mathrm{log}(g)$ is maximized using SciPy's implementation of a downhill simplex algorithm \citep{oliphant_python_2007}.
 To speed up convergence, optimization is first done using a coarse grid of pivot points which is subsequently refined to 12 pivots per year. Frequency estimation is done for mutations, particular genotypes, and major clades of the tree.
+At the end of the \augur{} pipeline, JSON files are exported containing the annotated phylogenetic tree, sequence data and frequency trajectories.
 
-The tree decorated with attributes and clade frequencies is written to file in a nested json format for display in the browser by \auspice.
-In addition to the tree, json files containing the sequences, frequencies of mutations and genotypes, as well as meta information are exported.
-
-The tree is visualized by \auspice{} using d3 \citep{bostock_d3_2011}.
-The user can explore the data interactively by selecting viruses from different dates (moving the date slider, top right corner in \FIG{tree}) or by coloring the tree by attributes such as:
+These JSON files are then visualized by \auspice{} using D$^3$ \citep{bostock_d3_2011} and the phylogenetic tree displayed (\FIG{tree}).
+The user can explore the data interactively by selecting viruses from different dates or by coloring the tree by attributes such as:
 \begin{itemize}
-	\item epitope mutations: each tip is colored by the number of aminoacid mutations at antibody epitopes ($\sim 50$ sites) relative to the root of the tree. Evolution at epitopes has been suggested to be predictive of future success \citep{luksza_predictive_2014}.
+	\item \textit{epitope mutations} at sites generally associated with antibody binding have been suggested to be predictive of future clade success \citep{luksza_predictive_2014},
 %	\item non-epitope mutations: 
 %	Mutations outside epitopes tend to be damaging and anti-correlated with clade expansion \citep{luksza_predictive_2014}.
-    \item receptor binding mutations: Mutations at seven positions close to the receptor binding site have been shown to be responsible for major antigenic positions in the past decades \citep{koel_substitutions_2013}.
-    \item local branching index is the exponentially weighted tree length surrounding a node, which is associated with rapid branching and expansion of clades \citep{neher_predicting_2014}.
+    \item \textit{receptor binding mutations} at seven positions close to the receptor binding site have been shown to be responsible for major antigenic transitions in the past decades \citep{koel_substitutions_2013},
+    \item \textit{local branching index} is the exponentially weighted tree length surrounding a node, which is associated with rapid branching and expansion of clades \citep{neher_predicting_2014},
  %   \item geographic location
-    \item HA genotype: enter amino acid positions to color every node according to the genotype at these positions.
+    \item \textit{HA genotype} directly colors the tree by genotype at specific amino acid positions.
 \end{itemize}
 
-The frequency plot below the tree (see \FIG{freq}) displays the frequency trajectory of clades in the tree whenever the mouse hovers above the branch defining the clade. 
-Furthermore, trajectories of individual mutations, combinations of two mutations, and predefined clades such as \textit{3c3.a} can be plotted by entering them in text field.
+The frequency plot below the tree (\FIG{freq}) displays the frequency trajectory of clades in the tree whenever the mouse hovers above the branch defining the clade. 
+Furthermore, trajectories of individual mutations, combinations of two mutations, and predefined clades such as 3c3.a can be plotted.
 
 \begin{figure}[t]
 	\begin{center}
 	\includegraphics[width=0.99\columnwidth]{figures/frequencies}
-\caption[]{The frequency diagram on \url{nextflu.org} allows geography specific
-		plotting of frequencies of individual mutations, pairs of mutations, 
-		predefined genotypes, as well as clades in the tree. }
+\caption[]{The frequency diagram allows geography-specific plotting of frequencies of individual mutations, pairs of mutations and clades in the tree.}
 \label{fig:freq}
 \end{center}
 \end{figure}
 
 %\section{Conclusion}
 We built \nextflu{} to facilitate the analysis and exploration of seasonal influenza sequence data collected by laboratories around to world.
-By using the most recent data and integrating phylogenies with frequency trajectories and sequence or tree based predictors of successful clades, we hope that \nextflu{} can inform the choice of strains used in seasonal influenza vaccines. 
-\nextflu{} was designed to be readily adapted to other rapidly evolving viruses. To that end, the generic classes used for processing the sequence data to include features specific to the virus in question. 
-
-\paragraph{Funding\textcolon}This work is supported by the ERC though Stg-260686.
+By using the most recent data and integrating phylogenies with frequency trajectories and predictors of successful clades, we hope that \nextflu{} can inform the choice of strains used in seasonal influenza vaccines. 
+\nextflu{} was designed to be readily adapted to other rapidly evolving viruses.
+ 
+\paragraph{Funding\textcolon}This work is supported by the ERC though Stg-260686 and by the NIH through U54 GM111274.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \bibliography{nextflu}
