@@ -327,6 +327,7 @@ var virusTooltip = d3.tip()
 		return string;
 	});
 treeplot.call(virusTooltip);
+var cbg;
 
 var linkTooltip = d3.tip()
 	.direction('e')
@@ -1170,7 +1171,8 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 		}
 		tree_legend = makeLegend();
 	}
-	
+
+	cbg = colorByGenotypePosition;	
 	d3.select("#coloring")
 		.style("cursor", "pointer")
 		.on("change", colorByTrait);
@@ -1367,6 +1369,7 @@ d3.json("/data/" + file_prefix + "frequencies.json", function(error, json){
 		            		}
 		            		console.log(tmp);
 		            		make_gt_chart(tmp);
+		            		cbg([d.x-1]);
 		            	}
 		            }
 		},
