@@ -1,0 +1,48 @@
+\documentclass[stdletter,letterpaper,addrfromleft,orderfromdateto,dateleft,11pt,noaddrto,sigleft]{newlfm}
+\topmarginskip{-0.4in}
+\bottommarginskip{-1.5in}
+\leftmarginsize{1in}
+\rightmarginsize{1.25in}
+\sigskipbefore{0.2in}
+\sigskipafter{0in}
+\noLines
+\nolines
+\noHeadline
+\noheadline
+\signature{Trevor Bedford and Richard Neher}
+
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+\namefrom{}
+\addrfrom{
+	\includegraphics[width=6.5cm]{figures/fhcrc_logo} \\ 
+	Vaccine and Infectious Disease Division \\ Fred Hutchinson Cancer Research Center \\ Seattle, WA, USA \\
+	\\
+	\includegraphics[width=4cm]{figures/max_planck_logo} \\ 
+	Max Planck Institute for Developmental Biology \\ T\"ubingen, Germany}
+
+\greetto{Dear Editor,}
+\closeline{Sincerely,}
+
+% comments
+\usepackage{color} 
+\usepackage{ulem}
+\definecolor{purple}{rgb}{0.459,0.109,0.538}
+\def\tb#1#2{\sout{#1} \textcolor{purple}{#2}} 
+\def\tbc#1{\textcolor{purple}{[#1]}}
+ 
+ \newcommand{\nextflu}{\textbf{nextflu}}
+ 
+\begin{document}
+
+\begin{newlfm}
+
+Please find, attached, our application note entitled ``nextflu: Real-time tracking of seasonal influenza virus evolution in humans,'' which we would be grateful for your consideration for publication in \textit{Bioinformatics}.
+We believe that \textit{Bioinformatics} is an appropriate venue to showcase our software application, as \nextflu{} represents a valuable contribution to public health bioinformatics as it allows better understanding of circulating viruses in an extremely timely fashion.
+Source code to \nextflu{} is freely available from \url{https://github.com/blab/nextflu}, while a live web application is publicly available at \url{http://nextflu.org}.
+At this point, we've received positive encouragement that \nextflu{} will be useful to several National Influenza Centers and WHO Collaborating Centers in aiding surveillance and strain selection efforts.
+As such, we believe that \nextflu{} will see substantial adoption by the influenza research community.
+
+\end{newlfm}
+\end{document}  
