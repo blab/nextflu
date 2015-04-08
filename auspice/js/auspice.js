@@ -1343,9 +1343,8 @@ d3.json("/data/" + file_prefix + "frequencies.json", function(error, json){
 			y: {
 				label: {
 					text: 'entropy',
-					position: 'outer-center'	
-				},
-				show: false,
+					position: 'outer-middle'	
+				}
 			},
 			x: {
 				label: {
