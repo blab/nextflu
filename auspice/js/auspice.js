@@ -374,7 +374,7 @@ var gt_chart = c3.generate({
 		x: {
 			label: {
 				text: 'time',
-				position: 'outer-center'	
+				position: 'outer-right'	
 			},
 			tick: {
 				values: time_ticks,
@@ -1326,7 +1326,7 @@ d3.json("/data/" + file_prefix + "frequencies.json", function(error, json){
 		});
 	}
 
-	var ent = [['x'],['']];
+	var ent = [['x'],['entropy']];
 	for (var ii=0;ii<json["entropy"].length;ii+=1){
 		if (Math.round(10000*json["entropy"][ii][1])/10000>0){
 			ent[1].push(Math.round(10000*json["entropy"][ii][1])/10000);
@@ -1343,16 +1343,18 @@ d3.json("/data/" + file_prefix + "frequencies.json", function(error, json){
 			y: {
 				label: {
 					text: 'entropy',
-					position: 'outer-middle'	
+					position: 'outer-center'	
 				},
+				show: false,
 			},
 			x: {
 				label: {
 					text: 'position',
-					position: 'outer-center'	
+					position: 'outer-right'	
 				},
 				tick: {
-					outer: false				
+					outer: false,
+					values: [100,200,300,400,500]				
 				}
 			}
 		},			
