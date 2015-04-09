@@ -6,7 +6,6 @@
 \usepackage{hyperref}
 \usepackage{graphicx}
 \usepackage{amsmath}
-\usepackage{natbib}
 
 \newcommand{\EQ}[1]{Eq.~(\ref{eq:#1})}
 \newcommand{\EQS}[2]{Eqs.~(\ref{eq:#1}) and (\ref{eq:#2})}
@@ -30,8 +29,6 @@
 
 %\date{\today}
 \maketitle
-\bibliographystyle{bioinformatics}
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract} \section{Summary:} Seasonal influenza viruses evolve rapidly, allowing them to evade immunity in their human hosts and reinfect previously infected individuals.
@@ -60,7 +57,7 @@ Currently, \nextflu{} tracks all four circulating lineages of seasonal influenza
 
 \begin{figure}[t!]
 	\centering
-	\includegraphics[width=0.99\columnwidth]{figures/tree}
+	\includegraphics[width=0.99\columnwidth]{tree}
 	\caption[]{The \nextflu{} website with the user interface on the left and the phylogenetic tree on the right.}
 	\label{fig:tree}
 \end{figure}
@@ -116,7 +113,7 @@ The user can explore the data interactively by selecting viruses from different 
 
 \begin{figure}[t]
 	\centering
-	\includegraphics[width=0.99\columnwidth]{figures/frequencies}
+	\includegraphics[width=0.99\columnwidth]{frequencies}
 	\caption[]{The frequency diagram allows geography-specific plotting of frequencies of individual mutations, pairs of mutations and clades in the tree.}
 	\label{fig:freq}
 \end{figure}
