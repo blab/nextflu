@@ -10,6 +10,40 @@ patterns = {('A / H3N2', ''):'H3N2',
 			('A / H1N1', 'seasonal'):'H1N1',
 			}
 
+def pull_fasta_from_s3(lineages = ['H3N2', 'H1N1pdm', 'Vic', 'Yam'], directory = 'data/', bucket = 'nextflu-data'):
+	"""Retrieve FASTA files from S3 bucket"""
+	"""Boto expects environmental variables AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY"""
+	directory = directory.rstrip('/')+'/'
+
+	import boto
+	conn = boto.connect_s3()
+	b = conn.get_bucket(bucket)
+	k = boto.s3.key.Key(b)
+
+	for lineage in lineages:
+		print "Retrieving FASTA for",lineage
+		fasta = lineage+'_gisaid_epiflu_sequence.fasta'
+		k.key = fasta
+		k.get_contents_to_filename(directory+fasta)
+		print fasta,"retrieved"
+		
+def push_fasta_to_s3(lineages= ['H3N2', 'H1N1pdm', 'Vic', 'Yam'], directory = 'data/', bucket = 'nextflu-data'):
+	"""Upload FASTA files to S3 bucket"""
+	"""Boto expects environmental variables AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY"""
+	directory = directory.rstrip('/')+'/'
+
+	import boto
+	conn = boto.connect_s3()
+	b = conn.get_bucket(bucket)
+	k = boto.s3.key.Key(b)
+
+	for lineage in lineages:
+		print "Uploading FASTA for",lineage
+		fasta = lineage+'_gisaid_epiflu_sequence.fasta'
+		k.key = fasta
+		k.set_contents_from_filename(directory+fasta)
+		print fasta,"uploaded"
+
 def ammend_files(fname, lineages= ['H3N2', 'H1N1pdm', 'Vic', 'Yam'], threshold = 10, directory = 'data/'):
 	directory = directory.rstrip('/')+'/'
 	updated = []
@@ -58,8 +92,12 @@ if __name__=="__main__":
 	parser.add_argument('--bin', type = str, default = "python")
 	parser.add_argument('--ATG', action = "store_true", default = False, help ="include full HA sequence starting at ATG")
 	parser.add_argument('--all', action = "store_true", default = False)
+	parser.add_argument('--s3', action = "store_true", default = False, help="pull FASTA files from S3")	
 	parser.add_argument('-r', type = float, default = 1.0)
 	params = parser.parse_args()
+	
+	if params.s3:
+		pull_fasta_from_s3(lineages = ['H3N2', 'H1N1pdm', 'Vic', 'Yam'], directory = 'data/', bucket = 'nextflu-data')
 
 	if params.all:	
 		run_pipeline = ammend_files(params.infile, lineages = ['H3N2', 'H1N1pdm', 'Vic', 'Yam'], threshold = 0, directory = 'data/')
@@ -90,3 +128,6 @@ if __name__=="__main__":
 		call = map(str, [params.bin, 'src/Yam_process.py', '-v', 30, '-y', 6, '--prefix', 'data/Yam_'] + common_args)
 		print call
 		subprocess.call(call)
+
+	if params.s3:
+		push_fasta_to_s3(lineages = ['H3N2', 'H1N1pdm', 'Vic', 'Yam'], directory = 'data/', bucket = 'nextflu-data')		
