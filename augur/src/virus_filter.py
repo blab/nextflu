@@ -91,7 +91,7 @@ class virus_filter(object):
 
 	def filter_date(self):
 		if self.date_spec=='full':
-			self.viruses = filter(lambda v: re.match(r'\d\d\d\d-\d\d-\d\d', v['date']) != None, self.viruses)
+			self.viruses = filter(lambda v: re.match(self.date_format['reg'], v['date']) != None, self.viruses)
 		elif self.date_spec=='year':
 			self.viruses = filter(lambda v: re.match(r'\d\d\d\d', v['date']) != None, self.viruses)
 
@@ -143,7 +143,10 @@ class virus_filter(object):
 		from collections import defaultdict
 		virus_tuples = defaultdict(list)
 		for v in tmp_viruses:
-			vdate = datetime.datetime.strptime(v['date'], '%Y-%m-%d').date()
+			try:
+				vdate = datetime.datetime.strptime(v['date'], self.date_format['fields']).date()
+			except:
+				vdate = datetime.datetime.strptime(v['date'], '%Y-%m-%d').date()
 			virus_tuples[(vdate.year, vdate.month, v['region'])].append(v)
 
 		return virus_tuples
