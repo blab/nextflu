@@ -60,7 +60,7 @@ class process(virus_frequencies):
 		self.time_interval = tuple(time_interval)
 		if run_dir is None:
 			import random
-			self.run_dir = '_'.join([time.strftime('%Y%m%d-%H%M%S',time.gmtime()), str(random.randint(0,100000000000000)),'temp_directory'])
+			self.run_dir = '_'.join(['temp', time.strftime('%Y%m%d-%H%M%S',time.gmtime()), str(random.randint(0,1000000))])
 		else:
 			self.run_dir = run_dir
 		self.run_dir = self.run_dir.rstrip('/')+'/'
@@ -260,11 +260,11 @@ class process(virus_frequencies):
 		print "RAxML branch length optimization and rooting"
 		os.system("raxml -f e -T 6 -s temp.phyx -n branches -c 25 -m GTRGAMMA -p 344312987 -t raxml_tree.newick -o " + self.outgroup['strain'])
 
-		os.chdir('..')
-		out_fname = self.prefix+"tree_infer.newick"
-		os.rename(self.run_dir+'RAxML_result.branches', out_fname)
+		out_fname = "tree_infer.newick"
+		shutil.copy('RAxML_result.branches', out_fname)
 		Phylo.write(Phylo.read(out_fname, 'newick'),'temp.newick','newick')
-		self.tree = self.tree = dendropy.Tree.get_from_string(delimit_newick(out_fname), 'newick', as_rooted=True)
+		self.tree = dendropy.Tree.get_from_string(delimit_newick(out_fname), 'newick', as_rooted=True)
+		os.chdir('..')
 		self.remove_run_dir()
 
 	def infer_ancestral(self):
