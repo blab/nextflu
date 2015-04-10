@@ -143,7 +143,10 @@ class virus_filter(object):
 		from collections import defaultdict
 		virus_tuples = defaultdict(list)
 		for v in tmp_viruses:
-			vdate = datetime.datetime.strptime(v['date'], self.date_format['fields']).date()
+			try:
+				vdate = datetime.datetime.strptime(v['date'], self.date_format['fields']).date()
+			except:
+				vdate = datetime.datetime.strptime(v['date'], '%Y-%m-%d').date()
 			virus_tuples[(vdate.year, vdate.month, v['region'])].append(v)
 
 		return virus_tuples

@@ -14,10 +14,13 @@ def year_delta(start_date, years):
 	delta = datetime.timedelta(days=days)
 	return start_date + delta
 
-def numerical_date(date):
+def numerical_date(date, format = '%Y-%m-%d'):
 	"""Takes a calendar date and a numerical dates in terms of years"""
 	if isinstance(date, basestring):
-		date = datetime.date(*map(int, date.split('-')))
+		try:
+			date = datetime.datetime.strptime(date, format).date()
+		except:
+			date = datetime.datetime.strptime(date, '%Y-%m-%d').date()
 	start_date = datetime.date(year=date.year, month=1, day=1)
 	start_ord = start_date.toordinal()
 	end_ord = date.toordinal()
