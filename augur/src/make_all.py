@@ -26,7 +26,7 @@ def pull_fasta_from_s3(lineage, directory = 'data/', bucket = 'nextflu-data'):
 	k.key = fasta
 	k.get_contents_to_filename(directory+fasta)
 	print fasta,"retrieved"
-		
+
 def push_fasta_to_s3(lineage, directory = 'data/', bucket = 'nextflu-data'):
 	"""Upload FASTA files to S3 bucket"""
 	"""Boto expects environmental variables AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY"""
@@ -42,6 +42,23 @@ def push_fasta_to_s3(lineage, directory = 'data/', bucket = 'nextflu-data'):
 	k.key = fasta
 	k.set_contents_from_filename(directory+fasta)
 	print fasta,"uploaded"
+	
+def push_json_to_s3(lineage, directory = '../auspice/data/', bucket = 'nextflu-dev'):
+	"""Upload JSON files to S3 bucket"""
+	"""Boto expects environmental variables AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY"""
+	directory = directory.rstrip('/')+'/'
+
+	import boto
+	conn = boto.connect_s3()
+	b = conn.get_bucket(bucket)
+	k = boto.s3.key.Key(b)
+
+	print "Uploading JSONs for",lineage
+	for postfix in ['_tree.json', '_sequences.json', '_frequencies.json', '_meta.json']:
+		json = lineage + postfix
+		k.key = 'data/'+json
+		k.set_contents_from_filename(directory+json)
+		print json,"uploaded"	
 
 def ammend_fasta(fname, lineage, threshold = 10, directory = 'data/'):
 	directory = directory.rstrip('/')+'/'
@@ -76,7 +93,7 @@ def ammend_fasta(fname, lineage, threshold = 10, directory = 'data/'):
 					print tmp_lineage,"not found"
 
 	print "Found", len(new_seqs), 'new for lineage', lineage
-	if len(new_seqs)>threshold:
+	if len(new_seqs)>=threshold:
 		with open(ex_fname, 'a') as outfile:
 			SeqIO.write(new_seqs, outfile, 'fasta')
 		updated = True
@@ -90,18 +107,20 @@ if __name__=="__main__":
 	parser.add_argument('--bin', type = str, default = "python")
 	parser.add_argument('--ATG', action = "store_true", default = False, help = "include full HA sequence starting at ATG")
 	parser.add_argument('--all', action = "store_true", default = False)
-	parser.add_argument('--s3', action = "store_true", default = False, help = "pull FASTA files from S3")
+	parser.add_argument('--s3', action = "store_true", default = False, help = "push/pull FASTA and JSON files to/from S3")
+	parser.add_argument('--fasta_bucket', type = str, default = "nextflu-data", help = "bucket for FASTA files")		
+	parser.add_argument('--json_bucket', type = str, default = "nextflu-dev", help = "bucket for JSON files")	
 	parser.add_argument('--threshold', type = float, default = 10.0, help = "number of new sequences required to rerun pipeline")	
 	parser.add_argument('-r', type = float, default = 1.0)
 	params = parser.parse_args()
 
-	common_args = ['--skip', 'genotype_frequencies','-r', params.r]
+	common_args = ['--skip', 'genotype_frequencies', '-r', params.r]
 	if params.ATG: common_args.append('--ATG')
 
 	for lineage in lineages:
 		print '\nLineage',lineage	
 		if params.s3:
-			pull_fasta_from_s3(lineage, directory = 'data/', bucket = 'nextflu-data')
+			pull_fasta_from_s3(lineage, directory = 'data/', bucket = params.fasta_bucket)
 		if params.all:
 			params.threshold = 0
 		run = ammend_fasta(params.infile, lineage, threshold = params.threshold, directory = 'data/')
@@ -119,4 +138,5 @@ if __name__=="__main__":
 			print call
 			subprocess.call(call)
 			if params.s3:
-				push_fasta_to_s3(lineage, directory = 'data/', bucket = 'nextflu-data')			
+				push_fasta_to_s3(lineage, directory = 'data/', bucket = params.fasta_bucket)
+				push_json_to_s3(lineage, directory = '../auspice/data/', bucket = params.json_bucket)
