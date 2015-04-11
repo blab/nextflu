@@ -21,7 +21,7 @@ def pull_from_dev(lineage, directory = '../auspice/data/', bucket = 'nextflu-dev
 		k.get_contents_to_filename(directory+json)
 		print json,"retrieved"
 	
-def push_to_production(lineage, directory = '../auspice/data/', bucket = 'nextflu'):
+def push_to_production(lineage, directory = '../auspice/data/', bucket = 'nextflu', cloudfront = 'E1ZD3XPSGXABBI'):
 	"""Upload JSON files to S3 production bucket"""
 	"""Boto expects environmental variables AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY"""
 	directory = directory.rstrip('/')+'/'
@@ -31,12 +31,18 @@ def push_to_production(lineage, directory = '../auspice/data/', bucket = 'nextfl
 	b = conn.get_bucket(bucket)
 	k = boto.s3.key.Key(b)
 
+	paths = []
+
 	print "Uploading JSONs for", lineage, "to bucket", bucket
 	for postfix in ['_tree.json', '_sequences.json', '_frequencies.json', '_meta.json']:
 		json = lineage + postfix
 		k.key = 'data/'+json
 		k.set_contents_from_filename(directory+json)
 		print json,"uploaded"
+		paths.append('data/'+json)
+
+	c = boto.connect_cloudfront()
+	c.create_invalidation_request(cloudfront, paths)
 
 if __name__=="__main__":
 	parser = argparse.ArgumentParser(description = "sync JSONs between local storage, dev server and production server")	

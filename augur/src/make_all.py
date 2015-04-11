@@ -43,7 +43,7 @@ def push_fasta_to_s3(lineage, directory = 'data/', bucket = 'nextflu-data'):
 	k.set_contents_from_filename(directory+fasta)
 	print fasta,"uploaded"
 	
-def push_json_to_s3(lineage, directory = '../auspice/data/', bucket = 'nextflu-dev'):
+def push_json_to_s3(lineage, directory = '../auspice/data/', bucket = 'nextflu-dev', cloudfront = 'E1XKGZG0ZTX4YN'):
 	"""Upload JSON files to S3 bucket"""
 	"""Boto expects environmental variables AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY"""
 	directory = directory.rstrip('/')+'/'
@@ -53,12 +53,18 @@ def push_json_to_s3(lineage, directory = '../auspice/data/', bucket = 'nextflu-d
 	b = conn.get_bucket(bucket)
 	k = boto.s3.key.Key(b)
 
+	paths = []	
+
 	print "Uploading JSONs for",lineage
 	for postfix in ['_tree.json', '_sequences.json', '_frequencies.json', '_meta.json']:
 		json = lineage + postfix
 		k.key = 'data/'+json
 		k.set_contents_from_filename(directory+json)
-		print json,"uploaded"	
+		print json,"uploaded"
+		paths.append('data/'+json)
+
+	c = boto.connect_cloudfront()
+	c.create_invalidation_request(cloudfront, paths)
 
 def ammend_fasta(fname, lineage, threshold = 10, directory = 'data/'):
 	directory = directory.rstrip('/')+'/'
