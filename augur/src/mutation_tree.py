@@ -1,4 +1,4 @@
-import time, re, os, argparse
+import time, re, os, argparse,shutil
 from tree_refine import tree_refine
 from virus_clean import virus_clean
 from process import process, virus_config
@@ -78,6 +78,14 @@ class mutation_tree(process, tree_refine, virus_clean):
 			self.translate_all()
 			self.add_aa_mutations()
 		self.layout()
+		for v in self.viruses:
+			if v.strain in self.node_lookup:
+				node = self.node_lookup[v.strain]
+				for attr in ['strain', 'desc']:
+					try:
+						node.__setattr__(attr, v.__getattribute__(attr))
+					except:
+						pass
 
 	def export(self):
 		from Bio import Phylo
@@ -161,3 +169,10 @@ if __name__=="__main__":
 	muttree = mutation_tree(params.aln, params.outgroup, **virus_config)
 	muttree.run(raxml_time_limit=0.1)
 	muttree.export()
+
+	shutil.copytree('../auspice/muttree_css', muttree.outdir+'css')
+	shutil.copytree('../auspice/js', muttree.outdir+'js')
+	shutil.copy2('src/muttree.html', muttree.outdir+'muttree.html')
+
+
+	os.system('firefox '+muttree.outdir+'muttree.html &')
