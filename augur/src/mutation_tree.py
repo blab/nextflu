@@ -19,12 +19,18 @@ virus_config.update({
 
 class mutation_tree(process, tree_refine, virus_clean):
 	"""docstring for mutation_tree"""
-	def __init__(self, aln_fname, outgroup, formats = ['pdf','svg','png'], verbose = 0, **kwargs):
-		self.verbose = verbose
-		self.formats = formats
+	def __init__(self, aln_fname, outgroup, outdir = './', formats = ['pdf','svg','png'], verbose = 0, **kwargs):
 		process.__init__(self, **kwargs)
 		tree_refine.__init__(self, **kwargs)
 		virus_clean.__init__(self, **kwargs)
+		self.verbose = verbose
+		self.formats = formats
+		self.outdir = outdir.rstrip('/')+'/'
+		self.auspice_tree_fname = 		self.outdir + 'tree.json'
+		self.auspice_sequences_fname = 	self.outdir + 'sequences.json'
+		self.auspice_frequencies_fname = None
+		self.auspice_meta_fname = 		self.outdir + 'meta.json'
+
 		if os.path.isfile(aln_fname):
 			self.aln_fname = aln_fname
 			try:
@@ -106,10 +112,11 @@ class mutation_tree(process, tree_refine, virus_clean):
 			if len(t.name) and len(muts): t.name+='-'
 			t.name+='_'.join(muts.split(','))
 		for fmt in self.formats:
-			plt.savefig(self.prefix+'tree.'+fmt)
+			plt.savefig(self.outdir+'tree.'+fmt)
 
-		Phylo.write(tmp_tree, self.prefix+'tree.nwk', 'newick')
+		Phylo.write(tmp_tree, self.outdir+'tree.nwk', 'newick')
 
+		self.export_to_auspice(tree_fields = ['aa_muts','desc'])
 
 	def run(self, raxml_time_limit):
 		self.align()
@@ -128,9 +135,10 @@ if __name__=="__main__":
 	parser.add_argument('--aln', required = True, type = str,  help ="fasta file with input sequences")
 	parser.add_argument('--outgroup', required = True, type = str,  help ="outgroup to root the tree, strain label or fasta file")
 	parser.add_argument('--cds', nargs = '+', type = int, default = None, help='part of the outgroup sequence that is to be translated')
-	parser.add_argument('--prefix', type = str, default = 'data/', help='path+prefix of file dumps')
+	parser.add_argument('--out', type = str, default = 'output/', help='output directory')
 	params = parser.parse_args()
 
+	# check and parse cds
 	if params.cds is None:
 		virus_config['cds']=None
 	else:
@@ -142,7 +150,13 @@ if __name__=="__main__":
 			raise ValueError("Expecting a cds of length 1 (start only) or 2, got "+str(params.cds))
 			exit()
 
-	virus_config["prefix"]=params.prefix
+	# check and create output directory
+	if not os.path.isdir(params.out):
+		try:
+			os.makedirs(params.out)
+		except OSError as e:
+			print "Cannot create output directory",e
+	virus_config["outdir"]=params.out
 
 	muttree = mutation_tree(params.aln, params.outgroup, **virus_config)
 	muttree.run(raxml_time_limit=0.1)
