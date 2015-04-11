@@ -210,7 +210,7 @@ class ancestral_sequences:
 			# code the sequences as a 0/1 probability matrix  (redundant but convenient)
 			for ni in xrange(self.nstates):
 				clade.prob[:,ni] = tmp_seq_array == self.alphabet[ni]
-			missing_seq = leaf.prob.sum(axis=1)==0
+			missing_seq = clade.prob.sum(axis=1)==0
 			clade.prob[missing_seq] = clade.up_message[missing_seq]
 
 			
