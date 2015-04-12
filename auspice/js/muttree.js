@@ -22,21 +22,6 @@ function gatherInternals(node, internals) {
 	return internals;
 }
 
-function setDistances(node) {
-	if (typeof node.ep == "undefined") {
-		node.ep = 0.0;
-	}
-	if (typeof node.ne == "undefined") {
-		node.ne = 0.0;
-	}
-	if (typeof node.children != "undefined") {
-		for (var i=0, c=node.children.length; i<c; i++) {
-			setDistances(node.children[i]);
-		}
-	}
-}
-
-
 function minimumAttribute(node, attr, min) {
 	if (typeof node.children != "undefined") {
 		for (var i=0, c=node.children.length; i<c; i++) {
@@ -65,14 +50,8 @@ function maximumAttribute(node, attr, max) {
 	return max;
 }
 
-function contains(arr, obj) {
-    for(var i=0; i<arr.length; i++) {
-        if (arr[i] == obj) return true;
-    }
-}
-
 function tipRadius(d) {
-	var radius = 8;
+	var radius = 4;
 	return radius;
 }
 
@@ -129,23 +108,9 @@ var virusTooltip = d3.tip()
 		string += "<div class=\"smallspacer\"></div>";
 		
 		string += "<div class=\"smallnote\">";		
-		
-		if (typeof d.country != "undefined") {
-			string += d.country.replace(/([A-Z])/g, ' $1');
-		}
-		if (typeof d.date != "undefined") {
-			string += ", " + d.date;
-		}
-		if ((typeof d.db != "undefined") && (typeof d.accession != "undefined") && (d.db == "GISAID")) {
-			string += "<br>GISAID ID: EPI" + d.accession;
-		}
-		if (typeof d.lab != "undefined") {
-			if (d.lab != "") {
-				string += "<br>Source: " + d.lab.substring(0,25);
-				if (d.lab.length>25) string += '...';
-			}
-		}			
+		string += d.desc;
 		string += "</div>";
+		console.log(d.desc);
 		return string;
 	});
 treeplot.call(virusTooltip);
@@ -173,11 +138,6 @@ d3.json(file_prefix + "tree.json", function(error, root) {
 		links = tree.links(nodes);
 	var tree_legend;
 	var rootNode = nodes[0];
-	if (typeof rootNode.pivots != "undefined"){
-		var dt = rootNode.pivots[1]-rootNode.pivots[0];		
-	}else{
-		var dt = 1.0/12;
-	}
 	var tips = gatherTips(rootNode, []);
 	var internals = gatherInternals(rootNode, []);
 
@@ -191,17 +151,16 @@ d3.json(file_prefix + "tree.json", function(error, root) {
 
 	var xScale = d3.scale.linear()
 		.domain([d3.min(xValues), d3.max(xValues)])
-		.range([10, width-10]);
+		.range([10, width-50]);
 
 	var yScale = d3.scale.linear()
 		.domain([d3.min(yValues), d3.max(yValues)])
-		.range([10, height-10]);
+		.range([20, height-10]);
 
 	nodes.forEach(function (d) {
 		d.x = xScale(d.xvalue);
 		d.y = yScale(d.yvalue);
 	});
-
 
 	var recencyLinksSizeScale = d3.scale.threshold()
 		.domain([0.0])
@@ -320,6 +279,34 @@ d3.json(file_prefix + "tree.json", function(error, root) {
   		})		
 		.on('mouseout', virusTooltip.hide);
 
+	if (tips.length<100){
+		var labels = treeplot.selectAll(".label")
+			.data(tips)
+			.enter()
+			.append("text")
+			.attr("class","label")
+			.attr("x", function(d) { return d.x+10; })
+			.attr("y", function(d) { return d.y+4; })
+			.text(function(d) { return d.strain;});
+		}
+
+	var mutations = treeplot.selectAll(".muts")
+		.data(nodes)
+		.enter()
+		.append("text")
+		.attr("class", "")
+		.attr("x", function(d) {
+			return d.x - 6;
+		})
+		.attr("y", function(d) {
+			return d.y - 3;
+		})
+		.style("text-anchor", "end")
+		.text(function (d) {
+			return d.aa_muts.replace(/,/g, ', ');
+		});
+
+
 	d3.select("#reset")
 		.on("click", function(d) {
 			var dMin = d3.min(xValues),
@@ -327,10 +314,9 @@ d3.json(file_prefix + "tree.json", function(error, root) {
 				lMin = d3.min(yValues),
 				lMax = d3.max(yValues);
 			rescale(dMin, dMax, lMin, lMax);
-		})
+		});
 
 	function rescale(dMin, dMax, lMin, lMax) {
-
 		var speed = 1500;
 		xScale.domain([dMin,dMax]);
 		yScale.domain([lMin,lMax]);
@@ -380,7 +366,6 @@ d3.json(file_prefix + "tree.json", function(error, root) {
 			.attr("y", function(d) {
 				return yScale(d[2]) - 6;
 			});			
-
 	}	
 
 	d3.select(window).on('resize', resize); 
@@ -510,26 +495,6 @@ d3.json(file_prefix + "tree.json", function(error, root) {
 
 	colorByGenotype();
 	tree_legend = makeLegend();
-
-	// add clade labels
-	clades = rootNode["clade_annotations"];
-	console.log(clades);
-	var clade_annotations = treeplot.selectAll('.annotation')
-		.data(clades)
-		.enter()
-		.append("text")
-		.attr("class", "annotation")
-		.attr("x", function(d) {
-			return xScale(d[1]) - 6;
-		})
-		.attr("y", function(d) {
-			return yScale(d[2]) - 6;
-		})
-		.style("text-anchor", "end")
-		.text(function (d) {
-			return d[0];
-		});
-
 
 });
 
