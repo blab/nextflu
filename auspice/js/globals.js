@@ -1,3 +1,4 @@
+var regions = ["Africa", "SouthAmerica", "WestAsia", "Oceania", "Europe", "JapanKorea", "NorthAmerica", "SoutheastAsia", "SouthAsia", "China"]
 var restrictTo = "all";
 
 var cladeToSeq = {}
@@ -27,6 +28,17 @@ var legend = d3.select("#legend")
 var colorBy = document.getElementById("coloring").value;
 var colorScale;
 
-var regions = ["Africa", "SouthAmerica", "WestAsia", "Oceania", "Europe", "JapanKorea", "NorthAmerica", "SoutheastAsia", "SouthAsia", "China"]
-
 var pivots, dt;
+
+
+d3.json("/data/" + file_prefix + "meta.json", function(error, json) {
+    if (error) return console.warn(error);
+    d3.select("#updated").text(json['updated']);
+    commit_id = json['commit'];
+    short_id = commit_id.substring(0, 6);   
+    d3.select("#commit")
+        .append("a")
+        .attr("href", "http://github.com/blab/nextflu/commit/" + commit_id)
+        .text(short_id);
+
+});

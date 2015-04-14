@@ -135,6 +135,7 @@ function dragend() {
 
 function date_init(){
 
+	nodes.forEach(function (d) {d.dateval = new Date(d.date)});
 	var dateValues = nodes.filter(function(d) {
 		return typeof d.date === 'string';
 		}).map(function(d) {

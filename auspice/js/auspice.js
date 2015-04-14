@@ -282,6 +282,34 @@ var linkTooltip = d3.tip()
 	});
 treeplot.call(linkTooltip);
 
+function tree_init(){
+	calcBranchLength(rootNode);
+	rootNode.branch_length= 0.01;	
+	rootNode.dfreq = 0.0;
+	freq_ii = 1;
+	if (typeof rootNode.pivots != "undefined"){
+		dt = rootNode.pivots[1]-rootNode.pivots[0];		
+	}else{
+		dt = 1.0/12;
+	}
+	if (typeof rootNode.pivots != "undefined") {
+		if (typeof rootNode.pivots.length != "undefined") {
+			freq_ii = rootNode.pivots.length - 1;
+		}
+	}
+	dfreqColorScale = d3.scale.linear()
+		.domain(([-1.0, -0.8, -0.6,-0.4, -0.2, 0, 0.2, 0.4, 0.6, 0.8]).map(function(d){return Math.round(d*dt*dfreq_dn*100)/100;}))
+		.range(colors)
+
+	calcNodeAges(LBItime_window);
+	calcLBI(rootNode, nodes, false);
+	calcDfreq(rootNode, freq_ii);
+	colorByTrait();
+	adjust_coloring_by_date();
+	adjust_freq_by_date();
+	tree_legend = makeLegend();
+}
+
 d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 
 	if (error) return console.warn(error);
@@ -292,11 +320,7 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 	rootNode = nodes[0];
 	tips = gatherTips(rootNode, []);
 	internals = gatherInternals(rootNode, []);
-	calcBranchLength(rootNode);
-	rootNode.branch_length= 0.01;
-	nodes.forEach(function (d) {d.dateval = new Date(d.date)});
 	vaccines = getVaccines(tips);
-	date_init()
 
 	var xValues = nodes.map(function(d) {
 		return +d.xvalue;
@@ -319,29 +343,8 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 		d.y = yScale(d.yvalue);
 	});
 
-	rootNode.dfreq = 0.0;
-	freq_ii = 1;
-	if (typeof rootNode.pivots != "undefined"){
-		dt = rootNode.pivots[1]-rootNode.pivots[0];		
-	}else{
-		dt = 1.0/12;
-	}
-	if (typeof rootNode.pivots != "undefined") {
-		if (typeof rootNode.pivots.length != "undefined") {
-			freq_ii = rootNode.pivots.length - 1;
-		}
-	}
-	dfreqColorScale = d3.scale.linear()
-		.domain(([-1.0, -0.8, -0.6,-0.4, -0.2, 0, 0.2, 0.4, 0.6, 0.8]).map(function(d){return Math.round(d*dt*dfreq_dn*100)/100;}))
-		.range(colors)
-
-	calcNodeAges(LBItime_window);
-	calcLBI(rootNode, nodes, false);
-	calcDfreq(rootNode, freq_ii);
-	console.log(freq_ii);
-	colorByTrait();
-	adjust_coloring_by_date();
-	adjust_freq_by_date();
+	date_init();
+	tree_init();
 
 	var link = treeplot.selectAll(".link")
 		.data(links)
@@ -589,8 +592,6 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 		.render();
 
 
-	tree_legend = makeLegend();
-
 	// add clade labels
 	clades = rootNode["clade_annotations"];
 	console.log(clades);
@@ -610,18 +611,6 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 			return d[0];
 		});
 
-
-});
-
-d3.json("/data/" + file_prefix + "meta.json", function(error, json) {
-	if (error) return console.warn(error);
-	d3.select("#updated").text(json['updated']);
-	commit_id = json['commit'];
-	short_id = commit_id.substring(0, 6);	
-	d3.select("#commit")
-		.append("a")
-		.attr("href", "http://github.com/blab/nextflu/commit/" + commit_id)
-		.text(short_id);
 
 });
 
