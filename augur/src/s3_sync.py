@@ -2,7 +2,6 @@
 import argparse
 
 verbose = False
-lineages = ['H3N2', 'H1N1pdm', 'Vic', 'Yam']
 
 def pull(lineage, directory = '../auspice/data/', bucket = 'nextflu-dev'):
 	"""Retrieve JSON files from S3 dev bucket"""
@@ -54,10 +53,14 @@ if __name__=="__main__":
 	parser.add_argument('--push_dev', action = "store_true", default = False, help = "push local files to dev")
 	parser.add_argument('--pull_pro', action = "store_true", default = False, help = "pull local files from pro")
 	parser.add_argument('--push_pro', action = "store_true", default = False, help = "push local files to pro")	
-	parser.add_argument('--sync', action = "store_true", default = False, help = "sync dev to production")	
+	parser.add_argument('--sync', action = "store_true", default = False, help = "sync dev to production")
+	parser.add_argument('--lineages', nargs='+', type = str,  help ="lineages to include")		
 	params = parser.parse_args()
 
-	for lineage in lineages:
+	if params.lineages is None:
+		params.lineages = ['H3N2', 'H1N1pdm', 'Vic', 'Yam']
+
+	for lineage in params.lineages:
 		print '\nLineage',lineage
 		if params.pull_dev or params.sync:
 			pull(lineage, directory = '../auspice/data/', bucket = params.dev_bucket)
