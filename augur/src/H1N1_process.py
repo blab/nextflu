@@ -38,7 +38,7 @@ virus_config = {
 	# define relevant clades in canonical HA1 numbering (+1)
 	'clade_designations': {},
 	'HI_fname':'source-data/H1N1_HI_titers.txt',
-	'auspice_prefix':'H1N1_long_',
+	'auspice_prefix':'H1N1_',
 }
 
 

@@ -20,19 +20,25 @@ epitope_mask = np.array(['1' if pos in [141,142,145,146,172,176,178,179,180,181,
 
 receptor_binding_sites = [x-1 for x in [159,169,170,172,173,203,207]]
 
+
+
+sp=17
 virus_config.update({
 	# data source and sequence parsing/cleaning/processing
 	'virus':'H1N1',
 	'alignment_file':'data/H1N1_gisaid_epiflu_sequence.fasta',
 	'outgroup':'A/Tokyo/1/51',
 	'time_interval':(1990,2010),
-	#'force_include':'source-data/HI_strains.txt',
-	'force_include_all':False,
+	'force_include':'source-data/H1N1_HI_strains.txt',
+	'force_include_all':True,
+	'date_spec':'year',
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
+	'min_freq':0.10,
 	'cds':[0,None], # define the HA start i n 0 numbering
 	# define relevant clades in canonical HA1 numbering (+1)
 	'clade_designations': {},
 	'auspice_prefix':'H1N1_',
+	'HI_fname':'source-data/H1N1_HI_titers.txt',
 	})
 
 
@@ -181,9 +187,9 @@ if __name__=="__main__":
 			if tmp_step in steps:
 				print "skipping",tmp_step
 				steps.remove(tmp_step)
-	if params.HA1:
-		signal_peptide = 17
-		virus_config, epitope_mask, receptor_binding_sites = shift_cds(3*signal_peptide, virus_config, epitope_mask, receptor_binding_sites)
+	# modify clade designations
+	if not params.ATG:
+		virus_config, epitope_mask, receptor_binding_sites = shift_cds(3*sp, virus_config, epitope_mask, receptor_binding_sites)
 
 	# add all arguments to virus_config (possibly overriding)
 	virus_config.update(params.__dict__)

@@ -27,8 +27,9 @@ virus_config.update({
 	'virus':'BVic',
 	'alignment_file':'data/Vic_gisaid_epiflu_sequence.fasta',
 	'outgroup':'B/HongKong/02/1993',
-	#'force_include':'source-data/HI_strains.txt',
-	'force_include_all':False,
+	'force_include':'source-data/Vic_HI_strains.txt',
+	'force_include_all':True,
+	'date_spec':'year',
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
 	'cds':[11,None], # define the translation start in 0 numbering
 	# define relevant clades in canonical HA1 numbering (+1)
@@ -38,6 +39,7 @@ virus_config.update({
 		'1B': [(90,'K'), (73, 'P'), (180, 'K')]
 	},
 	'auspice_prefix':'Vic_',
+	'HI_fname':'source-data/Vic_HI_titers.txt',
 	})
 
 

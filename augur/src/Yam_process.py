@@ -27,8 +27,9 @@ virus_config.update({
 	'virus':'BYam',
 	'alignment_file':'data/Yam_gisaid_epiflu_sequence.fasta',
 	'outgroup':'B/Singapore/11/94',
-	#'force_include':'source-data/HI_strains.txt',
-	'force_include_all':False,
+	'force_include':'source-data/Yam_HI_strains.txt',
+	'force_include_all':True,
+	'date_spec':'year',
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
 	'cds':[11,None], # define the translation start i n 0 numbering
 	# define relevant clades in canonical HA1 numbering (+1)
@@ -39,6 +40,7 @@ virus_config.update({
 		'3a': [(52,'A'), (313, 'E'), (63,'R'), (123, 'P'), (165, 'I')],
 	},
 	'auspice_prefix':'Yam_',
+	'HI_fname':'source-data/Yam_HI_titers.txt',
 	})
 
 
