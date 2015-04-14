@@ -23,6 +23,7 @@ parser.add_argument('--ATG', action="store_true", default=False, help ="include 
 
 
 virus_config = {
+	'date_format':{'fields':'%Y-%m-%d', 'reg':r'\d\d\d\d-\d\d-\d\d'},
 	'fasta_fields':{0:'strain', 1:'isolate_id', 3:'passage', 5:'date', 7:'lab', 8:"accession"},
 	# frequency estimation parameters
 	'aggregate_regions': [  ("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
@@ -46,15 +47,23 @@ def shift_cds(shift, vc, epi_mask, rbs):
 class process(virus_frequencies):
 	"""generic template class for processing virus sequences into trees"""
 	def __init__(self, prefix = 'data/', time_interval = (2012.0, 2015.0), 
-	             auspice_prefix = '', 
+	             auspice_prefix = '', run_dir = None, date_format={'fields':'%Y-%m-%d', 'reg':r'\d\d\d\d-\d\d-\d\d'},
 				 min_mutation_frequency = 0.01, min_genotype_frequency = 0.1, **kwargs):
 		self.tree_fname = prefix+'tree.pkl'
 		self.virus_fname = prefix+'virus.pkl'
 		self.frequency_fname = prefix+'frequencies.pkl'
 		self.aa_seq_fname = prefix+'aa_seq.pkl'
+		self.prefix = prefix
+		self.date_format = date_format
 		self.min_mutation_frequency = min_mutation_frequency
 		self.min_genotype_frequency = min_genotype_frequency
 		self.time_interval = tuple(time_interval)
+		if run_dir is None:
+			import random
+			self.run_dir = '_'.join(['temp', time.strftime('%Y%m%d-%H%M%S',time.gmtime()), str(random.randint(0,1000000))])
+		else:
+			self.run_dir = run_dir
+		self.run_dir = self.run_dir.rstrip('/')+'/'
 
 		self.auspice_tree_fname = 		'../auspice/data/' + auspice_prefix + 'tree.json'
 		self.auspice_sequences_fname = 	'../auspice/data/' + auspice_prefix + 'sequences.json'
@@ -63,6 +72,18 @@ class process(virus_frequencies):
 		self.nuc_alphabet = 'ACGT-N'
 		self.aa_alphabet = 'ACDEFGHIKLMNPQRSTVWY*X'
 		virus_frequencies.__init__(self, **kwargs)
+
+	def make_run_dir(self):
+		if not os.path.isdir(self.run_dir):
+			try:
+				os.makedirs(self.run_dir)
+			except OSError as e:
+				print "Cannot create run_dir",e
+
+	def remove_run_dir(self):
+		if os.path.isdir(self.run_dir):
+			import shutil
+			shutil.rmtree(self.run_dir)
 
 	def dump(self):
 		import cPickle
@@ -185,34 +206,26 @@ class process(virus_frequencies):
 		aligns viruses using mafft. produces temporary files and deletes those at the end
 		after this step, self.viruses is a BioPhython multiple alignment object
 		'''
+		self.make_run_dir()
+		os.chdir(self.run_dir)
 		SeqIO.write([SeqRecord(Seq(v['seq']), id=v['strain']) for v in self.viruses], "temp_in.fasta", "fasta")
 		os.system("mafft --nofft temp_in.fasta > temp_out.fasta")
 		aln = AlignIO.read('temp_out.fasta', 'fasta')
-		for tmp_file in ['temp_in.fasta', 'temp_out.fasta']:
-			try:
-				os.remove(tmp_file)
-			except OSError:
-				pass
-
 		self.sequence_lookup = {seq.id:seq for seq in aln}
 		# add attributes to alignment
 		for v in self.viruses:
 			self.sequence_lookup[v['strain']].__dict__.update({k:val for k,val in v.iteritems() if k!='seq'})
 		self.viruses = aln
+		os.chdir('..')
+		self.remove_run_dir()
 
 	def infer_tree(self, raxml_time_limit):
 		'''
 		builds a tree from the alignment using fasttree and RAxML. raxml runs for 
 		raxml_time_limit and is terminated thereafter. raxml_time_limit can be 0.
 		'''
-		def cleanup():
-			for file in glob.glob("RAxML_*") + glob.glob("temp*") + ["raxml_tree.newick", "initial_tree.newick"]:
-				try:
-					os.remove(file)
-				except OSError:
-					pass
-
-		cleanup()
+		self.make_run_dir()
+		os.chdir(self.run_dir)
 		AlignIO.write(self.viruses, 'temp.fasta', 'fasta')
 
 		print "Building initial tree with FastTree"
@@ -247,11 +260,13 @@ class process(virus_frequencies):
 		print "RAxML branch length optimization and rooting"
 		os.system("raxml -f e -T 6 -s temp.phyx -n branches -c 25 -m GTRGAMMA -p 344312987 -t raxml_tree.newick -o " + self.outgroup['strain'])
 
-		out_fname = "data/tree_infer.newick"
-		os.rename('RAxML_result.branches', out_fname)
+		out_fname = "tree_infer.newick"
+		shutil.copy('RAxML_result.branches', out_fname)
 		Phylo.write(Phylo.read(out_fname, 'newick'),'temp.newick','newick')
 		self.tree = dendropy.Tree.get_from_string(delimit_newick(out_fname), 'newick', as_rooted=True)
-		cleanup()
+
+		os.chdir('..')
+		self.remove_run_dir()
 
 	def infer_ancestral(self):
 		from tree_util import to_Biopython

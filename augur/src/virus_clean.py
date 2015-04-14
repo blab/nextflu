@@ -47,7 +47,7 @@ class virus_clean(object):
 		og = self.sequence_lookup[self.outgroup['strain']]
 		og.num_date = numerical_date(og.date)
 		for ii, v in enumerate(self.viruses):
-			v.num_date = numerical_date(v.date) + 1e-7*(ii+1)
+			v.num_date = numerical_date(v.date, self.date_format['fields']) + 1e-7*(ii+1)
 
 	def times_from_outgroup(self):
 		outgroup_date = self.sequence_lookup[self.outgroup['strain']].num_date

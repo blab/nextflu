@@ -70,7 +70,7 @@ class ancestral_sequences:
 				seqtmp = names_to_seqs[leaf.taxon.label].seq
 
 				if self.seqtype != 'Seq':
-					seqtmp = ''.join(seqtmp)
+					seqtmp = ''.join(seqtmp).upper()
 				setattr(leaf, self.attrname, seqtmp)
 
 				# convert to a numpy array for convenient slicing
@@ -196,15 +196,23 @@ class ancestral_sequences:
 		'''
 		calculate the marginal probabilities by multiplying all incoming messages
 		'''
-		clade.prob[:]=np.log(clade.up_message)
-		for child in clade.child_nodes():
-			clade.prob+=np.log(child.down_message)
-			
-		# normalize and continue for all children
-		self.log_normalize(clade)
-		#print clade.taxon.label, np.max(1.0-np.max(clade.prob, axis=1))
-		for child in clade.child_nodes():
-			self.calc_marginal_probabilities(child)
+		if clade.is_internal():
+			clade.prob[:]=np.log(clade.up_message)
+			for child in clade.child_nodes():
+				clade.prob+=np.log(child.down_message)			
+			# normalize and continue for all children
+			self.log_normalize(clade)
+			#print clade.taxon.label, np.max(1.0-np.max(clade.prob, axis=1))
+			for child in clade.child_nodes():
+				self.calc_marginal_probabilities(child)
+		else:
+			tmp_seq_array = np.fromstring(''.join(getattr(clade, self.attrname)), 'S1')
+			# code the sequences as a 0/1 probability matrix  (redundant but convenient)
+			for ni in xrange(self.nstates):
+				clade.prob[:,ni] = tmp_seq_array == self.alphabet[ni]
+			missing_seq = clade.prob.sum(axis=1)==0
+			clade.prob[missing_seq] = clade.up_message[missing_seq]
+
 			
 	def calc_most_likely_sequences(self, clade):
 		'''

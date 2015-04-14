@@ -96,7 +96,7 @@ class virus_filter(object):
 
 	def filter_date(self):
 		if self.date_spec=='full':
-			self.viruses = filter(lambda v: re.match(r'\d\d\d\d-\d\d-\d\d', v['date']) is not None, self.viruses)
+			self.viruses = filter(lambda v: re.match(self.date_format['reg'], v['date']) is not None, self.viruses)
 		elif self.date_spec=='year':
 			self.viruses = filter(lambda v: re.match(r'\d\d\d\d', v['date']) is not None, self.viruses)
 			for v in self.viruses:
@@ -152,12 +152,11 @@ class virus_filter(object):
 		virus_tuples = defaultdict(list)
 		for v in tmp_viruses:
 			try:
-				vdate = datetime.datetime.strptime(v['date'], '%Y-%m-%d').date()
+				vdate = datetime.datetime.strptime(v['date'], self.date_format['fields']).date()
 			except:
 				print "incomplete date!", v['strain'], v['date'], "adjusting to July 1st"
 				v['date']+='-07-01'	
 				vdate = datetime.datetime.strptime(v['date'], '%Y-%m-%d').date()
-
 			virus_tuples[(vdate.year, vdate.month, v['region'])].append(v)
 
 		return virus_tuples
