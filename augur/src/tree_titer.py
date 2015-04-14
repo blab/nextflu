@@ -1,10 +1,16 @@
 # clean, reroot, ladderize newick tree
 # output to tree.json
 import numpy as np
-import time, os
+import time, os, gzip
 from collections import defaultdict
 from matplotlib import pyplot as plt
 from itertools import izip
+
+def myopen(fname, mode='r'):
+	if fname[-2:]=='gz':
+		return gzip.open(fname, mode)
+	else:
+		return open(fname, mode)
 
 class HI_tree(object):
 
@@ -15,7 +21,7 @@ class HI_tree(object):
 	def read_HI_titers(self, fname):
 		strains = set()
 		measurements = {}
-		with open(fname, 'r') as infile:
+		with myopen(fname, 'r') as infile:
 			for line in infile:
 				entries = line.strip().split()
 				test, ref_virus, serum, val = entries[0], entries[1],entries[2], map(float, entries[3:])
@@ -370,7 +376,7 @@ def parse_HI_matrix(fname):
 					}
 	src_id = fname.split('/')[-1]
 	print fname
-	with open(fname) as infile:
+	with myopen(fname) as infile:
 		csv_reader = csv.reader(infile)
 
 		# parse sera
@@ -395,7 +401,7 @@ def parse_HI_matrix(fname):
 				print ref_sera[ri]
 
 		fields = ['source','ref/test', 'genetic group', 'collection date', 'passage history']+map(tuple, ref_sera)
-		print fields
+		#print fields
 		for row in csv_reader: # advance until the reference virus
 			if row[0].startswith('REFERENCE'):
 				break
@@ -429,7 +435,7 @@ def read_tables(flutype = 'H3N2'):
 	import glob
 	import pandas as pd
 	from itertools import product
-	flist = glob.glob('/home/richard/Projects/flu_HI_data/'+flutype+'_tables/NIMR*csv')
+	flist = glob.glob('../../flu_HI_data/'+flutype+'_tables/NIMR*csv')
 	all_names = set()
 	all_measurements = defaultdict(list)
 	HI_matrices = pd.DataFrame()
@@ -445,7 +451,7 @@ def read_trevor_table(flutype):
 	sera = set()
 	strains = set()
 	if os.path.isfile(trevor_table):
-		with open(trevor_table) as infile:
+		with myopen(trevor_table) as infile:
 			table_reader = csv.reader(infile, delimiter="\t")
 			header = table_reader.next()
 			for row in table_reader:
@@ -488,9 +494,9 @@ def write_strains_with_HI_and_sequence(flutype='H3N2'):
 	HI_strains.update([v[0] for v in HI_trevor[2]])
 	from Bio import SeqIO
 	good_strains = set()
-	with open("data/"+flutype+"_strains_with_HI.fasta", 'w') as outfile, \
-		 open("source-data/"+flutype+"_HI_strains.txt", 'w') as HI_strain_outfile, \
-		 open("data/"+flutype+"_gisaid_epiflu_sequence.fasta", 'r') as infile:
+	with myopen("data/"+flutype+"_strains_with_HI.fasta", 'w') as outfile, \
+		 myopen("source-data/"+flutype+"_HI_strains.txt", 'w') as HI_strain_outfile, \
+		 myopen("data/"+flutype+"_gisaid_epiflu_sequence.fasta", 'r') as infile:
 		for seq_rec in SeqIO.parse(infile, 'fasta'):
 			tmp_name = seq_rec.description.split('|')[0].strip()
 			reduced_name = strain_name_fixing(tmp_name)
@@ -503,11 +509,11 @@ def write_strains_with_HI_and_sequence(flutype='H3N2'):
 
 def write_flat_HI_titers(flutype = 'H3N2', fname = None):
 	measurements = get_all_titers_flat(flutype)
-	with open('source-data/'+flutype+'_HI_strains.txt') as infile:
+	with myopen('source-data/'+flutype+'_HI_strains.txt') as infile:
 		strains = [strain_name_fixing(line.strip()) for line in infile]	
 	if fname is None:
 		fname = 'source-data/'+flutype+'_HI_titers.txt'
-	with open(fname, 'w') as outfile:
+	with myopen(fname, 'w') as outfile:
 		for (test, ref), val in measurements.iteritems():
 			if strain_name_fixing(test) in strains and strain_name_fixing(ref[0]) in strains:
 				outfile.write(test+'\t'+ref[0]+'\t'+ref[1]+'\t'+'\t'.join(map(str,val))+'\n')

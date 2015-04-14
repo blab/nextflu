@@ -11,37 +11,34 @@ from Bio.Align import MultipleSeqAlignment
 import numpy as np
 from itertools import izip
 
-epitope_mask = np.fromstring("0000000000000000000000000000000000000000000011111011011001010011000100000001001011110011100110101000001100000100000001000110101011111101011010111110001010011111000101011011111111010010001111101110111001010001110011111111000000111110000000101010101110000000000011100100000001011011100000000000001001011000110111111000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", dtype='S1')
-	
+epitope_mask = np.array(['1' if pos in [141,142,145,146,172,176,178,179,180,181,183,184,185, #Sa
+										170,173,174,177,206,207,210,211,212,214,216,		 #Sb
+										183,187,191,196,221,225,254,258,288,				 #Ca1
+										154,157,158,159,161,163,238,239,242,243,			 #Ca2
+										87, 88, 90, 91, 92, 95, 96, 98, 99, 100, 132, 139	 #Cb
+									   ]
+						else '0' for pos in xrange(1,1725)])
+
+receptor_binding_sites = [x-1 for x in [159,169,170,172,173,203,207]]
+
+
+sp=17
 virus_config = {
 	# data source and sequence parsing/cleaning/processing
 	'virus':'H1N1',
 	'alignment_file':'data/H1N1_gisaid_epiflu_sequence.fasta',
-	'fasta_fields':{0:'strain', 1:'accession', 3:'passage', 5:'date' },
 	'outgroup':'A/Tokyo/1/51',
 	'force_include':'source-data/H1N1_HI_strains.txt',
 	'force_include_all':True,
 	'date_spec':'year',
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
-	'cds':[30,None], # define the HA1 start i n 0 numbering #CHECK
+	'cds':[0,None], # define the HA1 start i n 0 numbering #CHECK
 	'n_iqd':3,     # standard deviations from clock
-
-	# frequency estimation parameters
-	'aggregate_regions': [  ("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
-							("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ],
-	'frequency_stiffness':10.0,
 	'min_freq':0.10,
 	# define relevant clades in canonical HA1 numbering (+1)
 	'clade_designations': {},
-	'verbose':2, 
-	'tol':1e-4, #tolerance for frequency optimization
-	'pc':1e-3, #pseudocount for frequencies 
-	'extra_pivots': 6,  # number of pivot point for or after the last observations of a mutations
-	'inertia':0.7,		# fraction of frequency change carry over in the stiffness term
-	'auspice_frequency_fname':'../auspice/data/H1N1_frequencies.json',
-	'auspice_sequences_fname':'../auspice/data/H1N1_sequences.json',
-	'auspice_tree_fname':'../auspice/data/H1N1_tree.json',
 	'HI_fname':'source-data/H1N1_HI_titers.txt',
+	'auspice_prefix':'H1N1_long_',
 }
 
 
@@ -173,25 +170,27 @@ class H1N1_process(process, H1N1_filter, H1N1_clean, H1N1_refine, HI_tree, fitne
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies', 'HI', 'export']
-	parser = argparse.ArgumentParser(description='Process virus sequences, build tree, and prepare of web visualization')
-	parser.add_argument('-y', '--years_back', type = int, default=3, help='number of past years to sample sequences from')
-	parser.add_argument('-v', '--viruses_per_month', type = int, default = 50, help='number of viruses sampled per month')
-	parser.add_argument('-r', '--raxml_time_limit', type = float, default = 1.0, help='number of hours raxml is run')
-	parser.add_argument('--interval', nargs = '+', type = float, default = None, help='interval from which to pull sequences')
-	parser.add_argument('--prefix', type = str, default = 'data/H1N1_', help='path+prefix of file dumps')
-	parser.add_argument('--test', default = False, action="store_true",  help ="don't run the pipeline")
-	parser.add_argument('--start', default = 'filter', type = str,  help ="start pipeline at virus selection")
-	parser.add_argument('--stop', default = 'export', type=str,  help ="run to end")
+	from process import parser, shift_cds
 	params = parser.parse_args()
+
 	lt = time.localtime()
 	num_date = round(lt.tm_year+(lt.tm_yday-1.0)/365.0,2)
 	params.time_interval = (num_date-params.years_back, num_date) 
 	if params.interval is not None and len(params.interval)==2 and params.interval[0]<params.interval[1]:
 		params.time_interval = (params.interval[0], params.interval[1])
 	dt= params.time_interval[1]-params.time_interval[0]
-	params.pivots_per_year = 12.0 if dt<5 else 6.0 if dt<10 else 3.0
+	params.pivots_per_year = 2.0
 
 	steps = all_steps[all_steps.index(params.start):(all_steps.index(params.stop)+1)]
+	if params.skip is not None:
+		for tmp_step in params.skip:
+			if tmp_step in steps:
+				print "skipping",tmp_step
+				steps.remove(tmp_step)
+	# modify clade designations
+	if not params.ATG:
+		virus_config, epitope_mask, receptor_binding_sites = shift_cds(3*sp, virus_config, epitope_mask, receptor_binding_sites)
+	
 	# add all arguments to virus_config (possibly overriding)
 	virus_config.update(params.__dict__)
 	# pass all these arguments to the processor: will be passed down as kwargs through all classes

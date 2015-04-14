@@ -1,6 +1,10 @@
+A/Kamata/85/1987
 A/New Caledonia/20/1999
+A/Yamagata/32/1989
+A/Yamagata/120/1986
 A/Madagascar/57794/2000
 A/USSR/92/1977
+A/FortMonmouth/1/1947
 A/Florida/4/2004
 A/Arizona/14/1978
 A/Lackland/3/1978
@@ -15,7 +19,9 @@ A/Hong Kong/948/2006
 A/England/333/1980
 A/Denmark/3/2005
 A/Denmark/22/2005
+A/Volos/108/2008
 A/Finland/4/2007
+A/Norway/12/2008
 A/Madagascar/2121/2007
 A/Hong Kong/2652/2006
 A/Johannesburg/67/2007
@@ -36,27 +42,57 @@ A/St Petersburg/49/2003
 A/Beijing/262/1995
 A/Paris/577/2007
 A/Perth/200/2008
+A/Victoria/501/2008
+A/Bucuresti/134/2008
 A/Brisbane/59/2007
+A/Brazil/1059/2008
+A/Santiago/5593/2008
 A/Hong Kong/1870/2008
 A/Siena/10/1989
 A/Siena/9/1989
+A/Taiwan/638/2008
+A/Wisconsin/17/2008
+A/Idaho/23/2008
+A/New Jersey/23/2008
+A/Taiwan/639/2008
+A/Washington/10/2008
+A/Florida/28/2008
+A/Texas/32/2008
+A/Minnesota/34/2008
+A/Hong Kong/3212/2008
+A/Hong Kong/3216/2008
+A/Luxembourg/116/2008
+A/Berlin/47/2008
+A/Denmark/4/2008
+A/New Jersey/8/1976
 A/Wisconsin/13/2009
 A/Paraguay/61/2009
 A/Hong Kong/1988/2009
+A/Hong Kong/1987/2009
 A/Moscow/2/2009
-A/Ghana/FS-09-791/2009
-A/Ghana/FS-09-718/2009
+A/Finland/514/2009
 A/Marseille/1148/2009
 A/Menya/1386/2009
 A/Singapore/10/2009
 A/Seychelles/2239/2008
 A/Netherlands/345/2007
 A/Hong Kong/1856/2008
+A/Athens/41/2008
 A/Zagreb/1982/2008
+A/Kiev/245/2008
+A/Lisbon/3/2008
+A/Madagascar/2360/2008
+A/Chubut/102197/2008
+A/La Plata/535993/2008
+A/Seychelles/2010/2008
+A/Lyon/1059/2008
+A/Kursk/1/2008
 A/Minsk/179/2008
 A/Mauritius/403/2008
-A/Ghana/152/2008
 A/Ghana/163/2008
+A/Hong Kong/1404/2008
+A/Hong Kong/1496/2008
+A/Hong Kong/1776/2008
 A/Hong Kong/3176/2008
 A/Paris/781/2008
 A/Rabat/109/2009
@@ -64,9 +100,16 @@ A/Marrakech/510/2009
 A/Gyeonggibuk/4500/2008
 A/Incheon/4532/2008
 A/Berlin/59/2008
+A/Parma/27/2009
+A/Prague/89/2009
 A/Iceland/8064/2009
 A/Iceland/8599/2009
 A/Hong Kong/18106/2009
+A/Hong Kong/25324/2009
+A/CapeTown/124/2008
+A/KwaZulu Natal/272/2008
+A/Johannesburg/340/2008
+A/Luxembourg/1344/2008
 A/USSR/90/1977
 A/Hong Kong/33597/2009
 A/Annecy/2013/2009
@@ -74,6 +117,7 @@ A/Hong Kong/34079/2009
 A/Montpellier/2051/2009
 A/Madagascar/6054/2009
 A/Madagascar/6081/2009
+A/Sweden/8/2008
 A/Mauritius/543/2007
 A/Johannesburg/452/2005
 A/Egypt/136/2005
@@ -88,7 +132,70 @@ A/England/2/2002
 A/Johannesburg/5/2002
 A/Egypt/96/2002
 A/Hong Kong/1252/2000
+A/England/556/2008
 A/Egypt/10/2007
+A/Johannesburg/36/2008
+A/Lisbon/11/2008
+A/Astrakhan/80/2007
+A/Barcelona/202/2007
+A/Cape Town/106/2007
+A/Genoa/8/2007
+A/Lyon/30/2007
+A/Mauritius/610/2007
+A/Netherlands/2/2007
+A/Paris/160/2007
+A/Trieste/34c/2007
+A/Warsaw/9/2007
+A/Fukushima/97/2006
+A/Latvia/1951/2006
+A/Morocco/229/2006
+A/Novi Sad/150/2006
+A/Parma/4/2006
+A/Switzerland/7425/2006
+A/Zagreb/4622/2006
+A/Khabarovsk/21/2006
+A/Belgium/740/2005
+A/Egypt/39/2005
+A/Latvia/4216/2005
+A/Lisbon/55/2005
+A/Lisbon/94/2005
+A/Montpellier/937/2005
+A/Paris/1690/2005
+A/Slovakia/393/2005
+A/Sofia/504/2005
+A/St Petersburg/10/2005
+A/Turkey/248/2005
+A/England/40/2004
+A/England/57/2004
+A/England/69/2004
+A/Hong Kong/2637/2004
+A/Hong Kong/2765/2004
+A/Hong Kong/4555/2004
+A/Lyon/CHU/28824/2004
+A/Netherlands/130/2004
+A/Netherlands/134/2004
+A/Netherlands/135/2004
+A/Norway/69/2004
+A/Umea/1/2004
 A/Denmark/56/2003
+A/Iceland/46/2003
+A/Israel/2/2003
+A/Oslo/149/2003
+A/Oslo/3389/2003
+A/Paris/650/2003
+A/Segovia/17/2003
+A/Umea/3/2003
+A/Geneva/3762/2003
+A/Chile/8885/2002
+A/Hong Kong/1670/2002
+A/Hong Kong/841/2002
 A/Latvia/686/2002
+A/Lyon/1541/2002
+A/Lyon/1723/2002
+A/Montpellier/1120/2002
+A/Navarra/RR1252/2002
+A/Sachsen/32/2002
 A/Stockholm/13/2002
+A/Congo/6/2002
+A/Hong Kong/1273/2001
+A/Singapore/35/2009
