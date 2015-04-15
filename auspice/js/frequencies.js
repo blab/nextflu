@@ -173,9 +173,9 @@ d3.json("/data/" + file_prefix + "frequencies.json", function(error, json){
 	frequencies = json;
 	pivots= frequencies["mutations"]["global"]["pivots"].map(function (d) {return Math.round(parseFloat(d)*100)/100;});
 	var ticks = [Math.round(pivots[0])];
-	var step = Math.round((pivots[pivots.length-1]-pivots[0])/6*10)/10;
+	var tick_step = Math.round((pivots[pivots.length-1]-pivots[0])/6*10)/10;
 	while (ticks[ticks.length-1]<pivots[pivots.length-1]){
-		ticks.push(Math.round((ticks[ticks.length-1]+step)*10)/10);
+		ticks.push(Math.round((ticks[ticks.length-1]+tick_step)*10)/10);
 	}
 	//gt_chart.axis.x.values = ticks;
 	/**

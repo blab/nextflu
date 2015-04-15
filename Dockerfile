@@ -27,6 +27,7 @@ RUN pip install biopython==1.64
 RUN pip install DendroPy==3.12.0
 RUN pip install seqmagick==0.5.0
 RUN pip install schedule==0.3.0
+RUN pip install boto==2.38.0
 
 # libgit2 and python bindings
 RUN apt-get install -y libgit2

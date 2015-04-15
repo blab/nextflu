@@ -62,18 +62,16 @@ function colorByTrait() {
 	}
 	else if (colorBy == "lbi") {
 		colorScale = lbiColorScale;
-		nodes.map(function(d) { d.coloring = d.LBI; });
+		adjust_coloring_by_date();
 	}
 	else if (colorBy == "dfreq") {
 		colorScale = dfreqColorScale;
-		nodes.map(function(d) { d.coloring = d.dfreq; });
+		adjust_coloring_by_date();
 	}
 	else if (colorBy == "region") {
 		colorScale = regionColorScale;
 		nodes.map(function(d) { d.coloring = d.region; });
 	}
-
-	adjust_coloring_by_date();
 
 	treeplot.selectAll(".link")
 		.style("stroke", branchStrokeColor);
