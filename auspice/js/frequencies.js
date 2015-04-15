@@ -177,6 +177,65 @@ d3.json("/data/" + file_prefix + "frequencies.json", function(error, json){
 		});
 	}
 
+	var ent = [['x'],['entropy']];
+	for (var ii=0;ii<json["entropy"].length;ii+=1){
+		if (Math.round(10000*json["entropy"][ii][1])/10000>0){
+			ent[1].push(Math.round(10000*json["entropy"][ii][1])/10000);
+			ent[0].push(ii+1);
+		}
+	}
+
+	
+	var entropy_chart = c3.generate({
+		bindto: '#entropy',
+		size: {width: width, height: 350},
+		legend: {position: position},
+		axis: {
+			y: {
+				label: {
+					text: 'entropy',
+					position: 'outer-middle'	
+				}
+			},
+			x: {
+				label: {
+					text: 'position',
+					position: 'outer-right'	
+				},
+				tick: {
+					outer: false,
+					values: [100,200,300,400,500]				
+				}
+			}
+		},			
+		data: {
+			x: 'x',
+			columns: ent,
+			type: "bar",
+			onclick: function (d,i) { 
+						console.log(d);
+		            	if (json["entropy"][d.x-1][2].length>1){
+		            		var tmp = [];
+		            		for (var ii=0;ii<json["entropy"][d.x-1][2].length;ii+=1){
+								tmp.push(["global",d.x+json["entropy"][d.x-1][2][ii]]);
+		            		}
+		            		console.log(tmp);
+		            		make_gt_chart(tmp);
+		            		cbg([d.x-1]);
+		            	}
+		            }
+		},
+	    tooltip: {
+	        format: {
+	            title: function (d) { 
+	            	return 'Position ' + d + json["entropy"][d-1][2].join(","); },
+	            value: function (value, ratio, id) {
+	                return "Entropy: "+value;
+	            }
+	        }
+		},
+	});
+
 	d3.select("#plotfreq")
 		.on("click", function (){
 			gt = parse_gt_string(document.getElementById("gtspec").value);			

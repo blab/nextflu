@@ -8,6 +8,7 @@ import dendropy
 from bernoulli_frequency import virus_frequencies
 from tree_util import delimit_newick
 import numpy as np
+from itertools import izip
 
 parser = argparse.ArgumentParser(description='Process virus sequences, build tree, and prepare of web visualization')
 parser.add_argument('-y', '--years_back', type = float, default=3, help='number of past years to sample sequences from')
@@ -179,6 +180,12 @@ class process(virus_frequencies):
 			
 		# Include genotype frequencies
 		if hasattr(self, 'frequencies'):
+			if not hasattr(self, 'aa_entropy'):
+				self.determine_variable_positions()
+
+			self.frequencies["entropy"] = [ [pos, S, muts] for pos,S,muts in 
+					izip(xrange(self.aa_entropy.shape[0]), self.aa_entropy,self.variable_aa_identities) ]
+
 			write_json(self.frequencies, self.auspice_frequency_fname)
 
 		# Write out metadata
@@ -322,6 +329,10 @@ class process(virus_frequencies):
 
 			self.variable_aa = np.where(np.max(self.aa_frequencies,axis=0)<1.0-self.min_mutation_frequency)[0]
 			self.consensus_aa = "".join(np.fromstring(self.aa_alphabet, 'S1')[np.argmax(self.aa_frequencies,axis=0)])
+			self.aa_entropy = -np.sum(self.aa_frequencies*np.log(np.maximum(1e-10,self.aa_frequencies)), axis=0)
+			self.variable_aa_identities = [ [self.aa_alphabet[ii] for ii in np.where(self.aa_frequencies[:,pos])[0]]
+											for pos in xrange(self.aa_frequencies.shape[1])]
+
 
 	def estimate_frequencies(self, tasks = ['mutations','genotypes', 'clades', 'tree']):
 		if 'mutations' in tasks:
