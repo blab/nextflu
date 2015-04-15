@@ -18,43 +18,24 @@ var lbiColorScale = d3.scale.linear()
 	.domain([0.0, 0.02, 0.04, 0.07, 0.1, 0.2, 0.4, 0.7, 0.9, 1.0])
 	.range(colors);
 
-var dfreqColorScale; //defined after loading the tree.
-
+var dfreqColorScale; // defined after loading the tree
 
 var regionColorScale = d3.scale.ordinal()
 	.domain(regions)
 	.range(regionColors);
 
-function getMeanColoring() {	
-	var mean = 0;
-	var recent_tip_count = 0;
-	tips.forEach(function (d) {
-		if (d.current) {
-			mean += d.coloring;
-			recent_tip_count += 1;
-		}
-	});
-	mean = mean / recent_tip_count;
-	return mean;
-}	
-
+// "ep", "ne" and "rb" need no adjustments
 function adjust_coloring_by_date() {
-	if (colorBy == "ep" || colorBy == "ne" || colorBy == "rb") {
-		var mean = getMeanColoring();
-		nodes.forEach(function (d) {
-			d.adj_coloring = d.coloring; // - mean;
-		});
-	}
-	else if (colorBy == "lbi") {
+	if (colorBy == "lbi") {
 		calcLBI(rootNode, nodes, false);
 		nodes.forEach(function (d) {
-			d.adj_coloring = d.LBI;
+			d.coloring = d.LBI;
 		});
 	}
 	else if (colorBy == "dfreq") {
 		calcDfreq(rootNode, freq_ii);
 		nodes.forEach(function (d) {
-			d.adj_coloring = d.dfreq;
+			d.coloring = d.dfreq;
 		});
 	}
 }
@@ -79,11 +60,11 @@ function colorByTrait() {
 	}
 	else if (colorBy == "lbi") {
 		colorScale = lbiColorScale;
-		nodes.map(function(d) { d.adj_coloring = d.LBI; });
+		nodes.map(function(d) { d.coloring = d.LBI; });
 	}
 	else if (colorBy == "dfreq") {
 		colorScale = dfreqColorScale;
-		nodes.map(function(d) { d.adj_coloring = d.dfreq; });
+		nodes.map(function(d) { d.coloring = d.dfreq; });
 	}
 	else if (colorBy == "region") {
 		colorScale = regionColorScale;
@@ -95,7 +76,7 @@ function colorByTrait() {
 		.style("stroke", branchStrokeColor);
 		
 	d3.selectAll(".tip")
-		.attr("r", function(d) { return tipRadius(d); })
+		.attr("r", tipRadius)
 		.style("fill", tipFillColor)
 		.style("stroke", tipStrokeColor);
 		
@@ -114,7 +95,7 @@ function tipStrokeColor(d) {
 		col = colorScale(d.region);
 	}
 	else {
-		col = colorScale(d.adj_coloring);	
+		col = colorScale(d.coloring);	
 	}
 	return d3.rgb(col).toString();
 }
@@ -128,7 +109,7 @@ function tipFillColor(d) {
 		col = colorScale(d.region);
 	}
 	else {
-		col = colorScale(d.adj_coloring);	
+		col = colorScale(d.coloring);	
 	}
 	return d3.rgb(col).brighter([0.65]).toString();
 }
@@ -142,7 +123,7 @@ function branchStrokeColor(d) {
 		col = "#AAA";
 	}
 	else {
-		col = colorScale(d.target.adj_coloring);	
+		col = colorScale(d.target.coloring);	
 	}
 	var modCol = d3.interpolateRgb(col, "#BBB")(0.6);
 	return d3.rgb(modCol).toString();

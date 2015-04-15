@@ -52,7 +52,7 @@ function dragged(d) {
 	.style("stroke", function(d){return "#ccc";})
 
 	treeplot.selectAll(".tip")
-	.attr("r", function(d) { return tipRadius(d); })
+	.attr("r", tipRadius)
 	.style("fill", "#CCC")
 	.style("stroke", "#AAA");
 
@@ -102,7 +102,7 @@ function dragend() {
 
 		d3.selectAll(".tip")
 		.transition().duration(500)
-		.attr("r", function(d) { return tipRadius(d); })
+		.attr("r", tipRadius)
 		.style("fill", tipFillColor)
 		.style("stroke", tipStrokeColor);
 	}

@@ -142,7 +142,7 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 		.attr("id", function(d) { return (d.strain).replace(/\//g, ""); })
 		.attr("cx", function(d) { return d.x; })
 		.attr("cy", function(d) { return d.y; })
-		.attr("r", function(d) { return tipRadius(d); })
+		.attr("r", tipRadius)
 		.style("fill", tipFillColor)
 		.style("stroke", tipStrokeColor)
 		.on('mouseover', function(d) {
@@ -298,7 +298,7 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 		restrictTo = document.getElementById("region").value;
 		console.log(restrictTo);	
 		d3.selectAll(".tip")
-			.attr("r", function(d) { return tipRadius(d); });			
+			.attr("r", tipRadius);			
 	}
 
 	d3.select("#region")
