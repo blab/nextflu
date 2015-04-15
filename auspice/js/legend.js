@@ -22,7 +22,7 @@ function makeLegend(){
      return "Genotype"
    }
    if (colorBy == "dfreq") {
-    var tmp_nmonth = Math.round(12*dfreq_dn*dt);
+    var tmp_nmonth = Math.round(12*dfreq_dn*time_step);
     var tmp_text = "Freq. change ("+tmp_nmonth+" month";
       if (tmp_nmonth>1){
        tmp_text+='s';

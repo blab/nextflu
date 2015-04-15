@@ -28,7 +28,7 @@ var legend = d3.select("#legend")
 var colorBy = document.getElementById("coloring").value;
 var colorScale;
 
-var pivots, dt;
+var time_step;
 
 
 d3.json("/data/" + file_prefix + "meta.json", function(error, json) {

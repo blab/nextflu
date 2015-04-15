@@ -30,12 +30,13 @@ function tree_init(){
 	calcBranchLength(rootNode);
 	rootNode.branch_length= 0.01;	
 	rootNode.dfreq = 0.0;
-	freq_ii = 1;
 	if (typeof rootNode.pivots != "undefined"){
-		dt = rootNode.pivots[1]-rootNode.pivots[0];		
+		time_step = rootNode.pivots[1]-rootNode.pivots[0];		
 	}else{
-		dt = 1.0/12;
+		time_step = 1.0/12;
 	}
+	//setting index of frequency trajectory to use for calculating frequency change
+	freq_ii = 1;
 	if (typeof rootNode.pivots != "undefined") {
 		if (typeof rootNode.pivots.length != "undefined") {
 			freq_ii = rootNode.pivots.length - 1;
