@@ -94,6 +94,12 @@ function adjust_freq_by_date() {
 	});
 }	
 
+function contains(arr, obj) {
+    for(var i=0; i<arr.length; i++) {
+        if (arr[i] == obj) return true;
+    }
+}
+
 d3.json("/data/" + file_prefix + "frequencies.json", function(error, json){
 	console.log(error);
 	var pivots= json["mutations"]["global"]["pivots"].map(function (d) {return Math.round(parseFloat(d)*100)/100;});
