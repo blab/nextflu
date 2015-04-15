@@ -25,14 +25,6 @@ var regionColorScale = d3.scale.ordinal()
 	.domain(regions)
 	.range(regionColors);
 
-function tipStrokeColor(col) {
-	return d3.rgb(col).toString();	
-}
-
-function tipFillColor(col) {
-	return d3.rgb(col).brighter([0.65]).toString();
-}
-
 function getMeanColoring() {	
 	var mean = 0;
 	var recent_tip_count = 0;
@@ -104,29 +96,56 @@ function colorByTrait() {
 		
 	d3.selectAll(".tip")
 		.attr("r", function(d) { return tipRadius(d); })
-		.style("fill", function(d) {
-			if (colorScale != regionColorScale) {
-				var col = colorScale(d.adj_coloring);
-			}
-			else {
-				var col = colorScale(d.region);
-			}
-			return tipFillColor(col);
-		})
-		.style("stroke", function(d) {
-			if (colorScale != regionColorScale) {
-				var col = colorScale(d.adj_coloring);
-			}
-			else {
-				var col = colorScale(d.region);
-			}
-			return tipStrokeColor(col);
-		});
+		.style("fill", tipFillColor)
+		.style("stroke", tipStrokeColor);
 		
 	if (typeof tree_legend != undefined){
 		removeLegend();
 	}
 	tree_legend = makeLegend();	 				
+}
+
+function tipStrokeColor(d) {
+	var col;
+	if (colorBy == "genotype") {
+		col = colorScale(d.color_gt);
+	}
+	else if (colorBy == "region") {
+		col = colorScale(d.region);
+	}
+	else {
+		col = colorScale(d.adj_coloring);	
+	}
+	return d3.rgb(col).toString();
+}
+
+function tipFillColor(d) {
+	var col;
+	if (colorBy == "genotype") {
+		col = colorScale(d.color_gt);
+	}
+	else if (colorBy == "region") {
+		col = colorScale(d.region);
+	}
+	else {
+		col = colorScale(d.adj_coloring);	
+	}
+	return d3.rgb(col).brighter([0.65]).toString();
+}
+
+function branchStrokeColor(d) {
+	var col;
+	if (colorBy == "genotype") {
+		col = colorScale(d.target.color_gt);
+	}
+	else if (colorBy == "region") {
+		col = "#AAA";
+	}
+	else {
+		col = colorScale(d.target.adj_coloring);	
+	}
+	var modCol = d3.interpolateRgb(col, "#BBB")(0.6);
+	return d3.rgb(modCol).toString();
 }
 
 function colorByGenotype() {
@@ -173,19 +192,10 @@ function colorByGenotypePosition (positions) {
 		.domain(filtered_gts)
 		.range(genotypeColors);			
 		treeplot.selectAll(".link")
-		.style("stroke", function(d) {
-			var col = colorScale(d.target.color_gt);
-			return branchStrokeColor(col);
-		});
+		.style("stroke", branchStrokeColor);
 		treeplot.selectAll(".tip")
-		.style("fill", function(d) {
-			var col = colorScale(d.color_gt);
-			return tipFillColor(col);
-		})
-		.style("stroke", function(d) {
-			var col = colorScale(d.color_gt);
-			return tipStrokeColor(col);
-		});
+		.style("fill", tipFillColor)
+		.style("stroke", tipStrokeColor);
 	if (typeof tree_legend != undefined){
 		removeLegend();
 	}

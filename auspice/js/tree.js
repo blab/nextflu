@@ -21,16 +21,6 @@ function tipRadius(d) {
 	return radius;
 }
 
-
-function branchStrokeColor(d) {
-	var col = "#AAA";;
-	if (colorScale != regionColorScale) {
-		col = colorScale(d.target.adj_coloring);
-	}
-	var modCol = d3.interpolateRgb(col, "#BBB")(0.6);
-	return d3.rgb(modCol).toString();
-}
-
 function tree_init(){
 	calcBranchLength(rootNode);
 	rootNode.branch_length= 0.01;	
@@ -153,14 +143,8 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 		.attr("cx", function(d) { return d.x; })
 		.attr("cy", function(d) { return d.y; })
 		.attr("r", function(d) { return tipRadius(d); })
-		.style("fill", function(d) {
-			var col = colorScale(d.adj_coloring);
-			return tipFillColor(col);
-		})
-		.style("stroke", function(d) {
-			var col = colorScale(d.adj_coloring);
-			return tipStrokeColor(col);
-		})
+		.style("fill", tipFillColor)
+		.style("stroke", tipStrokeColor)
 		.on('mouseover', function(d) {
 			virusTooltip.show(d, this);
 		})

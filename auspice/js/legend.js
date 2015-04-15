@@ -53,7 +53,7 @@ function makeLegend(){
  })
   .style('stroke', function (d) {
    var col = colorScale(d);
-   return tipStrokeColor(col);
+   return d3.rgb(col).toString();
  });
 
   tmp_leg.append('text')

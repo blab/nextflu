@@ -103,24 +103,8 @@ function dragend() {
 		d3.selectAll(".tip")
 		.transition().duration(500)
 		.attr("r", function(d) { return tipRadius(d); })
-		.style("fill", function(d) {
-			if (colorScale != regionColorScale) {
-				var col = colorScale(d.adj_coloring);
-			}
-			else {
-				var col = colorScale(d.region);
-			}
-			return tipFillColor(col);
-		})
-		.style("stroke", function(d) {
-			if (colorScale != regionColorScale) {
-				var col = colorScale(d.adj_coloring);
-			}
-			else {
-				var col = colorScale(d.region);
-			}
-			return tipStrokeColor(col);
-		});
+		.style("fill", tipFillColor)
+		.style("stroke", tipStrokeColor);
 	}
 }
 
