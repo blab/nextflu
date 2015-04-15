@@ -42,12 +42,8 @@ function tree_init(){
 			freq_ii = rootNode.pivots.length - 1;
 		}
 	}
-
 	calcNodeAges(LBItime_window);
-	calcLBI(rootNode, nodes, false);
-	calcDfreq(rootNode, freq_ii);
 	colorByTrait();
-	adjust_coloring_by_date();
 	adjust_freq_by_date();
 	tree_legend = makeLegend();
 }
