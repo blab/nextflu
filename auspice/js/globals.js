@@ -5,7 +5,7 @@ var cladeToSeq = {}
 
 var globalDate = new Date();
 
-var nodes, tips, internals, rootNode, links, vaccines;
+var nodes, tips, rootNode, links, vaccines;
 
 function treePlotHeight(width) {
 	return 400 + 0.35*width;

@@ -12,16 +12,6 @@ function gatherTips(node, tips) {
 	return tips;
 }
 
-function gatherInternals(node, internals) {
-	if (typeof node.children != "undefined") {
-		internals.push(node);
-		for (var i=0, c=node.children.length; i<c; i++) {
-			gatherInternals(node.children[i], internals);
-		}
-	}
-	return internals;
-}
-
 function getVaccines(tips) {
 	vaccines = [];
 	tips.forEach(function (tip) {

@@ -70,7 +70,6 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 	var tree_legend;
 	rootNode = nodes[0];
 	tips = gatherTips(rootNode, []);
-	internals = gatherInternals(rootNode, []);
 	vaccines = getVaccines(tips);
 
 	var xValues = nodes.map(function(d) {
@@ -213,25 +212,6 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 			.attr("x", function(d) { return d.x; })
 			.attr("y", function(d) { return d.y; });
 
-		treeplot.selectAll(".internal").data(internals)
-			.transition().duration(speed)
-			.attr("x", function(d) {
-				if (typeof d.frequency != "undefined") {
-					return d.x - 5*Math.sqrt(d.frequency) - 0.5;
-				}
-				else {
-					return d.x - 1;
-				}
-			})
-			.attr("y", function(d) {
-				if (typeof d.frequency != "undefined") {
-					return d.y - 5*Math.sqrt(d.frequency) - 0.5;
-				}
-				else {
-					return d.y - 1;
-				}
-			});
-
 		treeplot.selectAll(".link").data(links)
 			.transition().duration(speed)
 			.attr("points", branchPoints);
@@ -245,7 +225,7 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 				return yScale(d[2]) - 6;
 			});			
 
-	}	
+	}
 
 	d3.select(window).on('resize', resize); 
 	
