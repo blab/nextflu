@@ -4,7 +4,7 @@ environment-dev.sh
 ec2-startup.sh
 data
 _site/
-auspice.js
+
 
 # Tex # 
 ###################
