@@ -221,7 +221,7 @@ d3.json("/data/" + file_prefix + "frequencies.json", function(error, json){
 		            		}
 		            		console.log(tmp);
 		            		make_gt_chart(tmp);
-		            		cbg([d.x-1]);
+		            		colorByGenotypePosition([d.x-1]);
 		            	}
 		            }
 		},
