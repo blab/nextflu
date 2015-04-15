@@ -18,7 +18,9 @@ var lbiColorScale = d3.scale.linear()
 	.domain([0.0, 0.02, 0.04, 0.07, 0.1, 0.2, 0.4, 0.7, 0.9, 1.0])
 	.range(colors);
 
-var dfreqColorScale; // defined after loading the tree
+var dfreqColorScale = d3.scale.linear()
+	.domain(dfreqColorDomain)
+	.range(colors);
 
 var regionColorScale = d3.scale.ordinal()
 	.domain(regions)

@@ -51,9 +51,6 @@ function tree_init(){
 			freq_ii = rootNode.pivots.length - 1;
 		}
 	}
-	dfreqColorScale = d3.scale.linear()
-		.domain(([-1.0, -0.8, -0.6,-0.4, -0.2, 0, 0.2, 0.4, 0.6, 0.8]).map(function(d){return Math.round(d*dt*dfreq_dn*100)/100;}))
-		.range(colors)
 
 	calcNodeAges(LBItime_window);
 	calcLBI(rootNode, nodes, false);
