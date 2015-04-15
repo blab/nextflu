@@ -1,28 +1,18 @@
-var recencySizeScale = d3.scale.threshold()
-	.domain([0.0, time_window])
-	.range([0, 4, 0]);
-
-var recencyVaccineSizeScale = d3.scale.threshold()
-	.domain([0.0])
-	.range([0, 8]);
-
-var recencyLinksSizeScale = d3.scale.threshold()
-	.domain([0.0])
-	.range([0, 2]);
-
 var freqScale = d3.scale.linear()
 	.domain([0, 1])
 	.range([1.5, 4.5]);
 
-function tipRadius(d) {
-	var radius = 0;
-	if (d.region == restrictTo || restrictTo == "all") {
-		radius = recencySizeScale(d.diff);
+var tipRadius = 4.0;
+
+function tipVisibility(d) {
+	var vis = "visible";
+	if (d.diff < 0 || d.diff > time_window) {
+		vis = "hidden";
 	}
-	else {
-		radius = 0;
+	else if (d.region != restrictTo && restrictTo != "all") {
+		vis = "hidden";
 	}
-	return radius;
+	return vis;
 }
 
 function branchPoints(d) {
@@ -147,6 +137,7 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 		.attr("cx", function(d) { return d.x; })
 		.attr("cy", function(d) { return d.y; })
 		.attr("r", tipRadius)
+		.style("visibility", tipVisibility)
 		.style("fill", tipFillColor)
 		.style("stroke", tipStrokeColor)
 		.on('mouseover', function(d) {
@@ -275,7 +266,7 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 		restrictTo = document.getElementById("region").value;
 		console.log(restrictTo);	
 		d3.selectAll(".tip")
-			.attr("r", tipRadius);			
+			.style("visibility", tipVisibility);
 	}
 
 	d3.select("#region")

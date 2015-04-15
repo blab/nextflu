@@ -38,30 +38,31 @@ function dragged(d) {
 	d.date = dateScale.invert(d3.event.x);
 	d.x = dateScale(d.date);
 	d3.selectAll(".date-input-text")
-	.attr("dx", function(d) {return 0.5*d.x})
-	.text(function(d) {
-		var format = d3.time.format("%Y %b %-d");
-		return format(d.date)
-	});
+		.attr("dx", function(d) {return 0.5*d.x})
+		.text(function(d) {
+			var format = d3.time.format("%Y %b %-d");
+			return format(d.date)
+		});
 	d3.selectAll(".date-input-marker")
-	.attr("cx", function(d) {return d.x});
+		.attr("cx", function(d) {return d.x});
+
 	globalDate = d.date;
 
 	calcNodeAges(LBItime_window);
 	treeplot.selectAll(".link")
-	.style("stroke", function(d){return "#ccc";})
+		.style("stroke", function(d){return "#ccc";})
 
 	treeplot.selectAll(".tip")
-	.attr("r", tipRadius)
-	.style("fill", "#CCC")
-	.style("stroke", "#AAA");
+		.style("visibility", tipVisibility)
+		.style("fill", "#CCC")
+		.style("stroke", "#AAA");
 
 	treeplot.selectAll(".vaccine")
-	.style("visibility", function(d) {
-		var date = new Date(d.choice);
-				var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
-				var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
-				if (diffYears > 0) { return "visible"; }
+		.style("visibility", function(d) {
+			var date = new Date(d.choice);
+			var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
+			var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
+			if (diffYears > 0) { return "visible"; }
 				else { return "hidden"; }
 			});					
 
@@ -95,7 +96,7 @@ function dragend() {
 
 		d3.selectAll(".tip")
 		.transition().duration(500)
-		.attr("r", tipRadius)
+		.style("visibility", tipVisibility)
 		.style("fill", tipFillColor)
 		.style("stroke", tipStrokeColor);
 	}

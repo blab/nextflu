@@ -79,7 +79,7 @@ function colorByTrait() {
 		.style("stroke", branchStrokeColor);
 		
 	d3.selectAll(".tip")
-		.attr("r", tipRadius)
+		.style("visibility", tipVisibility)
 		.style("fill", tipFillColor)
 		.style("stroke", tipStrokeColor);
 		
@@ -133,19 +133,21 @@ function colorByGenotype() {
 }
 
 function colorByGenotypePosition (positions) {
-	var gts = nodes.map(function (d) {var tmp = [];
-										for (var i=0; i<positions.length; i++){
-											var aa = cladeToSeq[d.clade];
-											tmp[tmp.length] = (positions[i]+1)+aa[positions[i]];
-										}
-										d.coloring = tmp.join(" / "); 
-										return d.coloring;});
+	var gts = nodes.map(function (d) {
+		var tmp = [];
+		for (var i=0; i<positions.length; i++){
+			var aa = cladeToSeq[d.clade];
+			tmp[tmp.length] = (positions[i]+1)+aa[positions[i]];
+		}
+		d.coloring = tmp.join(" / "); 
+		return d.coloring;});
 	var unique_gts = d3.set(gts).values();
 	var gt_counts = {};
 	for (var i=0; i<unique_gts.length; i++){gt_counts[unique_gts[i]]=0;}
 	gts.forEach(function (d) {gt_counts[d]+=1;});
 	var filtered_gts = unique_gts.filter(function (d) {return gt_counts[d]>=10;});
-	filtered_gts.sort(function (a,b){var res;
+	filtered_gts.sort(function (a,b){
+		var res;
 		if (gt_counts[a]>gt_counts[b]){ res=-1;}
 		else if (gt_counts[a]<gt_counts[b]){ res=1;}
 		else {res=0;}
@@ -154,9 +156,9 @@ function colorByGenotypePosition (positions) {
 	colorScale = d3.scale.ordinal()
 		.domain(filtered_gts)
 		.range(genotypeColors);			
-		treeplot.selectAll(".link")
+	treeplot.selectAll(".link")
 		.style("stroke", branchStrokeColor);
-		treeplot.selectAll(".tip")
+	treeplot.selectAll(".tip")
 		.style("fill", tipFillColor)
 		.style("stroke", tipStrokeColor);
 	if (typeof tree_legend != undefined){
