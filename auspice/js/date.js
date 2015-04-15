@@ -89,15 +89,8 @@ function dragend() {
 	if (colorBy!="genotype"){
 		d3.selectAll(".link")
 		.transition().duration(500)
-		.attr("points", function(d) {
-			var mod = 0.5 * freqScale(d.target.frequency) - freqScale(0);				
-			return (d.source.x-mod).toString() + "," + d.source.y.toString() + " "
-			+ (d.source.x-mod).toString() + "," + d.target.y.toString() + " "
-			+ (d.target.x).toString() + "," + d.target.y.toString()
-		})
-		.style("stroke-width", function(d) {
-			return freqScale(d.target.frequency);
-		})
+		.attr("points", branchPoints)
+		.style("stroke-width", branchStrokeWidth)
 		.style("stroke", branchStrokeColor);				
 
 		d3.selectAll(".tip")

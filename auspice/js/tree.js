@@ -10,6 +10,10 @@ var recencyLinksSizeScale = d3.scale.threshold()
 	.domain([0.0])
 	.range([0, 2]);
 
+var freqScale = d3.scale.linear()
+	.domain([0, 1])
+	.range([1.5, 4.5]);
+
 function tipRadius(d) {
 	var radius = 0;
 	if (d.region == restrictTo || restrictTo == "all") {
@@ -19,6 +23,17 @@ function tipRadius(d) {
 		radius = 0;
 	}
 	return radius;
+}
+
+function branchPoints(d) {
+	var mod = 0.5 * freqScale(d.target.frequency) - freqScale(0);
+	return (d.source.x-mod).toString() + "," + d.source.y.toString() + " "
+		+ (d.source.x-mod).toString() + "," + d.target.y.toString() + " "
+		+ (d.target.x).toString() + "," + d.target.y.toString();
+}
+
+function branchStrokeWidth(d) {
+	return freqScale(d.target.frequency);
 }
 
 function tree_init(){
@@ -89,15 +104,8 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 		.data(links)
 		.enter().append("polyline")
 		.attr("class", "link")
-		.attr("points", function(d) {
-			var mod = 0.5 * freqScale(d.target.frequency) - freqScale(0);
-			return (d.source.x-mod).toString() + "," + d.source.y.toString() + " "
-			+ (d.source.x-mod).toString() + "," + d.target.y.toString() + " "
-			+ (d.target.x).toString() + "," + d.target.y.toString()
-		})
-		.style("stroke-width", function(d) {
-			return freqScale(d.target.frequency);
-		})
+		.attr("points", branchPoints)
+		.style("stroke-width", branchStrokeWidth)
 		.style("stroke", branchStrokeColor)		
 		.style("cursor", "pointer")
 		.on('mouseover', function(d) {
@@ -229,11 +237,7 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 
 		treeplot.selectAll(".link").data(links)
 			.transition().duration(speed)
-			.attr("points", function(d) {
-				return (d.source.x).toString() + "," + d.source.y.toString() + " "
-				+ (d.source.x).toString() + "," + d.target.y.toString() + " "
-				+ (d.target.x).toString() + "," + d.target.y.toString()
-			});
+			.attr("points", branchPoints);
 			
 		treeplot.selectAll(".annotation").data(clades)
 			.transition().duration(speed)
@@ -275,11 +279,7 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 			.attr("y", function(d) { return d.y; });
 			
 		treeplot.selectAll(".link").data(links)
-			.attr("points", function(d) {
-				return (d.source.x).toString() + "," + d.source.y.toString() + " "
-				+ (d.source.x).toString() + "," + d.target.y.toString() + " "
-				+ (d.target.x).toString() + "," + d.target.y.toString()
-			});
+			.attr("points", branchPoints);
 			
 		treeplot.selectAll(".annotation").data(clades)
 			.attr("x", function(d) {

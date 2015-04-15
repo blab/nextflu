@@ -34,12 +34,6 @@ function calcTipCounts(node){
 	}
 };
 
-
-var freqScale = d3.scale.linear()
-	.domain([0, 1])
-	.range([1.5, 4.5]);
-
-
 width = parseInt(d3.select(".freqplot-container").style("width"), 10);
 var position = "right";
 if (width < 600) {
