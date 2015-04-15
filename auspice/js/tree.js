@@ -21,6 +21,16 @@ function tipRadius(d) {
 	return radius;
 }
 
+
+function branchStrokeColor(d) {
+	var col = "#AAA";;
+	if (colorScale != regionColorScale) {
+		col = colorScale(d.target.adj_coloring);
+	}
+	var modCol = d3.interpolateRgb(col, "#BBB")(0.6);
+	return d3.rgb(modCol).toString();
+}
+
 function tree_init(){
 	calcBranchLength(rootNode);
 	rootNode.branch_length= 0.01;	
@@ -98,10 +108,7 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 		.style("stroke-width", function(d) {
 			return freqScale(d.target.frequency);
 		})
-		.style("stroke", function(d) {
-				var col = colorScale(d.target.adj_coloring);
-				return branchStrokeColor(col);
-			})		
+		.style("stroke", branchStrokeColor)		
 		.style("cursor", "pointer")
 		.on('mouseover', function(d) {
 			linkTooltip.show(d.target, this);

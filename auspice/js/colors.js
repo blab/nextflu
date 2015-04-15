@@ -25,12 +25,6 @@ var regionColorScale = d3.scale.ordinal()
 	.domain(regions)
 	.range(regionColors);
 
-
-function branchStrokeColor(col) {
-	var modCol = d3.interpolateRgb(col, "#BBB")(0.6);
-	return d3.rgb(modCol).toString();
-}
-
 function tipStrokeColor(col) {
 	return d3.rgb(col).toString();	
 }
@@ -38,7 +32,6 @@ function tipStrokeColor(col) {
 function tipFillColor(col) {
 	return d3.rgb(col).brighter([0.65]).toString();
 }
-
 
 function getMeanColoring() {	
 	var mean = 0;
@@ -52,8 +45,6 @@ function getMeanColoring() {
 	mean = mean / recent_tip_count;
 	return mean;
 }	
-
-
 
 function adjust_coloring_by_date() {
 	if (colorBy == "ep" || colorBy == "ne" || colorBy == "rb") {
@@ -109,15 +100,7 @@ function colorByTrait() {
 	adjust_coloring_by_date();
 
 	treeplot.selectAll(".link")
-		.style("stroke", function(d) {
-				if (colorScale != regionColorScale) {
-					var col = colorScale(d.target.adj_coloring);
-				}
-				else {
-					var col = "#AAA";
-				}
-				return branchStrokeColor(col);
-			});
+		.style("stroke", branchStrokeColor);
 		
 	d3.selectAll(".tip")
 		.attr("r", function(d) { return tipRadius(d); })

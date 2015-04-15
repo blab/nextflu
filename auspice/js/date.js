@@ -98,15 +98,7 @@ function dragend() {
 		.style("stroke-width", function(d) {
 			return freqScale(d.target.frequency);
 		})
-		.style("stroke", function(d) {
-			if (colorScale != regionColorScale) {
-				var col = colorScale(d.target.adj_coloring);
-			}
-			else {
-				var col = "#AAA";
-			}
-			return branchStrokeColor(col);
-		});				
+		.style("stroke", branchStrokeColor);				
 
 		d3.selectAll(".tip")
 		.transition().duration(500)

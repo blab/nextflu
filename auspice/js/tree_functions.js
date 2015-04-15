@@ -33,18 +33,32 @@ function getVaccines(tips) {
 	return vaccines;
 }
 
-function setDistances(node) {
-	if (typeof node.ep == "undefined") {
-		node.ep = 0.0;
-	}
-	if (typeof node.ne == "undefined") {
-		node.ne = 0.0;
-	}
+function minimumAttribute(node, attr, min) {
 	if (typeof node.children != "undefined") {
 		for (var i=0, c=node.children.length; i<c; i++) {
-			setDistances(node.children[i]);
+			min = minimumAttribute(node.children[i], attr, min);
 		}
 	}
+	else {
+		if (node[attr] < min) {
+			min = node[attr];
+		}
+	}
+	return min;
+}
+
+function maximumAttribute(node, attr, max) {
+	if (typeof node.children != "undefined") {
+		for (var i=0, c=node.children.length; i<c; i++) {
+			max = maximumAttribute(node.children[i], attr, max);
+		}
+	}
+	else {
+		if (node[attr] > max) {
+			max = node[attr];
+		}
+	}
+	return max;
 }
 
 function calcBranchLength(node){
@@ -141,32 +155,3 @@ function calcLBI(node, allnodes){
 	maxLBI = d3.max(allnodes.map(function (d) {return d.LBI;}));
 	allnodes.forEach(function (d){ d.LBI /= maxLBI;});
 };
-
-
-function minimumAttribute(node, attr, min) {
-	if (typeof node.children != "undefined") {
-		for (var i=0, c=node.children.length; i<c; i++) {
-			min = minimumAttribute(node.children[i], attr, min);
-		}
-	}
-	else {
-		if (node[attr] < min) {
-			min = node[attr];
-		}
-	}
-	return min;
-}
-
-function maximumAttribute(node, attr, max) {
-	if (typeof node.children != "undefined") {
-		for (var i=0, c=node.children.length; i<c; i++) {
-			max = maximumAttribute(node.children[i], attr, max);
-		}
-	}
-	else {
-		if (node[attr] > max) {
-			max = node[attr];
-		}
-	}
-	return max;
-}
