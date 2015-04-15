@@ -68,6 +68,7 @@ function colorByTrait() {
 	}
 	else if (colorBy == "region") {
 		colorScale = regionColorScale;
+		nodes.map(function(d) { d.coloring = d.region; });
 	}
 
 	adjust_coloring_by_date();
@@ -87,39 +88,18 @@ function colorByTrait() {
 }
 
 function tipStrokeColor(d) {
-	var col;
-	if (colorBy == "genotype") {
-		col = colorScale(d.color_gt);
-	}
-	else if (colorBy == "region") {
-		col = colorScale(d.region);
-	}
-	else {
-		col = colorScale(d.coloring);	
-	}
+	var col = colorScale(d.coloring);
 	return d3.rgb(col).toString();
 }
 
 function tipFillColor(d) {
-	var col;
-	if (colorBy == "genotype") {
-		col = colorScale(d.color_gt);
-	}
-	else if (colorBy == "region") {
-		col = colorScale(d.region);
-	}
-	else {
-		col = colorScale(d.coloring);	
-	}
+	var col = colorScale(d.coloring);	;
 	return d3.rgb(col).brighter([0.65]).toString();
 }
 
 function branchStrokeColor(d) {
 	var col;
-	if (colorBy == "genotype") {
-		col = colorScale(d.target.color_gt);
-	}
-	else if (colorBy == "region") {
+	if (colorBy == "region") {
 		col = "#AAA";
 	}
 	else {
@@ -156,8 +136,8 @@ function colorByGenotypePosition (positions) {
 											var aa = cladeToSeq[d.clade];
 											tmp[tmp.length] = (positions[i]+1)+aa[positions[i]];
 										}
-										d.color_gt = tmp.join(" / "); 
-										return d.color_gt;});
+										d.coloring = tmp.join(" / "); 
+										return d.coloring;});
 	var unique_gts = d3.set(gts).values();
 	var gt_counts = {};
 	for (var i=0; i<unique_gts.length; i++){gt_counts[unique_gts[i]]=0;}
