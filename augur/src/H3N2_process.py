@@ -37,7 +37,7 @@ virus_config.update({
 						   "3c3.b":   [(83+sp,'R'), (261+sp,'Q'), (62+sp,'K'), (122+sp,'D')]
 							},
 	'HI_fname':'source-data/H3N2_HI_titers.txt',
-	'auspice_prefix':'H3N2_'							
+	'auspice_prefix':'H3N2_HI_'							
 	})
 
 
@@ -287,7 +287,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 			                       annotations = ['3c2.a', '3c3.a'])
 
 if __name__=="__main__":
-	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies', 'export']
+	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies', 'HI', 'export']
 	from process import parser, shift_cds
 	params = parser.parse_args()
 

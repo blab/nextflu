@@ -50,7 +50,7 @@ virus_config.update({
 		'7':[(160,'G'),  (114, 'D'), (214, 'T')],
 		'8':[(203,'T'), (289,'A')],
 		},
-	'auspice_prefix':'H1N1pdm_'
+	'auspice_prefix':'H1N1pdm_HI_'
 	})
 
 
@@ -173,7 +173,7 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine, HI
 			                       annotations = ['5','6','6b', '6c','7'])
 
 if __name__=="__main__":
-	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies', 'export']
+	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies','HI' 'export']
 	from process import parser, shift_cds
 	params = parser.parse_args()
 

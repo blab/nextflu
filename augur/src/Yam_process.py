@@ -2,6 +2,7 @@ import time, re, os
 from virus_filter import flu_filter
 from virus_clean import virus_clean
 from tree_refine import tree_refine
+from tree_titer import HI_tree
 from H3N2_process import H3N2_refine as BYam_refine
 from process import process, virus_config
 from Bio import SeqIO
@@ -39,7 +40,7 @@ virus_config.update({
 		'3':  [(63,'R'), (123, 'P'), (165, 'I')],
 		'3a': [(52,'A'), (313, 'E'), (63,'R'), (123, 'P'), (165, 'I')],
 	},
-	'auspice_prefix':'Yam_',
+	'auspice_prefix':'Yam_HI_',
 	'HI_fname':'source-data/Yam_HI_titers.txt',
 	})
 
@@ -137,7 +138,7 @@ class BYam_clean(virus_clean):
 		self.clean_outbreaks()
 		print "Number of viruses after outbreak filtering:",len(self.viruses)
 
-class BYam_process(process, BYam_filter, BYam_clean, BYam_refine):
+class BYam_process(process, BYam_filter, BYam_clean, BYam_refine, HI_tree):
 	"""docstring for BYam_process, BYam_filter"""
 	def __init__(self,verbose = 0, force_include = None, 
 				force_include_all = False, max_global= True, **kwargs):
@@ -148,9 +149,10 @@ class BYam_process(process, BYam_filter, BYam_clean, BYam_refine):
 		BYam_filter.__init__(self,**kwargs)
 		BYam_clean.__init__(self,**kwargs)
 		BYam_refine.__init__(self,**kwargs)
+		HI_tree.__init__(self,**kwargs)
 		self.verbose = verbose
 
-	def run(self, steps, viruses_per_month=50, raxml_time_limit = 1.0):
+	def run(self, steps, viruses_per_month=50, raxml_time_limit = 1.0, reg=0.2):
 		if 'filter' in steps:
 			print "--- Virus filtering at " + time.strftime("%H:%M:%S") + " ---"
 			self.filter()
@@ -192,11 +194,12 @@ class BYam_process(process, BYam_filter, BYam_clean, BYam_refine):
 		if 'export' in steps:
 			self.temporal_regional_statistics()
 			# exporting to json, including the BYam specific fields
-			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db','country'],
+			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country',
+												 'dHI', 'cHI', 'HI_titers', 'serum', 'HI_info', 'avidity', 'potency'], 
 									annotations = ['2', '3', '3a'])
 
 if __name__=="__main__":
-	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies', 'export']
+	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies','HI', 'export']
 	from process import parser, shift_cds
 	params = parser.parse_args()
 
