@@ -1,4 +1,3 @@
-
 {% include_relative d3.min.js %}
 {% include_relative d3.tip.js %}
 {% include_relative c3.min.js %}

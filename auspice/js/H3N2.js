@@ -1,4 +1,4 @@
-var file_prefix = 'H3N2_';
+var file_prefix = 'H3N2_HI_';
 var dfreq_dn = 2;
 
 var	vaccineChoice = {};
