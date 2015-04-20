@@ -90,20 +90,20 @@ class mutation_tree(process, tree_refine, virus_clean):
 	def export(self):
 		from Bio import Phylo
 		import matplotlib.pyplot as plt
-		plt.rcParams.update({
-          	'text.fontsize': 16,
-          	'font.size':10,
-          	'line.width':5,
-			'font.sans-serif': 'Helvetica',}
-		)
-		
+#		plt.rcParams.update({
+#          	'text.fontsize': 16,
+#          	'font.size':10,
+#          	'line.width':5,
+#			'font.sans-serif': 'Helvetica',}
+#		)
+		plt.ioff()
 		from tree_util import to_Biopython
 		tmp_tree = to_Biopython(self.tree)
 		tmp_tree.ladderize()
 		fig = plt.figure('Tree', figsize = (15,len(self.viruses)/3))
 		ax = plt.subplot('111')
 
-		Phylo.draw(tmp_tree, axes=ax, show_confidence=False, 
+		Phylo.draw(tmp_tree, axes=ax, show_confidence=False, do_show=False,
 			label_func = lambda x: x.name,
 			branch_labels = lambda x: x.aa_muts if hasattr(x,'aa_muts') else x.nuc_muts
 			)
@@ -112,6 +112,8 @@ class mutation_tree(process, tree_refine, virus_clean):
 		plt.plot( [0,lengthbar],[len(self.viruses),len(self.viruses)], lw=10, c='k')
 		plt.text(lengthbar/2, len(self.viruses)-1, str(lengthbar),horizontalalignment='center',fontsize=16)
 		ax.set_axis_off()
+		for fmt in self.formats:
+			plt.savefig(self.outdir+'tree.'+fmt)
 
 		for t in tmp_tree.find_clades():
 			if t.name is None:
@@ -119,8 +121,6 @@ class mutation_tree(process, tree_refine, virus_clean):
 			muts = t.aa_muts if hasattr(t,'aa_muts') else t.nuc_muts
 			if len(t.name) and len(muts): t.name+='-'
 			t.name+='_'.join(muts.split(','))
-		for fmt in self.formats:
-			plt.savefig(self.outdir+'tree.'+fmt)
 
 		Phylo.write(tmp_tree, self.outdir+'tree.nwk', 'newick')
 
@@ -175,4 +175,4 @@ if __name__=="__main__":
 	shutil.copy2('src/muttree.html', muttree.outdir+'muttree.html')
 
 
-	os.system('firefox '+muttree.outdir+'muttree.html &')
+#	os.system('firefox '+muttree.outdir+'muttree.html &')
