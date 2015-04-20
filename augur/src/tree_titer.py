@@ -315,8 +315,8 @@ class HI_tree(object):
 		for test in self.HI_strains:
 			self.node_lookup[test].avidity = self.virus_effect[test]
 		for ref in self.ref_strains:
-			self.node_lookup[ref.HI_titers = {key:np.mean(titers.values())
-			 		for key, titers in self.node_lookup[ref].HI_titers_perserum.iteritems()}
+			self.node_lookup[ref.HI_titers] = {key:np.mean(titers.values()) for key, titers in 
+			 									self.node_lookup[ref].HI_titers_perserum.iteritems()}
 			self.node_lookup[ref].mean_potency = np.mean(self.node_lookup[ref].potency.values)
 
 
