@@ -13,7 +13,7 @@ from itertools import izip
 std_outgroup_file = 'source-data/outgroups.fasta'
 virus_config.update({
 	# data source and sequence parsing/cleaning/processing
-	'fasta_fields':{0:'strain', 1:'date', 2:'isolate-id', 3:'passage', 4:'subtype', 5:'ori-lab', 6:'sub-lab', 7:'submitter', 8:"country"},
+	'fasta_fields':{0:'strain', 1:'date', 2:'isolate_id', 3:'passage', 4:'subtype', 5:'ori_lab', 6:'sub_lab', 7:'submitter', 8:"country"},
 	'cds':[0,None], # define the HA start i n 0 numbering
 	'auspice_prefix':'H1N1pdm_',
 	'verbose':3
@@ -71,6 +71,7 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 		self.ladderize()
 		self.collapse()
 		self.add_nuc_mutations()
+		self.add_node_attributes()
 		if self.cds is not None:
 			self.translate_all()
 			self.add_aa_mutations()
