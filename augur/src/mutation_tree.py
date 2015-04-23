@@ -1,6 +1,8 @@
 import time, re, os, argparse,shutil
 from tree_refine import tree_refine
 from virus_clean import virus_clean
+from virus_filter import flu_filter
+from collections import defaultdict
 from process import process, virus_config
 from Bio import SeqIO
 from Bio.Seq import Seq
@@ -11,16 +13,18 @@ from itertools import izip
 std_outgroup_file = 'source-data/outgroups.fasta'
 virus_config.update({
 	# data source and sequence parsing/cleaning/processing
+	'fasta_fields':{0:'strain', 1:'date', 2:'isolate-id', 3:'passage', 4:'subtype', 5:'ori-lab', 6:'sub-lab', 7:'submitter', 8:"country"},
 	'cds':[0,None], # define the HA start i n 0 numbering
 	'auspice_prefix':'H1N1pdm_',
 	'verbose':3
 	})
 
 
-class mutation_tree(process, tree_refine, virus_clean):
+class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 	"""docstring for mutation_tree"""
 	def __init__(self, aln_fname, outgroup, outdir = './', formats = ['pdf','svg','png'], verbose = 0, **kwargs):
 		process.__init__(self, **kwargs)
+		flu_filter.__init__(self, alignment_file = aln_fname, **kwargs)
 		tree_refine.__init__(self, **kwargs)
 		virus_clean.__init__(self, **kwargs)
 		self.verbose = verbose
@@ -31,15 +35,6 @@ class mutation_tree(process, tree_refine, virus_clean):
 		self.auspice_frequencies_fname = None
 		self.auspice_meta_fname = 		self.outdir + 'meta.json'
 
-		if os.path.isfile(aln_fname):
-			self.aln_fname = aln_fname
-			try:
-				self.viruses = [{'strain':seq.name, 'seq':str(seq.seq).upper(), 'desc':seq.description}
-								for seq in SeqIO.parse(self.aln_fname, 'fasta') ]
-			except:
-				raise ValueError("Parsing of fasta file %s failed!" % self.aln_fname)
-		else:
-			raise ValueError("file %s not found" % aln_fname)		
 		if os.path.isfile(outgroup):
 			tmp = [{'strain':seq.name, 'seq':str(record.seq).upper(), 'desc':seq.description}
 								for seq in SeqIO.parse(outgroup, 'fasta') ]			
@@ -56,20 +51,22 @@ class mutation_tree(process, tree_refine, virus_clean):
 				if self.verbose:
 					print "using outgroup found in alignment", outgroup
 			else:
-				standard_outgroups = [{'strain':seq.name, 'seq':str(record.seq).upper(), 'desc':seq.description}
+				standard_outgroups = [{'strain':seq.name, 'seq':str(seq.seq).upper(), 'desc':seq.description}
 										for seq in SeqIO.parse(std_outgroup_file, 'fasta') ]
 				outgroup_names = [x['strain'] for x in standard_outgroups]
 				if outgroup in outgroup_names:
-					self.outgroup = standard_outgroups.index(outgroup)
+					self.outgroup = standard_outgroups[outgroup_names.index(outgroup)]
 					if self.verbose:
 						print "using standard outgroup", outgroup
 				else:
 					raise ValueError("outgroup %s not found" % outgroup)
 					return
 		self.viruses.append(self.outgroup)
+		self.make_strain_names_unique()
 
 	def refine(self):
 		self.node_lookup = {node.taxon.label:node for node in self.tree.leaf_iter()}
+		self.unique_date()
 		self.remove_outgroup()
 		self.ladderize()
 		self.collapse()
@@ -88,29 +85,34 @@ class mutation_tree(process, tree_refine, virus_clean):
 						pass
 
 	def export(self):
+		def select_fontsize(n):
+			if n<10:
+				return 12
+			elif n<50:
+				return 10
+			else:
+				return 8
+
+
 		from Bio import Phylo
 		import matplotlib.pyplot as plt
-#		plt.rcParams.update({
-#          	'text.fontsize': 16,
-#          	'font.size':10,
-#          	'line.width':5,
-#			'font.sans-serif': 'Helvetica',}
-#		)
+		plt.rcParams.update({'font.size':select_fontsize(len(self.viruses))})
 		plt.ioff()
 		from tree_util import to_Biopython
 		tmp_tree = to_Biopython(self.tree)
 		tmp_tree.ladderize()
-		fig = plt.figure('Tree', figsize = (15,len(self.viruses)/3))
+		fig = plt.figure('Tree', figsize = (15,2+len(self.viruses)/5))
 		ax = plt.subplot('111')
 
 		Phylo.draw(tmp_tree, axes=ax, show_confidence=False, do_show=False,
 			label_func = lambda x: x.name,
 			branch_labels = lambda x: x.aa_muts if hasattr(x,'aa_muts') else x.nuc_muts
 			)
+		ax.invert_yaxis()
 		tl = np.diff(ax.get_xticks())[0]
 		lengthbar = tl/2
 		plt.plot( [0,lengthbar],[len(self.viruses),len(self.viruses)], lw=10, c='k')
-		plt.text(lengthbar/2, len(self.viruses)-1, str(lengthbar),horizontalalignment='center',fontsize=16)
+		plt.text(lengthbar/2, len(self.viruses)+0.1, str(lengthbar),horizontalalignment='center',fontsize=16)
 		ax.set_axis_off()
 		for fmt in self.formats:
 			plt.savefig(self.outdir+'tree.'+fmt)
@@ -124,7 +126,18 @@ class mutation_tree(process, tree_refine, virus_clean):
 
 		Phylo.write(tmp_tree, self.outdir+'tree.nwk', 'newick')
 
-		self.export_to_auspice(tree_fields = ['aa_muts','desc'])
+		self.export_to_auspice(tree_fields = ['aa_muts','num_date']+self.fasta_fields.values())
+
+	def make_strain_names_unique(self):
+		strain_to_seq = defaultdict(list)
+		for v in self.viruses:
+			strain_to_seq[v['strain']].append(v)
+		for strain, strain_list in strain_to_seq.iteritems():
+			if len(strain_list)>1:
+				for ii, virus in enumerate(strain_list):
+					virus['strain']+='-'+str(ii+1)
+
+
 
 	def run(self, raxml_time_limit):
 		self.align()
