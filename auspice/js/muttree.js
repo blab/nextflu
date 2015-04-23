@@ -98,9 +98,7 @@ var virusTooltip = d3.tip()
 	.attr('class', 'd3-tip')
 	.offset([0, 12])
 	.html(function(d) {
-	
-		string = "";
-				
+		string='';
 		// safe to assume the following attributes
 		if (typeof d.strain != "undefined") {
 			string += d.strain;
@@ -108,7 +106,28 @@ var virusTooltip = d3.tip()
 		string += "<div class=\"smallspacer\"></div>";
 		
 		string += "<div class=\"smallnote\">";		
-		string += d.desc;
+		
+		if (typeof d.country != "undefined") {
+			string += d.country.replace(/([A-Z])/g, ' $1');
+		}
+		if (typeof d.date != "undefined") {
+			string += ", " + d.date;
+		}
+		if (typeof d.isolate_id != "undefined") {
+			string += "<br>GISAID ID: EPI" + d.accession;
+		}
+		if (typeof d.orig_lab != "undefined") {
+			if (d.orig_lab != "") {
+				string += "<br>Source: " + d.orig_lab.substring(0,25);
+				if (d.orig_lab.length>25) string += '...';
+			}
+		}			
+		if (typeof d.sub_lab != "undefined") {
+			if (d.sub_lab != "") {
+				string += "<br>Subm: " + d.sub_lab.substring(0,25);
+				if (d.sub_lab.length>25) string += '...';
+			}
+		}			
 		string += "</div>";
 		console.log(d.desc);
 		return string;
