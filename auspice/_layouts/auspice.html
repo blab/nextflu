@@ -77,7 +77,7 @@ title: nextflu
 									{% if page.coloring contains 'dfreq' %}
 									<option value="dfreq">frequency change</option>
 									{% endif %}
-									{% if page.coloring contains 'HI %}
+									{% if page.coloring contains 'HI' %}
 									<option value="cHI">antigenic advance</option>
 									{% endif %}
 								</select>
@@ -89,13 +89,13 @@ title: nextflu
 							<input id="gt-color" type="search" placeholder= "{{ page.gtplaceholder }}"  class="form-control">
 						</div>
 					</div>
-					{% if page.coloring contains 'HI %}
+					{% if page.coloring contains 'HI' %}
 					<div class="form-group">
 						<label class="col-xs-4 control-label"></label>
 						<div class="col-xs-8 controls">
-						<input type="checkbox" id="HIprediction" value="pred"> use predicted HI<br>
-						<input type="checkbox" id="serum" value="serum"> correct for potency<br>
-						<input type="checkbox" id="virus" value="virus"> correct for virus effect<br>
+						<input type="checkbox" id="HIPrediction" value="pred"> use predicted HI<br>
+						<input type="checkbox" id="serum" value="serum"> correct potency<br>
+						<input type="checkbox" id="virus" value="virus"> correct avidity<br>
 						</div>
 					</div>		
 					{% endif %}	

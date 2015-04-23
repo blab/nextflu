@@ -22,9 +22,18 @@ var dfreqColorScale = d3.scale.linear()
 	.domain(dfreqColorDomain)
 	.range(colors);
 
-var HIColorScale = d3.scale.linear()
+var HIColorScale_valid = d3.scale.linear()
 	.domain(HIColorDomain)
 	.range(colors);
+
+var HIColorScale = function(c){
+	if (c!='NaN'){
+		return HIColorScale_valid(c);
+	}else{
+		return '#EEEEEE';
+	}
+}
+HIColorScale.domain = HIColorScale_valid.domain;
 
 var regionColorScale = d3.scale.ordinal()
 	.domain(regions)
@@ -79,10 +88,6 @@ function colorByTrait() {
 	else if (colorBy == "cHI") {
 		colorScale = HIColorScale;
 		nodes.map(function(d) { d.coloring = d.cHI; });
-	}
-	else if (colorBy == "deltaHI") {
-		colorScale = HIColorScale;
-		nodes.map(function(d) { d.coloring = d.HI_dist; });
 	}
 
 	treeplot.selectAll(".link")
@@ -178,9 +183,9 @@ function colorByGenotypePosition (positions) {
 }
 
 function colorByHIDistance(){
-	correctVirus = document.getElementById("virus").value;
-	correctSerum = document.getElementById("serum").value;
-	predictedHI = document.getElementById("predictedHI").value;
+	correctVirus = document.getElementById("virus").checked;
+	correctPotency = document.getElementById("serum").checked;
+	predictedHI = document.getElementById("HIPrediction").checked;
 	if (typeof(focusNode)=="undefined"){
 		focusNode=rootNode;
 	}
@@ -190,7 +195,26 @@ function colorByHIDistance(){
 	else{
 		calcHImeasured(focusNode, rootNode);
 	}
-	colorBy = "deltaHI";
+	console.log("Color by HI Distance from "+focusNode.strain);
+	console.log("Using predictedHI: "+predictedHI);
+	console.log("correcting for virus effect: "+correctVirus);
+	console.log("correction for serum effect: "+correctPotency);
+
+	colorScale = HIColorScale;
+	nodes.map(function(d) { d.coloring = d.HI_dist;});
+
+	treeplot.selectAll(".link")
+		.style("stroke", branchStrokeColor);
+		
+	d3.selectAll(".tip")
+		.style("visibility", tipHIvalid)
+		.style("fill", tipFillColor)
+		.style("stroke", tipStrokeColor);
+		
+	if (typeof tree_legend != undefined){
+		removeLegend();
+	}
+	tree_legend = makeLegend();	 				
 }
 
 

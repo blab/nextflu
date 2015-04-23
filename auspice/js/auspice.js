@@ -1,8 +1,11 @@
+---
+---
 {% include_relative d3.min.js %}
 {% include_relative d3.tip.js %}
 {% include_relative c3.min.js %}
 {% include_relative autocomplete.js %}
 {% include_relative globals.js %}
+{% include_relative HI.js %}
 {% include_relative date.js %}
 {% include_relative legend.js %}
 {% include_relative colors.js %}

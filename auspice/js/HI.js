@@ -1,6 +1,6 @@
 var predictedHI = true;
 var correctVirus = true;
-var correctSerum = true;
+var correctPotency = true;
 var focusNode;
 /**
  * for each node, accumulate HI difference along branches
@@ -49,17 +49,16 @@ function calcHIpred(node, rootNode){
 };
 
 function calcHImeasured(node, rootNode){
-	if (correctPotency){
-		node.HI_dist=-node.mean_potency;
-	}else{
-		node.HI_dist = 0;
-	}
+	console.log(node.strain+ ', mean_potency:'+node.mean_potency);
 	for (var i=0; i<tips.length; i+=1){
 		d = tips[i];
 		if (typeof(node.HI_titers[d.clade])!="undefined"){
-			tips[i].HI_dist = node.HI_titers[d.clade]
+			d.HI_dist = node.HI_titers[d.clade]
 			if (correctVirus){
-				d.HI_dist-=d.avidity;
+				d.HI_dist -= d.avidity;
+			}
+			if (correctPotency){
+				d.HI_dist -= node.mean_potency;
 			}
 		}else{
 			d.HI_dist = 'NaN';
@@ -67,6 +66,13 @@ function calcHImeasured(node, rootNode){
 	}
 };
 
+function tipHIvalid(d) {
+	var vis = "visible";
+	if (d.HI_dist =='NaN') {
+		vis = "hidden";
+	}
+	return vis;
+}
 
 function getSera(tree_tips){
 	return tree_tips.filter(function (d){return d.serum;})

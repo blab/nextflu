@@ -191,6 +191,11 @@ class BYam_process(process, BYam_filter, BYam_clean, BYam_refine, HI_tree):
 			if 'genotype_frequencies' in steps: 
 					self.estimate_frequencies(tasks = ["genotypes"])
 			self.dump()
+		if 'HI' in steps:
+			print "--- Adding HI titers to the tree " + time.strftime("%H:%M:%S") + " ---"
+			self.map_HI_to_tree(training_fraction=0.9, method = 'nnl1reg', lam_HI=reg, lam_avi=reg, lam_pot = reg)
+			self.add_titers()
+			self.dump()
 		if 'export' in steps:
 			self.temporal_regional_statistics()
 			# exporting to json, including the BYam specific fields

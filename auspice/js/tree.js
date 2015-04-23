@@ -187,7 +187,7 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 		.on('mouseover', function(d) {
 			virusTooltip.show(d, this);
 		})
-		.on('mouseout', virusTooltip.hide);
+		.on('mouseout', virusTooltip.hide)
 		.on('click', function (d){
 			focusNode = d;
 			colorByHIDistance();
