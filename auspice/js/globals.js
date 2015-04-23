@@ -5,7 +5,7 @@ var cladeToSeq = {}
 
 var globalDate = new Date();
 
-var nodes, tips, rootNode, links, vaccines;
+var nodes, tips, rootNode, links, vaccines, sera;
 
 function treePlotHeight(width) {
 	return 400 + 0.35*width;
@@ -27,7 +27,6 @@ var legend = d3.select("#legend")
 
 var colorBy = document.getElementById("coloring").value;
 var colorScale;
-
 var time_step;
 
 

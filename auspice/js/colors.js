@@ -22,6 +22,10 @@ var dfreqColorScale = d3.scale.linear()
 	.domain(dfreqColorDomain)
 	.range(colors);
 
+var HIColorScale = d3.scale.linear()
+	.domain(HIColorDomain)
+	.range(colors);
+
 var regionColorScale = d3.scale.ordinal()
 	.domain(regions)
 	.range(regionColors);
@@ -71,6 +75,14 @@ function colorByTrait() {
 	else if (colorBy == "region") {
 		colorScale = regionColorScale;
 		nodes.map(function(d) { d.coloring = d.region; });
+	}
+	else if (colorBy == "cHI") {
+		colorScale = HIColorScale;
+		nodes.map(function(d) { d.coloring = d.cHI; });
+	}
+	else if (colorBy == "deltaHI") {
+		colorScale = HIColorScale;
+		nodes.map(function(d) { d.coloring = d.HI_dist; });
 	}
 
 	treeplot.selectAll(".link")
@@ -164,6 +176,23 @@ function colorByGenotypePosition (positions) {
 	}
 	tree_legend = makeLegend();
 }
+
+function colorByHIDistance(){
+	correctVirus = document.getElementById("virus").value;
+	correctSerum = document.getElementById("serum").value;
+	predictedHI = document.getElementById("predictedHI").value;
+	if (typeof(focusNode)=="undefined"){
+		focusNode=rootNode;
+	}
+	if (predictedHI){
+		calcHIpred(focusNode, rootNode);
+	}
+	else{
+		calcHImeasured(focusNode, rootNode);
+	}
+	colorBy = "deltaHI";
+}
+
 
 d3.select("#coloring")
 	.style("cursor", "pointer")

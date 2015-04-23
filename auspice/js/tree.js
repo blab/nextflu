@@ -58,6 +58,7 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 	rootNode = nodes[0];
 	tips = gatherTips(rootNode, []);
 	vaccines = getVaccines(tips);
+	sera = getSera(tips);
 
 	var xValues = nodes.map(function(d) {
 		return +d.xvalue;
@@ -168,6 +169,29 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 			virusTooltip.show(d, this);
 		})
 		.on('mouseout', virusTooltip.hide);
+
+	var serumCircles = treeplot.selectAll(".serum")
+		.data(sera)
+		.enter()
+		.append("text")
+		.attr("class", "serum")
+		.attr("x", function(d) {return d.x})
+		.attr("y", function(d) {return d.y})
+		.attr('text-anchor', 'middle')
+		.attr('dominant-baseline', 'central')
+		.style("font-size", "28px")
+		.style('font-family', 'FontAwesome')
+		.style("fill", "#555555")
+		.text(function(d) { return '\uf00d'; })
+		.style("cursor", "default")
+		.on('mouseover', function(d) {
+			virusTooltip.show(d, this);
+		})
+		.on('mouseout', virusTooltip.hide);
+		.on('click', function (d){
+			focusNode = d;
+			colorByHIDistance();
+		});
 
 
 	d3.select("#reset")

@@ -114,6 +114,12 @@ if __name__=="__main__":
 	elif params.flutype=='H1N1':
 		from H1N1_process import *
 		flu_process = H1N1_process
+	elif params.flutype=='Vic':
+		from Vic_process import *
+		flu_process = BVic_process
+	elif params.flutype=='Yam':
+		from Yam_process import *
+		flu_process = BYam_process
 	params.__dict__['HI_fname']='source-data/'+params.flutype+'_HI_titers.txt'	
 
 	dHI_list = validation_figures(params)
