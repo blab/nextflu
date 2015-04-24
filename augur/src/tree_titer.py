@@ -34,6 +34,12 @@ class HI_tree(object):
 		return measurements, strains
 
 	def normalize_HI(self):
+		'''
+		convert the HI measurements into the log2 difference between the average 
+		HI titer measured between test virus and reference serum and the average 
+		homologous titer. all measurements relative to sera without homologous titer
+		are excluded
+		'''
 		consensus_func = np.mean
 		self.HI_normalized = {}
 		sera = set()
@@ -93,6 +99,9 @@ class HI_tree(object):
 		print "# of reference strains:",len(self.sera), "# of branches with HI constraint", self.HI_split_count
 
 	def get_path_no_terminals(self, v1, v2):
+		'''
+		returns the path between two tips in the tree excluding the terminal branches. 
+		'''
 		if v1 in self.node_lookup and v2 in self.node_lookup:
 			p1 = [self.node_lookup[v1]]
 			p2 = [self.node_lookup[v2]]
@@ -111,6 +120,11 @@ class HI_tree(object):
 		return path
 
 	def make_treegraph(self):
+		'''
+		code the path between serum and test virus of each HI measurement into a matrix
+		the matrix has dimensions #measurements x #tree branches with HI info
+		if the path between test and serum goes through a branch, the corresponding matrix element is 1, 0 otherwise
+		'''
 		tree_graph = []
 		HI_dist = []
 		n_params = self.HI_split_count + len(self.sera) + len(self.HI_strains)
@@ -120,19 +134,23 @@ class HI_tree(object):
 					if ref[0] in self.node_lookup and test in self.node_lookup:
 						path = self.get_path_no_terminals(test, ref[0])
 						tmp = np.zeros(n_params)
+						# determine branch indices on path
 						branches = np.unique([c.HI_branch_index for c in path if hasattr(c, 'HI_branch_index')])
 						if len(branches): tmp[branches] = 1
+						# add serum effect
 						tmp[self.HI_split_count+self.sera.index(ref)] = 1
-						tree_graph.append(tmp)
-						tmp[self.HI_split_count+self.sera.index(ref)] = 1
+						# add virus effect
 						tmp[self.HI_split_count+len(self.sera)+self.HI_strains.index(test)] = 1
+						# append model and fit value to lists tree_graph and HI_dist
+						tree_graph.append(tmp)
 						HI_dist.append(val)
 				except:
 					import pdb; pdb.set_trace()
 					print test, ref, "ERROR"
 
+		# convert to numpy arrays and save product of tree graph with its transpose for future use
 		self.HI_dist =  np.array(HI_dist)
-		self.tree_graph= np.array(tree_graph)
+		self.tree_graph = np.array(tree_graph)
 		self.TgT = np.dot(self.tree_graph.T, self.tree_graph)
 		print "Found", self.tree_graph.shape, "measurements x parameters"
 
@@ -206,6 +224,10 @@ class HI_tree(object):
 		return sol
 
 	def prepare_HI_map(self):
+		'''
+		normalize the HI measurements, split the data into training and test sets
+		and determine which branches on the tree are transversed by HI measurements
+		'''
 		from random import sample
 		self.normalize_HI()
 		self.add_mutations()
@@ -238,7 +260,7 @@ class HI_tree(object):
 
 		self.make_treegraph()		
 
-	def map_HI_to_tree(self, training_fraction = 1.0, method = 'nnls', lam_HI=5, 
+	def map_HI_to_tree(self, training_fraction = 1.0, method = 'nnls', lam_HI=5.0, 
 						lam_pot = 5.0, lam_avi = 5.0, cutoff_date = None, subset_strains = False):
 		self.training_fraction = training_fraction
 		self.subset_strains=subset_strains

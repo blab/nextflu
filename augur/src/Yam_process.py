@@ -200,7 +200,7 @@ class BYam_process(process, BYam_filter, BYam_clean, BYam_refine, HI_tree):
 			self.temporal_regional_statistics()
 			# exporting to json, including the BYam specific fields
 			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country',
-												 'dHI', 'cHI', 'HI_titers', 'serum', 'HI_info', 'avidity', 'potency'], 
+												 'dHI', 'cHI', 'HI_titers', 'serum', 'HI_info', 'avidity', 'potency', 'mean_potency'], 
 									annotations = ['2', '3', '3a'])
 
 if __name__=="__main__":

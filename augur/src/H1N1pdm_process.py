@@ -50,6 +50,7 @@ virus_config.update({
 		'7':[(160,'G'),  (114, 'D'), (214, 'T')],
 		'8':[(203,'T'), (289,'A')],
 		},
+	'HI_fname':'source-data/H1N1pdm_HI_titers.txt',
 	'auspice_prefix':'H1N1pdm_HI_'
 	})
 
@@ -162,14 +163,14 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine, HI
 			self.dump()
 		if 'HI' in steps:
 			print "--- Adding HI titers to the tree " + time.strftime("%H:%M:%S") + " ---"
-			self.map_HI_to_tree(training_fraction=0.9, method = 'nnl1reg', lam_HI=reg, lam_avi=reg, lam_pot = reg)
+			self.map_HI_to_tree(training_fraction=1.0, method = 'nnl1reg', lam_HI=reg, lam_avi=reg, lam_pot = reg)
 			self.add_titers()
 			self.dump()
 		if 'export' in steps:
 			self.temporal_regional_statistics()
 			# exporting to json, including the H1N1pdm specific fields
 			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country',
-									'dHI', 'cHI', 'HI_titers', 'serum', 'HI_info', 'avidity', 'potency'], 
+									'dHI', 'cHI', 'HI_titers', 'serum', 'HI_info', 'avidity', 'potency','mean_potency'], 
 			                       annotations = ['5','6','6b', '6c','7'])
 
 if __name__=="__main__":

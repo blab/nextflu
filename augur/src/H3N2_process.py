@@ -232,7 +232,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 		fitness_model.__init__(self,**kwargs)
 		self.verbose = verbose
 
-	def run(self, steps, viruses_per_month=50, raxml_time_limit = 1.0, reg = 2):
+	def run(self, steps, viruses_per_month=50, raxml_time_limit = 1.0, reg = 0.2):
 		if 'filter' in steps:
 			print "--- Virus filtering at " + time.strftime("%H:%M:%S") + " ---"
 			self.filter()
@@ -273,7 +273,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 			self.dump()
 		if 'HI' in steps:
 			print "--- Adding HI titers to the tree " + time.strftime("%H:%M:%S") + " ---"
-			self.map_HI_to_tree(training_fraction=0.9, method = 'nnl1reg', lam_HI=reg, lam_avi=reg, lam_pot = reg)
+			self.map_HI_to_tree(training_fraction=1.0, method = 'nnl1reg', lam_HI=reg, lam_avi=reg, lam_pot = reg)
 			self.add_titers()
 			self.dump()
 #		if 'fitness' in steps:

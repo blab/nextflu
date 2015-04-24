@@ -174,14 +174,14 @@ class BVic_process(process, BVic_filter, BVic_clean, BVic_refine, HI_tree):
 			self.dump()
 		if 'HI' in steps:
 			print "--- Adding HI titers to the tree " + time.strftime("%H:%M:%S") + " ---"
-			self.map_HI_to_tree(training_fraction=0.9, method = 'nnl1reg', lam_HI=reg, lam_avi=reg, lam_pot = reg)
+			self.map_HI_to_tree(training_fraction=1.0, method = 'nnl1reg', lam_HI=reg, lam_avi=reg, lam_pot = reg)
 			self.add_titers()
 			self.dump()
 		if 'export' in steps:
 			self.temporal_regional_statistics()
 			# exporting to json, including the BVic specific fields
 			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country',
-												 'dHI', 'cHI', 'HI_titers', 'serum', 'HI_info', 'avidity', 'potency'], 
+												 'dHI', 'cHI', 'HI_titers', 'serum', 'HI_info', 'avidity', 'potency', 'mean_potency'], 
 									annotations = ['1A', '1B'])
 
 if __name__=="__main__":

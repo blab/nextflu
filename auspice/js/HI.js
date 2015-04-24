@@ -12,7 +12,7 @@ function calcHIsubclade(node){
 		calcHIsubclade(node.children[i]);
 		}
 	}else{
-		if (typeof node.avidity != "undefined" && correctVirus){
+		if (typeof node.avidity != "undefined" && correctVirus==false){
 			node.HI_dist+=node.avidity;
 		}
 	}
