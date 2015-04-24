@@ -31,7 +31,7 @@ var colorScale;
 var time_step;
 
 
-d3.json("/data/" + file_prefix + "meta.json", function(error, json) {
+d3.json(path + file_prefix + "meta.json", function(error, json) {
     if (error) return console.warn(error);
     d3.select("#updated").text(json['updated']);
     commit_id = json['commit'];

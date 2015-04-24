@@ -184,9 +184,9 @@ if __name__=="__main__":
 	muttree.run(raxml_time_limit=0.1)
 	muttree.export()
 
-	shutil.copytree('../auspice/muttree_css', muttree.outdir+'css')
+	shutil.copytree('../auspice/_site/css', muttree.outdir+'css')
 	shutil.copytree('../auspice/js', muttree.outdir+'js')
-	shutil.copy2('src/muttree.html', muttree.outdir+'muttree.html')
+	shutil.copy2('../auspice/_site/muttree/index.html', muttree.outdir+'muttree.html')
 
 
 #	os.system('firefox '+muttree.outdir+'muttree.html &')

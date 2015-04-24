@@ -48,7 +48,7 @@ function tree_init(){
 	tree_legend = makeLegend();
 }
 
-d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
+d3.json(path + file_prefix + "tree.json", function(error, root) {
 
 	if (error) return console.warn(error);
 
@@ -125,6 +125,34 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 			}
 		});
 
+	if ((typeof branch_labels != "undefined")&&(branch_labels)){
+		var mutations = treeplot.selectAll(".muts")
+			.data(nodes)
+			.enter()
+			.append("text")
+			.attr("class", "")
+			.attr("x", function(d) {
+				return d.x - 6;
+			})
+			.attr("y", function(d) {
+				return d.y - 3;
+			})
+			.style("text-anchor", "end")
+			.text(function (d) {
+				return d.aa_muts.replace(/,/g, ', ');
+			});
+		}
+
+	if ((typeof tip_labels != "undefined")&&(tip_labels)){
+		var labels = treeplot.selectAll(".label")
+			.data(tips)
+			.enter()
+			.append("text")
+			.attr("class","label")
+			.attr("x", function(d) { return d.x+10; })
+			.attr("y", function(d) { return d.y+4; })
+			.text(function(d) { return d.strain;});
+		}
 	var tipCircles = treeplot.selectAll(".tip")
 		.data(tips)
 		.enter()
@@ -309,7 +337,7 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 
 });
 
-d3.json("/data/" + file_prefix + "sequences.json", function(error, json) {
+d3.json(path + file_prefix + "sequences.json", function(error, json) {
 	if (error) return console.warn(error);
 	cladeToSeq=json;
 });
