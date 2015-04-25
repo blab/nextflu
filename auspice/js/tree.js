@@ -179,10 +179,10 @@ d3.json("/data/" + file_prefix + "tree.json", function(error, root) {
 		.attr("y", function(d) {return d.y})
 		.attr('text-anchor', 'middle')
 		.attr('dominant-baseline', 'central')
-		.style("font-size", "28px")
+		.style("font-size", "24px")
 		.style('font-family', 'FontAwesome')
 		.style("fill", "#555555")
-		.text(function(d) { return '\uf00d'; })
+		.text(function(d) { return '\uf10c'; })
 		.style("cursor", "default")
 		.on('mouseover', function(d) {
 			virusTooltip.show(d, this);
