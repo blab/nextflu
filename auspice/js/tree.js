@@ -26,6 +26,16 @@ function branchStrokeWidth(d) {
 	return freqScale(d.target.frequency);
 }
 
+function labelFontSize(n){
+	if (n<20){
+		return 16;
+	}else if (n<50){
+		return 10;
+	}else{
+		return Math.max(1, Math.round(1.4*(treeHeight-30.0)/n - 1.0));
+	}
+}
+
 function tree_init(){
 	calcBranchLength(rootNode);
 	rootNode.branch_length= 0.01;	
@@ -73,7 +83,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 
 	var yScale = d3.scale.linear()
 		.domain([d3.min(yValues), d3.max(yValues)])
-		.range([10, treeHeight-10]);
+		.range([15, treeHeight-15]);
 
 	nodes.forEach(function (d) {
 		d.x = xScale(d.xvalue);
@@ -139,16 +149,23 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			})
 			.style("text-anchor", "end")
 			.text(function (d) {
-				return d.aa_muts.replace(/,/g, ', ');
+				if ((d.tipCount>1)||(tips.length<50)){
+					return d.aa_muts.replace(/,/g, ', ');
+				}else{
+					return "";
+				}
 			});
 		}
 
-	if ((typeof tip_labels != "undefined")&&(tip_labels)){
+	if ((typeof tip_labels != "undefined")&&(tip_labels)&&(tips.length < 200)){
+		console.log(tips.length);
+		console.log("Font size:" + labelFontSize(tips.length));
 		var labels = treeplot.selectAll(".label")
 			.data(tips)
 			.enter()
 			.append("text")
 			.attr("class","label")
+			.style("font-size", labelFontSize(tips.length)+"px")
 			.attr("x", function(d) { return d.x+10; })
 			.attr("y", function(d) { return d.y+4; })
 			.text(function(d) { return d.strain;});
