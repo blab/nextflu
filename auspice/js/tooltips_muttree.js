@@ -20,6 +20,9 @@ var virusTooltip = d3.tip()
 		if (typeof d.date != "undefined") {
 			string += ", " + d.date;
 		}
+		if (typeof d.isolate_id != "undefined") {
+			string += "<br>Isolate: " + d.isolate_id;
+		}
 		if (typeof d.accession != "undefined") {
 			string += "<br>GISAID ID: EPI" + d.accession;
 		}

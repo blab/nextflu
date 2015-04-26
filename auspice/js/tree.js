@@ -32,7 +32,7 @@ function labelFontSize(n){
 	}else if (n<50){
 		return 10;
 	}else{
-		return Math.max(1, Math.round(1.4*(treeHeight-30.0)/n - 1.0));
+		return Math.max(1, Math.round(1.3*(treeHeight-30.0)/n - 1.0));
 	}
 }
 

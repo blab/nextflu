@@ -178,6 +178,7 @@ if __name__=="__main__":
 	if not os.path.isdir(params.out):
 		try:
 			os.makedirs(params.out)
+			os.makedirs(params.out+'/js')
 		except OSError as e:
 			print "Cannot create output directory",e
 	virus_config["outdir"]=params.out
@@ -186,9 +187,9 @@ if __name__=="__main__":
 	muttree.run(raxml_time_limit=0.1)
 	muttree.export()
 
-	shutil.copytree('../auspice/_site/css', muttree.outdir+'css')
-	shutil.copytree('../auspice/js', muttree.outdir+'js')
+	shutil.copy2('../auspice/_site/js/muttree.js', muttree.outdir+'js/muttree.js')
 	shutil.copy2('../auspice/_site/muttree/index.html', muttree.outdir+'muttree.html')
+	shutil.copytree('../auspice/_site/css', muttree.outdir+'css')
 
 
 #	os.system('firefox '+muttree.outdir+'muttree.html &')
