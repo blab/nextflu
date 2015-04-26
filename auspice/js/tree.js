@@ -105,7 +105,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			linkTooltip.show(d.target, this);
 			var plot_data = [['x'].concat(rootNode["pivots"])];
 			var reg = "global";
-			if (d.target.freq[reg] != "undefined"){
+			if ((typeof d.target.freq !="undefined" )&&(d.target.freq[reg] != "undefined")){
 				plot_data[plot_data.length] = [reg].concat(d.target.freq[reg]);				
 			}
 			if (plot_data.length > 1) {

@@ -111,10 +111,14 @@ function date_init(){
 		}).map(function(d) {
 		return new Date(d.date);
 	});
-	
 	earliestDate = new Date(d3.min(dateValues));
 	earliestDate.setDate(earliestDate.getDate() + 180);
 	
+	var numDateValues = tips.map(function(d) {return d.num_date;})
+	var minDate = d3.min(numDateValues);
+	var maxDate = d3.max(numDateValues);
+	dateDomain = genericDomain.map(function (d){return Math.round(100*(minDate + d*(maxDate - minDate)))/100;});
+	dateColorScale.domain(dateDomain);
 	dateScale = d3.time.scale()
 		.domain([earliestDate, globalDate])
 		.range([5, 205])
