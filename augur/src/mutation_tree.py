@@ -13,7 +13,7 @@ from itertools import izip
 std_outgroup_file = 'source-data/outgroups.fasta'
 virus_config.update({
 	# data source and sequence parsing/cleaning/processing
-	'fasta_fields':{0:'strain', 1:'date', 2:'isolate_id', 3:'passage', 4:'subtype', 5:'ori_lab', 6:'sub_lab', 7:'submitter', 8:"country"},
+	'fasta_fields':{0:'strain', 1:'date', 2:'isolate_id', 3:'passage', 4:'subtype', 5:'ori_lab', 6:'sub_lab', 7:'submitter'},
 	'cds':[0,None], # define the HA start i n 0 numbering
 	'auspice_prefix':'H1N1pdm_',
 	'verbose':3
@@ -62,6 +62,7 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 					raise ValueError("outgroup %s not found" % outgroup)
 					return
 		self.viruses.append(self.outgroup)
+		self.filter_geo(prune=False)
 		self.make_strain_names_unique()
 
 	def refine(self):
