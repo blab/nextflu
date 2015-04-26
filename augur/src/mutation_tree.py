@@ -86,6 +86,7 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 						pass
 
 	def export(self):
+		from bio_draw import muttree_draw
 		def select_fontsize(n):
 			if n<10:
 				return 12
@@ -105,7 +106,7 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 		fig = plt.figure('Tree', figsize = (15,2+len(self.viruses)/5))
 		ax = plt.subplot('111')
 
-		Phylo.draw(tmp_tree, axes=ax, show_confidence=False, do_show=False,
+		muttree_draw(tmp_tree, axes=ax, show_confidence=False, do_show=False,
 			label_func = lambda x: x.name,
 			branch_labels = lambda x: x.aa_muts if hasattr(x,'aa_muts') else x.nuc_muts
 			)
