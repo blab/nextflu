@@ -189,8 +189,8 @@ if __name__=="__main__":
 	muttree.export()
 
 	shutil.copy2('../auspice/_site/js/muttree.js', muttree.outdir+'js/muttree.js')
-	shutil.copy2('../auspice/_site/muttree/index.html', muttree.outdir+'muttree.html')
+	shutil.copy2('../auspice/_site/muttree/index.html', muttree.outdir+'index.html')
 	shutil.copy2('../auspice/_site/css/style.css', muttree.outdir+'css/style.css')
 
 
-#	os.system('firefox '+muttree.outdir+'muttree.html &')
+#	os.system('firefox '+muttree.outdir+'index.html &')
