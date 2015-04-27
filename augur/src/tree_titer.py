@@ -14,9 +14,10 @@ def myopen(fname, mode='r'):
 
 class HI_tree(object):
 
-	def __init__(self, HI_fname = 'source-data/HI_titers.txt',**kwargs):
+	def __init__(self, HI_fname = 'source-data/HI_titers.txt', min_aamuts = 0,**kwargs):
 		self.HI, tmp = self.read_HI_titers(HI_fname)
 		self.tree_graph = None
+		self.min_aamuts = min_aamuts
 
 	def read_HI_titers(self, fname):
 		strains = set()
@@ -135,7 +136,8 @@ class HI_tree(object):
 						path = self.get_path_no_terminals(test, ref[0])
 						tmp = np.zeros(n_params)
 						# determine branch indices on path
-						branches = np.unique([c.HI_branch_index for c in path if hasattr(c, 'HI_branch_index')])
+						branches = np.unique([c.HI_branch_index for c in path 
+						                     if (hasattr(c, 'HI_branch_index') and len(c.aa_muts)>=self.min_aamuts)])
 						if len(branches): tmp[branches] = 1
 						# add serum effect
 						tmp[self.HI_split_count+self.sera.index(ref)] = 1

@@ -38,6 +38,7 @@ def validation_figures(params):
 
 	####  DISTANCE ASYMMETRIES #######################################################
 	reciprocal_measurements = []
+	reciprocal_measurements_titers = []
 	for (testvir, serum) in myflu.HI_normalized:
 		tmp_recip = [v for v in myflu.HI_normalized if serum[0]==v[0] and testvir==v[1][0]]
 		for v in tmp_recip:
@@ -46,7 +47,13 @@ def validation_figures(params):
 			diff_uncorrected = val_fwd - val_bwd
 			diff_corrected = (val_fwd - myflu.serum_potency[serum] - myflu.virus_effect[testvir])\
 							-(val_bwd - myflu.serum_potency[v[1]] - myflu.virus_effect[serum[0]])
+			dcHI = np.abs(myflu.node_lookup[testvir].cHI - myflu.node_lookup[serum[0]].cHI)
+			val_bwd = myflu.HI_normalized[v]
 			reciprocal_measurements.append([testvir, serum, diff_uncorrected, diff_corrected])
+			reciprocal_measurements_titers.append([testvir, serum, val_fwd, val_bwd, 
+			                                      (val_fwd - myflu.serum_potency[serum] - myflu.virus_effect[testvir]),
+                      							  (val_bwd - myflu.serum_potency[v[1]] - myflu.virus_effect[serum[0]]),
+												  dcHI, dcHI])
 
 	plt.figure()
 	plt.title('asymmetry in reciprocal titers')
@@ -56,6 +63,46 @@ def validation_figures(params):
 	plt.legend()
 	plt.savefig(fig_prefix+'HI_titer_asymmetry.pdf')
 
+	####  Ultrametricity #######################################################
+	symmetrized = {(v,s[0]): (val_fwd, val_bwd, cval_fwd, cval_bwd, cHI, cHI1) for v,s,val_fwd, val_bwd,cval_fwd, cval_bwd, cHI, cHI1 in reciprocal_measurements_titers}
+	all_reciprocal = set([v[0] for v in reciprocal_measurements_titers])
+	ultra_deviation = [[],[],[]]
+	ultra_norm = [[],[],[]]
+	from random import sample
+	from itertools import product
+	for trial in range(10000):
+		four = sample(all_reciprocal, 4)
+		distances = {}
+		for i1, v1 in enumerate(four):
+			for v2 in four:
+				if (v1,v2) in symmetrized:
+					if v1 != v2:
+						distances[(v1,v2)] = symmetrized[(v1,v2)]
+				else:
+					distances[(v1,v2)] = np.nan
+		if np.nan in distances.values():
+			continue
+		else:
+			for ci in [0,2,4]:
+				print "new"
+				for d12 in distances[(four[0], four[1])][ci:(ci+2)]:
+					for d13 in distances[(four[0], four[2])][ci:(ci+2)]:
+						for d14 in distances[(four[0], four[3])][ci:(ci+2)]:
+							for d23 in distances[(four[1], four[2])][ci:(ci+2)]:
+								for d24 in distances[(four[1], four[3])][ci:(ci+2)]:
+									for d34 in distances[(four[2], four[3])][ci:(ci+2)]:
+										tmp = sorted([d12 + d34, d13 + d24, d14 + d23])
+										ultra_deviation[ci/2].append(tmp[-1]-tmp[-2])
+										ultra_norm[ci/2].append(tmp[-1]-tmp[0])
+										print tmp
+	plt.figure()
+	plt.title('deviations from ultra metricity')
+	plt.hist(np.array(ultra_deviation[0])/np.mean(ultra_norm[0]),label = "uncorrected", alpha=0.7,normed=True)
+	plt.hist(np.array(ultra_deviation[1])/np.mean(ultra_norm[1]),label = "corrected", alpha=0.7,normed=True)
+	plt.hist(np.array(ultra_deviation[2])/np.mean(ultra_norm[2]),label = "linear", alpha=0.7,normed=True)
+	plt.xlabel('deviation')
+	plt.legend()
+	plt.savefig(fig_prefix+'HI_titer_ultrametricity.pdf')
 
 	#### titer effects ###############################################################
 	dHI_list = []
@@ -96,6 +143,7 @@ def scan_regularization(params, grid):
 	return accuracy
 
 if __name__=="__main__":
+	plt.ion()
 	parser = argparse.ArgumentParser(description='Process virus sequences, build tree, and prepare of web visualization')
 	parser.add_argument('--prefix', type = str, default = 'data/', help='path+prefix of file dumps')
 	parser.add_argument('--flutype', type = str, default = 'H3N2', help='flu strain')
@@ -104,6 +152,7 @@ if __name__=="__main__":
 	parser.add_argument('--reg', type = float, default = 1.0, help='regularization parameter')
 	parser.add_argument('--avi', type = float, default = 1.0, help='regularization parameter')
 	parser.add_argument('--pot', type = float, default = 1.0, help='regularization parameter')
+	parser.add_argument('--min_aamuts', type = int, default = 0, help='minimal number of aminoacid mutations to include branch')
 	params = parser.parse_args()
 	if params.flutype=='H3N2':
 		from H3N2_process import *
