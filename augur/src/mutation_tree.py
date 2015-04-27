@@ -179,6 +179,7 @@ if __name__=="__main__":
 		try:
 			os.makedirs(params.out)
 			os.makedirs(params.out+'/js')
+			os.makedirs(params.out+'/css')
 		except OSError as e:
 			print "Cannot create output directory",e
 	virus_config["outdir"]=params.out
