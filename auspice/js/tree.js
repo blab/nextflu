@@ -3,6 +3,12 @@ var freqScale = d3.scale.linear()
 	.range([1.5, 4.5]);
 
 var tipRadius = 4.0;
+var left_margin = 10;
+var bottom_margin = 10;
+var top_margin = 10;
+if ((typeof branch_labels != "undefined")&&(branch_labels)) {top_margin +=15;}
+var right_margin = 10;
+if ((typeof tip_labels != "undefined")&&(tip_labels)){ right_margin+=100;}
 
 function tipVisibility(d) {
 	var vis = "visible";
@@ -79,11 +85,12 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 
 	var xScale = d3.scale.linear()
 		.domain([d3.min(xValues), d3.max(xValues)])
-		.range([10, treeWidth-10]);
+		.range([left_margin, treeWidth - right_margin]);
 
 	var yScale = d3.scale.linear()
 		.domain([d3.min(yValues), d3.max(yValues)])
-		.range([15, treeHeight-15]);
+		.range([top_margin, treeHeight - bottom_margin]);
+	console.log(treeHeight +" " + top_margin);
 
 	nodes.forEach(function (d) {
 		d.x = xScale(d.xvalue);
@@ -103,19 +110,21 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.style("cursor", "pointer")
 		.on('mouseover', function(d) {
 			linkTooltip.show(d.target, this);
-			var plot_data = [['x'].concat(rootNode["pivots"])];
-			var reg = "global";
-			if ((typeof d.target.freq !="undefined" )&&(d.target.freq[reg] != "undefined")){
-				plot_data[plot_data.length] = [reg].concat(d.target.freq[reg]);				
-			}
-			if (plot_data.length > 1) {
-				if (plot_data[1][0] == "global") {
-					plot_data[1][0] = "clade";
+			if (typeof gt_chart != "undefined"){
+				var plot_data = [['x'].concat(rootNode["pivots"])];
+				var reg = "global";
+				if ((typeof d.target.freq !="undefined" )&&(d.target.freq[reg] != "undefined")){
+					plot_data[plot_data.length] = [reg].concat(d.target.freq[reg]);				
 				}
+				if (plot_data.length > 1) {
+					if (plot_data[1][0] == "global") {
+						plot_data[1][0] = "clade";
+					}
+				}
+				gt_chart.load({
+			       	columns: plot_data
+				});
 			}
-			gt_chart.load({
-		       	columns: plot_data
-			});
 		})
 		.on('mouseout', linkTooltip.hide)		
 		.on('click', function(d) {
@@ -140,7 +149,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.data(nodes)
 			.enter()
 			.append("text")
-			.attr("class", "")
+			.attr("class", "muts")
 			.attr("x", function(d) {
 				return d.x - 6;
 			})
@@ -249,15 +258,30 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.transition().duration(speed)
 			.attr("points", branchPoints);
 			
-		treeplot.selectAll(".annotation").data(clades)
-			.transition().duration(speed)
-			.attr("x", function(d) {
-				return xScale(d[1]) - 6;
-			})
-			.attr("y", function(d) {
-				return yScale(d[2]) - 6;
-			});			
+		if ((typeof tip_labels != "undefined")&&(tip_labels)&&(tips.length < 200)){
+			treeplot.selectAll(".label").data(tips)
+				.transition().duration(speed)
+				.attr("x", function(d) { return d.x+10; })
+				.attr("y", function(d) { return d.y+4; });
+		}
+		if ((typeof branch_labels != "undefined")&&(branch_labels)){
+			console.log('shift branch_labels');
+			treeplot.selectAll(".muts").data(nodes)
+				.transition().duration(speed)
+				.attr("x", function(d) {  return d.x - 6;})
+				.attr("y", function(d) {  return d.y - 3;});
+		}
 
+		if (typeof clades !="undefined"){
+			treeplot.selectAll(".annotation").data(clades)
+				.transition().duration(speed)
+				.attr("x", function(d) {
+					return xScale(d[1]) - 6;
+				})
+				.attr("y", function(d) {
+					return yScale(d[2]) - 6;
+				});			
+		}
 	}
 
 	d3.select(window).on('resize', resize); 
@@ -272,8 +296,8 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.attr("width", width)
 			.attr("height", height);			
 			
-		xScale.range([10, width-10]);
-		yScale.range([10, height-10]);
+		xScale.range([left_margin, width - right_margin]);
+		yScale.range([bottom_margin, height - top_margin]);
 		
 		nodes.forEach(function (d) {
 			d.x = xScale(d.xvalue);
@@ -291,14 +315,31 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		treeplot.selectAll(".link").data(links)
 			.attr("points", branchPoints);
 			
-		treeplot.selectAll(".annotation").data(clades)
-			.attr("x", function(d) {
-				return xScale(d[1]) - 6;
-			})
-			.attr("y", function(d) {
-				return yScale(d[2]) - 6;
-			});
+		if ((typeof tip_labels != "undefined")&&(tip_labels)&&(tips.length < 200))
+		{
+			treeplot.selectAll(".label").data(tips)
+				.attr("x", function(d) { return d.x+10; })
+				.attr("y", function(d) { return d.y+4; });
+		}
 
+		if ((typeof branch_labels != "undefined")&&(branch_labels))
+		{
+			console.log('shift branch_labels');
+			treeplot.selectAll(".muts").data(nodes)
+				.attr("x", function(d) {  return d.x - 6;})
+				.attr("y", function(d) {  return d.y - 3;});
+		}
+
+		if (typeof clades !="undefined")
+		{
+			treeplot.selectAll(".annotation").data(clades)
+				.attr("x", function(d) {
+					return xScale(d[1]) - 6;
+				})
+				.attr("y", function(d) {
+					return yScale(d[2]) - 6;
+				});
+		}
 	}
 	
 		
@@ -334,23 +375,24 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 
 	// add clade labels
 	clades = rootNode["clade_annotations"];
-	console.log(clades);
-	var clade_annotations = treeplot.selectAll('.annotation')
-		.data(clades)
-		.enter()
-		.append("text")
-		.attr("class", "annotation")
-		.attr("x", function(d) {
-			return xScale(d[1]) - 6;
-		})
-		.attr("y", function(d) {
-			return yScale(d[2]) - 6;
-		})
-		.style("text-anchor", "end")
-		.text(function (d) {
-			return d[0];
-		});
-
+	if (typeof clades != "undefined"){
+		console.log(clades);
+		var clade_annotations = treeplot.selectAll('.annotation')
+			.data(clades)
+			.enter()
+			.append("text")
+			.attr("class", "annotation")
+			.attr("x", function(d) {
+				return xScale(d[1]) - 6;
+			})
+			.attr("y", function(d) {
+				return yScale(d[2]) - 6;
+			})
+			.style("text-anchor", "end")
+			.text(function (d) {
+				return d[0];
+			});
+		}
 
 });
 

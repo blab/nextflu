@@ -104,6 +104,8 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 		from tree_util import to_Biopython
 		tmp_tree = to_Biopython(self.tree)
 		tmp_tree.ladderize()
+		fig = plt.figure('Tree')
+		plt.close()
 		fig = plt.figure('Tree', figsize = (15,2+len(self.viruses)/5))
 		ax = plt.subplot('111')
 
