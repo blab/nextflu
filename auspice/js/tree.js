@@ -68,9 +68,6 @@ function tipLabelSize(d) {
 	}else if (n<75){
 		tmp = 8;
 	}
-	else if (n<100){
-		tmp = 4;
-	}	
 	else {
 		tmp = 0;
 	}
