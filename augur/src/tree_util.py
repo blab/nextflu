@@ -116,7 +116,12 @@ def dendropy_to_json(node, extra_attr = []):
 			json[prop] = node.__getattribute__(prop)
 	for prop in num_attr:
 		if hasattr(node, prop):
-			json[prop] = round(node.__getattribute__(prop),5)
+			try:
+				json[prop] = round(node.__getattribute__(prop),5)
+			except:
+				print "cannot round:", node.__getattribute__(prop), "assigned as is"
+				json[prop] = node.__getattribute__(prop)
+
 	for prop in extra_attr:
 		if len(prop)==2 and callable(prop[1]):
 			if hasattr(node, prop[0]):

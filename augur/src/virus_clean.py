@@ -49,7 +49,11 @@ class virus_clean(object):
 			og.num_date = numerical_date(og.date)
 		for ii, v in enumerate(self.viruses):
 			if hasattr(v, 'date'):
-				v.num_date = numerical_date(v.date, self.date_format['fields']) + 1e-7*(ii+1)
+				try:
+					v.num_date = numerical_date(v.date, self.date_format['fields']) + 1e-7*(ii+1)
+				except:
+					print "cannot parse date"
+					v.num_date="undefined";
 
 	def times_from_outgroup(self):
 		outgroup_date = self.sequence_lookup[self.outgroup['strain']].num_date
