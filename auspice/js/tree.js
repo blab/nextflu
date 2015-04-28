@@ -369,9 +369,10 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		}
 	}
 	
-		
-	restrictTo = document.getElementById("region").value;
-
+	var tmp = document.getElementById("region");
+	if (tmp!=null){
+		restrictTo = tmp.value;
+	}else{restrictTo='all';}
 	function restrictToRegion() {
 		restrictTo = document.getElementById("region").value;
 		console.log(restrictTo);	
