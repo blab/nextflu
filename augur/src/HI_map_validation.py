@@ -47,13 +47,12 @@ def validation_figures(params):
 			diff_uncorrected = val_fwd - val_bwd
 			diff_corrected = (val_fwd - myflu.serum_potency[serum] - myflu.virus_effect[testvir])\
 							-(val_bwd - myflu.serum_potency[v[1]] - myflu.virus_effect[serum[0]])
-			dcHI = np.abs(myflu.node_lookup[testvir].cHI - myflu.node_lookup[serum[0]].cHI)
 			val_bwd = myflu.HI_normalized[v]
 			reciprocal_measurements.append([testvir, serum, diff_uncorrected, diff_corrected])
 			reciprocal_measurements_titers.append([testvir, serum, val_fwd, val_bwd, 
 			                                      (val_fwd - myflu.serum_potency[serum] - myflu.virus_effect[testvir]),
                       							  (val_bwd - myflu.serum_potency[v[1]] - myflu.virus_effect[serum[0]]),
-												  dcHI, dcHI])
+												  ])
 
 	plt.figure()
 	plt.title('asymmetry in reciprocal titers')
@@ -64,10 +63,10 @@ def validation_figures(params):
 	plt.savefig(fig_prefix+'HI_titer_asymmetry.pdf')
 
 	####  Ultrametricity #######################################################
-	symmetrized = {(v,s[0]): (val_fwd, val_bwd, cval_fwd, cval_bwd, cHI, cHI1) for v,s,val_fwd, val_bwd,cval_fwd, cval_bwd, cHI, cHI1 in reciprocal_measurements_titers}
+	symmetrized = {(v,s[0]): (val_fwd, val_bwd, cval_fwd, cval_bwd) for v,s,val_fwd, val_bwd,cval_fwd, cval_bwd in reciprocal_measurements_titers}
 	all_reciprocal = set([v[0] for v in reciprocal_measurements_titers])
-	ultra_deviation = [[],[],[]]
-	ultra_norm = [[],[],[]]
+	ultra_deviation = [[],[]]
+	ultra_norm = [[],[]]
 	from random import sample
 	from itertools import product
 	for trial in range(10000):
@@ -83,7 +82,7 @@ def validation_figures(params):
 		if np.nan in distances.values():
 			continue
 		else:
-			for ci in [0,2,4]:
+			for ci in [0,2]:
 				print "new"
 				for d12 in distances[(four[0], four[1])][ci:(ci+2)]:
 					for d13 in distances[(four[0], four[2])][ci:(ci+2)]:
@@ -94,12 +93,11 @@ def validation_figures(params):
 										tmp = sorted([d12 + d34, d13 + d24, d14 + d23])
 										ultra_deviation[ci/2].append(tmp[-1]-tmp[-2])
 										ultra_norm[ci/2].append(tmp[-1]-tmp[0])
-										print tmp
+										#print tmp
 	plt.figure()
 	plt.title('deviations from ultra metricity')
 	plt.hist(np.array(ultra_deviation[0])/np.mean(ultra_norm[0]),label = "uncorrected", alpha=0.7,normed=True)
 	plt.hist(np.array(ultra_deviation[1])/np.mean(ultra_norm[1]),label = "corrected", alpha=0.7,normed=True)
-	plt.hist(np.array(ultra_deviation[2])/np.mean(ultra_norm[2]),label = "linear", alpha=0.7,normed=True)
 	plt.xlabel('deviation')
 	plt.legend()
 	plt.savefig(fig_prefix+'HI_titer_ultrametricity.pdf')
