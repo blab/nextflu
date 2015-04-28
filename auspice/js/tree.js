@@ -38,7 +38,7 @@ function labelFontSize(n){
 	}else if (n<50){
 		return 10;
 	}else{
-		return Math.max(1, Math.round(1.3*(treeHeight-30.0)/n - 1.0));
+		return Math.max(1, Math.round(1.3*(treeHeight-bottom_margin-top_margin)/n - 1.0));
 	}
 }
 
@@ -159,7 +159,12 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.style("text-anchor", "end")
 			.text(function (d) {
 				if ((d.tipCount>1)||(tips.length<50)){
-					return d.aa_muts.replace(/,/g, ', ');
+					var tmp_str = d.aa_muts.replace(/,/g, ', '); 
+					if (tmp_str.length>50){
+						return tmp_str.substring(0,45)+'...';
+					}else{
+						return tmp_str;
+					}
 				}else{
 					return "";
 				}

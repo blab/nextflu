@@ -96,6 +96,17 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 			else:
 				return 8
 
+		def branch_label_func(n):
+			max_muts = 5
+			if hasattr(n,'aa_muts'):
+				muts = n.aa_muts
+			else:
+				muts = n.nuc_muts
+			tmp = muts.split(',')
+			if len(tmp)>max_muts:
+				return ', '.join(tmp[:max_muts])+' + '+str(len(tmp)-max_muts)+' others'
+			else:
+				return ', '.join(tmp)
 
 		from Bio import Phylo
 		import matplotlib.pyplot as plt
@@ -111,7 +122,7 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 
 		muttree_draw(tmp_tree, axes=ax, show_confidence=False, do_show=False,
 			label_func = lambda x: x.name,
-			branch_labels = lambda x: x.aa_muts if hasattr(x,'aa_muts') else x.nuc_muts
+			branch_labels = branch_label_func
 			)
 		ax.invert_yaxis()
 		tl = np.diff(ax.get_xticks())[0]
