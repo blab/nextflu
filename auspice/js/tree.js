@@ -9,7 +9,7 @@ var top_margin = 10;
 if ((typeof branch_labels != "undefined")&&(branch_labels)) {top_margin +=15;}
 var right_margin = 10;
 if ((typeof tip_labels != "undefined")&&(tip_labels)){ right_margin+=100;}
-var maxTipDisplay = 100;
+var maxTipDisplay = 150;
 
 function tipVisibility(d) {
 	var vis = "visible";
