@@ -48,12 +48,8 @@ function tipLabelText(d) {
 
 function branchLabelSize(d) {
 	var n = nDisplayTips;
-	if (d.tipCount>n/10) {
-		if (n<50){
-			return 16;
-		}else {
-			return 12;
-		}
+	if (d.tipCount>n/15) {
+		return 12;
 	}
 	else {
 		return 0;
