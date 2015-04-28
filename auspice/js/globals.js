@@ -7,12 +7,14 @@ var globalDate = new Date();
 
 var nodes, tips, rootNode, links, vaccines;
 
+var nDisplayTips;
+
 function treePlotHeight(width) {
 	return 400 + 0.35*width;
 }
 var containerWidth = parseInt(d3.select(".treeplot-container").style("width"), 10);
-var treeWidth = containerWidth, treeHeight;
-treeHeight = treePlotHeight(treeWidth);
+var treeWidth = containerWidth;
+var treeHeight = treePlotHeight(treeWidth);
 var tree = d3.layout.tree()
 	.size([treeHeight, treeWidth]);
 
