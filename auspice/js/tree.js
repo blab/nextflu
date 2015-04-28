@@ -9,7 +9,6 @@ var top_margin = 10;
 if ((typeof branch_labels != "undefined")&&(branch_labels)) {top_margin +=15;}
 var right_margin = 10;
 if ((typeof tip_labels != "undefined")&&(tip_labels)){ right_margin+=100;}
-var maxTipDisplay = 150;
 
 function tipVisibility(d) {
 	var vis = "visible";
@@ -34,36 +33,47 @@ function branchStrokeWidth(d) {
 }
 
 function branchLabelText(d) {
-	if ((d.tipCount>nDisplayTips/10)||(nDisplayTips<50)){
-		var tmp_str = d.aa_muts.replace(/,/g, ', '); 
-		if (tmp_str.length>50){
-			return tmp_str.substring(0,45)+'...';
-		}
-		else {
-			return tmp_str;
-		}
+	var tmp_str = d.aa_muts.replace(/,/g, ', '); 
+	if (tmp_str.length>50){
+		return tmp_str.substring(0,45)+'...';
 	}
 	else {
-		return "";
+		return tmp_str;
 	}
 }
 
 function tipLabelText(d) {
-	if (nDisplayTips<maxTipDisplay){
-		return d.strain;
+	return d.strain;
+}
+
+function branchLabelSize(d) {
+	var n = nDisplayTips;
+	if (d.tipCount>n/10) {
+		if (n<50){
+			return 16;
+		}else {
+			return 12;
+		}
 	}
 	else {
-		return "";
+		return 0;
 	}
 }
 
-function labelFontSize(n){
-	if (n<20){
+function tipLabelSize(d) {
+	var n = nDisplayTips;
+	if (n<25){
 		return 16;
 	}else if (n<50){
-		return 10;
-	}else{
-		return Math.max(1, Math.round(1.3*(treeHeight-bottom_margin-top_margin)/n - 1.0));
+		return 12;
+	}else if (n<75){
+		return 8;
+	}
+	else if (n<100){
+		return 4;
+	}	
+	else {
+		return 0;
 	}
 }
 
@@ -178,6 +188,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.enter()
 			.append("text")
 			.attr("class", "branchLabel")
+			.style("font-size", branchLabelSize)			
 			.attr("x", function(d) {
 				return d.x - 6;
 			})
@@ -190,13 +201,12 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 
 	if ((typeof tip_labels != "undefined")&&(tip_labels)){
 		console.log(tips.length);
-		console.log("Font size:" + labelFontSize(nDisplayTips));
 		var labels = treeplot.selectAll(".tipLabel")
 			.data(tips)
 			.enter()
 			.append("text")
 			.attr("class","tipLabel")
-			.style("font-size", labelFontSize(nDisplayTips)+"px")
+			.style("font-size", tipLabelSize)
 			.attr("x", function(d) { return d.x+10; })
 			.attr("y", function(d) { return d.y+4; })
 			.text(tipLabelText);
@@ -284,18 +294,17 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		if ((typeof tip_labels != "undefined")&&(tip_labels)){
 			treeplot.selectAll(".tipLabel").data(tips)
 				.transition().duration(speed)
-				.style("font-size", labelFontSize(nDisplayTips)+"px")
+				.style("font-size", tipLabelSize)
 				.attr("x", function(d) { return d.x+10; })
-				.attr("y", function(d) { return d.y+4; })
-				.text(tipLabelText);
+				.attr("y", function(d) { return d.y+4; });
 		}
 		if ((typeof branch_labels != "undefined")&&(branch_labels)){
 			console.log('shift branch_labels');
 			treeplot.selectAll(".branchLabel").data(nodes)
 				.transition().duration(speed)
+				.style("font-size", branchLabelSize)				
 				.attr("x", function(d) {  return d.x - 6;})
-				.attr("y", function(d) {  return d.y - 3;})
-				.text(branchLabelText);
+				.attr("y", function(d) {  return d.y - 3;});
 		}
 
 		if (typeof clades !="undefined"){
@@ -344,18 +353,18 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		if ((typeof tip_labels != "undefined")&&(tip_labels))
 		{
 			treeplot.selectAll(".tipLabel").data(tips)
+				.style("font-size", tipLabelSize)
 				.attr("x", function(d) { return d.x+10; })
-				.attr("y", function(d) { return d.y+4; })
-				.text(tipLabelText);
+				.attr("y", function(d) { return d.y+4; });
 		}
 
 		if ((typeof branch_labels != "undefined")&&(branch_labels))
 		{
 			console.log('shift branch_labels');
 			treeplot.selectAll(".branchLabel").data(nodes)
+				.style("font-size", branchLabelSize)			
 				.attr("x", function(d) {  return d.x - 6;})
-				.attr("y", function(d) {  return d.y - 3;})
-				.text(branchLabelText);
+				.attr("y", function(d) {  return d.y - 3;});
 		}
 
 		if (typeof clades !="undefined")
