@@ -48,29 +48,33 @@ function tipLabelText(d) {
 
 function branchLabelSize(d) {
 	var n = nDisplayTips;
+	var tmp;
 	if (d.tipCount>n/15) {
-		return 12;
+		tmp =  12;
 	}
 	else {
-		return 0;
+		tmp = 0;
 	}
+	return tmp+'px';
 }
 
 function tipLabelSize(d) {
 	var n = nDisplayTips;
+	var tmp;
 	if (n<25){
-		return 16;
+		tmp = 16;
 	}else if (n<50){
-		return 12;
+		tmp = 12;
 	}else if (n<75){
-		return 8;
+		tmp = 8;
 	}
 	else if (n<100){
-		return 4;
+		tmp = 4;
 	}	
 	else {
-		return 0;
+		tmp = 0;
 	}
+	return tmp+'px';
 }
 
 function tree_init(){
