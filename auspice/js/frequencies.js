@@ -18,7 +18,77 @@ function calcDfreq(node, freq_ii){
 		}
 	}
 };
+function parse_gt_string(gt){
+	separate_plots = gt.split(',');
+	mutations = separate_plots.map(
+		function (d) {	var tmp = d.split(/[\s//]/); //FIXME: make more inclusive
+						var region;
+						var positions = [];
+						for (var i=0; i<tmp.length; i++){
+							if (contains(["EU","NA","AS","OC"], tmp[i])){
+								region = tmp[i];
+							}else{
+								if (tmp[i].length>0) positions.push(tmp[i]);
+							}
+						}
+						if (typeof region == "undefined") region="global";
+						// sort of this is a multi mutation genotype
+						if (positions.length>1){
+							positions.sort(function (a,b){
+								return parseInt(a.substring(0,a.length-1)) - parseInt(b.substring(0,b.length-1));
+							});
+						}
+						return [region, positions.join('/')];});
+	return mutations;
+};
 
+/**
+loops over all genotypes from a certain region and sums the frequency contributions
+of the genotype matches at the specified positions
+**/
+function get_frequencies(region, gt){
+	var freq = [];
+	for (var pi=0; pi<pivots.length; pi++){freq[freq.length]=0;}
+	if (frequencies["clades"][region][gt.toLowerCase()]!=undefined) {
+		console.log(gt+" found as clade");
+		for (var pi=0; pi<freq.length; pi++){
+			freq[pi]+=frequencies["clades"][region][gt.toLowerCase()][pi];
+		}
+	}
+	else if ((typeof frequencies["genotypes"] !="undefined") && (frequencies["genotypes"][region][gt]!=undefined)) {
+		console.log(gt+" found as genotype");
+		for (var pi=0; pi<freq.length; pi++){
+			freq[pi]+=frequencies["genotypes"][region][gt][pi];
+		}
+	}else if (frequencies["mutations"][region][gt]!=undefined) {
+		console.log(gt+" found as mutation");
+		for (var pi=0; pi<freq.length; pi++){
+			freq[pi]+=frequencies["mutations"][region][gt][pi];
+		}
+	}
+	return freq.map(function (d) {return Math.round(d*100)/100;});
+};
+
+
+function make_gt_chart(gt){
+	var tmp_data = [];
+	var tmp_trace = ['x'];
+	tmp_data.push(tmp_trace.concat(pivots));
+	gt.forEach(function (d) {
+		var region = d[0];
+		var genotype = d[1];
+		var freq = get_frequencies(region, genotype);
+		var tmp_trace = genotype.toString().replace(/,/g, ', ');
+		if (region != "global") {
+			tmp_trace = region + ':\t' + tmp_trace;
+		}
+		tmp_data.push([tmp_trace].concat(freq));
+	});
+	gt_chart.load({
+       	columns: tmp_data,
+       	unload: true
+	});
+}
 
 width = parseInt(d3.select(".freqplot-container").style("width"), 10);
 var position = "right";
