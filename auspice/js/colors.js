@@ -26,6 +26,10 @@ var regionColorScale = d3.scale.ordinal()
 	.domain(regions)
 	.range(regionColors);
 
+var dateColorScale = d3.scale.linear().clamp([true])
+	.domain(dateDomain)
+	.range(colors);
+
 // "ep", "ne" and "rb" need no adjustments
 function adjust_coloring_by_date() {
 	if (colorBy == "lbi") {
@@ -71,6 +75,10 @@ function colorByTrait() {
 	else if (colorBy == "region") {
 		colorScale = regionColorScale;
 		nodes.map(function(d) { d.coloring = d.region; });
+	}
+	else if (colorBy == "date") {
+		colorScale = dateColorScale;
+		nodes.map(function(d) { d.coloring = d.num_date; });
 	}
 
 	treeplot.selectAll(".link")

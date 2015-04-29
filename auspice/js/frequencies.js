@@ -17,23 +17,6 @@ function calcDfreq(node, freq_ii){
 	}
 };
 
-
-/**
- * for each node, calculate the number of tips in the currently selected time window. 
-**/
-function calcTipCounts(node){
-	node.tipCount = 0;
-	if (typeof node.children != "undefined") {
-		for (var i=0; i<node.children.length; i++) {
-			calcTipCounts(node.children[i]);
-			node.tipCount += node.children[i].tipCount;
-		}
-	}
-	else if (node.current){ 
-		node.tipCount = 1;
-	}
-};
-
 width = parseInt(d3.select(".freqplot-container").style("width"), 10);
 var position = "right";
 if (width < 600) {
@@ -77,24 +60,13 @@ var gt_chart = c3.generate({
 	}
 });
 
-
-
-function adjust_freq_by_date() {
-	calcTipCounts(rootNode);
-	var tipCount = rootNode.tipCount;		
-	console.log("Total tipcount: " + tipCount);	
-	nodes.forEach(function (d) {
-		d.frequency = (d.tipCount)/tipCount;
-	});
-}	
-
 function contains(arr, obj) {
     for(var i=0; i<arr.length; i++) {
         if (arr[i] == obj) return true;
     }
 }
 
-d3.json("/data/" + file_prefix + "frequencies.json", function(error, json){
+d3.json(path + file_prefix + "frequencies.json", function(error, json){
 	console.log(error);
 	var pivots= json["mutations"]["global"]["pivots"].map(function (d) {return Math.round(parseFloat(d)*100)/100;});
 	var ticks = [Math.round(pivots[0])];

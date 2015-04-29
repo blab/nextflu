@@ -1,5 +1,14 @@
-var ymd_format = d3.time.format("%Y-%m-%d");
+function adjust_freq_by_date() {
+	calcTipCounts(rootNode);
+	var tipCount = rootNode.tipCount;
+	nDisplayTips = displayRoot.tipCount;
+	console.log("Total tipcount: " + tipCount);
+	nodes.forEach(function (d) {
+		d.frequency = (d.tipCount)/tipCount;
+	});
+}
 
+var ymd_format = d3.time.format("%Y-%m-%d");
 
 var dateValues, earliestDate, dateScale, niceDateScale, counterData;
 
@@ -64,7 +73,7 @@ function dragged(d) {
 			var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
 			if (diffYears > 0) { return "visible"; }
 				else { return "hidden"; }
-			});					
+			});
 
 }
 
@@ -89,17 +98,26 @@ function dragend() {
 
 	if (colorBy!="genotype"){
 		d3.selectAll(".link")
-		.transition().duration(500)
-		.attr("points", branchPoints)
-		.style("stroke-width", branchStrokeWidth)
-		.style("stroke", branchStrokeColor);				
+			.transition().duration(500)
+			.attr("points", branchPoints)
+			.style("stroke-width", branchStrokeWidth)
+			.style("stroke", branchStrokeColor);				
 
 		d3.selectAll(".tip")
-		.transition().duration(500)
-		.style("visibility", tipVisibility)
-		.style("fill", tipFillColor)
-		.style("stroke", tipStrokeColor);
+			.transition().duration(500)
+			.style("visibility", tipVisibility)
+			.style("fill", tipFillColor)
+			.style("stroke", tipStrokeColor);
+				
 	}
+	
+	if ((typeof tip_labels != "undefined")&&(tip_labels)) {
+		nDisplayTips = displayRoot.fullTipCount;
+		d3.selectAll(".tipLabel")
+			.transition().duration(1000)
+			.style("font-size", tipLabelSize);
+	}	
+	
 }
 
 
@@ -111,10 +129,14 @@ function date_init(){
 		}).map(function(d) {
 		return new Date(d.date);
 	});
-	
 	earliestDate = new Date(d3.min(dateValues));
 	earliestDate.setDate(earliestDate.getDate() + 180);
 	
+	var numDateValues = tips.map(function(d) {return d.num_date;})
+	var minDate = d3.min(numDateValues.filter(function (d){return d!="undefined";}));
+	var maxDate = d3.max(numDateValues.filter(function (d){return d!="undefined";}));
+	dateDomain = dateDomain.map(function (d){return Math.round(100*(minDate + d*(maxDate - minDate)))/100;});
+	dateColorScale.domain(dateDomain);
 	dateScale = d3.time.scale()
 		.domain([earliestDate, globalDate])
 		.range([5, 205])
