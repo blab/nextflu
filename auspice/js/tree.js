@@ -43,7 +43,12 @@ function branchLabelText(d) {
 }
 
 function tipLabelText(d) {
-	return d.strain;
+	if (d.strain.length>32){
+		return d.strain.substring(0,30)+'...';
+	}
+	else {
+		return d.strain;
+	}
 }
 
 function branchLabelSize(d) {
@@ -58,22 +63,26 @@ function branchLabelSize(d) {
 
 function tipLabelSize(d) {
 	if (d.diff < 0 || d.diff > time_window) {
-		return "0px";
+		return 0;
 	}
 	else if (d.region != restrictTo && restrictTo != "all") {
-		return "0px";
+		return 0;
 	}
 	var n = nDisplayTips;
 	if (n<25){
-		return "16px";
+		return 16;
 	}else if (n<50){
-		return "12px";
+		return 12;
 	}else if (n<75){
-		return "8px";
+		return 8;
 	}
 	else {
-		return "0px";
+		return 0;
 	}
+}
+
+function tipLabelWidth(d) {
+	return tipLabelText(d).length * (tipLabelSize(d)+12) * 0.25;
 }
 
 function tree_init(){
@@ -130,10 +139,10 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.enter()
 			.append("text")
 			.attr("class","tipLabel")
-			.style("font-size", tipLabelSize)		
+			.style("font-size", function(d) { return tipLabelSize(d)+"px"; })		
 			.text(tipLabelText)
 			.each(function(d) {
-				var textWidth = this.getBBox().width;
+				var textWidth = tipLabelWidth(d);
 				if (textWidth>maxTextWidth) {
 					maxTextWidth = textWidth;
 				}
@@ -222,7 +231,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 
 	if ((typeof tip_labels != "undefined")&&(tip_labels)){
 		treeplot.selectAll(".tipLabel").data(tips)
-			.style("font-size", tipLabelSize)			
+			.style("font-size", function(d) { return tipLabelSize(d)+"px"; })			
 			.attr("x", function(d) { return d.x+10; })
 			.attr("y", function(d) { return d.y+4; });			
 	}
@@ -292,7 +301,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			var labels = treeplot.selectAll(".tipLabel")
 				.data(tips)
 				.each(function(d) {
-					var textWidth = this.getBBox().width;
+					var textWidth = tipLabelWidth(d);
 					if (textWidth>maxTextWidth) {
 						maxTextWidth = textWidth;
 					}
@@ -326,7 +335,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		if ((typeof tip_labels != "undefined")&&(tip_labels)){		
 			treeplot.selectAll(".tipLabel").data(tips)
 				.transition().duration(speed)
-				.style("font-size", tipLabelSize)			
+				.style("font-size", function(d) { return tipLabelSize(d)+"px"; })			
 				.attr("x", function(d) { return d.x+10; })
 				.attr("y", function(d) { return d.y+4; });
 		}	
@@ -369,7 +378,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			var labels = treeplot.selectAll(".tipLabel")
 				.data(tips)
 				.each(function(d) {
-					var textWidth = this.getBBox().width;
+					var textWidth = tipLabelWidth(d);
 					if (textWidth>maxTextWidth) {
 						maxTextWidth = textWidth;
 					}
@@ -399,7 +408,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		if ((typeof tip_labels != "undefined")&&(tip_labels))
 		{
 			treeplot.selectAll(".tipLabel").data(tips)
-				.style("font-size", tipLabelSize)
+				.style("font-size", function(d) { return tipLabelSize(d)+"px"; })
 				.attr("x", function(d) { return d.x+10; })
 				.attr("y", function(d) { return d.y+4; });
 		}
