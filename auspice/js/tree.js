@@ -48,33 +48,36 @@ function tipLabelText(d) {
 
 function branchLabelSize(d) {
 	var n = nDisplayTips;
-	var tmp;
-	if (d.tipCount>n/15) {
-		tmp =  12;
+	if (d.fullTipCount>n/15) {
+		return "12px";
 	}
 	else {
-		tmp = 0;
+		return "0px";
 	}
-	return tmp+'px';
 }
 
 function tipLabelSize(d) {
+	if (d.diff < 0 || d.diff > time_window) {
+		return "0px";
+	}
+	else if (d.region != restrictTo && restrictTo != "all") {
+		return "0px";
+	}
 	var n = nDisplayTips;
-	var tmp;
 	if (n<25){
-		tmp = 16;
+		return "16px";
 	}else if (n<50){
-		tmp = 12;
+		return "12px";
 	}else if (n<75){
-		tmp = 8;
+		return "8px";
 	}
 	else {
-		tmp = 0;
+		return "0px";
 	}
-	return tmp+'px';
 }
 
 function tree_init(){
+	calcFullTipCounts(rootNode);
 	calcBranchLength(rootNode);
 	rootNode.branch_length= 0.01;	
 	rootNode.dfreq = 0.0;
@@ -94,6 +97,7 @@ function tree_init(){
 	colorByTrait();
 	adjust_freq_by_date();
 	tree_legend = makeLegend();
+	nDisplayTips = displayRoot.fullTipCount;	
 }
 
 d3.json(path + file_prefix + "tree.json", function(error, root) {
@@ -104,6 +108,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	links = tree.links(nodes);
 	var tree_legend;
 	rootNode = nodes[0];
+	displayRoot = rootNode;
 	tips = gatherTips(rootNode, []);
 	vaccines = getVaccines(tips);
 
@@ -131,7 +136,6 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 
 	date_init();
 	tree_init();
-	nDisplayTips = rootNode.tipCount;
 
 	var link = treeplot.selectAll(".link")
 		.data(links)
@@ -161,7 +165,8 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		})
 		.on('mouseout', linkTooltip.hide)		
 		.on('click', function(d) {
-			nDisplayTips = d.target.tipCount;
+			displayRoot = d.target;
+			nDisplayTips = displayRoot.fullTipCount;
 			var dMin = 0.5 * (minimumAttribute(d.target, "xvalue", d.target.xvalue) + minimumAttribute(d.source, "xvalue", d.source.xvalue)),
 				dMax = maximumAttribute(d.target, "xvalue", d.target.xvalue),
 				lMin = minimumAttribute(d.target, "yvalue", d.target.yvalue),
@@ -170,7 +175,8 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 				rescale(dMin, dMax, lMin, lMax);
 			}
 			else {
-				nDisplayTips = d.source.tipCount;
+				displayRoot = d.source;
+				nDisplayTips = displayRoot.fullTipCount;
 				dMin = minimumAttribute(d.source, "xvalue", d.source.xvalue),
 				dMax = maximumAttribute(d.source, "xvalue", d.source.xvalue),
 				lMin = minimumAttribute(d.source, "yvalue", d.source.yvalue),
@@ -203,7 +209,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.enter()
 			.append("text")
 			.attr("class","tipLabel")
-			.style("font-size", tipLabelSize)
+			.style("font-size", tipLabelSize)		
 			.attr("x", function(d) { return d.x+10; })
 			.attr("y", function(d) { return d.y+4; })
 			.text(tipLabelText);
@@ -255,7 +261,8 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 
 	d3.select("#reset")
 		.on("click", function(d) {
-			nDisplayTips = rootNode.tipCount;
+			displayRoot = rootNode;
+			nDisplayTips = displayRoot.fullTipCount;
 			var dMin = d3.min(xValues),
 				dMax = d3.max(xValues),
 				lMin = d3.min(yValues),
@@ -291,7 +298,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		if ((typeof tip_labels != "undefined")&&(tip_labels)){
 			treeplot.selectAll(".tipLabel").data(tips)
 				.transition().duration(speed)
-				.style("font-size", tipLabelSize)
+				.style("font-size", tipLabelSize)			
 				.attr("x", function(d) { return d.x+10; })
 				.attr("y", function(d) { return d.y+4; });
 		}

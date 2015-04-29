@@ -64,7 +64,7 @@ function dragged(d) {
 			var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
 			if (diffYears > 0) { return "visible"; }
 				else { return "hidden"; }
-			});					
+			});
 
 }
 
@@ -89,17 +89,26 @@ function dragend() {
 
 	if (colorBy!="genotype"){
 		d3.selectAll(".link")
-		.transition().duration(500)
-		.attr("points", branchPoints)
-		.style("stroke-width", branchStrokeWidth)
-		.style("stroke", branchStrokeColor);				
+			.transition().duration(500)
+			.attr("points", branchPoints)
+			.style("stroke-width", branchStrokeWidth)
+			.style("stroke", branchStrokeColor);				
 
 		d3.selectAll(".tip")
-		.transition().duration(500)
-		.style("visibility", tipVisibility)
-		.style("fill", tipFillColor)
-		.style("stroke", tipStrokeColor);
+			.transition().duration(500)
+			.style("visibility", tipVisibility)
+			.style("fill", tipFillColor)
+			.style("stroke", tipStrokeColor);
+				
 	}
+	
+	if ((typeof tip_labels != "undefined")&&(tip_labels)) {
+		nDisplayTips = displayRoot.fullTipCount;
+		d3.selectAll(".tipLabel")
+			.transition().duration(1000)
+			.style("font-size", tipLabelSize);
+	}	
+	
 }
 
 

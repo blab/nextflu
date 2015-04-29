@@ -7,7 +7,7 @@ var globalDate = new Date();
 
 var nodes, tips, rootNode, links, vaccines;
 
-var nDisplayTips;
+var nDisplayTips, displayRoot;
 
 function treePlotHeight(width) {
 	return 400 + 0.35*width;
