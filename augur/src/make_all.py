@@ -75,8 +75,8 @@ def ammend_fasta(fname, lineage, threshold = 10, directory = 'data/'):
 		print "No existing file found for",lineage, ex_fname
 	else:
 		for seq in SeqIO.parse(ex_fname, 'fasta'):
-			acc = int(seq.description.split('|')[-1].strip())
-			existing.add(acc)
+			strain = seq.description.split('|')[0].strip()
+			existing.add(strain)
 	print "Found", len(existing), 'existing for lineage', lineage 
 
 	new_seqs = []
@@ -90,8 +90,8 @@ def ammend_fasta(fname, lineage, threshold = 10, directory = 'data/'):
 			tmp_lineage = (fields[2], fields[4])
 			if tmp_lineage in patterns:
 				if patterns[tmp_lineage]==lineage:
-					acc = int(fields[-1])
-					if acc not in existing:
+					strain = fields[0]
+					if strain not in existing:
 						new_seqs.append(seq)
 			else:
 				if verbose:
