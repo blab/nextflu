@@ -46,7 +46,11 @@ class virus_clean(object):
 		from date_util import numerical_date
 		og = self.sequence_lookup[self.outgroup['strain']]
 		if hasattr(og, 'date'):
-			og.num_date = numerical_date(og.date)
+			try:
+				og.num_date = numerical_date(og.date)
+			except:
+				print "cannot parse date"
+				og.num_date="undefined";
 		for ii, v in enumerate(self.viruses):
 			if hasattr(v, 'date'):
 				try:
