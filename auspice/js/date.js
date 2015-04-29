@@ -1,5 +1,14 @@
-var ymd_format = d3.time.format("%Y-%m-%d");
+function adjust_freq_by_date() {
+	calcTipCounts(rootNode);
+	var tipCount = rootNode.tipCount;
+	nDisplayTips = displayRoot.tipCount;
+	console.log("Total tipcount: " + tipCount);
+	nodes.forEach(function (d) {
+		d.frequency = (d.tipCount)/tipCount;
+	});
+}
 
+var ymd_format = d3.time.format("%Y-%m-%d");
 
 var dateValues, earliestDate, dateScale, niceDateScale, counterData;
 

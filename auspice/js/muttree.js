@@ -12,4 +12,3 @@
 {% include_relative tree_functions.js %}
 {% include_relative tooltips_muttree.js %}
 {% include_relative tree.js %}
-{% include_relative frequencies.js %}

@@ -17,38 +17,6 @@ function calcDfreq(node, freq_ii){
 	}
 };
 
-/**
- * for each node, calculate the number of subtending tips (alive or dead) 
-**/
-function calcFullTipCounts(node){
-	node.fullTipCount = 0;
-	if (typeof node.children != "undefined") {
-		for (var i=0; i<node.children.length; i++) {
-			calcFullTipCounts(node.children[i]);
-			node.fullTipCount += node.children[i].fullTipCount;
-		}
-	}
-	else { 
-		node.fullTipCount = 1;
-	}
-};
-
-/**
- * for each node, calculate the number of tips in the currently selected time window. 
-**/
-function calcTipCounts(node){
-	node.tipCount = 0;
-	if (typeof node.children != "undefined") {
-		for (var i=0; i<node.children.length; i++) {
-			calcTipCounts(node.children[i]);
-			node.tipCount += node.children[i].tipCount;
-		}
-	}
-	else if (node.current){ 
-		node.tipCount = 1;
-	}
-};
-
 width = parseInt(d3.select(".freqplot-container").style("width"), 10);
 var position = "right";
 if (width < 600) {
@@ -91,18 +59,6 @@ var gt_chart = c3.generate({
 		columns: []
 	}
 });
-
-
-
-function adjust_freq_by_date() {
-	calcTipCounts(rootNode);
-	var tipCount = rootNode.tipCount;
-	nDisplayTips = displayRoot.tipCount;
-	console.log("Total tipcount: " + tipCount);
-	nodes.forEach(function (d) {
-		d.frequency = (d.tipCount)/tipCount;
-	});
-}
 
 function contains(arr, obj) {
     for(var i=0; i<arr.length; i++) {

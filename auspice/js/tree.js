@@ -8,17 +8,17 @@ var bottom_margin = 10;
 var top_margin = 10;
 if ((typeof branch_labels != "undefined")&&(branch_labels)) {top_margin +=15;}
 var right_margin = 10;
-if ((typeof tip_labels != "undefined")&&(tip_labels)){ right_margin+=100;}
 
 function tipVisibility(d) {
-	var vis = "visible";
 	if (d.diff < 0 || d.diff > time_window) {
-		vis = "hidden";
+		return "hidden";
 	}
 	else if (d.region != restrictTo && restrictTo != "all") {
-		vis = "hidden";
+		return "hidden";
 	}
-	return vis;
+	else {
+		return "visible";
+	}
 }
 
 function branchPoints(d) {
@@ -112,6 +112,9 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	tips = gatherTips(rootNode, []);
 	vaccines = getVaccines(tips);
 
+	date_init();
+	tree_init();
+
 	var xValues = nodes.map(function(d) {
 		return +d.xvalue;
 	});
@@ -119,6 +122,24 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	var yValues = nodes.map(function(d) {
 		return +d.yvalue;
 	});
+
+	if ((typeof tip_labels != "undefined")&&(tip_labels)){
+		var maxTextWidth = 0;
+		var labels = treeplot.selectAll(".tipLabel")
+			.data(tips)
+			.enter()
+			.append("text")
+			.attr("class","tipLabel")
+			.style("font-size", tipLabelSize)		
+			.text(tipLabelText)
+			.each(function(d) {
+				var textWidth = this.getBBox().width;
+				if (textWidth>maxTextWidth) {
+					maxTextWidth = textWidth;
+				}
+			});
+		right_margin = maxTextWidth + 10;
+	}
 
 	var xScale = d3.scale.linear()
 		.domain([d3.min(xValues), d3.max(xValues)])
@@ -133,9 +154,6 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		d.x = xScale(d.xvalue);
 		d.y = yScale(d.yvalue);
 	});
-
-	date_init();
-	tree_init();
 
 	var link = treeplot.selectAll(".link")
 		.data(links)
@@ -203,17 +221,12 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		}
 
 	if ((typeof tip_labels != "undefined")&&(tip_labels)){
-		console.log(tips.length);
-		var labels = treeplot.selectAll(".tipLabel")
-			.data(tips)
-			.enter()
-			.append("text")
-			.attr("class","tipLabel")
-			.style("font-size", tipLabelSize)		
+		treeplot.selectAll(".tipLabel").data(tips)
+			.style("font-size", tipLabelSize)			
 			.attr("x", function(d) { return d.x+10; })
-			.attr("y", function(d) { return d.y+4; })
-			.text(tipLabelText);
-		}
+			.attr("y", function(d) { return d.y+4; });			
+	}
+
 	var tipCircles = treeplot.selectAll(".tip")
 		.data(tips)
 		.enter()
@@ -273,6 +286,21 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	function rescale(dMin, dMax, lMin, lMax) {
 
 		var speed = 1500;
+		
+		if ((typeof tip_labels != "undefined")&&(tip_labels)){
+			var maxTextWidth = 0;
+			var labels = treeplot.selectAll(".tipLabel")
+				.data(tips)
+				.each(function(d) {
+					var textWidth = this.getBBox().width;
+					if (textWidth>maxTextWidth) {
+						maxTextWidth = textWidth;
+					}
+				});
+			right_margin = maxTextWidth + 10;
+			xScale.range([left_margin, treeWidth - right_margin]);
+		}		
+		
 		xScale.domain([dMin,dMax]);
 		yScale.domain([lMin,lMax]);
 
@@ -294,14 +322,15 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		treeplot.selectAll(".link").data(links)
 			.transition().duration(speed)
 			.attr("points", branchPoints);
-			
-		if ((typeof tip_labels != "undefined")&&(tip_labels)){
+
+		if ((typeof tip_labels != "undefined")&&(tip_labels)){		
 			treeplot.selectAll(".tipLabel").data(tips)
 				.transition().duration(speed)
 				.style("font-size", tipLabelSize)			
 				.attr("x", function(d) { return d.x+10; })
 				.attr("y", function(d) { return d.y+4; });
-		}
+		}	
+			
 		if ((typeof branch_labels != "undefined")&&(branch_labels)){
 			console.log('shift branch_labels');
 			treeplot.selectAll(".branchLabel").data(nodes)
@@ -333,7 +362,20 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			
 		d3.select("#treeplot")
 			.attr("width", treeWidth)
-			.attr("height", treeHeight);	
+			.attr("height", treeHeight);
+
+		if ((typeof tip_labels != "undefined")&&(tip_labels)){
+			var maxTextWidth = 0;
+			var labels = treeplot.selectAll(".tipLabel")
+				.data(tips)
+				.each(function(d) {
+					var textWidth = this.getBBox().width;
+					if (textWidth>maxTextWidth) {
+						maxTextWidth = textWidth;
+					}
+				});
+			right_margin = maxTextWidth + 10;
+		}	
 			
 		xScale.range([left_margin, treeWidth - right_margin]);
 		yScale.range([top_margin, treeHeight - bottom_margin]);
