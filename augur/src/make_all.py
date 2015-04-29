@@ -9,7 +9,6 @@ patterns = {('A / H3N2', ''):'H3N2',
 			('B / H0N0', 'Yamagata'):'Yam',
 			('A / H1N1', 'seasonal'):'H1N1',
 			}
-lineages = ['H3N2', 'H1N1pdm', 'Vic', 'Yam']
 
 def pull_fasta_from_s3(lineage, directory = 'data/', bucket = 'nextflu-data'):
 	"""Retrieve FASTA files from S3 bucket"""
@@ -76,8 +75,8 @@ def ammend_fasta(fname, lineage, threshold = 10, directory = 'data/'):
 		print "No existing file found for",lineage, ex_fname
 	else:
 		for seq in SeqIO.parse(ex_fname, 'fasta'):
-			acc = int(seq.description.split('|')[-1].strip())
-			existing.add(acc)
+			strain = seq.description.split('|')[0].strip()
+			existing.add(strain)
 	print "Found", len(existing), 'existing for lineage', lineage 
 
 	new_seqs = []
@@ -91,8 +90,8 @@ def ammend_fasta(fname, lineage, threshold = 10, directory = 'data/'):
 			tmp_lineage = (fields[2], fields[4])
 			if tmp_lineage in patterns:
 				if patterns[tmp_lineage]==lineage:
-					acc = int(fields[-1])
-					if acc not in existing:
+					strain = fields[0]
+					if strain not in existing:
 						new_seqs.append(seq)
 			else:
 				if verbose:
@@ -116,14 +115,18 @@ if __name__=="__main__":
 	parser.add_argument('--s3', action = "store_true", default = False, help = "push/pull FASTA and JSON files to/from S3")
 	parser.add_argument('--fasta_bucket', type = str, default = "nextflu-data", help = "bucket for FASTA files")		
 	parser.add_argument('--json_bucket', type = str, default = "nextflu-dev", help = "bucket for JSON files")	
-	parser.add_argument('--threshold', type = float, default = 10.0, help = "number of new sequences required to rerun pipeline")	
+	parser.add_argument('--threshold', type = float, default = 10.0, help = "number of new sequences required to rerun pipeline")
+	parser.add_argument('--lineages', nargs='+', type = str,  help ="lineages to include")		
 	parser.add_argument('-r', type = float, default = 1.0)
 	params = parser.parse_args()
 
 	common_args = ['--skip', 'genotype_frequencies', '-r', params.r]
 	if params.ATG: common_args.append('--ATG')
+	
+	if params.lineages is None:
+		params.lineages = ['H3N2', 'H1N1pdm', 'Vic', 'Yam']	
 
-	for lineage in lineages:
+	for lineage in params.lineages:
 		print '\nLineage',lineage	
 		if params.s3:
 			pull_fasta_from_s3(lineage, directory = 'data/', bucket = params.fasta_bucket)

@@ -20,94 +20,6 @@ function calcDfreq(node, freq_ii){
 };
 
 
-/**
- * for each node, calculate the number of tips in the currently selected time window. 
-**/
-function calcTipCounts(node){
-	node.tipCount = 0;
-	if (typeof node.children != "undefined") {
-		for (var i=0; i<node.children.length; i++) {
-			calcTipCounts(node.children[i]);
-			node.tipCount += node.children[i].tipCount;
-		}
-	}
-	else if (node.current){ 
-		node.tipCount = 1;
-	}
-};
-
-function parse_gt_string(gt){
-	separate_plots = gt.split(',');
-	mutations = separate_plots.map(
-		function (d) {	var tmp = d.split(/[\s//]/); //FIXME: make more inclusive
-						var region;
-						var positions = [];
-						for (var i=0; i<tmp.length; i++){
-							if (contains(["EU","NA","AS","OC"], tmp[i])){
-								region = tmp[i];
-							}else{
-								if (tmp[i].length>0) positions.push(tmp[i]);
-							}
-						}
-						if (typeof region == "undefined") region="global";
-						// sort of this is a multi mutation genotype
-						if (positions.length>1){
-							positions.sort(function (a,b){
-								return parseInt(a.substring(0,a.length-1)) - parseInt(b.substring(0,b.length-1));
-							});
-						}
-						return [region, positions.join('/')];});
-	return mutations;
-};
-
-/**
-loops over all genotypes from a certain region and sums the frequency contributions
-of the genotype matches at the specified positions
-**/
-function get_frequencies(region, gt){
-	var freq = [];
-	for (var pi=0; pi<pivots.length; pi++){freq[freq.length]=0;}
-	if (frequencies["clades"][region][gt.toLowerCase()]!=undefined) {
-		console.log(gt+" found as clade");
-		for (var pi=0; pi<freq.length; pi++){
-			freq[pi]+=frequencies["clades"][region][gt.toLowerCase()][pi];
-		}
-	}
-	else if ((typeof frequencies["genotypes"] !="undefined") && (frequencies["genotypes"][region][gt]!=undefined)) {
-		console.log(gt+" found as genotype");
-		for (var pi=0; pi<freq.length; pi++){
-			freq[pi]+=frequencies["genotypes"][region][gt][pi];
-		}
-	}else if (frequencies["mutations"][region][gt]!=undefined) {
-		console.log(gt+" found as mutation");
-		for (var pi=0; pi<freq.length; pi++){
-			freq[pi]+=frequencies["mutations"][region][gt][pi];
-		}
-	}
-	return freq.map(function (d) {return Math.round(d*100)/100;});
-};
-
-function make_gt_chart(gt){
-	var tmp_data = [];
-	var tmp_trace = ['x'];
-	tmp_data.push(tmp_trace.concat(pivots));
-	gt.forEach(function (d) {
-		var region = d[0];
-		var genotype = d[1];
-		var freq = get_frequencies(region, genotype);
-		var tmp_trace = genotype.toString().replace(/,/g, ', ');
-		if (region != "global") {
-			tmp_trace = region + ':\t' + tmp_trace;
-		}
-		tmp_data.push([tmp_trace].concat(freq));
-	});
-	gt_chart.load({
-       	columns: tmp_data,
-       	unload: true
-	});
-}
-
-
 width = parseInt(d3.select(".freqplot-container").style("width"), 10);
 var position = "right";
 if (width < 600) {
@@ -151,24 +63,13 @@ var gt_chart = c3.generate({
 	}
 });
 
-
-
-function adjust_freq_by_date() {
-	calcTipCounts(rootNode);
-	var tipCount = rootNode.tipCount;		
-	console.log("Total tipcount: " + tipCount);	
-	nodes.forEach(function (d) {
-		d.frequency = (d.tipCount)/tipCount;
-	});
-}	
-
 function contains(arr, obj) {
     for(var i=0; i<arr.length; i++) {
         if (arr[i] == obj) return true;
     }
 }
 
-d3.json("/data/" + file_prefix + "frequencies.json", function(error, json){
+d3.json(path + file_prefix + "frequencies.json", function(error, json){
 	console.log(error);
 	frequencies = json;
 	pivots= frequencies["mutations"]["global"]["pivots"].map(function (d) {return Math.round(parseFloat(d)*100)/100;});
