@@ -155,7 +155,7 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 
 	var ent = [['x'],['entropy']];
 	for (var ii=0;ii<frequencies["entropy"].length;ii+=1){
-		if (Math.round(10000*frequencies["entropy"][ii][1])/10000>0){
+		if (Math.round(10000*frequencies["entropy"][ii][1])/10000>0.05){
 			ent[1].push(Math.round(10000*frequencies["entropy"][ii][1])/10000);
 			ent[0].push(ii+1);
 		}
@@ -196,12 +196,12 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 								tmp.push(["global",d.x+frequencies["entropy"][d.x-1][2][ii]]);
 		            		}
 		            		console.log(tmp);
-		            		make_gt_chart(tmp);
 		            		colorBy = "genotype";
 		            		colorByGenotypePosition([d.x-1]);
 		            	}
 		            }
 		},
+		bar: {width: 3},
 	    tooltip: {
 	        format: {
 	            title: function (d) { 
