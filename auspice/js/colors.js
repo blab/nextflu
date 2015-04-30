@@ -190,7 +190,7 @@ var genotypeColoringEvent;
 d3.select("#gt-color")
 	.on("keyup", function(){
 		if (typeof genotypeColoringEvent != "undefined"){clearTimeout(genotypeColoringEvent);}
-		genotypeColoringEvent = setTimeout(colorByGenotype, 500);
+		genotypeColoringEvent = setTimeout(colorByGenotype, 100);
 	});
 
 

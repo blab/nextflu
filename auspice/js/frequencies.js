@@ -175,7 +175,7 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 		parses a genotype string into region and positions
 	**/
 
-	var ent = [['x'],['entropy']];
+	var ent = [['x'],['']];
 	for (var ii=0;ii<frequencies["entropy"].length;ii+=1){
 		if (Math.round(10000*frequencies["entropy"][ii][1])/10000>0.05){
 			ent[1].push(Math.round(10000*frequencies["entropy"][ii][1])/10000);
@@ -187,7 +187,8 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 	var entropy_chart = c3.generate({
 		bindto: '#entropy',
 		size: {width: width, height: 350},
-		legend: {position: position},
+		legend: {show: true},
+		color: {pattern: [genotypeColors[8]]},
 		axis: {
 			y: {
 				label: {
@@ -222,7 +223,7 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 		            	}
 		            }
 		},
-		bar: {width: 3},
+		bar: {width: 2},
 	    tooltip: {
 	        format: {
 	            title: function (d) { 
