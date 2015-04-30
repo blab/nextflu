@@ -228,6 +228,7 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 		            		}
 		            		colorBy = "genotype";
 		            		colorByGenotypePosition([d.x-1]);
+		            		d3.select("#gt-color").property("value", d.x);
 		            	}
 		            }
 		},
