@@ -175,11 +175,17 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.style("cursor", "pointer")
 		.on('mouseover', function (d){
 			linkTooltip.show(d.target, this);
-			clade_freq_event = setTimeout(addClade, 1000, d);})
+			if (colorBy!="genotype"){
+				clade_freq_event = setTimeout(addClade, 1000, d);
+			}
+			})
 		.on('mouseout', function(d) {
 			linkTooltip.hide(d);
 			clearTimeout(clade_freq_event);})		
 		.on('click', function(d) {
+			if (colorBy!="genotype"){
+				addClade(d);
+			}
 			displayRoot = d.target;
 			nDisplayTips = displayRoot.fullTipCount;
 			var dMin = 0.5 * (minimumAttribute(d.target, "xvalue", d.target.xvalue) + minimumAttribute(d.source, "xvalue", d.source.xvalue)),
@@ -278,6 +284,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 				lMin = d3.min(yValues),
 				lMax = d3.max(yValues);
 			rescale(dMin, dMax, lMin, lMax);
+			removeClade();
 		})
 
 	function rescale(dMin, dMax, lMin, lMax) {

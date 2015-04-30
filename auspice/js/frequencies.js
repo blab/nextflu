@@ -112,6 +112,14 @@ function addClade(d) {
 	}
 }
 
+function removeClade() {
+	if (typeof gt_chart != "undefined"){
+		gt_chart.unload({
+	       	ids: ["clade"]
+		});
+	}
+}
+
 width = parseInt(d3.select(".freqplot-container").style("width"), 10);
 var position = "right";
 if (width < 600) {
