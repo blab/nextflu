@@ -186,8 +186,12 @@ d3.select("#coloring")
 	.on("change", colorByTrait);
 
 
+var genotypeColoringEvent;
 d3.select("#gt-color")
-	.on("keyup", colorByGenotype);
+	.on("keyup", function(){
+		if (typeof genotypeColoringEvent != "undefined"){clearTimeout(genotypeColoringEvent);}
+		genotypeColoringEvent = setTimeout(colorByGenotype, 500);
+	});
 
 
 
