@@ -89,9 +89,9 @@ function make_gt_chart(gt){
 	console.log(tmp_colors);
 	gt_chart.load({
        	columns: tmp_data,
-       	unload: true,
-       	colors: tmp_colors
+       	unload: true
 	});
+	gt_chart.data.colors(tmp_colors);
 }
 
 width = parseInt(d3.select(".freqplot-container").style("width"), 10);
