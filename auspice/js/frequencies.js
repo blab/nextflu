@@ -73,8 +73,9 @@ function get_frequencies(region, gt){
 function make_gt_chart(gt){
 	var tmp_data = [];
 	var tmp_trace = ['x'];
+	var tmp_colors = {};
 	tmp_data.push(tmp_trace.concat(pivots));
-	gt.forEach(function (d) {
+	gt.forEach(function (d, i) {
 		var region = d[0];
 		var genotype = d[1];
 		var freq = get_frequencies(region, genotype);
@@ -83,10 +84,13 @@ function make_gt_chart(gt){
 			tmp_trace = region + ':\t' + tmp_trace;
 		}
 		tmp_data.push([tmp_trace].concat(freq));
+		tmp_colors[tmp_trace] = genotypeColors[i];
 	});
+	console.log(tmp_colors);
 	gt_chart.load({
        	columns: tmp_data,
-       	unload: true
+       	unload: true,
+       	colors: tmp_colors
 	});
 }
 
@@ -101,7 +105,7 @@ var gt_chart = c3.generate({
 	size: {width: width, height: 350},
 	legend: {position: position},
   	color: {
-        pattern: ["#60AA9E", "#D9AD3D", "#5097BA", "#E67030", "#8EBC66", "#E59637", "#AABD52", "#DF4327", "#C4B945", "#75B681"]
+        pattern: genotypeColors
     },
 	axis: {
 		y: {
@@ -129,7 +133,7 @@ var gt_chart = c3.generate({
 	},			
 	data: {
 		x: 'x',
-		columns: []
+		columns: [],
 	}
 });
 
@@ -169,7 +173,7 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 		axis: {
 			y: {
 				label: {
-					text: 'entropy',
+					text: 'variability',
 					position: 'outer-middle'	
 				}
 			},
@@ -195,7 +199,6 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 		            		for (var ii=0;ii<frequencies["entropy"][d.x-1][2].length;ii+=1){
 								tmp.push(["global",d.x+frequencies["entropy"][d.x-1][2][ii]]);
 		            		}
-		            		console.log(tmp);
 		            		colorBy = "genotype";
 		            		colorByGenotypePosition([d.x-1]);
 		            	}
@@ -207,7 +210,7 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 	            title: function (d) { 
 	            	return 'Position ' + d + frequencies["entropy"][d-1][2].join(","); },
 	            value: function (value, ratio, id) {
-	                return "Entropy: "+value;
+	                return "Variability: "+value;
 	            }
 	        }
 		},
