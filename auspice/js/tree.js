@@ -164,6 +164,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		d.y = yScale(d.yvalue);
 	});
 
+	var clade_freq_event;
 	var link = treeplot.selectAll(".link")
 		.data(links)
 		.enter().append("polyline")
@@ -172,25 +173,12 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.style("stroke-width", branchStrokeWidth)
 		.style("stroke", branchStrokeColor)		
 		.style("cursor", "pointer")
-		.on('mouseover', function(d) {
+		.on('mouseover', function (d){
 			linkTooltip.show(d.target, this);
-			if (typeof gt_chart != "undefined"){
-				var plot_data = [['x'].concat(rootNode["pivots"])];
-				var reg = "global";
-				if ((typeof d.target.freq !="undefined" )&&(d.target.freq[reg] != "undefined")){
-					plot_data[plot_data.length] = [reg].concat(d.target.freq[reg]);				
-				}
-				if (plot_data.length > 1) {
-					if (plot_data[1][0] == "global") {
-						plot_data[1][0] = "clade";
-					}
-				}
-				gt_chart.load({
-			       	columns: plot_data
-				});
-			}
-		})
-		.on('mouseout', linkTooltip.hide)		
+			clade_freq_event = setTimeout(addClade, 1000, d);})
+		.on('mouseout', function(d) {
+			linkTooltip.hide(d);
+			clearTimeout(clade_freq_event);})		
 		.on('click', function(d) {
 			displayRoot = d.target;
 			nDisplayTips = displayRoot.fullTipCount;

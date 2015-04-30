@@ -94,6 +94,24 @@ function make_gt_chart(gt){
 	gt_chart.data.colors(tmp_colors);
 }
 
+function addClade(d) {
+	if (typeof gt_chart != "undefined"){
+		var plot_data = [['x'].concat(rootNode["pivots"])];
+		var reg = "global";
+		if ((typeof d.target.freq !="undefined" )&&(d.target.freq[reg] != "undefined")){
+			plot_data[plot_data.length] = [reg].concat(d.target.freq[reg]);				
+		}
+		if (plot_data.length > 1) {
+			if (plot_data[1][0] == "global") {
+				plot_data[1][0] = "clade";
+			}
+		}
+		gt_chart.load({
+	       	columns: plot_data
+		});
+	}
+}
+
 width = parseInt(d3.select(".freqplot-container").style("width"), 10);
 var position = "right";
 if (width < 600) {
