@@ -82,7 +82,7 @@ function tipLabelSize(d) {
 }
 
 function tipLabelWidth(d) {
-	return tipLabelText(d).length * (tipLabelSize(d)+12) * 0.25;
+	return tipLabelText(d).length * tipLabelSize(d) * 0.5;
 }
 
 function tree_init(){
