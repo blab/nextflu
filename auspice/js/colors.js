@@ -135,6 +135,8 @@ function colorByGenotype() {
 	}
 	else {
 		d3.select("#coloring").each(colorByTrait);
+		gt = parse_gt_string(freqdefault);			
+		make_gt_chart(gt);
 	}
 }
 
@@ -190,7 +192,7 @@ var genotypeColoringEvent;
 d3.select("#gt-color")
 	.on("keyup", function(){
 		if (typeof genotypeColoringEvent != "undefined"){clearTimeout(genotypeColoringEvent);}
-		genotypeColoringEvent = setTimeout(colorByGenotype, 100);
+		genotypeColoringEvent = setTimeout(colorByGenotype, 200);
 	});
 
 

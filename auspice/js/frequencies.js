@@ -123,13 +123,21 @@ function removeClade() {
 width = parseInt(d3.select(".freqplot-container").style("width"), 10);
 var position = "right";
 if (width < 600) {
-	position = "bottom";
+	position = "inset";
 }
 
 var gt_chart = c3.generate({
 	bindto: '#gtchart',
 	size: {width: width, height: 350},
-	legend: {position: position},
+	legend: {
+		position: position,
+		inset: {
+    		anchor: 'top-right',
+    		x: 10,
+    		y: -5,
+    		step: 1
+    	}
+	},
   	color: {
         pattern: genotypeColors
     },
@@ -195,19 +203,23 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 	var entropy_chart = c3.generate({
 		bindto: '#entropy',
 		size: {width: width, height: 350},
-		legend: {show: true},
-		color: {pattern: [genotypeColors[8]]},
+		legend: {show: false},
+		color: {pattern: ["#AAA"]},
 		axis: {
 			y: {
 				label: {
 					text: 'variability',
 					position: 'outer-middle'	
-				}
+				},
+				tick: {
+					values: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6],
+					outer: false
+				},
 			},
 			x: {
 				label: {
 					text: 'position',
-					position: 'outer-right'	
+					position: 'outer-center'	
 				},
 				tick: {
 					outer: false,
@@ -220,17 +232,17 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 			columns: ent,
 			type: "bar",
 			onclick: function (d,i) { 
-						console.log(d);
-		            	if (frequencies["entropy"][d.x-1][2].length>1){
-		            		var tmp = [];
-		            		for (var ii=0;ii<frequencies["entropy"][d.x-1][2].length;ii+=1){
-								tmp.push(["global",d.x+frequencies["entropy"][d.x-1][2][ii]]);
-		            		}
-		            		colorBy = "genotype";
-		            		colorByGenotypePosition([d.x-1]);
-		            		d3.select("#gt-color").property("value", d.x);
-		            	}
-		            }
+				console.log(d);
+				if (frequencies["entropy"][d.x-1][2].length>1){
+					var tmp = [];
+					for (var ii=0;ii<frequencies["entropy"][d.x-1][2].length;ii+=1){
+						tmp.push(["global",d.x+frequencies["entropy"][d.x-1][2][ii]]);
+					}
+					colorBy = "genotype";
+					colorByGenotypePosition([d.x-1]);
+					d3.select("#gt-color").property("value", d.x);
+				}
+		    }            
 		},
 		bar: {width: 2},
 	    tooltip: {
