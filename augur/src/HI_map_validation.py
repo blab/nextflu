@@ -29,12 +29,13 @@ def validation_figures(params):
 	plt.hist(myflu.virus_effect.values())
 	plt.xlabel('virus avidities')
 	plt.savefig(fig_prefix+'HI_avidity_histogram.pdf')
+	print "virus effects:", np.mean(myflu.virus_effect.values()), np.std(myflu.virus_effect.values())
 
 	####  SERUM POTENCIES  #######################################################
 	with open(fig_prefix+'HI_potencies.txt','w') as outfile:
 		for serum, val in myflu.serum_potency.iteritems():
 			outfile.write(serum[0]+'\t'+serum[1]+'\t'+str(round(val,4))+'\n')
-
+	print "potencies:", np.mean(myflu.serum_potency.values()), np.std(myflu.serum_potency.values())
 
 	####  DISTANCE ASYMMETRIES #######################################################
 	reciprocal_measurements = []
@@ -83,7 +84,6 @@ def validation_figures(params):
 			continue
 		else:
 			for ci in [0,2]:
-				print "new"
 				for d12 in distances[(four[0], four[1])][ci:(ci+2)]:
 					for d13 in distances[(four[0], four[2])][ci:(ci+2)]:
 						for d14 in distances[(four[0], four[3])][ci:(ci+2)]:
@@ -150,7 +150,7 @@ if __name__=="__main__":
 	parser.add_argument('--reg', type = float, default = 1.0, help='regularization parameter')
 	parser.add_argument('--avi', type = float, default = 1.0, help='regularization parameter')
 	parser.add_argument('--pot', type = float, default = 1.0, help='regularization parameter')
-	parser.add_argument('--min_aamuts', type = int, default = 0, help='minimal number of aminoacid mutations to include branch')
+	parser.add_argument('--min_aamuts', type = str, default = '0', help='minimal number of aminoacid mutations to include branch or epi for epitope or rbs for receptor binding site')
 	params = parser.parse_args()
 	if params.flutype=='H3N2':
 		from H3N2_process import *
@@ -167,6 +167,10 @@ if __name__=="__main__":
 	elif params.flutype=='Yam':
 		from Yam_process import *
 		flu_process = BYam_process
+	try:
+		params.min_aamuts = int(params.min_aamuts)
+	except:
+		pass
 	params.__dict__['HI_fname']='source-data/'+params.flutype+'_HI_titers.txt'	
 
 	dHI_list = validation_figures(params)

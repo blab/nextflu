@@ -136,8 +136,15 @@ class HI_tree(object):
 						path = self.get_path_no_terminals(test, ref[0])
 						tmp = np.zeros(n_params)
 						# determine branch indices on path
-						branches = np.unique([c.HI_branch_index for c in path 
-						                     if (hasattr(c, 'HI_branch_index') and len(c.aa_muts)>=self.min_aamuts)])
+						if type(self.min_aamuts)==int:
+							branches = np.unique([c.HI_branch_index for c in path 
+							                     if (hasattr(c, 'HI_branch_index') and len(c.aa_muts)>=self.min_aamuts)])
+						elif self.min_aamuts=='epi':
+							branches = np.unique([c.HI_branch_index for c in path if (hasattr(c, 'HI_branch_index') and c.parent_node.ep<c.ep)])
+						elif self.min_aamuts=='rbs':
+							branches = np.unique([c.HI_branch_index for c in path if (hasattr(c, 'HI_branch_index') and c.parent_node.rb<c.rb)])
+						else:
+							branches = np.unique([c.HI_branch_index for c in path if hasattr(c, 'HI_branch_index') ])
 						if len(branches): tmp[branches] = 1
 						# add serum effect
 						tmp[self.HI_split_count+self.sera.index(ref)] = 1
