@@ -408,7 +408,8 @@ def parse_HI_matrix(fname):
 					"NETH":"NETHERLANDS", "FIN":"FINLAND", "BRIS":"BRISBANE", "MARY":"MARYLAND",	
 					"ST.P'BURG":"ST.PETERSBURG", 'CAL':'CALIFORNIA', 'AUCK':'AUCKLAND', "C'CHURCH":'CHRISTCHURCH',
 					'CHCH':'CHRISTCHURCH', 'ASTR':'ASTRAKHAN', 'ASTRAK':'ASTRAKHAN', 'ST.P':"ST.PETERSBURG",
-					}
+					'JHB':'JOHANNESBURG', 'FOR':'FORMOSA','MAL':'MALAYSIA', 'STHAUS':'SOUTHAUSTRALIA',
+					'FL':'FLORIDA', 'MASS':'MASSACHUSETTS','NOVO':'NOVOSIBIRSK','WIS':'WISCONSIN'.'BANG':'BANGLADESH','EG':'EGYPT' 	}
 	src_id = fname.split('/')[-1]
 	print fname
 	with myopen(fname) as infile:
@@ -420,11 +421,14 @@ def parse_HI_matrix(fname):
 		row3 = csv_reader.next()
 		ref_sera = [[strain_name_fixing(e1+'/'+e2), e3.replace(' ','')] for e1,e2,e3 in zip(row1, row2, row3)[4:]]
 		for ri in xrange(len(ref_sera)):
-			abbr = ref_sera[ri][0].split('/')[1]	
+			abbr = ref_sera[ri][0].split('/')[1].rstrip('01234566789')
 			if abbr in name_abbrev:
 				ref_sera[ri][0] = strain_name_fixing(ref_sera[ri][0].replace(abbr, name_abbrev[abbr]))
 			else:
 				ref_sera[ri][0] = strain_name_fixing(ref_sera[ri][0])
+			# strip numbers
+			tmp = ref_sera[ri][0].split('/')
+			ref_sera[ri][0] = '/'.join([tmp[0], tmp[1].rstrip('0123456789')]+tmp[2:])
 			try:
 				y = int(ref_sera[ri][0].split('/')[-1])
 				if y<100:

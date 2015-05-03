@@ -8,6 +8,7 @@ B/Hong Kong/335/2001
 B/India/7600/2001
 B/Malaysia/83077/2001
 B/New York/1/2002
+B/Shandong/7/97
 B/Oman/16296/2001
 B/Philippines/5072/2001
 B/Hawaii/13/2004
@@ -254,3 +255,6 @@ B/Denmark/23/2011
 B/Denmark/22/2011
 B/Denmark/24/2011
 B/Austria/653113/2012
+B/Formosa/V2367/2012
+B/Johannesburg/3964/2012
+B/South Australia/81/2012

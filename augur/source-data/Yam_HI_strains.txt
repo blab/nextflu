@@ -146,4 +146,9 @@ B/Israel/20/2011
 B/Turkey/17/2011
 B/England/9/2012
 B/Stockholm/12-00971/2012
+B/Massachusetts/02/2012
+B/Novosibirsk/1/2012
+B/Hong Kong/3577/2012
 B/SRI LANKA/4/2006
+B/PHUKET/3073/2013
+B/Hong Kong/3417/2014
