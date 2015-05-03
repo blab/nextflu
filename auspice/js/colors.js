@@ -180,6 +180,7 @@ function colorByGenotypePosition (positions) {
 			tmp_gts.push(["global", filtered_gts[ii]])
 		}
 		make_gt_chart(tmp_gts);
+		document.getElementById("gtspec").value = tmp_gts.map( function (d) {return d[1];}).join(', ');
 	}
 }
 
