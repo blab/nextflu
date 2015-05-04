@@ -19,26 +19,27 @@ function calcDfreq(node, freq_ii){
 	}
 };
 function parse_gt_string(gt){
-	separate_plots = gt.split(',');
-	mutations = separate_plots.map(
-		function (d) {	var tmp = d.split(/[\s//]/); //FIXME: make more inclusive
-						var region;
-						var positions = [];
-						for (var i=0; i<tmp.length; i++){
-							if (contains(["EU","NA","AS","OC"], tmp[i])){
-								region = tmp[i];
-							}else{
-								if (tmp[i].length>0) positions.push(tmp[i]);
-							}
-						}
-						if (typeof region == "undefined") region="global";
-						// sort of this is a multi mutation genotype
-						if (positions.length>1){
-							positions.sort(function (a,b){
-								return parseInt(a.substring(0,a.length-1)) - parseInt(b.substring(0,b.length-1));
-							});
-						}
-						return [region, positions.join('/')];});
+	mutations = [];
+	gt.split(',').map( function (d) {
+		var tmp = d.split(/[\s//]/); //FIXME: make more inclusive
+		var region;
+		var positions = [];
+		for (var i=0; i<tmp.length; i++){
+			if (contains(["EU","NA","AS","OC"], tmp[i])){
+				region = tmp[i];
+			}else{
+				if (tmp[i].length>0) positions.push(tmp[i]);
+			}
+		}
+		if (typeof region == "undefined") region="global";
+		// sort of this is a multi mutation genotype
+		if (positions.length>1){
+			positions.sort(function (a,b){
+				return parseInt(a.substring(0,a.length-1)) - parseInt(b.substring(0,b.length-1));
+			});
+		}
+		mutations.push([region, positions.join('/')]);
+	});
 	return mutations;
 };
 
@@ -79,12 +80,14 @@ function make_gt_chart(gt){
 		var region = d[0];
 		var genotype = d[1];
 		var freq = get_frequencies(region, genotype);
-		var tmp_trace = genotype.toString().replace(/,/g, ', ');
-		if (region != "global") {
-			tmp_trace = region + ':\t' + tmp_trace;
+		if (d3.max(freq)>0) {
+			var tmp_trace = genotype.toString().replace(/,/g, ', ');
+			if (region != "global") {
+				tmp_trace = region + ':\t' + tmp_trace;
+			}
+			tmp_data.push([tmp_trace].concat(freq));
+			tmp_colors[tmp_trace] = genotypeColors[i];
 		}
-		tmp_data.push([tmp_trace].concat(freq));
-		tmp_colors[tmp_trace] = genotypeColors[i];
 	});
 	console.log(tmp_colors);
 	gt_chart.load({
