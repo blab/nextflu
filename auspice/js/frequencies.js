@@ -124,14 +124,12 @@ function removeClade() {
 }
 
 width = parseInt(d3.select(".freqplot-container").style("width"), 10);
-var position = "right";
-if (width < 600) {
-	position = "inset";
-}
+height = 250;
+var position = "inset";
 
 var gt_chart = c3.generate({
 	bindto: '#gtchart',
-	size: {width: width, height: 350},
+	size: {width: width-10, height: height},
 	legend: {
 		position: position,
 		inset: {
@@ -205,7 +203,7 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 	
 	var entropy_chart = c3.generate({
 		bindto: '#entropy',
-		size: {width: width, height: 350},
+		size: {width: width-10, height: height},
 		legend: {show: false},
 		color: {pattern: ["#AAA"]},
 		axis: {
