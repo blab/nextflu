@@ -135,7 +135,7 @@ var gt_chart = c3.generate({
 		inset: {
     		anchor: 'top-right',
     		x: 10,
-    		y: -5,
+    		y: -15,
     		step: 1
     	}
 	},
