@@ -137,6 +137,7 @@ function colorByGenotype() {
 		d3.select("#coloring").each(colorByTrait);
 		gt = parse_gt_string(freqdefault);			
 		make_gt_chart(gt);
+		document.getElementById("gtspec").value = freqdefault;
 	}
 }
 
