@@ -130,6 +130,11 @@ var position = "inset";
 var gt_chart = c3.generate({
 	bindto: '#gtchart',
 	size: {width: width-10, height: height},
+	onresize: function() {
+		width = parseInt(d3.select(".freqplot-container").style("width"), 10);
+		height = 250;
+		gt_chart.resize({height: height, width: width});
+	},
 	legend: {
 		position: position,
 		inset: {
@@ -204,6 +209,11 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 	var entropy_chart = c3.generate({
 		bindto: '#entropy',
 		size: {width: width-10, height: height},
+		onresize: function() {
+			width = parseInt(d3.select(".freqplot-container").style("width"), 10);
+			height = 250;
+			entropy_chart.resize({height: height, width: width});
+		},		
 		legend: {show: false},
 		color: {pattern: ["#AAA"]},
 		axis: {
