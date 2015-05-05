@@ -210,7 +210,7 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 		bindto: '#entropy',
 		size: {width: width-10, height: height},
 		onresize: function() {
-			width = parseInt(d3.select(".freqplot-container").style("width"), 10);
+			width = parseInt(d3.select(".entropy-container").style("width"), 10);
 			height = 250;
 			entropy_chart.resize({height: height, width: width});
 		},		
