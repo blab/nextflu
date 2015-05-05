@@ -243,7 +243,13 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 					colorByGenotypePosition([d.x-1]);
 					d3.select("#gt-color").property("value", d.x);
 				}
-		    }            
+		    },
+		    onmouseover: function (d){
+		    	document.body.style.cursor = "pointer";
+		    },
+		    onmouseout: function (d){
+		    	document.body.style.cursor = "default";
+		    },
 		},
 		bar: {width: 2},
 	    tooltip: {
