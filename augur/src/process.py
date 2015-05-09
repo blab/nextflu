@@ -202,10 +202,16 @@ class process(virus_frequencies):
 		except ImportError:
 			meta["commit"] = "unknown"
 		
-		if hasattr(self,"date_region_count"):
+		if hasattr(self,"date_region_count") and hasattr(self, "year_month_pairs"):
 			meta["regions"] = self.regions
-			meta["virus_stats"] = [ [str(y)+'-'+str(m)] + [self.date_region_count[(y,m)][reg] for reg in self.regions]
-									for y,m in sorted(self.date_region_count.keys()) ]
+			meta["virus_stats"] = [ [str(y)+'-'+str(m)] + [self.date_region_count[(y,m, reg)] for reg in self.regions]
+									for y,m in sorted(self.year_month_pairs) ]
+		if hasattr(self, "virus_stats_before_subsampling")  and hasattr(self, "year_month_pairs"):
+			meta["virus_stats_before_subsampling"] = [[str(y)+'-'+str(m)] + 
+													  [self.virus_stats_before_subsampling[(y,m, reg)] for reg in self.regions]
+													   for y,m in sorted(self.year_month_pairs) ]
+
+
 		write_json(meta, self.auspice_meta_fname, indent=0)
 
 	def align(self):
@@ -291,17 +297,21 @@ class process(virus_frequencies):
 		self.region_totals
 		'''
 		from collections import defaultdict, Counter
-		self.date_region_count = defaultdict(lambda:defaultdict(int))
+		self.date_region_count = defaultdict(int)
 		regions = set()
+		tmp_year_month_pairs = set()
 		# count viruses in every month and every region
 		for v in self.viruses:
 			if v.strain != self.outgroup['strain']:
 				year, month, day = map(int, v.date.split('-'))
-				self.date_region_count[(year, month)][v.region]+=1
+				self.date_region_count[(year, month, v.region)]+=1
 				regions.add(v.region)
+				tmp_year_month_pairs.add((year, month))
 		# add a sorted list of all regions to self and calculate region totals
 		self.regions = sorted(regions)
-		self.region_totals = {reg:sum(val[reg] for val in self.date_region_count.values()) for reg in self.regions}
+		self.year_month_pairs = sorted(tmp_year_month_pairs)
+		self.region_totals = {reg:sum([val for key, val in self.date_region_count.iteritems() if key[-1]==reg])
+							  for reg in self.regions}
 
 	def determine_variable_positions(self):
 		'''
