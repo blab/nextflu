@@ -183,8 +183,9 @@ class process(virus_frequencies):
 			if not hasattr(self, 'aa_entropy'):
 				self.determine_variable_positions()
 
-			self.frequencies["entropy"] = [ [pos, S, muts] for pos,S,muts in 
-					izip(xrange(self.aa_entropy.shape[0]), self.aa_entropy,self.variable_aa_identities) ]
+			if hasattr(self, 'aa_entropy'):
+				self.frequencies["entropy"] = [ [pos, S, muts] for pos,S,muts in 
+						izip(xrange(self.aa_entropy.shape[0]), self.aa_entropy,self.variable_aa_identities) ]
 
 			write_json(self.frequencies, self.auspice_frequency_fname)
 
