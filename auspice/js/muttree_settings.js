@@ -10,7 +10,7 @@ var genericDomain = [0,0.1,0.2,0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 
 var epiColorDomain = [4,5,6,7,8,9,10,11,12,13];
 var nonEpiColorDomain = [2,3,4,5,6,7,8,9,10,11];
-var dateDomain = genericDomain;
+var dateDomain;
 var rbsColorDomain = [0,1,2,3,4];
 var dfreqColorDomain = genericDomain.map(function(d){return -0.18+d*0.36;});
 

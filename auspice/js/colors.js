@@ -44,6 +44,11 @@ function adjust_coloring_by_date() {
 			d.coloring = d.dfreq;
 		});
 	}
+	else if (colorBy == "date") {
+		nodes.forEach(function (d) {
+			d.coloring = d.diff;
+		});
+	}	
 }
 
 
@@ -78,7 +83,7 @@ function colorByTrait() {
 	}
 	else if (colorBy == "date") {
 		colorScale = dateColorScale;
-		nodes.map(function(d) { d.coloring = d.num_date; });
+		nodes.map(function(d) { d.coloring = d.diff; });
 	}
 
 	treeplot.selectAll(".link")
@@ -107,7 +112,7 @@ function tipFillColor(d) {
 
 function branchStrokeColor(d) {
 	var col;
-	if (colorBy == "region") {
+	if (colorBy == "region" || colorBy == "date") {
 		col = "#AAA";
 	}
 	else {

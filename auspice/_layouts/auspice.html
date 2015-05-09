@@ -70,12 +70,15 @@ layout: default
 									{% if page.coloring contains 'lbi' %}
 									<option value="lbi">local branching index</option>
 									{% endif %}
-									{% if page.coloring contains 'region' %}
-									<option value="region">geographic region</option>
-									{% endif %}
 									{% if page.coloring contains 'dfreq' %}
 									<option value="dfreq">frequency change</option>
 									{% endif %}
+									{% if page.coloring contains 'region' %}
+									<option value="region">geographic region</option>
+									{% endif %}
+									{% if page.coloring contains 'date' %}
+									<option value="date">sampling date</option>
+									{% endif %}														
 								</select>
 							</div>
 					</div>
