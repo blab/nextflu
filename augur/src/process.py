@@ -152,6 +152,7 @@ class process(virus_frequencies):
 
 		if hasattr(self,"clade_designations"):
 			# find basal node of clade and assign clade x and y values based on this basal node
+			clade_present = {}
 			clade_xval = {}
 			clade_yval = {}
 			for clade, gt in self.clade_designations.iteritems():
@@ -161,15 +162,17 @@ class process(virus_frequencies):
 						if not node.is_leaf() and all([node.aa_seq[pos-1]==aa for pos, aa in gt])),
 						key=lambda node: node.xvalue)
 					if len(tmp_nodes):
+						clade_present[clade] = True
 						base_node = tmp_nodes[0]
 						clade_xval[clade] = base_node.xvalue
 						clade_yval[clade] = base_node.yvalue
 					else:
+						clade_present[clade] = False
 						print "clade",clade, gt, "not in tree"
 			# append clades, coordinates and genotype to meta
 			self.tree_json["clade_annotations"] = [(clade, clade_xval[clade],clade_yval[clade], 
 								"/".join([str(pos)+aa for pos, aa in gt]))
-							for clade, gt in self.clade_designations.iteritems() if clade in annotations
+							for clade, gt in self.clade_designations.iteritems() if clade in annotations and clade_present[clade] == True
 							]
 		write_json(self.tree_json, self.auspice_tree_fname, indent=None)
 		try:
