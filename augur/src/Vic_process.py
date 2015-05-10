@@ -36,8 +36,7 @@ virus_config.update({
 	'clade_designations': {
 		'1A': [(90,'K'), (73, 'L'), (180, 'K'), (604,'S')],
 		'1B': [(90,'K'), (73, 'P'), (180, 'K')]
-	},
-	'auspice_prefix':'Vic_',
+	}
 	})
 
 

@@ -15,7 +15,8 @@ parser.add_argument('-y', '--years_back', type = float, default=3, help='number 
 parser.add_argument('-v', '--viruses_per_month', type = int, default = 50, help='number of viruses sampled per month')
 parser.add_argument('-r', '--raxml_time_limit', type = float, default = 1.0, help='number of hours raxml is run')
 parser.add_argument('--interval', nargs = '+', type = float, default = None, help='interval from which to pull sequences')
-parser.add_argument('--prefix', type = str, default = 'data/', help='path+prefix of file dumps')
+parser.add_argument('--path', type = str, default = 'data/', help='path of file dumps')
+parser.add_argument('--prefix', type = str, default = '', help='prefix of file dumps including auspice')
 parser.add_argument('--test', default = False, action="store_true",  help ="don't run the pipeline")
 parser.add_argument('--start', default = 'filter', type = str,  help ="start pipeline at specified step")
 parser.add_argument('--stop', default = 'export', type=str,  help ="run to end")
@@ -47,13 +48,14 @@ def shift_cds(shift, vc, epi_mask, rbs):
 
 class process(virus_frequencies):
 	"""generic template class for processing virus sequences into trees"""
-	def __init__(self, prefix = 'data/', time_interval = (2012.0, 2015.0), 
-	             auspice_prefix = '', run_dir = None, date_format={'fields':'%Y-%m-%d', 'reg':r'\d\d\d\d-\d\d-\d\d'},
+	def __init__(self, path = 'data/', prefix = 'virus', time_interval = (2012.0, 2015.0), 
+	             run_dir = None, date_format={'fields':'%Y-%m-%d', 'reg':r'\d\d\d\d-\d\d-\d\d'},
 				 min_mutation_frequency = 0.01, min_genotype_frequency = 0.1, **kwargs):
-		self.tree_fname = prefix+'tree.pkl'
-		self.virus_fname = prefix+'virus.pkl'
-		self.frequency_fname = prefix+'frequencies.pkl'
-		self.aa_seq_fname = prefix+'aa_seq.pkl'
+		self.tree_fname = path+prefix+'tree.pkl'
+		self.virus_fname = path+prefix+'virus.pkl'
+		self.frequency_fname = path+prefix+'frequencies.pkl'
+		self.aa_seq_fname = path+prefix+'aa_seq.pkl'
+		self.path = path
 		self.prefix = prefix
 		self.date_format = date_format
 		self.min_mutation_frequency = min_mutation_frequency
@@ -66,10 +68,10 @@ class process(virus_frequencies):
 			self.run_dir = run_dir
 		self.run_dir = self.run_dir.rstrip('/')+'/'
 
-		self.auspice_tree_fname = 		'../auspice/data/' + auspice_prefix + 'tree.json'
-		self.auspice_sequences_fname = 	'../auspice/data/' + auspice_prefix + 'sequences.json'
-		self.auspice_frequency_fname = 	'../auspice/data/' + auspice_prefix + 'frequencies.json'
-		self.auspice_meta_fname = 		'../auspice/data/' + auspice_prefix + 'meta.json'
+		self.auspice_tree_fname = 		'../auspice/data/' + prefix + 'tree.json'
+		self.auspice_sequences_fname = 	'../auspice/data/' + prefix + 'sequences.json'
+		self.auspice_frequency_fname = 	'../auspice/data/' + prefix + 'frequencies.json'
+		self.auspice_meta_fname = 		'../auspice/data/' + prefix + 'meta.json'
 		self.nuc_alphabet = 'ACGT-N'
 		self.aa_alphabet = 'ACDEFGHIKLMNPQRSTVWY*X'
 		virus_frequencies.__init__(self, **kwargs)
