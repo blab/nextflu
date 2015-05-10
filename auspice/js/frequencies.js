@@ -186,6 +186,8 @@ function contains(arr, obj) {
 d3.json(path + file_prefix + "frequencies.json", function(error, json){
 	console.log(error);
 	frequencies = json;
+	if (typeof frequencies["mutations"] == "undefined") return;
+
 	pivots= frequencies["mutations"]["global"]["pivots"].map(function (d) {return Math.round(parseFloat(d)*100)/100;});
 	var ticks = [Math.round(pivots[0])];
 	var tick_step = Math.round((pivots[pivots.length-1]-pivots[0])/6*10)/10;
