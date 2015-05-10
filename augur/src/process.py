@@ -204,12 +204,14 @@ class process(virus_frequencies):
 		
 		if hasattr(self,"date_region_count") and hasattr(self, "year_month_pairs"):
 			meta["regions"] = self.regions
-			meta["virus_stats"] = [ [str(y)+'-'+str(m)] + [self.date_region_count[(y,m, reg)] for reg in self.regions]
-									for y,m in sorted(self.year_month_pairs) ]
+			meta["dates"] = [y+(m-1)/12.0 for y, m in self.year_month_pairs]
+			meta["virus_stats"] = {reg: [self.date_region_count[(y,m, reg)] 
+									for y,m in sorted(self.year_month_pairs)]
+									for reg in self.regions}
 		if hasattr(self, "virus_stats_before_subsampling")  and hasattr(self, "year_month_pairs"):
-			meta["virus_stats_before_subsampling"] = [[str(y)+'-'+str(m)] + 
-													  [self.virus_stats_before_subsampling[(y,m, reg)] for reg in self.regions]
-													   for y,m in sorted(self.year_month_pairs) ]
+			meta["virus_stats_before_subsampling"] = {reg: [self.virus_stats_before_subsampling[(y,m, reg)] 
+							for y,m in sorted(self.year_month_pairs)]
+							for reg in self.regions}
 
 
 		write_json(meta, self.auspice_meta_fname, indent=0)

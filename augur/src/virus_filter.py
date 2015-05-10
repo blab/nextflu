@@ -114,8 +114,8 @@ class virus_filter(object):
 		priority_viruses = self.viruses_by_date_region([v for v in self.viruses if v['strain'].lower() in prioritize]) 
 		other_viruses = self.viruses_by_date_region([v for v in self.viruses if v['strain'].lower() not in prioritize]) 
 		# take a tally how many viruses are available from each region in each month
-		self.virus_stats_presampling = defaultdict(int) 
-		for key, val in priority_viruses.iteritems() + other_viruses.iteritems():
+		self.virus_stats_before_subsampling = defaultdict(int) 
+		for key, val in priority_viruses.items() + other_viruses.items():
 			self.virus_stats_before_subsampling[key]+=len(val)
 
 		filtered_viruses = []
