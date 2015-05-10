@@ -22,7 +22,7 @@ function makeLegend(){
 			return "Genotype";
 		}
 		if (colorBy == "date") {
-			return "Years back";
+			return "Date";
 		}		
 		if (colorBy == "dfreq") {
 			var tmp_nmonth = Math.round(12*dfreq_dn*time_step);

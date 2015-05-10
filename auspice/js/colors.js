@@ -46,7 +46,7 @@ function adjust_coloring_by_date() {
 	}
 	else if (colorBy == "date") {
 		nodes.forEach(function (d) {
-			d.coloring = d.diff;
+			d.coloring = d.num_date;
 		});
 	}	
 }
@@ -83,7 +83,7 @@ function colorByTrait() {
 	}
 	else if (colorBy == "date") {
 		colorScale = dateColorScale;
-		nodes.map(function(d) { d.coloring = d.diff; });
+		nodes.map(function(d) { d.coloring = d.num_date; });
 	}
 
 	treeplot.selectAll(".link")
