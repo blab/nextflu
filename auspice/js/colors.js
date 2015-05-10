@@ -27,7 +27,7 @@ var regionColorScale = d3.scale.ordinal()
 	.range(regionColors);
 
 var dateColorScale = d3.scale.linear().clamp([true])
-	.domain(dateDomain)
+	.domain(dateColorDomain)
 	.range(colors);
 
 // "ep", "ne" and "rb" need no adjustments

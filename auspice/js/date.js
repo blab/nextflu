@@ -79,8 +79,8 @@ function dragged(d) {
 
 function dragend() {
 	var num_date = globalDate/1000/3600/24/365.25+1970;	
-	dateDomain = genericDomain.map(function(d) {return Math.round(10*(num_date - time_window*(1.0-d)))/10;});
-	dateColorScale.domain(dateDomain);
+	dateColorDomain = genericDomain.map(function(d) {return Math.round(10*(num_date - time_window*(1.0-d)))/10;});
+	dateColorScale.domain(dateColorDomain);
 	
 	for (var ii=0; ii<rootNode.pivots.length-1; ii++){
 		if (rootNode.pivots[ii]<num_date && rootNode.pivots[ii+1]>=num_date){
@@ -142,9 +142,9 @@ function date_init(){
 	var minDate = d3.min(numDateValues.filter(function (d){return d!="undefined";}));
 	var maxDate = d3.max(numDateValues.filter(function (d){return d!="undefined";}));	
 	if (typeof time_window == "undefined"){time_window = maxDate-minDate;} 
-	dateDomain = genericDomain.map(function (d){return Math.round(10*(maxDate - (1.0-d)*time_window))/10;});	
+	dateColorDomain = genericDomain.map(function (d){return Math.round(10*(maxDate - (1.0-d)*time_window))/10;});	
 
-	dateColorScale.domain(dateDomain);
+	dateColorScale.domain(dateColorDomain);
 	dateScale = d3.time.scale()
 		.domain([earliestDate, globalDate])
 		.range([5, 205])
