@@ -27,7 +27,7 @@ var regionColorScale = d3.scale.ordinal()
 	.range(regionColors);
 
 var dateColorScale = d3.scale.linear().clamp([true])
-	.domain(dateDomain)
+	.domain(dateColorDomain)
 	.range(colors);
 
 // "ep", "ne" and "rb" need no adjustments
@@ -44,6 +44,11 @@ function adjust_coloring_by_date() {
 			d.coloring = d.dfreq;
 		});
 	}
+	else if (colorBy == "date") {
+		nodes.forEach(function (d) {
+			d.coloring = d.num_date;
+		});
+	}	
 }
 
 
@@ -107,7 +112,7 @@ function tipFillColor(d) {
 
 function branchStrokeColor(d) {
 	var col;
-	if (colorBy == "region") {
+	if (colorBy == "region" || colorBy == "date") {
 		col = "#AAA";
 	}
 	else {
