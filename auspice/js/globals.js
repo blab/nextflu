@@ -101,11 +101,15 @@ d3.json(path + file_prefix + "meta.json", function(error, json) {
     tmp_trace = ['x'];
     var sampled_virus_count = [];
     sampled_virus_count.push(tmp_trace.concat(json['dates']));
+    var all_regions = ['all'];
+    for (var i=0; i<sampled_virus_count[0].length-1; i++){all_regions.push(0);}
     for (var i=0; i<json['regions'].length; i++){
         reg = json['regions'][i];
         tmp_trace = [reg];
         sampled_virus_count.push(tmp_trace.concat(json['virus_stats'][reg]));
+        for (var j=0; j<json['virus_stats'][reg].length; j++){all_regions[j+1]+=json['virus_stats'][reg][j];}
     }
+    sampled_virus_count.push(all_regions);
     var virus_stats_chart = c3.generate({
         bindto: '#sampled_viruses',
         size: {width: width-10, height: height},
@@ -140,6 +144,11 @@ d3.json(path + file_prefix + "meta.json", function(error, json) {
             x: 'x',
             columns: sampled_virus_count,
         },
+        tooltip: {
+            format: {
+                title: function (d) {return "Date: "+d.toFixed(2);}
+            }
+        }
     });
 
 
