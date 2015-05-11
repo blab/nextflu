@@ -4,31 +4,34 @@ function makeLegend(){
 	
 	d3.select("#legend-title").text(function(d){
 		if (colorBy == "ep") {
-			return "Epitope mutations"
+			return "Epitope mutations";
 		}
 		if (colorBy == "ne") {
-			return "Non-epitope mutations"
+			return "Non-epitope mutations";
 		}
 		if (colorBy == "rb") {
-			return "Receptor binding mutations"
+			return "Receptor binding mutations";
 		}
 		if (colorBy == "lbi") {
-			return "Local branching index"
+			return "Local branching index";
 		}
-   if (colorBy == "region") {
-     return "Region"
-   }
-   if (colorBy == "genotype") {
-     return "Genotype"
-   }
-   if (colorBy == "dfreq") {
-    var tmp_nmonth = Math.round(12*dfreq_dn*time_step);
-    var tmp_text = "Freq. change ("+tmp_nmonth+" month";
-      if (tmp_nmonth>1){
-       tmp_text+='s';
-     }
-     return tmp_text+')';
-}
+		if (colorBy == "region") {
+			return "Region";
+		}
+		if (colorBy == "genotype") {
+			return "Genotype";
+		}
+		if (colorBy == "date") {
+			return "Date";
+		}		
+		if (colorBy == "dfreq") {
+			var tmp_nmonth = Math.round(12*dfreq_dn*time_step);
+			var tmp_text = "Freq. change ("+tmp_nmonth+" month";
+			if (tmp_nmonth>1){
+				tmp_text+='s';
+			}
+			return tmp_text+')';
+		}
 });
 
   var tmp_leg = legend.selectAll(".legend")

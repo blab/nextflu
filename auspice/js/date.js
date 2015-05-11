@@ -79,6 +79,9 @@ function dragged(d) {
 
 function dragend() {
 	var num_date = globalDate/1000/3600/24/365.25+1970;	
+	dateColorDomain = genericDomain.map(function(d) {return Math.round(10*(num_date - time_window*(1.0-d)))/10;});
+	dateColorScale.domain(dateColorDomain);
+	
 	for (var ii=0; ii<rootNode.pivots.length-1; ii++){
 		if (rootNode.pivots[ii]<num_date && rootNode.pivots[ii+1]>=num_date){
 			freq_ii=Math.max(dfreq_dn,ii+1);
@@ -94,6 +97,10 @@ function dragend() {
 
 	if (colorBy == "genotype") {
 		colorByGenotype();
+	}
+	if (colorBy == "date") {
+		removeLegend();
+		makeLegend();
 	}
 
 	if (colorBy!="genotype"){
@@ -122,7 +129,6 @@ function dragend() {
 
 
 function date_init(){
-
 	nodes.forEach(function (d) {d.dateval = new Date(d.date)});
 	var dateValues = nodes.filter(function(d) {
 		return typeof d.date === 'string';
@@ -134,9 +140,11 @@ function date_init(){
 	
 	var numDateValues = tips.map(function(d) {return d.num_date;})
 	var minDate = d3.min(numDateValues.filter(function (d){return d!="undefined";}));
-	var maxDate = d3.max(numDateValues.filter(function (d){return d!="undefined";}));
-	dateDomain = dateDomain.map(function (d){return Math.round(100*(minDate + d*(maxDate - minDate)))/100;});
-	dateColorScale.domain(dateDomain);
+	var maxDate = d3.max(numDateValues.filter(function (d){return d!="undefined";}));	
+	if (typeof time_window == "undefined"){time_window = maxDate-minDate;} 
+	dateColorDomain = genericDomain.map(function (d){return Math.round(10*(maxDate - (1.0-d)*time_window))/10;});	
+
+	dateColorScale.domain(dateColorDomain);
 	dateScale = d3.time.scale()
 		.domain([earliestDate, globalDate])
 		.range([5, 205])
