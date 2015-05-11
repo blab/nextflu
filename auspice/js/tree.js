@@ -9,6 +9,33 @@ var top_margin = 10;
 if ((typeof branch_labels != "undefined")&&(branch_labels)) {top_margin +=15;}
 var right_margin = 10;
 
+function initDateColorDomain(intAttributes){
+	var numDateValues = tips.map(function(d) {return d.num_date;})
+	var minDate = d3.min(numDateValues.filter(function (d){return d!="undefined";}));
+	var maxDate = d3.max(numDateValues.filter(function (d){return d!="undefined";}));	
+	if (typeof time_window == "undefined"){time_window = maxDate-minDate;} 
+	dateColorDomain = genericDomain.map(function (d){return Math.round(10*(maxDate - (1.0-d)*time_window))/10;});	
+	dateColorScale.domain(dateColorDomain);
+}
+
+
+function initColorDomain(attr, tmpCS){
+	//var vals = tips.filter(function(d) {return tipVisibility(d)=='visible';}).map(function(d) {return d[attr];});
+	var vals = tips.map(function(d) {return d[attr];});
+	var minval = d3.min(vals);
+	var maxval = d3.max(vals);	
+	var rangeIndex = Math.min(10, maxval - minval); 
+	var domain = []
+	for (var i=maxval - rangeIndex; i<=maxval; i+=1){domain.push(i);}
+	tmpCS.range(colors[rangeIndex]);
+	tmpCS.domain(domain);
+}
+
+function updateColorDomains(num_date){
+	dateColorDomain = genericDomain.map(function(d) {return Math.round(10*(num_date - time_window*(1.0-d)))/10;});
+	dateColorScale.domain(dateColorDomain);
+}
+
 function tipVisibility(d) {
 	if (d.diff < 0 || d.diff > time_window) {
 		return "hidden";
@@ -121,6 +148,10 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	tips = gatherTips(rootNode, []);
 	vaccines = getVaccines(tips);
 
+	initDateColorDomain();
+	initColorDomain('ep', epitopeColorScale);
+	initColorDomain('ne', nonepitopeColorScale);
+	initColorDomain('rb', receptorBindingColorScale);
 	date_init();
 	tree_init();
 

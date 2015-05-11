@@ -1,26 +1,34 @@
-var colors = ["#5097BA", "#60AA9E", "#75B681", "#8EBC66", "#AABD52", "#C4B945", "#D9AD3D", "#E59637", "#E67030", "#DF4327"];
+var colors = [[], ["#8EBC66"], ["#5097BA", "#DF4327"], ["#5097BA",  "#8EBC66",   "#DF4327"],
+				  ["#5097BA",  "#8EBC66",  "#E59637", "#DF4327"],
+				  ["#5097BA", "#60AA9E",  "#8EBC66",  "#E59637", "#DF4327"],
+			      ["#5097BA", "#60AA9E",  "#8EBC66",  "#C4B945", "#E59637", "#DF4327"],
+				  ["#5097BA", "#60AA9E", "#75B681",  "#AABD52",  "#D9AD3D", "#E59637","#DF4327"],
+				  ["#5097BA", "#60AA9E", "#75B681",  "#AABD52", "#C4B945", "#D9AD3D",  "#E67030", "#DF4327"],
+				  ["#5097BA", "#60AA9E", "#75B681", "#8EBC66", "#AABD52", "#C4B945", "#D9AD3D",  "#E67030", "#DF4327"],
+				  ["#5097BA", "#60AA9E", "#75B681", "#8EBC66", "#AABD52", "#C4B945", "#D9AD3D", "#E59637", "#E67030", "#DF4327"],
+				];
 var regionColors = ["#5097BA", "#60AA9E", "#75B681", "#8EBC66", "#AABD52", "#C4B945", "#D9AD3D", "#E59637", "#E67030", "#DF4327"]
 var genotypeColors = ["#60AA9E", "#D9AD3D", "#5097BA", "#E67030", "#8EBC66", "#E59637", "#AABD52", "#DF4327", "#C4B945", "#75B681"]
 
 var epitopeColorScale = d3.scale.linear().clamp([true])
 	.domain(epiColorDomain)
-	.range(colors);		
+	.range(colors[10]);		
 
 var nonepitopeColorScale = d3.scale.linear().clamp([true])
 	.domain(nonEpiColorDomain)
-	.range(colors);
+	.range(colors[10]);
 
 var receptorBindingColorScale = d3.scale.linear().clamp([true])
 	.domain(rbsColorDomain)
-	.range(colors.filter( function(d,i){return i%2;}));
+	.range(colors[4]);
 
 var lbiColorScale = d3.scale.linear()
 	.domain([0.0, 0.02, 0.04, 0.07, 0.1, 0.2, 0.4, 0.7, 0.9, 1.0])
-	.range(colors);
+	.range(colors[10]);
 
 var dfreqColorScale = d3.scale.linear()
 	.domain(dfreqColorDomain)
-	.range(colors);
+	.range(colors[10]);
 
 var regionColorScale = d3.scale.ordinal()
 	.domain(regions)
@@ -28,7 +36,7 @@ var regionColorScale = d3.scale.ordinal()
 
 var dateColorScale = d3.scale.linear().clamp([true])
 	.domain(dateColorDomain)
-	.range(colors);
+	.range(colors[10]);
 
 // "ep", "ne" and "rb" need no adjustments
 function adjust_coloring_by_date() {

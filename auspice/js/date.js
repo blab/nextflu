@@ -1,3 +1,6 @@
+var ymd_format = d3.time.format("%Y-%m-%d");
+var dateValues, earliestDate, dateScale, niceDateScale, counterData;
+
 function adjust_freq_by_date() {
 	calcTipCounts(rootNode);
 	var tipCount = rootNode.tipCount;
@@ -7,10 +10,6 @@ function adjust_freq_by_date() {
 		d.frequency = (d.tipCount)/tipCount;
 	});
 }
-
-var ymd_format = d3.time.format("%Y-%m-%d");
-
-var dateValues, earliestDate, dateScale, niceDateScale, counterData;
 
 var drag = d3.behavior.drag()
 	.origin(function(d) { return d; })
@@ -79,9 +78,8 @@ function dragged(d) {
 
 function dragend() {
 	var num_date = globalDate/1000/3600/24/365.25+1970;	
-	dateColorDomain = genericDomain.map(function(d) {return Math.round(10*(num_date - time_window*(1.0-d)))/10;});
-	dateColorScale.domain(dateColorDomain);
-	
+
+	updateColorDomains(num_date);
 	for (var ii=0; ii<rootNode.pivots.length-1; ii++){
 		if (rootNode.pivots[ii]<num_date && rootNode.pivots[ii+1]>=num_date){
 			freq_ii=Math.max(dfreq_dn,ii+1);
@@ -138,13 +136,6 @@ function date_init(){
 	earliestDate = new Date(d3.min(dateValues));
 	earliestDate.setDate(earliestDate.getDate() + 180);
 	
-	var numDateValues = tips.map(function(d) {return d.num_date;})
-	var minDate = d3.min(numDateValues.filter(function (d){return d!="undefined";}));
-	var maxDate = d3.max(numDateValues.filter(function (d){return d!="undefined";}));	
-	if (typeof time_window == "undefined"){time_window = maxDate-minDate;} 
-	dateColorDomain = genericDomain.map(function (d){return Math.round(10*(maxDate - (1.0-d)*time_window))/10;});	
-
-	dateColorScale.domain(dateColorDomain);
 	dateScale = d3.time.scale()
 		.domain([earliestDate, globalDate])
 		.range([5, 205])
