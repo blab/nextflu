@@ -33,7 +33,10 @@ virus_config.update({
 						   "3c2.a": [(144+sp,'S'), (159+sp,'Y'), (225+sp,'D'), (311+sp,'H'), (489+sp,'N')],
 						   "3c2":   [(144+sp,'N'), (159+sp,'F'), (225+sp,'N'), (489+sp,'N'), (142+sp, 'R')],
 						   "3c3.b":   [(83+sp,'R'), (261+sp,'Q'), (62+sp,'K'), (122+sp,'D')]
-							}					
+							},
+	'html_vars': {'coloring': 'ep, ne, rb, lbi, dfreq, region, date',
+				   'gtplaceholder': 'HA1 positions...',
+					'freqdefault': '3c2.a, 3c3.a'},
 	})
 
 
@@ -269,6 +272,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 			# exporting to json, including the H3N2 specific fields
 			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country'], 
 			                       annotations = ['3c2.a', '3c3.a'])
+			self.generate_indexHTML()
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies', 'export']

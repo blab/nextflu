@@ -22,6 +22,7 @@ parser.add_argument('--start', default = 'filter', type = str,  help ="start pip
 parser.add_argument('--stop', default = 'export', type=str,  help ="run to end")
 parser.add_argument('--skip', nargs='+', type = str,  help ="analysis steps to skip")	
 parser.add_argument('--ATG', action="store_true", default=False, help ="include full HA sequence starting at ATG")	
+parser.add_argument('--resolution', type = str,  help ="label for the resolution")	
 
 
 virus_config = {
@@ -49,29 +50,35 @@ def shift_cds(shift, vc, epi_mask, rbs):
 class process(virus_frequencies):
 	"""generic template class for processing virus sequences into trees"""
 	def __init__(self, path = 'data/', prefix = 'virus', time_interval = (2012.0, 2015.0), 
-	             run_dir = None, date_format={'fields':'%Y-%m-%d', 'reg':r'\d\d\d\d-\d\d-\d\d'},
+	             run_dir = None, virus = None, resolution = None, date_format={'fields':'%Y-%m-%d', 'reg':r'\d\d\d\d-\d\d-\d\d'},
 				 min_mutation_frequency = 0.01, min_genotype_frequency = 0.1, **kwargs):
 		self.tree_fname = path+prefix+'tree.pkl'
 		self.virus_fname = path+prefix+'virus.pkl'
 		self.frequency_fname = path+prefix+'frequencies.pkl'
 		self.aa_seq_fname = path+prefix+'aa_seq.pkl'
 		self.path = path
+		self.virus_type=virus
+		self.resolution = resolution
 		self.prefix = prefix
+		if resolution is not None:
+			self.resolution_prefix = resolution+'_'
+		else:
+			self.resolution_prefix = ''
 		self.date_format = date_format
 		self.min_mutation_frequency = min_mutation_frequency
 		self.min_genotype_frequency = min_genotype_frequency
 		self.time_interval = tuple(time_interval)
+		self.kwargs = kwargs
 		if run_dir is None:
 			import random
 			self.run_dir = '_'.join(['temp', time.strftime('%Y%m%d-%H%M%S',time.gmtime()), str(random.randint(0,1000000))])
 		else:
 			self.run_dir = run_dir
 		self.run_dir = self.run_dir.rstrip('/')+'/'
-
-		self.auspice_tree_fname = 		'../auspice/data/' + prefix + 'tree.json'
-		self.auspice_sequences_fname = 	'../auspice/data/' + prefix + 'sequences.json'
-		self.auspice_frequency_fname = 	'../auspice/data/' + prefix + 'frequencies.json'
-		self.auspice_meta_fname = 		'../auspice/data/' + prefix + 'meta.json'
+		self.auspice_tree_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'tree.json'
+		self.auspice_sequences_fname = 	'../auspice/data/' + self.prefix + self.resolution_prefix + 'sequences.json'
+		self.auspice_frequency_fname = 	'../auspice/data/' + self.prefix + self.resolution_prefix + 'frequencies.json'
+		self.auspice_meta_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'meta.json'
 		self.nuc_alphabet = 'ACGT-N'
 		self.aa_alphabet = 'ACDEFGHIKLMNPQRSTVWY*X'
 		virus_frequencies.__init__(self, **kwargs)
@@ -213,6 +220,34 @@ class process(virus_frequencies):
 			meta["virus_stats"] = [ [str(y)+'-'+str(m)] + [self.date_region_count[(y,m)][reg] for reg in self.regions]
 									for y,m in sorted(self.date_region_count.keys()) ]
 		write_json(meta, self.auspice_meta_fname, indent=0)
+
+	def generate_indexHTML(self):
+		htmlpath = '../auspice/'
+		rel_jspath = 'js/' 
+		if self.virus_type is not None: 
+			htmlpath+=self.virus_type+'/'
+			rel_jspath = '../'+rel_jspath
+		if self.resolution is not None: 
+			htmlpath+=self.resolution+'/'
+			rel_jspath = '../'+rel_jspath
+
+		if not os.path.isdir(htmlpath): os.makedirs(htmlpath)
+
+		with open(htmlpath+'index.html','w') as out:
+			out.write("---\ntitle: nextflu / "+self.virus_type+\
+					  "layout: auspice\nvirus: "+self.virus_type+"\n")
+			if "html_vars"  in self.kwargs:
+				for vname, val in self.kwargs["html_vars"].iteritems():
+					out.write(vname+": "+ val+'\n')
+			dt=self.time_interval[1]-self.time_interval[0]
+			step = 0.5 if dt<4 else '1' if dt<7 else dt//5
+			out.write('---\n\n')
+			out.write('<script>\nvar file_prefix = '+self.prefix+self.resolution_prefix+';\nvar dfreq_dn = 2;\n')
+			out.write('var time_window = '+str(max(1, dt//3))+'\n')
+			out.write('var LBItau = 0.0005\nvar LBItime_window = 0.5\n')
+			out.write('var time_ticks: ['+', '.join(map(str, np.arange(self.time_interval[0], self.time_interval[1], step)))+']\n')
+			out.write('{%include_relative '+rel_jspath + self.virus_type+'_vaccines.js %}\n')
+			out.write('</script>\n\n')
 
 	def align(self):
 		'''

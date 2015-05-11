@@ -44,7 +44,10 @@ virus_config.update({
 		'6b':[(180,'Q'), (273, 'T'), (214, 'A'), (300,'E')],
 		'7':[(160,'G'),  (114, 'D'), (214, 'T')],
 		'8':[(203,'T'), (289,'A')],
-		}
+		},
+	'html_vars': {'coloring': 'ep, ne, rb, lbi, dfreq, region, date',
+				  'gtplaceholder': 'HA1 positions...',
+				  'freqdefault': '6b, 6c'}
 	})
 
 

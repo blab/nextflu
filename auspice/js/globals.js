@@ -8,6 +8,7 @@ var globalDate = new Date();
 var nodes, tips, rootNode, links, vaccines;
 
 var nDisplayTips, displayRoot;
+var freqdefault = document.getElementById("gtspec").value;
 
 function treePlotHeight(width) {
 	return 400 + 0.35*width;
