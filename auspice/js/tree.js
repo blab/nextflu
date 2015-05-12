@@ -1,3 +1,5 @@
+console.log('Enter tree.js');
+
 var freqScale = d3.scale.linear()
 	.domain([0, 1])
 	.range([1.5, 4.5]);
@@ -15,6 +17,7 @@ function initDateColorDomain(intAttributes){
 	var maxDate = d3.max(numDateValues.filter(function (d){return d!="undefined";}));	
 	if (typeof time_window == "undefined"){time_window = maxDate-minDate;} 
 	dateColorDomain = genericDomain.map(function (d){return Math.round(10*(maxDate - (1.0-d)*time_window))/10;});	
+	console.log('setting date domain '+dateColorDomain);
 	dateColorScale.domain(dateColorDomain);
 }
 
@@ -149,9 +152,9 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	vaccines = getVaccines(tips);
 
 	initDateColorDomain();
-	initColorDomain('ep', epitopeColorScale);
-	initColorDomain('ne', nonepitopeColorScale);
-	initColorDomain('rb', receptorBindingColorScale);
+	if (typeof rootNode['ep'] != "undefined"){ initColorDomain('ep', epitopeColorScale);}
+	if (typeof rootNode['ne'] != "undefined"){ initColorDomain('ne', nonepitopeColorScale);}
+	if (typeof rootNode['rb'] != "undefined"){ initColorDomain('rb', receptorBindingColorScale);}
 	date_init();
 	tree_init();
 
