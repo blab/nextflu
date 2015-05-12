@@ -47,7 +47,7 @@ virus_config.update({
 		},
 	'html_vars': {'coloring': 'ep, ne, rb, lbi, dfreq, region, date',
 				  'gtplaceholder': 'HA1 positions...',
-				  'freqdefault': '6b, 6c'}
+				  'freqdefault': '6b, 6c'},
 	'js_vars': {'LBItau': 0.0005, 'LBItime_window': 0.5, 'dfreq_dn':2},
 	})
 

@@ -161,8 +161,9 @@ if __name__=="__main__":
 				if resolution == '12y':
 					n_viruses = 8
 					n_years = 12
-				prefix = lineage + '_' + resolution + '_'
-				call = map(str, [params.bin, process, '-v', n_viruses, '-y', n_years, '--prefix', prefix] + common_args)
+				prefix = lineage + '_'
+				call = map(str, [params.bin, process, '-v', n_viruses, '-y', n_years, 
+				           		 '--prefix', prefix, '--resolution', resolution] + common_args)
 				print call
 				subprocess.call(call)
 				if params.s3:
