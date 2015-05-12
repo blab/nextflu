@@ -24,7 +24,7 @@ receptor_binding_sites = [159,169,170,172,173,203,207]
 
 virus_config.update({
 	# data source and sequence parsing/cleaning/processing
-	'virus':'BVic',
+	'virus':'Vic',
 	'alignment_file':'data/Vic_gisaid_epiflu_sequence.fasta',
 	'outgroup':'B/HongKong/02/1993',
 	#'force_include':'source-data/HI_strains.txt',

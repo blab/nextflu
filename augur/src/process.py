@@ -52,10 +52,6 @@ class process(virus_frequencies):
 	def __init__(self, path = 'data/', prefix = 'virus', time_interval = (2012.0, 2015.0), 
 	             run_dir = None, virus = None, resolution = None, date_format={'fields':'%Y-%m-%d', 'reg':r'\d\d\d\d-\d\d-\d\d'},
 				 min_mutation_frequency = 0.01, min_genotype_frequency = 0.1, **kwargs):
-		self.tree_fname = path+prefix+'tree.pkl'
-		self.virus_fname = path+prefix+'virus.pkl'
-		self.frequency_fname = path+prefix+'frequencies.pkl'
-		self.aa_seq_fname = path+prefix+'aa_seq.pkl'
 		self.path = path
 		self.virus_type=virus
 		self.resolution = resolution
@@ -69,6 +65,10 @@ class process(virus_frequencies):
 		self.min_genotype_frequency = min_genotype_frequency
 		self.time_interval = tuple(time_interval)
 		self.kwargs = kwargs
+		self.tree_fname = 		self.path + self.prefix + self.resolution_prefix + 'tree.pkl'
+		self.virus_fname = 		self.path + self.prefix + self.resolution_prefix + 'virus.pkl'
+		self.frequency_fname = 	self.path + self.prefix + self.resolution_prefix + 'frequencies.pkl'
+		self.aa_seq_fname = 	self.path + self.prefix + self.resolution_prefix + 'aa_seq.pkl'
 		if run_dir is None:
 			import random
 			self.run_dir = '_'.join(['temp', time.strftime('%Y%m%d-%H%M%S',time.gmtime()), str(random.randint(0,1000000))])
@@ -237,12 +237,12 @@ class process(virus_frequencies):
 				for vname, val in self.kwargs["html_vars"].iteritems():
 					out.write(vname+": "+ val+'\n')
 			dt=self.time_interval[1]-self.time_interval[0]
-			step = 0.5 if dt<4 else '1' if dt<7 else dt//5
+			step = 0.5 if dt<4 else 1 if dt<7 else dt//5
 			out.write('---\n\n')
 			out.write('<script>\n')
 			out.write('var file_prefix = "'+self.prefix+self.resolution_prefix+'";\n')
 			out.write('var time_window = '+str(max(1, dt//3))+';\n')
-			out.write('var time_ticks=['+', '.join(map(str, np.arange(self.time_interval[0], self.time_interval[1], step)))+'];\n')
+			out.write('var time_ticks=['+', '.join(map(str, np.arange(np.ceil(self.time_interval[0]), np.ceil(self.time_interval[1]), step)))+'];\n')
 			if "js_vars" in self.kwargs:
 				for vname, val in self.kwargs['js_vars'].iteritems():
 					if isinstance(val, basestring):
