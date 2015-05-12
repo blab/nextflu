@@ -37,7 +37,11 @@ virus_config.update({
 		'2':  [(63,'K'), (123, 'A'), (165, 'S')],
 		'3':  [(63,'R'), (123, 'P'), (165, 'I')],
 		'3a': [(52,'A'), (313, 'E'), (63,'R'), (123, 'P'), (165, 'I')],
-	}
+	},
+	'html_vars': {'coloring': 'lbi, dfreq, region, date',
+				  'gtplaceholder': 'HA1 positions...',
+				  'freqdefault': '2, 3, 3a'}
+	'js_vars': {'LBItau': 0.0005, 'LBItime_window': 0.5, 'dfreq_dn':2},	
 	})
 
 

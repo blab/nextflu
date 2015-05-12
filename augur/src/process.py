@@ -231,7 +231,7 @@ class process(virus_frequencies):
 		if not os.path.isdir(htmlpath): os.makedirs(htmlpath)
 
 		with open(htmlpath+'index.html','w') as out:
-			out.write("---\ntitle: nextflu / "+self.virus_type+'\n'\
+			out.write("---\ntitle: nextflu / "+self.virus_type+" / "+self.resolution_prefix.rstrip('_')+'\n'\
 					  "layout: auspice\nvirus: "+self.virus_type+"\n")
 			if "html_vars"  in self.kwargs:
 				for vname, val in self.kwargs["html_vars"].iteritems():
@@ -239,10 +239,16 @@ class process(virus_frequencies):
 			dt=self.time_interval[1]-self.time_interval[0]
 			step = 0.5 if dt<4 else '1' if dt<7 else dt//5
 			out.write('---\n\n')
-			out.write('<script>\nvar file_prefix = "'+self.prefix+self.resolution_prefix+'";\nvar dfreq_dn = 2;\n')
+			out.write('<script>\n')
+			out.write('var file_prefix = "'+self.prefix+self.resolution_prefix+'";\n')
 			out.write('var time_window = '+str(max(1, dt//3))+';\n')
-			out.write('var LBItau = 0.0005;\nvar LBItime_window = 0.5;\n')
 			out.write('var time_ticks=['+', '.join(map(str, np.arange(self.time_interval[0], self.time_interval[1], step)))+'];\n')
+			if "js_vars" in self.kwargs:
+				for vname, val in self.kwargs['js_vars'].iteritems():
+					if isinstance(val, basestring):
+						out.write('var '+vname+' = "'+val+'";\n')
+					else:						
+						out.write('var '+vname+' = '+str(val)+';\n')
 			out.write('{%include '+self.virus_type+'_vaccines.js %}\n')
 			out.write('</script>\n\n')
 
