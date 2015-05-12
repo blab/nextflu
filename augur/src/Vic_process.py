@@ -176,6 +176,7 @@ class BVic_process(process, BVic_filter, BVic_clean, BVic_refine):
 			# exporting to json, including the BVic specific fields
 			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country'],
 									annotations = ['1A', '1B'])
+			self.generate_indexHTML()
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies', 'export']

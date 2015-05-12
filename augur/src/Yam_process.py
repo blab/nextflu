@@ -195,6 +195,7 @@ class BYam_process(process, BYam_filter, BYam_clean, BYam_refine):
 			# exporting to json, including the BYam specific fields
 			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db','country'],
 									annotations = ['2', '3', '3a'])
+			self.generate_indexHTML()
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies', 'export']
