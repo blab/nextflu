@@ -15,8 +15,15 @@ function initDateColorDomain(intAttributes){
 	var numDateValues = tips.map(function(d) {return d.num_date;})
 	var minDate = d3.min(numDateValues.filter(function (d){return d!="undefined";}));
 	var maxDate = d3.max(numDateValues.filter(function (d){return d!="undefined";}));	
-	if (typeof time_window == "undefined"){time_window = maxDate-minDate;} 
-	dateColorDomain = genericDomain.map(function (d){return Math.round(10*(maxDate - (1.0-d)*time_window))/10;});	
+	if (typeof time_window == "undefined"){
+		time_window = maxDate-minDate;
+		console.log("defining time window as " + time_window);
+	} 
+	if (time_window>1){
+		dateColorDomain = genericDomain.map(function (d){return Math.round(10*(maxDate - (1.0-d)*time_window))/10;});
+	}else{
+		dateColorDomain = genericDomain.map(function (d){return Math.round(100*(maxDate - (1.0-d)*time_window))/100;});		
+	}
 	console.log('setting date domain '+dateColorDomain);
 	dateColorScale.domain(dateColorDomain);
 }
@@ -27,9 +34,14 @@ function initColorDomain(attr, tmpCS){
 	var vals = tips.map(function(d) {return d[attr];});
 	var minval = d3.min(vals);
 	var maxval = d3.max(vals);	
-	var rangeIndex = Math.min(10, maxval - minval); 
-	var domain = []
-	for (var i=maxval - rangeIndex; i<=maxval; i+=1){domain.push(i);}
+	var rangeIndex = Math.min(10, maxval - minval);
+	var domain = [];
+	if (maxval-minval<20)
+	{
+		for (var i=maxval - rangeIndex; i<=maxval; i+=1){domain.push(i);}
+	}else{
+		for (var i=1.0*minval; i<=maxval; i+=(maxval-minval)/9.0){domain.push(i);}		
+	}
 	tmpCS.range(colors[rangeIndex]);
 	tmpCS.domain(domain);
 }
@@ -40,7 +52,7 @@ function updateColorDomains(num_date){
 }
 
 function tipVisibility(d) {
-	if (d.diff < 0 || d.diff > time_window) {
+	if ((d.diff < 0 || d.diff > time_window)&(date_select==true)) {
 		return "hidden";
 	}
 	else if (d.region != restrictTo && restrictTo != "all") {
@@ -209,15 +221,15 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.style("cursor", "pointer")
 		.on('mouseover', function (d){
 			linkTooltip.show(d.target, this);
-			if (colorBy!="genotype"){
+			if ((colorBy!="genotype")&(typeof addClade !="undefined")){
 				clade_freq_event = setTimeout(addClade, 1000, d);
 			}
 			})
 		.on('mouseout', function(d) {
 			linkTooltip.hide(d);
-			clearTimeout(clade_freq_event);})		
+			if (typeof addClade !="undefined") {clearTimeout(clade_freq_event);};})		
 		.on('click', function(d) {
-			if (colorBy!="genotype"){
+			if ((colorBy!="genotype")&(typeof addClade !="undefined")){
 				addClade(d);
 			}
 			displayRoot = d.target;
