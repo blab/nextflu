@@ -32,7 +32,7 @@ var dfreqColorScale = d3.scale.linear()
 
 var HIColorScale_valid = d3.scale.linear()
 	.domain(HIColorDomain)
-	.range(colors);
+	.range(colors[10]);
 
 var HIColorScale = function(c){
 	if (c!='NaN'){
@@ -105,6 +105,7 @@ function colorByTrait() {
 	else if (colorBy == "cHI") {
 		colorScale = HIColorScale;
 		nodes.map(function(d) { d.coloring = d.cHI; });
+	}
 	else if (colorBy == "date") {
 		colorScale = dateColorScale;
 		nodes.map(function(d) { d.coloring = d.num_date; });
