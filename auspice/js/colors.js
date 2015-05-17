@@ -1,26 +1,34 @@
-var colors = ["#5097BA", "#60AA9E", "#75B681", "#8EBC66", "#AABD52", "#C4B945", "#D9AD3D", "#E59637", "#E67030", "#DF4327"];
+var colors = [[], ["#8EBC66"], ["#5097BA", "#DF4327"], ["#5097BA",  "#8EBC66",   "#DF4327"],
+				  ["#5097BA",  "#8EBC66",  "#E59637", "#DF4327"],
+				  ["#5097BA", "#60AA9E",  "#8EBC66",  "#E59637", "#DF4327"],
+			      ["#5097BA", "#60AA9E",  "#8EBC66",  "#C4B945", "#E59637", "#DF4327"],
+				  ["#5097BA", "#60AA9E", "#75B681",  "#AABD52",  "#D9AD3D", "#E59637","#DF4327"],
+				  ["#5097BA", "#60AA9E", "#75B681",  "#AABD52", "#C4B945", "#D9AD3D",  "#E67030", "#DF4327"],
+				  ["#5097BA", "#60AA9E", "#75B681", "#8EBC66", "#AABD52", "#C4B945", "#D9AD3D",  "#E67030", "#DF4327"],
+				  ["#5097BA", "#60AA9E", "#75B681", "#8EBC66", "#AABD52", "#C4B945", "#D9AD3D", "#E59637", "#E67030", "#DF4327"],
+				];
 var regionColors = ["#5097BA", "#60AA9E", "#75B681", "#8EBC66", "#AABD52", "#C4B945", "#D9AD3D", "#E59637", "#E67030", "#DF4327"]
 var genotypeColors = ["#60AA9E", "#D9AD3D", "#5097BA", "#E67030", "#8EBC66", "#E59637", "#AABD52", "#DF4327", "#C4B945", "#75B681"]
 
 var epitopeColorScale = d3.scale.linear().clamp([true])
 	.domain(epiColorDomain)
-	.range(colors);		
+	.range(colors[10]);		
 
 var nonepitopeColorScale = d3.scale.linear().clamp([true])
 	.domain(nonEpiColorDomain)
-	.range(colors);
+	.range(colors[10]);
 
 var receptorBindingColorScale = d3.scale.linear().clamp([true])
 	.domain(rbsColorDomain)
-	.range(colors.filter( function(d,i){return i%2;}));
+	.range(colors[4]);
 
 var lbiColorScale = d3.scale.linear()
 	.domain([0.0, 0.02, 0.04, 0.07, 0.1, 0.2, 0.4, 0.7, 0.9, 1.0])
-	.range(colors);
+	.range(colors[10]);
 
 var dfreqColorScale = d3.scale.linear()
 	.domain(dfreqColorDomain)
-	.range(colors);
+	.range(colors[10]);
 
 var HIColorScale_valid = d3.scale.linear()
 	.domain(HIColorDomain)
@@ -39,6 +47,10 @@ var regionColorScale = d3.scale.ordinal()
 	.domain(regions)
 	.range(regionColors);
 
+var dateColorScale = d3.scale.linear().clamp([true])
+	.domain(dateColorDomain)
+	.range(colors[10]);
+
 // "ep", "ne" and "rb" need no adjustments
 function adjust_coloring_by_date() {
 	if (colorBy == "lbi") {
@@ -53,6 +65,11 @@ function adjust_coloring_by_date() {
 			d.coloring = d.dfreq;
 		});
 	}
+	else if (colorBy == "date") {
+		nodes.forEach(function (d) {
+			d.coloring = d.num_date;
+		});
+	}	
 }
 
 
@@ -88,6 +105,9 @@ function colorByTrait() {
 	else if (colorBy == "cHI") {
 		colorScale = HIColorScale;
 		nodes.map(function(d) { d.coloring = d.cHI; });
+	else if (colorBy == "date") {
+		colorScale = dateColorScale;
+		nodes.map(function(d) { d.coloring = d.num_date; });
 	}
 
 	treeplot.selectAll(".link")
@@ -116,7 +136,7 @@ function tipFillColor(d) {
 
 function branchStrokeColor(d) {
 	var col;
-	if (colorBy == "region") {
+	if (colorBy == "region" || colorBy == "date") {
 		col = "#AAA";
 	}
 	else {
@@ -144,6 +164,9 @@ function colorByGenotype() {
 	}
 	else {
 		d3.select("#coloring").each(colorByTrait);
+		gt = parse_gt_string(freqdefault);			
+		make_gt_chart(gt);
+		document.getElementById("gtspec").value = freqdefault;
 	}
 }
 
@@ -180,6 +203,15 @@ function colorByGenotypePosition (positions) {
 		removeLegend();
 	}
 	tree_legend = makeLegend();
+
+	if ((positions.length==1)&&(filtered_gts.length>1)){
+		var tmp_gts=[];
+		for (var ii=0; ii<filtered_gts.length; ii+=1){
+			tmp_gts.push(["global", filtered_gts[ii]])
+		}
+		make_gt_chart(tmp_gts);
+		document.getElementById("gtspec").value = tmp_gts.map( function (d) {return d[1];}).join(', ');
+	}
 }
 
 function colorByHIDistance(){
@@ -228,8 +260,12 @@ d3.select("#coloring")
 	.on("change", colorByTrait);
 
 
+var genotypeColoringEvent;
 d3.select("#gt-color")
-	.on("keyup", colorByGenotype);
+	.on("keyup", function(){
+		if (typeof genotypeColoringEvent != "undefined"){clearTimeout(genotypeColoringEvent);}
+		genotypeColoringEvent = setTimeout(colorByGenotype, 200);
+	});
 
 
 

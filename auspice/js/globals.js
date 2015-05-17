@@ -7,12 +7,19 @@ var globalDate = new Date();
 
 var nodes, tips, rootNode, links, vaccines, sera;
 
+var nDisplayTips, displayRoot;
+if (document.getElementById("gtspec") != null){
+    var freqdefault = document.getElementById("gtspec").value;
+}else{
+    var freqdefault ='';
+}
+
 function treePlotHeight(width) {
 	return 400 + 0.35*width;
 }
 var containerWidth = parseInt(d3.select(".treeplot-container").style("width"), 10);
-var treeWidth = containerWidth, treeHeight;
-treeHeight = treePlotHeight(treeWidth);
+var treeWidth = containerWidth;
+var treeHeight = treePlotHeight(treeWidth);
 var tree = d3.layout.tree()
 	.size([treeHeight, treeWidth]);
 
@@ -27,10 +34,16 @@ var legend = d3.select("#legend")
 
 var colorBy = document.getElementById("coloring").value;
 var colorScale;
+
+var epiColorDomain = genericDomain;
+var nonEpiColorDomain = genericDomain;
+var rbsColorDomain = genericDomain;
+var dateColorDomain = genericDomain;
+var dfreqColorDomain = genericDomain.map(function(d){return Math.round(100*(-0.18+d*0.36))/100;});
 var time_step;
 
 
-d3.json("/data/" + file_prefix + "meta.json", function(error, json) {
+d3.json(path + file_prefix + "meta.json", function(error, json) {
     if (error) return console.warn(error);
     d3.select("#updated").text(json['updated']);
     commit_id = json['commit'];

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>{{ page.title }}</title>
+
+    	<!-- Customized Bootstrap + Font Awesome -->
+		<link href="css/style.css" rel="stylesheet" media="screen">
+		
+		<!-- Favicon -->
+		<link rel="shortcut icon" href="/images/favicon.png"/>			
+		
+		<!-- Typekit -->
+		<script>
+			(function(d) {
+				var config = {
+					kitId: 'nzp8tsk',
+					scriptTimeout: 3000
+				},
+				h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='//use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
+			})(document);
+		</script>		
+		
+	</head>
+
+	<body>
+
+		<div class="container">
+
+		<div class="row">
+			<div class="col-md-3">
+				<div class="logo-container">
+					<div class="bigtitle">
+						<span class="c2">n</span><span class="c3">e</span><span class="c4">x</span><span class="c5">t</span><span class="c6">f</span><span class="c7">l</span><span class="c8">u</span>
+					</div>
+					<div class="subtitle-box">
+						Annotated phylogeny
+					</div>
+					<div class="spacer"></div>		
+				</div>
+				<div class="bigspacer"></div>	
+				<div class="row">
+					<div class="col-xs-6 io-container">
+						<div>
+							<h5 id="legend-title">Legend</h5>
+							<svg id="legend"></svg>
+						</div>
+						<div class="spacer"></div>
+					</div>
+					<div class="col-xs-6 io-container">			
+						<form class="form-horizontal form-small">
+							<div class="form-group">
+									<label class="col-xs-4 control-label">Color by</label>
+									<div class="col-xs-8 controls">
+										<select id="coloring" class="form-control">
+											{% if page.coloring contains 'ep' %}
+											<option value="ep">epitope mutations</option>
+											{% endif %}
+											{% if page.coloring contains 'ne' %}
+											<option value="ne">non-epitope mutations</option>
+											{% endif %}
+											{% if page.coloring contains 'rb' %}
+											<option value="rb">receptor binding mutations</option>
+											{% endif %}
+											{% if page.coloring contains 'lbi' %}
+											<option value="lbi">local branching index</option>
+											{% endif %}
+											{% if page.coloring contains 'region' %}
+											<option value="region">geographic region</option>
+											{% endif %}
+											{% if page.coloring contains 'dfreq' %}
+											<option value="dfreq">frequency change</option>
+											{% endif %}
+											{% if page.coloring contains 'date' %}
+											<option value="date">date</option>
+											{% endif %}
+										</select>
+									</div>
+							</div>
+							<div class="form-group">
+								<label class="col-xs-4 control-label">Or</label>
+								<div class="col-xs-8 controls">
+									<input id="gt-color" type="search" placeholder= "{{ page.gtplaceholder }}"  class="form-control">
+								</div>
+							</div>		
+						</form>
+						<div class="spacer"></div>
+						<div id="search"></div>
+						<div class="spacer"></div>
+						<div>
+							<button id="reset" class="btn btn-default">reset layout</button>
+						</div>
+						<div class="spacer"></div>
+					</div>					
+				</div>
+			</div>
+			<div class="col-md-9">
+				<div class="bigspacer"></div>
+				<div class="treeplot-container">
+					<svg id="treeplot"></svg>
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-12">
+			<div class="btn-group" role="group">
+			  <a href="tree.png"><button type="button" class="btn btn-default">png</button></a>
+			  <a href="tree.pdf"><button type="button" class="btn btn-default">pdf</button></a>
+			  <a href="tree.nwk"><button type="button" class="btn btn-default">newick</button></a>					
+			</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<div class="bigspacer"></div>
+				<div class="bigspacer"></div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-3"></div>
+			<div class="col-md-9">
+				<hr>The
+				<a href="http://github.com/blab/nextflu" target="_blank">source code</a> is freely available under the terms of the 
+				<a href="http://github.com/blab/nextflu/blob/master/LICENSE.txt" target="_blank">GNU Affero General Public License</a>. Data processed with commit <span id="commit"></span>.		
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-3"></div>
+			<div class="col-md-9">
+				<hr>		
+				<div class="center text-gray smallnote">
+					&copy; 2015 Trevor Bedford and Richard Neher
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-12">
+				<div class="bigspacer"></div>
+			</div>
+		</div>
+
+		<script src="js/muttree.js"></script>
+
+    	</div>
+
+	</body>
+
+</html>

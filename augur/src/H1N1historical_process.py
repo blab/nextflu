@@ -40,6 +40,10 @@ virus_config.update({
 	'clade_designations': {},
 	'auspice_prefix':'H1N1_HI_',
 	'HI_fname':'source-data/H1N1_HI_titers.txt',
+	'html_vars': {'coloring': 'ep, ne, rb, lbi, dfreq, region, date, HI',
+				   'gtplaceholder': 'HA1 positions...',
+					'freqdefault': '3c2.a, 3c3.a'},
+	'js_vars': {'LBItau': 0.0005, 'LBItime_window': 0.5, 'dfreq_dn':2},
 	})
 
 

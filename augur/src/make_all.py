@@ -9,7 +9,6 @@ patterns = {('A / H3N2', ''):'H3N2',
 			('B / H0N0', 'Yamagata'):'Yam',
 			('A / H1N1', 'seasonal'):'H1N1',
 			}
-lineages = ['H3N2', 'H1N1pdm', 'Vic', 'Yam']
 
 def pull_fasta_from_s3(lineage, directory = 'data/', bucket = 'nextflu-data'):
 	"""Retrieve FASTA files from S3 bucket"""
@@ -43,7 +42,7 @@ def push_fasta_to_s3(lineage, directory = 'data/', bucket = 'nextflu-data'):
 	k.set_contents_from_filename(directory+fasta)
 	print fasta,"uploaded"
 	
-def push_json_to_s3(lineage, directory = '../auspice/data/', bucket = 'nextflu-dev', cloudfront = 'E1XKGZG0ZTX4YN'):
+def push_json_to_s3(lineage, resolution, directory = '../auspice/data/', bucket = 'nextflu-dev', cloudfront = 'E1XKGZG0ZTX4YN'):
 	"""Upload JSON files to S3 bucket"""
 	"""Boto expects environmental variables AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY"""
 	directory = directory.rstrip('/')+'/'
@@ -55,9 +54,9 @@ def push_json_to_s3(lineage, directory = '../auspice/data/', bucket = 'nextflu-d
 
 	paths = []	
 
-	print "Uploading JSONs for",lineage
-	for postfix in ['_tree.json', '_sequences.json', '_frequencies.json', '_meta.json']:
-		json = lineage + postfix
+	print "Uploading JSONs for", lineage, resolution
+	for postfix in ['tree.json', 'sequences.json', 'frequencies.json', 'meta.json']:
+		json = lineage + '_' + resolution + '_' + postfix
 		k.key = 'data/'+json
 		k.set_contents_from_filename(directory+json)
 		print json,"uploaded"
@@ -76,8 +75,8 @@ def ammend_fasta(fname, lineage, threshold = 10, directory = 'data/'):
 		print "No existing file found for",lineage, ex_fname
 	else:
 		for seq in SeqIO.parse(ex_fname, 'fasta'):
-			acc = int(seq.description.split('|')[-1].strip())
-			existing.add(acc)
+			strain = seq.description.split('|')[0].strip()
+			existing.add(strain)
 	print "Found", len(existing), 'existing for lineage', lineage 
 
 	new_seqs = []
@@ -91,8 +90,8 @@ def ammend_fasta(fname, lineage, threshold = 10, directory = 'data/'):
 			tmp_lineage = (fields[2], fields[4])
 			if tmp_lineage in patterns:
 				if patterns[tmp_lineage]==lineage:
-					acc = int(fields[-1])
-					if acc not in existing:
+					strain = fields[0]
+					if strain not in existing:
 						new_seqs.append(seq)
 			else:
 				if verbose:
@@ -116,33 +115,57 @@ if __name__=="__main__":
 	parser.add_argument('--s3', action = "store_true", default = False, help = "push/pull FASTA and JSON files to/from S3")
 	parser.add_argument('--fasta_bucket', type = str, default = "nextflu-data", help = "bucket for FASTA files")		
 	parser.add_argument('--json_bucket', type = str, default = "nextflu-dev", help = "bucket for JSON files")	
-	parser.add_argument('--threshold', type = float, default = 10.0, help = "number of new sequences required to rerun pipeline")	
+	parser.add_argument('--threshold', type = float, default = 10.0, help = "number of new sequences required to rerun pipeline")
+	parser.add_argument('--lineages', nargs='+', type = str,  help ="lineages to include")
+	parser.add_argument('--resolutions', nargs='+', type = str,  help ="resolutions to include")		
 	parser.add_argument('-r', type = float, default = 1.0)
 	params = parser.parse_args()
 
 	common_args = ['--skip', 'genotype_frequencies', '-r', params.r]
 	if params.ATG: common_args.append('--ATG')
+	
+	if params.lineages is None:
+		params.lineages = ['H3N2', 'H1N1pdm', 'Vic', 'Yam']
+		
+	if params.resolutions is None:		
+#		params.resolutions = ['1y', '3y', '6y', '12y']
+		params.resolutions = ['2y', '5y']
 
-	for lineage in lineages:
-		print '\nLineage',lineage	
+	for lineage in params.lineages:
 		if params.s3:
 			pull_fasta_from_s3(lineage, directory = 'data/', bucket = params.fasta_bucket)
 		if params.all:
 			params.threshold = 0
 		run = ammend_fasta(params.infile, lineage, threshold = params.threshold, directory = 'data/')
 		if run:
-			if lineage == 'H3N2':
-				call = map(str, [params.bin, 'src/H3N2_process.py', '-v', 50, '-y', 3,  '--prefix', 'data/H3N2_'] + common_args)
-			if lineage == 'H1N1':
-				call = map(str, [params.bin, 'src/H1N1historical_process.py', '-v', 20, '--interval', 1990, 2010, '--prefix', 'data/H1N1_']+ common_args)
-			if lineage == 'H1N1pdm':
-				call = map(str, [params.bin, 'src/H1N1pdm_process.py', '-v', 30, '-y', 6, '--prefix', 'data/H1N1pdm_']+ common_args)
-			if lineage == 'Vic':
-				call = map(str, [params.bin, 'src/Vic_process.py', '-v', 30, '-y', 6, '--prefix', 'data/Vic_'] + common_args)
-			if lineage == 'Yam':
-				call = map(str, [params.bin, 'src/Yam_process.py', '-v', 30, '-y', 6, '--prefix', 'data/Yam_'] + common_args)
-			print call
-			subprocess.call(call)
-			if params.s3:
-				push_fasta_to_s3(lineage, directory = 'data/', bucket = params.fasta_bucket)
-				push_json_to_s3(lineage, directory = '../auspice/data/', bucket = params.json_bucket)
+			for resolution in params.resolutions:
+				print '\n------------------------------\n'
+				print 'Lineage',lineage			
+				print 'Resolution',resolution
+				process = 'src/' + lineage + '_process.py'
+				if resolution == '1y':
+					n_viruses = 100
+					n_years = 1
+				if resolution == '2y':
+					n_viruses = 50
+					n_years = 2
+				if resolution == '3y':
+					n_viruses = 32
+					n_years = 3
+				if resolution == '5y':
+					n_viruses = 20
+					n_years = 5
+				if resolution == '6y':
+					n_viruses = 18
+					n_years = 6
+				if resolution == '12y':
+					n_viruses = 8
+					n_years = 12
+				prefix = lineage + '_'
+				call = map(str, [params.bin, process, '-v', n_viruses, '-y', n_years, 
+				           		 '--prefix', prefix, '--resolution', resolution] + common_args)
+				print call
+				subprocess.call(call)
+				if params.s3:
+					push_fasta_to_s3(lineage, directory = 'data/', bucket = params.fasta_bucket)
+					push_json_to_s3(lineage, resolution, directory = '../auspice/data/', bucket = params.json_bucket)

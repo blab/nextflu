@@ -1,7 +1,15 @@
 var ymd_format = d3.time.format("%Y-%m-%d");
-
-
 var dateValues, earliestDate, dateScale, niceDateScale, counterData;
+
+function adjust_freq_by_date() {
+	calcTipCounts(rootNode);
+	var tipCount = rootNode.tipCount;
+	nDisplayTips = displayRoot.tipCount;
+	console.log("Total tipcount: " + tipCount);
+	nodes.forEach(function (d) {
+		d.frequency = (d.tipCount)/tipCount;
+	});
+}
 
 var drag = d3.behavior.drag()
 	.origin(function(d) { return d; })
@@ -64,12 +72,14 @@ function dragged(d) {
 			var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
 			if (diffYears > 0) { return "visible"; }
 				else { return "hidden"; }
-			});					
+			});
 
 }
 
 function dragend() {
 	var num_date = globalDate/1000/3600/24/365.25+1970;	
+
+	updateColorDomains(num_date);
 	for (var ii=0; ii<rootNode.pivots.length-1; ii++){
 		if (rootNode.pivots[ii]<num_date && rootNode.pivots[ii+1]>=num_date){
 			freq_ii=Math.max(dfreq_dn,ii+1);
@@ -86,32 +96,43 @@ function dragend() {
 	if (colorBy == "genotype") {
 		colorByGenotype();
 	}
+	if (colorBy == "date") {
+		removeLegend();
+		makeLegend();
+	}
 
 	if (colorBy!="genotype"){
 		d3.selectAll(".link")
-		.transition().duration(500)
-		.attr("points", branchPoints)
-		.style("stroke-width", branchStrokeWidth)
-		.style("stroke", branchStrokeColor);				
+			.transition().duration(500)
+			.attr("points", branchPoints)
+			.style("stroke-width", branchStrokeWidth)
+			.style("stroke", branchStrokeColor);				
 
 		d3.selectAll(".tip")
-		.transition().duration(500)
-		.style("visibility", tipVisibility)
-		.style("fill", tipFillColor)
-		.style("stroke", tipStrokeColor);
+			.transition().duration(500)
+			.style("visibility", tipVisibility)
+			.style("fill", tipFillColor)
+			.style("stroke", tipStrokeColor);
+				
 	}
+	
+	if ((typeof tip_labels != "undefined")&&(tip_labels)) {
+		nDisplayTips = displayRoot.fullTipCount;
+		d3.selectAll(".tipLabel")
+			.transition().duration(1000)
+			.style("font-size", tipLabelSize);
+	}	
+	
 }
 
 
 function date_init(){
-
 	nodes.forEach(function (d) {d.dateval = new Date(d.date)});
 	var dateValues = nodes.filter(function(d) {
 		return typeof d.date === 'string';
 		}).map(function(d) {
 		return new Date(d.date);
 	});
-	
 	earliestDate = new Date(d3.min(dateValues));
 	earliestDate.setDate(earliestDate.getDate() + 180);
 	

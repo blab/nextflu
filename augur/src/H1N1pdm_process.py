@@ -51,7 +51,12 @@ virus_config.update({
 		'8':[(203,'T'), (289,'A')],
 		},
 	'HI_fname':'source-data/H1N1pdm_HI_titers.txt',
-	'auspice_prefix':'H1N1pdm_HI_'
+	'auspice_prefix':'H1N1pdm_'
+	'html_vars': {'coloring': 'ep, ne, rb, lbi, dfreq, region, date, HI',
+				  'gtplaceholder': 'HA1 positions...',
+				  'freqdefault': '6b, 6c'},
+	'js_vars': {'LBItau': 0.0005, 'LBItime_window': 0.5, 'dfreq_dn':2},
+>>>>>>> 7b34bfd6528abf6eb0cf5ac72bd4ce500746da49
 	})
 
 
@@ -172,6 +177,7 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine, HI
 			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country',
 									'dHI', 'cHI', 'HI_titers', 'serum', 'HI_info', 'avidity', 'potency','mean_potency'], 
 			                       annotations = ['5','6','6b', '6c','7'])
+			self.generate_indexHTML()
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies','HI', 'export']

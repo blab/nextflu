@@ -61,6 +61,38 @@ function calcBranchLength(node){
 };
 
 /**
+ * for each node, calculate the number of subtending tips (alive or dead) 
+**/
+function calcFullTipCounts(node){
+	node.fullTipCount = 0;
+	if (typeof node.children != "undefined") {
+		for (var i=0; i<node.children.length; i++) {
+			calcFullTipCounts(node.children[i]);
+			node.fullTipCount += node.children[i].fullTipCount;
+		}
+	}
+	else { 
+		node.fullTipCount = 1;
+	}
+};
+
+/**
+ * for each node, calculate the number of tips in the currently selected time window. 
+**/
+function calcTipCounts(node){
+	node.tipCount = 0;
+	if (typeof node.children != "undefined") {
+		for (var i=0; i<node.children.length; i++) {
+			calcTipCounts(node.children[i]);
+			node.tipCount += node.children[i].tipCount;
+		}
+	}
+	else if (node.current){ 
+		node.tipCount = 1;
+	}
+};
+
+/**
 sets each node in the tree to alive=true if it has at least one descendent with current=true
 **/
 function setNodeAlive(node){
