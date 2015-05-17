@@ -1,17 +1,17 @@
 [{	"virus": "H3N2",
  	"default": "/H3N2/2y/",
 	"name": "A/H3N2",
-  	"resolutions": ["2y","5y", "10y"]},
+  	"resolutions": ["2y","5y", "12y"]},
  {	"virus": "H1N1pdm",
 	"default": "/H1N1pdm/2y/",
 	"name": "A/H1N1pdm",
-	"resolutions": ["2y","5y", "10y"]},
+	"resolutions": ["2y","5y", "12y"]},
 {"virus": "Vic",
   "default": "/Vic/2y/",
   "name": "B/Vic",
-  "resolutions": ["2y","5y", "10y"]},
+  "resolutions": ["2y","5y", "12y"]},
 { "virus": "Yam",
   	"default": "/Yam/2y/",
   	"name": "B/Yam",
-  	"resolutions": ["2y","5y", "10y"]}
+  	"resolutions": ["2y","5y", "12y"]}
 ]
