@@ -37,7 +37,7 @@ virus_config.update({
 						   "3c3.b":   [(83+sp,'R'), (261+sp,'Q'), (62+sp,'K'), (122+sp,'D')]
 							},
 	'HI_fname':'source-data/H3N2_HI_titers.txt',
-	'auspice_prefix':'H3N2_'		
+	'auspice_prefix':'H3N2_',
 	'html_vars': {'coloring': 'ep, ne, rb, lbi, dfreq, region, date, HI',
 				   'gtplaceholder': 'HA1 positions...',
 					'freqdefault': '3c2.a, 3c3.a'},

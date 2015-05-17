@@ -214,7 +214,7 @@ class flu_filter(virus_filter):
 		self.filter_passage()
 		print len(self.viruses), "without egg passage"
 		self.filter_generic(prepend_strains = self.vaccine_strains)	
-		self.filter_geo(prune_unknown=False)
+		self.filter_geo(prune=False)
 		print len(self.viruses), "with geographic information"
 		
 	def add_gisaid_metadata(self):
