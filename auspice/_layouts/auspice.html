@@ -34,9 +34,9 @@ layout: default
 					{% for virus in site.data.viruses %}
 						{% if page.virus == virus.virus %} 
 							{% for res in virus.resolutions %}
-								<option value="/{{ virus.virus }}/{{ res }}">{{ res }}
+								<option value="/{{ virus.virus }}/{{ res }}"
 								{% if page.resolution == res %} selected="selected"{% endif %}
-								</option>
+								>{{ res }}</option>
 							{% endfor %}
 					{% endif %}
 					{% endfor %}
