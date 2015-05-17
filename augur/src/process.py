@@ -38,6 +38,8 @@ virus_config = {
 	'extra_pivots': 12,  # number of pivot point for or after the last observations of a mutations
 	'inertia':0.7,		# fraction of frequency change carry over in the stiffness term
 	'n_iqd':3,     # standard deviations from clock
+	'min_mutation_frequency' = 0.1, 
+	'min_genotype_frequency' = 0.1,	
 }
 
 def shift_cds(shift, vc, epi_mask, rbs):
