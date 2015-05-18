@@ -132,7 +132,9 @@ class HI_tree(object):
 		for (test, ref), val in self.train_HI.iteritems():
 			if not np.isnan(val):
 				try:
-					if ref[0] in self.node_lookup and test in self.node_lookup:
+					if ref[0] in self.node_lookup and test in self.node_lookup\
+						and self.node_lookup[ref[0]].parent_node is not None\
+						and self.node_lookup[test].parent_node is not None:
 						path = self.get_path_no_terminals(test, ref[0])
 						tmp = np.zeros(n_params)
 						# determine branch indices on path

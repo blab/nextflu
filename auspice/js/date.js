@@ -80,6 +80,7 @@ function dragend() {
 	var num_date = globalDate/1000/3600/24/365.25+1970;	
 
 	updateColorDomains(num_date);
+	initHIColorDomain();
 	for (var ii=0; ii<rootNode.pivots.length-1; ii++){
 		if (rootNode.pivots[ii]<num_date && rootNode.pivots[ii+1]>=num_date){
 			freq_ii=Math.max(dfreq_dn,ii+1);
@@ -96,7 +97,7 @@ function dragend() {
 	if (colorBy == "genotype") {
 		colorByGenotype();
 	}
-	if (colorBy == "date") {
+	if ((colorBy == "date")||(colorBy=='cHI')) {
 		removeLegend();
 		makeLegend();
 	}

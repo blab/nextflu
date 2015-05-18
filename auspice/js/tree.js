@@ -28,6 +28,14 @@ function initDateColorDomain(intAttributes){
 	dateColorScale.domain(dateColorDomain);
 }
 
+function initHIColorDomain(){
+	var numHIValues = tips.filter(function(d) {return tipVisibility(d)=='visible';}).map(function(d) {return d.cHI;})
+	var minHI = d3.min(numHIValues.filter(function (d){return d!="undefined";}));
+	var maxHI = d3.max(numHIValues.filter(function (d){return d!="undefined";}));	
+	var cHIColorDomain = genericDomain.map(function (d){return Math.round(10*(maxHI - (1.0-d)*(maxHI-minHI)))/10;});
+	console.log('setting cHI domain '+cHIColorDomain);
+	cHIColorScale.domain(cHIColorDomain);
+}
 
 function initColorDomain(attr, tmpCS){
 	//var vals = tips.filter(function(d) {return tipVisibility(d)=='visible';}).map(function(d) {return d[attr];});
@@ -40,7 +48,7 @@ function initColorDomain(attr, tmpCS){
 	{
 		for (var i=maxval - rangeIndex; i<=maxval; i+=1){domain.push(i);}
 	}else{
-		for (var i=1.0*minval; i<=maxval; i+=(maxval-minval)/9.0){domain.push(i);}		
+		for (var i=1.0*minval; i<=maxval; i+=(maxval-minval)/9.0){domain.push(Math.round(10*i)/10);}		
 	}
 	tmpCS.range(colors[rangeIndex]);
 	tmpCS.domain(domain);
@@ -165,6 +173,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	sera = getSera(tips);
 
 	initDateColorDomain();
+	initHIColorDomain();
 	if (typeof rootNode['ep'] != "undefined"){ initColorDomain('ep', epitopeColorScale);}
 	if (typeof rootNode['ne'] != "undefined"){ initColorDomain('ne', nonepitopeColorScale);}
 	if (typeof rootNode['rb'] != "undefined"){ initColorDomain('rb', receptorBindingColorScale);}

@@ -51,12 +51,11 @@ virus_config.update({
 		'8':[(203,'T'), (289,'A')],
 		},
 	'HI_fname':'source-data/H1N1pdm_HI_titers.txt',
-	'auspice_prefix':'H1N1pdm_'
+	'auspice_prefix':'H1N1pdm_',
 	'html_vars': {'coloring': 'ep, ne, rb, lbi, dfreq, region, date, HI',
 				  'gtplaceholder': 'HA1 positions...',
 				  'freqdefault': '6b, 6c'},
 	'js_vars': {'LBItau': 0.0005, 'LBItime_window': 0.5, 'dfreq_dn':2},
->>>>>>> 7b34bfd6528abf6eb0cf5ac72bd4ce500746da49
 	})
 
 

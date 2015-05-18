@@ -34,6 +34,11 @@ var HIColorScale_valid = d3.scale.linear()
 	.domain(HIColorDomain)
 	.range(colors[10]);
 
+var cHIColorScale = d3.scale.linear()
+	.domain(HIColorDomain)
+	.range(colors[10]);
+
+
 var HIColorScale = function(c){
 	if (c!='NaN'){
 		return HIColorScale_valid(c);
@@ -103,7 +108,7 @@ function colorByTrait() {
 		nodes.map(function(d) { d.coloring = d.region; });
 	}
 	else if (colorBy == "cHI") {
-		colorScale = HIColorScale;
+		colorScale = cHIColorScale;
 		nodes.map(function(d) { d.coloring = d.cHI; });
 	}
 	else if (colorBy == "date") {
@@ -219,7 +224,10 @@ function colorByHIDistance(){
 	correctVirus = document.getElementById("virus").checked;
 	correctPotency = document.getElementById("serum").checked;
 	predictedHI = document.getElementById("HIPrediction").checked;
+	colorBy = 'HI_dist'
 	if (typeof(focusNode)=="undefined"){
+		rootNode.mean_potency=0;
+		rootNode.avidity=0;
 		focusNode=rootNode;
 	}
 	treeplot.selectAll(".serum")
