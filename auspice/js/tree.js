@@ -104,10 +104,7 @@ function branchLabelSize(d) {
 }
 
 function tipLabelSize(d) {
-	if (d.diff < 0 || d.diff > time_window) {
-		return 0;
-	}
-	else if (d.region != restrictTo && restrictTo != "all") {
+	if (tipVisibility(d)!="visible"){
 		return 0;
 	}
 	var n = nDisplayTips;
@@ -373,10 +370,10 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.transition().duration(speed)
 			.attr("points", branchPoints);
 
-		if ((typeof tip_labels != "undefined")&&(tip_labels)){		
+		if ((typeof tip_labels != "undefined")&&(tip_labels)){
 			treeplot.selectAll(".tipLabel").data(tips)
 				.transition().duration(speed)
-				.style("font-size", function(d) { return tipLabelSize(d)+"px"; })			
+				.style("font-size", function(d) {return tipLabelSize(d)+"px"; })			
 				.attr("x", function(d) { return d.x+10; })
 				.attr("y", function(d) { return d.y+4; });
 		}	
