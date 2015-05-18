@@ -150,6 +150,7 @@ if __name__=="__main__":
 	parser.add_argument('--reg', type = float, default = 1.0, help='regularization parameter')
 	parser.add_argument('--avi', type = float, default = 1.0, help='regularization parameter')
 	parser.add_argument('--pot', type = float, default = 1.0, help='regularization parameter')
+	parser.add_argument('--resolution', type = str,  help ="label for the resolution")	
 	parser.add_argument('--min_aamuts', type = str, default = '0', help='minimal number of aminoacid mutations to include branch or epi for epitope or rbs for receptor binding site')
 	params = parser.parse_args()
 	if params.flutype=='H3N2':
