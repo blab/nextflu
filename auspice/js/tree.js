@@ -34,11 +34,11 @@ function initColorDomain(attr, tmpCS){
 	var vals = tips.map(function(d) {return d[attr];});
 	var minval = d3.min(vals);
 	var maxval = d3.max(vals);	
-	var rangeIndex = Math.min(10, maxval - minval);
+	var rangeIndex = Math.min(10, maxval - minval + 1);
 	var domain = [];
 	if (maxval-minval<20)
 	{
-		for (var i=maxval - rangeIndex; i<=maxval; i+=1){domain.push(i);}
+		for (var i=maxval - rangeIndex + 1; i<=maxval; i+=1){domain.push(i);}
 	}else{
 		for (var i=1.0*minval; i<=maxval; i+=(maxval-minval)/9.0){domain.push(i);}		
 	}
