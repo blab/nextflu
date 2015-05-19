@@ -34,7 +34,7 @@
 \begin{abstract} \section{Summary:} Seasonal influenza viruses evolve rapidly, allowing them to evade immunity in their human hosts and reinfect previously infected individuals.
 Similarly, vaccines against seasonal influenza need to be updated frequently to protect against an evolving virus population.
 We have thus developed a processing pipeline and browser-based visualization that allows convenient exploration and analysis of the most recent influenza virus sequence data.
-This web-application displays a phylogenetic tree that can be decorated with additional information such the viral genotype at specific sites, sampling location, and derived statistics that have been shown to be predictive of future virus dynamics.
+This web-application displays a phylogenetic tree that can be decorated with additional information such as the viral genotype at specific sites, sampling location, and derived statistics that have been shown to be predictive of future virus dynamics.
 Additionally, mutation, genotype and clade frequency trajectories are calculated and displayed.
 
 \section{Availability and implementation:} Python and Javascript source code is freely available from \url{https://github.com/blab/nextflu}, while the web-application is live at \url{http://nextflu.org}.
@@ -99,7 +99,7 @@ Here, the objective function $\mathrm{log}(f) + \mathrm{log}(g)$ is maximized us
 To speed up convergence, optimization is first done using a coarse grid of pivot points which is subsequently refined to 12 pivots per year. Frequency estimation is done for mutations, particular genotypes, and major clades of the tree.
 At the end of the \augur{} pipeline, JSON files are exported containing the annotated phylogenetic tree, sequence data and frequency trajectories.
 
-These JSON files are then visualized by \auspice{} using D$^3$ \citep{bostock_d3_2011} and the phylogenetic tree displayed (\FIG{tree}).
+These JSON files are then visualized by \auspice{} using D$^3$ \citep{bostock_d3_2011} and the phylogenetic tree displayed with branches scaled according to evolutionary distance across all sites (\FIG{tree}).
 The user can explore the data interactively by selecting viruses from different dates or by coloring the tree by attributes such as:
 \begin{itemize}
 	\item \textit{epitope mutations} at sites generally associated with antibody binding have been suggested to be predictive of future clade success \citep{luksza_predictive_2014},
@@ -122,7 +122,7 @@ The frequency plot below the tree (\FIG{freq}) displays the frequency trajectory
 Furthermore, trajectories of individual mutations, combinations of two mutations, and predefined clades such as 3c3.a can be plotted.
 
 %\section{Conclusion}
-We built \nextflu{} to facilitate the analysis and exploration of seasonal influenza sequence data collected by laboratories around to world.
+We built \nextflu{} to facilitate the analysis and exploration of seasonal influenza sequence data collected by laboratories around the world.
 By using the most recent data and integrating phylogenies with frequency trajectories and predictors of successful clades, we hope that \nextflu{} can inform the choice of strains used in seasonal influenza vaccines. 
 \nextflu{} was designed to be readily adapted to other rapidly evolving viruses and we see significant room for future developments in this area.
  

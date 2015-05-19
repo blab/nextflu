@@ -76,7 +76,7 @@ Original reviewer criticisms are in plain text.  Our responses follow in \textbf
 
 \subsection*{Comments to the Author}
 
-Neher and Bedford report “nextflu”, an interactive near real time web interface to browse and explore the most informative approx. 2000 influenza HA gene sequences deposited in GISAID for the four most common strains. The automated pipeline “augur” fetches most recent data from GISAID, prunes the sequences which are subsequently combined to one multiple alignment with MAFFT. From this alignment, a phylogenetic tree is constructed and additional information is inferred, both of which are displayed on the interactive web site via “auspice”.
+Neher and Bedford report ``nextflu'', an interactive near real time web interface to browse and explore the most informative approx. 2000 influenza HA gene sequences deposited in GISAID for the four most common strains. The automated pipeline ``augur'' fetches most recent data from GISAID, prunes the sequences which are subsequently combined to one multiple alignment with MAFFT. From this alignment, a phylogenetic tree is constructed and additional information is inferred, both of which are displayed on the interactive web site via ``auspice''.
 
 The freely available Python source code is of exemplary structure and quality, the website is well documented and clearly structured. Nevertheless, I want to raise some critical comments regarding the application note as well as the application itself:
 
@@ -92,7 +92,11 @@ The freely available Python source code is of exemplary structure and quality, t
 
 5. I suggest to add the word ``as'' in ``additional information such \textit{as} the viral genotype at specific sites'' in the Abstract.
 
-6. Typo: ``by laboratories around to world'' → ``by laboratories around the world''
+\textbf{Done.}
+
+6. Typo: ``by laboratories around to world'' $\rightarrow$ ``by laboratories around the world''
+
+\textbf{Fixed.}
 
 7. You report that HA genes from GISAID are downloaded. Is the alignment build by whole genes or just the CDS?
 
@@ -112,7 +116,11 @@ The freely available Python source code is of exemplary structure and quality, t
 
 5. Unfortunately, observing the tree and the frequencies is impossible because of the large vertical expansion of the tree. Could you find some way to have both information more close to each other?
 
+\textbf{Thank you for the suggestion. We experimented extensively with 3-column layouts and other methods to help display frequency plot alongside the phylogeny. However, the resulting layouts did not quite work aesthetically or in terms of usability space on a small display. Our suggestion here would be to `zoom' out with the web browser. The SVG implementation is fully responsive and the shrunk display will nicely fit both the frequency plot and the phylogeny. This seemed like the best solution to this particular issue.}
+
 6. What is the X-Axis for the tree? Is it somehow related with time? If so, how comes that the sequence A/Georgia/16/2012 (2012-09-02) is farther to the right then sequence A/Georgia/3058/2012 (2012-09-26)?
+
+\textbf{The x-axis is scaled in terms of substitutions per site, which is the native units of RAxML. This distance is across all sites. As influenza shows clock-like behavior we expect a general correlation between date of sampling and x coordinate. However, this correlation is not perfect and there will be cases like A/Georgia/16/2012 vs A/Georgia/3058/2012. We've clarified this point in the text.}
 
 %%% REVIEWER 2 %%%
 \section*{Reviewer 2}
