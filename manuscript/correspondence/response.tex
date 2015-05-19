@@ -1,0 +1,145 @@
+\documentclass[11pt,oneside,letterpaper]{article}
+
+% graphicx package, useful for including eps and pdf graphics
+\usepackage{graphicx}
+\DeclareGraphicsExtensions{.pdf,.png,.jpg}
+
+% basic packages
+\usepackage{color} 
+\usepackage{parskip}
+\usepackage{float}
+\usepackage{hyperref}
+
+% text layout
+\usepackage{geometry}
+\geometry{textwidth=15.25cm} % 15.25cm for single-space, 16.25cm for double-space
+\geometry{textheight=22cm} % 22cm for single-space, 22.5cm for double-space
+
+% helps to keep figures from being orphaned on a page by themselves
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\textfraction}{0.1}
+
+% bold the 'Figure #' in the caption and separate it with a period
+% Captions will be left justified
+\usepackage[labelfont=bf,labelsep=period,font=small]{caption}
+
+% review layout with double-spacing
+%\usepackage{setspace} 
+%\doublespacing
+%\captionsetup{labelfont=bf,labelsep=period,font=doublespacing}
+
+% cite package, to clean up citations in the main text. Do not remove.
+\usepackage{cite}
+%\renewcommand\citeleft{(}
+%\renewcommand\citeright{)}
+%\renewcommand\citeform[1]{\textsl{#1}}
+
+% Remove brackets from numbering in list of References
+\renewcommand\refname{\large References}
+\makeatletter
+\renewcommand{\@biblabel}[1]{\quad#1.}
+\makeatother
+
+\usepackage{authblk}
+\renewcommand\Authands{ \& }
+\renewcommand\Authfont{\normalsize \bf}
+\renewcommand\Affilfont{\small \normalfont}
+\makeatletter
+\renewcommand\AB@affilsepx{, \protect\Affilfont}
+\makeatother
+
+\begin{document}
+
+\newgeometry{top=4cm}
+
+\today
+
+\vspace{1cm}
+
+Dear editor,
+
+Please find attached our revised manuscript entitled ```nextflu: Real-time tracking of seasonal influenza virus evolution in humans''.  This is a resubmission of manuscript number BIOINF-2015-0560.
+
+Sincerely,\\
+Richard Neher and Trevor Bedford
+
+\restoregeometry
+
+\newpage
+
+\section*{Reviewer responses}
+
+Original reviewer criticisms are in plain text.  Our responses follow in \textbf{bold}.  
+
+%%% REVIEWER 1 %%%
+\section*{Reviewer 1}
+
+\subsection*{Comments to the Author}
+
+Neher and Bedford report “nextflu”, an interactive near real time web interface to browse and explore the most informative approx. 2000 influenza HA gene sequences deposited in GISAID for the four most common strains. The automated pipeline “augur” fetches most recent data from GISAID, prunes the sequences which are subsequently combined to one multiple alignment with MAFFT. From this alignment, a phylogenetic tree is constructed and additional information is inferred, both of which are displayed on the interactive web site via “auspice”.
+
+The freely available Python source code is of exemplary structure and quality, the website is well documented and clearly structured. Nevertheless, I want to raise some critical comments regarding the application note as well as the application itself:
+
+\subsection*{Manuscript}
+
+1. Despite the fact that I do not fully understand the computation of the ``frequency trajectories of mutations'' I suspect that is tries to express the same measure as the ``frequencies of alleles'' in the ``Allele dynamic plots'' of Steinbrueck \& McHardy (NAR 2011) with the addition of relating it to a noise model. You should include a statement of comparison to AD  plots in your manuscript.
+
+2. The prefix ``next'' of ``nextflu'' raises hope that the application will provide some forecast or recommendation which influenza might be the next to be battled with vaccination. This hope is further fueled by the expression ``predictors of successful clades''. However, I cannot see how to obtain such predictions with nextflu. Also the frequency plot does not seem to state something about future strain frequencies.
+
+3. The use case of the application is not clear to me. Can you give a more explicit example how information retrieval with nextflu could foster selection of the ``next successful clade'', rather than browsing the plain GISAID sequences? Of course, nextflu just visualizes existing data and thus cannot make up something that could not also be found in the database itself, but it would be nice to see how you intend to use nextflu.
+
+4. Please give some hints why ``nextflu'' is not real-time but only near-real-time.
+
+5. I suggest to add the word ``as'' in ``additional information such \textit{as} the viral genotype at specific sites'' in the Abstract.
+
+6. Typo: ``by laboratories around to world'' → ``by laboratories around the world''
+
+7. You report that HA genes from GISAID are downloaded. Is the alignment build by whole genes or just the CDS?
+
+8. Please explain what the variable $i$ stands for.
+
+9. To me, the presented explanation of the frequency calculation is not very comprehensible. I want to suggest to skip the maths (which better suits a research paper) and use the gained space to further convince readers of the usability of the tool. Anyways, a reference (or at least as supplemental material) to a detailed explanation of these computations should be provided.
+
+\subsection*{Application}
+
+1. You give information about the workflow of the augur pipeline to process data of the underlying GISAID database. What happens if GISAID is updated. Do you have to manually restart augur? Is it possible to trigger such an update by the user of nextflu? If it is not possible, is the term ``real-time'' really satisfied?
+
+2. You describe the data pruning of the GISAID sequences, which also involves a step of pruning the alignment to various criteria. Is this done automatically? It would be nice to give the user the capability to parameterize some of these criteria prior to visualizing the tree.
+
+3. It is rather complicated to zoom in and out or to scroll in the tree. Would it be possible to add according navigation buttons, rather then resetting the whole display when zooming out a bit?
+
+4. It is difficult to use the date slider to actually move through time since the refresh is only accomplished when releasing the mouse button. Also slight horizontal movements can cause unwanted jumps. Could you maybe provide two buttons to jump to the neighboring date points? Or a functionality to automatically move through time like in a movie.
+
+5. Unfortunately, observing the tree and the frequencies is impossible because of the large vertical expansion of the tree. Could you find some way to have both information more close to each other?
+
+6. What is the X-Axis for the tree? Is it somehow related with time? If so, how comes that the sequence A/Georgia/16/2012 (2012-09-02) is farther to the right then sequence A/Georgia/3058/2012 (2012-09-26)?
+
+%%% REVIEWER 2 %%%
+\section*{Reviewer 2}
+
+\subsection*{Comments to the Author}
+
+This Applications Note introduces Nextflu, an original and important online tool to track the evolution of human Influenza in real time.
+
+The paper is interesting and clearly written so I don't have any major comment.
+
+\subsection*{Minor revisions}
+
+p1, col1, l47: ``near real-time'', can the authors specify the updating frequency? from the website, it seems to be every 5 days.
+
+p1, col2, l54: how is the outgroup chosen?
+
+p2, col1, l21: typo: the sampling time point is $t_v$ not $x(t_v)$
+
+%%% REVIEWER 3 %%%
+\section*{Reviewer 3}
+
+\subsection*{Major comments}
+
+This may be beyond the scope of the tool, but it would be extremely useful if the tool could visualize not just the \# of epitope or receptor binding site changes, but which specific amino acid changes are involved -- at least for the branches defining the main clusters identified (e.g., 3c3.a and 3c2.a).
+
+\subsection*{Minor comment}
+
+Could the authors clarify what they mean by `removing known reassortant clusters'?  This is very vague and I assume naturally occurring reassortant viruses are not being removed.
+
+\end{document}
