@@ -42,11 +42,11 @@ function initColorDomain(attr, tmpCS){
 	var vals = tips.map(function(d) {return d[attr];});
 	var minval = d3.min(vals);
 	var maxval = d3.max(vals);	
-	var rangeIndex = Math.min(10, maxval - minval);
+	var rangeIndex = Math.min(10, maxval - minval + 1);
 	var domain = [];
 	if (maxval-minval<20)
 	{
-		for (var i=maxval - rangeIndex; i<=maxval; i+=1){domain.push(i);}
+		for (var i=maxval - rangeIndex + 1; i<=maxval; i+=1){domain.push(i);}
 	}else{
 		for (var i=1.0*minval; i<=maxval; i+=(maxval-minval)/9.0){domain.push(Math.round(10*i)/10);}		
 	}
@@ -112,10 +112,7 @@ function branchLabelSize(d) {
 }
 
 function tipLabelSize(d) {
-	if (d.diff < 0 || d.diff > time_window) {
-		return 0;
-	}
-	else if (d.region != restrictTo && restrictTo != "all") {
+	if (tipVisibility(d)!="visible"){
 		return 0;
 	}
 	var n = nDisplayTips;
@@ -406,10 +403,10 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.transition().duration(speed)
 			.attr("points", branchPoints);
 
-		if ((typeof tip_labels != "undefined")&&(tip_labels)){		
+		if ((typeof tip_labels != "undefined")&&(tip_labels)){
 			treeplot.selectAll(".tipLabel").data(tips)
 				.transition().duration(speed)
-				.style("font-size", function(d) { return tipLabelSize(d)+"px"; })			
+				.style("font-size", function(d) {return tipLabelSize(d)+"px"; })			
 				.attr("x", function(d) { return d.x+10; })
 				.attr("y", function(d) { return d.y+4; });
 		}	
