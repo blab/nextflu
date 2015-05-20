@@ -11,7 +11,7 @@ layout: default
 			<div class="subtitle-box">
 				Real-time tracking of seasonal influenza virus evolution in humans
 			</div>
-			<div class="spacer"></div>		
+			<div class="spacer"></div>
 		</div>
 		<div class="io-container">
 
@@ -19,18 +19,27 @@ layout: default
 				<div class="form-group">
 					<label class="control-label">Virus</label>
 					<select id="virus_select" class="form-control" onChange="document.location = this.value" value="GO">
-						<option value="/H3N2/" 
-							{% if page.virus == "H3N2" %}selected="selected"{% endif %}
-							>A/H3N2</option>
-						<option value="/H1N1pdm/"
-							{% if page.virus == "H1N1pdm" %}selected="selected"{% endif %}
-							>A/H1N1pdm</option>
-						<option value="/Vic/"
-							{% if page.virus == "Vic" %}selected="selected"{% endif %}
-							>B/Vic</option>
-						<option value="/Yam/"
-							{% if page.virus == "Yam" %}selected="selected"{% endif %}
-							>B/Yam</option>
+					{% for virus in site.data.viruses %}
+						<option value="{{ virus.default }}" 
+							{% if page.virus == virus.virus %} selected="selected"{% endif %}
+							>{{ virus.name }}</option>
+					{% endfor %}
+					</select>
+				</div>
+			</form>		
+			<form class="form-inline form-small">
+				<div class="form-group">
+					<label class="control-label">Time</label>
+					<select id="resolution_select" class="form-control" onChange="document.location = this.value" value="GO">
+					{% for virus in site.data.viruses %}
+						{% if page.virus == virus.virus %} 
+							{% for res in virus.resolutions %}
+								<option value="/{{ virus.virus }}/{{ res }}"
+								{% if page.resolution == res %} selected="selected"{% endif %}
+								>{{ res }}</option>
+							{% endfor %}
+					{% endif %}
+					{% endfor %}
 					</select>
 				</div>
 			</form>		
@@ -281,6 +290,10 @@ layout: default
 		<div class="bigspacer"></div>
 	</div>
 </div>
-<script type="text/javascript">var genericDomain = [0,0.111,0.222,0.333, 0.444, 0.555, 0.666, 0.777, 0.888, 1.0];</script>
-<script src="/js/{{ page.virus }}.js"></script>
+<script type="text/javascript">
+	var genericDomain = [0,0.111,0.222,0.333, 0.444, 0.555, 0.666, 0.777, 0.888, 1.0];
+	var path = '/data/';
+	var tip_labels = true;
+</script>
+{{ content }}
 <script src="/js/auspice.js"></script>

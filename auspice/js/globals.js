@@ -8,6 +8,11 @@ var globalDate = new Date();
 var nodes, tips, rootNode, links, vaccines;
 
 var nDisplayTips, displayRoot;
+if (document.getElementById("gtspec") != null){
+    var freqdefault = document.getElementById("gtspec").value;
+}else{
+    var freqdefault ='';
+}
 
 function treePlotHeight(width) {
 	return 400 + 0.35*width;
@@ -29,7 +34,11 @@ var legend = d3.select("#legend")
 
 var colorBy = document.getElementById("coloring").value;
 var colorScale;
-
+var epiColorDomain = genericDomain;
+var nonEpiColorDomain = genericDomain;
+var rbsColorDomain = genericDomain;
+var dateColorDomain = genericDomain;
+var dfreqColorDomain = genericDomain.map(function(d){return Math.round(100*(-0.18+d*0.36))/100;});
 var time_step;
 
 

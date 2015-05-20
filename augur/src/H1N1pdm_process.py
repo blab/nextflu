@@ -45,7 +45,10 @@ virus_config.update({
 		'7':[(160,'G'),  (114, 'D'), (214, 'T')],
 		'8':[(203,'T'), (289,'A')],
 		},
-	'auspice_prefix':'H1N1pdm_'
+	'html_vars': {'coloring': 'ep, ne, rb, lbi, dfreq, region, date',
+				  'gtplaceholder': 'HA1 positions...',
+				  'freqdefault': '6b, 6c'},
+	'js_vars': {'LBItau': 0.0005, 'LBItime_window': 0.5, 'dfreq_dn':2},
 	})
 
 
@@ -158,6 +161,7 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine):
 			# exporting to json, including the H1N1pdm specific fields
 			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country'], 
 			                       annotations = ['5','6','6b', '6c','7'])
+			self.generate_indexHTML()
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies', 'export']

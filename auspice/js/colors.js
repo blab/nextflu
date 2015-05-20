@@ -1,26 +1,42 @@
-var colors = ["#5097BA", "#60AA9E", "#75B681", "#8EBC66", "#AABD52", "#C4B945", "#D9AD3D", "#E59637", "#E67030", "#DF4327"];
+// 2 color	["#5097BA", "#DF4327"]
+
+var colors = [
+	[], 
+	["#8EBC66"], 
+	["#5EA9A1", "#E0A23A"],
+	["#5CA7A4", "#A4BE56", "#E39B39"],
+	["#5AA5A7", "#8ABB6A", "#C3BA46", "#E69237"],
+	["#59A3AA", "#7CB879", "#AABD52", "#D4B13F", "#E68634"],
+	["#57A1AD", "#73B583", "#98BD5E", "#C0BA47", "#DEA73C", "#E67B32"],
+	["#559EB1", "#6DB28B", "#8CBB68", "#AFBD4F", "#CFB541", "#E39B39", "#E56E30"],
+	["#539CB4", "#68AF92", "#83BA71", "#A2BE57", "#C1BA47", "#DAAC3D", "#E68E36", "#E35F2D"],
+	["#519AB7", "#64AC99", "#7BB879", "#97BD5F", "#B5BD4C", "#CFB541", "#E0A13A", "#E67F33", "#E1512A"],
+	["#5097BA", "#60AA9E", "#75B681", "#8EBC66", "#AABD52", "#C4B945", "#D9AD3D", "#E59637", "#E67030", "#DF4327"],
+	["#4E95BD", "#5DA8A3", "#70B487", "#87BB6D", "#A0BE58", "#BABC4A", "#D0B440", "#E0A23A", "#E68634", "#E35F2D", "#DD3425"],
+	["#4D92BF", "#5AA5A8", "#6BB18D", "#80B974", "#98BD5E", "#B1BD4E", "#C8B944", "#DAAC3D", "#E59738", "#E67732", "#E14F2A", "#DB2522"]
+];
 var regionColors = ["#5097BA", "#60AA9E", "#75B681", "#8EBC66", "#AABD52", "#C4B945", "#D9AD3D", "#E59637", "#E67030", "#DF4327"]
 var genotypeColors = ["#60AA9E", "#D9AD3D", "#5097BA", "#E67030", "#8EBC66", "#E59637", "#AABD52", "#DF4327", "#C4B945", "#75B681"]
 
 var epitopeColorScale = d3.scale.linear().clamp([true])
 	.domain(epiColorDomain)
-	.range(colors);		
+	.range(colors[10]);		
 
 var nonepitopeColorScale = d3.scale.linear().clamp([true])
 	.domain(nonEpiColorDomain)
-	.range(colors);
+	.range(colors[10]);
 
 var receptorBindingColorScale = d3.scale.linear().clamp([true])
 	.domain(rbsColorDomain)
-	.range(colors.filter( function(d,i){return i%2;}));
+	.range(colors[4]);
 
 var lbiColorScale = d3.scale.linear()
 	.domain([0.0, 0.02, 0.04, 0.07, 0.1, 0.2, 0.4, 0.7, 0.9, 1.0])
-	.range(colors);
+	.range(colors[10]);
 
 var dfreqColorScale = d3.scale.linear()
 	.domain(dfreqColorDomain)
-	.range(colors);
+	.range(colors[10]);
 
 var regionColorScale = d3.scale.ordinal()
 	.domain(regions)
@@ -28,7 +44,7 @@ var regionColorScale = d3.scale.ordinal()
 
 var dateColorScale = d3.scale.linear().clamp([true])
 	.domain(dateColorDomain)
-	.range(colors);
+	.range(colors[10]);
 
 // "ep", "ne" and "rb" need no adjustments
 function adjust_coloring_by_date() {

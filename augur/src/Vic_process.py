@@ -24,7 +24,7 @@ receptor_binding_sites = [159,169,170,172,173,203,207]
 
 virus_config.update({
 	# data source and sequence parsing/cleaning/processing
-	'virus':'BVic',
+	'virus':'Vic',
 	'alignment_file':'data/Vic_gisaid_epiflu_sequence.fasta',
 	'outgroup':'B/HongKong/02/1993',
 	#'force_include':'source-data/HI_strains.txt',
@@ -37,7 +37,10 @@ virus_config.update({
 		'1A': [(90,'K'), (73, 'L'), (180, 'K'), (604,'S')],
 		'1B': [(90,'K'), (73, 'P'), (180, 'K')]
 	},
-	'auspice_prefix':'Vic_',
+	'html_vars': {'coloring': 'lbi, dfreq, region, date',
+				  'gtplaceholder': 'HA1 positions...',
+				  'freqdefault': '1A, 1B'},
+	'js_vars': {'LBItau': 0.0005, 'LBItime_window': 0.5, 'dfreq_dn':2},
 	})
 
 
@@ -173,6 +176,7 @@ class BVic_process(process, BVic_filter, BVic_clean, BVic_refine):
 			# exporting to json, including the BVic specific fields
 			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country'],
 									annotations = ['1A', '1B'])
+			self.generate_indexHTML()
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies', 'export']
