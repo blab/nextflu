@@ -1,4 +1,18 @@
-var regions = ["Africa", "SouthAmerica", "WestAsia", "Oceania", "Europe", "JapanKorea", "NorthAmerica", "SoutheastAsia", "SouthAsia", "China"]
+var regions = ['Lola',
+     'Kailahun',
+     'Siguiri',
+     'Gueckedou',
+     'Faranah',
+     'Foya',
+     'Beyla',
+     'Nzerekore',
+     'Kerouane',
+     'Voinjama',
+     'Macenta',
+     'Kouroussa',
+     'Kankan',
+     '?',
+     'Kissidougou'];
 var restrictTo = "all";
 
 var cladeToSeq = {}
