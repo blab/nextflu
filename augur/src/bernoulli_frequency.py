@@ -234,7 +234,7 @@ class virus_frequencies(object):
 		tps = all_dates[leaf_order]
 		obs = np.array(observations)[leaf_order]
 
-		if len(tps)>threshold and np.sum(obs)>min_observations:
+		if len(tps)>threshold and np.sum(obs)>min_observations and np.sum(obs)<len(obs)-min_observations:
 			if self.verbose: 
 				print "# of time points",len(tps), "# observations",sum(obs) 
 			fe = frequency_estimator(zip(tps, obs), pivots=self.pivots, extra_pivots = self.extra_pivots,
@@ -246,11 +246,15 @@ class virus_frequencies(object):
 			if self.verbose: print "too few observations"
 			return None, (tps, obs)
 
-	def get_sub_alignment(self, regions=None):
+	def get_sub_alignment(self, regions=None, nuc=False):
 		from Bio.Align import MultipleSeqAlignment
 		sub_aln = []
 		all_dates = []
-		for seq in self.aa_aln:
+		if nuc:
+			tmp_aln = self.nuc_aln
+		else:
+			tmp_aln = self.aa_aln
+		for seq in tmp_aln:
 			if regions is None or seq.annotations['region'] in regions:
 				seq_date = seq.annotations['num_date']
 				if seq_date>=self.time_interval[0] and seq_date < self.time_interval[1]:
@@ -270,6 +274,22 @@ class virus_frequencies(object):
 					mut = str(pos+1)+aa
 					print "estimating freq of ", mut, "total frequency:", self.aa_frequencies[ai,pos]
 					freq, (tps, obs) = self.estimate_genotype_frequency(sub_aln, [(pos, aa)])
+					if freq is not None:
+						mutation_frequencies[mut] = list(np.round(logit_inv(freq.y),3))
+		return mutation_frequencies
+
+	def determine_nuc_mutation_frequencies(self, regions=None, threshold=0.01):
+		'''
+		determine the abundance of all single position variants  
+		'''
+		sub_aln = self.get_sub_alignment(regions, nuc=True)
+		mutation_frequencies = {"pivots":list(self.pivots)}
+		for pos in xrange(sub_aln.get_alignment_length()):
+			for ni, nuc in enumerate(self.nuc_alphabet):
+				if self.nucleotide_frequencies[ni,pos]>threshold and self.nucleotide_frequencies[ni,pos]<1.0-threshold:
+					mut = str(pos+1)+nuc
+					print "estimating freq of ", mut, "total frequency:", self.nucleotide_frequencies[ni,pos]
+					freq, (tps, obs) = self.estimate_genotype_frequency(sub_aln, [(pos, nuc)], min_observations=1)
 					if freq is not None:
 						mutation_frequencies[mut] = list(np.round(logit_inv(freq.y),3))
 		return mutation_frequencies
@@ -412,13 +432,16 @@ class virus_frequencies(object):
 		# start estimating frequencies of subclades recursively
 		self.estimate_sub_frequencies(rootnode, all_dates, reverse_order, threshold = threshold, region_name = region_name)
 
-	def all_mutation_frequencies(self, threshold = 0.01):
+	def all_mutation_frequencies(self, threshold = 0.01, nuc=False):
 		if not hasattr(self, 'nucleotide_frequencies'):
 			self.determine_variable_positions()
 		self.frequencies["mutations"]={}
 		for region_label, regions in self.aggregate_regions:
 			print "--- "+"determining mutation frequencies in "+region_label+ " "  + time.strftime("%H:%M:%S") + " ---"
-			self.frequencies["mutations"][region_label] = self.determine_mutation_frequencies(regions, threshold = threshold)
+			if nuc:
+				self.frequencies["mutations"][region_label] = self.determine_nuc_mutation_frequencies(regions, threshold = threshold)
+			else:
+				self.frequencies["mutations"][region_label] = self.determine_mutation_frequencies(regions, threshold = threshold)
 
 
 	def all_genotypes_frequencies(self, threshold = 0.1):

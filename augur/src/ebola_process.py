@@ -115,16 +115,16 @@ class ebola_process(process, ebola_filter, ebola_clean, ebola_refine):
 		if 'frequencies' in steps:
 			print "--- Estimating frequencies at " + time.strftime("%H:%M:%S") + " ---"
 			self.determine_variable_positions()
-			self.estimate_frequencies(tasks = ["mutations", "clades", "tree"])
+			self.estimate_frequencies(tasks = ["nuc_mutations", "clades", "tree"])
 			if 'genotype_frequencies' in steps: 
 					self.estimate_frequencies(tasks = ["genotypes"])
 			self.dump()
 		if 'export' in steps:
 			self.temporal_regional_statistics()
 			# exporting to json, including the H1N1pdm specific fields
-			self.export_to_auspice(tree_fields = ['aa_muts','accession','isolate_id', 'lab','db', 'country'] 
+			self.export_to_auspice(tree_fields = ['nuc_muts','accession','isolate_id', 'lab','db', 'country'] 
 													+ self.fasta_fields.values(), 
-			                       annotations = [])
+			                       annotations = [], export_entropy = 'nuc')
 			self.generate_indexHTML()
 
 if __name__=="__main__":

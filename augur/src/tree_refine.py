@@ -42,6 +42,9 @@ class tree_refine(object):
 		tmp_aaseqs = [SeqRecord(Seq(node.aa_seq), id=node.strain, annotations = {'num_date':node.num_date, 'region':node.region}) for node in self.tree.leaf_iter()]
 		tmp_aaseqs.sort(key = lambda x:x.annotations['num_date'])
 		self.aa_aln = MultipleSeqAlignment(tmp_aaseqs)
+		tmp_nucseqs = [SeqRecord(Seq(node.seq), id=node.strain, annotations = {'num_date':node.num_date, 'region':node.region}) for node in self.tree.leaf_iter()]
+		tmp_nucseqs.sort(key = lambda x:x.annotations['num_date'])
+		self.nuc_aln = MultipleSeqAlignment(tmp_nucseqs)
 
 
 	def remove_outgroup(self):
