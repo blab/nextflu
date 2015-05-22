@@ -77,7 +77,9 @@ Next, the state of every internal node of the tree is inferred using a marginal 
 Internal branches without mutations are collapsed into polytomies.
 The final tree is decorated with the attributes to be displayed in the browser.
 
-In addition to the phylogenetic tree, \augur{} estimates the frequency trajectories of mutations, genotypes and clades in the tree. Frequency are determined by maximizing the likelihood of sampling the observed set of virus sequences. In addition, we impose a smoothing that penalized rapid changes in frequency of the frequency derivative. \augur{} estimates frequency with up to one month resolution using a downhill simplex algorithm \citep{oliphant_python_2007}. At the end of the \augur{} pipeline, JSON files are exported containing the annotated phylogenetic tree, sequence data and frequency trajectories.
+In addition to the phylogenetic tree, \augur{} estimates the frequency trajectories of mutations, genotypes and clades in the tree. Frequency are determined by maximizing the likelihood of sampling the observed set of virus sequences. In addition, we impose a smoothing that penalized rapid changes in frequency of the frequency derivative. \augur{} estimates frequency with up to one month resolution using a downhill simplex algorithm \citep{oliphant_python_2007}. The result is similar to ``allele dynamics'' plots in \citep{Steinrueck_2011}, but provides frequencies of clades in the tree in addition to single point mutations.
+
+At the end of the \augur{} pipeline, JSON files are exported containing the annotated phylogenetic tree, sequence data and frequency trajectories.
 
 These JSON files are then visualized by \auspice{} using D$^3$ \citep{bostock_d3_2011} and the phylogenetic tree displayed with branches scaled according to evolutionary distance across all sites (\FIG{tree}).
 The user can explore the data interactively by selecting viruses from different dates or by coloring the tree by attributes such as:

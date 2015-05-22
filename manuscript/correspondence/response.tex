@@ -89,15 +89,15 @@ The freely available Python source code is of exemplary structure and quality, t
 
 1. Despite the fact that I do not fully understand the computation of the ``frequency trajectories of mutations'' I suspect that is tries to express the same measure as the ``frequencies of alleles'' in the ``Allele dynamic plots'' of Steinbrueck \& McHardy (NAR 2011) with the addition of relating it to a noise model. You should include a statement of comparison to AD  plots in your manuscript.
 
-{\bf yes, the mutation trajectories are essentially the same, but nextflu also provides frequiencies of clades in the tree. The trajectories provide a useful sense of the temporal change. We have included a reference to the suggested paper. TODO}
+{\bf Yes, the mutation trajectories are essentially the same, but nextflu also provides frequiencies of clades in the tree. The trajectories provide a useful sense of the temporal change. We have included a reference to the suggested paper.}
 
 2. The prefix ``next'' of ``nextflu'' raises hope that the application will provide some forecast or recommendation which influenza might be the next to be battled with vaccination. This hope is further fueled by the expression ``predictors of successful clades''. However, I cannot see how to obtain such predictions with nextflu. Also the frequency plot does not seem to state something about future strain frequencies.
 
-{\bf The purpose of nextflu is to integrate as much information as possible to get an overview of the currently circulating viruses. As such, nextflu can help making an informed vaccine strain selection. We included quantities that have been suggested to be predictive for this purpose. However, we feel that predictors are not mature or specific enough to make an automated prediction and many practical constraints (virus/serum availability, cell-culture behavior etc) needs to be taken into account when selecting the vaccine strain. By providing the predictors along with explicit temporal dynamics of clades in the tree, the user can evaluate their relative merits and pick the most promising strain, given other constraints.}
+{\bf The purpose of nextflu is to integrate as much information as possible to get an overview of the currently circulating viruses. As such, nextflu can help making an informed vaccine strain selection. We included quantities that have been suggested to be predictive for this purpose. However, in addition to choosing the clade that best approximates the future virus population, vaccine strain selection faces many practical constraints (virus/serum availability, cell-culture behavior etc). By providing the predictors along with explicit temporal dynamics of clades in the tree, the user can evaluate their relative merits and pick the most promising strain, given other constraints.}
 
 3. The use case of the application is not clear to me. Can you give a more explicit example how information retrieval with nextflu could foster selection of the ``next successful clade'', rather than browsing the plain GISAID sequences? Of course, nextflu just visualizes existing data and thus cannot make up something that could not also be found in the database itself, but it would be nice to see how you intend to use nextflu.
 
-{\bf Nextflu is meant as a tool to explore the most recent influenza sequences, their geographic distribution, and the dynamics of different variants. We have received enthusiastic feedback from the influenza community}
+{\bf Nextflu is meant as a tool to explore the most recent influenza sequences, their geographic distribution, and the dynamics of different variants. We have received enthusiastic feedback from the influenza community.}
 
 4. Please give some hints why ``nextflu'' is not real-time but only near-real-time.
 
@@ -121,7 +121,7 @@ The freely available Python source code is of exemplary structure and quality, t
 
 9. To me, the presented explanation of the frequency calculation is not very comprehensible. I want to suggest to skip the maths (which better suits a research paper) and use the gained space to further convince readers of the usability of the tool. Anyways, a reference (or at least as supplemental material) to a detailed explanation of these computations should be provided.
 
-{\bf We provided a method tab in nextflu.}
+{\bf We provided a method tab in nextflu. TODO}
 
 \subsection*{Application}
 
@@ -135,7 +135,7 @@ The freely available Python source code is of exemplary structure and quality, t
 
 3. It is rather complicated to zoom in and out or to scroll in the tree. Would it be possible to add according navigation buttons, rather then resetting the whole display when zooming out a bit?
 
-{\bf With the current set-up, this is not readily achieved.}
+{\bf With the current set-up, this is not readily achieved. But we have added a dynamic inclusion of strain labels once the zoom level becomes high enough that labels can be discerned.}
 
 4. It is difficult to use the date slider to actually move through time since the refresh is only accomplished when releasing the mouse button. Also slight horizontal movements can cause unwanted jumps. Could you maybe provide two buttons to jump to the neighboring date points? Or a functionality to automatically move through time like in a movie.
 
