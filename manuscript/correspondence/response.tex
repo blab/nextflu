@@ -60,6 +60,8 @@ Dear editor,
 
 Please find attached our revised manuscript entitled ```nextflu: Real-time tracking of seasonal influenza virus evolution in humans''.  This is a resubmission of manuscript number BIOINF-2015-0560.
 
+We would like to thank you and the reviewers for their supportive comments. We have addressed all comments in detailed poin-by-point response below. We also have implemented the LBI calculation that can be used as a coloring option an is dynamically updated when the date-slider is changed.
+
 Sincerely,\\
 Richard Neher and Trevor Bedford
 
@@ -71,6 +73,7 @@ Richard Neher and Trevor Bedford
 
 Original reviewer criticisms are in plain text.  Our responses follow in \textbf{bold}.  
 
+
 %%% REVIEWER 1 %%%
 \section*{Reviewer 1}
 
@@ -80,15 +83,25 @@ Neher and Bedford report ``nextflu'', an interactive near real time web interfac
 
 The freely available Python source code is of exemplary structure and quality, the website is well documented and clearly structured. Nevertheless, I want to raise some critical comments regarding the application note as well as the application itself:
 
+{\bf We would like to thank the reviewer for the supportive and constructive comments.}
+
 \subsection*{Manuscript}
 
 1. Despite the fact that I do not fully understand the computation of the ``frequency trajectories of mutations'' I suspect that is tries to express the same measure as the ``frequencies of alleles'' in the ``Allele dynamic plots'' of Steinbrueck \& McHardy (NAR 2011) with the addition of relating it to a noise model. You should include a statement of comparison to AD  plots in your manuscript.
 
+{\bf yes, the mutation trajectories are essentially the same, but nextflu also provides frequiencies of clades in the tree. The trajectories provide a useful sense of the temporal change. We have included a reference to the suggested paper. TODO}
+
 2. The prefix ``next'' of ``nextflu'' raises hope that the application will provide some forecast or recommendation which influenza might be the next to be battled with vaccination. This hope is further fueled by the expression ``predictors of successful clades''. However, I cannot see how to obtain such predictions with nextflu. Also the frequency plot does not seem to state something about future strain frequencies.
+
+{\bf The purpose of nextflu is to integrate as much information as possible to get an overview of the currently circulating viruses. As such, nextflu can help making an informed vaccine strain selection. We included quantities that have been suggested to be predictive for this purpose. However, we feel that predictors are not mature or specific enough to make an automated prediction and many practical constraints (virus/serum availability, cell-culture behavior etc) needs to be taken into account when selecting the vaccine strain. By providing the predictors along with explicit temporal dynamics of clades in the tree, the user can evaluate their relative merits and pick the most promising strain, given other constraints.}
 
 3. The use case of the application is not clear to me. Can you give a more explicit example how information retrieval with nextflu could foster selection of the ``next successful clade'', rather than browsing the plain GISAID sequences? Of course, nextflu just visualizes existing data and thus cannot make up something that could not also be found in the database itself, but it would be nice to see how you intend to use nextflu.
 
+{\bf Nextflu is meant as a tool to explore the most recent influenza sequences, their geographic distribution, and the dynamics of different variants. We have received enthusiastic feedback from the influenza community}
+
 4. Please give some hints why ``nextflu'' is not real-time but only near-real-time.
+
+{\bf As of now, nextflu requires manual update which we do on a weekly basis. Future integration into GISAID might make this step obsolete. Furthermore, nextflu can only track sequences in the data base, and as they are deposited with some lag, nextflu isn't traking influenza in real time -- strictly speaking.}
 
 5. I suggest to add the word ``as'' in ``additional information such \textit{as} the viral genotype at specific sites'' in the Abstract.
 
@@ -100,19 +113,33 @@ The freely available Python source code is of exemplary structure and quality, t
 
 7. You report that HA genes from GISAID are downloaded. Is the alignment build by whole genes or just the CDS?
 
+{\bf We use the entire HA segment, but include shorter sequences if necessary.}
+
 8. Please explain what the variable $i$ stands for.
 
+{\bf We have worked extensively on this section, see below.}
+
 9. To me, the presented explanation of the frequency calculation is not very comprehensible. I want to suggest to skip the maths (which better suits a research paper) and use the gained space to further convince readers of the usability of the tool. Anyways, a reference (or at least as supplemental material) to a detailed explanation of these computations should be provided.
+
+{\bf We provided a method tab in nextflu.}
 
 \subsection*{Application}
 
 1. You give information about the workflow of the augur pipeline to process data of the underlying GISAID database. What happens if GISAID is updated. Do you have to manually restart augur? Is it possible to trigger such an update by the user of nextflu? If it is not possible, is the term ``real-time'' really satisfied?
 
+{\bf as of now, we need to update manually. In any case, the deposition of sequences incurs a greater lag than our update frequency. We settled for ``near real time''.}
+
 2. You describe the data pruning of the GISAID sequences, which also involves a step of pruning the alignment to various criteria. Is this done automatically? It would be nice to give the user the capability to parameterize some of these criteria prior to visualizing the tree.
+
+{\bf Since building aligning $>2000$ sequences and building a tree requires substantial computation, we can't have the user choose sequence filtering criteria and rerun the pipeline on demand. To address this concern, we have included multiple time resolutions. Users who want to customize this further can always clone the github repo and run the pipeline locally.}
 
 3. It is rather complicated to zoom in and out or to scroll in the tree. Would it be possible to add according navigation buttons, rather then resetting the whole display when zooming out a bit?
 
+{\bf With the current set-up, this is not readily achieved.}
+
 4. It is difficult to use the date slider to actually move through time since the refresh is only accomplished when releasing the mouse button. Also slight horizontal movements can cause unwanted jumps. Could you maybe provide two buttons to jump to the neighboring date points? Or a functionality to automatically move through time like in a movie.
+
+{\bf Dynamic update of the tree imposes a heavy computational burden. To address this issue, we now update a limited set of features as the slider is moved. We feel that the current compromise of updating tip circles without recalculating predictors and colors is a good compromise. Depending on the speed of the user's computer, this well be more or less smooth.}
 
 5. Unfortunately, observing the tree and the frequencies is impossible because of the large vertical expansion of the tree. Could you find some way to have both information more close to each other?
 
@@ -137,7 +164,10 @@ p1, col1, l47: ``near real-time'', can the authors specify the updating frequenc
 
 p1, col2, l54: how is the outgroup chosen?
 
+{\bf We choose a well characterized strain predating the time interval of interest by a few years. We updated the text to clarify this.}
+
 p2, col1, l21: typo: the sampling time point is $t_v$ not $x(t_v)$
+{\bf Fixed, thank you.}
 
 %%% REVIEWER 3 %%%
 \section*{Reviewer 3}
@@ -146,8 +176,12 @@ p2, col1, l21: typo: the sampling time point is $t_v$ not $x(t_v)$
 
 This may be beyond the scope of the tool, but it would be extremely useful if the tool could visualize not just the \# of epitope or receptor binding site changes, but which specific amino acid changes are involved -- at least for the branches defining the main clusters identified (e.g., 3c3.a and 3c2.a).
 
+{\bf Tool tips of branches now show the amino-acid mutations associated with the branch. Furthermore, the we added a display of all alignment variability that allows to spot variable positions. Clicking on these positions in the graph will plot the frequencies of amino acids and color the tree accordingly. }
+
 \subsection*{Minor comment}
 
 Could the authors clarify what they mean by `removing known reassortant clusters'?  This is very vague and I assume naturally occurring reassortant viruses are not being removed.
+
+{\bf We filter sequences that are very similar to sequences from outbreaks of triple reassortants with pH1N1. ADD DETAIL.}
 
 \end{document}
