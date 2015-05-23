@@ -42,6 +42,14 @@ var regionColorScale = d3.scale.ordinal()
 	.domain(regions)
 	.range(regionColors);
 
+var subtypeColorScale = d3.scale.ordinal()
+	.domain(subtypes)
+	.range(regionColors);
+
+var hostColorScale = d3.scale.ordinal()
+	.domain(host_groups)
+	.range(regionColors);
+
 var dateColorScale = d3.scale.linear().clamp([true])
 	.domain(dateColorDomain)
 	.range(colors[10]);
@@ -80,6 +88,14 @@ function colorByTrait() {
 	else if (colorBy == "ne") {
 		colorScale = nonepitopeColorScale;
 		nodes.map(function(d) { d.coloring = d.ne; });
+	}
+	else if (colorBy == "na") {
+		colorScale = subtypeColorScale;
+		nodes.map(function(d) { d.coloring = d.na; });
+	}
+	else if (colorBy == "host") {
+		colorScale = hostColorScale;
+		nodes.map(function(d) { d.coloring = d.group; });
 	}
 	else if (colorBy == "rb") {
 		colorScale = receptorBindingColorScale;

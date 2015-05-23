@@ -1,4 +1,6 @@
-var regions = ["Africa", "SouthAmerica", "WestAsia", "Oceania", "Europe", "JapanKorea", "NorthAmerica", "SoutheastAsia", "SouthAsia", "China"]
+var regions = ["Africa", "SouthAmerica", "WestAsia", "Oceania", "Europe", "JapanKorea", "NorthAmerica", "SoutheastAsia", "SouthAsia", "China"];
+var subtypes = ['H5N1','H5N3','H5N2','H5N5','H5N7','H5N6','H5N9','H5N8'];
+var host_groups = ['Aquatic bird','swan','equine','wild bird','wild goose','gull','goosander','goose','bird','ferret','feline','duck','chicken','wild duck'];
 var restrictTo = "all";
 
 var cladeToSeq = {}

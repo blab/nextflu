@@ -141,7 +141,7 @@ class tree_refine(object):
 		for v in self.viruses:
 			if v.strain in self.node_lookup:
 				node = self.node_lookup[v.strain]
-				for attr in self.fasta_fields.values() + ['num_date', 'db', 'region', 'country']:
+				for attr in self.fasta_fields.values() + ['host', 'group', 'num_date', 'db', 'region', 'country']:
 					try:
 						node.__setattr__(attr, v.__getattribute__(attr))
 					except:
