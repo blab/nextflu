@@ -116,10 +116,7 @@ layout: default
 			</div>
 		</div>
 		<div class="spacer"></div>
-		Input mutations as position+amino acid, i.e. <span class="highlight">159Y</span>, clades as clade name, 
-		i.e. <span class="highlight">3c2.a</span> and add locations as <span class="highlight">/AS</span>, 
-		<span class="highlight">/NA</span>, <span class="highlight">/EU</span>, <span class="highlight">/OC</span>, 
-		i.e. <span class="highlight">159Y/AS</span>
+		Input mutations as position+nucleotide, i.e. <span class="highlight">8926C</span> to plot its frequency through time.
 		<div class="spacer"></div>
 	</div>
 	<div class="col-md-9">
@@ -146,26 +143,16 @@ layout: default
 	</div>
 	<div class="col-md-9">
 		<h4>Phylogenetic tree</h4>
-		<p> Use the <a href="/help/#date_slider"><b>date slider</b></a> to highlight viruses sampled within 12 month of the date displayed.
-		<p> Use the <a href="/help/#epitope_mutations"><b>drop down menu</b></a> to color viruses by number of <span class="highlight"><a href="/help/#epitope_mutations">epitope mutations</a></span>, 
-		<span class="highlight"><a href="/help/#nonepitope_mutations">non-epitope mutations</a></span> or 
-		<span class="highlight"><a href="/help/#rbs">receptor binding mutations</a></span>
-		relative to root, or to color viruses by <span class="highlight"><a href="/help/#lbi">local branching index</a></span> or 
-		<span class="highlight"><a href="/help/#geo">geographic region</a></span>.
-		<p> Use the <a href="/help/#genotype"><b>input box</b></a> to specify positions to color viruses by genotype. Amino acid positions must be 
+		<p> Use the <a href="/help/#date_slider"><b>date slider</b></a> to highlight viruses sampled within 6 month of the date displayed.
+		<p> Use the <a href="/help/#epitope_mutations"><b>drop down menu</b></a> to color viruses <span class="highlight"><a href="/help/#geo">geographic region</a></span>, sampling date,  or <span class="highlight"><a href="/help/#lbi">local branching index</a></span>.
+		<p> Use the <a href="/help/#genotype"><b>input box</b></a> to specify positions to color viruses by genotype. Nucleotide positions must be 
 		separated by a comma (e.g. <span class="highlight">159,225</span>).
 		<p> <a href="/help/#mouse_tip"><b>Mouse over</b></a> a tip to show virus name, location and features.
-		<p> <a href="/help/#mouse_branch"><b>Mouse over</b></a> a branch to graph the frequency of the correponding clade trajectory below or <b>click</b>
-		on a branch to zoom into its descendent clade.
+		<p> <a href="/help/#mouse_branch"><b>Mouse over</b></a> a branch to graph the frequency of the correponding clade trajectory below or <b>click</b> on a branch to zoom into its descendent clade.
 		<h4>Frequencies</h4>
-		Enter a mutation or genotype above (e.g. <span class="highlight">225D</span>) and click 
-		<b>plot frequencies</b> to show estimated frequency of this mutation through time. Complex genotypes can be specified by combining mutations as 
-		<span class="highlight">159Y/225D</span>. In addition, geographic regions can be specified by adding AS 
-		(Asia), NA (North America), EU (Europe), or OC (Oceania) as <span class="highlight">159S/225D/AS</span>.
-		Several genotypes can be entered simultaneously when separated by commas (e.g. 
-		<span class="highlight">225D, 159S/225D/AS</span> will graph the global frequency of 225D and the frequency 
-		of strains containing both 159S and 225D in Asia). Instead of a genotype, the common clades 3c3, 3c3.a, 3c2, 3c2.a can be used. Positions with very little variation are omitted. Beware 
-		that region specific frequencies are noisy. <a href="/help/#frequencies">Click here for help with the interface.</a>		
+		Enter a mutation or genotype above (e.g. <span class="highlight">8926C</span>) and click 
+		<b>plot frequencies</b> to show estimated frequency of this mutation through time. Positions with very little variation are omitted. Beware 
+		that frequencies of rare mutations are noisy. <a href="/help/#frequencies">Click here for help with the interface.</a>		
 	</div>	
 </div>
 
@@ -183,18 +170,6 @@ layout: default
 		<div class="spacer"></div>	
 	</div>
 	<div class="col-md-9">
-		<p> <b>Epitope mutations</b> are based on 
-		<a href="http://www.nature.com/nature/journal/v289/n5796/abs/289366a0.html">HA structure and exposed residues</a>. 
-		Multiple recent mutations at epitope
-		sites have been <a href="http://www.nature.com/nature/journal/v507/n7490/abs/nature13087.html">
-		suggested</a> to be predictive for strains dominating future seasons. Similarly, mutations
-		outside of these epitopes -- termed <b>non-epitope sites</b> --- tend to be damaging and are suggested to 
-		be predictive of clade contraction.</p>
-		<p>Antigenic evolution has been <a href="http://www.sciencemag.org/content/342/6161/976.abs">shown</a> 
-		to depend primarily on substitutions surrounding the receptor binding site of HA1. 
-		These seven positions (145, 155, 156, 158, 159, 189, 193 in HA1 numbering) are referred to here
-		as <b>receptor binding positions</b> and changes at these positions could correspond to 
-		large changes in antigenic properties.</p>
 		<p>The <b>local branching index</b> is the exponentially weighted tree length surrounding 
 		a node, which is associated with <a href="http://elifesciences.org/content/3/e03568"> 
 		rapid branching and expansion of clades</a>. A more detailed explanation is available 
@@ -213,9 +188,7 @@ layout: default
 	<div class="col-md-9">
 		<hr>
 		Built with love by <a href="http://bedford.io">Trevor Bedford</a> and 
-		<a href="https://neherlab.wordpress.com/">Richard Neher</a>. This work is made possible by the 
-		<a href="http://gisaid.org" target="_blank">GISAID Initiative</a> and the open sharing of genetic data by influenza research 
-		groups from all over the world. <a href="/acknowledgements/">We gratefully acknowledge their contributions.</a>
+		<a href="https://neherlab.wordpress.com/">Richard Neher</a>. 
 		Give us a shout at <a href="https://twitter.com/trvrb" target="_blank">@trvrb</a> or 
 		<a href="https://twitter.com/richardneher" target="_blank">@richardneher</a> with questions or comments. All 
 		<a href="http://github.com/blab/nextflu" target="_blank">source code</a> is freely available under the terms of the 
