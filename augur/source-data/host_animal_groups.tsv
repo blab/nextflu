@@ -78,7 +78,7 @@ goldeneyeduck	wild duck
 goldenpheasant	goldenpheasant
 goosander	goosander
 goose	goose
-goshawk	goshawk
+goshawk	bird
 greatblack-backedgull	gull
 greatblack-headedgull	gull
 greatcormorant	bird
@@ -89,25 +89,25 @@ greenwingedteal	bird
 greyheron	bird
 greylaggoose	bird
 guineafowl	bird
-gull	bird
+gull	gull
 gyrfalcon	bird
 harrier	bird
 hatay	bird
 hen'segg	bird
-herringgull	bird
+herringgull	gull
 hillmyna	bird
 hoodedcrane	bird
-houbarabustard	bird
-housecrow	bird
+houbarabustard	wild bird
+housecrow	wild bird
 hubei	bird
-human	bird
-hunan	bird
+human	human
+hunan	human
 indonesia	bird
 japanesewhite-eye	bird
 kalijpheasant	bird
-koreannativechicken	bird
+koreannativechicken	chicken
 largebilledcrow	bird
-leopard	bird
+leopard	feline
 lesserkestrel	bird
 littleegret	bird
 littlegrebe	bird
@@ -158,7 +158,7 @@ shoveler	bird
 shrike	bird
 silkychicken	bird
 silverpheasant	bird
-snowgoose	bird
+snowgoose	wild goose
 sparrow	bird
 spot-billedduck	bird
 spotteddove	bird
@@ -166,19 +166,19 @@ spur-wingedgoose	bird
 starling	bird
 stonemarten	bird
 stork	bird
-swan	bird
-swangoose	bird
-swine	bird
+swan	Aquatic bird
+swangoose	wild goose
+swine	swine
 teal	bird
 tern	bird
-tiger	bird
+tiger	feline
 treesparrow	bird
-tuftedduck	bird
+tuftedduck	wild duch
 tundraswan	bird
-turkey	bird
-villagechicken	bird
-water	bird
-waterfowl	bird
+turkey	turkey
+villagechicken	chicken
+water	Aquatic bird
+waterfowl	Aquatic bird
 whistlingswan	bird
 white-frontedgoose	bird
 whitefacedwhistlingduck	bird
@@ -187,7 +187,7 @@ whitepeafowl	bird
 whooperswan	bird
 whoopingswan	bird
 wigeon	bird
-wildbird	bird
-wildduck	bird
-woodduck	bird
+wildbird	wild bird
+wildduck	wild duck
+woodduck	wild duck
 yellowbilledduck	bird
