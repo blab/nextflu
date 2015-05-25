@@ -30,14 +30,15 @@ var virusTooltip = d3.tip()
 			string += ", " + d.date;
 		}
 		if ((typeof d.db != "undefined") && (typeof d.accession != "undefined") && (d.db == "GISAID")) {
-			string += "<br>GISAID ID: EPI" + d.accession +'<br>';
+			string += "<br>GISAID ID: EPI" + d.accession;
 		}
 		if (typeof d.host != "undefined") {
-			string += "host: " + d.host + "<br>";
+			string += "<br>host: " + d.host;
 		}
 		if (typeof d.na != "undefined") {
-			string += "subtype: " + d.na + "<br>";
+			string += "<br>subtype: " + d.na;
 		}
+
 		if (typeof d.lab != "undefined") {
 			if (d.lab != "") {
 				string += "<br>Source: " + d.lab.substring(0,25);

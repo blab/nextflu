@@ -232,7 +232,7 @@ class process(virus_frequencies):
 
 		with open(htmlpath+'index.html','w') as out:
 			out.write("---\ntitle: nextflu / "+self.virus_type+" / "+self.resolution_prefix.rstrip('_')+'\n'\
-					  "layout: auspice_animals\nvirus: "+self.virus_type+"\nresolution: "+self.resolution_prefix.rstrip('_')+"\n")
+					  "layout: auspice\nvirus: "+self.virus_type+"\nresolution: "+self.resolution_prefix.rstrip('_')+"\n")
 			if "html_vars"  in self.kwargs:
 				for vname, val in self.kwargs["html_vars"].iteritems():
 					out.write(vname+": "+ val+'\n')
