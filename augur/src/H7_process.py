@@ -25,6 +25,8 @@ virus_config.update({
 	'fasta_fields':{0:'strain', 1:'isolate_id',2:'na', 3:'passage', 5:'date', 7:'lab', 8:"accession"},
 	'alignment_file':'data/H7_gisaid_epiflu_sequence.fasta',
 	'outgroup':'A/duck/Potsdam/15/1980',
+	'strict_geo':False,
+	'strict_host':False,
 	#'force_include':'source-data/HI_strains.txt',
 	'force_include_all':False,
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
@@ -61,52 +63,11 @@ class H7_filter(flu_filter):
 		}
 	def filter(self):
 		self.filter_generic(prepend_strains = self.vaccine_strains)	
-		self.filter_strain_names()
 		print len(self.viruses), "with proper strain names"
 		self.filter_passage()
 		print len(self.viruses), "without egg passage"
-		self.filter_geo(field=2, prune=False)
-		self.filter_geo(field=1, prune=False) # redo geo parsing with field one for human strains
-		print len(self.viruses), "with geographic information"
-		self.filter_host(prune=False)
-		print len(self.viruses), "with host information"
 		for v in self.viruses:
 			v['na'] = v['na'].split('/')[-1].strip()
-
-	def filter_host(self,prune=True, field=1):
-		from csv import DictReader
-		reader = DictReader(open("source-data/host_synonyms.tsv"), delimiter='\t')		# list of dicts
-		label_to_animal = {}
-		for line in reader:
-			label_to_animal[line['label'].lower()] = line['animal']
-		for v in self.viruses:
-			v['host'] = 'Unknown'
-			try:
-				label = re.match(r'^[AB]/([^/]+)/', v['strain']).group(field).lower()	# check first for whole geo match
-				if label in label_to_animal:
-					v['host'] = label_to_animal[label]
-				else:
-					label = re.match(r'^[AB]/([^\-^\/]+)[\-\/]', v['strain']).group(field).lower()		# check for partial geo match
-					if label in label_to_animal:
-						v['host'] = label_to_animal[label]
-				if v['host'] == 'Unknown':
-					print "couldn't parse host for", v['strain']
-			except:
-				print "couldn't parse", v['strain']
-
-		reader = DictReader(open("source-data/host_animal_groups.tsv"), delimiter='\t')		# list of dicts
-		animal_to_group = {}
-		for line in reader:
-			animal_to_group[line['animal']] = line['group']
-		for v in self.viruses:
-			v['group'] = 'Unknown'
-			if v['host'] in animal_to_group:
-				v['group'] = animal_to_group[v['host']]
-			if v['host'] != 'Unknown' and v['group'] == 'Unknown':
-				print "couldn't parse group for", v['strain'], "animal:", v["host"]		
-		
-		if prune:
-			self.viruses = filter(lambda v: v['group'] != 'Unknown', self.viruses)
 
 
 

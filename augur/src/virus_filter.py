@@ -63,6 +63,8 @@ class virus_filter(object):
 		if prepend_strains is not None:
 			self.viruses = prepend_strains + self.viruses
 			print len(self.viruses), "after adding custom strains"
+		self.parse_and_filter_label()
+		print len(self.viruses), "after filtering for label"
 		self.filter_unique()
 		print len(self.viruses), "after filtering for unique strains"
 
@@ -85,6 +87,22 @@ class virus_filter(object):
 				filtered_viruses.append(v)
 				self.strain_lookup[label]=v
 		self.viruses=filtered_viruses
+
+	def parse_and_filter_label(self):
+		tmp_viruses = []
+		for v in self.viruses:
+			strain_info, strain_ok = self.parse_strain_name(v['strain'])
+			if strain_ok:
+				for key, val in strain_info.iteritems():
+					v[key]=val
+				tmp_viruses.append(v)
+		self.viruses=tmp_viruses
+
+#	def parse_strain_name(self, strain_name):
+#		'''
+#		meant to me over written by subclass
+#		'''
+#		return {}, True
 
 	def filter_length(self, min_length):
 		self.viruses = filter(lambda v: len(v['seq']) >= min_length, self.viruses)
@@ -192,27 +210,85 @@ class virus_filter(object):
 
 class flu_filter(virus_filter):
 
-	def __init__(self, alignment_file='', fasta_fields=None, **kwargs):	
+	def __init__(self, alignment_file='', fasta_fields=None, strict_geo=True, 
+				strict_host=False, **kwargs):	
 		virus_filter.__init__(self, alignment_file = alignment_file, fasta_fields = fasta_fields, **kwargs)
+		self.strict_host = strict_host
+		self.strict_geo = strict_geo
 		self.add_gisaid_metadata()
 		self.fix_strain_names()
 		self.vaccine_strains=[]
+		self.load_strain_name_parsing_info()
+
+	def load_strain_name_parsing_info(self):
+		from csv import DictReader
+		self.label_to_country = {}
+		for line in DictReader(open("source-data/geo_synonyms.tsv"), delimiter='\t'):
+			self.label_to_country[line['label'].lower()] = line['country']
+
+		self.country_to_region = {}
+		for line in DictReader(open("source-data/geo_regions.tsv"), delimiter='\t'):
+			self.country_to_region[line['country']] = line['region']
+
+		self.label_to_animal = {}
+		for line in DictReader(open("source-data/host_synonyms.tsv"), delimiter='\t'):
+			self.label_to_animal[line['label'].lower()] = line['animal']
+
+		self.animal_to_group = {}
+		for line in DictReader(open("source-data/host_animal_groups.tsv"), delimiter='\t'):
+			self.animal_to_group[line['animal']] = line['group']
+
+	def parse_strain_name(self, strain_name):
+		fields = map(lambda x:x.strip().lower(), strain_name.split('/'))
+		strain_info = {}
+		def add_geo(place):
+			country = self.label_to_country[place]
+			strain_info['country'] = country
+			if country in self.country_to_region:
+				strain_info['region'] = self.country_to_region[country]
+			else:
+				strain_info['region'] = 'Unknown'
+		def add_host(host):
+			animal = self.label_to_animal[host]
+			strain_info['host'] = animal
+			if animal in self.animal_to_group:
+				strain_info['group'] = self.animal_to_group[animal]
+			else:
+				strain_info['group'] = 'Unknown'
+
+		if fields[0].upper() not in ['A', 'B']:
+			return strain_info, False
+		if fields[2] in self.label_to_country:
+			add_geo(fields[2])
+			if fields[1] in self.label_to_animal:
+				add_host(fields[1])
+			else:
+				strain_info['host'] = 'Unknown'
+				strain_info['group'] = 'Unknown'
+		elif fields[1] in self.label_to_animal:
+				add_host(fields[1])
+				strain_info['country'] = 'Unknown'
+				strain_info['region'] = 'Unknown'
+		elif fields[1] in self.label_to_country:
+			add_geo(fields[1])
+			add_host("human")
+		else:
+			strain_info['country'] = 'Unknown'
+			strain_info['region'] = 'Unknown'
+			strain_info['host'] = 'Unknown'
+			strain_info['group'] = 'Unknown'
+		return strain_info, not(((strain_info['country']=='Unknown') and self.strict_geo) or\
+								((strain_info['host']=='Unknown') and self.strict_host))
+
 
 	def filter(self):
 		self.filter_generic(prepend_strains = self.vaccine_strains)	
-		self.filter_strain_names()
-		print len(self.viruses), "with proper strain names"
 		self.filter_passage()
 		print len(self.viruses), "without egg passage"
-		self.filter_geo()
-		print len(self.viruses), "with geographic information"
 		
 	def add_gisaid_metadata(self):
 		for v in self.viruses:
 			v['db']="GISAID"
-
-	def filter_strain_names(self):
-		self.viruses = filter(lambda v: re.match(r'^[AB]/', v['strain']) != None, self.viruses)
 
 	def fix_strain_names(self):
 		for v in self.viruses:
@@ -221,42 +297,4 @@ class flu_filter(virus_filter):
 	def filter_passage(self):
 		self.viruses = filter(lambda v: re.match(r'^E\d+', v.get('passage',''), re.I) == None, self.viruses)
 		self.viruses = filter(lambda v: re.match(r'^Egg', v.get('passage',''), re.I) == None, self.viruses)
-
-	def filter_geo(self, prune = True, field = 1):
-		"""Label viruses with geographic location based on strain name"""
-		"""Location is to the level of country of administrative division when available"""
-		reader = csv.DictReader(open("source-data/geo_synonyms.tsv"), delimiter='\t')		# list of dicts
-		label_to_country = {}
-		for line in reader:
-			label_to_country[line['label'].lower()] = line['country']
-		for v in self.viruses:
-			if "country" not in v or v['country']=='Unknown':
-				v['country'] = 'Unknown'
-				#try:
-				if True:
-					label = v['strain'].split('/')[field].lower()	# check first for whole geo match
-					if label in label_to_country:
-						v['country'] = label_to_country[label]
-					else:
-						label = v['strain'].split('/')[field].lower()	# check first for whole geo match
-						if label in label_to_country:
-							v['country'] = label_to_country[label]
-					if v['country'] == 'Unknown':
-						print "couldn't parse location for", v['strain']
-				#except:
-				#	print "couldn't parse", v['strain']
-
-		reader = csv.DictReader(open("source-data/geo_regions.tsv"), delimiter='\t')		# list of dicts
-		country_to_region = {}
-		for line in reader:
-			country_to_region[line['country']] = line['region']
-		for v in self.viruses:
-			v['region'] = 'Unknown'
-			if v['country'] in country_to_region:
-				v['region'] = country_to_region[v['country']]
-			if v['country'] != 'Unknown' and v['region'] == 'Unknown':
-				print "couldn't parse region for", v['strain'], "country:", v["country"]		
-		
-		if prune:
-			self.viruses = filter(lambda v: v['region'] != 'Unknown', self.viruses)
 
