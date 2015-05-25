@@ -2,7 +2,7 @@ import time, re, os
 from virus_filter import flu_filter
 from virus_clean import virus_clean
 from tree_refine import tree_refine
-from H3N2_process import H3N2_refine as H5_refine
+from H3N2_process import H3N2_refine as H7_refine
 from process import process, virus_config
 from Bio import SeqIO
 from Bio.Seq import Seq
@@ -20,11 +20,11 @@ receptor_binding_sites = [x-1 for x in []]
 
 virus_config.update({
 	# data source and sequence parsing/cleaning/processing
-	'virus':'H5',
-	'auspice_prefix':'H5',
+	'virus':'H7',
+	'auspice_prefix':'H7',
 	'fasta_fields':{0:'strain', 1:'isolate_id',2:'na', 3:'passage', 5:'date', 7:'lab', 8:"accession"},
-	'alignment_file':'data/H5_gisaid_epiflu_sequence.fasta',
-	'outgroup':'A/HongKong/156/97',
+	'alignment_file':'data/H7_gisaid_epiflu_sequence.fasta',
+	'outgroup':'A/duck/Potsdam/15/1980',
 	#'force_include':'source-data/HI_strains.txt',
 	'force_include_all':False,
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
@@ -32,7 +32,7 @@ virus_config.update({
 	# define relevant clades in canonical HA1 numbering (+1)
 	# numbering starting at methionine including the signal peptide
 	'clade_designations': {},
-	'n_iqd':10,
+	'time_window_fraction':1,
 	'min_mutation_frequency':0.45,
 	'html_vars': {'coloring': 'host, na, lbi, dfreq, region, date',
 				  'gtplaceholder': 'HA1 positions...',
@@ -41,7 +41,7 @@ virus_config.update({
 	})
 
 
-class H5_filter(flu_filter):
+class H7_filter(flu_filter):
 	def __init__(self,min_length = 987, **kwargs):
 		'''
 		parameters
@@ -51,12 +51,13 @@ class H5_filter(flu_filter):
 		self.min_length = min_length
 		self.vaccine_strains =[]
 		self.outgroup = {
-			'strain': 'A/HongKong/156/97',
+			'strain': 'A/duck/Potsdam/15/1980',
+			'subtype':'H7N7',
 			'db': 'GISAID',
-			'date': '1997-07-01',
-			'country': 'HongKong',
-			'region': 'China',
-			'seq': 'GATCAGATTTGCATTGGTTACCATGCAAACAACTCGACAGAGCAGGTTGACACAATAATGGAAAAGAATGTTACTGTTACACATGCCCAAGACATACTGGAAAGGACACACAACGGGAAGCTCTGCGATCTAAATGGAGTGAAGCCTCTCATTTTGAGGGATTGTAGTGTAGCTGGATGGCTCCTCGGAAACCCTATGTGTGACGAATTCATCAATGTGCCGGAATGGTCTTACATAGTGGAGAAGGCCAGTCCAGCCAATGACCTCTGTTATCCAGGGAATTTCAACGACTATGAAGAACTGAAACACCTATTGAGCAGAATAAACCATTTTGAGAAAATTCAGATCATCCCCAAAAGTTCTTGGTCCAATCATGATGCCTCATCAGGGGTGAGCTCAGCATGTCCATACCTTGGGAGGTCCTCCTTTTTCAGAAATGTGGTATGGCTTATCAAAAAGAACAGTGCATACCCAACAATAAAGAGGAGCTACAATAATACCAACCAAGAAGATCTTTTGGTACTGTGGGGGATTCACCATCCTAATGATGCGGCAGAGCAGACAAAGCTCTATCAAAATCCAACCACCTACATTTCCGTTGGAACATCAACACTGAACCAGAGATTGGTTCCAGAAATAGCTACTAGACCCAAAGTAAACGGGCAAAGTGGAAGAATGGAGTTCTTCTGGACAATTTTAAAGCCGAATGATGCCATCAATTTCGAGAGTAATGGAAATTTCATTGCTCCAGAATATGCATACAAAATTGTCAAGAAAGGGGACTCAACAATTATGAAAAGTGAATTGGAATATGGTAACTGCAACACCAAGTGTCAAACTCCAATGGGGGCGATAAACTCTAGTATGCCATTCCACAACATACACCCCCTCACCATCGGGGAATGCCCCAAATATGTGAAATCAAACAGATTAGTCCTTGCGACTGGACTCAGAAATACCCCTCAAAGAGAGAGAAGAAGAAAAAAGAGAGGACTATTTGGAGCTATAGCAGGTTTTATAGAGGGAGGATGGCAGGGAATGGTAGATGGTTGGTATGGGTACCACCATAGCAATGAGCAGGGGAGTGGATACGCTGCAGACAAAGAATCCACTCAAAAGGCAATAGATGGAGTCACCAATAAGGTCAACTCGATCATTAACAAAATGAACACTCAGTTTGAGGCCGTTGGAAGGGAATTTAATAACTTGGAAAGGAGGATAGAGAATTTAAACAAGAAGATGGAAGACGGATTCCTAGATGTCTGGACTTACAATGCTGAACTTCTGGTTCTCATGGAAAATGAGAGAACTCTCGACTTTCATGACTCAAATGTCAAGAACCTTTACGACAAGGTCCGACTACAGCTTAGGGATAATGCAAAGGAGCTGGGTAATGGTTGTTTCGAATTCTATCACAAATGTGATAATGAATGTATGGAAAGTGTAAAAAACGGAACGTATGACTACCCGCAGTATTCAGAAGAAGCAAGACTAAACAGAGAGGAAATAAGTGGAGTAAAATTGGAATCAATGGGAACTTACCAAATACTGTCAATTTATTCAACAGTGGCGAGTTCCCTAGCACTGGCAATCATGGTAGCTGGTCTATCTTTATGGATGTGCTCCAATGGATCGTTACAATGCAGAATTTGCATTTAAATTTGTGAGTTCAGATTGTAGTTAAAAACAC',
+			'date': '1980-07-01',
+			'country': 'Germany',
+			'region': 'Europe',
+			'seq': 'TACAAAATGAACACTCAAATCCTGATATTCGCTCTTGTGGCGATCATCCCAACAAATGCAGACAAAATTTGCCTTGGGCATCATGCCGTGTCAAACGGAACTAAAGTAAACACACTAACTGAGAGAGGAATAGAAGTTGTCAATGCAACTGAAACAGTGGAGAGAGCAAACATCCCCAGGATCTGCTCAAAAGGGAAAAGGACAATCGACCTTGGCCAATGTGGACTGCTGGGAACAATCACTGGACCACCTCAATGTGACCAATTCCTAGAATTCTCAGCTGATTTGATCATTGAAAGGCGGGAAGGAAATGATGTTTGTTATCCTGGAAAATTTGTAAACGAAGAAGCTCTGAGACAGATTCTCAGGGAATCAGGCGGAATTGATAAGGAAACAATGGGATTCACATATAGCGGAATAAGAACCAATGGAGCAACCGGTGCATGTAGAAGATCAGGATCTTCATTCTATGCAGAGATGAAATGGCTTCTGTCAAATACAGACGATGCTGCTTTCCCACAGACAACGAAGTCGTACAAGAACACAAGGAAAGATCCAGCTCTGATAATCTGGGGAATCCATCATTCTGGATCAACCACAGAACAGACCAAATTATATGGAAGTGGGAGCAAACTAATAACAGTTGGGAGTTCCAATTACCAACAGTCTTTTGTACCGAGTCCAGGAGCGAGGCCACAAGTGAATGGCCAATCTGGACGGATCGATTTCCATTGGTTGATGCTGAATCCCAATGACACAGTCACTTTCAGCTTCAATGGTGCTTTTATAGCTCCAGATCGTGCAAGTTTTCTGAGAGGGAAGTCTATGGGAATTCAGAGCGATGTACAAGTTGATGCCAATTGTGAGGGGGATTGCTATCATAGTGGAGGAACAATAATAAGTAATTTGCCTTTTCAGAATATCAATAGCAGAGCAGTAGGGAAATGTCCGAGGTATGTGAAACAAGAGAGCCTGCTACTGGCAACAGGGATGAAGAACGTTCCTGAAATTCCAAAAGGGAGAGGACTATTTGGTGCCATAGCGGGTTTTATTGAAAATGGGTGGGAAGGTCTGGTTGATGGATGGTATGGCTTCAGACATCAAAATGCACAGGGGGAGGGAACTGCGGCAGATTACAAGAGCACTCAGTCAGCAATTGATCAAATAACAGGGAAGTTAAACCGGCTCATAGAGAAAACTAACCAACAATTTGAGTTGATTGACAATGAATTCACCGAGGTTGAAAAGCAAATTGGCAACGTGATAAACTGGACCAGAGACTCCATAACAGAAGTGTGGTCCTATAATGCTGAACTCCTAGTGGCAATGGAAAATCAGCACACTATCGATCTGGCCGATTCGGAAATGAACAAGTTGTACGAAAGAGTGAGAAGGCAATTGAGGGAAAATGCAGAGGAAGATGGTACTGGTTGTTTCGAAATATTCCACAAGTGTGATGACGATTGTATGGCCAGTATAAGGAACAACACTTATGATCACAGCAAATACAGAGAAGAAGCAATGCAAAATAGGATACAGATTGATCCAGTCAAACTGAGCAGTGGCTACAAAGATGTGATACTTTGGTTTAGCTTCGGGGCGTCATGTTTCATACTTCTGGCCATTGCAATGGGCCTTATTTTCATGTGTGTGAAGAATGGAAACATGCGGTGCACTATTTGTATATAA',
 		}
 	def filter(self):
 		self.filter_generic(prepend_strains = self.vaccine_strains)	
@@ -109,7 +110,7 @@ class H5_filter(flu_filter):
 
 
 
-class H5_clean(virus_clean):
+class H7_clean(virus_clean):
 	def __init__(self,**kwargs):
 		virus_clean.__init__(self, **kwargs)
 
@@ -132,17 +133,17 @@ class H5_clean(virus_clean):
 		self.clean_generic()
 		print "Number of viruses after outbreak filtering:",len(self.viruses)
 
-class H5_process(process, H5_filter, H5_clean, H5_refine):
-	"""docstring for H5_process, H5_filter"""
+class H7_process(process, H7_filter, H7_clean, H7_refine):
+	"""docstring for H7_process, H7_filter"""
 	def __init__(self,verbose = 0, force_include = None, 
 				force_include_all = False, max_global= True, **kwargs):
 		self.force_include = force_include
 		self.force_include_all = force_include_all
 		self.max_global = max_global
 		process.__init__(self, **kwargs)
-		H5_filter.__init__(self,**kwargs)
-		H5_clean.__init__(self,**kwargs)
-		H5_refine.__init__(self,**kwargs)
+		H7_filter.__init__(self,**kwargs)
+		H7_clean.__init__(self,**kwargs)
+		H7_refine.__init__(self,**kwargs)
 		self.verbose = verbose
 
 	def run(self, steps, viruses_per_month=50, raxml_time_limit = 1.0):
@@ -186,7 +187,7 @@ class H5_process(process, H5_filter, H5_clean, H5_refine):
 			self.dump()
 		if 'export' in steps:
 			self.temporal_regional_statistics()
-			# exporting to json, including the H5 specific fields
+			# exporting to json, including the H7 specific fields
 			self.export_to_auspice(tree_fields = ['host', 'group', 'na', 'aa_muts','accession','isolate_id', 'lab','db', 'country'], 
 			                       annotations = [])
 			self.generate_indexHTML()
@@ -217,9 +218,9 @@ if __name__=="__main__":
 	# add all arguments to virus_config (possibly overriding)
 	virus_config.update(params.__dict__)
 	# pass all these arguments to the processor: will be passed down as kwargs through all classes
-	myH5 = H5_process(**virus_config) 
+	myH7 = H7_process(**virus_config) 
 	if params.test:
-		myH5.load()
+		myH7.load()
 	else:
-		myH5.run(steps,viruses_per_month = virus_config['viruses_per_month'], 
+		myH7.run(steps,viruses_per_month = virus_config['viruses_per_month'], 
 			raxml_time_limit = virus_config['raxml_time_limit'])

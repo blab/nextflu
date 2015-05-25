@@ -34,12 +34,14 @@ function makeLegend(){
 		}
 });
 
+  legend.attr("height", function(d){return 20*Math.ceil(0.5*colorScale.domain().length);});
+
   var tmp_leg = legend.selectAll(".legend")
   .data(colorScale.domain())
   .enter().append('g')
   .attr('class', 'legend')
   .attr('transform', function(d, i) {
-   var stack = 5;
+   var stack = colorScale.domain().length/2;
    var height = legendRectSize + legendSpacing;
    var fromRight = Math.floor(i / stack);
    var fromTop = i % stack;
@@ -63,7 +65,9 @@ function makeLegend(){
   .attr('x', legendRectSize + legendSpacing + 5)
   .attr('y', legendRectSize - legendSpacing)
   .text(function(d) {
-   return d.toString().replace(/([a-z])([A-Z])/g, '$1 $2').replace(/,/g, ', ');
+  	if (typeof d != 'undefined'){
+	   return d.toString().replace(/([a-z])([A-Z])/g, '$1 $2').replace(/,/g, ', ');
+	}else{ return '';}
  });		
   return tmp_leg;
 }

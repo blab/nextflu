@@ -237,11 +237,15 @@ class process(virus_frequencies):
 				for vname, val in self.kwargs["html_vars"].iteritems():
 					out.write(vname+": "+ val+'\n')
 			dt=self.time_interval[1]-self.time_interval[0]
+			if 'time_window_fraction' in self.kwargs:
+				tw = str(max(1, self.kwarks['time_window_fraction']*dt))
+			else:
+				tw = str(max(1, dt//3))
 			step = 0.5 if dt<4 else 1 if dt<7 else dt//5
 			out.write('---\n\n')
 			out.write('<script>\n')
 			out.write('var file_prefix = "'+self.prefix+self.resolution_prefix+'";\n')
-			out.write('var time_window = '+str(max(1, dt//3))+';\n')
+			out.write('var time_window = '+tw+';\n')
 			out.write('var time_ticks=['+', '.join(map(str, np.arange(np.ceil(self.time_interval[0]), np.ceil(self.time_interval[1]), step)))+'];\n')
 			if "js_vars" in self.kwargs:
 				for vname, val in self.kwargs['js_vars'].iteritems():

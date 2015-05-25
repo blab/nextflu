@@ -3,7 +3,7 @@ var dateValues, earliestDate, dateScale, niceDateScale, counterData;
 
 function adjust_freq_by_date() {
 	calcTipCounts(rootNode);
-	var tipCount = rootNode.tipCount;
+	var tipCount = Math.max(1,rootNode.tipCount);
 	nDisplayTips = displayRoot.tipCount;
 	console.log("Total tipcount: " + tipCount);
 	nodes.forEach(function (d) {

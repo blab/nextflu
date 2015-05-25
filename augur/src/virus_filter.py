@@ -230,7 +230,7 @@ class flu_filter(virus_filter):
 		for line in reader:
 			label_to_country[line['label'].lower()] = line['country']
 		for v in self.viruses:
-			if "country" not in v:
+			if "country" not in v or v['country']=='Unknown':
 				v['country'] = 'Unknown'
 				#try:
 				if True:
