@@ -24,14 +24,14 @@ class tree_refine(object):
 		will add strain attributes to nodes and translate the sequences -> produces aa_aln
 		'''
 		self.node_lookup = {node.taxon.label:node for node in self.tree.leaf_iter()}
-		self.remove_outgroup()
+#		self.remove_outgroup()
 		self.ladderize()
 		self.collapse()
 		self.translate_all()
 		self.add_nuc_mutations()
 		self.add_aa_mutations()
 		self.add_node_attributes()
-		self.reduce()
+#		self.reduce()
 		self.layout()
 		self.define_trunk()
 

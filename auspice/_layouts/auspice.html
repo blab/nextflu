@@ -19,11 +19,11 @@ layout: default
 				<div class="form-group">
 					<label class="control-label">Virus</label>
 					<select id="virus_select" class="form-control" onChange="document.location = this.value" value="GO">
-					{% for virus in site.data.viruses %}
-						<option value="{{ virus.default }}" 
-							{% if page.virus == virus.virus %} selected="selected"{% endif %}
-							>{{ virus.name }}</option>
-					{% endfor %}
+						{% for entry in site.data.viruses %}
+						<option value="/{{entry.virus}}/{{page.resolution}}/" 
+							{% if page.virus == entry.virus %} selected="selected" {% endif %}
+							>{{ entry.name }}</option>
+						{% endfor %}
 					</select>
 				</div>
 			</form>		
@@ -31,11 +31,11 @@ layout: default
 				<div class="form-group">
 					<label class="control-label">Time</label>
 					<select id="resolution_select" class="form-control" onChange="document.location = this.value" value="GO">
-					{% for virus in site.data.viruses %}
-						{% if page.virus == virus.virus %} 
-							{% for res in virus.resolutions %}
-								<option value="/{{ virus.virus }}/{{ res }}"
-								{% if page.resolution == res %} selected="selected"{% endif %}
+					{% for entry in site.data.viruses %}
+						{% if page.virus == entry.virus %} 
+							{% for res in entry.resolutions %}
+								<option value="/{{ entry.virus }}/{{ res }}"
+								{% if page.resolution == res %} selected="selected" {% endif %}
 								>{{ res }}</option>
 							{% endfor %}
 					{% endif %}

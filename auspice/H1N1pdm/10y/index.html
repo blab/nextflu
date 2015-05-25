@@ -1,0 +1,20 @@
+---
+title: nextflu / H1N1pdm / 10y
+layout: auspice
+virus: H1N1pdm
+resolution: 10y
+coloring: ep, ne, rb, lbi, dfreq, region, date
+gtplaceholder: HA1 positions...
+freqdefault: 6b, 6c
+---
+
+<script>
+var file_prefix = "H1N1pdm_10y_";
+var time_window = 3.0;
+var time_ticks=[2006.0, 2008.0, 2010.0, 2012.0, 2014.0];
+var LBItau = 0.0005;
+var dfreq_dn = 2;
+var LBItime_window = 0.5;
+{%include H1N1pdm_vaccines.js %}
+</script>
+

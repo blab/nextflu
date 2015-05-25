@@ -127,9 +127,8 @@ if __name__=="__main__":
 	if params.lineages is None:
 		params.lineages = ['H3N2', 'H1N1pdm', 'Vic', 'Yam']
 		
-	if params.resolutions is None:		
-#		params.resolutions = ['1y', '3y', '6y', '12y']
-		params.resolutions = ['2y', '5y']
+	if params.resolutions is None:
+		params.resolutions = ['2y', '5y', '10y']
 
 	for lineage in params.lineages:
 		if params.s3:
@@ -158,6 +157,9 @@ if __name__=="__main__":
 				if resolution == '6y':
 					n_viruses = 18
 					n_years = 6
+				if resolution == '10y':
+					n_viruses = 10
+					n_years = 10				
 				if resolution == '12y':
 					n_viruses = 8
 					n_years = 12

@@ -1,0 +1,20 @@
+---
+title: nextflu / H3N2 / 10y
+layout: auspice
+virus: H3N2
+resolution: 10y
+coloring: ep, ne, rb, lbi, dfreq, region, date
+gtplaceholder: HA1 positions...
+freqdefault: 3c2.a, 3c3.a
+---
+
+<script>
+var file_prefix = "H3N2_10y_";
+var time_window = 3.0;
+var time_ticks=[2006.0, 2008.0, 2010.0, 2012.0, 2014.0];
+var LBItau = 0.0005;
+var dfreq_dn = 2;
+var LBItime_window = 0.5;
+{%include H3N2_vaccines.js %}
+</script>
+
