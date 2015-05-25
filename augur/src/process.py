@@ -260,7 +260,7 @@ class process(virus_frequencies):
 		self.make_run_dir()
 		os.chdir(self.run_dir)
 		SeqIO.write([SeqRecord(Seq(v['seq']), id=v['strain']) for v in self.viruses], "temp_in.fasta", "fasta")
-		os.system("mafft --nofft temp_in.fasta > temp_out.fasta")
+		os.system("mafft --anysymbol --nofft temp_in.fasta > temp_out.fasta")
 		aln = AlignIO.read('temp_out.fasta', 'fasta')
 		self.sequence_lookup = {seq.id:seq for seq in aln}
 		# add attributes to alignment
