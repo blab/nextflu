@@ -11,30 +11,38 @@ layout: default
 			<div class="subtitle-box">
 				Real-time tracking of seasonal influenza virus evolution in humans
 			</div>
-			<div class="spacer"></div>		
+			<div class="spacer"></div>
 		</div>
 		<div class="io-container">
-
 			<form class="form-inline form-small">
 				<div class="form-group">
 					<label class="control-label">Virus</label>
 					<select id="virus_select" class="form-control" onChange="document.location = this.value" value="GO">
-						<option value="/H3N2/" 
-							{% if page.virus == "H3N2" %}selected="selected"{% endif %}
-							>A/H3N2</option>
-						<option value="/H1N1pdm/"
-							{% if page.virus == "H1N1pdm" %}selected="selected"{% endif %}
-							>A/H1N1pdm</option>
-						<option value="/Vic/"
-							{% if page.virus == "Vic" %}selected="selected"{% endif %}
-							>B/Vic</option>
-						<option value="/Yam/"
-							{% if page.virus == "Yam" %}selected="selected"{% endif %}
-							>B/Yam</option>
+						{% for entry in site.data.viruses %}
+						<option value="/{{entry.virus}}/{{page.resolution}}/" 
+							{% if page.virus == entry.virus %} selected="selected" {% endif %}
+							>{{ entry.name }}</option>
+						{% endfor %}
 					</select>
 				</div>
-			</form>		
-					
+			</form>
+			<div class="spacer"></div>
+			<form class="form-inline form-small">
+				<div class="form-group">
+					<label class="control-label">Time</label>
+					<select id="resolution_select" class="form-control" onChange="document.location = this.value" value="GO">
+					{% for entry in site.data.viruses %}
+						{% if page.virus == entry.virus %} 
+							{% for res in entry.resolutions %}
+								<option value="/{{ entry.virus }}/{{ res }}"
+								{% if page.resolution == res %} selected="selected" {% endif %}
+								>{{ res }}</option>
+							{% endfor %}
+					{% endif %}
+					{% endfor %}
+					</select>
+				</div>
+			</form>	
 		</div>
 		<div class="bigspacer"></div>	
 		<div class="io-container title">
@@ -58,27 +66,11 @@ layout: default
 							<label class="col-xs-4 control-label">Color by</label>
 							<div class="col-xs-8 controls">
 								<select id="coloring" class="form-control">
-									{% if page.coloring contains 'ep' %}
-									<option value="ep">epitope mutations</option>
+								{% for color_option in site.data.color_options %}
+									{% if page.coloring contains color_option[0] %}
+									<option value={{color_option[0] }}>{{ color_option[1] }}</option>
 									{% endif %}
-									{% if page.coloring contains 'ne' %}
-									<option value="ne">non-epitope mutations</option>
-									{% endif %}
-									{% if page.coloring contains 'rb' %}
-									<option value="rb">receptor binding mutations</option>
-									{% endif %}
-									{% if page.coloring contains 'lbi' %}
-									<option value="lbi">local branching index</option>
-									{% endif %}
-									{% if page.coloring contains 'dfreq' %}
-									<option value="dfreq">frequency change</option>
-									{% endif %}
-									{% if page.coloring contains 'region' %}
-									<option value="region">geographic region</option>
-									{% endif %}
-									{% if page.coloring contains 'date' %}
-									<option value="date">sampling date</option>
-									{% endif %}														
+								{% endfor %}														
 								</select>
 							</div>
 					</div>
@@ -96,17 +88,9 @@ layout: default
 						<label class="col-xs-4 control-label">Region</label>
 						<div class="col-xs-8 controls">
 							<select id="region" class="form-control">
-								<option value="all">all</option>
-								<option value="Africa">Africa</option>
-								<option value="China">China</option>
-								<option value="Europe">Europe</option>
-								<option value="JapanKorea">Japan / Korea</option>
-								<option value="NorthAmerica">North America</option>
-								<option value="Oceania">Oceania</option>
-								<option value="SouthAmerica">South America</option>
-								<option value="SouthAsia">South Asia</option>								
-								<option value="SoutheastAsia">Southeast Asia</option>
-								<option value="WestAsia">West Asia</option>
+								{% for reg in site.data.regions %}
+								<option value={{ reg[0] }}>{{reg[1] }}</option>
+								{% endfor %}
 							</select>
 						</div>
 					</div>
@@ -281,6 +265,10 @@ layout: default
 		<div class="bigspacer"></div>
 	</div>
 </div>
-<script type="text/javascript">var genericDomain = [0,0.111,0.222,0.333, 0.444, 0.555, 0.666, 0.777, 0.888, 1.0];</script>
-<script src="/js/{{ page.virus }}.js"></script>
+<script type="text/javascript">
+	var genericDomain = [0,0.111,0.222,0.333, 0.444, 0.555, 0.666, 0.777, 0.888, 1.0];
+	var path = '/data/';
+	var tip_labels = true;
+</script>
+{{ content }}
 <script src="/js/auspice.js"></script>

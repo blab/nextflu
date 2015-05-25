@@ -15,12 +15,14 @@ parser.add_argument('-y', '--years_back', type = float, default=3, help='number 
 parser.add_argument('-v', '--viruses_per_month', type = int, default = 50, help='number of viruses sampled per month')
 parser.add_argument('-r', '--raxml_time_limit', type = float, default = 1.0, help='number of hours raxml is run')
 parser.add_argument('--interval', nargs = '+', type = float, default = None, help='interval from which to pull sequences')
-parser.add_argument('--prefix', type = str, default = 'data/', help='path+prefix of file dumps')
+parser.add_argument('--path', type = str, default = 'data/', help='path of file dumps')
+parser.add_argument('--prefix', type = str, default = '', help='prefix of file dumps including auspice')
 parser.add_argument('--test', default = False, action="store_true",  help ="don't run the pipeline")
 parser.add_argument('--start', default = 'filter', type = str,  help ="start pipeline at specified step")
 parser.add_argument('--stop', default = 'export', type=str,  help ="run to end")
 parser.add_argument('--skip', nargs='+', type = str,  help ="analysis steps to skip")	
 parser.add_argument('--ATG', action="store_true", default=False, help ="include full HA sequence starting at ATG")	
+parser.add_argument('--resolution', type = str,  help ="label for the resolution")	
 
 
 virus_config = {
@@ -47,29 +49,36 @@ def shift_cds(shift, vc, epi_mask, rbs):
 
 class process(virus_frequencies):
 	"""generic template class for processing virus sequences into trees"""
-	def __init__(self, prefix = 'data/', time_interval = (2012.0, 2015.0), 
-	             auspice_prefix = '', run_dir = None, date_format={'fields':'%Y-%m-%d', 'reg':r'\d\d\d\d-\d\d-\d\d'},
+	def __init__(self, path = 'data/', prefix = 'virus', time_interval = (2012.0, 2015.0), 
+	             run_dir = None, virus = None, resolution = None, date_format={'fields':'%Y-%m-%d', 'reg':r'\d\d\d\d-\d\d-\d\d'},
 				 min_mutation_frequency = 0.01, min_genotype_frequency = 0.1, **kwargs):
-		self.tree_fname = prefix+'tree.pkl'
-		self.virus_fname = prefix+'virus.pkl'
-		self.frequency_fname = prefix+'frequencies.pkl'
-		self.aa_seq_fname = prefix+'aa_seq.pkl'
+		self.path = path
+		self.virus_type=virus
+		self.resolution = resolution
 		self.prefix = prefix
+		if resolution is not None:
+			self.resolution_prefix = resolution+'_'
+		else:
+			self.resolution_prefix = ''
 		self.date_format = date_format
 		self.min_mutation_frequency = min_mutation_frequency
 		self.min_genotype_frequency = min_genotype_frequency
 		self.time_interval = tuple(time_interval)
+		self.kwargs = kwargs
+		self.tree_fname = 		self.path + self.prefix + self.resolution_prefix + 'tree.pkl'
+		self.virus_fname = 		self.path + self.prefix + self.resolution_prefix + 'virus.pkl'
+		self.frequency_fname = 	self.path + self.prefix + self.resolution_prefix + 'frequencies.pkl'
+		self.aa_seq_fname = 	self.path + self.prefix + self.resolution_prefix + 'aa_seq.pkl'
 		if run_dir is None:
 			import random
 			self.run_dir = '_'.join(['temp', time.strftime('%Y%m%d-%H%M%S',time.gmtime()), str(random.randint(0,1000000))])
 		else:
 			self.run_dir = run_dir
 		self.run_dir = self.run_dir.rstrip('/')+'/'
-
-		self.auspice_tree_fname = 		'../auspice/data/' + auspice_prefix + 'tree.json'
-		self.auspice_sequences_fname = 	'../auspice/data/' + auspice_prefix + 'sequences.json'
-		self.auspice_frequency_fname = 	'../auspice/data/' + auspice_prefix + 'frequencies.json'
-		self.auspice_meta_fname = 		'../auspice/data/' + auspice_prefix + 'meta.json'
+		self.auspice_tree_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'tree.json'
+		self.auspice_sequences_fname = 	'../auspice/data/' + self.prefix + self.resolution_prefix + 'sequences.json'
+		self.auspice_frequency_fname = 	'../auspice/data/' + self.prefix + self.resolution_prefix + 'frequencies.json'
+		self.auspice_meta_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'meta.json'
 		self.nuc_alphabet = 'ACGT-N'
 		self.aa_alphabet = 'ACDEFGHIKLMNPQRSTVWY*X'
 		virus_frequencies.__init__(self, **kwargs)
@@ -212,6 +221,37 @@ class process(virus_frequencies):
 									for y,m in sorted(self.date_region_count.keys()) ]
 		write_json(meta, self.auspice_meta_fname, indent=0)
 
+	def generate_indexHTML(self):
+		htmlpath = '../auspice/'
+		if self.virus_type is not None: 
+			htmlpath+=self.virus_type+'/'
+		if self.resolution is not None: 
+			htmlpath+=self.resolution+'/'
+
+		if not os.path.isdir(htmlpath): os.makedirs(htmlpath)
+
+		with open(htmlpath+'index.html','w') as out:
+			out.write("---\ntitle: nextflu / "+self.virus_type+" / "+self.resolution_prefix.rstrip('_')+'\n'\
+					  "layout: auspice\nvirus: "+self.virus_type+"\nresolution: "+self.resolution_prefix.rstrip('_')+"\n")
+			if "html_vars"  in self.kwargs:
+				for vname, val in self.kwargs["html_vars"].iteritems():
+					out.write(vname+": "+ val+'\n')
+			dt=self.time_interval[1]-self.time_interval[0]
+			step = 0.5 if dt<4 else 1 if dt<7 else dt//5
+			out.write('---\n\n')
+			out.write('<script>\n')
+			out.write('var file_prefix = "'+self.prefix+self.resolution_prefix+'";\n')
+			out.write('var time_window = '+str(max(1, dt//3))+';\n')
+			out.write('var time_ticks=['+', '.join(map(str, np.arange(np.ceil(self.time_interval[0]), np.ceil(self.time_interval[1]), step)))+'];\n')
+			if "js_vars" in self.kwargs:
+				for vname, val in self.kwargs['js_vars'].iteritems():
+					if isinstance(val, basestring):
+						out.write('var '+vname+' = "'+val+'";\n')
+					else:						
+						out.write('var '+vname+' = '+str(val)+';\n')
+			out.write('{%include '+self.virus_type+'_vaccines.js %}\n')
+			out.write('</script>\n\n')
+
 	def align(self):
 		'''
 		aligns viruses using mafft. produces temporary files and deletes those at the end
@@ -220,7 +260,7 @@ class process(virus_frequencies):
 		self.make_run_dir()
 		os.chdir(self.run_dir)
 		SeqIO.write([SeqRecord(Seq(v['seq']), id=v['strain']) for v in self.viruses], "temp_in.fasta", "fasta")
-		os.system("mafft --nofft temp_in.fasta > temp_out.fasta")
+		os.system("mafft --anysymbol --nofft temp_in.fasta > temp_out.fasta")
 		aln = AlignIO.read('temp_out.fasta', 'fasta')
 		self.sequence_lookup = {seq.id:seq for seq in aln}
 		# add attributes to alignment

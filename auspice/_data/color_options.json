@@ -1,0 +1,10 @@
+[["ep", "epitope mutations"],
+ ["ne","non epitope mutations"],
+ ["rb","receptor binding mutations"],
+ ["lbi","local branching index"],
+ ["region","geographic region"],
+ ["date","sampling date"],
+ ["dfreq","frequency change"],
+ ["host","host"],
+ ["subtype","subtype"],
+]

@@ -1,3 +1,5 @@
+console.log('Enter tree.js');
+
 var freqScale = d3.scale.linear()
 	.domain([0, 1])
 	.range([1.5, 4.5]);
@@ -9,8 +11,48 @@ var top_margin = 10;
 if ((typeof branch_labels != "undefined")&&(branch_labels)) {top_margin +=15;}
 var right_margin = 10;
 
+function initDateColorDomain(intAttributes){
+	var numDateValues = tips.map(function(d) {return d.num_date;})
+	var minDate = d3.min(numDateValues.filter(function (d){return d!="undefined";}));
+	var maxDate = d3.max(numDateValues.filter(function (d){return d!="undefined";}));	
+	if (typeof time_window == "undefined"){
+		time_window = maxDate-minDate;
+		console.log("defining time window as " + time_window);
+	} 
+	if (time_window>1){
+		dateColorDomain = genericDomain.map(function (d){return Math.round(10*(maxDate - (1.0-d)*time_window))/10;});
+	}else{
+		dateColorDomain = genericDomain.map(function (d){return Math.round(100*(maxDate - (1.0-d)*time_window))/100;});		
+	}
+	console.log('setting date domain '+dateColorDomain);
+	dateColorScale.domain(dateColorDomain);
+}
+
+
+function initColorDomain(attr, tmpCS){
+	//var vals = tips.filter(function(d) {return tipVisibility(d)=='visible';}).map(function(d) {return d[attr];});
+	var vals = tips.map(function(d) {return d[attr];});
+	var minval = d3.min(vals);
+	var maxval = d3.max(vals);	
+	var rangeIndex = Math.min(10, maxval - minval + 1);
+	var domain = [];
+	if (maxval-minval<20)
+	{
+		for (var i=maxval - rangeIndex + 1; i<=maxval; i+=1){domain.push(i);}
+	}else{
+		for (var i=1.0*minval; i<=maxval; i+=(maxval-minval)/9.0){domain.push(i);}		
+	}
+	tmpCS.range(colors[rangeIndex]);
+	tmpCS.domain(domain);
+}
+
+function updateColorDomains(num_date){
+	dateColorDomain = genericDomain.map(function(d) {return Math.round(10*(num_date - time_window*(1.0-d)))/10;});
+	dateColorScale.domain(dateColorDomain);
+}
+
 function tipVisibility(d) {
-	if (d.diff < 0 || d.diff > time_window) {
+	if ((d.diff < 0 || d.diff > time_window)&(date_select==true)) {
 		return "hidden";
 	}
 	else if (d.region != restrictTo && restrictTo != "all") {
@@ -62,10 +104,7 @@ function branchLabelSize(d) {
 }
 
 function tipLabelSize(d) {
-	if (d.diff < 0 || d.diff > time_window) {
-		return 0;
-	}
-	else if (d.region != restrictTo && restrictTo != "all") {
+	if (tipVisibility(d)!="visible"){
 		return 0;
 	}
 	var n = nDisplayTips;
@@ -121,6 +160,10 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	tips = gatherTips(rootNode, []);
 	vaccines = getVaccines(tips);
 
+	initDateColorDomain();
+	if (typeof rootNode['ep'] != "undefined"){ initColorDomain('ep', epitopeColorScale);}
+	if (typeof rootNode['ne'] != "undefined"){ initColorDomain('ne', nonepitopeColorScale);}
+	if (typeof rootNode['rb'] != "undefined"){ initColorDomain('rb', receptorBindingColorScale);}
 	date_init();
 	tree_init();
 
@@ -175,15 +218,15 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.style("cursor", "pointer")
 		.on('mouseover', function (d){
 			linkTooltip.show(d.target, this);
-			if (colorBy!="genotype"){
+			if ((colorBy!="genotype")&(typeof addClade !="undefined")){
 				clade_freq_event = setTimeout(addClade, 1000, d);
 			}
 			})
 		.on('mouseout', function(d) {
 			linkTooltip.hide(d);
-			clearTimeout(clade_freq_event);})		
+			if (typeof addClade !="undefined") {clearTimeout(clade_freq_event);};})		
 		.on('click', function(d) {
-			if (colorBy!="genotype"){
+			if ((colorBy!="genotype")&(typeof addClade !="undefined")){
 				addClade(d);
 			}
 			displayRoot = d.target;
@@ -327,10 +370,10 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.transition().duration(speed)
 			.attr("points", branchPoints);
 
-		if ((typeof tip_labels != "undefined")&&(tip_labels)){		
+		if ((typeof tip_labels != "undefined")&&(tip_labels)){
 			treeplot.selectAll(".tipLabel").data(tips)
 				.transition().duration(speed)
-				.style("font-size", function(d) { return tipLabelSize(d)+"px"; })			
+				.style("font-size", function(d) {return tipLabelSize(d)+"px"; })			
 				.attr("x", function(d) { return d.x+10; })
 				.attr("y", function(d) { return d.y+4; });
 		}	
