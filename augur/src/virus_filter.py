@@ -283,7 +283,7 @@ class flu_filter(virus_filter):
 			else:
 				strain_info['host'] = 'Unknown'
 				strain_info['group'] = 'Unknown'
-		elif fields[1] in self.label_to_animal:
+		elif fields[1] in self.label_to_animal and fields[1]!='turkey':
 				add_host(fields[1])
 				if self.fix_geo:
 					country = self.determine_country(fields[2])
@@ -300,8 +300,17 @@ class flu_filter(virus_filter):
 			add_geo(fields[1])
 			add_host("human")
 		else:
-			strain_info['country'] = 'Unknown'
-			strain_info['region'] = 'Unknown'
+			if self.fix_geo:
+				country = self.determine_country(fields[1])
+				if country is not None:
+					self.label_to_country[fields[1]]=country
+					add_geo(fields[1])
+				else:
+					strain_info['country'] = country
+					strain_info['region'] = 'Unknown'
+			else:
+				strain_info['country'] = country
+				strain_info['region'] = 'Unknown'
 			strain_info['host'] = 'Unknown'
 			strain_info['group'] = 'Unknown'
 		return strain_info, not(((strain_info['country']=='Unknown') and self.strict_geo) or\
