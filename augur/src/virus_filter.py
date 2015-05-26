@@ -9,6 +9,23 @@ from collections import defaultdict
 from Bio import SeqIO
 import numpy as np
 
+def get_geo(label):
+	from geopy.geocoders import GoogleV3
+	geoobj = GoogleV3()
+	loc = geoobj.geocode(label)
+	if loc is not None:
+		country, location = None, None
+		for c in loc.raw['address_components']:
+			if 'country' in c['types']: 
+				country = c['long_name']
+			if 'administrative_area_level_1' in c['types']: 
+				location = c['long_name']
+		if location is None:
+			location=country
+		return location, country
+	else:
+		return None, None
+
 class virus_filter(object):
 
 	def __init__(self, alignment_file='', fasta_fields=None, date_spec='full', **kwargs):
@@ -219,6 +236,7 @@ class flu_filter(virus_filter):
 		self.fix_strain_names()
 		self.vaccine_strains=[]
 		self.load_strain_name_parsing_info()
+		self.fix_geo=False
 
 	def load_strain_name_parsing_info(self):
 		from csv import DictReader
@@ -267,8 +285,17 @@ class flu_filter(virus_filter):
 				strain_info['group'] = 'Unknown'
 		elif fields[1] in self.label_to_animal:
 				add_host(fields[1])
-				strain_info['country'] = 'Unknown'
-				strain_info['region'] = 'Unknown'
+				if self.fix_geo:
+					country = self.determine_country(fields[2])
+					if country is not None:
+						self.label_to_country[fields[2]]=country
+						add_geo(fields[2])
+					else:
+						strain_info['country'] = country
+						strain_info['region'] = 'Unknown'
+				else:
+					strain_info['country'] = country
+					strain_info['region'] = 'Unknown'
 		elif fields[1] in self.label_to_country:
 			add_geo(fields[1])
 			add_host("human")
@@ -279,6 +306,18 @@ class flu_filter(virus_filter):
 			strain_info['group'] = 'Unknown'
 		return strain_info, not(((strain_info['country']=='Unknown') and self.strict_geo) or\
 								((strain_info['host']=='Unknown') and self.strict_host))
+
+
+	def determine_country(self, label):
+		location, country = get_geo(label)
+		if country is not None:
+			with open('source-data/geo_synonyms.tsv', 'a') as outf:
+				try:
+					print "adding:",label+'\t'+country+'\t'+location
+					outf.write(label+'\t'+country+'\t'+location+'\n')
+				except:
+					print "Can't write to file:",label+'\t'+country+'\t'+location
+		return country
 
 
 	def filter(self):
