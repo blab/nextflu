@@ -16,7 +16,8 @@ sp = 17
 virus_config.update({
 	# data source and sequence parsing/cleaning/processing
 	'virus':'ebola',
-	'fasta_fields':{1:'strain',2:'lab',3:'country',4:'region',5:'date'},
+	'fasta_fields':{2:'strain', 3:'lab', 4:'country', 5:'region', 7:'date'},
+	#>EBOV|KM233062|G3758|VHFC1|SLE|Kailahun|Jawie|2014-06-11
 	'alignment_file':'data/ebola.fasta',
 	'outgroup':'EM_079404',
 	'aggregate_regions':[('global', None)],
@@ -59,8 +60,12 @@ class ebola_clean(virus_clean):
 		virus_clean.__init__(self, **kwargs)
 
 	def clean(self):
-		self.clean_generic()
-		print "Number of viruses after outbreak filtering:",len(self.viruses)
+		print "Number of viruses before cleaning:",len(self.viruses)
+		self.unique_date()
+		self.remove_insertions()
+		self.clean_ambiguous()
+		self.viruses.sort(key=lambda x:x.num_date)
+		print "Number of viruses after cleaning:",len(self.viruses)
 
 class ebola_refine(tree_refine):
 	def refine(self):
