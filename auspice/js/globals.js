@@ -1,4 +1,6 @@
 var regions = [
+//generic country codes
+"GUI","GIN","SLE","LIB","LBR",
 // Guinean prefectures
 "Boffa", "Boke", "Fria", "Gaoual", "Koundara", "Conakry", "Dabola",
 "Dinguiraye", "Faranah", "Kissidougou", "Kankan", "Kerouane",
@@ -14,7 +16,7 @@ var regions = [
 "Nimba", "RiverCess", "RiverGee", "Sinoe", "Bomi", "Bong",
 "Gbapolu", "GrandCapeMount", "GrandBassa", "GrandGedeh",
 "GrandKru", "Lofa", "Margibi", "Maryland", "Montserrado",
-"GUI","GIN","SLE","LIB","LBR"	];
+];
 var restrictTo = "all";
 
 var cladeToSeq = {}

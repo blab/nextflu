@@ -17,6 +17,9 @@ var colors = [
 ];
 
 var regionColors = [
+//generic country colors
+"#AAA","#AAA","#AAA","#AAA","#AAA",   
+// proper regions
 "#58A2AB", "#56A0AE", "#5BA7A6", "#62AB9C", "#64AC99", "#60AA9F",
 "#84BA70", "#81B973", "#86BB6D", "#95BD61", "#92BC63", "#9EBE5A",
 "#89BB6B", "#8FBC66", "#8CBB68", "#66AE95", "#5DA8A2", "#68AF92",
@@ -25,9 +28,10 @@ var regionColors = [
 "#AABD52", "#9BBE5C", "#A4BE56", "#A7BE54", "#4C90C0", "#447ECC",
 "#4272CE", "#691D93", "#781C86", "#4041C7", "#691D93", "#482BB6",
 "#4066CF", "#4041C7", "#4041C7", "#4887C6", "#482BB6", "#691D93",
+
 "#E67D33", "#E68735", "#E29E39", "#E49838", "#DF4528", "#E4682F",
 "#DC2D24", "#DB2122", "#E67431", "#E69036", "#DFA53B", "#DE3926",
-"#E35C2C", "#DCAB3C", "#E1512A"
+"#E35C2C", "#DCAB3C", "#E1512A",
 ]
 
 var genotypeColors = ["#60AA9E", "#D9AD3D", "#5097BA", "#E67030", "#8EBC66", "#E59637", "#AABD52", "#DF4327", "#C4B945", "#75B681"]
