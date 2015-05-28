@@ -294,9 +294,9 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			virusTooltip.show(d, this);
 			if (colorBy=='region'){
 				legend.selectAll('.map_feature')
-					.filter(function (m) {return m.id==d.region;})
-					.style("fill", function() {console.log(d.id+' '+d.coloring+' '+d.country);
-                		return d3.rgb(colorScale(d.coloring)).brighter();});
+					.filter(function (m) { return match_region(m, d);})
+					.style("fill", function(m) {
+						return d3.rgb(colorScale(d.coloring)).brighter();});
 			}
 		})
 		.on('click', function(d) {
@@ -311,7 +311,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			virusTooltip.hide(d, this);
 			if (colorBy=='region'){
 				legend.selectAll('.map_feature')
-					.filter(function (m) {return m.id==d.region;})
+					.filter(function (m) { return match_region(m, d);})
 					.style("fill", function (){return colorScale(d.coloring);});
 			}
 		})

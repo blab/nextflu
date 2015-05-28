@@ -132,15 +132,22 @@ function make_map(){
     });
 }
 
+function match_region(map_region, tip){
+  if (typeof map_region.id != "undefined"){
+    return map_region.id.replace(' ','')==tip.region.replace(' ','');
+  }else{
+    return false;
+  }
+}
 
 function mouseOverMap(region){
     treeplot.selectAll(".tip")
-            .filter(function (d){return d.region==region.id;})
+            .filter(function (d){ return match_region(region, d);})
                 .attr("r", function(d){return tipRadius*2;});
 }
 
 function mouseOutMap(region){
     treeplot.selectAll(".tip")
-            .filter(function (d){return d.region==region.id;})
+            .filter(function (d){ return match_region(region, d);})
                 .attr("r", function(d){return tipRadius;});
 }
