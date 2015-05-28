@@ -80,7 +80,7 @@ function removeLegend(){
 }
 var map_features;
 
-function patch_color(d){
+function patch_region_name(d){
   var tmp = d.properties.NAME_2;
   if (tmp == null){
     tmp= d.properties.NAME_1;
@@ -89,7 +89,11 @@ function patch_color(d){
     tmp = d.properties.ISO;
     console.log('Falling back on ISO: '+ d.properties.NAME_2+ ' ' + d.properties.NAME_1 + ' ' + d.properties.ISO + ' ' +d.id);
   }
-  return regionColorScale(tmp.replace(' ',''));
+  return tmp.replace(' ','');
+}
+
+function patch_color(d) {
+	return regionColorScale(patch_region_name(d));
 }
 
 function make_map(){
@@ -159,6 +163,7 @@ function match_region(map_region, tip){
 }
 
 function mouseOverMap(region){
+	console.log(region);
     mapTooltip.show(region);
     treeplot.selectAll(".tip")
             .filter(function (d){ return match_region(region, d);})
@@ -166,6 +171,11 @@ function mouseOverMap(region){
                 .style("fill", function (t) {
                   return d3.rgb(tipFillColor(t)).brighter();
                 });
+	legend.selectAll('.map_feature')
+		.filter(function (m) { return patch_region_name(m) == patch_region_name(region);})
+		.style("fill", function(m) {
+			return d3.rgb(patch_color(region)).brighter();
+		});
 }
 
 function mouseOutMap(region){
@@ -174,4 +184,9 @@ function mouseOutMap(region){
             .filter(function (d){ return match_region(region, d);})
                 .attr("r", function(d){return tipRadius;})
                 .style("fill", tipFillColor);
+	legend.selectAll('.map_feature')
+		.filter(function (m) { return patch_region_name(m) == patch_region_name(region);})
+		.style("fill", function(m) {
+			return d3.rgb(patch_color(region));
+		});          
 }
