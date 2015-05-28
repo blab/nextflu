@@ -40,7 +40,7 @@ var dfreqColorScale = d3.scale.linear()
 
 var regionColorScale = d3.scale.ordinal()
 	.domain(regions)
-	.range(regionColors);
+	.range(["lightseagreen", "steelblue", "lightcoral"]);
 
 var dateColorScale = d3.scale.linear().clamp([true])
 	.domain(dateColorDomain)
@@ -95,7 +95,7 @@ function colorByTrait() {
 	}
 	else if (colorBy == "region") {
 		colorScale = regionColorScale;
-		nodes.map(function(d) { d.coloring = d.region; });
+		nodes.map(function(d) { d.coloring = d.country; });
 	}
 	else if (colorBy == "date") {
 		colorScale = dateColorScale;

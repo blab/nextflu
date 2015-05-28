@@ -1,19 +1,5 @@
 var regions = [
-	'Lola',
-	'Kailahun',
-	'Siguiri',
-	'Gueckedou',
-	'Faranah',
-	'Foya',
-	'Beyla',
-	'Nzerekore',
-	'Kerouane',
-	'Voinjama',
-	'Macenta',
-	'Kouroussa',
-	'Kankan',
-	'?',
-	'Kissidougou'
+'GIN', 'SLE', 'LBR'
 	];
 var restrictTo = "all";
 
