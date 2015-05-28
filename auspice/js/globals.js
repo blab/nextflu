@@ -8,13 +8,13 @@ var regions = [
 "Nzerekore", "Yamou",
 // Sierra Leonean districts
 "Kailahun", "Kenema", "Kono", "Bombali", "Kambia", "Koinadugu",
-"Port Loko", "Tonkolili", "Bo", "Bonthe", "Moyamba", "Pujehun",
-"Western Rural", "Western Urban",
+"PortLoko", "Tonkolili", "Bo", "Bonthe", "Moyamba", "Pujehun",
+"WesternRural", "WesternUrban",
 // Liberian counties
-"Nimba", "River Cess", "River Gee", "Sinoe", "Bomi", "Bong",
-"Gbapolu", "Grand Cape Mount", "GrandBassa", "GrandGedeh",
-"GrandKru", "Lofa", "Margibi", "Maryland", "Montserrado"
-	];
+"Nimba", "RiverCess", "RiverGee", "Sinoe", "Bomi", "Bong",
+"Gbapolu", "GrandCapeMount", "GrandBassa", "GrandGedeh",
+"GrandKru", "Lofa", "Margibi", "Maryland", "Montserrado",
+"GUI","GIN","SLE","LIB","LBR"	];
 var restrictTo = "all";
 
 var cladeToSeq = {}

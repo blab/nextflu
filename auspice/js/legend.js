@@ -81,7 +81,15 @@ function removeLegend(){
 var map_features;
 
 function patch_color(d){
-  return regionColorScale(d.properties.NAME_2);
+  var tmp = d.properties.NAME_2;
+  if (tmp == null){
+    tmp= d.properties.NAME_1;
+  }
+  if (tmp=='?'||tmp==null){
+    tmp = d.properties.ISO;
+    console.log('Falling back on ISO: '+ d.properties.NAME_2+ ' ' + d.properties.NAME_1 + ' ' + d.properties.ISO + ' ' +d.id);
+  }
+  return regionColorScale(tmp.replace(' ',''));
 }
 
 function make_map(){
@@ -134,10 +142,18 @@ function make_map(){
 }
 
 function match_region(map_region, tip){
-  if (typeof map_region.id != "undefined"){
-    return map_region.id.replace(' ','')==tip.region.replace(' ','');
-  }else{
+  var tmp = map_region.properties.NAME_2;
+  if (tmp == null){
+    tmp = map_region.properties.NAME_1;
+  }
+  if (tmp==null){
+    console.log('Falling back on ISO: '+ map_region.properties.NAME_2+ ' ' + map_region.properties.NAME_1 + ' ' + map_region.properties.ISO + ' ' +map_region.id);
+    tmp = map_region.properties.ISO;
+  }
+  if (tmp == null){
     return false;
+  }else{
+    return tmp.replace(' ','')==tip.region.replace(' ','');
   }
 }
 
