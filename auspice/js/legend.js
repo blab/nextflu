@@ -160,11 +160,15 @@ function match_region(map_region, tip){
 function mouseOverMap(region){
     treeplot.selectAll(".tip")
             .filter(function (d){ return match_region(region, d);})
-                .attr("r", function(d){return tipRadius*2;});
+                .attr("r", function(d){return tipRadius*2;})
+                .style("fill", function (t) {
+                  return d3.rgb(tipFillColor(t)).brighter();
+                });
 }
 
 function mouseOutMap(region){
     treeplot.selectAll(".tip")
             .filter(function (d){ return match_region(region, d);})
-                .attr("r", function(d){return tipRadius;});
+                .attr("r", function(d){return tipRadius;})
+                .style("fill", tipFillColor);
 }
