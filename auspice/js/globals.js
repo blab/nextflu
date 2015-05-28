@@ -1,5 +1,19 @@
 var regions = [
-'GIN', 'SLE', 'LBR'
+// Guinean prefectures
+"Boffa", "Boke", "Fria", "Gaoual", "Koundara", "Conakry", "Dabola",
+"Dinguiraye", "Faranah", "Kissidougou", "Kankan", "Kerouane",
+"Kouroussa", "Mandiana", "Siguiri", "Coyah", "Dubreka", "Forecariah",
+"Kindia", "Telimele", "Koubia", "Labe", "Lelouma", "Mali", "Tougue",
+"Dalaba", "Mamou", "Pita", "Beyla", "Gueckedou", "Lola", "Macenta",
+"Nzerekore", "Yamou",
+// Sierra Leonean districts
+"Kailahun", "Kenema", "Kono", "Bombali", "Kambia", "Koinadugu",
+"Port Loko", "Tonkolili", "Bo", "Bonthe", "Moyamba", "Pujehun",
+"Western Rural", "Western Urban",
+// Liberian counties
+"Nimba", "River Cess", "River Gee", "Sinoe", "Bomi", "Bong",
+"Gbapolu", "Grand Cape Mount", "GrandBassa", "GrandGedeh",
+"GrandKru", "Lofa", "Margibi", "Maryland", "Montserrado"
 	];
 var restrictTo = "all";
 

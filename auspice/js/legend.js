@@ -81,9 +81,7 @@ function removeLegend(){
 var map_features;
 
 function patch_color(d){
-  return (d.properties.ISO === "GIN" ? "lightseagreen" :
-                        (d.properties.ISO === "SLE" ? "steelblue" :
-                        (d.properties.ISO === "LBR" ? "lightcoral" : "lightseagreen")));
+  return regionColorScale(d.properties.NAME_2);
 }
 
 function make_map(){

@@ -15,7 +15,21 @@ var colors = [
 	["#4E95BD", "#5DA8A3", "#70B487", "#87BB6D", "#A0BE58", "#BABC4A", "#D0B440", "#E0A23A", "#E68634", "#E35F2D", "#DD3425"],
 	["#4D92BF", "#5AA5A8", "#6BB18D", "#80B974", "#98BD5E", "#B1BD4E", "#C8B944", "#DAAC3D", "#E59738", "#E67732", "#E14F2A", "#DB2522"]
 ];
-var regionColors = ["#5097BA", "#60AA9E", "#75B681", "#8EBC66", "#AABD52", "#C4B945", "#D9AD3D", "#E59637", "#E67030", "#DF4327"]
+
+var regionColors = [
+"#58A2AB", "#56A0AE", "#5BA7A6", "#62AB9C", "#64AC99", "#60AA9F",
+"#84BA70", "#81B973", "#86BB6D", "#95BD61", "#92BC63", "#9EBE5A",
+"#89BB6B", "#8FBC66", "#8CBB68", "#66AE95", "#5DA8A2", "#68AF92",
+"#6AB18F", "#5AA4A8", "#7EB976", "#74B582", "#6FB388", "#71B485",
+"#7CB879", "#77B67F", "#79B77C", "#6CB28C", "#A1BE58", "#98BD5E",
+"#AABD52", "#9BBE5C", "#A4BE56", "#A7BE54", "#4C90C0", "#447ECC",
+"#4272CE", "#691D93", "#781C86", "#4041C7", "#691D93", "#482BB6",
+"#4066CF", "#4041C7", "#4041C7", "#4887C6", "#482BB6", "#691D93",
+"#E67D33", "#E68735", "#E29E39", "#E49838", "#DF4528", "#E4682F",
+"#DC2D24", "#DB2122", "#E67431", "#E69036", "#DFA53B", "#DE3926",
+"#E35C2C", "#DCAB3C", "#E1512A"
+]
+
 var genotypeColors = ["#60AA9E", "#D9AD3D", "#5097BA", "#E67030", "#8EBC66", "#E59637", "#AABD52", "#DF4327", "#C4B945", "#75B681"]
 
 var epitopeColorScale = d3.scale.linear().clamp([true])
@@ -40,7 +54,7 @@ var dfreqColorScale = d3.scale.linear()
 
 var regionColorScale = d3.scale.ordinal()
 	.domain(regions)
-	.range(["lightseagreen", "steelblue", "lightcoral"]);
+	.range(regionColors);
 
 var dateColorScale = d3.scale.linear().clamp([true])
 	.domain(dateColorDomain)
@@ -95,7 +109,7 @@ function colorByTrait() {
 	}
 	else if (colorBy == "region") {
 		colorScale = regionColorScale;
-		nodes.map(function(d) { d.coloring = d.country; });
+		nodes.map(function(d) { d.coloring = d.region; });
 	}
 	else if (colorBy == "date") {
 		colorScale = dateColorScale;
