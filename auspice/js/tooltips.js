@@ -81,3 +81,18 @@ var linkTooltip = d3.tip()
 		return string;
 	});
 treeplot.call(linkTooltip);
+
+
+var mapTooltip = d3.tip()
+	.direction('e')
+	.attr('class', 'd3-tip')
+	.offset([0,10])
+	.html(function(d) {
+		  var tmp = '';
+		  if (d.properties.NAME_2!=null) tmp+=d.properties.NAME_2;
+		  if ((d.properties.NAME_2==null)&&(d.properties.NAME_1!=null)){
+		  	tmp+=d.properties.NAME_1;
+		  }
+		  tmp+=', '+d.properties.ISO;
+		  return tmp;
+	});

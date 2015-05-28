@@ -106,6 +106,7 @@ function make_map(){
         .projection(projection);
 
     var svg = d3.select("#legend");
+    svg.call(mapTooltip);
 
     svg
         .attr("width", width)
@@ -158,6 +159,7 @@ function match_region(map_region, tip){
 }
 
 function mouseOverMap(region){
+    mapTooltip.show(region);
     treeplot.selectAll(".tip")
             .filter(function (d){ return match_region(region, d);})
                 .attr("r", function(d){return tipRadius*2;})
@@ -167,6 +169,7 @@ function mouseOverMap(region){
 }
 
 function mouseOutMap(region){
+    mapTooltip.hide(region);
     treeplot.selectAll(".tip")
             .filter(function (d){ return match_region(region, d);})
                 .attr("r", function(d){return tipRadius;})
