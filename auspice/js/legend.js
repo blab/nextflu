@@ -78,7 +78,7 @@ function removeLegend(){
     legend.selectAll('.map_feature')
   .remove();
 }
-
+var map_features;
 function make_map(){
     var width = 300,
         height = 250,
@@ -109,7 +109,7 @@ function make_map(){
     d3.json("/data/ebov.json", function(error, locations) {
         var locationData = topojson.feature(locations, locations.objects.ebov).features;
 
-        var tmp_leg = g.selectAll(".map_feature")
+        map_features = g.selectAll(".map_feature")
             .data(locationData)
             .enter().append("path")
             .style("fill", function(d) {console.log(d.id);

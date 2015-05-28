@@ -292,6 +292,12 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.style("stroke", tipStrokeColor)
 		.on('mouseover', function(d) {
 			virusTooltip.show(d, this);
+			if (colorBy=='region'){
+				legend.selectAll('.map_feature')
+					.filter(function (m) {return m.id==d.region;})
+					.style("fill", function() {console.log(d.id+' '+d.coloring+' '+d.country);
+                		return d3.rgb(colorScale(d.coloring)).brighter();});
+			}
 		})
 		.on('click', function(d) {
 			if ((typeof d.db != "undefined") && (d.db == "GISAID") && (typeof d.accession != "undefined")) {
@@ -301,7 +307,14 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
   				win.focus();
   			}	
   		})		
-		.on('mouseout', virusTooltip.hide);
+		.on('mouseout', function(d) {
+			virusTooltip.hide(d, this);
+			if (colorBy=='region'){
+				legend.selectAll('.map_feature')
+					.filter(function (m) {return m.id==d.region;})
+					.style("fill", function (){return colorScale(d.coloring);});
+			}
+		})
 
 	var vaccineCircles = treeplot.selectAll(".vaccine")
 		.data(vaccines)
