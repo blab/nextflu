@@ -93,8 +93,8 @@ function patch_color(d){
 }
 
 function make_map(){
-    var width = 300,
-        height = 250,
+    var width = 400,
+        height = 340,
         active = d3.select(null);
 
     console.log('enter map');
@@ -132,7 +132,7 @@ function make_map(){
             .on("mouseover",mouseOverMap)
             .on("mouseout",mouseOutMap);
 
-        g.attr("transform", "translate(250,200) scale(" + 0.5 + ")");
+        g.attr("transform", "translate(260,180) scale(" + 0.7 + ")");
 
       g.append("path")
           .datum(topojson.mesh(locations, locations.objects.ebov, function(a, b) { return a !== b; }))
