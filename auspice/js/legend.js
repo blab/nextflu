@@ -79,6 +79,13 @@ function removeLegend(){
   .remove();
 }
 var map_features;
+
+function patch_color(d){
+  return (d.properties.ISO === "GIN" ? "lightseagreen" :
+                        (d.properties.ISO === "SLE" ? "steelblue" :
+                        (d.properties.ISO === "LBR" ? "lightcoral" : "lightseagreen")));
+}
+
 function make_map(){
     var width = 300,
         height = 250,
@@ -112,11 +119,7 @@ function make_map(){
         map_features = g.selectAll(".map_feature")
             .data(locationData)
             .enter().append("path")
-            .style("fill", function(d) {console.log(d.id);
-                return (d.properties.ISO === "GIN" ? "lightseagreen" :
-                        (d.properties.ISO === "SLE" ? "steelblue" :
-                        (d.properties.ISO === "LBR" ? "lightcoral" : "lightseagreen")));
-                })
+            .style("fill", patch_color)
             .attr("d", path)
             .attr("class", "map_feature")
             .on("mouseover",mouseOverMap)
