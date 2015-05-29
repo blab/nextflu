@@ -147,20 +147,18 @@ function make_map(){
 }
 
 function match_region(map_region, tip){
-  var tmp = map_region.properties.NAME_2;
-  if (tmp == null){
-    tmp = map_region.properties.NAME_1;
-  }
-  if (tmp==null){
-    console.log('Falling back on ISO: '+ map_region.properties.NAME_2+ ' ' + map_region.properties.NAME_1 + ' ' + map_region.properties.ISO + ' ' +map_region.id);
-    tmp = map_region.properties.ISO;
-  }
-  if (tmp == null){
-    return false;
-  }else{
-    return tmp.replace(' ','')==tip.region.replace(' ','');
-  }
+  var tmp = patch_region_name(map_region);
+  return tmp==tip.region.replace(' ','');
 }
+
+function patch_in_list(map_region, branch){
+  var tmp = patch_region_name(map_region);
+  for (reg in branch.target.allRegions){
+    if (tmp==reg.replace(' ','')) return true;
+  }
+  return false;
+}
+
 
 function mouseOverMap(region){
 	console.log(region);

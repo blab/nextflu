@@ -76,6 +76,26 @@ function calcFullTipCounts(node){
 	}
 };
 
+
+/**
+ * for each node, count tips in all regions of subtending tips (alive or dead) 
+**/
+function calcAllRegions(node){
+	node.allRegions = {};
+	if (typeof node.children != "undefined") {
+		for (var i=0; i<node.children.length; i++) {
+			calcAllRegions(node.children[i]);
+			for (var reg in node.children[i].allRegions){
+				node.allRegions[reg] = node.children[i].allRegions[reg];
+			}
+		}
+	}
+	else { 
+		node.allRegions[node.region] = 1;
+	}
+};
+
+
 /**
  * for each node, calculate the number of tips in the currently selected time window. 
 **/

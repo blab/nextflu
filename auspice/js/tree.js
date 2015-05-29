@@ -2,7 +2,7 @@ console.log('Enter tree.js');
 
 var freqScale = d3.scale.linear()
 	.domain([0, 1])
-	.range([1.5, 4.5]);
+	.range([2, 4.5]);
 
 var tipRadius = 4.0;
 var left_margin = 10;
@@ -131,6 +131,7 @@ function tipLabelWidth(d) {
 
 function tree_init(){
 	calcFullTipCounts(rootNode);
+	calcAllRegions(rootNode);
 	calcBranchLength(rootNode);
 	rootNode.branch_length= 0.01;	
 	rootNode.dfreq = 0.0;
@@ -226,10 +227,21 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			if ((colorBy!="genotype")&(typeof addClade !="undefined")){
 				clade_freq_event = setTimeout(addClade, 1000, d);
 			}
+			if (colorBy=='region'){
+				legend.selectAll('.map_feature')
+					.filter(function (m) { return patch_in_list(m, d);})
+					.style("fill", function (m){return d3.rgb(patch_color(m)).brighter();});
+				}
 			})
 		.on('mouseout', function(d) {
 			linkTooltip.hide(d);
-			if (typeof addClade !="undefined") {clearTimeout(clade_freq_event);};})		
+			if (typeof addClade !="undefined") {clearTimeout(clade_freq_event);};
+			if (colorBy=='region'){
+				legend.selectAll('.map_feature')
+					.filter(function (m) { return patch_in_list(m, d);})
+					.style("fill", function (m){return d3.rgb(patch_color(m));});
+				}
+		})		
 		.on('click', function(d) {
 			if ((colorBy!="genotype")&(typeof addClade !="undefined")){
 				addClade(d);
