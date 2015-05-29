@@ -131,6 +131,8 @@ function make_map(){
             .data(locationData)
             .enter().append("path")
             .style("fill", patch_color)
+            .style("stroke-width", 1)
+            .style("stroke", '#CCC')   
             .attr("d", path)
             .attr("class", "map_feature")
             .on("mouseover",mouseOverMap)
@@ -171,6 +173,7 @@ function mouseOverMap(region){
                 });
 	legend.selectAll('.map_feature')
 		.filter(function (m) { return patch_region_name(m) == patch_region_name(region);})
+    .style("stroke-width", 3)
 		.style("fill", function(m) {
 			return d3.rgb(patch_color(region)).brighter();
 		});
@@ -184,6 +187,7 @@ function mouseOutMap(region){
                 .style("fill", tipFillColor);
 	legend.selectAll('.map_feature')
 		.filter(function (m) { return patch_region_name(m) == patch_region_name(region);})
+    .style("stroke-width", 1)
 		.style("fill", function(m) {
 			return d3.rgb(patch_color(region));
 		});          
