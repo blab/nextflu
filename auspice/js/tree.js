@@ -230,7 +230,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			if (colorBy=='region'){
 				legend.selectAll('.map_feature')
 					.filter(function (m) { return patch_in_list(m, d);})
-				    .style("stroke-width", 3)
+				    .style("stroke-width", mapStrokeWidthFat)
 					.style("fill", function (m){return d3.rgb(patch_color(m)).brighter();});
 				}
 			})
@@ -309,7 +309,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			if (colorBy=='region'){
 				legend.selectAll('.map_feature')
 					.filter(function (m) { return match_region(m, d);})
-				    .style("stroke-width", 3)
+				    .style("stroke-width", mapStrokeWidthFat)
 					.style("fill", function(m) {
 						return d3.rgb(colorScale(d.coloring)).brighter();});
 			}
