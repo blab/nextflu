@@ -1,5 +1,6 @@
 var regions = ["Africa", "SouthAmerica", "WestAsia", "Oceania", "Europe", "JapanKorea", "NorthAmerica", "SoutheastAsia", "SouthAsia", "China", "Unknown"];
 var restrictTo = "all";
+var restrictToHost = "all";
 
 var cladeToSeq = {}
 
