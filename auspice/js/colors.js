@@ -15,8 +15,39 @@ var colors = [
 	["#4E95BD", "#5DA8A3", "#70B487", "#87BB6D", "#A0BE58", "#BABC4A", "#D0B440", "#E0A23A", "#E68634", "#E35F2D", "#DD3425"],
 	["#4D92BF", "#5AA5A8", "#6BB18D", "#80B974", "#98BD5E", "#B1BD4E", "#C8B944", "#DAAC3D", "#E59738", "#E67732", "#E14F2A", "#DB2522"]
 ];
-var regionColors = ["#5097BA", "#60AA9E", "#75B681", "#8EBC66", "#AABD52", "#C4B945", "#D9AD3D", "#E59637", "#E67030", "#DF4327","#CCC"]
-var hostColors = ['#CCC', "#60AA9E", "#D9AD3D", "#5097BA", "#E67030", "#8EBC66", "#E59637", "#AABD52", "#DF4327", "#C4B945", "#75B681", "#60AA9E", "#D9AD3D", "#5097BA", "#E67030", "#8EBC66", "#E59637", "#AABD52", "#DF4327", "#C4B945", "#75B681"]
+var regionColors = ["#CCC", "#5097BA", "#60AA9E", "#75B681", "#8EBC66", "#AABD52", "#C4B945", "#D9AD3D", "#E59637", "#E67030", "#DF4327"]
+
+
+var hostColors = [
+['Unknown', '#ccc'],
+['other', '#ccc'],
+//human
+['human', '#df65b0'],
+//swine
+['swine', '#fe9929'],
+//mammals
+['other mammal', '#9ecae1'],
+['ferret', '#6baed6'],
+['equine', '#4292c6'],
+['canine', '#2171b5'],
+['feline', '#084594'],
+//domestic bird
+['turkey', '#005a32'],
+['domestic duck', '#238b45'],
+['chicken', '#41ab5d'],
+//wild birds
+['other avian', '#fcbba1'],
+['eagle', '#fc9272'],
+['aquatic bird', '#fb6a4a'],
+['gull', '#fb6a4a'],
+['heron', '#fb6a4a'],
+['swan', '#ef3b2c'],
+['goose', '#cb181d'],
+['duck', '#99000d'],
+]
+
+
+
 var genotypeColors = ["#60AA9E", "#D9AD3D", "#5097BA", "#E67030", "#8EBC66", "#E59637", "#AABD52", "#DF4327", "#C4B945", "#75B681"]
 
 var epitopeColorScale = d3.scale.linear().clamp([true])
@@ -45,11 +76,11 @@ var regionColorScale = d3.scale.ordinal()
 
 var subtypeColorScale = d3.scale.ordinal()
 	.domain(subtypes)
-	.range(hostColors);
+	.range(regionColors);
 
 var hostColorScale = d3.scale.ordinal()
-	.domain(host_groups)
-	.range(hostColors);
+	.domain(hostColors.map(function (d){return d[0];}))
+	.range(hostColors.map(function (d){return d[1];}));
 
 var dateColorScale = d3.scale.linear().clamp([true])
 	.domain(dateColorDomain)
