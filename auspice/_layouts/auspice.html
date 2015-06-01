@@ -95,6 +95,18 @@ layout: default
 						</div>
 					</div>
 				</form>
+				<form class="form-horizontal form-small">
+					<div class="form-group">
+						<label class="col-xs-4 control-label">Host</label>
+						<div class="col-xs-8 controls">
+							<select id="host" class="form-control">
+								{% for reg in site.data.hosts %}
+								<option value={{ reg[0] }}>{{reg[1] }}</option>
+								{% endfor %}
+							</select>
+						</div>
+					</div>
+				</form>
 				<div id="search"></div>
 				<div class="spacer"></div>
 				<div>

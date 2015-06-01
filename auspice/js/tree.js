@@ -58,6 +58,9 @@ function tipVisibility(d) {
 	else if (d.region != restrictTo && restrictTo != "all") {
 		return "hidden";
 	}
+	else if (d.host != restrictToHost && restrictToHost != "all") {
+		return "hidden";
+	}
 	else {
 		return "visible";
 	}
@@ -483,9 +486,23 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.style("visibility", tipVisibility);
 	}
 
+	var tmp = document.getElementById("host");
+	if (tmp!=null){
+		restrictToHost = tmp.value;
+	}else{restrictToHost='all';}
+	function restrictToHostFunc() {
+		restrictToHost = document.getElementById("host").value;
+		console.log(restrictToHost);	
+		d3.selectAll(".tip")
+			.style("visibility", tipVisibility);
+	}
+
 	d3.select("#region")
 		.style("cursor", "pointer")
 		.on("change", restrictToRegion);		
+	d3.select("#host")
+		.style("cursor", "pointer")
+		.on("change", restrictToHostFunc);		
 
 	function onSelect(tip) {
 		d3.select("#"+(tip.strain).replace(/\//g, ""))
