@@ -6,5 +6,5 @@
  ["date","sampling date"],
  ["dfreq","frequency change"],
  ["host","host"],
- ["subtype","subtype"],
+ ["na","subtype"],
 ]

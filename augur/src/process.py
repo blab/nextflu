@@ -275,7 +275,7 @@ class process(virus_frequencies):
 		os.chdir('..')
 		self.remove_run_dir()
 
-	def infer_tree(self, raxml_time_limit):
+	def infer_tree(self, raxml_time_limit, root_at_midpoint=False):
 		'''
 		builds a tree from the alignment using fasttree and RAxML. raxml runs for 
 		raxml_time_limit and is terminated thereafter. raxml_time_limit can be 0.
@@ -320,6 +320,8 @@ class process(virus_frequencies):
 		shutil.copy('RAxML_result.branches', out_fname)
 		Phylo.write(Phylo.read(out_fname, 'newick'),'temp.newick','newick')
 		self.tree = dendropy.Tree.get_from_string(delimit_newick(out_fname), 'newick', as_rooted=True)
+		if root_at_midpoint:
+			self.tree.reroot_at_midpoint()
 		os.chdir('..')
 		self.remove_run_dir()
 

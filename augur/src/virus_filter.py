@@ -291,10 +291,10 @@ class flu_filter(virus_filter):
 						self.label_to_country[fields[2]]=country
 						add_geo(fields[2])
 					else:
-						strain_info['country'] = country
+						strain_info['country'] = 'Unknown'
 						strain_info['region'] = 'Unknown'
 				else:
-					strain_info['country'] = country
+					strain_info['country'] = 'Unknown'
 					strain_info['region'] = 'Unknown'
 		elif fields[1] in self.label_to_country:
 			add_geo(fields[1])
@@ -309,7 +309,7 @@ class flu_filter(virus_filter):
 					strain_info['country'] = country
 					strain_info['region'] = 'Unknown'
 			else:
-				strain_info['country'] = country
+				strain_info['country'] = 'Unknown'
 				strain_info['region'] = 'Unknown'
 			strain_info['host'] = 'Unknown'
 			strain_info['group'] = 'Unknown'

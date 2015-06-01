@@ -35,7 +35,7 @@ virus_config.update({
 	# numbering starting at methionine including the signal peptide
 	'clade_designations': {},
 	'time_window_fraction':1,
-	'min_mutation_frequency':0.45,
+	'min_mutation_frequency':0.1,
 	'html_vars': {'coloring': 'host, na, lbi, dfreq, region, date',
 				  'gtplaceholder': 'HA1 positions...',
 				  'freqdefault': ''},

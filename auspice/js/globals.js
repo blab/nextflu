@@ -1,8 +1,24 @@
 var regions = ["Africa", "SouthAmerica", "WestAsia", "Oceania", "Europe", "JapanKorea", "NorthAmerica", "SoutheastAsia", "SouthAsia", "China", "Unknown"];
-var host_groups = ['turkey', 'Aquatic bird', 'swan', 'group', 'equine', 
-                   'wild duck', 'wild bird', 'wild goose', 'gull', 
-                   'goose', 'bird', 'ferret', 'swine', 'feline', 'human',
-                    'duck', 'chicken', 'Unknown'];
+var host_groups = [ 'Unknown','aquatic bird',
+ 'canine',
+ 'chicken',
+ 'domestic duck',
+ 'duck',
+ 'eagle',
+ 'equine',
+ 'feline',
+ 'ferret',
+ 'goose',
+ 'group',
+ 'gull',
+ 'heron',
+ 'human',
+ 'other',
+ 'other avian',
+ 'other mammal',
+ 'swan',
+ 'swine',
+ 'turkey'];
 var restrictTo = "all";
 
 var cladeToSeq = {}

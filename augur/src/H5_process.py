@@ -35,7 +35,7 @@ virus_config.update({
 	# numbering starting at methionine including the signal peptide
 	'clade_designations': {},
 	'n_iqd':10,
-	'min_mutation_frequency':0.45,
+	'min_mutation_frequency':0.1,
 	'html_vars': {'coloring': 'host, na, lbi, dfreq, region, date',
 				  'gtplaceholder': 'HA1 positions...',
 				  'freqdefault': ''},
@@ -129,7 +129,7 @@ class H5_process(process, H5_filter, H5_clean, H5_refine):
 			self.dump()
 		if 'tree' in steps:
 			print "--- Tree	 infer at " + time.strftime("%H:%M:%S") + " ---"
-			self.infer_tree(raxml_time_limit)  # -> self has a tree
+			self.infer_tree(raxml_time_limit, root_at_midpoint=True)  # -> self has a tree
 			self.dump()
 		if 'ancestral' in steps:
 			print "--- Infer ancestral sequences " + time.strftime("%H:%M:%S") + " ---"

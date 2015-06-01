@@ -1,193 +1,191 @@
 animal	group
-americanblackduck	wild duck
-americangreen-wingedteal	wild bird
-americanwidgeon	wild bird
-americanwigeon	wild bird
-anasacuta	wild bird
-anasplatyrhynchos	wild bird
-aquaticbird	Aquatic bird
-ardeacinerea	wild bird
-baikalteal	wild bird
-bar-headedgoose	wild goose
-barnswallow	wild bird
-beangoose	wild goose
-black-crownednightheron	wild bird
-black-neckedgrebe	wild bird
-blackbelliedwhistlingduck	wild bird
-blackbird	wild bird
-blackduck	wild duck
+americanblackduck	duck
+americangreen-wingedteal	duck
+americanwidgeon	duck
+americanwigeon	duck
+anasacuta	duck
+anasplatyrhynchos	duck
+aquaticother avian	aquatic bird
+ardeacinerea	heron
+baikalteal	duck
+bar-headedgoose	goose
+barnswallow	other avian
+beangoose	goose
+black-crownednightheron	heron
+black-neckedgrebe	aquatic bird
+blackbelliedwhistlingduck	duck
+blackother avian	other avian
+blackduck	duck
 blackheadedgull	gull
 blackswan	swan
-blowfly	wild bird
-blue-wingedteal	wild bird
-bluegoose	wild goose
+blowfly	other
+blue-wingedteal	duck
+bluegoose	goose
 breederchicken	chicken
-breederduck	duck
-broilerduck	duck
+breederduck	domestic duck
+broilerduck	domestic duck
 brown-headedgull	gull
-buzzard	wild bird
-canadagoose	wild goose
-canvasback	wild bird
+buzzard	eagle
+canadagoose	goose
+canvasback	duck
 cat	feline
 chicken	chicken
-chinesepondheron	Aquatic bird
-chukkar	wild bird
-cinnamonteal	wild bird
-civet	wild bird
-civetcat	wild bird
-ck	wild bird
-commonbussard	wild bird
-commoncoot	wild bird
-commongoldeneye	wild bird
+chinesepondheron	heron
+chukkar	other avian
+cinnamonteal	duck
+civet	other mammal
+civetcat	other mammal
+ck	other
+commonbussard	eagle
+commoncoot	aquatic bird
+commongoldeneye	other avian
 commongull	gull
-commonketrel	wild bird
-commonmoorhen	wild bird
-commonmyna	wild bird
-commonpochard	wild bird
-commonshelduck	wild duck
-commonteal	wild bird
-condor	wild bird
-coot	wild bird
-crane	wild bird
-crestedeagle	wild bird
-crestedmyna	wild bird
-crow	wild bird
-cygnuscygnus	wild bird
-cygnusolor	wild bird
+commonketrel	eagle
+commonmoorhen	aquatic bird
+commonmyna	other avian
+commonpochard	duck
+commonshelduck	duck
+commonteal	duck
+condor	eagle
+coot	aquatic bird
+crane	aquatic bird
+crestedeagle	eagle
+crestedmyna	other avian
+crow	other avian
+cygnuscygnus	swan
+cygnusolor	swan
 domesticduck	duck
 domesticgoose	goose
-domesticgreen-wingedteal	chicken
+domesticgreen-wingedteal	duck
 domesticmallardduck	duck
-dove	wild bird
+dove	other avian
 duck	duck
-eagleowl	wild bird
-egret	Aquatic bird
-emu	wild bird
-env	wild bird
+eagleowl	eagle
+egret	heron
+emu	other avian
+env	other avian
 equine	equine
-eurasianeagleowl	wild bird
-eurasianwoodcock	wild bird
-europeanteal	wild bird
-falcon	wild bird
-feralpigeon	wild bird
+eurasianeagleowl	eagle
+eurasianwoodcock	other avian
+europeanteal	duck
+falcon	eagle
+feralpigeon	other avian
 ferret	ferret
-finch	wild bird
-gadwall	wild bird
-garganey	wild bird
-goldeneyeduck	wild duck
-goldenpheasant	goldenpheasant
+finch	other avian
+gadwall	duck
+garganey	duck
+goldeneyeduck	duck
+goldenpheasant	other avian
 goosander	goose
 goose	goose
-goshawk	bird
+goshawk	eagle
 greatblack-backedgull	gull
 greatblack-headedgull	gull
-greatcormorant	bird
-greatcrestedgrebe	bird
-greategret	bird
-grebe	bird
-greenwingedteal	bird
-greyheron	bird
-greylaggoose	bird
-guineafowl	bird
+greatcormorant	aquatic bird
+greatcrestedgrebe	duck
+greategret	heron
+grebe	duck
+greenwingedteal	duck
+greyheron	heron
+greylaggoose	goose
+guineafowl	other avian
 gull	gull
-gyrfalcon	bird
-harrier	bird
-hatay	bird
-hen'segg	bird
+gyrfalcon	eagle
+harrier	canine
+hatay	other
+hen'segg	chicken
 herringgull	gull
-hillmyna	bird
-hoodedcrane	bird
-houbarabustard	wild bird
-housecrow	wild bird
-hubei	bird
+hillmyna	other avian
+hoodedcrane	aquatic bird
+houbarabustard	eagle
+housecrow	other avian
 human	human
 hunan	human
-indonesia	bird
-japanesewhite-eye	bird
-kalijpheasant	bird
+japanesewhite-eye	other avian
+kalijpheasant	other avian
 koreannativechicken	chicken
-largebilledcrow	bird
+largebilledcrow	other avian
 leopard	feline
-lesserkestrel	bird
-littleegret	bird
-littlegrebe	bird
-magpierobin	bird
-mallard	bird
-mandarinduck	bird
-maraboustork	bird
-mergusalbellus	bird
-mountainhawk-eagle	bird
-muleduck	bird
-muscovyduck	bird
-muteswan	bird
-mynah	bird
-mynas	bird
-ngan	bird
-northernpintail	bird
-northernshoveler	bird
-open-billedstork	bird
-orientalmagpierobin	bird
-ostrich	bird
-owl	bird
-parrot	bird
-partridge	bird
-peacefuldove	bird
-peacock	bird
-pekingduck	bird
-peregrinefalcon	bird
-pheasant	bird
-piedmegpie	bird
-pigeon	bird
-pika	bird
-pintail	bird
-plateaupika	bird
-pochard	bird
-poultry	bird
-prachinburi	bird
-quail	bird
-raccoondog	bird
-rhea	bird
-rook	bird
-rubbyshelduck	bird
-ruddyturnstone	bird
-sakerfalcon	bird
-scaly-breastedmunia	bird
-shearwater	bird
-shorebird	bird
-shoveler	bird
-shrike	bird
-silkychicken	bird
-silverpheasant	bird
-snowgoose	wild goose
-sparrow	bird
-spot-billedduck	bird
-spotteddove	bird
-spur-wingedgoose	bird
-starling	bird
-stonemarten	bird
-stork	bird
-swan	Aquatic bird
-swangoose	wild goose
+lesserkestrel	eagle
+littleegret	heron
+littlegrebe	duck
+magpierobin	other avian
+mallard	duck
+mandarinduck	duck
+maraboustork	other avian
+mergusalbellus	other avian
+mountainhawk-eagle	eagle
+muleduck	duck
+muscovyduck	duck
+muteswan	swan
+mynah	other avian
+mynas	other avian
+ngan	other avian
+northernpintail	duck
+northernshoveler	other avian
+open-billedstork	other avian
+orientalmagpierobin	other avian
+ostrich	other avian
+owl	eagle
+parrot	other avian
+partridge	other avian
+peacefuldove	other avian
+peacock	other avian
+pekingduck	duck
+peregrinefalcon	other avian
+pheasant	other avian
+piedmegpie	other avian
+pigeon	other avian
+pika	other avian
+pintail	duck
+plateaupika	other avian
+pochard	other avian
+poultry	chicken
+prachinburi	other avian
+quail	other avian
+raccoondog	other avian
+rhea	other avian
+rook	other avian
+rubbyshelduck	duck
+ruddyturnstone	other avian
+sakerfalcon	eagle
+scaly-breastedmunia	other avian
+shearwater	other avian
+shoreother avian	other avian
+shoveler	other avian
+shrike	other avian
+silkychicken	chicken
+silverpheasant	other avian
+snowgoose	goose
+sparrow	other avian
+spot-billedduck	duck
+spotteddove	other avian
+spur-wingedgoose	other avian
+starling	other avian
+stonemarten	other avian
+stork	other avian
+swan	swan
+swangoose	goose
 swine	swine
-teal	bird
-tern	bird
+teal	duck
+tern	gull
 tiger	feline
-treesparrow	bird
-tuftedduck	wild duch
-tundraswan	bird
+treesparrow	other avian
+tuftedduck	duck
+tundraswan	swan
 turkey	turkey
 villagechicken	chicken
-water	Aquatic bird
-waterfowl	Aquatic bird
-whistlingswan	bird
-white-frontedgoose	bird
-whitefacedwhistlingduck	bird
-whitefrontgoose	bird
-whitepeafowl	bird
-whooperswan	bird
-whoopingswan	bird
-wigeon	bird
-wildbird	wild bird
-wildduck	wild duck
-woodduck	wild duck
-yellowbilledduck	bird
+water	aquatic bird
+waterfowl	aquatic bird
+whistlingswan	swan
+white-frontedgoose	goose
+whitefacedwhistlingduck	duck
+whitefrontgoose	goose
+whitepeafowl	other avian
+whooperswan	swan
+whoopingswan	swan
+wigeon	duck
+wildbird	other avian
+wildduck	duck
+woodduck	duck
+yellowbilledduck	duck
