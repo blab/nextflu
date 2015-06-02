@@ -27,6 +27,8 @@ virus_config.update({
 	'outgroup':'A/HongKong/156/97',
 	'strict_geo':False,
 	'strict_host':False,
+	'min_length':900,
+	'date_spec':'year',
 	#'force_include':'source-data/HI_strains.txt',
 	'force_include_all':False,
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
@@ -63,7 +65,7 @@ class H5_filter(flu_filter):
 	def filter(self):
 		self.filter_generic(prepend_strains = self.vaccine_strains)	
 		print len(self.viruses), "with proper strain names"
-		self.filter_passage()
+		#self.filter_passage()
 		print len(self.viruses), "without egg passage"
 		for v in self.viruses:
 			v['na'] = v['na'].split('/')[-1].strip()

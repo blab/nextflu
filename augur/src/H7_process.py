@@ -27,6 +27,7 @@ virus_config.update({
 	'outgroup':'A/duck/Potsdam/15/1980',
 	'strict_geo':False,
 	'strict_host':False,
+	'date_spec':'year',
 	#'force_include':'source-data/HI_strains.txt',
 	'force_include_all':False,
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
@@ -64,7 +65,7 @@ class H7_filter(flu_filter):
 	def filter(self):
 		self.filter_generic(prepend_strains = self.vaccine_strains)	
 		print len(self.viruses), "with proper strain names"
-		self.filter_passage()
+		#self.filter_passage()
 		print len(self.viruses), "without egg passage"
 		for v in self.viruses:
 			v['na'] = v['na'].split('/')[-1].strip()
@@ -130,7 +131,7 @@ class H7_process(process, H7_filter, H7_clean, H7_refine):
 			self.dump()
 		if 'tree' in steps:
 			print "--- Tree	 infer at " + time.strftime("%H:%M:%S") + " ---"
-			self.infer_tree(raxml_time_limit)  # -> self has a tree
+			self.infer_tree(raxml_time_limit, root_at_midpoint=True)  # -> self has a tree
 			self.dump()
 		if 'ancestral' in steps:
 			print "--- Infer ancestral sequences " + time.strftime("%H:%M:%S") + " ---"
