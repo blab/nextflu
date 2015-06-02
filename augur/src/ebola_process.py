@@ -16,7 +16,7 @@ sp = 17
 virus_config.update({
 	# data source and sequence parsing/cleaning/processing
 	'virus':'ebola',
-	'fasta_fields':{2:'strain', 3:'lab', 4:'country', 5:'region', 7:'date'},
+	'fasta_fields':{2:'strain', 3:'lab', 4:'country', 5:'region', 8:'date'},
 	#>EBOV|KM233062|G3758|VHFC1|SLE|Kailahun|Jawie|2014-06-11
 	'alignment_file':'data/ebola.fasta',
 	'outgroup':'EM_079404',
