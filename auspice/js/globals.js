@@ -18,6 +18,7 @@ var regions = [
 "GrandKru", "Lofa", "Margibi", "Maryland", "Montserrado",
 ];
 var restrictTo = "all";
+var restrictToLab = "all";
 
 var cladeToSeq = {}
 
