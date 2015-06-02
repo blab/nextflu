@@ -1,7 +1,5 @@
 var legendRectSize = 15;
 var legendSpacing = 4;
-var mapStrokeWidthFat = 4;
-
 function makeLegend(){
 	
 	d3.select("#legend-title").text(function(d){
@@ -175,7 +173,7 @@ function mouseOverMap(region){
                 });
 	legend.selectAll('.map_feature')
 		.filter(function (m) { return patch_region_name(m) == patch_region_name(region);})
-    .style("stroke-width", mapStrokeWidthFat)
+    .style("stroke-width", 3)
 		.style("fill", function(m) {
 			return d3.rgb(patch_color(region)).brighter();
 		});
