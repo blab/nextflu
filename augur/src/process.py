@@ -231,16 +231,14 @@ class process(virus_frequencies):
 
 	def generate_indexHTML(self):
 		htmlpath = '../auspice/'
-		if self.virus_type is not None: 
-			htmlpath+=self.virus_type+'/'
-		if self.resolution is not None: 
-			htmlpath+=self.resolution+'/'
-
 		if not os.path.isdir(htmlpath): os.makedirs(htmlpath)
 
 		with open(htmlpath+'index.html','w') as out:
-			out.write("---\ntitle: nextflu / "+self.virus_type+" / "+self.resolution_prefix.rstrip('_')+'\n'\
-					  "layout: ebola\nvirus: "+self.virus_type+"\nresolution: "+self.resolution_prefix.rstrip('_')+"\n")
+			out.write("---\n")
+			out.write("title: nextflu / "+self.virus_type+" / "+self.resolution_prefix.rstrip('_')+'\n')
+			out.write("layout: ebola\n")
+			out.write("virus: "+self.virus_type+"\n")
+			out.write("resolution: "+self.resolution_prefix.rstrip('_')+"\n")
 			if "html_vars"  in self.kwargs:
 				for vname, val in self.kwargs["html_vars"].iteritems():
 					out.write(vname+": "+ val+'\n')

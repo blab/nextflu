@@ -1,0 +1,109 @@
+---
+layout: default
+---
+
+<div class="row">
+	<div class="col-md-4">
+		<div class="logo-container">
+		</div>
+		<div class="bigspacer"></div>		
+		<div class="row">
+			<div class="col-xs-6 io-container">
+				<div>
+					<svg id="date-input"></svg>
+				</div>
+				<div>
+					<h5 id="legend-title">Legend</h5>
+					<svg id="legend"></svg>
+				</div>
+				<div class="spacer"></div>
+			</div>
+			<div class="col-xs-6 io-container">			
+				<form class="form-horizontal form-small">
+					<div class="form-group">
+							<label class="col-xs-4 control-label">Color by</label>
+							<div class="col-xs-8 controls">
+								<select id="coloring" class="form-control">
+									{% if page.coloring contains 'region' %}
+									<option value="region">geographic region</option>
+									{% endif %}									
+									{% if page.coloring contains 'date' %}
+									<option value="date">sampling date</option>
+									{% endif %}												
+									{% if page.coloring contains 'lbi' %}
+									<option value="lbi">local branching index</option>
+									{% endif %}
+									{% if page.coloring contains 'dfreq' %}
+									<option value="dfreq">frequency change</option>
+									{% endif %}
+															
+								</select>
+							</div>
+					</div>
+					<div class="form-group">
+						<label class="col-xs-4 control-label">Or</label>
+						<div class="col-xs-8 controls">
+							<input id="gt-color" type="search" placeholder= "{{ page.gtplaceholder }}"  class="form-control">
+						</div>
+					</div>		
+				</form>
+				<div class="spacer"></div>
+				
+				<form class="form-horizontal form-small">
+					<div class="form-group">
+						<label class="col-xs-4 control-label">Region</label>
+						<div class="col-xs-8 controls">
+							<select id="region" class="form-control">
+								<option value="all">all</option>
+								{% for reg in site.data.regions %}
+									<option value="{{ reg }}">{{ reg }}</option>
+								{% endfor %}
+							</select>
+						</div>
+					</div>
+				</form>
+				<div id="search"></div>
+				<div class="spacer"></div>
+				<div>
+					<button id="reset" class="btn btn-default">reset layout</button>
+				</div>
+				<div class="spacer"></div>
+			</div>					
+		</div>
+	</div>
+	<div class="col-md-8">
+		<div class="bigspacer"></div>
+		<div class="treeplot-container">
+			<svg id="treeplot"></svg>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<div class="bigspacer"></div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-3"></div>
+	<div class="col-md-9">
+		<hr>		
+		<div class="center text-gray smallnote">
+			&copy; 2015 Trevor Bedford and Richard Neher
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<div class="bigspacer"></div>
+	</div>
+</div>
+<script type="text/javascript">
+	var genericDomain = [0,0.111,0.222,0.333, 0.444, 0.555, 0.666, 0.777, 0.888, 1.0];
+	var path = '/data/';
+	var tip_labels = true;
+</script>
+{{ content }}
+<script src="/js/auspice.js"></script>
