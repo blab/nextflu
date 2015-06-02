@@ -1,1 +1,31 @@
-['Lola', 'Kailahun', 'Siguiri', 'Gueckedou', 'Faranah', 'Foya', 'Beyla', 'Nzerekore', 'Kerouane', 'Voinjama', 'Macenta', 'Kouroussa', 'Kankan', '?', 'Kissidougou']
+[
+["Nzerekore, GUI","Nzerekore"],
+["Faranah, GUI","Faranah"],
+["Kerouane, GUI","Kerouane"],
+["Kankan, GUI","Kankan"],
+["Gueckedou, GUI","Gueckedou"],
+["Macenta, GUI","Macenta"],
+["Kouroussa, GUI","Kouroussa"],
+["Siguiri, GUI","Siguiri"],
+["Kissidougou, GUI","Kissidougou"],
+["Lola, GUI","Lola"],
+["Beyla, GUI","Beyla"],
+["Lofa, LBR","Lofa"],
+["WesternRural, SLE","WesternRural"],
+["Kono, SLE","Kono"],
+["Kambia, SLE","Kambia"],
+["WesternUrban, SLE","WesternUrban"],
+["Pujehun, SLE","Pujehun"],
+["Kailahun, SLE","Kailahun"],
+["Bombali, SLE","Bombali"],
+["Bonthe, SLE","Bonthe"],
+["Kenema, SLE","Kenema"],
+["Tonkolili, SLE","Tonkolili"],
+["Porloko, SLE","Porloko"],
+["Freetown, SLE","Freetown"],
+["PortLoko, SLE","PortLoko"],
+["WesternArea, SLE","WesternArea"],
+["Moyamba, SLE","Moyamba"],
+["Bo, SLE","Bo"]
+]
+
