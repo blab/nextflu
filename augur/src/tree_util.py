@@ -7,7 +7,9 @@ def delimit_newick(infile_name):
 	from cStringIO import StringIO
 	tmp_tree = Phylo.read(infile_name, 'newick')
 	for t in tmp_tree.get_terminals():
-	    t.name = "'"+t.name+"'"
+		if t.name is None:
+			t.name = str(t.confidence)
+		t.name = "'"+t.name+"'"
 	tree_string = StringIO()
 	Phylo.write(tmp_tree, tree_string, format="newick")
 	delimited_tree = tree_string.getvalue().replace("\\'","")
@@ -206,3 +208,4 @@ def BioPhylo_to_json(node):
 		for ch in node.clades:
 			json["children"].append(BioPhylo_to_json(ch))
 	return json
+
