@@ -21,21 +21,21 @@ var regionColors = ["#CCC", "#5097BA", "#60AA9E", "#75B681", "#8EBC66", "#AABD52
 var hostColors = [
 ['Unknown', '#ccc'],
 //human
-['human', '#df65b0'],
+['human', '#99000d'],
 //swine
-['swine', '#fe9929'],
+['swine', '#fd8d3c'],
 //mammals
-['other mammal', '#9ecae1'],
+['other mammal', '#fed976'],
 //domestic bird
-['turkey', '#005a32'],
-['domestic duck', '#238b45'],
-['chicken', '#41ab5d'],
+['chicken', 		'#e7298a'],
+['domestic duck', 	'#8c96c6'],
+['turkey', 			'#88419d'],
 //wild birds
-['other avian', '#fcbba1'],
-['aquatic bird', '#fb6a4a'],
-['gull', '#fb6a4a'],
-['goose', '#cb181d'],
-['duck', '#99000d'],
+['duck', 		'#084594'],
+['goose', 		'#2171b5'],
+['gull', 		'#4292c6'],
+['aquatic bird','#6baed6'],
+['other avian', '#9ecae1'],
 ]
 
 
