@@ -89,7 +89,7 @@ layout: default
 						<div class="col-xs-8 controls">
 							<select id="region" class="form-control">
 								{% for reg in site.data.regions %}
-								<option value={{ reg[0] }}>{{reg[1] }}</option>
+								<option value="{{ reg[0] }}">{{reg[1] }}</option>
 								{% endfor %}
 							</select>
 						</div>
@@ -101,7 +101,7 @@ layout: default
 						<div class="col-xs-8 controls">
 							<select id="host" class="form-control">
 								{% for reg in site.data.hosts %}
-								<option value={{ reg[0] }}>{{reg[1] }}</option>
+								<option value="{{ reg[0] }}">{{reg[1] }}</option>
 								{% endfor %}
 							</select>
 						</div>

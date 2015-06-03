@@ -18,6 +18,12 @@ function makeLegend(){
 		if (colorBy == "region") {
 			return "Region";
 		}
+        if (colorBy == "host") {
+            return "Host";
+        }
+        if (colorBy == "na") {
+            return "Subtype";
+        }
 		if (colorBy == "genotype") {
 			return "Genotype";
 		}
@@ -41,6 +47,7 @@ function makeLegend(){
   .enter().append('g')
   .attr('class', 'legend')
   .attr('transform', function(d, i) {
+    console.log(colorScale.domain()+' '+ d+' '+i);
    var stack = colorScale.domain().length/2;
    var height = legendRectSize + legendSpacing;
    var fromRight = Math.floor(i / stack);

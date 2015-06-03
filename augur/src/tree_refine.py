@@ -52,7 +52,7 @@ class tree_refine(object):
 			print "removed outgroup",self.outgroup['strain']
 		else:
 			print "outgroup",self.outgroup['strain'], "not found"
-		if len(self.tree.seed_node.child_nodes())==1:
+		while len(self.tree.seed_node.child_nodes())==1:
 			print "ROOT had one child only, moving root up!"
 			self.tree.seed_node = self.tree.seed_node.child_nodes()[0]
 			self.tree.seed_node.parent_node = None

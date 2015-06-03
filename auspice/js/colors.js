@@ -68,7 +68,7 @@ var regionColorScale = d3.scale.ordinal()
 
 var subtypeColorScale = d3.scale.ordinal()
 	.domain(subtypes)
-	.range(regionColors);
+	.range(regionColors.filter(function (d,i){return i<subtypes.length;}));
 
 var hostColorScale = d3.scale.ordinal()
 	.domain(hostColors.map(function (d){return d[0];}))
