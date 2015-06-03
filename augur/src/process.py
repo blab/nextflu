@@ -79,7 +79,7 @@ class process(virus_frequencies):
 		self.auspice_sequences_fname = 	'../auspice/data/' + self.prefix + self.resolution_prefix + 'sequences.json'
 		self.auspice_frequency_fname = 	'../auspice/data/' + self.prefix + self.resolution_prefix + 'frequencies.json'
 		self.auspice_meta_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'meta.json'
-		self.nuc_alphabet = 'ACGT-N'
+		self.nuc_alphabet = 'ACGT'
 		self.aa_alphabet = 'ACDEFGHIKLMNPQRSTVWY*X'
 		virus_frequencies.__init__(self, **kwargs)
 
@@ -365,8 +365,13 @@ class process(virus_frequencies):
 		'''
 		aln_array = np.array(self.viruses)
 		self.nucleotide_frequencies = np.zeros((len(self.nuc_alphabet),aln_array.shape[1]))
+		self.total_nucleotide_frequencies = np.zeros(aln_array.shape[1])
 		for ni,nuc in enumerate(self.nuc_alphabet):
-			self.nucleotide_frequencies[ni,:]=(aln_array==nuc).mean(axis=0)
+			freq = (aln_array==nuc).mean(axis=0)
+			self.nucleotide_frequencies[ni,:] = freq
+			self.total_nucleotide_frequencies += freq
+		for ni,nuc in enumerate(self.nuc_alphabet):
+			self.nucleotide_frequencies[ni,:] /= self.total_nucleotide_frequencies		
 
 		self.variable_nucleotides = np.where(np.max(self.nucleotide_frequencies,axis=0)<1.0-self.min_mutation_frequency)[0]
 		self.consensus_nucleotides = "".join(np.fromstring(self.nuc_alphabet, 'S1')[np.argmax(self.nucleotide_frequencies,axis=0)])
