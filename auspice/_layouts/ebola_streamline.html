@@ -56,12 +56,27 @@ layout: default
 							<select id="region" class="form-control">
 								<option value="all">all</option>
 								{% for reg in site.data.regions %}
-									<option value="{{ reg }}">{{ reg }}</option>
+									<option value="{{ reg[1] }}">{{ reg[0] }}</option>
 								{% endfor %}
 							</select>
 						</div>
 					</div>
 				</form>
+				
+				<form class="form-horizontal form-small">
+					<div class="form-group">
+						<label class="col-xs-4 control-label">Lab</label>
+						<div class="col-xs-8 controls">
+							<select id="lab" class="form-control">
+								<option value="all">all</option>
+								{% for lab in site.data.labs %}
+									<option value="{{ lab[1] }}">{{ lab[0] }}</option>
+								{% endfor %}
+							</select>
+						</div>
+					</div>
+				</form>
+				
 				<div id="search"></div>
 				<div class="spacer"></div>
 				<div>
