@@ -17,10 +17,14 @@ var drag = d3.behavior.drag()
 	.on("dragstart", function() {
 		d3.selectAll(".date-input-text").style("fill", "#5DA8A3");
 		d3.selectAll(".date-input-marker").style("fill", "#5DA8A3");
+		d3.selectAll(".date-input-window").style("stroke", "#5DA8A3");
+		d3.selectAll(".date-input-edge").style("stroke", "#5DA8A3");
 	})
 	.on("dragend", function() {
 		d3.selectAll(".date-input-text").style("fill", "#CCC");
 		d3.selectAll(".date-input-marker").style("fill", "#CCC");
+		d3.selectAll(".date-input-window").style("stroke", "#CCC");
+		d3.selectAll(".date-input-edge").style("stroke", "#CCC");
 		dragend();
 	});
 
@@ -45,6 +49,10 @@ function dragged(d) {
 
 	d.date = dateScale.invert(d3.event.x);
 	d.x = dateScale(d.date);
+	var startDate = new Date(d.date);
+	startDate.setDate(startDate.getDate() - (time_window * 365.25));
+	d.x2 = dateScale(startDate);	
+	
 	d3.selectAll(".date-input-text")
 		.attr("dx", function(d) {return 0.5*d.x})
 		.text(function(d) {
@@ -53,6 +61,16 @@ function dragged(d) {
 		});
 	d3.selectAll(".date-input-marker")
 		.attr("cx", function(d) {return d.x});
+	d3.selectAll(".date-input-window")
+		.attr("x1", function(d) {return d.x})
+		.attr("x2", function(d) {return d.x2});
+	d3.selectAll(".date-input-edge")
+		.attr("x1", function(d) {return d.x2;})
+		.attr("x2", function(d) {return d.x2})
+		.style("visibility", function(d) {
+			if (startDate < earliestDate) { return "hidden"; }
+			else { return "visible"; }
+		});		
 
 	globalDate = d.date;
 
@@ -148,8 +166,11 @@ function date_init(){
 		.nice(d3.time.month);
 	
 	counterData = {}
-		counterData['date'] = globalDate
-		counterData['x'] = dateScale(globalDate)
+	counterData['date'] = globalDate
+	counterData['x'] = dateScale(globalDate)
+	var startDate = new Date(globalDate);
+	startDate.setDate(startDate.getDate() - (time_window * 365.25));
+	counterData['x2'] = dateScale(startDate);
 
 	d3.select("#date-input")
 		.attr("width", 240)
@@ -197,6 +218,32 @@ function date_init(){
 		.attr("transform", "translate(0,35)")
 		.call(dateAxis);
 
+	var window = d3.select("#date-input").selectAll(".date-input-window")
+		.data([counterData])
+		.enter()
+		.append("line")
+		.attr("class", "date-input-window")
+		.attr("x1", function(d) { return d.x; })
+		.attr("x2", function(d) { return d.x2; })	
+		.attr("y1", 35)
+		.attr("y2", 35)		
+		.style("stroke", "#CCC")
+		.style("stroke-width", 5)	
+		.style("cursor", "pointer");
+		
+	var edge = d3.select("#date-input").selectAll(".date-input-edge")
+		.data([counterData])
+		.enter()
+		.append("line")
+		.attr("class", "date-input-edge")
+		.attr("x1", function(d) { return d.x2; })
+		.attr("x2", function(d) { return d.x2; })	
+		.attr("y1", 30)
+		.attr("y2", 40)
+		.style("stroke", "#CCC")
+		.style("stroke-width", 3)	
+		.style("cursor", "pointer");			
+
 	var marker = d3.select("#date-input").selectAll(".date-input-marker")
 		.data([counterData])
 		.enter()
@@ -204,7 +251,7 @@ function date_init(){
 		.attr("class", "date-input-marker")
 		.attr("cx", function(d) {return d.x})
 		.attr("cy", 35)
-		.attr("r", 5)
+		.attr("r", 6)
 		.style("fill", "#CCC")
 		.style("stroke", "#777")		
 		.style("cursor", "pointer")
