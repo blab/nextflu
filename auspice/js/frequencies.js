@@ -285,7 +285,7 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 	            title: function (d) { 
 	            	return 'Position ' + d + frequencies["entropy"][d-1][2].join(","); },
 	            value: function (value, ratio, id) {
-	                return "Variability: "+value;
+	                return id==''?"Variability: "+value:"start/stop";
 	            }
 	        }
 		},
