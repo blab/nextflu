@@ -8,4 +8,5 @@ vaccineChoice['A/Victoria/361/2011'] = "2012-02-21";
 vaccineChoice['A/Texas/50/2012'] = "2013-09-25";
 vaccineChoice['A/Switzerland/9715293/2013'] = "2014-09-25";
 var vaccineStrains = Object.keys(vaccineChoice);
-
+var genome_annotation = {'HA1':[[1,1,1], [1,160,329]],
+						 'HA2':[[1.5,1.5,1.5], [329,450,580]]}
