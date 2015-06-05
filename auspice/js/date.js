@@ -66,11 +66,7 @@ function dragged(d) {
 		.attr("x2", function(d) {return d.x2});
 	d3.selectAll(".date-input-edge")
 		.attr("x1", function(d) {return d.x2;})
-		.attr("x2", function(d) {return d.x2})
-		.style("visibility", function(d) {
-			if (startDate < earliestDate) { return "hidden"; }
-			else { return "visible"; }
-		});		
+		.attr("x2", function(d) {return d.x2});		
 
 	globalDate = d.date;
 
@@ -152,7 +148,7 @@ function date_init(){
 		return new Date(d.date);
 	});
 	earliestDate = new Date(d3.min(dateValues));
-	earliestDate.setDate(earliestDate.getDate() + 180);
+	earliestDate.setDate(earliestDate.getDate() + 1);
 	
 	dateScale = d3.time.scale()
 		.domain([earliestDate, globalDate])
