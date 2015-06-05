@@ -57,7 +57,6 @@ function makeLegend(){
   .enter().append('g')
   .attr('class', 'legend')
   .attr('transform', function(d, i) {
-    console.log(colorScale.domain()+' '+ d+' '+i);
    var stack = colorScale.domain().length/2;
    var height = legendRectSize + legendSpacing;
    var fromRight = Math.floor(i / stack);
