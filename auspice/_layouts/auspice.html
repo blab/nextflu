@@ -89,7 +89,11 @@ layout: default
 						<div class="col-xs-8 controls">
 							<select id="region" class="form-control">
 								{% for reg in site.data.regions %}
-								<option value="{{ reg[0] }}">{{reg[1] }}</option>
+									<option value="{{ reg[0] }}"
+									{% if reg[1] == "all" %}
+										selected="selected"
+									{% endif %}
+									>{{reg[1] }}</option>
 								{% endfor %}
 							</select>
 						</div>
@@ -100,8 +104,29 @@ layout: default
 						<label class="col-xs-4 control-label">Host</label>
 						<div class="col-xs-8 controls">
 							<select id="host" class="form-control">
-								{% for reg in site.data.hosts %}
-								<option value="{{ reg[0] }}">{{reg[1] }}</option>
+								{% for host in site.data.hosts %}
+									<option value="{{ host[0] }}" 
+									{% if host[1] == "all" %}
+										selected="selected"
+									{% endif %}
+									>{{host[1] }}</option>	
+								{% endfor %}
+							</select>
+						</div>
+					</div>
+				</form>
+				<form class="form-horizontal form-small">
+					<div class="form-group">
+						<label class="col-xs-4 control-label">Subtype</label>
+						<div class="col-xs-8 controls">
+							<select id="subtype" class="form-control">
+								{% for st in site.data.NA_segment %}
+									{% if st[1] == "all" %}
+										<option value="{{ st[0] }}" selected="selected">{{st[1] }}</option>	
+									{% else %}
+										<option value="{{page.virus}}{{ st[0] }}">
+										{{page.virus}}{{st[1] }}</option>	
+									{% endif %}
 								{% endfor %}
 							</select>
 						</div>
