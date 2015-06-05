@@ -12,17 +12,36 @@ function adjust_freq_by_date() {
 }
 
 var drag = d3.behavior.drag()
-	.origin(function(d) { return d; })
 	.on("drag", dragged)
 	.on("dragstart", function() {
 		d3.selectAll(".date-input-text").style("fill", "#5DA8A3");
 		d3.selectAll(".date-input-marker").style("fill", "#5DA8A3");
+		d3.selectAll(".date-input-window").style("stroke", "#5DA8A3");
+		d3.selectAll(".date-input-edge").style("stroke", "#5DA8A3");
 	})
 	.on("dragend", function() {
 		d3.selectAll(".date-input-text").style("fill", "#CCC");
 		d3.selectAll(".date-input-marker").style("fill", "#CCC");
+		d3.selectAll(".date-input-window").style("stroke", "#CCC");
+		d3.selectAll(".date-input-edge").style("stroke", "#CCC");
 		dragend();
 	});
+	
+var dragMin = d3.behavior.drag()
+	.on("drag", draggedMin)
+	.on("dragstart", function() {
+		d3.selectAll(".date-input-text").style("fill", "#5DA8A3");
+		d3.selectAll(".date-input-marker").style("fill", "#5DA8A3");
+		d3.selectAll(".date-input-window").style("stroke", "#5DA8A3");
+		d3.selectAll(".date-input-edge").style("stroke", "#5DA8A3");
+	})
+	.on("dragend", function() {
+		d3.selectAll(".date-input-text").style("fill", "#CCC");
+		d3.selectAll(".date-input-marker").style("fill", "#CCC");
+		d3.selectAll(".date-input-window").style("stroke", "#CCC");
+		d3.selectAll(".date-input-edge").style("stroke", "#CCC");
+		dragend();
+	});	
 
 
 function calcNodeAges(tw){
@@ -45,6 +64,10 @@ function dragged(d) {
 
 	d.date = dateScale.invert(d3.event.x);
 	d.x = dateScale(d.date);
+	var startDate = new Date(d.date);
+	startDate.setDate(startDate.getDate() - (time_window * 365.25));
+	d.x2 = dateScale(startDate);	
+	
 	d3.selectAll(".date-input-text")
 		.attr("dx", function(d) {return 0.5*d.x})
 		.text(function(d) {
@@ -53,8 +76,48 @@ function dragged(d) {
 		});
 	d3.selectAll(".date-input-marker")
 		.attr("cx", function(d) {return d.x});
+	d3.selectAll(".date-input-window")
+		.attr("x1", function(d) {return d.x})
+		.attr("x2", function(d) {return d.x2});
+	d3.selectAll(".date-input-edge")
+		.attr("x1", function(d) {return d.x2;})
+		.attr("x2", function(d) {return d.x2});		
 
 	globalDate = d.date;
+
+	calcNodeAges(LBItime_window);
+	treeplot.selectAll(".link")
+		.style("stroke", function(d){return "#ccc";})
+
+	treeplot.selectAll(".tip")
+		.style("visibility", tipVisibility)
+		.style("fill", "#CCC")
+		.style("stroke", "#AAA");
+
+	treeplot.selectAll(".vaccine")
+		.style("visibility", function(d) {
+			var date = new Date(d.choice);
+			var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
+			var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
+			if (diffYears > 0) { return "visible"; }
+				else { return "hidden"; }
+			});
+
+}
+
+function draggedMin(d) {
+
+	d.date = dateScale.invert(d3.event.x);
+	d.x2 = dateScale(d.date);
+
+	var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
+	time_window = (globalDate.getTime() - d.date.getTime()) / oneYear;
+	
+	d3.selectAll(".date-input-window")
+		.attr("x2", function(d) {return d.x2});
+	d3.selectAll(".date-input-edge")
+		.attr("x1", function(d) {return d.x2;})
+		.attr("x2", function(d) {return d.x2});		
 
 	calcNodeAges(LBItime_window);
 	treeplot.selectAll(".link")
@@ -134,7 +197,7 @@ function date_init(){
 		return new Date(d.date);
 	});
 	earliestDate = new Date(d3.min(dateValues));
-	earliestDate.setDate(earliestDate.getDate() + 180);
+	earliestDate.setDate(earliestDate.getDate() + 1);
 	
 	dateScale = d3.time.scale()
 		.domain([earliestDate, globalDate])
@@ -148,8 +211,11 @@ function date_init(){
 		.nice(d3.time.month);
 	
 	counterData = {}
-		counterData['date'] = globalDate
-		counterData['x'] = dateScale(globalDate)
+	counterData['date'] = globalDate
+	counterData['x'] = dateScale(globalDate)
+	var startDate = new Date(globalDate);
+	startDate.setDate(startDate.getDate() - (time_window * 365.25));
+	counterData['x2'] = dateScale(startDate);
 
 	d3.select("#date-input")
 		.attr("width", 240)
@@ -197,6 +263,32 @@ function date_init(){
 		.attr("transform", "translate(0,35)")
 		.call(dateAxis);
 
+	var window = d3.select("#date-input").selectAll(".date-input-window")
+		.data([counterData])
+		.enter()
+		.append("line")
+		.attr("class", "date-input-window")
+		.attr("x1", function(d) { return d.x; })
+		.attr("x2", function(d) { return d.x2; })	
+		.attr("y1", 35)
+		.attr("y2", 35)		
+		.style("stroke", "#CCC")
+		.style("stroke-width", 5);
+		
+	var edge = d3.select("#date-input").selectAll(".date-input-edge")
+		.data([counterData])
+		.enter()
+		.append("line")
+		.attr("class", "date-input-edge")
+		.attr("x1", function(d) { return d.x2; })
+		.attr("x2", function(d) { return d.x2; })	
+		.attr("y1", 30)
+		.attr("y2", 40)
+		.style("stroke", "#CCC")
+		.style("stroke-width", 3)	
+		.style("cursor", "pointer")
+		.call(dragMin);		
+
 	var marker = d3.select("#date-input").selectAll(".date-input-marker")
 		.data([counterData])
 		.enter()
@@ -204,7 +296,7 @@ function date_init(){
 		.attr("class", "date-input-marker")
 		.attr("cx", function(d) {return d.x})
 		.attr("cy", 35)
-		.attr("r", 5)
+		.attr("r", 6)
 		.style("fill", "#CCC")
 		.style("stroke", "#777")		
 		.style("cursor", "pointer")
