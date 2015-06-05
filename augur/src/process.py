@@ -134,7 +134,7 @@ class process(virus_frequencies):
 			with open(self.aa_seq_fname, 'r') as infile:
 				self.aa_aln = cPickle.load(infile)
 
-	def export_to_auspice(self, tree_fields = [], tree_pop_list = [], annotations = []):
+	def export_to_auspice(self, tree_fields = [], tree_pop_list = [], annotations = [], seq='aa'):
 		from tree_util import dendropy_to_json, all_descendants
 		from io_util import write_json, read_json
 		print "--- Streamline at " + time.strftime("%H:%M:%S") + " ---"
@@ -142,8 +142,10 @@ class process(virus_frequencies):
 		print "Writing sequences"
 		elems = {}
 		for node in self.tree:
-			if hasattr(node, "clade") and hasattr(node, "aa_seq"):
+			if seq=='aa' and hasattr(node, "clade") and hasattr(node, "aa_seq"):
 				elems[node.clade] = node.aa_seq
+			elif seq=='nuc' and hasattr(node, "clade") and hasattr(node, "seq"):
+				elems[node.clade] = node.seq
 		write_json(elems, self.auspice_sequences_fname, indent=None)
 
 		print "Writing tree"
@@ -192,12 +194,15 @@ class process(virus_frequencies):
 			
 		# Include genotype frequencies
 		if hasattr(self, 'frequencies'):
-			if not hasattr(self, 'aa_entropy'):
+			if not hasattr(self, 'aa_entropy') and not hasattr(self, 'nuc_entropy'):
 				self.determine_variable_positions()
 
-			if hasattr(self, 'aa_entropy'):
+			if seq=='aa' and hasattr(self, 'aa_entropy'):
 				self.frequencies["entropy"] = [ [pos, S, muts] for pos,S,muts in 
 						izip(xrange(self.aa_entropy.shape[0]), self.aa_entropy,self.variable_aa_identities) ]
+			elif seq=='nuc' and hasattr(self, 'nuc_entropy'):
+				self.frequencies["entropy"] = [ [pos, S, muts] for pos,S,muts in 
+						izip(xrange(self.nuc_entropy.shape[0]), self.nuc_entropy,self.variable_nuc_identities) ]
 
 			write_json(self.frequencies, self.auspice_frequency_fname)
 
@@ -357,13 +362,16 @@ class process(virus_frequencies):
 		self.variable_nucleotides
 		self.variable_aa
 		'''
-		aln_array = np.array(self.viruses)
-		self.nucleoties_frequencies = np.zeros((len(self.nuc_alphabet),aln_array.shape[1]))
+		aln_array = np.array(self.aln_nuc)
+		self.nuc_frequencies = np.zeros((len(self.nuc_alphabet),aln_array.shape[1]))
 		for ni,nuc in enumerate(self.nuc_alphabet):
-			self.nucleoties_frequencies[ni,:]=(aln_array==nuc).mean(axis=0)
+			self.nuc_frequencies[ni,:]=(aln_array==nuc).mean(axis=0)
 
-		self.variable_nucleotides = np.where(np.max(self.nucleoties_frequencies,axis=0)<1.0-self.min_mutation_frequency)[0]
-		self.consensus_nucleotides = "".join(np.fromstring(self.nuc_alphabet, 'S1')[np.argmax(self.nucleoties_frequencies,axis=0)])
+		self.variable_nuc = np.where(np.max(self.nuc_frequencies,axis=0)<1.0-self.min_mutation_frequency)[0]
+		self.consensus_nuc = "".join(np.fromstring(self.nuc_alphabet, 'S1')[np.argmax(self.nuc_frequencies,axis=0)])
+		self.nuc_entropy = -np.sum(self.nuc_frequencies*np.log(np.maximum(1e-10,self.nuc_frequencies)), axis=0)
+		self.variable_nuc_identities = [ [self.nuc_alphabet[ii] for ii in np.where(self.nuc_frequencies[:,pos])[0]]
+											for pos in xrange(self.nuc_frequencies.shape[1])]
 
 		if hasattr(self, 'aa_aln'):
 			aln_array = np.array(self.aa_aln)
@@ -381,6 +389,8 @@ class process(virus_frequencies):
 	def estimate_frequencies(self, tasks = ['mutations','genotypes', 'clades', 'tree']):
 		if 'mutations' in tasks:
 			self.all_mutation_frequencies(threshold = self.min_mutation_frequency) 
+		if 'nuc_mutations' in tasks:
+			self.all_mutation_frequencies(threshold = self.min_mutation_frequency, nuc=True) 
 		if 'genotypes' in tasks:
 			self.all_genotypes_frequencies(threshold = self.min_genotype_frequency) 
 		if 'clades' in tasks:
