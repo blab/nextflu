@@ -6,6 +6,7 @@ var date_select = true;
 {% include_relative c3.min.js %}
 {% include_relative autocomplete.js %}
 {% include_relative globals.js %}
+{% include_relative ordinal_colormaps.js %}
 {% include_relative date.js %}
 {% include_relative legend.js %}
 {% include_relative colors.js %}
