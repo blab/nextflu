@@ -40,6 +40,16 @@ function makeLegend(){
 		}
 });
 
+  //reset domains
+  if (colorBy=='host'){
+    colorScale.domain(hostColors.map(function (d){return d[0];}));
+    colorScale.range(hostColors.map(function (d){return d[1];}));
+  }  
+  if (colorBy=='na'){
+    colorScale.domain(subtypes); 
+    colorScale.range(regionColors);
+  }  
+
   legend.attr("height", function(d){return 20*Math.ceil(0.5*colorScale.domain().length);});
 
   var tmp_leg = legend.selectAll(".legend")
