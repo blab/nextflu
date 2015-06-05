@@ -7,3 +7,4 @@ vaccineChoice['B/Wisconsin/01/2010'] = "2012-02-25";
 vaccineChoice['B/Massachusetts/02/2012'] = "2013-02-25";
 vaccineChoice['B/PHUKET/3073/2013'] = "2014-09-25";
 var vaccineStrains = Object.keys(vaccineChoice);
+var restrictTo = {"region":"all"};
