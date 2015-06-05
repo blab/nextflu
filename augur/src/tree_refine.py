@@ -58,6 +58,28 @@ class tree_refine(object):
 			self.tree.seed_node.parent_node = None
 		self.tree.seed_node.edge_length = 0.001
 
+
+	def fix_long_branches(self, length):
+		node = None
+		while node is None or node.parent_node is not None:
+			for node in self.tree.postorder_node_iter():
+				if node.edge_length>length and node.parent_node is not None:
+					# memorize parent node and determine oldest leaf
+					parent = node.parent_node
+					oldest_leaf = sorted(node.leaf_nodes(), 
+						key = lambda x:x.num_date)[0]
+					parent.remove_child(node)
+					# create a temporary tree and reroot it at the oldest node
+					tmp_tree = dendropy.Tree()
+					tmp_tree.seed_node=node
+					tmp_tree.reroot_at_node(oldest_leaf.parent_node)
+					#add the root of the rerooted tree to the parent
+					parent.add_child(tmp_tree.seed_node, edge_length = length)
+					# terminate loop and restart (such that we don't mess up the iterators)
+					break
+				elif node.parent_node is None:
+					node.edge_length=0.001
+				
 	def collapse(self):
 		"""Collapse edges without mutations to polytomies"""
 		for edge in self.tree.postorder_edge_iter():

@@ -135,6 +135,7 @@ class H7_process(process, H7_filter, H7_clean, H7_refine):
 			self.dump()
 		if 'ancestral' in steps:
 			print "--- Infer ancestral sequences " + time.strftime("%H:%M:%S") + " ---"
+			self.fix_long_branches(0.2)
 			self.infer_ancestral()  # -> every node has a sequence
 		if 'refine' in steps:
 			print "--- Tree refine at " + time.strftime("%H:%M:%S") + " ---"
