@@ -471,9 +471,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 				});
 		}
 	}
-	var restrictions = ["region", "host", "na"];	
-	for (ri in restrictions){
-		var rt = restrictions[ri];
+	for (rt in restrictTo){
 		var tmp = document.getElementById(rt);
 		if (tmp!=null){
 			restrictTo[rt] = tmp.value;
