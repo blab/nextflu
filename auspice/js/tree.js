@@ -55,12 +55,12 @@ function tipVisibility(d) {
 	if ((d.diff < 0 || d.diff > time_window)&(date_select==true)) {
 		return "hidden";
 	}
-	else if (d.region != restrictTo && restrictTo != "all") {
-		return "hidden";
+	for (var k in restrictTo){
+		if (d[k]!=restrictTo[k] && restrictTo[k]!="all"){
+			return "hidden";
+		}
 	}
-	else {
-		return "visible";
-	}
+	return "visible";
 }
 
 function branchPoints(d) {
@@ -472,20 +472,29 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		}
 	}
 	
-	var tmp = document.getElementById("region");
-	if (tmp!=null){
-		restrictTo = tmp.value;
-	}else{restrictTo='all';}
-	function restrictToRegion() {
-		restrictTo = document.getElementById("region").value;
-		console.log(restrictTo);	
+
+	function restrictToFunc(rt) {
+		restrictTo[rt] = document.getElementById(rt).value;
+		console.log("restriction to "+rt+" "+restrictTo[rt]);	
 		d3.selectAll(".tip")
 			.style("visibility", tipVisibility);
 	}
 
-	d3.select("#region")
-		.style("cursor", "pointer")
-		.on("change", restrictToRegion);		
+	for (rt in restrictTo){
+		var tmp = document.getElementById(rt);
+		if (tmp!=null){
+			restrictTo[rt] = tmp.value;
+		}else{restrictTo[rt]='all';}
+		console.log(restrictTo);
+		d3.select("#"+rt)
+			.style("cursor", "pointer")
+			.on("change", (function(restrictor){
+							return function(){
+								return restrictToFunc(restrictor);
+							}
+						})(rt));		
+	}
+
 
 	function onSelect(tip) {
 		d3.select("#"+(tip.strain).replace(/\//g, ""))
