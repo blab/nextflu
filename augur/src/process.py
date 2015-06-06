@@ -265,7 +265,7 @@ class process(virus_frequencies):
 			out.write('{%include '+self.virus_type+'_vaccines.js %}\n')
 			out.write('</script>\n\n')
 
-	def align(self):
+	def align(self, fast=False):
 		'''
 		aligns viruses using mafft. produces temporary files and deletes those at the end
 		after this step, self.viruses is a BioPhython multiple alignment object
@@ -273,7 +273,10 @@ class process(virus_frequencies):
 		self.make_run_dir()
 		os.chdir(self.run_dir)
 		SeqIO.write([SeqRecord(Seq(v['seq']), id=v['strain']) for v in self.viruses], "temp_in.fasta", "fasta")
-		os.system("mafft --anysymbol --nofft temp_in.fasta > temp_out.fasta")
+		if fast:
+			os.system("mafft --anysymbol temp_in.fasta > temp_out.fasta")
+		else:
+			os.system("mafft --anysymbol --nofft temp_in.fasta > temp_out.fasta")
 		aln = AlignIO.read('temp_out.fasta', 'fasta')
 		self.sequence_lookup = {seq.id:seq for seq in aln}
 		# add attributes to alignment
