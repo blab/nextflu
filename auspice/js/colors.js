@@ -45,6 +45,10 @@ var regionColorScale = d3.scale.ordinal()
 	.domain(regions.map(function(d){return d[0];}))
 	.range(regions.map(function(d){return d[1];}));
 
+var hostColorScale = d3.scale.ordinal()
+	.domain(hosts.map(function(d){return d[0];}))
+	.range(hosts.map(function(d){return d[1];}));
+
 // "ep", "ne" and "rb" need no adjustments
 function adjust_coloring_by_date() {
 	if (colorBy == "lbi") {
@@ -102,6 +106,10 @@ function colorByTrait() {
 	else if (colorBy == "region") {
 		colorScale = regionColorScale;
 		nodes.map(function(d) { d.coloring = d.region; });
+	}
+	else if (colorBy == "host") {
+		colorScale = hostColorScale;
+		nodes.map(function(d) { d.coloring = d.host; });
 	}
 	else if (colorBy == "date") {
 		colorScale = dateColorScale;

@@ -1,0 +1,271 @@
+---
+layout: default
+---
+
+<div class="row">
+	<div class="col-md-4">
+		<div class="logo-container">
+			<div class="bigtitle">
+				Real-time analysis of MERS-CoV evolution
+			</div>
+		</div>
+		<div class="bigspacer"></div>		
+		<div class="row">
+			<div class="col-xs-6 io-container">
+				<div>
+					<svg id="date-input"></svg>
+				</div>
+				<div>
+					<h5 id="legend-title">Legend</h5>
+					<svg id="legend"></svg>
+				</div>
+				<div class="spacer"></div>
+			</div>
+			<div class="col-xs-6 io-container">			
+				<form class="form-horizontal form-small">
+					<div class="form-group">
+							<label class="col-xs-4 control-label">Color by</label>
+							<div class="col-xs-8 controls">
+								<select id="coloring" class="form-control">
+									{% if page.coloring contains 'region' %}
+									<option value="region">geographic region</option>
+									{% endif %}									
+									{% if page.coloring contains 'date' %}
+									<option value="date">sampling date</option>
+									{% endif %}												
+									{% if page.coloring contains 'lbi' %}
+									<option value="lbi">local branching index</option>
+									{% endif %}
+									{% if page.coloring contains 'dfreq' %}
+									<option value="dfreq">frequency change</option>
+									{% endif %}
+															
+								</select>
+							</div>
+					</div>
+					<div class="form-group">
+						<label class="col-xs-4 control-label">Or</label>
+						<div class="col-xs-8 controls">
+							<input id="gt-color" type="search" placeholder= "{{ page.gtplaceholder }}"  class="form-control">
+						</div>
+					</div>		
+				</form>
+				<div class="spacer"></div>
+				
+				{% for res in site.data.restrictions %}
+				<form class="form-horizontal form-small">
+					<div class="form-group">
+						<label class="col-xs-4 control-label">{{res.label}}</label>
+						<div class="col-xs-8 controls">
+							<select id="{{res.id}}" class="form-control">
+								{% for reg in res.fields %}
+								<option value="{{ reg[0] }}">{{reg[1] }}</option>
+								{% endfor %}
+							</select>
+						</div>
+					</div>
+				</form>
+				{% endfor %}
+				<div id="search"></div>
+				<div class="spacer"></div>
+				<div>
+					<button id="reset" class="btn btn-default">reset layout</button>
+				</div>
+				<div class="spacer"></div>
+			</div>					
+		</div>
+	</div>
+	<div class="col-md-8">
+		<div class="bigspacer"></div>
+		<div class="treeplot-container">
+			<svg id="treeplot"></svg>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<div class="bigspacer"></div>
+		<div class="bigspacer"></div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-3">
+		<div class="io-container title">
+			Frequencies
+		</div>
+		<div class="spacer"></div>
+		<div class="row">			
+			<div class="col-xs-6 io-container">	
+				<form class="form-horizontal form-small">
+					<div class="form-group">
+						<div class="col-xs-12">
+							<input id="gtspec" type="search" class="form-control" value="{{ page.freqdefault }}">
+						</div>
+					</div>
+				</form>	
+			</div>
+			<div class="col-xs-6 io-container">					
+				<div>
+					<button id="plotfreq" type=button class="btn btn-default">plot frequencies</button>
+				</div>
+			</div>
+		</div>
+		<div class="spacer"></div>
+		Input mutations as position+nucleotide, i.e. <span class="highlight">8926C</span> to plot its frequency through time.
+		<div class="spacer"></div>
+	</div>
+	<div class="col-md-9">
+		<div class="freqplot-container">		
+			<div id="gtchart"></div>
+		</div>
+		<div class="entropy-container">		
+			<div id="entropy"></div>
+		</div>
+	</div>	
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<div class="bigspacer"></div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-3">
+		<div class="io-container title">
+			Feature explanation
+		</div>	
+	</div>
+	<div class="col-md-9">
+		<h4>Phylogenetic tree</h4>
+		<p> Use the <a href="/help/#date_slider"><b>date slider</b></a> to highlight viruses sampled within 6 month of the date displayed.
+		<p> Use the <a href="/help/#epitope_mutations"><b>drop down menu</b></a> to color viruses <span class="highlight"><a href="/help/#geo">geographic region</a></span>, sampling date,  or <span class="highlight"><a href="/help/#lbi">local branching index</a></span>.
+		<p> Use the <a href="/help/#genotype"><b>input box</b></a> to specify positions to color viruses by genotype. Nucleotide positions must be 
+		separated by a comma (e.g. <span class="highlight">159,225</span>).
+		<p> <a href="/help/#mouse_tip"><b>Mouse over</b></a> a tip to show virus name, location and features.
+		<p> <a href="/help/#mouse_branch"><b>Mouse over</b></a> a branch to graph the frequency of the correponding clade trajectory below or <b>click</b> on a branch to zoom into its descendent clade.
+		<h4>Frequencies</h4>
+		Enter a mutation or genotype above (e.g. <span class="highlight">8926C</span>) and click 
+		<b>plot frequencies</b> to show estimated frequency of this mutation through time. Positions with very little variation are omitted. Beware 
+		that frequencies of rare mutations are noisy. <a href="/help/#frequencies">Click here for help with the interface.</a>		
+	</div>	
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<div class="bigspacer"></div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-3">
+		<div class="io-container title">
+			Rationale and details
+		</div>	
+		<div class="spacer"></div>	
+	</div>
+	<div class="col-md-9">
+		<p>The <b>local branching index</b> is the exponentially weighted tree length surrounding 
+		a node, which is associated with <a href="http://elifesciences.org/content/3/e03568"> 
+		rapid branching and expansion of clades</a>. A more detailed explanation is available 
+		<a href="https://neherlab.wordpress.com/2014/11/11/now-out-in-elife-predicting-evolution/">here</a>. 
+		Retrospective analysis has shown that LBI correlates with clade growth. 
+		</p><p>
+		<b>Frequencies</b> are estimated as maximum likelihood trajectories that penalize rapid changes in 
+		frequency and slope. The frequencies of large clades or abundant genotypes have sufficiently 
+		many observations to by robust, while rare mutations or combinations thereof can't be reliably
+		estimated.
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-3">
+		<div class="io-container title">
+			Acknowledgements
+		</div>	
+		<div class="spacer"></div>	
+	</div>
+	<div class="col-md-9">
+		<p>We thank:
+		<ul>
+			<li>
+				the EVIDENT consortium: European Mobile Lab (<b>EMLab</b>)<br>
+				Carroll et al. (2015) Nature, in press.
+			</li>
+			<li>
+				the Viral Hemorrhagic Fever Consortium: Kenema Government Hospital, Broad Institute, Harvard University, Tulane University, University of Edinburgh (<b>VHFC1</b> and <b>VHFC2</b>)<br>
+				<a href="http://dx.doi.org/10.1126/science.1259657">Gire et al. (2014) Science, 345: 1369-1372</a>
+				Park et al. (2015) Cell, in press.
+			</li>
+			<li>
+				China CDC and the State Key Laboratory of Pharmaceutical Biotechnology (<b>SKLPB</b>)<br>
+				<a href="http://dx.doi.org/10.1038/nature14490">Tong et al. (2015) Nature, advanced access</a>
+			</li>
+			<li>
+				the Centers for Disease Control and Prevention (<b>CDC</b>)<br>
+				Park et al. (2015) Cell, in press.
+			</li>
+			<li>
+				the United States Army Medical Research Institute of Infectious Diseases (<b>USAMRIID</b>)<br>
+				<a href="http://dx.doi.org/10.3201/eid2107.150522">Kugelman JR et al. Emerg Infect Dis. 2015 Jul.</a>
+			</li>
+			<li>
+				University of Cambridge/Wellcome Trust Sanger/Public Health England (<b>UoC/WT/PHE</b>)<br>
+				<a href="http://virological.org/t/direct-deep-sequencing-in-sierra-leone-yields-73-new-ebov-genomes-from-february-may-2015/134">Goodfellow I et al. </a>
+			</li>
+			<li>
+				Public Health England (<b>PHE</b>)<br>
+				<a href="http://www.eurosurveillance.org/ViewArticle.aspx?ArticleId=21131">Bell A et al. Eurosurveillance, Volume 20, Issue 20, 21 May 2015</a> 
+			</li>
+			<li>
+				National Institute for Infectious Diseases 'Lazzaro Spallanzani' IRCCS, Italy (<b>INMI</b>)<br>
+				Maria Capobianchi et al.
+			</li>
+			<li>
+				Genetic Medicine and Development, University of Geneva, Switzerland (<b>CHE_UoG</b>)<br>
+				Laurent Kaiser et al.
+			</li>
+		</ul>
+		for generously sharing EBOV sequence data. We also thank <a href="http://tree.bio.ed.ac.uk/">Andrew Rambaut</a> for leadership and coordination of data sharing and analysis efforts.
+		</p>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-3"></div>
+	<div class="col-md-9">
+		<hr>
+		Built by <a href="http://bedford.io">Trevor Bedford</a> and 
+		<a href="https://neherlab.wordpress.com/">Richard Neher</a>. 
+		Give us a shout at <a href="https://twitter.com/trvrb" target="_blank">@trvrb</a> or 
+		<a href="https://twitter.com/richardneher" target="_blank">@richardneher</a> with questions or comments. All 
+		<a href="http://github.com/blab/nextflu" target="_blank">source code</a> is freely available under the terms of the 
+		<a href="http://github.com/blab/nextflu/blob/master/LICENSE.txt" target="_blank">GNU Affero General Public License</a>. Data 
+		updated <span id="updated"></span> and processed with commit <span id="commit"></span>.		
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-3"></div>
+	<div class="col-md-9">
+		<hr>		
+		<div class="center text-gray smallnote">
+			&copy; 2015 Trevor Bedford and Richard Neher
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<div class="bigspacer"></div>
+	</div>
+</div>
+<script type="text/javascript">
+	var genericDomain = [0,0.111,0.222,0.333, 0.444, 0.555, 0.666, 0.777, 0.888, 1.0];
+	var path = '/data/';
+	var tip_labels = true;
+</script>
+{{ content }}
+<script src="/js/auspice.js"></script>

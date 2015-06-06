@@ -126,7 +126,8 @@ class process(virus_frequencies):
 				try:
 					self.sequence_lookup = {v.strain:v for v in self.viruses}
 				except:
-					pass
+					self.sequence_lookup = {v["strain"]:v for v in self.viruses}
+					print "error generating sequence lookup"
 		if os.path.isfile(self.frequency_fname):
 			with open(self.frequency_fname, 'r') as infile:
 				self.frequencies = cPickle.load(infile)
@@ -274,7 +275,7 @@ class process(virus_frequencies):
 		os.chdir(self.run_dir)
 		SeqIO.write([SeqRecord(Seq(v['seq']), id=v['strain']) for v in self.viruses], "temp_in.fasta", "fasta")
 		if fast:
-			os.system("mafft --anysymbol temp_in.fasta > temp_out.fasta")
+			os.system("mafft --fft temp_in.fasta > temp_out.fasta")
 		else:
 			os.system("mafft --anysymbol --nofft temp_in.fasta > temp_out.fasta")
 		aln = AlignIO.read('temp_out.fasta', 'fasta')

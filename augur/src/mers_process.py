@@ -15,8 +15,8 @@ sp = 0
 
 virus_config.update({
 	# data source and sequence parsing/cleaning/processing
-	'virus':'MERS-CoV',
-	'fasta_fields':{0:'strain', 1:'accession', 2:'location', 3:'country', 4:'date', 5:'host', 6:'lab'},
+	'virus':'mers',
+	'fasta_fields':{0:'strain', 1:'accession', 2:'region', 3:'country', 4:'date', 5:'host', 6:'lab'},
 	#>Strain_name|Accession|Location|Country|Date|Host|Lab
 	'alignment_file':'data/MERS-CoV.fasta',
 	'outgroup':'Camel_Egypt_NRCE_KHU270',
@@ -38,7 +38,7 @@ virus_config.update({
 
 
 class mers_filter(virus_filter):
-	def __init__(self,min_length = 15000, **kwargs):
+	def __init__(self,min_length = 3000, **kwargs):
 		'''
 		parameters
 		min_length  -- minimal length for a sequence to be acceptable
@@ -56,10 +56,13 @@ class mers_filter(virus_filter):
 		}
 	def filter(self):
 		for v in self.viruses:
+			v['seq'] = v['seq'].replace('-', '')[:5000]
 			if 'XX' in v['date']:
 				print "fixing:", v['strain'], v['date']
 				v['date'] = v['date'].replace('XX','15')
 				print "now:", v['strain'], v['date']
+		self.viruses.append(self.outgroup)
+		print len(self.viruses), "with outgroup"
 		self.filter_generic()
 
 
@@ -100,8 +103,13 @@ class mers_process(process, mers_filter, mers_clean, mers_refine):
 			self.dump()
 		else:
 			self.load()
+			try:
+				self.refine()
+			except:
+				pass
 		if 'align' in steps:
-			self.align()   	# -> self.viruses is an alignment object
+			self.align(fast=True)   	# -> self.viruses is an alignment object
+			self.dump()
 		if 'clean' in steps:
 			print "--- Clean at " + time.strftime("%H:%M:%S") + " ---"
 			self.clean()   # -> every node as a numerical date
@@ -129,7 +137,7 @@ class mers_process(process, mers_filter, mers_clean, mers_refine):
 			# exporting to json, including the H1N1pdm specific fields
 			self.export_to_auspice(tree_fields = ['nuc_muts','accession','isolate_id', 'lab','db', 'country'] 
 													+ self.fasta_fields.values(), 
-			                       annotations = [], export_entropy = 'nuc')
+			                       annotations = [], seq = 'nuc')
 			self.generate_indexHTML()
 
 if __name__=="__main__":
