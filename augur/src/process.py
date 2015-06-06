@@ -142,10 +142,18 @@ class process(virus_frequencies):
 		print "Writing sequences"
 		elems = {}
 		for node in self.tree:
-			if seq=='aa' and hasattr(node, "clade") and hasattr(node, "aa_seq"):
-				elems[node.clade] = node.aa_seq
-			elif seq=='nuc' and hasattr(node, "clade") and hasattr(node, "seq"):
-				elems[node.clade] = node.seq
+			if hasattr(node, "clade") and hasattr(node, "seq"):
+				if seq == 'nuc':
+					elems[node.clade] = {pos:state for pos, (state, ancstate) in 
+								enumerate(izip(node.seq, self.tree.seed_node.seq)) if state!=ancstate}
+				else:
+					elems[node.clade] = {pos:state for pos, (state, ancstate) in 
+								enumerate(izip(node.aa_seq, self.tree.seed_node.aa_seq)) if state!=ancstate}
+
+		if seq == 'nuc':
+			elems['root'] = self.tree.seed_node.seq
+		else:
+			elems['root'] = self.tree.seed_node.aa_seq
 		write_json(elems, self.auspice_sequences_fname, indent=None)
 
 		print "Writing tree"
