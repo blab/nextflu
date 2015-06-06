@@ -370,7 +370,7 @@ class process(virus_frequencies):
 		self.variable_nucleotides
 		self.variable_aa
 		'''
-		aln_array = np.array(self.aln_nuc)
+		aln_array = np.array(self.nuc_aln)
 		self.nuc_frequencies = np.zeros((len(self.nuc_alphabet),aln_array.shape[1]))
 		for ni,nuc in enumerate(self.nuc_alphabet):
 			self.nuc_frequencies[ni,:]=(aln_array==nuc).mean(axis=0)
