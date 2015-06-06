@@ -66,6 +66,13 @@ function adjust_coloring_by_date() {
 	}	
 }
 
+function stateAtPosition(clade, pos){
+	if (typeof cladeToSeq[clade][pos] == "undefined"){
+		return cladeToSeq["root"][pos];
+	}else{
+		return cladeToSeq[clade][pos];		
+	}
+}
 
 function colorByTrait() {
 	
@@ -165,8 +172,7 @@ function colorByGenotypePosition (positions) {
 	var gts = nodes.map(function (d) {
 		var tmp = [];
 		for (var i=0; i<positions.length; i++){
-			var aa = cladeToSeq[d.clade];
-			tmp[tmp.length] = (positions[i]+1)+aa[positions[i]];
+			tmp[tmp.length] = (positions[i]+1)+stateAtPosition(d.clade, positions[i]);
 		}
 		d.coloring = tmp.join(" / "); 
 		return d.coloring;});
