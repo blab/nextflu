@@ -1,5 +1,3 @@
-var restrictTo = "all";
-
 var cladeToSeq = {}
 
 var globalDate = new Date();

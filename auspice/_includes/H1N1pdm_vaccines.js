@@ -4,3 +4,6 @@ var vaccineStrains = Object.keys(vaccineChoice);
 
 var genome_annotation = {'HA1':[[1,1,1], [1,160,327]],
                          'HA2':[[1.2,1.2,1.2], [327,450,580]]}
+
+var restrictTo = {"region":"all"};
+

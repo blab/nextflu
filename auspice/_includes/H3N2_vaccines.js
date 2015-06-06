@@ -10,3 +10,6 @@ vaccineChoice['A/Switzerland/9715293/2013'] = "2014-09-25";
 var vaccineStrains = Object.keys(vaccineChoice);
 var genome_annotation = {'HA1':[[1,1,1], [1,160,329]],
 						 'HA2':[[1.2,1.2,1.2], [329,450,580]]}
+
+var restrictTo = {"region":"all"};
+
