@@ -293,17 +293,15 @@ class process(virus_frequencies):
 	def align_seqan(self):
 		from seqanpy import align_overlap
 		from Bio.Align import MultipleSeqAlignment
-		from Bio.Seq import Seq
-		from Bio.Align import MultipleSeqAlignment
-		outgroup = str(self.outgroup.seq).replace('-', '')
-		aln = MultipleSeqAlignment([Seq(outgroup)])
+		outgroup = str(self.outgroup['seq']).replace('-', '')
+		aln = MultipleSeqAlignment([SeqRecord(Seq(outgroup), id=self.outgroup['strain'])])
 		for v in self.viruses:
 			print 'Aligning ',v['strain'],' to outgroup'
 			if v['strain']!=self.outgroup['strain']:
 				tmp_aln = align_overlap(outgroup, v['seq'].replace('-',''),
 							score_gapopen=-10, score_gapext=-1)
 				tmp_seq = ''.join(np.fromstring(tmp_aln[2],'S1')[np.fromstring(tmp_aln[1],'S1')!='-'])
-				aln.append(tmp_seq, id=v['strain'])
+				aln.append(SeqRecord(Seq(tmp_seq), id=v['strain']))
 		self.sequence_lookup = {seq.id:seq for seq in aln}
 		# add attributes to alignment
 		for v in self.viruses:
