@@ -1,4 +1,4 @@
-var restrictTo = "all";
+var regions = ["Africa", "SouthAmerica", "WestAsia", "Oceania", "Europe", "JapanKorea", "NorthAmerica", "SoutheastAsia", "SouthAsia", "China"]
 
 var cladeToSeq = {}
 
