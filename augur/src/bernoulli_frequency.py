@@ -271,12 +271,12 @@ class virus_frequencies(object):
 		mutation_frequencies = {"pivots":list(self.pivots)}
 		for pos in xrange(sub_aln.get_alignment_length()):
 			for ai, aa in enumerate(alpha):
-				if freq[ai,pos]>threshold and freqs[ai,pos]<1.0-threshold:
+				if freqs[ai,pos]>threshold and freqs[ai,pos]<1.0-threshold:
 					mut = str(pos+1)+aa
 					print "estimating freq of ", mut, "total frequency:", freqs[ai,pos]
-					freq, (tps, obs) = self.estimate_genotype_frequency(sub_aln, [(pos, aa)])
-					if freq is not None:
-						mutation_frequencies[mut] = list(np.round(logit_inv(freq.y),3))
+					est_freq, (tps, obs) = self.estimate_genotype_frequency(sub_aln, [(pos, aa)])
+					if est_freq is not None:
+						mutation_frequencies[mut] = list(np.round(logit_inv(est_freq.y),3))
 		return mutation_frequencies
 
 	def determine_genotype_frequencies(self, regions=None, threshold=0.1):
