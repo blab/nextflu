@@ -292,7 +292,7 @@ class process(virus_frequencies):
 		self.remove_run_dir()
 
 	def align_seqan(self):
-		from seqan import align_overlap
+		from seqanpy import align_overlap
 		from Bio.Align import MultipleSeqAlignment
 		from Bio.Seq import Seq
 		from Bio.Align import MultipleSeqAlignment
