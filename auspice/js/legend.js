@@ -36,9 +36,9 @@ function makeLegend(){
 			return tmp_text+')';
 		}
 });
-
+	console.log(colorScale.domain());
   var tmp_leg = legend.selectAll(".legend")
-  .data(colorScale.domain())
+  .data(colorScale.domain().filter(function(d){return typeof d != "undefined";}))
   .enter().append('g')
   .attr('class', 'legend')
   .attr('transform', function(d, i) {

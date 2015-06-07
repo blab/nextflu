@@ -34,7 +34,7 @@ virus_config.update({
 	'html_vars': {'coloring': 'lbi, dfreq, country, date, host',
 				   'gtplaceholder': 'Genomic positions...',
 					'freqdefault': ''},
-	'js_vars': {'LBItau': 0.0005, 'LBItime_window': 0.5, 'dfreq_dn':2},
+	'js_vars': {'LBItau': 0.0005, 'LBItime_window': 0.5, 'dfreq_dn':2, 'time_window':3},
 	})
 
 

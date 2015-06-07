@@ -213,7 +213,7 @@ class process(virus_frequencies):
 				self.frequencies["entropy"] = [ [pos, S, muts] for pos,S,muts in 
 						izip(xrange(self.nuc_entropy.shape[0]), self.nuc_entropy,self.variable_nuc_identities) ]
 
-			write_json(self.frequencies, self.auspice_frequency_fname)
+			write_json(self.frequencies, self.auspice_frequency_fname, indent=None)
 
 		# Write out metadata
 		print "Writing out metadata"		
