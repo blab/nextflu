@@ -295,8 +295,8 @@ class process(virus_frequencies):
 		from Bio.Align import MultipleSeqAlignment
 		outgroup = str(self.outgroup['seq']).replace('-', '')
 		aln = MultipleSeqAlignment([SeqRecord(Seq(outgroup), id=self.outgroup['strain'])])
-		for v in self.viruses:
-			print 'Aligning ',v['strain'],' to outgroup'
+		for vi, v in enumerate(self.viruses):
+			print 'Aligning ',v['strain'],' to outgroup', vi+1, ' out of ',len(self.viruses)
 			if v['strain']!=self.outgroup['strain']:
 				tmp_aln = align_overlap(outgroup, v['seq'].replace('-',''),
 							score_gapopen=-10, score_gapext=-1)
