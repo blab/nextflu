@@ -255,7 +255,7 @@ class process(virus_frequencies):
 						out.write('var '+vname+' = "'+val+'";\n')
 					else:						
 						out.write('var '+vname+' = '+str(val)+';\n')
-			out.write('{%include '+self.virus_type+'_vaccines.js %}\n')
+			out.write('{%include '+self.virus_type+'_meta.js %}\n')
 			out.write('</script>\n\n')
 
 	def align(self):
