@@ -128,8 +128,8 @@ class mers_process(process, mers_filter, mers_clean, mers_refine):
 		if 'frequencies' in steps:
 			print "--- Estimating frequencies at " + time.strftime("%H:%M:%S") + " ---"
 			self.determine_variable_positions()
-			self.estimate_frequencies(tasks = ["nuc_mutations", "clades", "tree"])
-			if 'genotype_frequencies' in steps: 
+			self.estimate_frequencies(tasks = ["nuc_mutations", "nuc_clades", "tree"])
+			if 'genotype_frequencies' in steps:
 					self.estimate_frequencies(tasks = ["genotypes"])
 			self.dump()
 		if 'export' in steps:
