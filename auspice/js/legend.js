@@ -18,9 +18,12 @@ function makeLegend(){
 		if (colorBy == "region") {
 			return "Region";
 		}
-		if (colorBy == "Country") {
+		if (colorBy == "country") {
 			return "Country";
 		}
+        if (colorBy == "host") {
+            return "Host";
+        }
 		if (colorBy == "genotype") {
 			return "Genotype";
 		}
@@ -36,13 +39,13 @@ function makeLegend(){
 			return tmp_text+')';
 		}
 });
-	console.log(colorScale.domain());
+ console.log(colorScale.domain());
+ var stack = Math.ceil(colorScale.domain().filter(function(d){return typeof d != "undefined";}).length/2);
   var tmp_leg = legend.selectAll(".legend")
   .data(colorScale.domain().filter(function(d){return typeof d != "undefined";}))
   .enter().append('g')
   .attr('class', 'legend')
   .attr('transform', function(d, i) {
-   var stack = 5;
    var height = legendRectSize + legendSpacing;
    var fromRight = Math.floor(i / stack);
    var fromTop = i % stack;
@@ -66,8 +69,13 @@ function makeLegend(){
   .attr('x', legendRectSize + legendSpacing + 5)
   .attr('y', legendRectSize - legendSpacing)
   .text(function(d) {
-   return d.toString().replace(/([a-z])([A-Z])/g, '$1 $2').replace(/,/g, ', ');
- });		
+    if (colorBy=="country"){
+        console.log(d);
+       return codeToCountry[d];
+    }else{
+       return d.toString().replace(/([a-z])([A-Z])/g, '$1 $2').replace(/,/g, ', ');
+    }
+    });		
   return tmp_leg;
 }
 

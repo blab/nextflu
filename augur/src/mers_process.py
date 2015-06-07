@@ -22,6 +22,7 @@ virus_config.update({
 	'outgroup':'Camel_Egypt_NRCE_KHU270',
 	'aggregate_regions':[('global', None)],
 	'force_include_all':False,
+	'n_iqd':5,
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
 	'cds':None, # no coding region
 	# define relevant clades in canonical HA1 numbering (+1)
@@ -31,7 +32,7 @@ virus_config.update({
 	'min_genotype_frequency':0.1,
 	'auspice_prefix':'mers_',
 	'layout':'mers',
-	'html_vars': {'coloring': 'lbi, dfreq, country, date, host',
+	'html_vars': {'coloring': 'country, date, host, lbi, dfreq',
 				   'gtplaceholder': 'Genomic positions...',
 					'freqdefault': ''},
 	'js_vars': {'LBItau': 0.0005, 'LBItime_window': 0.5, 'dfreq_dn':2, 'time_window':3},
@@ -76,6 +77,7 @@ class mers_clean(virus_clean):
 		self.unique_date()
 		self.remove_insertions()
 		self.clean_ambiguous()
+		self.clean_distances()
 		self.viruses.sort(key=lambda x:x.num_date)
 		print "Number of viruses after cleaning:",len(self.viruses)
 

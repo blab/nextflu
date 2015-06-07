@@ -1,12 +1,12 @@
 [
 {
-	"label":"Countries",
+	"label":"Country",
 	"id":"country",
 	"fields":[["all", "all"],
-			  ["ARE", "UnitedArabEmirates"],
+			  ["ARE", "U. Arab Emirates"],
 			  ["EGY", "Egypt"],
-			  ["KSA", "SaudiArabia"],
-			  ["GBR", "UnitedKingdom"],
+			  ["KSA", "Saudi Arabia"],
+			  ["GBR", "United Kingdom"],
 			  ["QAT", "Qatar"],
 			  ["OMN", "Oman"]]
 },
