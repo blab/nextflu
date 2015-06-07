@@ -83,18 +83,21 @@ layout: default
 				</form>
 				<div class="spacer"></div>
 				
+				{% for res in site.data.restrictions %}
 				<form class="form-horizontal form-small">
 					<div class="form-group">
-						<label class="col-xs-4 control-label">Region</label>
+						<label class="col-xs-4 control-label">{{res.label}}</label>
 						<div class="col-xs-8 controls">
-							<select id="region" class="form-control">
-								{% for reg in site.data.regions %}
-								<option value={{ reg[0] }}>{{reg[1] }}</option>
+							<select id="{{res.id}}" class="form-control">
+								{% for reg in res.fields %}
+								<option value="{{ reg[0] }}">{{reg[1] }}</option>
 								{% endfor %}
 							</select>
 						</div>
 					</div>
 				</form>
+				{% endfor %}
+
 				<div id="search"></div>
 				<div class="spacer"></div>
 				<div>
