@@ -279,7 +279,7 @@ class virus_frequencies(object):
 						mutation_frequencies[mut] = list(np.round(logit_inv(est_freq.y),3))
 		return mutation_frequencies
 
-	def determine_genotype_frequencies(self, regions=None, threshold=0.1, nuc=nuc):
+	def determine_genotype_frequencies(self, regions=None, threshold=0.1, nuc=False):
 		'''
 		determine the abundance of all two mutation combinations 
 		'''

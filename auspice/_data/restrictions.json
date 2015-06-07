@@ -1,14 +1,22 @@
-[{	
+[
+{
+	"label":"Countries",
+	"id":"country",
+	"fields":[["all", "all"],
+			  ["ARE", "UnitedArabEmirates"],
+			  ["EGY", "Egypt"],
+			  ["KSA", "SaudiArabia"],
+			  ["GBR", "UnitedKingdom"],
+			  ["QAT", "Qatar"],
+			  ["OMN", "Oman"]]
+},
+{	
 	"label":"Region", 
-	"id":"location", 
+	"id":"region", 
 	"fields": 
 	[["all", "all"],
-	["AbuDhabi", "AbuDhabi, ARE"],
 	["Dubai", "Dubai, ARE"],
 	["Dubai/AbuDhabi", "Dubai/AbuDhabi, ARE"],
-	["Egypt", "Egypt"],
-	["UnitedKingdom", "UnitedKingdom"],
-	["Al-Zarqa", "Al-Zarqa, JOR"],
 	["Al-Hasa", "Al-Hasa, KSA"],
 	["Al-Hofuf", "Al-Hofuf, KSA"],
 	["Asir", "Asir, KSA"],
@@ -18,18 +26,13 @@
 	["Dhahran", "Dhahran, KSA"],
 	["Hafr-Al-Batin" ,"Hafr-Al-Batin, KSA"],
 	["Jeddah", "Jeddah, KSA"],
-	["KSA", "KSA"],
 	["Khamis-Mushait", "Khamis-Mushait ,KSA"],
 	["Madinah", "Madinah, KSA"],
 	["Makkah", "Makkah, KSA"],
 	["Medinah", "Medinah, KSA"],
 	["Riyadh", "Riyadh, KSA"],
-	["SaudiArabia", "SaudiArabia, KSA"],
 	["Taif", "Taif, KSA"],
-	["Wadi-Ad-Dawasir", "Wadi-Ad-Dawasir, KSA"],
-	["Oman", "Oman, OMN"],
-	["Doha", "Doha, QAT"],
-	["Qatar", "Qatar, QAT"]],
+	["Wadi-Ad-Dawasir", "Wadi-Ad-Dawasir, KSA"]],
 },
 {
 	"label":"Host",
@@ -53,15 +56,4 @@
 			  ["HKU", "HKU"],
 			  ["USNavy", "USNavy"]]
 },
-{
-	"label":"Countries",
-	"id":"country",
-	"fields":[["all", "all"],
-			  ["ARE", ""],
-			  ["EGY", "Egypt"],
-			  ["KSA", "SaudiArabia"],
-			  ["GBR", "UnitedKingdom"],
-			  ["QAT", "Qatar"],
-			  ["OMN", "Oman"]]
-}
 ]

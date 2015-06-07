@@ -13,5 +13,5 @@ var genome_annotation = {'ORF1a':[[1,1,1], [233, 6500, 13408]],
 						 'N':[[1,1,1], [ 28520, 29000, 29761]],
 						 'ORF8b':[[1,1,1], [ 28716, 28800, 29054]],
 }
-var restrictTo = {"region":"all", "lab":"all", "host":"all"};
+var restrictTo = {"country":"all","region":"all", "lab":"all", "host":"all"};
 
