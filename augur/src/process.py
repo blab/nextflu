@@ -290,6 +290,26 @@ class process(virus_frequencies):
 		os.chdir('..')
 		self.remove_run_dir()
 
+	def align_seqan(self):
+		from seqan import align_overlap
+		from Bio.Align import MultipleSeqAlignment
+		from Bio.Seq import Seq
+		from Bio.Align import MultipleSeqAlignment
+		outgroup = str(self.outgroup.seq).replace('-', '')
+		aln = MultipleSeqAlignment([Seq(outgroup)])
+		for v in self.viruses:
+			print 'Aligning ',v['strain'],' to outgroup'
+			if v['strain']!=self.outgroup['strain']:
+				tmp_aln = align_overlap(outgroup, v['seq'].replace('-',''),
+							score_gapopen=-10, score_gapext=-1)
+				tmp_seq = ''.join(np.fromstring(tmp_aln[2],'S1')[np.fromstring(tmp_aln[1],'S1')!='-'])
+				aln.append(tmp_seq, id=v['strain'])
+		self.sequence_lookup = {seq.id:seq for seq in aln}
+		# add attributes to alignment
+		for v in self.viruses:
+			self.sequence_lookup[v['strain']].__dict__.update({k:val for k,val in v.iteritems() if k!='seq'})
+		self.viruses = aln
+
 	def infer_tree(self, raxml_time_limit):
 		'''
 		builds a tree from the alignment using fasttree and RAxML. raxml runs for 
