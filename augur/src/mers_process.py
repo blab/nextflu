@@ -31,7 +31,7 @@ virus_config.update({
 	'min_genotype_frequency':0.1,
 	'auspice_prefix':'mers_',
 	'layout':'mers',
-	'html_vars': {'coloring': 'lbi, dfreq, country, date',
+	'html_vars': {'coloring': 'lbi, dfreq, country, date, host',
 				   'gtplaceholder': 'Genomic positions...',
 					'freqdefault': ''},
 	'js_vars': {'LBItau': 0.0005, 'LBItime_window': 0.5, 'dfreq_dn':2},

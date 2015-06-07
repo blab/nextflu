@@ -44,6 +44,9 @@ var dateColorScale = d3.scale.linear().clamp([true])
 var regionColorScale = d3.scale.ordinal()
 	.domain(regions.map(function(d){return d[0];}))
 	.range(regions.map(function(d){return d[1];}));
+var countryColorScale = d3.scale.ordinal()
+	.domain(countries.map(function(d){return d[0];}))
+	.range(countries.map(function(d){return d[1];}));
 
 var hostColorScale = d3.scale.ordinal()
 	.domain(hosts.map(function(d){return d[0];}))
@@ -106,6 +109,10 @@ function colorByTrait() {
 	else if (colorBy == "region") {
 		colorScale = regionColorScale;
 		nodes.map(function(d) { d.coloring = d.region; });
+	}
+	else if (colorBy == "country") {
+		colorScale = countryColorScale;
+		nodes.map(function(d) { d.coloring = d.country; });
 	}
 	else if (colorBy == "host") {
 		colorScale = hostColorScale;

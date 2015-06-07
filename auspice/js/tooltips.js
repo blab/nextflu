@@ -23,11 +23,17 @@ var virusTooltip = d3.tip()
 			string += "<div class=\"smallspacer\"></div>";
 		}			
 		
+		if (typeof d.region != "undefined") {
+			string += d.region.replace(/([A-Z])/g, '$1');
+		}
 		if (typeof d.country != "undefined") {
-			string += d.country.replace(/([A-Z])/g, ' $1');
+			string += ", "+d.country.replace(/([A-Z])/g, '$1');
 		}
 		if (typeof d.date != "undefined") {
 			string += ", " + d.date;
+		}
+		if (typeof d.host != "undefined") {
+			string += "<br>" + d.host;
 		}
 		if ((typeof d.db != "undefined") && (typeof d.accession != "undefined") && (d.db == "GISAID")) {
 			string += "<br>GISAID ID: EPI" + d.accession;

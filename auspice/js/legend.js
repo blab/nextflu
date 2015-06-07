@@ -18,6 +18,9 @@ function makeLegend(){
 		if (colorBy == "region") {
 			return "Region";
 		}
+		if (colorBy == "Country") {
+			return "Country";
+		}
 		if (colorBy == "genotype") {
 			return "Genotype";
 		}

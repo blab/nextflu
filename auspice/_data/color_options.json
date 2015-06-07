@@ -7,4 +7,5 @@
  ["dfreq","frequency change"],
  ["host","host"],
  ["subtype","subtype"],
+ ["country","country"],
 ]

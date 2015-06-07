@@ -11,6 +11,17 @@ var regions = [
 ["China",  			"#DF4327"]
 ];
 
+var countries = [
+["ARE",  		"#5097BA"],
+["KSA",  	"#DF4327"],
+["GBR",  		"#75B681"],
+["OMN",  		"#8EBC66"],
+["JOR",  		"#AABD52"],
+["EGY",  	"#C4B945"],
+["QAT",  	"#D9AD3D"],
+];
+
+
 var hosts = [
 ["Human","#5097BA"],
 ["Camel", "#DF4327"]
