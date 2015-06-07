@@ -279,11 +279,11 @@ class virus_frequencies(object):
 						mutation_frequencies[mut] = list(np.round(logit_inv(est_freq.y),3))
 		return mutation_frequencies
 
-	def determine_genotype_frequencies(self, regions=None, threshold=0.1):
+	def determine_genotype_frequencies(self, regions=None, threshold=0.1, nuc=nuc):
 		'''
 		determine the abundance of all two mutation combinations 
 		'''
-		sub_aln = self.get_sub_alignment(regions)
+		sub_aln = self.get_sub_alignment(regions, nuc=nuc)
 		genotype_frequencies = {"pivots":list(self.pivots)}
 		relevant_pos = np.where(1.0 - self.aa_frequencies.max(axis=0)>threshold)[0]
 		for i1,pos1 in enumerate(relevant_pos[:-1]):
@@ -300,7 +300,7 @@ class virus_frequencies(object):
 								genotype_frequencies[gt_label] = list(np.round(logit_inv(freq.y),3))
 		return genotype_frequencies
 
-	def determine_clade_frequencies(self, clades, regions=None):
+	def determine_clade_frequencies(self, clades, regions=None, nuc=False):
 		'''
 		loop over different clades and determine their frequencies
 		returns a dictionary with clades:frequencies
@@ -310,7 +310,7 @@ class virus_frequencies(object):
 
 		for ci, (clade_name, clade_gt) in enumerate(clades.iteritems()):
 			print "estimating frequency of clade", clade_name, clade_gt
-			freq, (tps, obs) = self.estimate_genotype_frequency(sub_aln, [(pos-1, aa) for pos, aa in clade_gt])
+			freq, (tps, obs) = self.estimate_genotype_frequency(sub_aln, [(pos-1, aa) for pos, aa in clade_gt], nuc=nuc)
 			if freq is not None:
 				clade_frequencies[clade_name.lower()] = list(np.round(logit_inv(freq.y),3))
 		return clade_frequencies
@@ -435,7 +435,7 @@ class virus_frequencies(object):
 			self.frequencies["genotypes"][region_label] = self.determine_genotype_frequencies(regions, threshold=threshold)
 
 
-	def all_clade_frequencies(self, clades = None):
+	def all_clade_frequencies(self, clades = None, nuc=False):
 		if not hasattr(self, 'nuc_frequencies'):
 			self.determine_variable_positions()
 		if clades is None:
@@ -446,7 +446,7 @@ class virus_frequencies(object):
 		self.frequencies["clades"] = {}
 		for region_label, regions in self.aggregate_regions:
 			print "--- "+"determining clade frequencies "+region_label+ " "  + time.strftime("%H:%M:%S") + " ---"
-			self.frequencies["clades"][region_label] = self.determine_clade_frequencies(clades, regions=regions)
+			self.frequencies["clades"][region_label] = self.determine_clade_frequencies(clades, regions=regions, nuc=nuc)
 
 	def all_tree_frequencies(self, threshold = 20):
 		for region_label, regions in self.aggregate_regions:
