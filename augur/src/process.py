@@ -407,5 +407,7 @@ class process(virus_frequencies):
 			self.all_genotypes_frequencies(threshold = self.min_genotype_frequency) 
 		if 'clades' in tasks:
 			self.all_clade_frequencies() 
+		if 'nuc_clades' in tasks:
+			self.all_clade_frequencies(nuc=True) 
 		if 'tree' in tasks:
 			self.all_tree_frequencies() 
