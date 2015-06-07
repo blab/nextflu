@@ -250,7 +250,7 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 				},
 				tick: {
 					outer: false,
-					values: [100,200,300,400,500]				
+					values:[0, 5000, 10000, 15000, 20000, 25000, 30000]
 				}
 			},
 		},			
