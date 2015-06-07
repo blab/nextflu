@@ -305,7 +305,7 @@ class virus_frequencies(object):
 		loop over different clades and determine their frequencies
 		returns a dictionary with clades:frequencies
 		'''
-		sub_aln = self.get_sub_alignment(regions)
+		sub_aln = self.get_sub_alignment(regions, nuc)
 		clade_frequencies = {"pivots":list(self.pivots)}
 
 		for ci, (clade_name, clade_gt) in enumerate(clades.iteritems()):
