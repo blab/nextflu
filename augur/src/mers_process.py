@@ -56,7 +56,7 @@ class mers_filter(virus_filter):
 		}
 	def filter(self):
 		for v in self.viruses:
-			v['seq'] = v['seq'].replace('-', '')[:5000]
+			v['seq'] = v['seq'].replace('-', '')
 			if 'XX' in v['date']:
 				print "fixing:", v['strain'], v['date']
 				v['date'] = v['date'].replace('XX','15')
