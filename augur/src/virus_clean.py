@@ -49,7 +49,7 @@ class virus_clean(object):
 			try:
 				og.num_date = numerical_date(og.date)
 			except:
-				print "cannot parse date"
+				print "cannot parse date", og.date
 				og.num_date="undefined";
 		for ii, v in enumerate(self.viruses):
 			if hasattr(v, 'date'):

@@ -8,7 +8,8 @@
 			  ["KSA", "Saudi Arabia"],
 			  ["GBR", "United Kingdom"],
 			  ["QAT", "Qatar"],
-			  ["OMN", "Oman"]]
+			  ["OMN", "Oman"],
+			  ["China", "China"]]
 },
 {	
 	"label":"Region", 

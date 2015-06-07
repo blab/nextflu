@@ -40,7 +40,7 @@ virus_config.update({
 
 
 class mers_filter(virus_filter):
-	def __init__(self,min_length = 3000, **kwargs):
+	def __init__(self,min_length = 5000, **kwargs):
 		'''
 		parameters
 		min_length  -- minimal length for a sequence to be acceptable

@@ -21,5 +21,6 @@ var codeToCountry = {
 "JOR":"Jordan",
 "GBR":"United Kingdom",
 "QAT":"Qatar",
-"OMN":"Oman"
+"OMN":"Oman",
+"China":"China"
 }

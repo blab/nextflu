@@ -19,6 +19,7 @@ var countries = [
 ["JOR",  		"#fb9a99"],
 ["EGY",  	    "#e31a1c"],
 ["GBR",         "#fdbf6f"],
+["China",      "#66c2a5"],
 ];
 
 
