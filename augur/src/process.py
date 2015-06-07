@@ -243,9 +243,9 @@ class process(virus_frequencies):
 
 		if not os.path.isdir(htmlpath): os.makedirs(htmlpath)
 		if "layout" in self.kwargs:
-			tmp_layout=self.kwargs["layout"]+'.html'
+			tmp_layout=self.kwargs["layout"]
 		else:
-			tmp_layout="auspice.html"
+			tmp_layout="auspice"
 		with open(htmlpath+'index.html','w') as out:
 			out.write("---\ntitle: nextflu / "+self.virus_type+" / "+self.resolution_prefix.rstrip('_')
 					  +"\nlayout: "+tmp_layout
