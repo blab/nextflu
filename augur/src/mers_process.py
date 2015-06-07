@@ -22,7 +22,7 @@ virus_config.update({
 	'outgroup':'Camel_Egypt_NRCE_KHU270',
 	'aggregate_regions':[('global', None)],
 	'force_include_all':False,
-	'n_iqd':5,
+	'n_iqd':7,
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
 	'cds':None, # no coding region
 	# define relevant clades in canonical HA1 numbering (+1)
