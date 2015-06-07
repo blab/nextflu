@@ -296,7 +296,7 @@ class process(virus_frequencies):
 		from Bio.Align import MultipleSeqAlignment
 		from Bio.Seq import Seq
 		from Bio.Align import MultipleSeqAlignment
-		outgroup = str(self.outgroup.seq).replace('-', '')
+		outgroup = str(self.outgroup['seq']).replace('-', '')
 		aln = MultipleSeqAlignment([Seq(outgroup)])
 		for v in self.viruses:
 			print 'Aligning ',v['strain'],' to outgroup'
