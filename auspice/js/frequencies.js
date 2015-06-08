@@ -289,7 +289,20 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 	    tooltip: {
 	        format: {
 	            title: function (d) { 
-	            	return 'Position ' + d + frequencies["entropy"][d-1][2].join(","); },
+	                {
+						if (frequencies["entropy"][d-1][2].length>1){
+							var tmp = [];
+							for (var ii=0;ii<frequencies["entropy"][d-1][2].length;ii+=1){
+								tmp.push(["global",d+frequencies["entropy"][d-1][2][ii]]);
+							}
+							console.log("tooltip");
+							colorBy = "genotype";
+							colorByGenotypePosition([d-1]);
+							d3.select("#gt-color").property("value", d);
+						}
+					}
+	            	return 'Position ' + d + frequencies["entropy"][d-1][2].join(","); 
+	            },
 	            value: function (value, ratio, id) {
 	                return id==''?"Variability: "+value:"start/stop";
 	            }
