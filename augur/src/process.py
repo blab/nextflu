@@ -309,6 +309,34 @@ class process(virus_frequencies):
 			self.sequence_lookup[v['strain']].__dict__.update({k:val for k,val in v.iteritems() if k!='seq'})
 		self.viruses = aln
 
+	def align_piecemeal(self):
+		from Bio.Align import MultipleSeqAlignment
+		outgroup = str(self.outgroup['seq']).replace('-', '')
+		aln = MultipleSeqAlignment([SeqRecord(Seq(outgroup), id=self.outgroup['strain'])])
+		self.make_run_dir()
+		os.chdir(self.run_dir)
+		for vi, v in enumerate(self.viruses):
+			print 'Aligning ',v['strain'],' to outgroup', vi+1, ' out of ',len(self.viruses)
+			SeqIO.write([SeqRecord(Seq(outgroup), id=self.outgroup['strain']), 
+		             SeqRecord(Seq(v['seq']), id=v['strain'])], "temp_in.fasta", "fasta")
+			os.system("mafft --auto temp_in.fasta > temp_out.fasta")
+			tmp_aln = AlignIO.read('temp_out.fasta', 'fasta')
+			if tmp_aln[0].id==self.outgroup['strain']:
+				A = [np.array(tmp_aln[0]), np.array(tmp_aln[1])]
+			elif tmp_aln[1].id==self.outgroup['strain']:
+				A = [np.array(tmp_aln[1]), np.array(tmp_aln[0])]
+
+			tmp_seq = ''.join(A[1][A[0]!='-'])
+			aln.append(SeqRecord(Seq(tmp_seq), id=v['strain']))
+		self.sequence_lookup = {seq.id:seq for seq in aln}
+		# add attributes to alignment
+		for v in self.viruses:
+			self.sequence_lookup[v['strain']].__dict__.update({k:val for k,val in v.iteritems() if k!='seq'})
+		self.viruses = aln
+		os.chdir('..')
+		self.remove_run_dir()
+
+
 	def infer_tree(self, raxml_time_limit):
 		'''
 		builds a tree from the alignment using fasttree and RAxML. raxml runs for 

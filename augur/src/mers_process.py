@@ -112,7 +112,7 @@ class mers_process(process, mers_filter, mers_clean, mers_refine):
 			except:
 				pass
 		if 'align' in steps:
-			self.align_seqan()   	# -> self.viruses is an alignment object
+			self.align_piecemeal()   	# -> self.viruses is an alignment object
 			self.dump()
 		if 'clean' in steps:
 			print "--- Clean at " + time.strftime("%H:%M:%S") + " ---"
