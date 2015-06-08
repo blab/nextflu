@@ -12,14 +12,14 @@ var regions = [
 ];
 
 var countries = [
-["ARE",  		"#a6cee3"],
-["KSA",  	    "#1f78b4"],
-["QAT",         "#b2df8a"],
-["OMN",  		"#33a02c"],
-["JOR",  		"#fb9a99"],
-["EGY",  	    "#e31a1c"],
-["GBR",         "#fdbf6f"],
-["China",      "#66c2a5"],
+["ARE",  		"#e41a1c"],
+["KSA",  	    "#377eb8"],
+["QAT",         "#4daf4a"],
+["OMN",  		"#984ea3"],
+["JOR",  		"#ff7f00"],
+["EGY",  	    "#ffff33"],
+["GBR",         "#a65628"],
+["China",       "#f781bf"],
 ];
 
 
