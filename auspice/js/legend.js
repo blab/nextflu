@@ -40,6 +40,12 @@ function makeLegend(){
 		}
 });
  console.log(colorScale.domain());
+ var dd;
+ if (colorBy=='date'){
+  dd =  colorScale.domain()[1]-colorScale.domain()[0];
+ }else{
+  dd=0;
+ }
  var stack = Math.ceil(colorScale.domain().filter(function(d){return typeof d != "undefined";}).length/2);
   var tmp_leg = legend.selectAll(".legend")
   .data(colorScale.domain().filter(function(d){return typeof d != "undefined";}))
@@ -63,7 +69,30 @@ function makeLegend(){
   .style('stroke', function (d) {
    var col = colorScale(d);
    return d3.rgb(col).toString();
- });
+ })
+  .on('mouseover', function(leg){
+    treeplot.selectAll(".tip")
+            .filter(function (d){
+              if (colorBy=='date') {return d.coloring<leg && d.coloring>=leg-dd;}
+              else if (colorBy=='host' || colorBy=="country") {return d.coloring==leg;}
+            })
+                .attr("r", function(d){return tipRadius*1.7;})
+                .style("fill", function (t) {
+                  return d3.rgb(tipFillColor(t)).brighter();
+                });
+  }) 
+  .on('mouseout', function(leg){
+    treeplot.selectAll(".tip")
+            .filter(function (d){
+              if (colorBy=='date') {return d.coloring<leg && d.coloring>=leg-dd;}
+              else if (colorBy=='host' || colorBy=="country") {return d.coloring==leg;}
+            })
+                .attr("r", function(d){return tipRadius;})
+                .style("fill", function (t) {
+                  return d3.rgb(tipFillColor(t));
+                });
+    });
+
 
   tmp_leg.append('text')
   .attr('x', legendRectSize + legendSpacing + 5)
@@ -75,7 +104,7 @@ function makeLegend(){
     }else{
        return d.toString().replace(/([a-z])([A-Z])/g, '$1 $2').replace(/,/g, ', ');
     }
-    });		
+    });
   return tmp_leg;
 }
 

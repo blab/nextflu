@@ -15,9 +15,9 @@ var countries = [
 ["ARE",  		"#e41a1c"],
 ["KSA",  	    "#377eb8"],
 ["QAT",         "#4daf4a"],
-["OMN",  		"#984ea3"],
-["JOR",  		"#ff7f00"],
-["EGY",  	    "#ffff33"],
+//["OMN",  		"#984ea3"],
+["JOR",  		"#ffff33"],
+["EGY",  	    "#ff7f00"],
 ["GBR",         "#a65628"],
 ["China",       "#f781bf"],
 ];
