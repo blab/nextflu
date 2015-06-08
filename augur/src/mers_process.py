@@ -22,7 +22,7 @@ virus_config.update({
 	'outgroup':'Camel_Egypt_NRCE_KHU270',
 	'aggregate_regions':[('global', None)],
 	'force_include_all':False,
-	'n_iqd':10,
+	'n_iqd':20,
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
 	'cds':None, # no coding region
 	# define relevant clades in canonical HA1 numbering (+1)
@@ -84,7 +84,22 @@ class mers_clean(virus_clean):
 
 class mers_refine(tree_refine):
 	def refine(self):
-		self.refine_generic()
+		self.node_lookup = {node.taxon.label:node for node in self.tree.leaf_iter()}
+		self.ladderize()
+		self.collapse()
+		self.add_nuc_mutations()
+		self.add_node_attributes()
+		self.reduce()
+		self.layout()
+		self.define_trunk()
+
+		# make an amino acid aligment
+		from Bio.Align import MultipleSeqAlignment
+		from Bio.Seq import Seq
+		from Bio.SeqRecord import SeqRecord
+		tmp_nucseqs = [SeqRecord(Seq(node.seq), id=node.strain, annotations = {'num_date':node.num_date, 'region':node.region}) for node in self.tree.leaf_iter()]
+		tmp_nucseqs.sort(key = lambda x:x.annotations['num_date'])
+		self.nuc_aln = MultipleSeqAlignment(tmp_nucseqs)
 
 
 class mers_process(process, mers_filter, mers_clean, mers_refine):
