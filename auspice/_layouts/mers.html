@@ -32,6 +32,7 @@ layout: default
 									<option value={{color_option[0] }}>{{ color_option[1] }}</option>
 									{% endif %}
 								{% endfor %}														
+								<option value="--">--</option>
 								</select>
 							</div>
 					</div>
@@ -85,27 +86,22 @@ layout: default
 <div class="row">
 	<div class="col-md-3">
 		<div class="io-container title">
-			Frequencies
-		</div>
+			Variable positions
+		</div>	
 		<div class="spacer"></div>
 		<div class="row">			
 			<div class="col-xs-6 io-container">	
 				<form class="form-horizontal form-small">
 					<div class="form-group">
 						<div class="col-xs-12">
-							<input id="gtspec" type="search" class="form-control" value="{{ page.freqdefault }}">
+							<input id="gtspec" type="search" class="form-control" value="{{ page.freqdefault }}" style="display: none;">
 						</div>
 					</div>
 				</form>	
 			</div>
-			<div class="col-xs-6 io-container">					
-				<div>
-					<button id="plotfreq" type=button class="btn btn-default">plot frequencies</button>
-				</div>
-			</div>
 		</div>
 		<div class="spacer"></div>
-		Input mutations as position+nucleotide, i.e. <span class="highlight">8926C</span> to plot its frequency through time.
+		Mouse over variable positions to color by nucleotide at this site.
 		<div class="spacer"></div>
 	</div>
 	<div class="col-md-9">
@@ -141,9 +137,6 @@ layout: default
 		<p> Use the <a href="/help/#genotype"><b>input box</b></a> to specify positions to color viruses by the nucleotide at a specific position. Equivalently, click on a bar in variability graph.
 		<p> <a href="/help/#mouse_tip"><b>Mouse over</b></a> a tip to show virus name, location and features.
 		<p> <a href="/help/#mouse_branch"><b>Mouse over</b></a> a branch to graph the frequency of the correponding clade trajectory below or <b>click</b> on a branch to zoom into its descendent clade.
-		<h4>Frequencies</h4>
-		Enter a mutation or genotype above (e.g. <span class="highlight">8926C</span>) and click 
-		<b>plot frequencies</b> to show estimated frequency of this mutation through time. Positions with very little variation are omitted. Beware that frequencies of rare mutations are noisy. <a href="/help/#frequencies">Click here for help with the interface.</a>		
 	</div>	
 </div>
 

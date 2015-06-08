@@ -84,6 +84,10 @@ function stateAtPosition(clade, pos){
 function colorByTrait() {
 	
 	colorBy = document.getElementById("coloring").value;
+	if (colorBy='--'){
+		colorBy='host';
+		document.getElementById("coloring").value = 'host';
+	}
 	console.log(colorBy);
 
 	if (colorBy == "ep") {
@@ -215,6 +219,7 @@ function colorByGenotypePosition (positions) {
 		removeLegend();
 	}
 	tree_legend = makeLegend();
+	document.getElementById("coloring").value = '--';
 
 	if ((positions.length==1)&&(filtered_gts.length>1)){
 		var tmp_gts=[];
