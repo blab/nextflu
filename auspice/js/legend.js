@@ -104,7 +104,30 @@ function makeLegend(){
     }else{
        return d.toString().replace(/([a-z])([A-Z])/g, '$1 $2').replace(/,/g, ', ');
     }
+    })
+  .on('mouseover', function(leg){
+    treeplot.selectAll(".tip")
+            .filter(function (d){
+              if (colorBy=='date') {return d.coloring<leg && d.coloring>=leg-dd;}
+              else if (colorBy=='host' || colorBy=="country") {return d.coloring==leg;}
+            })
+                .attr("r", function(d){return tipRadius*1.7;})
+                .style("fill", function (t) {
+                  return d3.rgb(tipFillColor(t)).brighter();
+                });
+  }) 
+  .on('mouseout', function(leg){
+    treeplot.selectAll(".tip")
+            .filter(function (d){
+              if (colorBy=='date') {return d.coloring<leg && d.coloring>=leg-dd;}
+              else if (colorBy=='host' || colorBy=="country") {return d.coloring==leg;}
+            })
+                .attr("r", function(d){return tipRadius;})
+                .style("fill", function (t) {
+                  return d3.rgb(tipFillColor(t));
+                });
     });
+  
   return tmp_leg;
 }
 
