@@ -317,17 +317,19 @@ class process(virus_frequencies):
 		os.chdir(self.run_dir)
 		for vi, v in enumerate(self.viruses):
 			print 'Aligning ',v['strain'],' to outgroup', vi+1, ' out of ',len(self.viruses)
-			SeqIO.write([SeqRecord(Seq(outgroup), id=self.outgroup['strain']), 
-		             SeqRecord(Seq(v['seq']), id=v['strain'])], "temp_in.fasta", "fasta")
-			os.system("mafft --auto temp_in.fasta > temp_out.fasta")
-			tmp_aln = AlignIO.read('temp_out.fasta', 'fasta')
-			if tmp_aln[0].id==self.outgroup['strain']:
-				A = [np.array(tmp_aln[0]), np.array(tmp_aln[1])]
-			elif tmp_aln[1].id==self.outgroup['strain']:
-				A = [np.array(tmp_aln[1]), np.array(tmp_aln[0])]
+			if v['strain']!=self.outgroup['strain']:
+				SeqIO.write([SeqRecord(Seq(outgroup), id=self.outgroup['strain']), 
+			             SeqRecord(Seq(v['seq']), id=v['strain'])], "temp_in.fasta", "fasta")
+				os.system("mafft --auto temp_in.fasta > temp_out.fasta")
+				tmp_aln = AlignIO.read('temp_out.fasta', 'fasta')
+				print tmp_aln[0].id, tmp_aln[1].id
+				if tmp_aln[0].id==self.outgroup['strain']:
+					A = [np.array(tmp_aln[0]), np.array(tmp_aln[1])]
+				elif tmp_aln[1].id==self.outgroup['strain']:
+					A = [np.array(tmp_aln[1]), np.array(tmp_aln[0])]
 
-			tmp_seq = ''.join(A[1][A[0]!='-'])
-			aln.append(SeqRecord(Seq(tmp_seq), id=v['strain']))
+				tmp_seq = ''.join(A[1][A[0]!='-'])
+				aln.append(SeqRecord(Seq(tmp_seq), id=v['strain']))
 		self.sequence_lookup = {seq.id:seq for seq in aln}
 		# add attributes to alignment
 		for v in self.viruses:
