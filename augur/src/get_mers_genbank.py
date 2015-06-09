@@ -22,9 +22,9 @@ def fix_country(x):
 
 def fix_host(x):
     if "homo" in x.lower():
-        return "human"
+        return "Human"
     elif "camel" in x.lower():
-        return "camel"
+        return "Camel"
     else:
         return x
 
