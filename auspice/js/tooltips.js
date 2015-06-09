@@ -21,7 +21,7 @@ var virusTooltip = d3.tip()
 
 			string += "First chosen " + vaccine_date.toLocaleString("en-us", { month: "short" }) + " " + vaccine_date.getFullYear() + "<br>";
 			string += "<div class=\"smallspacer\"></div>";
-		}			
+		}
 		
 		if (typeof d.region != "undefined") {
 			string += d.region.replace(/([A-Z])/g, '$1');
@@ -50,6 +50,7 @@ var virusTooltip = d3.tip()
 				
 		// following may or may not be present
 		string += "<div class=\"smallnote\">";
+		string+="Click to open genbank record";
 		if (typeof d.ep != "undefined") {
 			string += "Epitope distance: " + d.ep + "<br>";
 		}
@@ -73,13 +74,18 @@ var linkTooltip = d3.tip()
 	.offset([0, 12])
 	.html(function(d) {
 		string = ""
+		string+="Click to zoom into clade"
 		if (typeof d.frequency != "undefined") {
-			string += "Frequency: " + (100 * d.frequency).toFixed(1) + "%"
+			string += "<br>Frequency: " + (100 * d.frequency).toFixed(1) + "%"
 		}
 		if ((typeof d.aa_muts !="undefined")&&(d.aa_muts.length)){
 			string+="<br>Mutations: "+d.aa_muts.replace(/,/g, ', ');
 		}else if ((typeof d.nuc_muts !="undefined")&&(d.nuc_muts.length)){
-			string+="<br>Mutations: "+d.nuc_muts.replace(/,/g, ', ');
+			var tmp_muts = d.nuc_muts.split(',');
+			var nmuts = tmp_muts.length;
+			tmp_muts = tmp_muts.slice(0,Math.min(10, nmuts))
+			string+="<br>Mutations: "+tmp_muts.join(', ');
+			if (nmuts>10) {string+=' + '+ (nmuts-10) + ' more';}
 		}
 		return string;
 	});
