@@ -144,9 +144,16 @@ class process(virus_frequencies):
 		for node in self.tree:
 			if hasattr(node, "clade") and hasattr(node, "seq"):
 				if export_entropy == 'nuc':
-					elems[node.clade] = node.seq
+					elems[node.clade] = {pos:state for pos, (state, ancstate) in 
+								enumerate(izip(node.seq, self.tree.seed_node.seq)) if state!=ancstate}
 				else:
-					elems[node.clade] = node.aa_seq
+					elems[node.clade] = {pos:state for pos, (state, ancstate) in 
+								enumerate(izip(node.aa_seq, self.tree.seed_node.aa_seq)) if state!=ancstate}
+
+		if export_entropy == 'nuc':
+			elems['root'] = self.tree.seed_node.seq
+		else:
+			elems['root'] = self.tree.seed_node.aa_seq
 
 		write_json(elems, self.auspice_sequences_fname, indent=None)
 
@@ -255,7 +262,7 @@ class process(virus_frequencies):
 						out.write('var '+vname+' = "'+val+'";\n')
 					else:						
 						out.write('var '+vname+' = '+str(val)+';\n')
-			out.write('{%include '+self.virus_type+'_vaccines.js %}\n')
+			out.write('{%include '+self.virus_type+'_meta.js %}\n')
 			out.write('</script>\n\n')
 
 	def align(self):
