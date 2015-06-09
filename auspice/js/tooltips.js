@@ -35,8 +35,8 @@ var virusTooltip = d3.tip()
 		if (typeof d.host != "undefined") {
 			string += "<br>Host: " + d.host;
 		}
-		if ((typeof d.db != "undefined") && (typeof d.accession != "undefined") && (d.db == "GISAID")) {
-			string += "<br>GISAID ID: EPI" + d.accession;
+		if ((typeof d.accession != "undefined")) {
+			string += "<br>Accession: " + d.accession;
 		}
 		if (typeof d.lab != "undefined") {
 			if (d.lab != "") {

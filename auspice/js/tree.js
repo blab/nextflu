@@ -289,8 +289,8 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			virusTooltip.show(d, this);
 		})
 		.on('click', function(d) {
-			if ((typeof d.db != "undefined") && (d.db == "GISAID") && (typeof d.accession != "undefined")) {
-				var url = "http://gisaid.org/EPI/"+d.accession;
+			if (typeof d.accession != "undefined") {
+				var url = "http://www.ncbi.nlm.nih.gov/nuccore/"+d.accession;
 				console.log("opening url "+url);
 				var win = window.open(url, '_blank');
   				win.focus();
