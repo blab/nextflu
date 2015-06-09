@@ -109,13 +109,13 @@ layout: default
 <div class="row">
 	<div class="col-md-4">
 		<div class="io-container title">
-			Frequencies
+			Variable position
 		</div>
 		<div class="spacer"></div>
 		<div class="row">			
 			<div class="col-xs-6 io-container">	
 				<form class="form-horizontal form-small">
-					<div class="form-group">
+					<div class="form-group" style="display: none;">
 						<div class="col-xs-12">
 							<input id="gtspec" type="search" class="form-control" value="{{ page.freqdefault }}">
 						</div>
@@ -124,16 +124,16 @@ layout: default
 			</div>
 			<div class="col-xs-6 io-container">					
 				<div>
-					<button id="plotfreq" type=button class="btn btn-default">plot frequencies</button>
+					<button id="plotfreq" type=button  style="display: none;" class="btn btn-default">plot frequencies</button>
 				</div>
 			</div>
 		</div>
 		<div class="spacer"></div>
-		Input mutations as position+nucleotide, i.e. <span class="highlight">8926C</span> to plot its frequency through time.
+		Click on a variable site to color the tree by the nucleotide at this position.
 		<div class="spacer"></div>
 	</div>
 	<div class="col-md-8">
-		<div class="freqplot-container">		
+		<div class="freqplot-container" style="display: none;">		
 			<div id="gtchart"></div>
 		</div>
 		<div class="entropy-container">		
@@ -161,23 +161,15 @@ layout: default
 		<p> Use the <a href="/help/#genotype"><b>input box</b></a> to specify positions to color viruses by genotype. Nucleotide positions must be 
 		separated by a comma (e.g. <span class="highlight">159,225</span>).
 		<p> <a href="/help/#mouse_tip"><b>Mouse over</b></a> a tip to show virus name, location and features.
-		<p> <a href="/help/#mouse_branch"><b>Mouse over</b></a> a branch to graph the frequency of the correponding clade trajectory below or <b>click</b> on a branch to zoom into its descendent clade.
-		<h4>Frequencies</h4>
-		Enter a mutation or genotype above (e.g. <span class="highlight">8926C</span>) and click 
-		<b>plot frequencies</b> to show estimated frequency of this mutation through time. Positions with very little variation are omitted. Beware 
-		that frequencies of rare mutations are noisy. <a href="/help/#frequencies">Click here for help with the interface.</a>		
-		
+		<p> <a href="/help/#mouse_branch"><b>Mouse over</b></a> a branch to display the mutations associated with the branch or <b>click</b> on a branch to zoom into its descendent clade.
+
 		<h4>Tree annotation</h4>
 		<p>The <b>local branching index</b> is the exponentially weighted tree length surrounding 
 		a node, which is associated with <a href="http://elifesciences.org/content/3/e03568"> 
 		rapid branching and expansion of clades</a>. A more detailed explanation is available 
 		<a href="https://neherlab.wordpress.com/2014/11/11/now-out-in-elife-predicting-evolution/">here</a>. 
 		Retrospective analysis has shown that LBI correlates with clade growth. 
-		</p><p>
-		<b>Frequencies</b> are estimated as maximum likelihood trajectories that penalize rapid changes in 
-		frequency and slope. The frequencies of large clades or abundant genotypes have sufficiently 
-		many observations to by robust, while rare mutations or combinations thereof can't be reliably
-		estimated.
+		</p>
 	</div>
 </div>
 
