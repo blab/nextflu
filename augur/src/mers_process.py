@@ -28,8 +28,8 @@ virus_config.update({
 	# define relevant clades in canonical HA1 numbering (+1)
 	# numbering starting at methionine including the signal peptide
 	'clade_designations': {},
-	'min_mutation_frequency':0.1,
-	'min_genotype_frequency':0.1,
+	'min_mutation_frequency':0.49,
+	'min_genotype_frequency':0.49,
 	'auspice_prefix':'mers_',
 	'layout':'mers',
 	'html_vars': {'coloring': 'country, date, host, lbi, dfreq',
@@ -101,6 +101,28 @@ class mers_refine(tree_refine):
 		tmp_nucseqs.sort(key = lambda x:x.annotations['num_date'])
 		self.nuc_aln = MultipleSeqAlignment(tmp_nucseqs)
 
+def hamming_matrix(aln):
+	dm = np.zeros((aln.shape[0], aln.shape[0]), dtype = float)
+	for si, seq in enumerate(aln):
+		dm[si] = 1.0 - (seq == aln).mean(axis=1)
+	return dm
+
+def plot_distance_matrices(distance_matrices):
+	import matplotlib.pyplot as plt
+	fig, axs = plt.subplots(1,len(distance_matrices), sharex=True, sharey=True, figsize = (25,4))
+	axs[0].set_ylabel('genomes')
+	step = distance_matrices[2][0]-distance_matrices[1][0]
+	for ax, (pos, im) in izip(axs.flatten(), distance_matrices):
+		ax.imshow(np.log10(im+1e-3), interpolation='nearest', vmin = -3, vmax = -2)
+		if pos=='complete':
+			ax.set_title("complete")
+		else:
+			ax.set_title(str(pos) +'--'+str(pos+step))
+		ax.set_axis_off()
+		ax.set_xlim([0, im.shape[0]])
+		ax.set_ylim([0, im.shape[1]])
+		axs[0].set_xlabel('genomes')
+	plt.tight_layout()
 
 class mers_process(process, mers_filter, mers_clean, mers_refine):
 	"""docstring for mers, """
@@ -114,6 +136,28 @@ class mers_process(process, mers_filter, mers_clean, mers_refine):
 		mers_clean.__init__(self,**kwargs)
 		mers_refine.__init__(self,**kwargs)
 		self.verbose = verbose
+
+	def make_matrices(self):
+		from Bio.SeqRecord import SeqRecord
+		from Bio.Seq import Seq
+		from Bio.Align import MultipleSeqAlignment
+
+		tree_ordered_aln = MultipleSeqAlignment([])
+		for n in self.tree.leaf_iter():
+			tree_ordered_aln.append(SeqRecord(Seq(n.seq), id=n.strain))
+
+		start=1000
+		stop = 29000
+		step = 4000
+		windows = range(start,stop, step)
+		distance_matrices = []
+		aln_array = np.array(tree_ordered_aln[:,start:stop])
+		distance_matrices.append(['complete', hamming_matrix(aln_array)])
+		for pos in windows:
+			print "Making matrix for", pos, '--', pos+step
+			aln_array = np.array(tree_ordered_aln[:,pos:(pos+step)])
+			distance_matrices.append([pos, hamming_matrix(aln_array)])
+		return distance_matrices
 
 	def run(self, steps, viruses_per_month=50, raxml_time_limit = 1.0):
 		if 'filter' in steps:

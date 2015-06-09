@@ -59,13 +59,8 @@ with open('data/genbank_mers_seqs.fasta', 'w') as mersout:
 
             fasta_fields.append(genbank_id)
 
-            if 'collection_date' in src:
-                fasta_fields.append(get_date(src['collection_date'][0]))
-            else:
-                fasta_fields.append('')
-
-            if 'host' in src:
-                fasta_fields.append(fix_host(src['host'][0]))
+            if 'location' in src:
+                fasta_fields.append(src['location'][0])
             else:
                 fasta_fields.append('')
 
@@ -74,9 +69,13 @@ with open('data/genbank_mers_seqs.fasta', 'w') as mersout:
             else:
                 fasta_fields.append('')
 
+            if 'collection_date' in src:
+                fasta_fields.append(get_date(src['collection_date'][0]))
+            else:
+                fasta_fields.append('')
 
-            if 'location' in src:
-                fasta_fields.append(src['location'][0])
+            if 'host' in src:
+                fasta_fields.append(fix_host(src['host'][0]))
             else:
                 fasta_fields.append('')
 
