@@ -3,8 +3,8 @@ from StringIO import StringIO
 from datetime import datetime
 
 Entrez.email = "richard.neher@tuebingen.mpg.de"     # Always tell NCBI who you are
-handle = Entrez.esearch(db="nucleotide", term='"Middle East respiratory syndrome coronavirus"[Organism] OR MERS-CoV[All Fields]', retmax=1000)
-record = Entrez.read(handle)
+#handle = Entrez.esearch(db="nucleotide", term='"Middle East respiratory syndrome coronavirus"[Organism] OR MERS-CoV[All Fields]', retmax=1000)
+#record = Entrez.read(handle)
 
 translation = {
     "Homo sapiens":"human",
@@ -41,9 +41,18 @@ def get_date(x):
         except:
             return x
 
+accessions = [
+"KT026453",
+"KT026454",
+"KT026455",
+"KT026456",
+"KR011263",
+"KR011264",
+"KR011265",
+"KR011266",]
 
 with open('data/genbank_mers_seqs.fasta', 'w') as mersout:
-    for genbank_id in ['KT006149']: #record["IdList"]+['KR011263']+['KJ477102']:
+    for genbank_id in accessions[:3]: 
         handle = Entrez.efetch(db="nucleotide", id=genbank_id, rettype="gb")
         seq= SeqIO.read(StringIO(handle.read()), format = 'genbank')
         if len(seq)>5000:
@@ -62,12 +71,12 @@ with open('data/genbank_mers_seqs.fasta', 'w') as mersout:
             if 'location' in src:
                 fasta_fields.append(src['location'][0])
             else:
-                fasta_fields.append('')
+                fasta_fields.append('Riyadh')
 
             if 'country' in src:
                 fasta_fields.append(fix_country(src['country'][0]))
             else:
-                fasta_fields.append('')
+                fasta_fields.append('KSA')
 
             if 'collection_date' in src:
                 fasta_fields.append(get_date(src['collection_date'][0]))
@@ -82,10 +91,11 @@ with open('data/genbank_mers_seqs.fasta', 'w') as mersout:
             if 'lab' in src:
                 fasta_fields.append(src['lab'][0])
             else:
-                fasta_fields.append('')
+                fasta_fields.append('CDC')
 
             fasta_header = '|'.join(fasta_fields)  
             print fasta_header
             seq.id = fasta_header
+            seq.description = ''
             SeqIO.write(seq, mersout, format='fasta')
 

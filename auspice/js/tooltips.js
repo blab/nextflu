@@ -50,7 +50,7 @@ var virusTooltip = d3.tip()
 				
 		// following may or may not be present
 		string += "<div class=\"smallnote\">";
-		string+="Click to open genbank record";
+		string+="Click to open genbank record" + "<br>";
 		if (typeof d.ep != "undefined") {
 			string += "Epitope distance: " + d.ep + "<br>";
 		}
