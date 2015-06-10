@@ -479,7 +479,6 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.attr("y", function(d) { return d.y; });
 			
 		treeplot.selectAll(".serum").data(sera)
-			.transition().duration(speed)
 			.attr("x", function(d) {return d.x})
 			.attr("y", function(d) {return d.y})
 

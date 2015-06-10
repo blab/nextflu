@@ -6,5 +6,6 @@
  ["date","sampling date"],
  ["dfreq","frequency change"],
  ["host","host"],
+ ["cHI","antigenic advance"],
  ["subtype","subtype"],
 ]
