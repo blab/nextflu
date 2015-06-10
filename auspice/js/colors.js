@@ -1,12 +1,20 @@
-var colors = [[], ["#8EBC66"], ["#5097BA", "#DF4327"], ["#5097BA",  "#8EBC66",   "#DF4327"],
-				  ["#5097BA",  "#8EBC66",  "#E59637", "#DF4327"],
-				  ["#5097BA", "#60AA9E",  "#8EBC66",  "#E59637", "#DF4327"],
-			      ["#5097BA", "#60AA9E",  "#8EBC66",  "#C4B945", "#E59637", "#DF4327"],
-				  ["#5097BA", "#60AA9E", "#75B681",  "#AABD52",  "#D9AD3D", "#E59637","#DF4327"],
-				  ["#5097BA", "#60AA9E", "#75B681",  "#AABD52", "#C4B945", "#D9AD3D",  "#E67030", "#DF4327"],
-				  ["#5097BA", "#60AA9E", "#75B681", "#8EBC66", "#AABD52", "#C4B945", "#D9AD3D",  "#E67030", "#DF4327"],
-				  ["#5097BA", "#60AA9E", "#75B681", "#8EBC66", "#AABD52", "#C4B945", "#D9AD3D", "#E59637", "#E67030", "#DF4327"],
-				];
+// 2 color	["#5097BA", "#DF4327"]
+
+var colors = [
+	[], 
+	["#8EBC66"], 
+	["#5EA9A1", "#E0A23A"],
+	["#5CA7A4", "#A4BE56", "#E39B39"],
+	["#5AA5A7", "#8ABB6A", "#C3BA46", "#E69237"],
+	["#59A3AA", "#7CB879", "#AABD52", "#D4B13F", "#E68634"],
+	["#57A1AD", "#73B583", "#98BD5E", "#C0BA47", "#DEA73C", "#E67B32"],
+	["#559EB1", "#6DB28B", "#8CBB68", "#AFBD4F", "#CFB541", "#E39B39", "#E56E30"],
+	["#539CB4", "#68AF92", "#83BA71", "#A2BE57", "#C1BA47", "#DAAC3D", "#E68E36", "#E35F2D"],
+	["#519AB7", "#64AC99", "#7BB879", "#97BD5F", "#B5BD4C", "#CFB541", "#E0A13A", "#E67F33", "#E1512A"],
+	["#5097BA", "#60AA9E", "#75B681", "#8EBC66", "#AABD52", "#C4B945", "#D9AD3D", "#E59637", "#E67030", "#DF4327"],
+	["#4E95BD", "#5DA8A3", "#70B487", "#87BB6D", "#A0BE58", "#BABC4A", "#D0B440", "#E0A23A", "#E68634", "#E35F2D", "#DD3425"],
+	["#4D92BF", "#5AA5A8", "#6BB18D", "#80B974", "#98BD5E", "#B1BD4E", "#C8B944", "#DAAC3D", "#E59738", "#E67732", "#E14F2A", "#DB2522"]
+];
 var regionColors = ["#5097BA", "#60AA9E", "#75B681", "#8EBC66", "#AABD52", "#C4B945", "#D9AD3D", "#E59637", "#E67030", "#DF4327"]
 var genotypeColors = ["#60AA9E", "#D9AD3D", "#5097BA", "#E67030", "#8EBC66", "#E59637", "#AABD52", "#DF4327", "#C4B945", "#75B681"]
 
@@ -77,6 +85,13 @@ function adjust_coloring_by_date() {
 	}	
 }
 
+function stateAtPosition(clade, pos){
+	if (typeof cladeToSeq[clade][pos] == "undefined"){
+		return cladeToSeq["root"][pos];
+	}else{
+		return cladeToSeq[clade][pos];		
+	}
+}
 
 function colorByTrait() {
 	
@@ -180,8 +195,7 @@ function colorByGenotypePosition (positions) {
 	var gts = nodes.map(function (d) {
 		var tmp = [];
 		for (var i=0; i<positions.length; i++){
-			var aa = cladeToSeq[d.clade];
-			tmp[tmp.length] = (positions[i]+1)+aa[positions[i]];
+			tmp[tmp.length] = (positions[i]+1)+stateAtPosition(d.clade, positions[i]);
 		}
 		d.coloring = tmp.join(" / "); 
 		return d.coloring;});

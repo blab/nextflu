@@ -29,9 +29,10 @@ class tree_refine(object):
 		self.ladderize()
 		self.collapse()
 		self.remove_outgroup()
-		self.translate_all()
 		self.add_nuc_mutations()
-		self.add_aa_mutations()
+		if self.cds is not None:
+			self.translate_all()
+			self.add_aa_mutations()
 		self.add_node_attributes()
 		self.reduce()
 		self.layout()
@@ -41,9 +42,13 @@ class tree_refine(object):
 		from Bio.Align import MultipleSeqAlignment
 		from Bio.Seq import Seq
 		from Bio.SeqRecord import SeqRecord
-		tmp_aaseqs = [SeqRecord(Seq(node.aa_seq), id=node.strain, annotations = {'num_date':node.num_date, 'region':node.region}) for node in self.tree.leaf_iter()]
-		tmp_aaseqs.sort(key = lambda x:x.annotations['num_date'])
-		self.aa_aln = MultipleSeqAlignment(tmp_aaseqs)
+		if self.cds is not None:
+			tmp_aaseqs = [SeqRecord(Seq(node.aa_seq), id=node.strain, annotations = {'num_date':node.num_date, 'region':node.region}) for node in self.tree.leaf_iter()]
+			tmp_aaseqs.sort(key = lambda x:x.annotations['num_date'])
+			self.aa_aln = MultipleSeqAlignment(tmp_aaseqs)
+		tmp_nucseqs = [SeqRecord(Seq(node.seq), id=node.strain, annotations = {'num_date':node.num_date, 'region':node.region}) for node in self.tree.leaf_iter()]
+		tmp_nucseqs.sort(key = lambda x:x.annotations['num_date'])
+		self.nuc_aln = MultipleSeqAlignment(tmp_nucseqs)
 
 
 	def remove_outgroup(self):
