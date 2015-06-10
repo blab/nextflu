@@ -1,15 +1,4 @@
 [
-{
-	"label":"Country",
-	"id":"country",
-	"fields":[["all", "all"],
-			  ["ARE", "U. Arab Emirates"],
-			  ["EGY", "Egypt"],
-			  ["KSA", "Saudi Arabia"],
-			  ["GBR", "United Kingdom"],
-			  ["QAT", "Qatar"],
-			  ["China", "China"]]
-},
 {	
 	"label":"Region", 
 	"id":"region", 
