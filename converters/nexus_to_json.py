@@ -1,6 +1,7 @@
 import dendropy
 import json
 import time
+import argparse
 
 from datetime import datetime as dt
 from dateutil.parser import parse
@@ -57,14 +58,25 @@ def process_node(node, x, y):
     
     return node1, y0
 
-tree = dendropy.Tree.get(
-    path='sequence_data_1028.4part.HKYG.UCLN.SG.MCC.tree',
-    schema='nexus',
-    rooting="default-rooted")
+def main():
+
+	parser = argparse.ArgumentParser(description='NEXUS to JSON converter')
+	#parser.add_argument('--clock', action='store_true', help='Run ntpdate to fix date', required=False)
+	parser.add_argument('args', nargs=argparse.REMAINDER)
+	args = parser.parse_args()
+	#clock = args['clock']
+
+	tree = dendropy.Tree.get(
+		path=args.args[0],
+		schema='nexus',
+		rooting="default-rooted")
  
-y = [0]
-root = process_node(tree.seed_node, 0.0, y)
+	y = [0]
+	root = process_node(tree.seed_node, 0.0, y)
 
-with open('tree.json', 'w') as outfile:
-    json.dump(root, outfile, indent=4)
+	with open(args.args[1], 'w') as outfile:
+		json.dump(root, outfile, indent=4)
 
+
+if __name__ == "__main__":
+	main()
