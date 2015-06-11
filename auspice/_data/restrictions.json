@@ -38,10 +38,11 @@
 			  ["EMC", "EMC"],
 			  ["CDC", "CDC"],
 			  ["KFMRC", "KFMRC"],
-			  ["WTSI", "KSA/WTSI"],
+			  ["KSA/WTSI", "KSA/WTSI"],
 			  ["PHE", "PHE"],
 			  ["Bonn", "Bonn"],
 			  ["HKU", "HKU"],
+			  ["ChinaCDC", "ChinaCDC"],
 			  ["KNIH", "KNIH"],
 			  ["USNavy", "USNavy"]]
 },
