@@ -60,11 +60,10 @@ def process_node(node, x, y):
 
 def main():
 
+	#using argparse incase switches need to be added
 	parser = argparse.ArgumentParser(description='NEXUS to JSON converter')
-	#parser.add_argument('--clock', action='store_true', help='Run ntpdate to fix date', required=False)
 	parser.add_argument('args', nargs=argparse.REMAINDER)
 	args = parser.parse_args()
-	#clock = args['clock']
 
 	tree = dendropy.Tree.get(
 		path=args.args[0],
@@ -72,7 +71,7 @@ def main():
 		rooting="default-rooted")
  
 	y = [0]
-	root = process_node(tree.seed_node, 0.0, y)
+	root, y1 = process_node(tree.seed_node, 0.0, y)
 
 	with open(args.args[1], 'w') as outfile:
 		json.dump(root, outfile, indent=4)
