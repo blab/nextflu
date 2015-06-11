@@ -153,7 +153,7 @@ function tipFillColor(d) {
 
 function branchStrokeColor(d) {
 	var col;
-	if (colorBy == "region" || colorBy == "date" || colorBy == "host") {
+	if (colorBy == "region" ||colorBy == "country" || colorBy == "date" || colorBy == "host") {
 		col = "#AAA";
 	}
 	else {
