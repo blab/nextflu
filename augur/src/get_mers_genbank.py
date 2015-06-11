@@ -42,14 +42,10 @@ def get_date(x):
             return x
 
 accessions = [
-"KT026453",
-"KT026454",
-"KT026455",
-"KT026456",
-"KR011263",
-"KR011264",
-"KR011265",
-"KR011266",]
+"KT036372",
+"KT036373",
+"KT036374",
+]
 
 with open('data/genbank_mers_seqs.fasta', 'w') as mersout:
     for genbank_id in accessions[:3]: 
@@ -71,12 +67,12 @@ with open('data/genbank_mers_seqs.fasta', 'w') as mersout:
             if 'location' in src:
                 fasta_fields.append(src['location'][0])
             else:
-                fasta_fields.append('Riyadh')
+                fasta_fields.append('')
 
             if 'country' in src:
                 fasta_fields.append(fix_country(src['country'][0]))
             else:
-                fasta_fields.append('KSA')
+                fasta_fields.append('')
 
             if 'collection_date' in src:
                 fasta_fields.append(get_date(src['collection_date'][0]))
@@ -91,7 +87,7 @@ with open('data/genbank_mers_seqs.fasta', 'w') as mersout:
             if 'lab' in src:
                 fasta_fields.append(src['lab'][0])
             else:
-                fasta_fields.append('CDC')
+                fasta_fields.append('')
 
             fasta_header = '|'.join(fasta_fields)  
             print fasta_header
