@@ -7,14 +7,12 @@ from seq_util import *
 from date_util import *
 
 class tree_refine(object):
-	def __init__(self,cds = (0,None), max_length = 0.01, dt=1, **kwargs):
+	def __init__(self, max_length = 0.01, dt=1, **kwargs):
 		'''
 		parameters:
-		cds 		-- coding region		
 		max_length  -- maximal length of external branches
 		dt 			-- time interval used to define the trunk of the tree
 		'''
-		self.cds = cds 
 		self.max_length = max_length
 		self.dt = dt
 
