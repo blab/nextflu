@@ -12,7 +12,7 @@ with open(fname) as table:
 	for line in mers_table:
 		case_numbers[line['country']][line['reported']] +=1
 
-countries = ['Saudi Arabia', 'Korea/China', 'other']
+countries = ['other', 'Korea/China','Saudi Arabia']
 reduced_casenumbers = {c:defaultdict(int) for c in countries}
 
 
@@ -31,7 +31,7 @@ for c, cases in case_numbers.iteritems():
 	for y in [2012, 2013, 2014,2015]:
 		for w in range(1,53):
 			d = y+w*7/365.25
-			if d>2012.5 and d<2015.4:
+			if d>2012.6 and d<2015.4 and roughc!='Korea/China':
 				reduced_casenumbers[roughc][d]+=0
 
 

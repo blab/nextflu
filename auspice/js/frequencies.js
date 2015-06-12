@@ -225,8 +225,10 @@ d3.json(path + file_prefix + "case_numbers.json", function(error, json){
 				}
 			}
 		},			
+		bar: {width:3},
 		data: {
 			json: case_numbers,
+			type: 'line',
 			xs: {
 				'Korea/China':'xKorea/China',
 				'other':'xother',
