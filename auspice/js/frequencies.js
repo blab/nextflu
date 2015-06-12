@@ -351,10 +351,6 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 							for (var ii=0;ii<frequencies["entropy"][d-1][2].length;ii+=1){
 								tmp.push(["global",d+frequencies["entropy"][d-1][2][ii]]);
 							}
-							console.log("tooltip");
-							colorBy = "genotype";
-							colorByGenotypePosition([d-1]);
-							d3.select("#gt-color").property("value", d);
 						}
 					}
 	            	return 'Position ' + d + frequencies["entropy"][d-1][2].join(","); 
