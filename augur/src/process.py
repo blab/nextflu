@@ -388,23 +388,28 @@ class process(virus_frequencies):
 											for pos in xrange(self.nuc_frequencies.shape[1])]
 
 		if hasattr(self, 'aa_aln'):
-			aln_array = np.array(self.aa_aln)
-			self.aa_frequencies = np.zeros((len(self.aa_alphabet),aln_array.shape[1]))
-			for ai,aa in enumerate(self.aa_alphabet):
-				self.aa_frequencies[ai,:]=(aln_array==aa).mean(axis=0)
+			self.variable_aa = {}
+			self.consensus_aa = {}
+			self.aa_entropy = {}
+			self.variable_aa_identities = {}
+			for anno, aln in self.aa_aln:
+				aln_array = np.array(aln)
+				self.aa_frequencies = np.zeros((len(self.aa_alphabet),aln_array.shape[1]))
+				for ai,aa in enumerate(self.aa_alphabet):
+					self.aa_frequencies[ai,:]=(aln_array==aa).mean(axis=0)
 
-			self.variable_aa = np.where(np.max(self.aa_frequencies,axis=0)<1.0-self.min_mutation_frequency)[0]
-			self.consensus_aa = "".join(np.fromstring(self.aa_alphabet, 'S1')[np.argmax(self.aa_frequencies,axis=0)])
-			self.aa_entropy = -np.sum(self.aa_frequencies*np.log(np.maximum(1e-10,self.aa_frequencies)), axis=0)
-			self.variable_aa_identities = [ [self.aa_alphabet[ii] for ii in np.where(self.aa_frequencies[:,pos])[0]]
-											for pos in xrange(self.aa_frequencies.shape[1])]
+				self.variable_aa[anno] = np.where(np.max(self.aa_frequencies,axis=0)<1.0-self.min_mutation_frequency)[0]
+				self.consensus_aa[anno] = "".join(np.fromstring(self.aa_alphabet, 'S1')[np.argmax(self.aa_frequencies,axis=0)])
+				self.aa_entropy[anno] = -np.sum(self.aa_frequencies*np.log(np.maximum(1e-10,self.aa_frequencies)), axis=0)
+				self.variable_aa_identities[anno] = [ [self.aa_alphabet[ii] for ii in np.where(self.aa_frequencies[:,pos])[0]]
+												for pos in xrange(self.aa_frequencies.shape[1])]
 
 
 	def estimate_frequencies(self, tasks = ['mutations','genotypes', 'clades', 'tree']):
 		if 'mutations' in tasks:
 			self.all_mutation_frequencies(threshold = self.min_mutation_frequency) 
 		if 'nuc_mutations' in tasks:
-			self.all_mutation_frequencies(threshold = self.min_mutation_frequency, nuc=True) 
+			self.all_mutation_frequencies(threshold = self.min_mutation_frequency, gene='nuc') 
 		if 'genotypes' in tasks:
 			self.all_genotypes_frequencies(threshold = self.min_genotype_frequency) 
 		if 'clades' in tasks:
