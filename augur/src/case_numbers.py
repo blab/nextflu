@@ -26,19 +26,22 @@ for c, cases in case_numbers.iteritems():
 
 	for rep_date, val in cases.iteritems():
 		if rep_date!='':
-			tmp_date = datetime.strptime(rep_date, '%Y-%m-%d').isocalendar()
-			reduced_casenumbers[roughc][tmp_date[0]+tmp_date[1]*7.0/365.25]+=val
+			y,w,d = datetime.strptime(rep_date, '%Y-%m-%d').isocalendar()
+			reduced_casenumbers[roughc][(y,w)]+=val
+
+for roughc in countries:
+	valid_dates = sorted(reduced_casenumbers[roughc].keys())
+	print valid_dates
 	for y in [2012, 2013, 2014,2015]:
 		for w in range(1,53):
-			d = y+w*7/365.25
-			if d>2012.6 and d<2015.4 and roughc!='Korea/China':
-				reduced_casenumbers[roughc][d]+=0
+			if (y,w-1) in valid_dates or (y,w+1) in valid_dates:
+				reduced_casenumbers[roughc][(y,w)]+=0
 
 
 processed_casenumbers = {}
 for c, cases in reduced_casenumbers.iteritems():
 	tmpcases = sorted(cases.items())
-	processed_casenumbers.update({'x'+c:[round(x[0],2) for x in tmpcases],
+	processed_casenumbers.update({'x'+c:[round(x[0][0]+x[0][1]*7/365.25,2) for x in tmpcases],
 								  c:[x[1] for x in tmpcases]})
 
 
