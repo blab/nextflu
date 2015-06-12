@@ -48,6 +48,11 @@ class mers_filter(virus_filter):
 		virus_filter.__init__(self, **kwargs)
 		self.min_length = min_length
 		self.vaccine_strains =[]
+		genome_annotation = SeqIO.read('source-data/outgroup.gb', 'genbank').features
+		self.cds = {x.qualifiers['gene'][0]:x for x in genome_annotation
+				if 'gene' in x.qualifiers and x.type=='CDS' and 
+				x.qualifiers['gene'][0] in 
+				['ORF1ab', 'S', 'ORF3', 'ORF4a', 'ORF4b', 'E', 'N', 'M', 'ORF8b']}
 		self.outgroup = {
 			'strain': 'Camel_Egypt_NRCE-HKU270',
 			'accession':'KJ477103',
@@ -90,6 +95,7 @@ class mers_refine(tree_refine):
 		self.collapse()
 		self.add_nuc_mutations()
 		self.add_node_attributes()
+		self.translate_all()
 		self.reduce()
 		self.layout()
 		self.define_trunk()
