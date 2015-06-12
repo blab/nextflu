@@ -183,6 +183,60 @@ function contains(arr, obj) {
     }
 }
 
+var case_numbers;
+d3.json(path + file_prefix + "case_numbers.json", function(error, json){
+	console.log(error);
+	case_numbers = json;
+	var case_numbers_chart = c3.generate({
+		bindto: '#casenumberschart',
+		size: {width: width-10, height: height},
+		onresize: function() {
+			width = parseInt(d3.select(".freqplot-container").style("width"), 10);
+			height = 250;
+			case_numbers_chart.resize({height: height, width: width});
+		},
+		legend: {
+			position: position,
+			inset: {
+	    		anchor: 'top-right',
+	    		x: 10,
+	    		y: -15,
+	    		step: 4
+	    	}
+		},
+		axis: {
+			y: {
+				label: {
+					text: 'weekly case numbers',
+					position: 'outer-middle'	
+				},
+				tick:{
+					values: [0, 50, 100, 150, 200, 250]
+				},
+			},
+			x: {
+				label: {
+					text: 'time',
+					position: 'outer-center'	
+				},
+				tick: {
+					values: time_ticks,
+					outer: false				
+				}
+			}
+		},			
+		data: {
+			json: case_numbers,
+			xs: {
+				'Korea/China':'xKorea/China',
+				'other':'xother',
+				'Saudi Arabia':'xSaudi Arabia'
+			}
+		}
+	});
+});
+
+
 d3.json(path + file_prefix + "frequencies.json", function(error, json){
 	console.log(error);
 	frequencies = json;
