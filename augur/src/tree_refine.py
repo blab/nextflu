@@ -108,6 +108,8 @@ class tree_refine(object):
 	def add_aa_mutations(self):
 		if hasattr(self.tree.seed_node, 'aa_seq'):
 			for node in self.tree.postorder_internal_node_iter():
+				for child in node.child_nodes():
+					child.aa_muts = {}
 				for anno, parent_aa_seq in node.aa_seq.iteritems():
 					for child in node.child_nodes():
 						child.aa_muts[anno] = ','.join([anc+str(pos)+der for pos,anc, der in 
