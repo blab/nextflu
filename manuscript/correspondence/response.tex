@@ -60,7 +60,8 @@ Dear editor,
 
 Please find attached our revised manuscript entitled ```nextflu: Real-time tracking of seasonal influenza virus evolution in humans''.  This is a resubmission of manuscript number BIOINF-2015-0560.
 
-We would like to thank you and the reviewers for their supportive comments. We have addressed all comments in detailed poin-by-point response below. We also have implemented the LBI calculation that can be used as a coloring option an is dynamically updated when the date-slider is changed. 
+We would like to thank you and the reviewers for their supportive comments. We have addressed all comments in detailed point-by-point response below.
+%We also have implemented the LBI calculation that can be used as a coloring option an is dynamically updated when the date-slider is changed. 
 
 Sincerely,\\
 Richard Neher and Trevor Bedford
@@ -89,19 +90,19 @@ The freely available Python source code is of exemplary structure and quality, t
 
 1. Despite the fact that I do not fully understand the computation of the ``frequency trajectories of mutations'' I suspect that is tries to express the same measure as the ``frequencies of alleles'' in the ``Allele dynamic plots'' of Steinbrueck \& McHardy (NAR 2011) with the addition of relating it to a noise model. You should include a statement of comparison to AD  plots in your manuscript.
 
-{\bf Yes, the mutation trajectories are essentially the same, but nextflu also provides frequiencies of clades in the tree. The trajectories provide a useful sense of the temporal change. We have included a reference to the suggested paper.}
+{\bf Yes, the mutation trajectories are essentially the same, but nextflu also provides frequiencies of clades in the tree. As with the ``allele dynamic plots'', we believe trajectories provide a useful sense of the temporal change when combined with maximum-likelihood phylogenies. We have now included a reference to the suggested paper.}
 
 2. The prefix ``next'' of ``nextflu'' raises hope that the application will provide some forecast or recommendation which influenza might be the next to be battled with vaccination. This hope is further fueled by the expression ``predictors of successful clades''. However, I cannot see how to obtain such predictions with nextflu. Also the frequency plot does not seem to state something about future strain frequencies.
 
-{\bf The purpose of nextflu is to integrate as much information as possible to get an overview of the currently circulating viruses. As such, nextflu can help making an informed vaccine strain selection. We included quantities that have been suggested to be predictive for this purpose. However, in addition to choosing the clade that best approximates the future virus population, vaccine strain selection faces many practical constraints (virus/serum availability, cell-culture behavior etc). By providing the predictors along with explicit temporal dynamics of clades in the tree, the user can evaluate their relative merits and pick the most promising strain, given other constraints.}
+{\bf The purpose of nextflu is to integrate as much information as possible to get an overview of the currently circulating viruses. As such, nextflu can help making an informed vaccine strain selection. We included quantities that have been suggested to be predictive for this purpose. However, in addition to choosing the clade that best approximates the future virus population, vaccine strain selection faces many practical constraints (virus/serum availability, cell-culture behavior, etc...). By providing the predictors along with explicit temporal dynamics of clades in the tree, the user can evaluate their relative merits and pick the most promising strain, given other constraints. We believe that continually up-to-date displays of circulating viruses will be of the most use to WHO vaccine strain selection. These displays could help week-to-week in making it clear which viruses should be chosen to become test viruses in HI and other phenotypic assays. This said, we would eventually like to experiment with fully predictive models of virus population dynamics (like the models used by Steinbr\"{u}ck et al. 2014 or \L{}uksza and L\"{a}ssig 2014), however, we believe that this work is beyond the scope of nextflu 1.0.}
 
 3. The use case of the application is not clear to me. Can you give a more explicit example how information retrieval with nextflu could foster selection of the ``next successful clade'', rather than browsing the plain GISAID sequences? Of course, nextflu just visualizes existing data and thus cannot make up something that could not also be found in the database itself, but it would be nice to see how you intend to use nextflu.
 
-{\bf Nextflu is meant as a tool to explore the most recent influenza sequences, their geographic distribution, and the dynamics of different variants. We have received enthusiastic feedback from the influenza community.}
+{\bf nextflu is meant as a tool to explore the most recent influenza sequences, their geographic distribution, and the dynamics of different variants. We have received enthusiastic feedback from the influenza community, including representatives from all five WHO Collaborating Centers and from the GISAID Initiative.}
 
 4. Please give some hints why ``nextflu'' is not real-time but only near-real-time.
 
-{\bf As of now, nextflu requires manual update which we do on a weekly basis. Future integration into GISAID might make this step obsolete. Furthermore, nextflu can only track sequences in the data base, and as they are deposited with some lag, nextflu isn't traking influenza in real time -- strictly speaking.}
+{\bf As of now, nextflu requires manual update which we do on a weekly basis, as there is no API to allow automatic updating from the GISAID database. Future integration into GISAID might make this step obsolete. We understand that nextflu can only track sequences in the database, and as they are deposited with some lag, nextflu isn't traking influenza in real time -- strictly speaking.}
 
 5. I suggest to add the word ``as'' in ``additional information such \textit{as} the viral genotype at specific sites'' in the Abstract.
 
@@ -113,7 +114,7 @@ The freely available Python source code is of exemplary structure and quality, t
 
 7. You report that HA genes from GISAID are downloaded. Is the alignment build by whole genes or just the CDS?
 
-{\bf We use the entire HA segment, but include shorter sequences if necessary.}
+{\bf We use the entire HA segment, but include shorter sequences if necessary. This has been noted in the manuscript.}
 
 8. Please explain what the variable $i$ stands for.
 
@@ -121,17 +122,17 @@ The freely available Python source code is of exemplary structure and quality, t
 
 9. To me, the presented explanation of the frequency calculation is not very comprehensible. I want to suggest to skip the maths (which better suits a research paper) and use the gained space to further convince readers of the usability of the tool. Anyways, a reference (or at least as supplemental material) to a detailed explanation of these computations should be provided.
 
-{\bf We provided a method tab in nextflu. TODO}
+{\bf We agree that breaking out the mathematical details behind the frequency estimation is warranted. We've removed these details from the manuscript and describe them online at \href{http://nextflu.org/methods/}{\texttt{nextflu.org/methods/}}.}
 
 \subsection*{Application}
 
 1. You give information about the workflow of the augur pipeline to process data of the underlying GISAID database. What happens if GISAID is updated. Do you have to manually restart augur? Is it possible to trigger such an update by the user of nextflu? If it is not possible, is the term ``real-time'' really satisfied?
 
-{\bf as of now, we need to update manually. In any case, the deposition of sequences incurs a greater lag than our update frequency. We settled for ``near real time''.}
+{\bf As of now, we need to update manually, which involves clicking through to download all recent human sequences from GISAID and running the augur processing script. In any case, the deposition of sequences incurs a greater lag than our update frequency. During the North Hemisphere influenza season, when data deposition is frequent, GISAID and nextflu contain sequences within ~3 weeks of the present day. This is as close to `real-time' as present surveillance allows and we believe labeling nextflu as `real-time' is warranted. Also, as surveillance pipelines continue to improve, this lag will continue to decrease.}
 
 2. You describe the data pruning of the GISAID sequences, which also involves a step of pruning the alignment to various criteria. Is this done automatically? It would be nice to give the user the capability to parameterize some of these criteria prior to visualizing the tree.
 
-{\bf Since building aligning $>2000$ sequences and building a tree requires substantial computation, we can't have the user choose sequence filtering criteria and rerun the pipeline on demand. To address this concern, we have included multiple time resolutions. Users who want to customize this further can always clone the github repo and run the pipeline locally.}
+{\bf Since building aligning $>2000$ sequences and building a tree requires substantial computation, we can't have the user choose sequence filtering criteria and rerun the pipeline on demand. However, to address this concern, we have invested a substantial of effort to provide multiple temporal `resolutions' displaying different sampling windows. For example, \href{http://nextflu.org/H3N2/1y/}{\texttt{nextflu.org/H3N2/1y/}} displays a detailed view of the last year of viral evolution and consequently deep sampling, while \href{http://nextflu.org/H3N2/12y/}{\texttt{nextflu.org/H3N2/12y/}} displays a courser view of the last 12 years of viral evolution. Furthermore, users who want to customize sampling can easily clone the GitHub repo and run the pipeline locally.}
 
 3. It is rather complicated to zoom in and out or to scroll in the tree. Would it be possible to add according navigation buttons, rather then resetting the whole display when zooming out a bit?
 
@@ -139,15 +140,15 @@ The freely available Python source code is of exemplary structure and quality, t
 
 4. It is difficult to use the date slider to actually move through time since the refresh is only accomplished when releasing the mouse button. Also slight horizontal movements can cause unwanted jumps. Could you maybe provide two buttons to jump to the neighboring date points? Or a functionality to automatically move through time like in a movie.
 
-{\bf Dynamic update of the tree imposes a heavy computational burden. To address this issue, we now update a limited set of features as the slider is moved. We feel that the current compromise of updating tip circles without recalculating predictors and colors is a good compromise. Depending on the speed of the user's computer, this well be more or less smooth.}
+{\bf Dynamic update of the tree imposes a heavy computational burden. To address this issue, we now show/hide virus circles as the slider is moved to show sampling time, but `gray out' the virus colors while manipulating the time window. We feel that the current compromise of updating tip circles without recalculating predictors and colors is a good compromise. Depending on the speed of the user's computer, this well be more or less smooth.}
 
 5. Unfortunately, observing the tree and the frequencies is impossible because of the large vertical expansion of the tree. Could you find some way to have both information more close to each other?
 
-\textbf{Thank you for the suggestion. We experimented extensively with 3-column layouts and other methods to help display frequency plot alongside the phylogeny. However, the resulting layouts did not quite work aesthetically or in terms of usability space on a small display. Our suggestion here would be to `zoom' out with the web browser. The SVG implementation is fully responsive and the shrunk display will nicely fit both the frequency plot and the phylogeny. This seemed like the best solution to this particular issue.}
+\textbf{Thank you for the suggestion. We experimented extensively with 3-column layouts and other methods to help display frequency plot alongside the phylogeny. However, the resulting layouts did not quite work aesthetically or in terms of usability space on a small display. Our suggestion here would be to `zoom' out with the web browser. The SVG implementation is fully responsive and the shrunk display will nicely fit both the frequency plot and the phylogeny. After substantial experimentation, this seemed like the best solution to this particular issue.}
 
 6. What is the X-Axis for the tree? Is it somehow related with time? If so, how comes that the sequence A/Georgia/16/2012 (2012-09-02) is farther to the right then sequence A/Georgia/3058/2012 (2012-09-26)?
 
-\textbf{The x-axis is scaled in terms of substitutions per site, which is the native units of RAxML. This distance is across all sites. As influenza shows clock-like behavior we expect a general correlation between date of sampling and x coordinate. However, this correlation is not perfect and there will be cases like A/Georgia/16/2012 vs A/Georgia/3058/2012. We've clarified this point in the text.}
+\textbf{The x-axis is scaled in terms of substitutions per site, which is the native unit of RAxML. This distance is across all sites. As influenza shows clock-like behavior we expect a general correlation between date of sampling and x coordinate. However, this correlation is not perfect and there will be cases like A/Georgia/16/2012 vs A/Georgia/3058/2012. We've clarified this point in the text.}
 
 %%% REVIEWER 2 %%%
 \section*{Reviewer 2}

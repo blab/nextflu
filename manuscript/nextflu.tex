@@ -69,7 +69,7 @@ The first step in the processing pipeline is to automatically select a subset of
 Here, viruses without complete date or geographic information, viruses passaged in eggs and sequences less than 987 bases are removed.
 In addition, local outbreaks are filtered by keeping only one instance of identical sequences sampled at the same location on the same day.
 Following filtering, the viruses are subsampled to achieve a more equitable temporal and geographic distribution.
-For our standard display period of 3 years and 50 viruses per month, this typically results in $\sim$1800 viruses, which we align using MAFFT \citep{katoh_mafft_2013}.
+For our standard display period of 3 years and 50 viruses per month, this typically results in $\sim$1800 viruses, in which we align full-length HA sequences, where available and partial sequences otherwise, using MAFFT \citep{katoh_mafft_2013}.
 Once aligned, the set of virus sequences is further cleaned by removing insertions relative to the outgroup to enforce canonical HA site numbering, by removing sequences that show either too much or too little divergence relative to the expectation given sampling date, and by removing known reassortant clusters. As outgroup for each viral lineage, we chose a well characterized virus without insertions relative to the canonical amino-acid numbering and a sampling date a few years before the time interval of interest.
 
 From the filtered and cleaned alignment, \augur{} builds a phylogenetic tree using FastTree \citep{price_fasttree_2009}, which is then further refined using RAxML \citep{stamatakis_raxml_2014}.
@@ -77,7 +77,7 @@ Next, the state of every internal node of the tree is inferred using a marginal 
 Internal branches without mutations are collapsed into polytomies.
 The final tree is decorated with the attributes to be displayed in the browser.
 
-In addition to the phylogenetic tree, \augur{} estimates the frequency trajectories of mutations, genotypes and clades in the tree. Frequency are determined by maximizing the likelihood of sampling the observed set of virus sequences. In addition, we impose a smoothing that penalized rapid changes in frequency of the frequency derivative. \augur{} estimates frequency with up to one month resolution using a downhill simplex algorithm \citep{oliphant_python_2007}. The result is similar to ``allele dynamics'' plots in \citep{Steinrueck_2011}, but provides frequencies of clades in the tree in addition to single point mutations.
+In addition to the phylogenetic tree, \augur{} estimates the frequency trajectories of mutations, genotypes and clades in the tree. Frequency are determined by maximizing the likelihood of sampling the observed set of virus sequences. In addition, we impose a smoothing that penalized rapid changes in frequency of the frequency derivative. \augur{} estimates frequency with up to one month resolution using a downhill simplex algorithm \citep{oliphant_python_2007}. The result is similar to ``allele dynamics'' plots in \citep{steinbruck_allele_2011}, but provides frequencies of clades in the tree in addition to point mutations.
 
 At the end of the \augur{} pipeline, JSON files are exported containing the annotated phylogenetic tree, sequence data and frequency trajectories.
 
@@ -152,6 +152,10 @@ Oliphant,T. (2007{\em{}}) Python for scientific computing.
 Price,M.N. {\em et~al.} (2009{\em{}}) {FastTree:} computing
   large minimum evolution trees with profiles instead of a distance matrix.
 \newblock {\em Mol Biol Evol, } {\bf 26} (7), 1641--50.
+
+\bibitem[Steinbr\"{u}ck, 2011]{steinbruck_allele_2011}
+Steinbr\"{u}ck,L. and McHardy,A.C. (2011{\em{}}) Allele dynamics plots for the study of evolutionary dynamics in viral populations.
+\newblock {\em Nucleic Acids Res, } {\bf 39} (1), e4.
 
 \bibitem[Stamatakis, 2014]{stamatakis_raxml_2014}
 Stamatakis,A. (2014{\em{}}) {RAxML} version 8: a tool for phylogenetic analysis
