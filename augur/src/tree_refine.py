@@ -40,7 +40,7 @@ class tree_refine(object):
 		from Bio.SeqRecord import SeqRecord
 		if self.cds is not None:
 			self.aa_aln = {}
-			for anno in self.outgroup.cds:
+			for anno in self.cds:
 				tmp_aaseqs = [SeqRecord(Seq(node.aa_seq[anno]), id=node.strain, annotations = {'num_date':node.num_date, 'region':node.region}) for node in self.tree.leaf_iter()]
 				tmp_aaseqs.sort(key = lambda x:x.annotations['num_date'])
 				self.aa_aln[anno] = MultipleSeqAlignment(tmp_aaseqs)
@@ -102,7 +102,7 @@ class tree_refine(object):
 	def translate_all(self):
 		for node in self.tree.postorder_node_iter():
 			node.aa_seq = {}
-			for anno, feature in self.outgroup.cds.iteritems():
+			for anno, feature in self.cds.iteritems():
 				self.aa_seq[anno] = translate(feature.extract(node.seq), to_stop = True)
 
 	def add_aa_mutations(self):
