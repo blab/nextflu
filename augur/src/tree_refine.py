@@ -96,7 +96,7 @@ class tree_refine(object):
 		for node in self.tree.postorder_node_iter():
 			node.aa_seq = {}
 			for anno, feature in self.cds.iteritems():
-				node.aa_seq[anno] = translate(feature.extract(node.seq), to_stop = True)
+				node.aa_seq[anno] = translate(feature.extract(node.seq), to_stop = False)
 
 		self.add_aa_mutations()
 		self.aa_aln = {}
