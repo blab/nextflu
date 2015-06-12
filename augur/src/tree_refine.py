@@ -28,22 +28,11 @@ class tree_refine(object):
 		self.add_nuc_mutations()
 		if self.cds is not None:
 			self.translate_all()
-			self.add_aa_mutations()
 		self.add_node_attributes()
 		self.reduce()
 		self.layout()
 		self.define_trunk()
 
-		# make an amino acid aligment
-		from Bio.Align import MultipleSeqAlignment
-		from Bio.Seq import Seq
-		from Bio.SeqRecord import SeqRecord
-		if self.cds is not None:
-			self.aa_aln = {}
-			for anno in self.cds:
-				tmp_aaseqs = [SeqRecord(Seq(node.aa_seq[anno]), id=node.strain, annotations = {'num_date':node.num_date, 'region':node.region}) for node in self.tree.leaf_iter()]
-				tmp_aaseqs.sort(key = lambda x:x.annotations['num_date'])
-				self.aa_aln[anno] = MultipleSeqAlignment(tmp_aaseqs)
 		tmp_nucseqs = [SeqRecord(Seq(node.seq), id=node.strain, annotations = {'num_date':node.num_date, 'region':node.region}) for node in self.tree.leaf_iter()]
 		tmp_nucseqs.sort(key = lambda x:x.annotations['num_date'])
 		self.nuc_aln = MultipleSeqAlignment(tmp_nucseqs)
@@ -100,10 +89,21 @@ class tree_refine(object):
 				node._child_nodes.sort(key=lambda n:n.tree_length, reverse=True)
 
 	def translate_all(self):
+		# make an amino acid aligment
+		from Bio.Align import MultipleSeqAlignment
+		from Bio.Seq import Seq
+		from Bio.SeqRecord import SeqRecord
 		for node in self.tree.postorder_node_iter():
 			node.aa_seq = {}
 			for anno, feature in self.cds.iteritems():
 				node.aa_seq[anno] = translate(feature.extract(node.seq), to_stop = True)
+
+		self.add_aa_mutations()
+		self.aa_aln = {}
+		for anno in self.cds:
+			tmp_aaseqs = [SeqRecord(Seq(node.aa_seq[anno]), id=node.strain, annotations = {'num_date':node.num_date, 'region':node.region}) for node in self.tree.leaf_iter()]
+			tmp_aaseqs.sort(key = lambda x:x.annotations['num_date'])
+			self.aa_aln[anno] = MultipleSeqAlignment(tmp_aaseqs)
 
 	def add_aa_mutations(self):
 		if hasattr(self.tree.seed_node, 'aa_seq'):
