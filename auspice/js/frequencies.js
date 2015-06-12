@@ -264,16 +264,18 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 	var chart_types = {'':'bar'}
 	var chart_xaxis = {'':'x'}
 	var ymin = 0;
-	for (x in genome_annotation){
-		chart_data['x'+x] = genome_annotation[x][1];
-		chart_data[x] = genome_annotation[x][0].map(function(d) {return -0.1*d;});
-		if (ymin>chart_data[x][0]){
-			ymin = chart_data[x][0];
+	if (typeof genome_annotation !== 'undefined') {
+		for (x in genome_annotation){
+			chart_data['x'+x] = genome_annotation[x][1];
+			chart_data[x] = genome_annotation[x][0].map(function(d) {return -0.1*d;});
+			if (ymin>chart_data[x][0]){
+				ymin = chart_data[x][0];
+			}
+			chart_types[x] = 'line';
+			chart_xaxis[x] = 'x'+x;
 		}
-		chart_types[x] = 'line';
-		chart_xaxis[x] = 'x'+x;
+		ymin-=0.08;
 	}
-	ymin-=0.08;
 	console.log(chart_data);
 	console.log(chart_types);
 	console.log(chart_xaxis);
