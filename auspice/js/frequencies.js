@@ -1,5 +1,5 @@
 var frequencies, pivots;
-
+var gene = 'nuc'
 /**
  * for each node, calculate the derivative of the frequency tranjectory. if none exists, copy parent
 **/
