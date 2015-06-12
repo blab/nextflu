@@ -35,7 +35,8 @@ for roughc in countries:
 	for y in [2012, 2013, 2014,2015]:
 		for w in range(1,53):
 			if (y,w-1) in valid_dates or (y,w+1) in valid_dates:
-				reduced_casenumbers[roughc][(y,w)]+=0
+				if (y,w-1) != valid_dates[-1]:
+					reduced_casenumbers[roughc][(y,w)]+=0
 
 
 processed_casenumbers = {}
