@@ -242,10 +242,14 @@ class process(virus_frequencies):
 			htmlpath+=self.resolution+'/'
 
 		if not os.path.isdir(htmlpath): os.makedirs(htmlpath)
-
+		if "layout" in self.kwargs:
+			tmp_layout=self.kwargs["layout"]
+		else:
+			tmp_layout="auspice"
 		with open(htmlpath+'index.html','w') as out:
-			out.write("---\ntitle: nextflu / "+self.virus_type+" / "+self.resolution_prefix.rstrip('_')+'\n'\
-					  "layout: auspice\nvirus: "+self.virus_type+"\nresolution: "+self.resolution_prefix.rstrip('_')+"\n")
+			out.write("---\ntitle: nextflu / "+self.virus_type+" / "+self.resolution_prefix.rstrip('_')
+					  +"\nlayout: "+tmp_layout
+					  +"\nvirus: "+self.virus_type+"\nresolution: "+self.resolution_prefix.rstrip('_')+"\n")
 			if "html_vars"  in self.kwargs:
 				for vname, val in self.kwargs["html_vars"].iteritems():
 					out.write(vname+": "+ val+'\n')
@@ -265,7 +269,7 @@ class process(virus_frequencies):
 			out.write('{%include '+self.virus_type+'_meta.js %}\n')
 			out.write('</script>\n\n')
 
-	def align(self):
+	def align(self, fast=False):
 		'''
 		aligns viruses using mafft. produces temporary files and deletes those at the end
 		after this step, self.viruses is a BioPhython multiple alignment object
@@ -273,7 +277,10 @@ class process(virus_frequencies):
 		self.make_run_dir()
 		os.chdir(self.run_dir)
 		SeqIO.write([SeqRecord(Seq(v['seq']), id=v['strain']) for v in self.viruses], "temp_in.fasta", "fasta")
-		os.system("mafft --anysymbol --nofft temp_in.fasta > temp_out.fasta")
+		if fast:
+			os.system("mafft --anysymbol temp_in.fasta > temp_out.fasta")
+		else:
+			os.system("mafft --anysymbol --nofft temp_in.fasta > temp_out.fasta")
 		aln = AlignIO.read('temp_out.fasta', 'fasta')
 		self.sequence_lookup = {seq.id:seq for seq in aln}
 		# add attributes to alignment
@@ -403,5 +410,7 @@ class process(virus_frequencies):
 			self.all_genotypes_frequencies(threshold = self.min_genotype_frequency) 
 		if 'clades' in tasks:
 			self.all_clade_frequencies() 
+		if 'nuc_clades' in tasks:
+			self.all_clade_frequencies(nuc=True) 
 		if 'tree' in tasks:
 			self.all_tree_frequencies() 
