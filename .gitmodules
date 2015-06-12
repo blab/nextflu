@@ -1,0 +1,3 @@
+[submodule "MERS-Cases"]
+	path = MERS-Cases
+	url = https://github.com/rambaut/MERS-Cases.git
