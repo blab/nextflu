@@ -163,11 +163,14 @@ The paper is interesting and clearly written so I don't have any major comment.
 
 p1, col1, l47: ``near real-time'', can the authors specify the updating frequency? from the website, it seems to be every 5 days.
 
+{\bf At the moment, GISAID does not provide an API to automatically download sequences, and so, as of now, we need to update manually, which involves clicking through to download all recent human sequences from GISAID and running the augur processing script. We monitor the addition of new sequences in the database and update the site when more than 10 new sequences have appeared relative to what's present on the nextflu site. In practice, this means updates every 3-7 days. We've made a note of this in the main text. From what we understand, a forthcoming version of the GISAID database will make the process of updating easier and allow automated downloads through an API. When this occurs, nextflu could be fully automated and update daily.}
+
 p1, col2, l54: how is the outgroup chosen?
 
-{\bf We choose a well characterized strain predating the time interval of interest by a few years. We updated the text to clarify this.}
+{\bf We choose a well characterized strain predating the time interval of interest by a few years (A/Beijing/32/1992 for H3N2). We've updated the manuscript text to clarify this.}
 
 p2, col1, l21: typo: the sampling time point is $t_v$ not $x(t_v)$
+
 {\bf Fixed, thank you.}
 
 %%% REVIEWER 3 %%%
@@ -177,12 +180,12 @@ p2, col1, l21: typo: the sampling time point is $t_v$ not $x(t_v)$
 
 This may be beyond the scope of the tool, but it would be extremely useful if the tool could visualize not just the \# of epitope or receptor binding site changes, but which specific amino acid changes are involved -- at least for the branches defining the main clusters identified (e.g., 3c3.a and 3c2.a).
 
-{\bf Tool tips of branches now show the amino-acid mutations associated with the branch. Furthermore, the we added a display of all alignment variability that allows to spot variable positions. Clicking on these positions in the graph will plot the frequencies of amino acids and color the tree accordingly. }
+{\bf This is a good suggestion. We've revised nextflu to make it so that tool tips of branches now show the amino-acid mutations associated with the branch. Furthermore, we've added a display of all alignment variability that allows one to spot variable positions. Clicking on these positions in the graph will plot the frequencies of amino acids and color the tree accordingly. This allows investigation of how specific amino acid changes map to the phylogeny.}
 
 \subsection*{Minor comment}
 
 Could the authors clarify what they mean by `removing known reassortant clusters'?  This is very vague and I assume naturally occurring reassortant viruses are not being removed.
 
-{\bf We filter sequences that are very similar to sequences from outbreaks of triple reassortants with pH1N1. ADD DETAIL.}
+{\bf We filter sequences that are very similar to sequences from outbreaks of triple-reassortant swine influenza H1N1 that contain hemagglutinin (HA) from seasonal H3N2 viruses as described in Bastien et al. (2010, Journal of Infectious Diseases). This is a specific clade of reassortant viruses that has circulated sporadically in North America since 2009. We just filter out this clade, rather than looking for any reassortant virus. This has been clarified in the text.}
 
 \end{document}

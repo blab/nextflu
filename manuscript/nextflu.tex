@@ -49,10 +49,10 @@ Additionally, mutation, genotype and clade frequency trajectories are calculated
 
 Every year, seasonal influenza infects between 10\% and 20\% of the global population resulting in substantial human morbidity and mortality \citep{flufactsheet}.
 Vaccination remains the most effective public health measure to combat seasonal epidemics.
-However, influenza viruses constantly evolve and thereby undergo antigenic drift, allowing drifted viruses to reinfect those in the human population with acquired immunity to previously circulating strains.
+However, influenza viruses constantly evolve and thereby undergo antigenic drift, allowing drifted viruses to reinfect individuals with acquired immunity to previously circulating strains.
 Owing to antigenic drift, the seasonal influenza vaccine needs frequent updating to remain effective.
 In any given year, the particular choice of vaccine strain plays a major role in determining vaccine efficacy and so it is of critical importance to develop tools to analyze the ongoing evolution of the influenza virus population in order to aid vaccine strain selection.
-The program \nextflu{} presents a near real-time display of genetic relationships among influenza viruses and allows investigation of currently available sequence data. By visualizing many different observables and predictors, we hope that \nextflu{} will help vaccine strain selection.
+The program \nextflu{} presents a near real-time display of genetic relationships among influenza viruses and allows investigation of currently available sequence data. By visualizing many different genetic and epidemiological features, we hope that \nextflu{} will help vaccine strain selection.
 Currently, \nextflu{} tracks all four circulating lineages of seasonal influenza: A/H3N2, A/H1N1pdm, B/Victoria and B/Yamagata.
 
 \begin{figure}[t!]
@@ -63,36 +63,22 @@ Currently, \nextflu{} tracks all four circulating lineages of seasonal influenza
 \end{figure}
 
 In implementation, \nextflu{} consists of a processing pipeline written in Python called \augur{} that analyzes virus sequence data and a JavaScript-based browser visualization called \auspice{} that displays this processed information.
-As input, \augur{} requires a FASTA file of sequences with FASTA header labels containing relevant information such as the strain name, the sampling date and passage history.
+As input, \augur{} requires a FASTA file of sequences with header labels containing relevant information such as strain name, sampling date and passage history.
 For this purpose, influenza sequence data for the hemagglutinin (HA) gene is downloaded from the GISAID EpiFlu database \citep{GISAID}, which contains the most up-to-date collection of seasonal influenza viruses.
 The first step in the processing pipeline is to automatically select a subset of representative viruses.
 Here, viruses without complete date or geographic information, viruses passaged in eggs and sequences less than 987 bases are removed.
 In addition, local outbreaks are filtered by keeping only one instance of identical sequences sampled at the same location on the same day.
-Following filtering, the viruses are subsampled to achieve a more equitable temporal and geographic distribution.
-For our standard display period of 3 years and 50 viruses per month, this typically results in $\sim$1800 viruses, in which we align full-length HA sequences, where available and partial sequences otherwise, using MAFFT \citep{katoh_mafft_2013}.
-Once aligned, the set of virus sequences is further cleaned by removing insertions relative to the outgroup to enforce canonical HA site numbering, by removing sequences that show either too much or too little divergence relative to the expectation given sampling date, and by removing known reassortant clusters. As outgroup for each viral lineage, we chose a well characterized virus without insertions relative to the canonical amino-acid numbering and a sampling date a few years before the time interval of interest.
+Following filtering, viruses are subsampled to achieve a more equitable temporal and geographic distribution.
+For our standard display period of 3 years and 32 viruses per month, this typically results in $\sim$1200 viruses, for which we align full-length HA sequences where available and partial sequences otherwise, using MAFFT \citep{katoh_mafft_2013}.
+Once aligned, the set of virus sequences is further cleaned by removing insertions relative to the outgroup to enforce canonical HA site numbering, by removing sequences that show either too much or too little divergence relative to the expectation given sampling date, and by removing known reassortant clusters, such as the triple-reassortant swine influenza viruses that have sporadically circulating since 2009 \citep{bastien_human_2010}. As outgroup for each viral lineage, we chose a well characterized virus without insertions relative to the canonical amino-acid numbering and a sampling date a few years before the time interval of interest.
 
 From the filtered and cleaned alignment, \augur{} builds a phylogenetic tree using FastTree \citep{price_fasttree_2009}, which is then further refined using RAxML \citep{stamatakis_raxml_2014}.
 Next, the state of every internal node of the tree is inferred using a marginal maximum likelihood method and missing sequence data at phylogeny tips is filled with the nearest ancestral sequence at these sites.
 Internal branches without mutations are collapsed into polytomies.
 The final tree is decorated with the attributes to be displayed in the browser.
 
-In addition to the phylogenetic tree, \augur{} estimates the frequency trajectories of mutations, genotypes and clades in the tree. Frequency are determined by maximizing the likelihood of sampling the observed set of virus sequences. In addition, we impose a smoothing that penalized rapid changes in frequency of the frequency derivative. \augur{} estimates frequency with up to one month resolution using a downhill simplex algorithm \citep{oliphant_python_2007}. The result is similar to ``allele dynamics'' plots in \citep{steinbruck_allele_2011}, but provides frequencies of clades in the tree in addition to point mutations.
-
-At the end of the \augur{} pipeline, JSON files are exported containing the annotated phylogenetic tree, sequence data and frequency trajectories.
-
-These JSON files are then visualized by \auspice{} using D$^3$ \citep{bostock_d3_2011} and the phylogenetic tree displayed with branches scaled according to evolutionary distance across all sites (\FIG{tree}).
-The user can explore the data interactively by selecting viruses from different dates or by coloring the tree by attributes such as:
-\begin{itemize}
-	\item \textit{epitope mutations} at sites generally associated with antibody binding have been suggested to be predictive of future clade success \citep{luksza_predictive_2014},
-%	\item non-epitope mutations: 
-%	Mutations outside epitopes tend to be damaging and anti-correlated with clade expansion \citep{luksza_predictive_2014}.
-    \item \textit{receptor binding mutations} at seven positions close to the receptor binding site have been shown to be responsible for major antigenic transitions in the past decades \citep{koel_substitutions_2013},
-    \item \textit{local branching index} is the exponentially weighted tree length surrounding a node, which is associated with rapid branching and expansion of clades \citep{neher_predicting_2014},
- %   \item geographic location
-    \item \textit{HA genotype} directly colors the tree by genotype at specific amino acid positions.
-\end{itemize}
-The tree display can also be restricted to different geographic regions.
+In addition to the phylogenetic tree, \augur{} estimates the frequency trajectories of mutations, genotypes and clades in the tree. Frequencies are determined by maximizing the likelihood of sampling the observed set of virus sequences. In addition, we impose a smoothing that penalized rapid changes in frequency of the frequency derivative. \augur{} estimates frequency with up to one month resolution. The result is similar to ``allele dynamics'' plots in \citet{steinbruck_allele_2011}, but provides frequencies of clades in the tree in addition to point mutations.
+The \augur{} pipeline is run every 3-7 days in response to sequence updates in the GISAID database.
 
 \begin{figure}[t]
 	\centering
@@ -101,7 +87,21 @@ The tree display can also be restricted to different geographic regions.
 	\label{fig:freq}
 \end{figure}
 
-The frequency plot below the tree (\FIG{freq}) displays the frequency trajectory of clades in the tree whenever the mouse hovers above the branch defining the clade. Furthermore, trajectories of individual mutations, combinations of two mutations, and predefined clades such as 3c3.a can be plotted. A second plot shows the variability of the alignment. On mouse-click on a variable positions in this plot, \auspice{} will color the tree by amino-acid at this position and plot the frequencies mutations at his positions.
+At the end of the \augur{} pipeline, JSON files are exported containing the annotated phylogenetic tree, sequence data and frequency trajectories.
+These JSON files are then visualized by \auspice{} using D$^3$ \citep{bostock_d3_2011} and a phylogenetic tree is displayed with branches scaled according to evolutionary distance across all sites (\FIG{tree}).
+The user can explore the data interactively by selecting viruses from different dates or by coloring the tree by attributes such as:
+\begin{itemize}
+	\item \textit{epitope mutations} at sites generally associated with antibody binding that have been suggested to be predictive of future clade success \citep{luksza_predictive_2014},
+%	\item non-epitope mutations: 
+%	Mutations outside epitopes tend to be damaging and anti-correlated with clade expansion \citep{luksza_predictive_2014}.
+    \item \textit{receptor binding mutations} at seven positions close to the receptor binding site that have been shown to be responsible for major antigenic transitions in the past decades \citep{koel_substitutions_2013},
+    \item \textit{local branching index} indicating the exponentially weighted tree length surrounding a node, which is associated with rapid branching and expansion of clades \citep{neher_predicting_2014},
+ %   \item geographic location
+    \item \textit{HA genotype}, which directly colors the tree by genotype at specific amino acid positions.
+\end{itemize}
+The display can also be restricted to different geographic regions.
+
+The frequency plot below the tree (\FIG{freq}) displays the frequency trajectory of clades in the tree whenever the mouse hovers above the branch defining the clade. Furthermore, trajectories of individual mutations, combinations of two mutations, and predefined clades such as 3c3.a can be plotted. A second plot shows the variability of the alignment. On mouse-click on a variable position in this plot, \auspice{} will color the tree by amino-acid at this position and plot its mutation frequencies.
 
 %\section{Conclusion}
 We built \nextflu{} to facilitate the analysis and exploration of seasonal influenza sequence data collected by laboratories around the world.
@@ -112,6 +112,13 @@ By using the most recent data and integrating phylogenies with frequency traject
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{thebibliography}{}
+
+\bibitem[Bastien {\em et~al.}, 2010]{bastien_human_2010}
+Bastien,N. {\em et~al.} (2010{\em{}})
+  Human infection with a triple-reassortant swine influenza {A (H1N1)} virus
+  containing the hemagglutinin and neuraminidase genes of seasonal influenza
+  virus.
+\newblock {\em J Infect Dis, } {\bf 201} (8), 1178--1182.
 
 \bibitem[Bogner {\em et~al.}, 2006]{GISAID}
 Bogner,P. {\em et~al.} (2006{\em{}}) A global
@@ -144,9 +151,9 @@ Neher,R.A. {\em et~al.} (2014{\em{}}) Predicting evolution
   from the shape of genealogical trees.
 \newblock {\em eLife Sciences, } {\bf 3}, e03568.
 
-\bibitem[Oliphant, 2007]{oliphant_python_2007}
-Oliphant,T. (2007{\em{}}) Python for scientific computing.
-\newblock {\em Comput Sci Eng, } {\bf 9} (3), 10--20.
+%\bibitem[Oliphant, 2007]{oliphant_python_2007}
+%Oliphant,T. (2007{\em{}}) Python for scientific computing.
+%\newblock {\em Comput Sci Eng, } {\bf 9} (3), 10--20.
 
 \bibitem[Price {\em et~al.}, 2009]{price_fasttree_2009}
 Price,M.N. {\em et~al.} (2009{\em{}}) {FastTree:} computing
