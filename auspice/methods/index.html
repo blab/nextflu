@@ -1,0 +1,145 @@
+---
+layout: default
+title: nextflu / methods
+---
+
+<div class="row">
+	<div class="col-md-3">
+		<div class="logo-container">
+			<div class="bigtitle">
+				<a href="/" class="nounderline"><span class="c2">n</span><span class="c3">e</span><span class="c4">x</span><span class="c5">t</span><span class="c6">f</span><span class="c7">l</span><span class="c8">u</span></a>
+			</div>
+			<div class="subtitle-box">
+				Real-time tracking of seasonal influenza virus evolution in humans
+			</div>
+			<div class="spacer"></div>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<div class="bigspacer"></div>	
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-3">
+		<div class="io-container">
+			<div class="title">
+			Methods
+			</div>
+		</div>
+		<div class="spacer"></div>
+	</div>
+
+	<div class="col-md-9">
+		All source code is <a href="https://github.com/blab/nextflu/">publicly available</a> and the exact steps of the nextflu algorithms are detailed in the processing pipeline files: <span class="highlight"><a href="https://github.com/blab/nextflu/blob/master/augur/src/H3N2_process.py">H3N2_process.py</a></span>, <span class="highlight"><a href="https://github.com/blab/nextflu/blob/master/augur/src/H1N1pdm_process.py">H1N1pdm_process.py</a></span>, <span class="highlight"><a href="https://github.com/blab/nextflu/blob/master/augur/src/Vic_process.py">Vic_process.py</a></span> and <span class="highlight"><a href="https://github.com/blab/nextflu/blob/master/augur/src/Yam_process.py">Yam_process.py</a></span>. Here we give an overview of these methods. Broadly, <span class="highlight">nextflu</span> contains two separate functions, the <span class="highlight">augur</span> pipeline that processes FASTA sequence data and compiles JSON files, and <span class="highlight">auspice</span> visualization package that displays these results in the browser.
+	</div>
+
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<div class="bigspacer"></div>	
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-3">
+		<div class="io-container">
+			<div class="title">
+			Pruning and alignment
+			</div>
+		</div>
+		<div class="spacer"></div>
+	</div>
+
+	<div class="col-md-9">
+		The first step in the processing pipeline is to automatically select a subset of representative viruses.
+		Here, viruses without complete date or geographic information, viruses passaged in eggs and sequences less than 987 bases are removed.
+		In addition, local outbreaks are filtered by keeping only one instance of identical sequences sampled at the same location on the same day.
+		Following filtering, the viruses are subsampled to achieve a more equitable temporal and geographic distribution.
+		For our standard display period of 3 years and 32 viruses per month, this typically results in ~1200 viruses, which we align using <a href="http://mafft.cbrc.jp/alignment/software/">MAFFT</a>.
+		Once aligned, the set of virus sequences is further cleaned by removing insertions relative to the outgroup to enforce canonical HA site numbering, by removing sequences that show either too much or too little divergence relative to the expectation given sampling date, and by removing known reassortant clusters.
+		As outgroup for each viral lineage, we chose a well characterized virus without insertions relative to the canonical amino-acid numbering and possessing a sampling date a few years before the time interval of interest.
+
+	</div>
+
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<div class="bigspacer"></div>	
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-3">
+		<div class="io-container">
+			<div class="title">
+			Tree building
+			</div>
+		</div>
+		<div class="spacer"></div>
+	</div>
+
+	<div class="col-md-9">
+	From the filtered and cleaned alignment, <span class="highlight">augur</span> builds a phylogenetic tree using <a href="http://www.microbesonline.org/fasttree/">FastTree<a/>, which is then further refined using <a href="http://sco.h-its.org/exelixis/web/software/raxml/index.html">RAxML</a>.
+	Next, the state of every internal node of the tree is inferred using a marginal maximum likelihood method and missing sequence data at phylogeny tips is filled with the nearest ancestral sequence at these sites.
+	Internal branches without mutations are collapsed into polytomies.
+	The final tree is decorated with the attributes to be displayed in the browser. 
+	</div>
+
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<div class="bigspacer"></div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-3">
+		<div class="io-container">
+			<div class="title">
+			Frequency calculation
+			</div>
+		</div>
+		<div class="spacer"></div>
+	</div>
+
+	<div class="col-md-9">
+	<span class="highlight">augur</span> estimates the frequency trajectories of mutations, genotypes and clades in the tree. 
+	Frequency trajectories are represented as a linear interpolation $x(t)$ of pivot frequencies $x_i$ at time points $t_i$ spaced one month apart. 
+	The frequencies $x_i$ corresponding to a feature $\phi$ (e.g. mutation) are estimated by simultaneously maximizing the Bernoulli observation model 
+	$$
+	f(\mathbf{x}) = \prod_{v\in V_\phi} x(t_v) \prod_{v\notin V_{\phi}} (1-x(t_v))
+	$$
+where $V_{\phi}$ is the set of viruses carring attribute $\phi$ and $t_v$ is the collection date of virus $v$, and the process noise model
+	$$
+	g(\mathbf{x}) = \mathrm{exp}\left(
+		-\sum_i \frac{(\Delta x_i - \epsilon\Delta x_{i-1})^2}{2\gamma \Delta t_i}
+	\right)
+	$$
+where $\Delta x_i = x_i-x_{i-1}$, $\Delta t_i = t_i-t_{i-1}$. Here, $\gamma$ parameterizes the smoothing imposed on the frequency estimate and $\epsilon$ parameterizes our expectation of frequency changes in interval $i$ based on the  change in interval $i-1$.
+$\epsilon=0$ implies that frequency changes are uncorrelated from one interval to the next, while $\epsilon=1$ implies that the most likely $\Delta x_i$ is $\Delta x_{i-1}$.
+We typically use $\epsilon = 0.7$.
+Here, the objective function $\mathrm{log}(f) + \mathrm{log}(g)$ is maximized using SciPy's implementation of a <a href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.fmin.html">downhill simplex algorithm</a>.
+To speed up convergence, optimization is first done using a coarse grid of pivot points which is subsequently refined to 12 pivots per year. Frequency estimation is done for mutations, particular genotypes, and major clades of the tree.
+
+	</div>
+
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<div class="bigspacer"></div>
+	</div>
+</div>
+
+<!-- MathJax support -->
+<script type="text/javascript"
+ src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<!-- MathJax config -->
+<script src="/js/mathjax.config.js"></script>	
