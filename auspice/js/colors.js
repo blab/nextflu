@@ -158,7 +158,7 @@ function colorByGenotype() {
 	console.log(positions_list);
 	if (positions_list.length > 0) {
 		colorBy = "genotype";
-		colorByGenotypePosition(positions_list);
+		colorByGenotypePosition(positions_list, 'nuc');
 	}
 	else {
 		d3.select("#coloring").each(colorByTrait);
@@ -168,7 +168,7 @@ function colorByGenotype() {
 	}
 }
 
-function colorByGenotypePosition (positions) {
+function colorByGenotypePosition (positions, gene) {
 	var gts = nodes.map(function (d) {
 		var tmp = [];
 		for (var i=0; i<positions.length; i++){
