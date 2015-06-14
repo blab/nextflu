@@ -277,11 +277,7 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 		chart_data['x'+gene]=[];
 		chart_types[gene]='bar';
 		chart_xaxis[gene]='x'+gene;
-		if 	(typeof chart_data['x'+gene+'anno']!="undefined"){
-			var offset= chart_data['x'+gene+'anno'][0];
-		}else{
-			var offset=1;
-		}
+		var offset = frequencies['location'][gene][0];
 		for (var ii=0;ii<frequencies["entropy"][gene].length;ii+=1){
 			if (Math.round(10000*frequencies["entropy"][gene][ii][1])/10000>0.05){
 				chart_data[gene].push(Math.round(10000*frequencies["entropy"][gene][ii][1])/10000);
