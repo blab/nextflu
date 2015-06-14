@@ -272,6 +272,7 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 	}
 
 	for (gene in frequencies["entropy"]){
+		console.log('adding gene to entropy: '+gene);
 		chart_data[gene]=[];
 		chart_data['x'+gene]=[];
 		chart_types[gene]='bar';

@@ -52,7 +52,7 @@ class mers_filter(virus_filter):
 		self.cds = {x.qualifiers['gene'][0]:x for x in genome_annotation
 				if 'gene' in x.qualifiers and x.type=='CDS' and 
 				x.qualifiers['gene'][0] in 
-				['ORF1ab', 'S', 'ORF3', 'ORF4a', 'ORF4b', 'E', 'N', 'M', 'ORF8b']}
+				['ORF1ab', 'S', 'ORF3', 'ORF4a', 'ORF4b', 'ORF5', 'E', 'N', 'M', 'ORF8b']}
 		self.outgroup = {
 			'strain': 'Camel_Egypt_NRCE-HKU270',
 			'accession':'KJ477103',
