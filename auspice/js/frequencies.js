@@ -273,8 +273,8 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 		for (x in genome_annotation){
 			chart_data['x'+x+'anno'] = genome_annotation[x][1];
 			chart_data[x+'anno'] = genome_annotation[x][0].map(function(d) {return -0.1*d;});
-			if (ymin>chart_data[x][0]){
-				ymin = chart_data[x][0];
+			if (ymin>chart_data[x+'anno'][0]){
+				ymin = chart_data[x+'anno'][0];
 			}
 			chart_types[x+'anno'] = 'line';
 			chart_xaxis[x+'anno'] = 'x'+x+'anno';
