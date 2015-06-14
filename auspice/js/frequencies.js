@@ -351,8 +351,8 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 		    },
 			labels:{
 				format:function (v, id, i, j){
-					if ((typeof id !="undefined")&&(id.substring(-4)=='anno')&&(i==1)){
-						return id.substring(0,-4);
+					if ((typeof id !="undefined")&&(id.substring(id.length-4)=='anno')&&(i==1)){
+						return id.substring(0,id.length-4);
 					}else{return '';}
 				}
 			},
