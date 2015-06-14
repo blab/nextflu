@@ -253,26 +253,31 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 		parses a genotype string into region and positions
 	**/
 
-	var chart_data = {'x':[], '':[]};
-	for (var ii=0;ii<frequencies["entropy"].length;ii+=1){
-		if (Math.round(10000*frequencies["entropy"][ii][1])/10000>0.05){
-			chart_data[''].push(Math.round(10000*frequencies["entropy"][ii][1])/10000);
-			chart_data['x'].push(ii+1);
+	var chart_data = {}
+	var chart_types = {}
+	var chart_xaxis = {}
+	for (gene in frequencies["entropy"]){
+		chart_data[gene]=[];
+		chart_data['x'+gene]=[];
+		chart_types[gene]='bar';
+		chart_xaxis[gene]='x'+gene;		
+		for (var ii=0;ii<frequencies["entropy"][gene].length;ii+=1){
+			if (Math.round(10000*frequencies["entropy"][ii][1])/10000>0.05){
+				chart_data[gene].push(Math.round(10000*frequencies["entropy"][gene][ii][1])/10000);
+				chart_data['x'+gene].push(ii*3+1);
+			}
 		}
 	}
-
-	var chart_types = {'':'bar'}
-	var chart_xaxis = {'':'x'}
 	var ymin = 0;
 	if (typeof genome_annotation !== 'undefined') {
 		for (x in genome_annotation){
-			chart_data['x'+x] = genome_annotation[x][1];
-			chart_data[x] = genome_annotation[x][0].map(function(d) {return -0.1*d;});
+			chart_data['x'+x+'anno'] = genome_annotation[x][1];
+			chart_data[x+'anno'] = genome_annotation[x][0].map(function(d) {return -0.1*d;});
 			if (ymin>chart_data[x][0]){
 				ymin = chart_data[x][0];
 			}
-			chart_types[x] = 'line';
-			chart_xaxis[x] = 'x'+x;
+			chart_types[x+'anno'] = 'line';
+			chart_xaxis[x+'anno'] = 'x'+x+'anno';
 		}
 		ymin-=0.08;
 	}

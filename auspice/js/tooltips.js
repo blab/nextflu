@@ -68,6 +68,7 @@ var virusTooltip = d3.tip()
 	});
 treeplot.call(virusTooltip);
 
+
 var linkTooltip = d3.tip()
 	.direction('e')
 	.attr('class', 'd3-tip')
@@ -83,6 +84,8 @@ var linkTooltip = d3.tip()
 				if (d.aa_muts[tmp_gene].length){
 					string+="<br>"+tmp_gene+": "+d.aa_muts[tmp_gene].replace(/,/g, ', ');
 				}
+			}
+		}
 		else if ((typeof d.nuc_muts !="undefined")&&(d.nuc_muts.length)){
 			var tmp_muts = d.nuc_muts.split(',');
 			var nmuts = tmp_muts.length;
