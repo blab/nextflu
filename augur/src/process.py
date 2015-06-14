@@ -208,6 +208,7 @@ class process(virus_frequencies):
 			if hasattr(self, 'aa_entropy'):
 				self.frequencies["entropy"] = {}
 				for anno, alnS in self.aa_entropy.iteritems():
+					self.frequencies["offset"][anno] = int(self.cds[anno].location.start)
 					self.frequencies["entropy"][anno] = [ [pos, S, muts] for pos,S,muts in 
 						izip(xrange(alnS.shape[0]), alnS,self.variable_aa_identities[anno]) ]
 			elif seq=='nuc' and hasattr(self, 'nuc_entropy'):
