@@ -147,12 +147,12 @@ class process(virus_frequencies):
 				elems[node.clade] = {}
 				elems[node.clade]['nuc'] = {pos:state for pos, (state, ancstate) in 
 								enumerate(izip(node.seq, self.tree.seed_node.seq)) if state!=ancstate}
-				for anno, aa_seq in node.aa_seq:
+				for anno, aa_seq in node.aa_seq.iteritems():
 					elems[node.clade][anno] = {pos:state for pos, (state, ancstate) in 
 								enumerate(izip(aa_seq, self.tree.seed_node.aa_seq[anno])) if state!=ancstate}
 
 		elems['root']['nuc'] = self.tree.seed_node.seq
-		for anno, aa_seq in self.tree.seed_node.aa_seq:
+		for anno, aa_seq in self.tree.seed_node.aa_seq.iteritems():
 			elems['root'] = aa_seq
 		write_json(elems, self.auspice_sequences_fname, indent=None)
 
