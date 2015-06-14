@@ -346,7 +346,10 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 		    	document.body.style.cursor = "default";
 		    },
 			labels:{
-				format:function (v, id, i, j){return i==1?id:'';},
+				format:function (v, id, i, j){
+					if ((id.substring(-4)=='anno')&&(i==1)){
+						return id.substring(0,-4);
+					}else{return '';}
 			},
 		},
 		bar: {width: 2},
