@@ -200,6 +200,7 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 	var chart_data = {}
 	var chart_types = {}
 	var chart_xaxis = {}
+	var posToAA = {};
 	var ymin = 0;
 	if (typeof genome_annotation !== 'undefined') {
 		for (x in genome_annotation){
@@ -228,6 +229,7 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 			if (Math.round(10000*frequencies["entropy"][gene][ii][1])/10000>0.05){
 				chart_data[gene].push(Math.round(10000*frequencies["entropy"][gene][ii][1])/10000);
 				chart_data['x'+gene].push(ii*3+offset);
+				posToAA[ii*3+offset] = [anno, i];
 			}
 		}
 	}
@@ -305,8 +307,10 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
     	},
 	    tooltip: {
 	        format: {
-	            title: function (d) { 
-	            	return 'Position ' + d + frequencies["entropy"][d-1][2].join(","); },
+	            title: function (d) {
+	            	gene = posToAA[d][0];
+	            	var pos = posToAA[d][0];
+	            	return 'Genome ' + d + ' == ' + gene ' codon ' + pos + frequencies["entropy"][gene][d-1][2].join(","); },
 	            value: function (value, ratio, id) {
 	                return id==''?"Variability: "+value:"start/stop";
 	            }
