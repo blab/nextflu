@@ -274,15 +274,17 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 			json: chart_data,
 			types: chart_types,
 			onclick: function (d,i) { 
+            	gene = posToAA[d.x][0];
+            	var pos = posToAA[d.x][0];
 				console.log(d);
-				if (frequencies["entropy"][d.x-1][2].length>1){
+				if (frequencies["entropy"][gene][pos][2].length>1){
 					var tmp = [];
-					for (var ii=0;ii<frequencies["entropy"][d.x-1][2].length;ii+=1){
-						tmp.push(["global",d.x+frequencies["entropy"][d.x-1][2][ii]]);
+					for (var ii=0;ii<frequencies["entropy"][gene][pos][2].length;ii+=1){
+						tmp.push(["global",d.x+frequencies["entropy"][gene][pos][2][ii]]);
 					}
 					colorBy = "genotype";
-					colorByGenotypePosition([d.x-1]);
-					d3.select("#gt-color").property("value", d.x);
+					colorByGenotypePosition([pos], gene);
+					d3.select("#gt-color").property("value", gene + ' ' + pos);
 				}
 		    },
 		    onmouseover: function (d){
