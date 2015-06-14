@@ -206,7 +206,7 @@ class mers_process(process, mers_filter, mers_clean, mers_refine):
 		if 'export' in steps:
 			self.temporal_regional_statistics()
 			# exporting to json, including the H1N1pdm specific fields
-			self.export_to_auspice(tree_fields = ['nuc_muts','accession','isolate_id', 'lab','db', 'country'] 
+			self.export_to_auspice(tree_fields = ['nuc_muts','aa_muts', 'accession','isolate_id', 'lab','db', 'country'] 
 													+ self.fasta_fields.values(), 
 			                       annotations = [], seq = 'nuc')
 			self.generate_indexHTML()
