@@ -382,8 +382,8 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 								d3.select("#gt-color").property("value", d);
 							}
 						}
-		            	return 'Genomic position ' + d + ', ' + gene + ' codon ' + pos + frequencies["entropy"][gene][pos][2].join(","); },
-		            }else{ return d;}
+		            	return 'Genomic position ' + d + ', ' + gene + ' codon ' + pos + frequencies["entropy"][gene][pos][2].join(",");
+		            }else{ return d;}},
 	            value: function (value, ratio, id) {
 	            	console.log('tooltip id: '+id+' '+id.substring(0,id.length-4));
 	                return id.substring(0,id.length-4)=='anno'?"start/stop":"Variability: "+value;
