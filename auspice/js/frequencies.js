@@ -256,18 +256,6 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 	var chart_data = {}
 	var chart_types = {}
 	var chart_xaxis = {}
-	for (gene in frequencies["entropy"]){
-		chart_data[gene]=[];
-		chart_data['x'+gene]=[];
-		chart_types[gene]='bar';
-		chart_xaxis[gene]='x'+gene;		
-		for (var ii=0;ii<frequencies["entropy"][gene].length;ii+=1){
-			if (Math.round(10000*frequencies["entropy"][gene][ii][1])/10000>0.05){
-				chart_data[gene].push(Math.round(10000*frequencies["entropy"][gene][ii][1])/10000);
-				chart_data['x'+gene].push(ii*3+1);
-			}
-		}
-	}
 	var ymin = 0;
 	if (typeof genome_annotation !== 'undefined') {
 		for (x in genome_annotation){
@@ -280,6 +268,19 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 			chart_xaxis[x+'anno'] = 'x'+x+'anno';
 		}
 		ymin-=0.08;
+	}
+
+	for (gene in frequencies["entropy"]){
+		chart_data[gene]=[];
+		chart_data['x'+gene]=[];
+		chart_types[gene]='bar';
+		chart_xaxis[gene]='x'+gene;		
+		for (var ii=0;ii<frequencies["entropy"][gene].length;ii+=1){
+			if (Math.round(10000*frequencies["entropy"][gene][ii][1])/10000>0.05){
+				chart_data[gene].push(Math.round(10000*frequencies["entropy"][gene][ii][1])/10000);
+				chart_data['x'+gene].push(ii*3+chart_data['x'+gene+'anno'][0]);
+			}
+		}
 	}
 	console.log(chart_data);
 	console.log(chart_types);
