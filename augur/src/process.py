@@ -151,9 +151,10 @@ class process(virus_frequencies):
 					elems[node.clade][anno] = {pos:state for pos, (state, ancstate) in 
 								enumerate(izip(aa_seq, self.tree.seed_node.aa_seq[anno])) if state!=ancstate}
 
+		elems['root'] = {}
 		elems['root']['nuc'] = self.tree.seed_node.seq
 		for anno, aa_seq in self.tree.seed_node.aa_seq.iteritems():
-			elems['root'] = aa_seq
+			elems['root'][anno] = aa_seq
 		write_json(elems, self.auspice_sequences_fname, indent=None)
 
 		print "Writing tree"
