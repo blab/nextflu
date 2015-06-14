@@ -95,12 +95,13 @@ class mers_refine(tree_refine):
 		self.collapse()
 		self.add_nuc_mutations()
 		self.add_node_attributes()
-		self.translate_all()
 		self.reduce()
 		self.layout()
 		self.define_trunk()
 
 		# make an amino acid aligment
+		self.translate_all()
+
 		from Bio.Align import MultipleSeqAlignment
 		from Bio.Seq import Seq
 		from Bio.SeqRecord import SeqRecord
