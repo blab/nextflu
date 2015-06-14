@@ -366,24 +366,26 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 	    tooltip: {
 	        format: {
 	            title: function (d) {
-	            	var gene = posToAA[d][0];
-	            	var pos = posToAA[d][1];
-	            	console.log(gene+ ' '+pos);
-	                {
-						if (frequencies["entropy"][gene][pos][2].length>1){
-							var tmp = [];
-							for (var ii=0;ii<frequencies["entropy"][gene][pos][2].length;ii+=1){
-								tmp.push(["global",d+frequencies["entropy"][gene][pos][2][ii]]);
+	            	if (typeof posToAA[d] != "undefined"){
+		            	var gene = posToAA[d][0];
+		            	var pos = posToAA[d][1];
+		            	console.log(gene+ ' '+pos);
+		                {
+							if (frequencies["entropy"][gene][pos][2].length>1){
+								var tmp = [];
+								for (var ii=0;ii<frequencies["entropy"][gene][pos][2].length;ii+=1){
+									tmp.push(["global",d+frequencies["entropy"][gene][pos][2][ii]]);
+								}
+								console.log("tooltip");
+								colorBy = "genotype";
+								colorByGenotypePosition([pos], gene);
+								d3.select("#gt-color").property("value", d);
 							}
-							console.log("tooltip");
-							colorBy = "genotype";
-							colorByGenotypePosition([pos], gene);
-							d3.select("#gt-color").property("value", d);
 						}
-					}
-	            	return 'Genome ' + d + ' == ' + gene + ' codon ' + pos + frequencies["entropy"][gene][pos][2].join(","); },
+	            		return 'Genome ' + d + ' == ' + gene + ' codon ' + pos + frequencies["entropy"][gene][pos][2].join(",");
+		            }else{ return d;}
 	            value: function (value, ratio, id) {
-	                return id==''?"Variability: "+value:"start/stop";
+	                return id.substring(0,id.length-4)=='anno'?:"start/stop":"Variability: "+value;
 	            }
 	        }
 		},
