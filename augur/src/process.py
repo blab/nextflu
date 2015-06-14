@@ -443,7 +443,7 @@ class process(virus_frequencies):
 			self.consensus_aa = {}
 			self.aa_entropy = {}
 			self.variable_aa_identities = {}
-			for anno, aln in self.aa_aln:
+			for anno, aln in self.aa_aln.iteritems():
 				aln_array = np.array(aln)
 				self.aa_frequencies = np.zeros((len(self.aa_alphabet),aln_array.shape[1]))
 				for ai,aa in enumerate(self.aa_alphabet):
