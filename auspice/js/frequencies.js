@@ -229,7 +229,7 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 			if (Math.round(10000*frequencies["entropy"][gene][ii][1])/10000>0.05){
 				chart_data[gene].push(Math.round(10000*frequencies["entropy"][gene][ii][1])/10000);
 				chart_data['x'+gene].push(ii*3+offset);
-				posToAA[ii*3+offset] = [anno, ii];
+				posToAA[ii*3+offset] = [gene, ii];
 			}
 		}
 	}
@@ -310,11 +310,13 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 	    tooltip: {
 	        format: {
 	            title: function (d) {
-	            	var gene = posToAA[d][0];
-	            	var pos = posToAA[d][1];
-	            	return 'Genome ' + d + ' == ' + gene + ' codon ' + pos + frequencies["entropy"][gene][d-1][2].join(","); },
+	            	if (typeof posToAA[d] != "undefined"){
+		            	var gene = posToAA[d][0];
+		            	var pos = posToAA[d][1];
+		            	return 'Genome ' + d + ' == ' + gene + ' codon ' + pos + frequencies["entropy"][gene][d-1][2].join(","); },
+		            }else{ return d;}
 	            value: function (value, ratio, id) {
-	                return id==''?"Variability: "+value:"start/stop";
+	                return id.substring(0,id.length-4)=='anno'?:"start/stop":"Variability: "+value;
 	            }
 	        }
 		},
