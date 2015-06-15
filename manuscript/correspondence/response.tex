@@ -54,7 +54,7 @@
 
 \begin{document}
 
-\newgeometry{top=4cm}
+\newgeometry{top=6cm}
 
 \today
 
@@ -65,6 +65,32 @@ Dear editor,
 Please find attached our revised manuscript entitled ```nextflu: Real-time tracking of seasonal influenza virus evolution in humans''.  This is a resubmission of manuscript number BIOINF-2015-0560.
 
 We would like to thank you and the reviewers for their supportive comments. We have addressed all comments in detailed point-by-point response below. In the mean-time, we have received very positive feedback from the community, including enthusiastic responses from the many involved with the World Health Organization Global Influenza Surveillance and Response System. Additionally, we've received requests to set up separate websites for Ebola virus and MERS-CoV evolution. Owing to the modular and flexible structure of \augur{} and \auspice{}, implementation of these pipelines was straightforward. This shows that the nextflu framework can be readily applied to very different pathogens. However, the work with Ebola and MERS-CoV is still somewhat experimental, while the pipelines in \nextflu{} proper are very robust. We believe \nextflu{} will prove highly useful in continued influenza surveillance.
+
+Additionally, we've made the following specific changes to the program / manuscript:
+
+``1) Prediction of successful clades: you could easily implement your Local Branching Index (LBI), instead of the full likelihood calculation, for fitness calculation.''
+
+We provide LBI for each node in the tree at any point in time. This has previously been shown to be predictive of clade success. However, a full analysis of predictive clade dynamics is beyond version 1.0 of the platform. More work on this is forthcoming. We'd like to do this as properly as possible to keep trust in the platform by public health officials. If we provide explicit clade frequency predictions, we want them to be right.
+
+``2) Try to clarify the example case as suggested''
+
+As reviewer 1 suggested, we've clarified the example case.
+
+``3) Try to update the visualization while sliding through the data''
+
+We've clarified and improved the `date slider' behavior.
+
+``4) Move technical parts to supplementary material''
+
+We've moved technical details to an online methods page at \href{http://nextflu.org/methods/}{\texttt{nextflu.org/methods/}}.
+
+``5) It would be convenient to provide the users some control of how the data is being pruned''
+
+We've invested significant effort to making this happen. Users can now select a `data resolution'. \href{http://nextflu.org/H3N2/1y/}{\texttt{nextflu.org/H3N2/1y/}} displays a detailed view of the last year of viral evolution and consequently uses deeper sampling, while \href{http://nextflu.org/H3N2/12y/}{\texttt{nextflu.org/H3N2/12y/}} displays a coarser view of the last 12 years of viral evolution.
+
+``6) Explain how the tool accepts updateds of the database''
+
+This has been clarified.
 
 Sincerely,\\
 Richard Neher and Trevor Bedford
