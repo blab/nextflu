@@ -358,6 +358,9 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 	    grid: {
     	    y: {
         	    lines: [{value: 0}]
+        	},
+        	focus:{
+        		show:false
         	}
     	},
 	    tooltip: {
