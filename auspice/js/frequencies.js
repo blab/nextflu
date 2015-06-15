@@ -309,7 +309,7 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 	            	if (typeof posToAA[d] != "undefined"){
 		            	var gene = posToAA[d][0];
 		            	var pos = posToAA[d][1];
-		            	return 'Genomic position ' + d + ', ' + gene + ' codon ' + pos + frequencies["entropy"][gene][pos][2].join(",");
+		            	return gene + ' codon ' + (pos+1) + frequencies["entropy"][gene][pos][2].join(",");
 		            }else{ return d;}},
 	            value: function (value, ratio, id) {
 	                return id.substring(id.length-4)=='anno'?"start/stop":"Variability: "+value;
