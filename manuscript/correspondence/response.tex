@@ -70,7 +70,7 @@ Additionally, we've made the following specific changes to the program / manuscr
 
 ``1) Prediction of successful clades: you could easily implement your Local Branching Index (LBI), instead of the full likelihood calculation, for fitness calculation.''
 
-We provide LBI for each node in the tree at any point in time. This has previously been shown to be predictive of clade success. However, a full analysis of predictive clade dynamics is beyond version 1.0 of the platform. More work on this is forthcoming. We'd like to do this as properly as possible to keep trust in the platform by public health officials. If we provide explicit clade frequency predictions, we want them to be right.
+We have implemented the LBI calculation that can be used as a coloring option and is dynamically updated when the date-slider is changed.
 
 ``2) Try to clarify the example case as suggested''
 
@@ -86,7 +86,7 @@ We've moved technical details to an online methods page at \href{http://nextflu.
 
 ``5) It would be convenient to provide the users some control of how the data is being pruned''
 
-We've invested significant effort to making this happen. Users can now select a `data resolution'. \href{http://nextflu.org/H3N2/1y/}{\texttt{nextflu.org/H3N2/1y/}} displays a detailed view of the last year of viral evolution and consequently uses deeper sampling, while \href{http://nextflu.org/H3N2/12y/}{\texttt{nextflu.org/H3N2/12y/}} displays a coarser view of the last 12 years of viral evolution.
+To provide customization of data pruning, users can now select between alternative `data resolutions'. For example, \href{http://nextflu.org/H3N2/1y/}{\texttt{nextflu.org/H3N2/1y/}} displays a detailed view of the last year of viral evolution and consequently uses deeper sampling, while \href{http://nextflu.org/H3N2/12y/}{\texttt{nextflu.org/H3N2/12y/}} displays a coarser view of the last 12 years of viral evolution.
 
 ``6) Explain how the tool accepts updateds of the database''
 
