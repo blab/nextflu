@@ -169,7 +169,7 @@ function colorByGenotype() {
 	positions_string.map(function(d) {
 		val = parseInt(d)-1;
 		if (!isNaN(val)) {
-			if (val < 551) {
+			if (val < 30000) {
 				positions_list.push(val);
 			}
 		}
