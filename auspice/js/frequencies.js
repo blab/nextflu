@@ -340,11 +340,28 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 					d3.select("#gt-color").property("value", gene + ' ' + pos);
 				}
 		    },
-		    onmouseover: function (d){
+		    onmouseover: function (d,i){
 		    	document.body.style.cursor = "pointer";
+		    	
+				var gene = posToAA[d.x][0];
+				var pos = posToAA[d.x][1];
+				console.log(d);
+				if (frequencies["entropy"][gene][pos][2].length>1){
+					var tmp = [];
+					for (var ii=0;ii<frequencies["entropy"][gene][pos][2].length;ii+=1){
+						tmp.push(["global",d.x+frequencies["entropy"][gene][pos][2][ii]]);
+					}
+					colorBy = "genotype";
+					colorByGenotypePosition([pos], gene);
+					d3.select("#gt-color").property("value", gene + ' ' + pos);
+				}
+		    	
 		    },
 		    onmouseout: function (d){
 		    	document.body.style.cursor = "default";
+		    	colorBy = document.getElementById("coloring").value;
+		    	d3.select("#gt-color").property("value", "");
+		    	colorByTrait();
 		    },
 			labels:{
 				format:function (v, id, i, j){
@@ -369,7 +386,6 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 	            	if (typeof posToAA[d] != "undefined"){
 		            	var gene = posToAA[d][0];
 		            	var pos = posToAA[d][1];
-		            	console.log(gene+ ' '+pos);
 		                {
 							if (frequencies["entropy"][gene][pos][2].length>1){
 								var tmp = [];
@@ -378,8 +394,8 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 								}
 								console.log("tooltip");
 								colorBy = "genotype";
-								colorByGenotypePosition([pos], gene);
-								d3.select("#gt-color").property("value", d);
+					//			colorByGenotypePosition([pos], gene);
+					//			d3.select("#gt-color").property("value", d);
 							}
 						}
 		            	return gene + ' codon ' + (pos+1) + frequencies["entropy"][gene][pos][2].join(",");
