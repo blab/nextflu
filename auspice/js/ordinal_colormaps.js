@@ -26,7 +26,7 @@ var countries = [
 
 var hosts = [
 ["Human","#5097BA"],
-["Human, camel exposure","#ff7f00"],
+["Human, camel contact","#ff7f00"],
 ["Camel", "#DF4327"],
 ]
 
