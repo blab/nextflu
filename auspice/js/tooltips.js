@@ -40,8 +40,20 @@ var virusTooltip = d3.tip()
 		}			
 		string += "</div>";
 		
+		// following may or may not be present
+		if ((typeof focusNode != "undefined")&&(typeof focusNode.HI_titers[d.clade]!="undefined")){
+			string += "<div class=\"smallspacer\"></div>";				
+			string += "HI distances: log2, raw (homologues)<br><div class=\"smallnote\"><ul>";
+			for (var tmp_serum in focusNode.HI_titers[d.clade]){
+				var homHI = focusNode.HI_titers_raw[focusNode.clade][tmp_serum];
+				var logHI = focusNode.HI_titers[d.clade][tmp_serum];
+				var rawHI = focusNode.HI_titers_raw[d.clade][tmp_serum];
+				string += "<li>" + tmp_serum + ':\t' +  logHI.toFixed(1)+', ' + rawHI.toFixed(0)+ ' (' + homHI.toFixed(0) +")</li>";
+			}
+			string += "</ul></div>";
+		}
+
 		string += "<div class=\"smallspacer\"></div>";
-				
 		// following may or may not be present
 		string += "<div class=\"smallnote\">";
 		if (typeof d.ep != "undefined") {

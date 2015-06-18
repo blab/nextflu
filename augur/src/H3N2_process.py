@@ -279,16 +279,17 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 		if 'HI' in steps:
 			print "--- Adding HI titers to the tree " + time.strftime("%H:%M:%S") + " ---"
 			self.map_HI_to_tree(training_fraction=1.0, method = 'nnl1reg', lam_HI=reg, lam_avi=reg, lam_pot = reg)
-			self.add_titers()
 			self.dump()
 #		if 'fitness' in steps:
 
 
 		if 'export' in steps:
+			self.add_titers()
 			self.temporal_regional_statistics()
 			# exporting to json, including the H3N2 specific fields
 			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country',
-												 'dHI', 'cHI', 'HI_titers', 'serum', 'HI_info', 'avidity', 'potency', 'mean_potency'], 
+												 'dHI', 'cHI', 'mean_HI_titers','HI_titers','HI_titers_raw', 'serum', 'HI_info', 'avidity', 
+												 'potency', 'mean_potency'], 
 			                       annotations = ['3c2.a', '3c3.a'])
 			self.generate_indexHTML()
 

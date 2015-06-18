@@ -52,8 +52,8 @@ function calcHImeasured(node, rootNode){
 	console.log(node.strain+ ', mean_potency:'+node.mean_potency);
 	for (var i=0; i<tips.length; i+=1){
 		d = tips[i];
-		if (typeof(node.HI_titers[d.clade])!="undefined"){
-			d.HI_dist = node.HI_titers[d.clade]
+		if (typeof(node.mean_HI_titers[d.clade])!="undefined"){
+			d.HI_dist = node.mean_HI_titers[d.clade]
 			if (correctVirus){
 				d.HI_dist -= d.avidity;
 			}
