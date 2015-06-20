@@ -272,7 +272,7 @@ class virus_frequencies(object):
 		for pos in xrange(sub_aln.get_alignment_length()):
 			for ai, aa in enumerate(alpha):
 				if freqs[ai,pos]>threshold and freqs[ai,pos]<1.0-threshold:
-					mut = gene+': '+str(pos+1)+aa
+					mut = gene+':'+str(pos+1)+aa
 					print "estimating freq of ", mut, "total frequency:", freqs[ai,pos]
 					est_freq, (tps, obs) = self.estimate_genotype_frequency(sub_aln, [(pos, aa)])
 					if est_freq is not None:
@@ -420,10 +420,12 @@ class virus_frequencies(object):
 	def all_mutation_frequencies(self, threshold = 0.01, gene='nuc'):
 		if not hasattr(self, 'nuc_frequencies'):
 			self.determine_variable_positions()
-		self.frequencies["mutations"]={}
 		for region_label, regions in self.aggregate_regions:
 			print "--- "+"determining mutation frequencies in "+region_label+ " "  + time.strftime("%H:%M:%S") + " ---"
-			self.frequencies["mutations"][region_label] = self.determine_mutation_frequencies(regions, threshold = threshold, gene=gene)
+			freqs = self.determine_mutation_frequencies(regions, threshold = threshold, gene=gene)
+			print freqs.keys()
+			self.frequencies["mutations"][region_label].update(freqs)
+			print self.frequencies["mutations"][region_label].keys()
 
 
 	def all_genotypes_frequencies(self, threshold = 0.1):

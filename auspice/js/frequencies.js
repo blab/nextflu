@@ -1,6 +1,6 @@
 var frequencies, pivots;
 var gene = 'nuc';
-var mutType = 'nuc';
+var mutType = 'aa';
 /**
  * for each node, calculate the derivative of the frequency tranjectory. if none exists, copy parent
 **/
@@ -272,8 +272,7 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 			types: chart_types,
 			onclick: function (d,i) { 
             	gene = posToAA[d.x][0];
-            	var pos = posToAA[d.x][0];
-				console.log(d);
+            	var pos = posToAA[d.x][1];
 				if (frequencies["entropy"][gene][pos][2].length>1){
 					var tmp = [];
 					for (var ii=0;ii<frequencies["entropy"][gene][pos][2].length;ii+=1){
@@ -281,7 +280,7 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 					}
 					colorBy = "genotype";
 					colorByGenotypePosition([pos], gene);
-					d3.select("#gt-color").property("value", gene + ' ' + pos);
+					d3.select("#gt-color").property("value", gene + ' ' + (pos+1));
 				}
 		    },
 		    onmouseover: function (d){
@@ -302,6 +301,9 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 	    grid: {
     	    y: {
         	    lines: [{value: 0}]
+        	},
+        	focus:{
+        		show:false
         	}
     	},
 	    tooltip: {

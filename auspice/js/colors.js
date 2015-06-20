@@ -174,7 +174,7 @@ function colorByGenotypePosition (positions, gene) {
 		for (var i=0; i<positions.length; i++){
 			tmp[tmp.length] = (positions[i]+1)+stateAtPosition(d.clade, gene, positions[i]);
 		}
-		d.coloring = gene+': '+tmp.join(" / "); 
+		d.coloring = gene+':'+tmp.join(" / "); 
 		return d.coloring;});
 	var unique_gts = d3.set(gts).values();
 	var gt_counts = {};

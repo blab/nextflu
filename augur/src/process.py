@@ -167,6 +167,9 @@ class process(virus_frequencies):
 			clade_present = {}
 			clade_xval = {}
 			clade_yval = {}
+			self.frequencies['clades'] = {reg:{"pivots":list(self.tree.seed_node.pivots)} 
+											for reg in self.tree.seed_node.freq}
+
 			for clade, gt in self.clade_designations.iteritems():
 				if clade in annotations:
 					print "Annotating clade", clade
@@ -181,6 +184,7 @@ class process(virus_frequencies):
 						for region in base_node.freq:
 							try:
 								self.frequencies["clades"][region][clade] = [round(x,3) for x in base_node.freq[region]]
+								print "added frequencies",region, clade
 							except:
 								print base_node.freq[region]
 					else:
@@ -413,6 +417,7 @@ class process(virus_frequencies):
 
 	def estimate_frequencies(self, tasks = ['mutations','genotypes', 'clades', 'tree']):
 		if 'mutations' in tasks:
+			self.frequencies["mutations"]={reg:{} for reg, _ in self.aggregate_regions}
 			for gene in self.cds:
 				self.all_mutation_frequencies(threshold = self.min_mutation_frequency, gene=gene) 
 		if 'nuc_mutations' in tasks:
