@@ -40,13 +40,6 @@ virus_config = {
 	'n_iqd':3,     # standard deviations from clock
 }
 
-def shift_cds(shift, vc, epi_mask, rbs):
-	vc['cds'] = (vc['cds'][0]+shift,vc['cds'][1])
-	aashift = shift//3
-	vc['clade_designations'] = {cl:[(pos-aashift, aa) for pos, aa in gt]
-								for cl, gt in vc['clade_designations'].iteritems()}
-	return vc, epi_mask[aashift:], [pos-aashift for pos in rbs]
-
 class process(virus_frequencies):
 	"""generic template class for processing virus sequences into trees"""
 	def __init__(self, path = 'data/', prefix = 'virus', time_interval = (2012.0, 2015.0), 
