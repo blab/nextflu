@@ -4,6 +4,10 @@ var freqScale = d3.scale.linear()
 	.domain([0, 1])
 	.range([1.5, 4.5]);
 
+var dHIScale = d3.scale.linear()
+	.domain([0, 1])
+	.range([2.0, 4.5]);
+
 var tipRadius = 4.0;
 var left_margin = 10;
 var bottom_margin = 10;
@@ -79,7 +83,7 @@ function branchPoints(d) {
 }
 
 function branchStrokeWidth(d) {
-	return freqScale(d.target.frequency);
+	return dHIScale(d.target.dHI);
 }
 
 function branchLabelText(d) {
