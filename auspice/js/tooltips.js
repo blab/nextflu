@@ -96,6 +96,9 @@ var linkTooltip = d3.tip()
 		if (typeof d.frequency != "undefined") {
 			string += "Frequency: " + (100 * d.frequency).toFixed(1) + "%"
 		}
+		if (typeof d.dHI != "undefined") {
+			string += "<br>Titer drop: " + d.dHI.toFixed(2)
+		}
 		string += "<div class=\"smallspacer\"></div>";
 		string += "<div class=\"smallnote\">";
 		if ((typeof d.aa_muts !="undefined")&&(mutType=='aa')){
