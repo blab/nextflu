@@ -24,6 +24,7 @@ class tree_refine(object):
 		run through the generic refining methods, 
 		will add strain attributes to nodes and translate the sequences -> produces aa_aln
 		'''
+		self.remove_outgroup()
 		self.node_lookup = {node.taxon.label:node for node in self.tree.leaf_iter()}
 		self.node_lookup.update({node.taxon.label.lower():node for node in self.tree.leaf_iter()})
 		self.node_lookup.update({node.taxon.label.upper():node for node in self.tree.leaf_iter()})

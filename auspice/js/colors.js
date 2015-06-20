@@ -56,8 +56,8 @@ var HIColorScale = function(c){
 HIColorScale.domain = HIColorScale_valid.domain;
 
 var regionColorScale = d3.scale.ordinal()
-	.domain(regions)
-	.range(regionColors);
+	.domain(regions.map(function(d){return d[0];}))
+	.range(regions.map(function(d){return d[1];}));
 
 var dateColorScale = d3.scale.linear().clamp([true])
 	.domain(dateColorDomain)

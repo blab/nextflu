@@ -175,7 +175,6 @@ class H3N2_refine(tree_refine):
 
 	def refine(self):
 		self.refine_generic()  # -> all nodes now have aa_seq, xvalue, yvalue, trunk, and basic virus properties
-		self.remove_outgroup()
 		self.add_H3N2_attributes()
 
 	def epitope_sites(self, aa):
