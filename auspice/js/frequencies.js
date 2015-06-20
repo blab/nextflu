@@ -203,6 +203,7 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 	var chart_xaxis = {}
 	var posToAA = {};
 	var ymin = 0;
+	var xmax = 0;
 	if (typeof genome_annotation !== 'undefined') {
 		for (x in genome_annotation){
 			chart_data['x'+x+'anno'] = genome_annotation[x][1];
@@ -227,12 +228,10 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 				chart_data[gene].push(Math.round(10000*frequencies["entropy"][gene][ii][1])/10000);
 				chart_data['x'+gene].push(ii*3+offset);
 				posToAA[ii*3+offset] = [gene, ii];
+				if ((ii*3+offset)>xmax) {xmax = (ii*3+offset);}
 			}
 		}
 	}
-	console.log(chart_data);
-	console.log(chart_types);
-	console.log(chart_xaxis);
 	var entropy_chart = c3.generate({
 		bindto: '#entropy',
 		size: {width: width-10, height: height},
@@ -262,7 +261,11 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 				},
 				tick: {
 					outer: false,
-					values: [100,200,300,400,500]				
+					values: ([1,2,3,4,5]).map(function (d){
+						var dec = Math.pow(10,Math.floor(Math.log10(xmax/5)))
+						var step = dec*Math.floor(xmax/5/dec);
+						return d*step;
+					})
 				}
 			},
 		},			
