@@ -1,5 +1,6 @@
 var frequencies, pivots;
-
+var gene = 'nuc';
+var mutType = 'aa';
 /**
  * for each node, calculate the derivative of the frequency tranjectory. if none exists, copy parent
 **/
@@ -197,28 +198,37 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 		parses a genotype string into region and positions
 	**/
 
-	var chart_data = {'x':[], '':[]};
-	for (var ii=0;ii<frequencies["entropy"].length;ii+=1){
-		if (Math.round(10000*frequencies["entropy"][ii][1])/10000>0.05){
-			chart_data[''].push(Math.round(10000*frequencies["entropy"][ii][1])/10000);
-			chart_data['x'].push(ii+1);
-		}
-	}
-
-	var chart_types = {'':'bar'}
-	var chart_xaxis = {'':'x'}
+	var chart_data = {}
+	var chart_types = {}
+	var chart_xaxis = {}
+	var posToAA = {};
 	var ymin = 0;
 	if (typeof genome_annotation !== 'undefined') {
 		for (x in genome_annotation){
-			chart_data['x'+x] = genome_annotation[x][1];
-			chart_data[x] = genome_annotation[x][0].map(function(d) {return -0.1*d;});
-			if (ymin>chart_data[x][0]){
-				ymin = chart_data[x][0];
+			chart_data['x'+x+'anno'] = genome_annotation[x][1];
+			chart_data[x+'anno'] = genome_annotation[x][0].map(function(d) {return -0.1*d;});
+			if (ymin>chart_data[x+'anno'][0]){
+				ymin = chart_data[x+'anno'][0];
 			}
-			chart_types[x] = 'line';
-			chart_xaxis[x] = 'x'+x;
+			chart_types[x+'anno'] = 'line';
+			chart_xaxis[x+'anno'] = 'x'+x+'anno';
 		}
 		ymin-=0.08;
+	}
+
+	for (gene in frequencies["entropy"]){
+		chart_data[gene]=[];
+		chart_data['x'+gene]=[];
+		chart_types[gene]='bar';
+		chart_xaxis[gene]='x'+gene;
+		var offset = frequencies['location'][gene][0];
+		for (var ii=0;ii<frequencies["entropy"][gene].length;ii+=1){
+			if (Math.round(10000*frequencies["entropy"][gene][ii][1])/10000>0.05){
+				chart_data[gene].push(Math.round(10000*frequencies["entropy"][gene][ii][1])/10000);
+				chart_data['x'+gene].push(ii*3+offset);
+				posToAA[ii*3+offset] = [gene, ii];
+			}
+		}
 	}
 	console.log(chart_data);
 	console.log(chart_types);
@@ -261,15 +271,16 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 			json: chart_data,
 			types: chart_types,
 			onclick: function (d,i) { 
-				console.log(d);
-				if (frequencies["entropy"][d.x-1][2].length>1){
+            	gene = posToAA[d.x][0];
+            	var pos = posToAA[d.x][1];
+				if (frequencies["entropy"][gene][pos][2].length>1){
 					var tmp = [];
-					for (var ii=0;ii<frequencies["entropy"][d.x-1][2].length;ii+=1){
-						tmp.push(["global",d.x+frequencies["entropy"][d.x-1][2][ii]]);
+					for (var ii=0;ii<frequencies["entropy"][gene][pos][2].length;ii+=1){
+						tmp.push(["global",d.x+frequencies["entropy"][gene][pos][2][ii]]);
 					}
 					colorBy = "genotype";
-					colorByGenotypePosition([d.x-1]);
-					d3.select("#gt-color").property("value", d.x);
+					colorByGenotypePosition([pos], gene);
+					d3.select("#gt-color").property("value", gene + ' ' + (pos+1));
 				}
 		    },
 		    onmouseover: function (d){
@@ -279,21 +290,32 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 		    	document.body.style.cursor = "default";
 		    },
 			labels:{
-				format:function (v, id, i, j){return i==1?id:'';},
+				format:function (v, id, i, j){
+					if ((typeof id !="undefined")&&(id.substring(id.length-4)=='anno')&&(i==1)){
+						return id.substring(0,id.length-4);
+					}else{return '';}
+				}
 			},
 		},
 		bar: {width: 2},
 	    grid: {
     	    y: {
         	    lines: [{value: 0}]
+        	},
+        	focus:{
+        		show:false
         	}
     	},
 	    tooltip: {
 	        format: {
-	            title: function (d) { 
-	            	return 'Position ' + d + frequencies["entropy"][d-1][2].join(","); },
+	            title: function (d) {
+	            	if (typeof posToAA[d] != "undefined"){
+		            	var gene = posToAA[d][0];
+		            	var pos = posToAA[d][1];
+		            	return gene + ' codon ' + (pos+1) + frequencies["entropy"][gene][pos][2].join(",");
+		            }else{ return d;}},
 	            value: function (value, ratio, id) {
-	                return id==''?"Variability: "+value:"start/stop";
+	                return id.substring(id.length-4)=='anno'?"start/stop":"Variability: "+value;
 	            }
 	        }
 		},
