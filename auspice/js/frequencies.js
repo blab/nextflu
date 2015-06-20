@@ -1,5 +1,6 @@
 var frequencies, pivots;
-var gene = 'nuc'
+var gene = 'nuc';
+var mutType = 'nuc';
 /**
  * for each node, calculate the derivative of the frequency tranjectory. if none exists, copy parent
 **/

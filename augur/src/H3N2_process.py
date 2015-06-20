@@ -26,13 +26,14 @@ virus_config.update({
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
 	'cds':[0,None], # define the HA1 start i n 0 numbering
 	'n_iqd':6,
+	'min_mutation_frequency':0.4,
 	# define relevant clades in canonical HA1 numbering (+1)
 	# numbering starting at HA1 start, adding sp to obtain numbering from methionine
-	'clade_designations': { "3c3.a":[(128+sp,'A'), (142+sp,'G'), (159+sp,'S')],
-						   "3c3":   [(128+sp,'A'), (142+sp,'G'), (159+sp,'F')],
-						   "3c2.a": [(144+sp,'S'), (159+sp,'Y'), (225+sp,'D'), (311+sp,'H'), (489+sp,'N')],
-						   "3c2":   [(144+sp,'N'), (159+sp,'F'), (225+sp,'N'), (489+sp,'N'), (142+sp, 'R')],
-						   "3c3.b":   [(83+sp,'R'), (261+sp,'Q'), (62+sp,'K'), (122+sp,'D')]
+	'clade_designations': { "3c3.a":[('HA1', 128,'A'), ('HA1',142,'G'), ('HA1',159,'S')],
+						   "3c3":   [('HA1', 128,'A'), ('HA1',142,'G'), ('HA1',159,'F')],
+						   "3c2.a": [('HA1', 144,'S'), ('HA1',159,'Y'), ('HA1',225,'D'), ('HA1', 311,'H'), ('HA2', 160,'N')],
+						   "3c2":   [('HA1', 144,'N'), ('HA1',159,'F'), ('HA1',225,'N'), ('HA2', 160,'N'), ('HA1', 142, 'R')],
+						   "3c3.b": [('HA1',  83,'R'), ('HA1',261,'Q'), ('HA1',62,'K'),  ('HA1', 122,'D')]
 							},
 	'html_vars': {'coloring': 'ep, ne, rb, lbi, dfreq, region, date',
 				   'gtplaceholder': 'HA1 positions...',
@@ -273,14 +274,15 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 		if 'frequencies' in steps:
 			print "--- Estimating frequencies at " + time.strftime("%H:%M:%S") + " ---"
 			self.determine_variable_positions()
-			self.estimate_frequencies(tasks = ["mutations", "clades", "tree"])
+			self.estimate_frequencies(tasks = ["mutations","tree"])
 			if 'genotype_frequencies' in steps: 
 					self.estimate_frequencies(tasks = ["genotypes"])
 			self.dump()
 		if 'export' in steps:
 			self.temporal_regional_statistics()
 			# exporting to json, including the H3N2 specific fields
-			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country'], 
+			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession',
+			                       				  'isolate_id', 'lab','db', 'country'], 
 			                       annotations = ['3c2.a', '3c3.a'])
 			self.generate_indexHTML()
 

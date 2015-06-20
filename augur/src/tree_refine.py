@@ -5,6 +5,9 @@ import os, re, time
 import dendropy
 from seq_util import *
 from date_util import *
+from Bio.Align import MultipleSeqAlignment
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
 
 class tree_refine(object):
 	def __init__(self, max_length = 0.01, dt=1, **kwargs):
@@ -25,10 +28,10 @@ class tree_refine(object):
 		self.remove_outgroup()
 		self.ladderize()
 		self.collapse()
+		self.add_node_attributes()
 		self.add_nuc_mutations()
 		if self.cds is not None:
 			self.translate_all()
-		self.add_node_attributes()
 		self.reduce()
 		self.layout()
 		self.define_trunk()
@@ -90,9 +93,6 @@ class tree_refine(object):
 
 	def translate_all(self):
 		# make an amino acid aligment
-		from Bio.Align import MultipleSeqAlignment
-		from Bio.Seq import Seq
-		from Bio.SeqRecord import SeqRecord
 		for node in self.tree.postorder_node_iter():
 			node.aa_seq = {}
 			for anno, feature in self.cds.iteritems():
@@ -101,7 +101,9 @@ class tree_refine(object):
 		self.add_aa_mutations()
 		self.aa_aln = {}
 		for anno in self.cds:
-			tmp_aaseqs = [SeqRecord(Seq(node.aa_seq[anno]), id=node.strain, annotations = {'num_date':node.num_date, 'region':node.region}) for node in self.tree.leaf_iter()]
+			tmp_aaseqs = [SeqRecord(Seq(node.aa_seq[anno]), id=node.strain, 
+			              annotations = {'num_date':node.num_date, 'region':node.region}) 
+						  for node in self.tree.leaf_iter()]
 			tmp_aaseqs.sort(key = lambda x:x.annotations['num_date'])
 			self.aa_aln[anno] = MultipleSeqAlignment(tmp_aaseqs)
 

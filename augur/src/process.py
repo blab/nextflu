@@ -171,21 +171,26 @@ class process(virus_frequencies):
 				if clade in annotations:
 					print "Annotating clade", clade
 					tmp_nodes = sorted((node for node in self.tree.postorder_node_iter()
-						if not node.is_leaf() and all([node.aa_seq[pos-1]==aa for pos, aa in gt])),
+						if not node.is_leaf() and all([node.aa_seq[gene][pos-1]==aa for gene, pos, aa in gt])),
 						key=lambda node: node.xvalue)
 					if len(tmp_nodes):
 						clade_present[clade] = True
 						base_node = tmp_nodes[0]
 						clade_xval[clade] = base_node.xvalue
 						clade_yval[clade] = base_node.yvalue
+						for region in base_node.freq:
+							try:
+								self.frequencies["clades"][region][clade] = [round(x,3) for x in base_node.freq[region]]
+							except:
+								print base_node.freq[region]
 					else:
 						clade_present[clade] = False
 						print "clade",clade, gt, "not in tree"
 			# append clades, coordinates and genotype to meta
 			self.tree_json["clade_annotations"] = [(clade, clade_xval[clade],clade_yval[clade], 
-								"/".join([str(pos)+aa for pos, aa in gt]))
-							for clade, gt in self.clade_designations.iteritems() if clade in annotations and clade_present[clade] == True
-							]
+								"/".join([gene+':'+str(pos)+aa for gene, pos, aa in gt]))
+							for clade, gt in self.clade_designations.iteritems() 
+							if clade in annotations and clade_present[clade] == True]
 		write_json(self.tree_json, self.auspice_tree_fname, indent=None)
 		try:
 			read_json(self.auspice_tree_fname)
@@ -370,9 +375,9 @@ class process(virus_frequencies):
 		calculates nucleoties_frequencies and aa_frequencies at each position of the alignment
 		also computes consensus sequences and position at which the major allele is at less than 1-min_mutation_frequency
 		results are stored as
-		self.nucleoties_frequencies
+		self.nuc_frequencies
 		self.aa_frequencies
-		self.variable_nucleotides
+		self.variable_nuc
 		self.variable_aa
 		'''
 		aln_array = np.array(self.nuc_aln)
@@ -390,23 +395,26 @@ class process(virus_frequencies):
 			self.variable_aa = {}
 			self.consensus_aa = {}
 			self.aa_entropy = {}
+			self.aa_frequencies = {}
 			self.variable_aa_identities = {}
 			for anno, aln in self.aa_aln.iteritems():
 				aln_array = np.array(aln)
-				self.aa_frequencies = np.zeros((len(self.aa_alphabet),aln_array.shape[1]))
+				tmp_af = np.zeros((len(self.aa_alphabet),aln_array.shape[1]))
 				for ai,aa in enumerate(self.aa_alphabet):
-					self.aa_frequencies[ai,:]=(aln_array==aa).mean(axis=0)
+					tmp_af[ai,:]=(aln_array==aa).mean(axis=0)
 
-				self.variable_aa[anno] = np.where(np.max(self.aa_frequencies,axis=0)<1.0-self.min_mutation_frequency)[0]
-				self.consensus_aa[anno] = "".join(np.fromstring(self.aa_alphabet, 'S1')[np.argmax(self.aa_frequencies,axis=0)])
-				self.aa_entropy[anno] = -np.sum(self.aa_frequencies*np.log(np.maximum(1e-10,self.aa_frequencies)), axis=0)
-				self.variable_aa_identities[anno] = [ [self.aa_alphabet[ii] for ii in np.where(self.aa_frequencies[:,pos])[0]]
-												for pos in xrange(self.aa_frequencies.shape[1])]
+				self.variable_aa[anno] = np.where(np.max(tmp_af,axis=0)<1.0-self.min_mutation_frequency)[0]
+				self.consensus_aa[anno] = "".join(np.fromstring(self.aa_alphabet, 'S1')[np.argmax(tmp_af,axis=0)])
+				self.aa_entropy[anno] = -np.sum(tmp_af*np.log(np.maximum(1e-10,tmp_af)), axis=0)
+				self.variable_aa_identities[anno] = [ [self.aa_alphabet[ii] for ii in np.where(tmp_af[:,pos])[0]]
+												for pos in xrange(tmp_af.shape[1])]
+				self.aa_frequencies[anno] = tmp_af
 
 
 	def estimate_frequencies(self, tasks = ['mutations','genotypes', 'clades', 'tree']):
 		if 'mutations' in tasks:
-			self.all_mutation_frequencies(threshold = self.min_mutation_frequency) 
+			for gene in self.cds:
+				self.all_mutation_frequencies(threshold = self.min_mutation_frequency, gene=gene) 
 		if 'nuc_mutations' in tasks:
 			self.all_mutation_frequencies(threshold = self.min_mutation_frequency, gene='nuc') 
 		if 'genotypes' in tasks:
