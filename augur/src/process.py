@@ -110,10 +110,6 @@ class process(virus_frequencies):
 		if os.path.isfile(self.tree_fname):
 			with open(self.tree_fname, 'r') as infile:
 				self.tree = cPickle.load(infile)
-				try:
-					self.refine()
-				except:
-					pass
 		if os.path.isfile(self.virus_fname):
 			with open(self.virus_fname, 'r') as infile:
 				self.viruses = cPickle.load(infile)
@@ -127,6 +123,10 @@ class process(virus_frequencies):
 		if os.path.isfile(self.aa_seq_fname):
 			with open(self.aa_seq_fname, 'r') as infile:
 				self.aa_aln = cPickle.load(infile)
+		try:
+			self.refine()
+		except:
+			pass
 
 	def export_to_auspice(self, tree_fields = [], tree_pop_list = [], annotations = [], seq='aa'):
 		from tree_util import dendropy_to_json, all_descendants

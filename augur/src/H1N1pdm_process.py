@@ -173,18 +173,38 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine, HI
 		if 'HI' in steps:
 			print "--- Adding HI titers to the tree " + time.strftime("%H:%M:%S") + " ---"
 			self.map_HI_to_tree(training_fraction=1.0, method = 'nnl1reg', lam_HI=reg, lam_avi=reg, lam_pot = reg)
-			self.add_titers()
 			self.dump()
 		if 'export' in steps:
+			self.add_titers()
 			self.temporal_regional_statistics()
 			# exporting to json, including the H1N1pdm specific fields
-			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country',
-									'dHI', 'cHI', 'HI_titers', 'serum', 'HI_info', 'avidity', 'potency','mean_potency'], 
-			                       annotations = ['5','6','6b', '6c','7'])
+			self.export_to_auspice(tree_fields = [
+				'ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country',
+				'dHI', 'cHI', 'mean_HI_titers','HI_titers','HI_titers_raw', 'serum', 'HI_info', 'avidity', 
+				 'potency', 'mean_potency'], 
+                   annotations = ['5','6','6b', '6c','7'])
 			self.generate_indexHTML()
 
+		if 'HIvalidate' in steps:
+			print "--- generating validation figures " + time.strftime("%H:%M:%S") + " ---"
+			import matplotlib.pyplot as plt
+			htmlpath = '../auspice/'
+			if self.virus_type is not None: 
+				htmlpath+=self.virus_type+'/'
+			if self.resolution is not None: 
+				htmlpath+=self.resolution+'/'
+
+			self.check_symmetry(plot=True)
+			plt.savefig(htmlpath+'HI_symmetry.png')
+
+			self.map_HI_to_tree(training_fraction=0.9, method='nnl1reg', lam_HI=reg, lam_avi=reg, lam_pot=reg, force_redo=True)
+			self.validate(plot=True)
+			plt.savefig(htmlpath+'HI_prediction.png')
+
+
 if __name__=="__main__":
-	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies', 'export']
+	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 
+				'frequencies','genotype_frequencies', 'HI', 'export']
 	from process import parser
 	params = parser.parse_args()
 
@@ -195,7 +215,7 @@ if __name__=="__main__":
 		params.time_interval = (params.interval[0], params.interval[1])
 	dt= params.time_interval[1]-params.time_interval[0]
 	params.pivots_per_year = 12.0 if dt<5 else 6.0 if dt<10 else 3.0
-	steps = all_steps[all_steps.index(params.start):(all_steps.index(params.stop)+1)] + ['HIvalidation']
+	steps = all_steps[all_steps.index(params.start):(all_steps.index(params.stop)+1)] + ['HIvalidate']
 	if params.skip is not None:
 		for tmp_step in params.skip:
 			if tmp_step in steps:

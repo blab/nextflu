@@ -230,6 +230,7 @@ class H3N2_refine(tree_refine):
 			node.rb = self.receptor_binding_distance(total_aa_seq, root_total_aa_seq)
 
 
+
 class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitness_model):
 	"""docstring for H3N2_process, H3N2_filter"""
 	def __init__(self,verbose = 0, force_include = None, 
