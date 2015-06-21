@@ -5,16 +5,17 @@ import os, re, time
 import dendropy
 from seq_util import *
 from date_util import *
+from Bio.Align import MultipleSeqAlignment
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
 
 class tree_refine(object):
-	def __init__(self,cds = (0,None), max_length = 0.01, dt=1, **kwargs):
+	def __init__(self, max_length = 0.01, dt=1, **kwargs):
 		'''
 		parameters:
-		cds 		-- coding region		
 		max_length  -- maximal length of external branches
 		dt 			-- time interval used to define the trunk of the tree
 		'''
-		self.cds = cds 
 		self.max_length = max_length
 		self.dt = dt
 
@@ -23,27 +24,23 @@ class tree_refine(object):
 		run through the generic refining methods, 
 		will add strain attributes to nodes and translate the sequences -> produces aa_aln
 		'''
+		self.remove_outgroup()
 		self.node_lookup = {node.taxon.label:node for node in self.tree.leaf_iter()}
 		self.node_lookup.update({node.taxon.label.lower():node for node in self.tree.leaf_iter()})
 		self.node_lookup.update({node.taxon.label.upper():node for node in self.tree.leaf_iter()})
 		self.ladderize()
 		self.collapse()
-		self.remove_outgroup()
-		self.translate_all()
-		self.add_nuc_mutations()
-		self.add_aa_mutations()
 		self.add_node_attributes()
+		self.add_nuc_mutations()
+		if self.cds is not None:
+			self.translate_all()
 		self.reduce()
 		self.layout()
 		self.define_trunk()
 
-		# make an amino acid aligment
-		from Bio.Align import MultipleSeqAlignment
-		from Bio.Seq import Seq
-		from Bio.SeqRecord import SeqRecord
-		tmp_aaseqs = [SeqRecord(Seq(node.aa_seq), id=node.strain, annotations = {'num_date':node.num_date, 'region':node.region}) for node in self.tree.leaf_iter()]
-		tmp_aaseqs.sort(key = lambda x:x.annotations['num_date'])
-		self.aa_aln = MultipleSeqAlignment(tmp_aaseqs)
+		tmp_nucseqs = [SeqRecord(Seq(node.seq), id=node.strain, annotations = {'num_date':node.num_date, 'region':node.region}) for node in self.tree.leaf_iter()]
+		tmp_nucseqs.sort(key = lambda x:x.annotations['num_date'])
+		self.nuc_aln = MultipleSeqAlignment(tmp_nucseqs)
 
 
 	def remove_outgroup(self):
@@ -97,16 +94,31 @@ class tree_refine(object):
 				node._child_nodes.sort(key=lambda n:n.tree_length, reverse=True)
 
 	def translate_all(self):
+		# make an amino acid aligment
 		for node in self.tree.postorder_node_iter():
-			node.aa_seq = translate(node.seq[self.cds[0]:self.cds[1]])
+			node.aa_seq = {}
+			for anno, feature in self.cds.iteritems():
+				node.aa_seq[anno] = translate(feature.extract(node.seq), to_stop = False)
+
+		self.add_aa_mutations()
+		self.aa_aln = {}
+		for anno in self.cds:
+			tmp_aaseqs = [SeqRecord(Seq(node.aa_seq[anno]), id=node.strain, 
+			              annotations = {'num_date':node.num_date, 'region':node.region}) 
+						  for node in self.tree.leaf_iter()]
+			tmp_aaseqs.sort(key = lambda x:x.annotations['num_date'])
+			self.aa_aln[anno] = MultipleSeqAlignment(tmp_aaseqs)
 
 	def add_aa_mutations(self):
 		if hasattr(self.tree.seed_node, 'aa_seq'):
 			for node in self.tree.postorder_internal_node_iter():
 				for child in node.child_nodes():
-					child.aa_muts = ','.join([anc+str(pos)+der for pos,anc, der in 
-							zip(range(1,len(node.aa_seq)+1), node.aa_seq, child.aa_seq) if anc!=der])
-			self.tree.seed_node.aa_muts=""
+					child.aa_muts = {}
+				for anno, parent_aa_seq in node.aa_seq.iteritems():
+					for child in node.child_nodes():
+						child.aa_muts[anno] = ','.join([anc+str(pos)+der for pos,anc, der in 
+							zip(range(1,len(parent_aa_seq)+1), parent_aa_seq, child.aa_seq[anno]) if anc!=der])
+			self.tree.seed_node.aa_muts={}
 		else:
 			print "no translation available"
 

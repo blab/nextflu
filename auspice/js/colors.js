@@ -15,7 +15,6 @@ var colors = [
 	["#4E95BD", "#5DA8A3", "#70B487", "#87BB6D", "#A0BE58", "#BABC4A", "#D0B440", "#E0A23A", "#E68634", "#E35F2D", "#DD3425"],
 	["#4D92BF", "#5AA5A8", "#6BB18D", "#80B974", "#98BD5E", "#B1BD4E", "#C8B944", "#DAAC3D", "#E59738", "#E67732", "#E14F2A", "#DB2522"]
 ];
-var regionColors = ["#5097BA", "#60AA9E", "#75B681", "#8EBC66", "#AABD52", "#C4B945", "#D9AD3D", "#E59637", "#E67030", "#DF4327"]
 var genotypeColors = ["#60AA9E", "#D9AD3D", "#5097BA", "#E67030", "#8EBC66", "#E59637", "#AABD52", "#DF4327", "#C4B945", "#75B681"]
 
 var epitopeColorScale = d3.scale.linear().clamp([true])
@@ -57,12 +56,16 @@ var HIColorScale = function(c){
 HIColorScale.domain = HIColorScale_valid.domain;
 
 var regionColorScale = d3.scale.ordinal()
-	.domain(regions)
-	.range(regionColors);
+	.domain(regions.map(function(d){return d[0];}))
+	.range(regions.map(function(d){return d[1];}));
 
 var dateColorScale = d3.scale.linear().clamp([true])
 	.domain(dateColorDomain)
 	.range(colors[10]);
+
+var regionColorScale = d3.scale.ordinal()
+	.domain(regions.map(function(d){return d[0];}))
+	.range(regions.map(function(d){return d[1];}));
 
 // "ep", "ne" and "rb" need no adjustments
 function adjust_coloring_by_date() {
@@ -85,6 +88,13 @@ function adjust_coloring_by_date() {
 	}	
 }
 
+function stateAtPosition(clade, gene, pos){
+	if (typeof cladeToSeq[clade][gene][pos] == "undefined"){
+		return cladeToSeq["root"][gene][pos];
+	}else{
+		return cladeToSeq[clade][gene][pos];
+	}
+}
 
 function colorByTrait() {
 	
@@ -174,7 +184,7 @@ function colorByGenotype() {
 	console.log(positions_list);
 	if (positions_list.length > 0) {
 		colorBy = "genotype";
-		colorByGenotypePosition(positions_list);
+		colorByGenotypePosition(positions_list, 'nuc');
 	}
 	else {
 		d3.select("#coloring").each(colorByTrait);
@@ -184,14 +194,13 @@ function colorByGenotype() {
 	}
 }
 
-function colorByGenotypePosition (positions) {
+function colorByGenotypePosition (positions, gene) {
 	var gts = nodes.map(function (d) {
 		var tmp = [];
 		for (var i=0; i<positions.length; i++){
-			var aa = cladeToSeq[d.clade];
-			tmp[tmp.length] = (positions[i]+1)+aa[positions[i]];
+			tmp[tmp.length] = (positions[i]+1)+stateAtPosition(d.clade, gene, positions[i]);
 		}
-		d.coloring = tmp.join(" / "); 
+		d.coloring = gene+':'+tmp.join(" / "); 
 		return d.coloring;});
 	var unique_gts = d3.set(gts).values();
 	var gt_counts = {};

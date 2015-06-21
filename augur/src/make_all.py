@@ -161,6 +161,12 @@ if __name__=="__main__":
 				if resolution == '20y':
 					n_viruses = 20
 					n_years = 20
+				if resolution == '10y':
+					n_viruses = 10
+					n_years = 10				
+				if resolution == '12y':
+					n_viruses = 8
+					n_years = 12
 				prefix = lineage + '_'
 				call = map(str, [params.bin, process, '-v', n_viruses, '-y', n_years, 
 				           		 '--prefix', prefix, '--resolution', resolution] + common_args)

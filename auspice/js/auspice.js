@@ -7,6 +7,7 @@ var date_select = true;
 {% include_relative autocomplete.js %}
 {% include_relative globals.js %}
 {% include_relative HI.js %}
+{% include_relative ordinal_colormaps.js %}
 {% include_relative date.js %}
 {% include_relative legend.js %}
 {% include_relative colors.js %}

@@ -40,8 +40,42 @@ var virusTooltip = d3.tip()
 		}			
 		string += "</div>";
 		
+		// following may or may not be present
+		if ((typeof focusNode != "undefined")&&(typeof focusNode.HI_titers[d.clade]!="undefined")){
+			string += "<div class=\"smallspacer\"></div>";				
+			string += "HI distances:<br><div class=\"smallnote\"><ul>";
+			string += '<li>Serum: <span style="float:right">log2, raw (self)</span></li>';
+			for (var tmp_serum in focusNode.HI_titers[d.clade]){
+				var homHI = focusNode.HI_titers_raw[focusNode.clade][tmp_serum];
+				var logHI = focusNode.HI_titers[d.clade][tmp_serum];
+				var rawHI = focusNode.HI_titers_raw[d.clade][tmp_serum];
+				var serum_name;
+				if (tmp_serum.length<20){
+					serum_name = tmp_serum+':';
+				}else{
+					serum_name = tmp_serum.substring(0,17)+'..:';
+				}
+				console.log(serum_name);
+				string += '<li>' + serum_name + ' <span style="float:right">' +  logHI.toFixed(1)+', ' + rawHI.toFixed(0)+ ' (' + homHI.toFixed(0) +")</span></li>";
+			}
+			string += "</ul></div>";
+		}
+
+		// following may or may not be present
+//		if ((typeof focusNode != "undefined")&&(typeof focusNode.HI_titers[d.clade]!="undefined")){
+//			string += '<div class=\"smallspacer\"></div><table bgcolor="#CCC">';				
+//			string += "<tr><td>Serum</td><td>log2</td><td>raw</td><td>homologous</td></tr>";
+//			for (var tmp_serum in focusNode.HI_titers[d.clade]){
+//				var homHI = focusNode.HI_titers_raw[focusNode.clade][tmp_serum];
+//				var logHI = focusNode.HI_titers[d.clade][tmp_serum];
+//				var rawHI = focusNode.HI_titers_raw[d.clade][tmp_serum];
+//				string += "<tr><td>" + tmp_serum + '</td><td>' +  logHI.toFixed(1)+'</td><td>' + rawHI.toFixed(0)+ '</td><td>' + homHI.toFixed(0) +"</td></tr>";
+//			}
+//			string += "</table>";
+//		}
+//		console.log(string);
+
 		string += "<div class=\"smallspacer\"></div>";
-				
 		// following may or may not be present
 		string += "<div class=\"smallnote\">";
 		if (typeof d.ep != "undefined") {
@@ -61,6 +95,7 @@ var virusTooltip = d3.tip()
 	});
 treeplot.call(virusTooltip);
 
+
 var linkTooltip = d3.tip()
 	.direction('e')
 	.attr('class', 'd3-tip')
@@ -69,10 +104,30 @@ var linkTooltip = d3.tip()
 		string = ""
 		if (typeof d.frequency != "undefined") {
 			string += "Frequency: " + (100 * d.frequency).toFixed(1) + "%"
-			if (d.aa_muts.length){
-				string+="<br>Mutations: "+d.aa_muts.replace(/,/g, ', ');
+		}
+		string += "<div class=\"smallspacer\"></div>";
+		string += "<div class=\"smallnote\">";
+		if ((typeof d.aa_muts !="undefined")&&(mutType=='aa')){
+			var ncount = 0;
+			for (tmp_gene in d.aa_muts) {ncount+=d.aa_muts[tmp_gene].length;}
+			if (ncount) {string += "<b>Mutations:</b><ul>";}
+			for (tmp_gene in d.aa_muts){
+				if (d.aa_muts[tmp_gene].length){
+					string+="<li>"+tmp_gene+":</b> "+d.aa_muts[tmp_gene].replace(/,/g, ', ') + "</li>";
+				}
 			}
 		}
+		else if ((typeof d.nuc_muts !="undefined")&&(mutType=='nuc')&&(d.nuc_muts.length)){
+			var tmp_muts = d.nuc_muts.split(',');
+			var nmuts = tmp_muts.length;
+			tmp_muts = tmp_muts.slice(0,Math.min(10, nmuts))
+			string += "<li>"+tmp_muts.join(', ');
+			if (nmuts>10) {string+=' + '+ (nmuts-10) + ' more';}
+			string += "</li>";
+		}
+		string += "</ul>";
+		string += "click to zoom into clade"
+		string += "</div>";
 		return string;
 	});
 treeplot.call(linkTooltip);

@@ -43,6 +43,7 @@ class HI_tree(object):
 		'''
 		consensus_func = np.mean
 		self.HI_normalized = {}
+		self.HI_raw = {}
 		sera = set()
 		ref_strains = set()
 		HI_strains = set()
@@ -55,6 +56,7 @@ class HI_tree(object):
 					ref_strains.add(ref[0])
 					normalized_val = consensus_func(np.log2(self.HI[(ref[0], ref)])) - consensus_func(np.log2(val))
 					self.HI_normalized[(test, ref)] = normalized_val
+					self.HI_raw[(test, ref)] = np.median(val)
 				else:
 					print "no homologous titer found:", ref
 		self.sera = list(sera)
@@ -338,17 +340,20 @@ class HI_tree(object):
 
 	def add_titers(self):
 		for ref in self.ref_strains:
-			self.node_lookup[ref].HI_titers_perserum= defaultdict(dict)
+			self.node_lookup[ref].HI_titers= defaultdict(dict)
+			self.node_lookup[ref].HI_titers_raw= defaultdict(dict)
 			self.node_lookup[ref].potency={}
 		for ref in self.sera:
 			self.node_lookup[ref[0]].potency[ref[1]] = self.serum_potency[ref]
 		for (test, ref), val in self.HI_normalized.iteritems():
-			self.node_lookup[ref[0]].HI_titers_perserum[self.node_lookup[test].clade][ref[1]] = val
+			self.node_lookup[ref[0]].HI_titers[self.node_lookup[test].clade][ref[1]] = val
+		for (test, ref), val in self.HI_raw.iteritems():
+			self.node_lookup[ref[0]].HI_titers_raw[self.node_lookup[test].clade][ref[1]] = val
 		for test in self.HI_strains:
 			self.node_lookup[test].avidity = self.virus_effect[test]
 		for ref in self.ref_strains:
-			self.node_lookup[ref].HI_titers = {key:np.mean(titers.values()) for key, titers in 
-			 									self.node_lookup[ref].HI_titers_perserum.iteritems()}
+			self.node_lookup[ref].mean_HI_titers = {key:np.mean(titers.values()) for key, titers in 
+			 									self.node_lookup[ref].HI_titers.iteritems()}
 			self.node_lookup[ref].mean_potency = np.mean(self.node_lookup[ref].potency.values())
 
 
