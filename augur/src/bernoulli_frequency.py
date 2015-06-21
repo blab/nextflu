@@ -340,7 +340,7 @@ class virus_frequencies(object):
 
 				# make n pivots a year, interpolate frequencies
 				# FIXME: adjust stiffness to total number of observations in a more robust manner
-				if len(obs)>0 and len(obs)<len(tps):
+				if np.sum(obs)>0 and np.sum(obs)<len(tps):
 					fe = frequency_estimator(zip(tps, obs), pivots=self.pivots, stiffness=self.stiffness*len(all_dates)/2000.0, 
 											logit=True, extra_pivots = self.extra_pivots, **self.kwarks)
 					fe.learn()

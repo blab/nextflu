@@ -280,7 +280,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 		if 'frequencies' in steps:
 			print "--- Estimating frequencies at " + time.strftime("%H:%M:%S") + " ---"
 			self.determine_variable_positions()
-			self.estimate_frequencies(tasks = ["mutations","tree"])
+			self.estimate_frequencies(tasks = ["mutations", "tree"])
 			if 'genotype_frequencies' in steps: 
 					self.estimate_frequencies(tasks = ["genotypes"])
 			self.dump()
@@ -301,7 +301,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 			self.generate_indexHTML()
 
 		if 'HIvalidate' in steps:
-			print "--- generating valitation figures " + time.strftime("%H:%M:%S") + " ---"
+			print "--- generating validation figures " + time.strftime("%H:%M:%S") + " ---"
 			import matplotlib.pyplot as plt
 			htmlpath = '../auspice/'
 			if self.virus_type is not None: 
