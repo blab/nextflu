@@ -340,17 +340,20 @@ class virus_frequencies(object):
 
 				# make n pivots a year, interpolate frequencies
 				# FIXME: adjust stiffness to total number of observations in a more robust manner
-				fe = frequency_estimator(zip(tps, obs), pivots=self.pivots, stiffness=self.stiffness*len(all_dates)/2000.0, 
-										logit=True, extra_pivots = self.extra_pivots, **self.kwarks)
-				fe.learn()
+				if len(obs)>0 and len(obs)<len(tps):
+					fe = frequency_estimator(zip(tps, obs), pivots=self.pivots, stiffness=self.stiffness*len(all_dates)/2000.0, 
+											logit=True, extra_pivots = self.extra_pivots, **self.kwarks)
+					fe.learn()
 
-				# assign the frequency vector to the node
-				child.freq[region_name] = frequency_left * logit_inv(fe.final_pivot_freq)
+					# assign the frequency vector to the node
+					child.freq[region_name] = frequency_left * logit_inv(fe.final_pivot_freq)
+					if debug: print len(child.tips), child.freq[region_name][-5:]
+				else:
+					child.freq[region_name] = np.zeros_like(self.pivots)
 				child.logit_freq[region_name] = logit_transform(child.freq[region_name])
-				if debug: print len(child.tips), child.freq[region_name][-5:]
 
 				# update the frequency remaining to be explained and prune explained observations
-				frequency_left *= (1.0-logit_inv(fe.final_pivot_freq))
+				frequency_left *= (1.0-child.freq[region_name]/(frequency_left+1e-10))
 				tps_left = np.ones_like(tps,dtype=bool)
 				tps_left[obs]=False # prune observations from clade
 				tps = tps[tps_left]
