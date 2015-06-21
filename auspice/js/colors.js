@@ -99,6 +99,10 @@ function stateAtPosition(clade, gene, pos){
 function colorByTrait() {
 	
 	colorBy = document.getElementById("coloring").value;
+	if (colorBy=="--"){
+		document.getElementById("coloring").value = "ep";
+		colorBy = document.getElementById("coloring").value;
+	}
 	console.log(colorBy);
 
 	if (colorBy == "ep") {
@@ -252,19 +256,20 @@ function colorByHIDistance(){
 		.style("font-size", function (d) {if (d==focusNode) {return "32px";} else {return "24px";}})
 		.text(function (d) {if (d==focusNode) {return '\uf05b';} else {return '\uf10c';}});
 
-	if (predictedHI){
-		calcHIpred(focusNode, rootNode);
-	}
-	else{
-		calcHImeasured(focusNode, rootNode);
-	}
+	calcHIpred(focusNode, rootNode);
+	calcHImeasured(focusNode, rootNode);
+
 	console.log("Color by HI Distance from "+focusNode.strain);
 	console.log("Using predictedHI: "+predictedHI);
 	console.log("correcting for virus effect: "+correctVirus);
 	console.log("correction for serum effect: "+correctPotency);
 
 	colorScale = HIColorScale;
-	nodes.map(function(d) { d.coloring = d.HI_dist;});
+	if (HIPrediction){
+		nodes.map(function(d) { d.coloring = d.HI_dist_pred;});
+	}else{
+		nodes.map(function(d) { d.coloring = d.HI_dist_meas;});		
+	}
 
 	treeplot.selectAll(".link")
 		.style("stroke", branchStrokeColor);

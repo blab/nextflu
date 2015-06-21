@@ -71,6 +71,7 @@ layout: default
 									<option value={{color_option[0] }}>{{ color_option[1] }}</option>
 									{% endif %}
 								{% endfor %}														
+								<option value="--">--</option>
 								</select>
 							</div>
 					</div>
@@ -82,12 +83,9 @@ layout: default
 					</div>
 					{% if page.coloring contains 'HI' %}
 					<div class="form-group">
-						<label class="col-xs-4 control-label"></label>
-						<div class="col-xs-8 controls">
-						<input type="checkbox" id="HIPrediction" value="pred" checked="checked"> use predicted HI<br>
-						<input type="checkbox" id="serum" value="serum" checked="checked"> correct potency<br>
-						<input type="checkbox" id="virus" value="virus" checked="checked"> correct avidity<br>
-						</div>
+						<input type="checkbox" id="HIPrediction" value="pred" checked="checked"> color by predicted HI<br>
+						<input type="checkbox" id="serum" value="serum" checked="checked"> correct column effect (serum)<br>
+						<input type="checkbox" id="virus" value="virus" checked="checked"> correct row effect (virus)<br>
 					</div>		
 					{% endif %}	
 				</form>
@@ -246,6 +244,33 @@ layout: default
 		estimated.
 	</div>
 </div>
+
+<div class="row">
+	<div class="col-md-12">
+		<div class="bigspacer"></div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-3">
+		<div class="io-container title">
+			Validation of HI model
+		</div>	
+		<div class="spacer"></div>	
+	</div>
+	<div class="col-md-9">
+	 <figure>
+		<img src="/{{ page.virus }}/{{ page.resolution }}/HI_prediction.png" width="700" align="middle">
+  		<figcaption>Predicted log2 HI titer distance vs measured HI titer distance. The model was trained on 90% of the data and the remaining 10% are shown here. The average absolution deviation and the RMS deviation are given in the figure title. </figcaption>
+	 </figure> 
+	 <div class="bigspacer"></div>	
+	 <figure>
+		<img src="/{{ page.virus }}/{{ page.resolution }}HI_symmetry.png" width="700" align="middle">
+  		<figcaption>Within our model, titer distance is <it>serum effect + distance + virus effect</it>. Subtracting the respective serum and virus effect from reciprocal HI titer measurements should result in the same <it>distance</it>. The figure shows the difference between reciprocal titers before and after subtraction of the serum and virus effect. The standard deviation of the corrected difference is much smaller than the prior to correction, consistent with an approximately symmetric distance.</figcaption>
+	 </figure> 
+	</div>
+</div>
+
 
 <div class="row">
 	<div class="col-md-3"></div>

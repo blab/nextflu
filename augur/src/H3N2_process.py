@@ -288,8 +288,6 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 			print "--- Adding HI titers to the tree " + time.strftime("%H:%M:%S") + " ---"
 			self.map_HI_to_tree(training_fraction=1.0, method = 'nnl1reg', lam_HI=reg, lam_avi=reg, lam_pot = reg)
 			self.dump()
-#		if 'fitness' in steps:
-
 
 		if 'export' in steps:
 			self.add_titers()
@@ -302,8 +300,27 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 	               annotations = ['3c2.a', '3c3.a'])
 			self.generate_indexHTML()
 
+		if 'HIvalidate' in steps:
+			print "--- generating valitation figures " + time.strftime("%H:%M:%S") + " ---"
+			import matplotlib.pyplot as plt
+			htmlpath = '../auspice/'
+			if self.virus_type is not None: 
+				htmlpath+=self.virus_type+'/'
+			if self.resolution is not None: 
+				htmlpath+=self.resolution+'/'
+
+			self.check_symmetry(plot=True)
+			plt.savefig(htmlpath+'HI_symmetry.png')
+
+			self.map_HI_to_tree(training_fraction=0.9, method='nnl1reg', lam_HI=reg, lam_avi=reg, lam_pot=reg, force_redo=True)
+			self.validate(plot=True)
+			plt.savefig(htmlpath+'HI_prediction.png')
+
+
+
 if __name__=="__main__":
-	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies', 'HI', 'export']
+	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 
+				 'frequencies','genotype_frequencies', 'HI', 'export']
 	from process import parser
 
 	params = parser.parse_args()
@@ -315,7 +332,7 @@ if __name__=="__main__":
 		params.time_interval = (params.interval[0], params.interval[1])
 	dt= params.time_interval[1]-params.time_interval[0]
 	params.pivots_per_year = 12.0 if dt<5 else 6.0 if dt<10 else 3.0
-	steps = all_steps[all_steps.index(params.start):(all_steps.index(params.stop)+1)]
+	steps = all_steps[all_steps.index(params.start):(all_steps.index(params.stop)+1)] + ['HIvalidate']
 	if params.skip is not None:
 		for tmp_step in params.skip:
 			if tmp_step in steps:

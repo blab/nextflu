@@ -274,14 +274,14 @@ class HI_tree(object):
 		self.make_treegraph()		
 
 	def map_HI_to_tree(self, training_fraction = 1.0, method = 'nnls', lam_HI=5.0, 
-						lam_pot = 5.0, lam_avi = 5.0, cutoff_date = None, subset_strains = False):
+						lam_pot = 5.0, lam_avi = 5.0, cutoff_date = None, subset_strains = False, force_redo = False):
 		self.training_fraction = training_fraction
 		self.subset_strains=subset_strains
 		self.lam_pot = lam_pot
 		self.lam_avi = lam_avi
 		self.lam_HI = lam_HI
 		self.cutoff_date = cutoff_date
-		if self.tree_graph is None:
+		if self.tree_graph is None or force_redo:
 			self.prepare_HI_map()
 
 		if method=='l1reg':  # l1 regularized fit, no constraint on sign of effect
@@ -313,12 +313,13 @@ class HI_tree(object):
 							  for ii, strain in enumerate(self.HI_strains)}
 
 	def validate(self, plot=False):
+		from scipy.stats import linregress, pearsonr
 		self.validation = {}
 		for key, val in self.test_HI.iteritems():
 			pred_HI = self.predict_HI(key[0], key[1])
 			if pred_HI is not None:
 				self.validation[key] = (val, pred_HI)
-		from scipy.stats import linregress, pearsonr
+
 		a = np.array(self.validation.values())
 		self.abs_error = np.mean(np.abs(a[:,0]-a[:,1]))
 		self.rms_error = np.sqrt(np.mean((a[:,0]-a[:,1])**2))
@@ -326,17 +327,54 @@ class HI_tree(object):
 		print "error (abs/rms): ",self.abs_error, self.rms_error
 		print "slope, intercept:", self.slope, self.intercept
 		print "pearson correlation:", pearsonr(a[:,0], a[:,1])
+
 		if plot:
 			import matplotlib.pyplot as plt
+			import seaborn as sns
+			sns.set_style('darkgrid')
+			fs = 16
 			plt.figure()
+			ax = plt.subplot(111)
 			plt.plot([-1,6], [-1,6], 'k')
 			plt.scatter(a[:,0], a[:,1])
-			plt.xlabel("measured")
-			plt.ylabel("predicted")
-			plt.xlabel("measured")
-			plt.title('reg HI/pot/avi ='+str(self.lam_HI)+'/'+str(self.lam_pot)+'/'+str(self.lam_avi)+', avg abs/rms '\
+			plt.ylabel("predicted log2 distance", fontsize = fs)
+			plt.xlabel("measured log2 distance" , fontsize = fs)
+			ax.tick_params(axis='both', labelsize=fs)
+			plt.title('regularization HI/pot/avi ='+str(self.lam_HI)+'/'+str(self.lam_pot)+'/'+str(self.lam_avi)+'\n prediction error: avg abs/rms '\
 						+str(round(self.abs_error, 3))\
-					+'/'+str(round(self.rms_error,3)))
+					+'/'+str(round(self.rms_error,3)), fontsize = fs)
+
+	def check_symmetry(self, plot=False):
+		reciprocal_measurements = []
+		reciprocal_measurements_titers = []
+		for (testvir, serum) in self.HI_normalized:
+			tmp_recip = [v for v in self.HI_normalized if serum[0]==v[0] and testvir==v[1][0]]
+			for v in tmp_recip:
+				val_fwd = self.HI_normalized[(testvir,serum)]
+				val_bwd = self.HI_normalized[v]
+				diff_uncorrected = val_fwd - val_bwd
+				diff_corrected = (val_fwd - self.serum_potency[serum] - self.virus_effect[testvir])\
+								-(val_bwd - self.serum_potency[v[1]] - self.virus_effect[serum[0]])
+				val_bwd = self.HI_normalized[v]
+				reciprocal_measurements.append([testvir, serum, diff_uncorrected, diff_corrected])
+				reciprocal_measurements_titers.append([testvir, serum, val_fwd, val_bwd, 
+				                                      (val_fwd - self.serum_potency[serum] - self.virus_effect[testvir]),
+	                      							  (val_bwd - self.serum_potency[v[1]] - self.virus_effect[serum[0]]),
+													  ])
+		if plot:
+			import matplotlib.pyplot as plt
+			import seaborn as sns
+			sns.set_style('darkgrid')
+			fs = 16
+			plt.figure()
+			ax = plt.subplot(111)
+			plt.title('asymmetry in reciprocal titers', fontsize = 16)
+			plt.hist([x[2] for x in reciprocal_measurements],alpha=0.7, label="raw asymmetry", normed=True)
+			plt.hist([x[3] for x in reciprocal_measurements],alpha=0.7, label="corrected", normed=True)
+			plt.xlabel('distance asymmetry', fontsize=fs)
+			ax.tick_params(axis='both', labelsize=fs)
+			plt.legend()
+
 
 	def add_titers(self):
 		for ref in self.ref_strains:

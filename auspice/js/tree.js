@@ -351,6 +351,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.on('mouseout', virusTooltip.hide)
 		.on('click', function (d){
 			focusNode = d;
+			document.getElementById("coloring").value = "--";
 			colorByHIDistance();
 		});
 

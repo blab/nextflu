@@ -1,8 +1,10 @@
 import matplotlib.pyplot as plt
+import seaborn as sns
 from tree_titer import plot_tree, plot_dHI_distribution
 import cPickle, argparse
 
 def validation_figures(params):
+	sns.set_style('darkgrid')
 	virus_config.update(params.__dict__)
 	# pass all these arguments to the processor: will be passed down as kwargs through all classes
 	myflu = flu_process(**virus_config) 
@@ -13,22 +15,22 @@ def validation_figures(params):
 	myflu.map_HI_to_tree(training_fraction=params.training, method = 'nnl1reg', 
 		lam_HI=params.reg, lam_pot=params.pot, lam_avi=params.avi, subset_strains = params.train_strains)
 	myflu.validate(plot=True)
-	plt.savefig(fig_prefix+'HI_scatter.pdf')
+	plt.savefig(fig_prefix+'HI_scatter.png')
 
 	####  effects and mutations  #######################################################
 	plot_dHI_distribution(myflu.tree)
-	plt.savefig(fig_prefix+'dHI_distribution.pdf')
+	plt.savefig(fig_prefix+'dHI_distribution.png')
 
 	####  cHI colored tree  #######################################################
 	plot_tree(myflu.tree)
-	plt.savefig(fig_prefix+'cHI_tree.pdf')
+	plt.savefig(fig_prefix+'cHI_tree.png')
 
 	####  VIRUS EFFECTS   #######################################################
 	plt.figure()
 	plt.title('histogram of inferred virus effects')
 	plt.hist(myflu.virus_effect.values())
 	plt.xlabel('virus avidities')
-	plt.savefig(fig_prefix+'HI_avidity_histogram.pdf')
+	plt.savefig(fig_prefix+'HI_avidity_histogram.png')
 	print "virus effects:", np.mean(myflu.virus_effect.values()), np.std(myflu.virus_effect.values())
 
 	####  SERUM POTENCIES  #######################################################
@@ -61,7 +63,7 @@ def validation_figures(params):
 	plt.hist([x[3] for x in reciprocal_measurements],alpha=0.7, label="corrected", normed=True)
 	plt.xlabel('distance asymmetry')
 	plt.legend()
-	plt.savefig(fig_prefix+'HI_titer_asymmetry.pdf')
+	plt.savefig(fig_prefix+'HI_titer_asymmetry.png')
 
 	####  Ultrametricity #######################################################
 	symmetrized = {(v,s[0]): (val_fwd, val_bwd, cval_fwd, cval_bwd) for v,s,val_fwd, val_bwd,cval_fwd, cval_bwd in reciprocal_measurements_titers}
@@ -100,7 +102,7 @@ def validation_figures(params):
 	plt.hist(np.array(ultra_deviation[1])/np.mean(ultra_norm[1]),label = "corrected", alpha=0.7,normed=True)
 	plt.xlabel('deviation')
 	plt.legend()
-	plt.savefig(fig_prefix+'HI_titer_ultrametricity.pdf')
+	plt.savefig(fig_prefix+'HI_titer_ultrametricity.png')
 
 	#### titer effects ###############################################################
 	dHI_list = []

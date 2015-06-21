@@ -6,23 +6,23 @@ var focusNode;
  * for each node, accumulate HI difference along branches
 **/
 function calcHIsubclade(node){
-	node.HI_dist = node.parent.HI_dist+node.dHI;
+	node.HI_dist_pred = node.parent.HI_dist_pred+node.dHI;
 	if (typeof node.children != "undefined") {
 		for (var i=0; i<node.children.length; i++) {
 		calcHIsubclade(node.children[i]);
 		}
 	}else{
 		if (typeof node.avidity != "undefined" && correctVirus==false){
-			node.HI_dist+=node.avidity;
+			node.HI_dist_pred+=node.avidity;
 		}
 	}
 };
 
 function calcHIpred(node, rootNode){
 	if (correctPotency){
-		node.HI_dist = 0;
+		node.HI_dist_pred = 0;
 	}else{
-		node.HI_dist=node.mean_potency;
+		node.HI_dist_pred=node.mean_potency;
 	}
 	if (typeof node.children != "undefined") {
 		for (var i=0; i<node.children.length; i++) {
@@ -32,7 +32,7 @@ function calcHIpred(node, rootNode){
 	var tmp_node = node;
 	var pnode = tmp_node.parent;
 	while (tmp_node.clade != rootNode.clade){
-		pnode.HI_dist=tmp_node.HI_dist + tmp_node.dHI;
+		pnode.HI_dist_pred=tmp_node.HI_dist_pred + tmp_node.dHI;
 		if (typeof pnode.children != "undefined") {
 			for (var i=0; i<pnode.children.length; i++) {
 				if (tmp_node.clade!=pnode.children[i].clade){
@@ -44,7 +44,7 @@ function calcHIpred(node, rootNode){
 		pnode = tmp_node.parent;
 	}
 	if (correctVirus==false){
-		node.HI_dist += node.avidity;
+		node.HI_dist_pred += node.avidity;
 	}
 };
 
@@ -53,22 +53,22 @@ function calcHImeasured(node, rootNode){
 	for (var i=0; i<tips.length; i+=1){
 		d = tips[i];
 		if (typeof(node.mean_HI_titers[d.clade])!="undefined"){
-			d.HI_dist = node.mean_HI_titers[d.clade]
+			d.HI_dist_meas = node.mean_HI_titers[d.clade]
 			if (correctVirus){
-				d.HI_dist -= d.avidity;
+				d.HI_dist_meas -= d.avidity;
 			}
 			if (correctPotency){
-				d.HI_dist -= node.mean_potency;
+				d.HI_dist_meas -= node.mean_potency;
 			}
 		}else{
-			d.HI_dist = 'NaN';
+			d.HI_dist_meas = 'NaN';
 		}
 	}
 };
 
 function tipHIvalid(d) {
 	var vis = "visible";
-	if (d.HI_dist =='NaN') {
+	if ((predictedHI==false)&&(d.HI_dist_meas =='NaN')) {
 		vis = "hidden";
 	}
 	return vis;

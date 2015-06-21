@@ -21,7 +21,7 @@ var virusTooltip = d3.tip()
 
 			string += "First chosen " + vaccine_date.toLocaleString("en-us", { month: "short" }) + " " + vaccine_date.getFullYear() + "<br>";
 			string += "<div class=\"smallspacer\"></div>";
-		}			
+		}
 		
 		if (typeof d.country != "undefined") {
 			string += d.country.replace(/([A-Z])/g, ' $1');
@@ -41,30 +41,33 @@ var virusTooltip = d3.tip()
 		string += "</div>";
 		
 		// following may or may not be present
-		if ((predictedHI==false)&&(typeof focusNode != "undefined")&&(typeof focusNode.HI_titers[d.clade]!="undefined")){
+		if ((typeof focusNode != "undefined")){
 			string += "<div class=\"smallspacer\"></div>";				
 			string += "HI rel to "+d.strain+":<br><div class=\"smallnote\"><ul>";
 			string += '<li>Serum: <span style="float:right">log2, raw (self)</span></li>';
-			for (var tmp_serum in focusNode.HI_titers[d.clade]){
-				var homHI = focusNode.HI_titers_raw[focusNode.clade][tmp_serum];
-				var rawHI = focusNode.HI_titers_raw[d.clade][tmp_serum];
-				var logHI = focusNode.HI_titers[d.clade][tmp_serum];
-				if (correctVirus){logHI-=d.avidity;}
-				if (correctPotency){logHI-=focusNode.potency[tmp_serum];}
-				var serum_name;
-				if (tmp_serum.length<20){
-					serum_name = tmp_serum+':';
-				}else{
-					serum_name = tmp_serum.substring(0,17)+'..:';
+			if (typeof focusNode.HI_titers[d.clade] != "undefined"){
+				for (var tmp_serum in focusNode.HI_titers[d.clade]){
+					var homHI = focusNode.HI_titers_raw[focusNode.clade][tmp_serum];
+					var rawHI = focusNode.HI_titers_raw[d.clade][tmp_serum];
+					var logHI = focusNode.HI_titers[d.clade][tmp_serum];
+					if (correctVirus){logHI-=d.avidity;}
+					if (correctPotency){logHI-=focusNode.potency[tmp_serum];}
+					var serum_name;
+					if (tmp_serum.length<20){
+						serum_name = tmp_serum+':';
+					}else{
+						serum_name = tmp_serum.substring(0,17)+'..:';
+					}
+					string += '<li>' + serum_name + ' <span style="float:right">' +  logHI.toFixed(1)+', ' + rawHI.toFixed(0)+ ' (' + homHI.toFixed(0) +")</span></li>";
 				}
-				console.log(serum_name);
-				string += '<li>' + serum_name + ' <span style="float:right">' +  logHI.toFixed(1)+', ' + rawHI.toFixed(0)+ ' (' + homHI.toFixed(0) +")</span></li>";
 			}
+			string += '<li>' + 'predicted:' + ' <span style="float:right">' +  d.HI_dist_pred.toFixed(2) + ', NA, (NA)'+ "</span></li>";
 			string += "</ul></div>";
-		}else if ((predictedHI==true)&&(typeof focusNode != "undefined")){
-			string += "<div class=\"smallspacer\"></div>";		
-			string += "HI rel to "+d.strain+":<br>Pred. log2: "+d.HI_dist.toFixed(2)+"<br>";
 		}
+		//else if ((predictedHI==true)&&(typeof focusNode != "undefined")){
+		//	string += "<div class=\"smallspacer\"></div>";		
+		//	string += "HI rel to "+d.strain+":<br>Pred. log2: "+d.HI_dist_pred.toFixed(2)+"<br>";
+		//}
 
 		string += "<div class=\"smallspacer\"></div>";
 		// following may or may not be present
