@@ -141,7 +141,7 @@ class BVic_process(process, BVic_filter, BVic_clean, BVic_refine, HI_tree):
 		HI_tree.__init__(self,**kwargs)
 		self.verbose = verbose
 
-	def run(self, steps, viruses_per_month=50, raxml_time_limit = 1.0, reg=0.2):
+	def run(self, steps, viruses_per_month=50, raxml_time_limit = 1.0, reg=1.0):
 		if 'filter' in steps:
 			print "--- Virus filtering at " + time.strftime("%H:%M:%S") + " ---"
 			self.filter()
@@ -183,9 +183,9 @@ class BVic_process(process, BVic_filter, BVic_clean, BVic_refine, HI_tree):
 		if 'HI' in steps:
 			print "--- Adding HI titers to the tree " + time.strftime("%H:%M:%S") + " ---"
 			self.map_HI_to_tree(training_fraction=1.0, method = 'nnl1reg', lam_HI=reg, lam_avi=reg, lam_pot = reg)
-			self.add_titers()
 			self.dump()
 		if 'export' in steps:
+			self.add_titers()
 			self.temporal_regional_statistics()
 			# exporting to json, including the BVic specific fields
 			self.export_to_auspice(tree_fields = [
