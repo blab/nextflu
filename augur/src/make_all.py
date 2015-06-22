@@ -10,7 +10,7 @@ patterns = {('A / H3N2', ''):'H3N2',
 			('A / H1N1', 'seasonal'):'H1N1',
 			}
 
-outgroups = {lineage:SeqIO.read('source-data/'+lineage+'_ougroup.gb', 'genbank')
+outgroups = {lineage:SeqIO.read('source-data/'+lineage+'_outgroup.gb', 'genbank')
 			for lineage in ['H3N2', 'H1N1pdm', 'Vic', 'Yam']}
 
 def determine_lineage(seq):
