@@ -6,7 +6,7 @@ Entrez.email = "richard.neher@tuebingen.mpg.de"     # Always tell NCBI who you a
 outgroups = {'H3N2':'U26830',
              'H1N1pdm':'AF455680',
              'Vic':'CY018813',
-             'Yam':'AF059996'
+             'Yam':'CY019707'
              }
 
 for virus, genbank_id in outgroups.iteritems(): 
