@@ -128,7 +128,7 @@ if __name__=="__main__":
 		params.lineages = ['H3N2', 'H1N1pdm', 'Vic', 'Yam']
 		
 	if params.resolutions is None:
-		params.resolutions = ['1y', '3y', '6y']
+		params.resolutions = ['1y', '3y', '6y', '12y']
 
 	for lineage in params.lineages:
 		if params.s3:
