@@ -10,6 +10,24 @@ patterns = {('A / H3N2', ''):'H3N2',
 			('A / H1N1', 'seasonal'):'H1N1',
 			}
 
+outgroups = {lineage:SeqIO.read('source-data/'+lineage+'_ougroup.gb', 'genbank')
+			for lineage in ['H3N2', 'H1N1pdm', 'Vic', 'Yam']}
+
+def determine_lineage(seq):
+	fields = map(lambda x:x.strip(), seq.description.split('|'))
+	tmp_lineage = (fields[2], fields[4])
+	if tmp_lineage in patterns:
+		return fields[0], patterns[tmp_lineage]
+	else:
+		scores = []
+		for olineage, oseq in outgroups.iteritems():
+			SeqIO.write([oseq, seq], "temp_in.fasta", "fasta")
+			os.system("mafft --auto temp_in.fasta > temp_out.fasta")
+			tmp_aln = np.array(AlignIO.read('temp_out.fasta', 'fasta'))
+			scores.append((olineage, (tmp_aln[0]==tmp_aln[1]).sum()))
+		scores.sort(key = lambda x:x[1])
+		return fields[0], scores[-1][0]
+
 def pull_fasta_from_s3(lineage, directory = 'data/', bucket = 'nextflu-data'):
 	"""Retrieve FASTA files from S3 bucket"""
 	"""Boto expects environmental variables AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY"""
@@ -86,16 +104,10 @@ def ammend_fasta(fname, lineage, threshold = 10, directory = 'data/'):
 		return updated
 	else:
 		for seq in SeqIO.parse(seq_fname, 'fasta'):
-			fields = map(lambda x:x.strip(), seq.description.split('|'))
-			tmp_lineage = (fields[2], fields[4])
-			if tmp_lineage in patterns:
-				if patterns[tmp_lineage]==lineage:
-					strain = fields[0]
-					if strain not in existing:
-						new_seqs.append(seq)
-			else:
-				if verbose:
-					print tmp_lineage,"not found"
+			strain, tmp_lineage = determine_lineage(seq)
+			if tmp_lineage == lineage:
+				if strain not in existing:
+					new_seqs.append(seq)
 
 	print "Found", len(new_seqs), 'new for lineage', lineage
 	if len(new_seqs)>=threshold:
