@@ -43,8 +43,8 @@ var virusTooltip = d3.tip()
 		// following may or may not be present
 		if ((typeof focusNode != "undefined")){
 			string += "<div class=\"smallspacer\"></div>";				
-			string += "HI rel to "+d.strain+":<br><div class=\"smallnote\"><ul>";
-			string += '<li>Serum: <span style="float:right">log2, raw (self)</span></li>';
+			string += "HI rel to "+focusNode.strain+":<br><div class=\"smallnote\"><ul>";
+			string += '<li>Serum <span style="float:right">log2, raw (self)</span></li>';
 			if (typeof focusNode.HI_titers[d.clade] != "undefined"){
 				for (var tmp_serum in focusNode.HI_titers[d.clade]){
 					var homHI = focusNode.HI_titers_raw[focusNode.clade][tmp_serum];
@@ -61,7 +61,7 @@ var virusTooltip = d3.tip()
 					string += '<li>' + serum_name + ' <span style="float:right">' +  logHI.toFixed(1)+', ' + rawHI.toFixed(0)+ ' (' + homHI.toFixed(0) +")</span></li>";
 				}
 			}
-			string += '<li>' + 'predicted:' + ' <span style="float:right">' +  d.HI_dist_pred.toFixed(2) + ', NA, (NA)'+ "</span></li>";
+			string += '<li>' + 'predicted:' + ' <span style="float:right">' +  d.HI_dist_pred.toFixed(2) + ', --- (----)'+ "</span></li>";
 			string += "</ul></div>";
 		}
 		//else if ((predictedHI==true)&&(typeof focusNode != "undefined")){

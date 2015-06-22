@@ -131,7 +131,7 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine, HI
 		fitness_model.__init__(self,**kwargs)
 		self.verbose = verbose
 
-	def run(self, steps, viruses_per_month=50, raxml_time_limit = 1.0, reg=0.2):
+	def run(self, steps, viruses_per_month=50, raxml_time_limit = 1.0, reg=2.0):
 		if 'filter' in steps:
 			print "--- Virus filtering at " + time.strftime("%H:%M:%S") + " ---"
 			self.filter()

@@ -246,7 +246,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 		fitness_model.__init__(self,**kwargs)
 		self.verbose = verbose
 
-	def run(self, steps, viruses_per_month=50, raxml_time_limit = 1.0, reg = 0.2):
+	def run(self, steps, viruses_per_month=50, raxml_time_limit = 1.0, reg = 5.0):
 		if 'filter' in steps:
 			print "--- Virus filtering at " + time.strftime("%H:%M:%S") + " ---"
 			self.filter()
