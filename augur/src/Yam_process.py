@@ -208,8 +208,10 @@ class BYam_process(process, BYam_filter, BYam_clean, BYam_refine, HI_tree):
 		if 'export' in steps:
 			self.temporal_regional_statistics()
 			# exporting to json, including the BYam specific fields
-			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country',
-												 'dHI', 'cHI', 'HI_titers', 'serum', 'HI_info', 'avidity', 'potency', 'mean_potency'], 
+			self.export_to_auspice(tree_fields = [
+				'ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country',
+				'dHI', 'cHI', 'mean_HI_titers','HI_titers','HI_titers_raw', 'serum', 'HI_info', 'avidity', 
+				 'potency', 'mean_potency'], 
 									annotations = ['2', '3', '3a'])
 			self.generate_indexHTML()
 
