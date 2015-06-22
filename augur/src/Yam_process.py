@@ -184,6 +184,7 @@ class BYam_process(process, BYam_filter, BYam_clean, BYam_refine):
 		if 'ancestral' in steps:
 			print "--- Infer ancestral sequences " + time.strftime("%H:%M:%S") + " ---"
 			self.infer_ancestral()  # -> every node has a sequence
+			self.dump()
 		if 'refine' in steps:
 			print "--- Tree refine at " + time.strftime("%H:%M:%S") + " ---"
 			self.refine()

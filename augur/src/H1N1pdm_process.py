@@ -150,6 +150,7 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine):
 		if 'ancestral' in steps:
 			print "--- Infer ancestral sequences " + time.strftime("%H:%M:%S") + " ---"
 			self.infer_ancestral()  # -> every node has a sequence
+			self.dump()
 		if 'refine' in steps:
 			print "--- Tree refine at " + time.strftime("%H:%M:%S") + " ---"
 			self.refine()
