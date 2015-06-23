@@ -133,6 +133,10 @@ function colorByTrait() {
 		colorScale = cHIColorScale;
 		nodes.map(function(d) { d.coloring = d.cHI; });
 	}
+	else if (colorBy == "HI_dist") {
+		colorByHIDistance();
+		return;
+	}
 	else if (colorBy == "date") {
 		colorScale = dateColorScale;
 		nodes.map(function(d) { d.coloring = d.num_date; });
@@ -258,9 +262,7 @@ function colorByHIDistance(){
 	predictedHI = document.getElementById("HIPrediction").checked;
 	colorBy = 'HI_dist'
 	if (typeof(focusNode)=="undefined"){
-		rootNode.mean_potency=0;
-		rootNode.avidity=0;
-		focusNode=rootNode;
+		focusNode=sera[0];
 	}
 	treeplot.selectAll(".serum")
 		.style("fill", function (d){if (d==focusNode) {return '#FF3300';} else {return '#555555';}})

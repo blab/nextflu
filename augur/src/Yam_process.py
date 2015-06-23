@@ -42,7 +42,7 @@ virus_config.update({
 	},
 	'auspice_prefix':'Yam_',
 	'HI_fname':'source-data/Yam_HI_titers.txt',
-	'html_vars': {'coloring': 'lbi, dfreq, region, date, HI',
+	'html_vars': {'coloring': 'lbi, dfreq, region, date, cHI, HI_dist',
 				  'gtplaceholder': 'HA1 positions...',
 				  'freqdefault': '2, 3, 3a'},
 	'js_vars': {'LBItau': 0.0005, 'LBItime_window': 0.5, 'dfreq_dn':2},	

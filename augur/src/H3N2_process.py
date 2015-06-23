@@ -39,7 +39,7 @@ virus_config.update({
 							},
 	'HI_fname':'source-data/H3N2_HI_titers.txt',
 	'auspice_prefix':'H3N2_',
-	'html_vars': {'coloring': 'ep, ne, rb, lbi, dfreq, region, date, HI',
+	'html_vars': {'coloring': 'ep, ne, rb, lbi, dfreq, region, date, cHI, HI_dist',
 				   'gtplaceholder': 'HA1 positions...',
 					'freqdefault': '3c2.a, 3c3.a'},
 	'js_vars': {'LBItau': 0.0005, 'LBItime_window': 0.5, 'dfreq_dn':2},
