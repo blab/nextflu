@@ -286,8 +286,9 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 						tmp.push(["global",d.x+frequencies["entropy"][gene][pos][2][ii]]);
 					}
 					colorBy = "genotype";
-					colorByGenotypePosition([gene, pos]);
-					d3.select("#gt-color").property("value", gene + ' ' + (pos+1));
+					console.log("color by genotype: "+gene + ' ' + pos)
+					colorByGenotypePosition([[gene, pos]]);
+					d3.select("#gt-color").property("value", gene + ':' + (pos+1));
 				}
 		    },
 		    onmouseover: function (d){
