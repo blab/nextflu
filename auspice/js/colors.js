@@ -178,17 +178,28 @@ function colorByGenotype() {
 	var positions_string = document.getElementById("gt-color").value.split(',');
 	var positions_list = []
 	positions_string.map(function(d) {
-		val = parseInt(d)-1;
-		if (!isNaN(val)) {
-			if (val < 551) {
-				positions_list.push(val);
+		var pos_fields = d.split(':');
+		var val, gene;
+		if (pos_fields.length==1){
+			val = parseInt(pos_fields[0])-1;
+			gene='nuc';
+		}else if (pos_fields.length==2){
+			val = parseInt(pos_fields[1])-1;
+			gene=pos_fields[0].replace(' ','');
+		}else{
+			val = parseInt('NaN');
+		}
+		console.log('attempt genotype coloring: '+ [gene, val]);
+		if ((!isNaN(val))&&(typeof cladeToSeq["root"][gene]!="undefined")) {
+			if (val < cladeToSeq["root"][gene].length) {
+				positions_list.push([gene, val]);
 			}
 		}
 	});
 	console.log(positions_list);
 	if (positions_list.length > 0) {
 		colorBy = "genotype";
-		colorByGenotypePosition(positions_list, 'nuc');
+		colorByGenotypePosition(positions_list);
 	}
 	else {
 		d3.select("#coloring").each(colorByTrait);
@@ -198,13 +209,13 @@ function colorByGenotype() {
 	}
 }
 
-function colorByGenotypePosition (positions, gene) {
+function colorByGenotypePosition (positions) {
 	var gts = nodes.map(function (d) {
 		var tmp = [];
 		for (var i=0; i<positions.length; i++){
-			tmp[tmp.length] = (positions[i]+1)+stateAtPosition(d.clade, gene, positions[i]);
+			tmp[tmp.length] = positions[i][0]+':'+(positions[i][1]+1)+stateAtPosition(d.clade, positions[i][0], positions[i][1]);
 		}
-		d.coloring = gene+':'+tmp.join(" / "); 
+		d.coloring = tmp.join('/');
 		return d.coloring;});
 	var unique_gts = d3.set(gts).values();
 	var gt_counts = {};

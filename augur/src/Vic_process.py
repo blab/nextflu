@@ -169,6 +169,7 @@ class BVic_process(process, BVic_filter, BVic_clean, BVic_refine, HI_tree):
 		if 'ancestral' in steps:
 			print "--- Infer ancestral sequences " + time.strftime("%H:%M:%S") + " ---"
 			self.infer_ancestral()  # -> every node has a sequence
+			self.dump()
 		if 'refine' in steps:
 			print "--- Tree refine at " + time.strftime("%H:%M:%S") + " ---"
 			self.refine()
