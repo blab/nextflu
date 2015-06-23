@@ -82,10 +82,10 @@ layout: default
 						</div>
 					</div>
 					{% if page.coloring contains 'HI' %}
-					<div class="form-group">
-						<input type="checkbox" id="HIPrediction" value="pred" checked="checked"> color by predicted HI<br>
-						<input type="checkbox" id="serum" value="serum" checked="checked"> correct column effect (serum)<br>
-						<input type="checkbox" id="virus" value="virus" checked="checked"> correct row effect (virus)<br>
+					<div class="form-group" id="HIcontrols" style="display: none">
+						<input type="checkbox" id="HIPrediction" value="pred"> color by predicted HI<br>
+						<input type="checkbox" id="serum" value="serum"> correct column effect (serum)<br>
+						<input type="checkbox" id="virus" value="virus"> correct row effect (virus)<br>
 					</div>		
 					{% endif %}	
 				</form>

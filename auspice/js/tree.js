@@ -63,6 +63,10 @@ function updateColorDomains(num_date){
 	dateColorScale.domain(dateColorDomain);
 }
 
+function serumVisibility(d){
+	return (colorBy=='HI_dist')?"visible":"hidden";
+}
+
 function tipVisibility(d) {
 	if ((d.diff < 0 || d.diff > time_window)&(date_select==true)) {
 		return "hidden";
@@ -308,7 +312,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 				console.log("opening url "+url);
 				var win = window.open(url, '_blank');
   				win.focus();
-  			}	
+  			}
   		})		
 		.on('mouseout', virusTooltip.hide);
 
@@ -343,6 +347,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.style("font-size", "24px")
 		.style('font-family', 'FontAwesome')
 		.style("fill", "#555555")
+		.style("visibility", serumVisibility)
 		.text(function(d) { return '\uf10c'; })
 		.style("cursor", "default")
 		.on('mouseover', function(d) {
