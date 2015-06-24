@@ -2,7 +2,7 @@ var regions = [
 //generic country codes
 "GUI","GIN","SLE","LIB","LBR",
 // Guinean prefectures
-"Boffa", "Boke", "Fria", "Gaoual", "Koundara", "Conarky", "Dabola",
+"Boffa", "Boke", "Fria", "Gaoual", "Koundara", "Conakry", "Dabola",
 "Dinguiraye", "Faranah", "Kissidougou", "Kankan", "Kerouane",
 "Kouroussa", "Mandiana", "Siguiri", "Coyah", "Dubreka", "Forecariah",
 "Kindia", "Telimele", "Koubia", "Labe", "Lelouma", "Mali", "Tougue",
