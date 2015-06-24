@@ -66,11 +66,11 @@ function adjust_coloring_by_date() {
 	}	
 }
 
-function stateAtPosition(clade, pos){
-	if (typeof cladeToSeq[clade][pos] == "undefined"){
-		return cladeToSeq["root"][pos];
+function stateAtPosition(clade, gene, pos){
+	if (typeof cladeToSeq[clade][gene][pos] == "undefined"){
+		return cladeToSeq["root"][gene][pos];
 	}else{
-		return cladeToSeq[clade][pos];		
+		return cladeToSeq[clade][gene][pos];
 	}
 }
 
@@ -148,10 +148,21 @@ function colorByGenotype() {
 	var positions_string = document.getElementById("gt-color").value.split(',');
 	var positions_list = []
 	positions_string.map(function(d) {
-		val = parseInt(d)-1;
-		if (!isNaN(val)) {
-			if (val < 551) {
-				positions_list.push(val);
+		var pos_fields = d.split(':');
+		var val, gene;
+		if (pos_fields.length==1){
+			val = parseInt(pos_fields[0])-1;
+			gene='nuc';
+		}else if (pos_fields.length==2){
+			val = parseInt(pos_fields[1])-1;
+			gene=pos_fields[0].replace(' ','');
+		}else{
+			val = parseInt('NaN');
+		}
+		console.log('attempt genotype coloring: '+ [gene, val]);
+		if ((!isNaN(val))&&(typeof cladeToSeq["root"][gene]!="undefined")) {
+			if (val < cladeToSeq["root"][gene].length) {
+				positions_list.push([gene, val]);
 			}
 		}
 	});
@@ -172,9 +183,9 @@ function colorByGenotypePosition (positions) {
 	var gts = nodes.map(function (d) {
 		var tmp = [];
 		for (var i=0; i<positions.length; i++){
-			tmp[tmp.length] = (positions[i]+1)+stateAtPosition(d.clade, positions[i]);
+			tmp[tmp.length] = positions[i][0]+':'+(positions[i][1]+1)+stateAtPosition(d.clade, positions[i][0], positions[i][1]);
 		}
-		d.coloring = tmp.join(" / "); 
+		d.coloring = tmp.join('/');
 		return d.coloring;});
 	var unique_gts = d3.set(gts).values();
 	var gt_counts = {};
