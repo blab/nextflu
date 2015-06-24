@@ -6,10 +6,10 @@ def hamming_distance(seq1, seq2):
 	non_gap = (aseq1!='-')*(aseq2!='-')
 	return np.mean(aseq1[non_gap]!=aseq2[non_gap])
 
-def translate(nuc):
+def translate(nuc, to_stop = False):
 	"""Translate nucleotide sequence to amino acid"""
 	from Bio import Seq
-	return Seq.translate(nuc) #returns string when argument is a string, Bio.Seq otherwise
+	return Seq.translate(nuc, to_stop=to_stop) #returns string when argument is a string, Bio.Seq otherwise
 
 def json_to_Bio_alignment(seq_json):
 	from Bio.Align import MultipleSeqAlignment

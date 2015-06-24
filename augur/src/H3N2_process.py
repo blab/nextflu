@@ -26,13 +26,14 @@ virus_config.update({
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
 	'cds':[0,None], # define the HA1 start i n 0 numbering
 	'n_iqd':6,
+	'min_mutation_frequency':0.1,
 	# define relevant clades in canonical HA1 numbering (+1)
 	# numbering starting at HA1 start, adding sp to obtain numbering from methionine
-	'clade_designations': { "3c3.a":[(128+sp,'A'), (142+sp,'G'), (159+sp,'S')],
-						   "3c3":   [(128+sp,'A'), (142+sp,'G'), (159+sp,'F')],
-						   "3c2.a": [(144+sp,'S'), (159+sp,'Y'), (225+sp,'D'), (311+sp,'H'), (489+sp,'N')],
-						   "3c2":   [(144+sp,'N'), (159+sp,'F'), (225+sp,'N'), (489+sp,'N'), (142+sp, 'R')],
-						   "3c3.b":   [(83+sp,'R'), (261+sp,'Q'), (62+sp,'K'), (122+sp,'D')]
+	'clade_designations': { "3c3.a":[('HA1', 128,'A'), ('HA1',142,'G'), ('HA1',159,'S')],
+						   "3c3":   [('HA1', 128,'A'), ('HA1',142,'G'), ('HA1',159,'F')],
+						   "3c2.a": [('HA1', 144,'S'), ('HA1',159,'Y'), ('HA1',225,'D'), ('HA1', 311,'H'), ('HA2', 160,'N')],
+						   "3c2":   [('HA1', 144,'N'), ('HA1',159,'F'), ('HA1',225,'N'), ('HA2', 160,'N'), ('HA1', 142, 'R')],
+						   "3c3.b": [('HA1',  83,'R'), ('HA1',261,'Q'), ('HA1',62,'K'),  ('HA1', 122,'D')]
 							},
 	'html_vars': {'coloring': 'ep, ne, rb, lbi, dfreq, region, date',
 				   'gtplaceholder': 'HA1 positions...',
@@ -88,6 +89,11 @@ class H3N2_filter(flu_filter):
 					"seq": "ATGAAGACTATCATTGCTTTGAGCTACATTCTATGTCTGGTTTTCGCTCAAAAACTTCCTGGAAATGACAATAGCACGGCAACGCTGTGCCTTGGGCACCATGCAGTACCAAACGGAACGATAGTGAAAACAATCACGAATGACCGAATTGAAGTTACTAATGCTACTGAGCTGGTTCAGAATTCCTCAATAGGTGAAATATGCGACAGTCCTCATCAGATCCTTGATGGAGAAAACTGCACACTAATAGATGCTCTATTGGGAGACCCTCAGTGTGATGGCTTTCAAAATAAGAAATGGGACCTTTTTGTTGAACGAAGCAAAGCCTACAGCAACTGTTACCCTTATGATGTGCCGGATTATGCCTCCCTTAGGTCACTAGTTGCCTCATCCGGCACACTGGAGTTTAACAATGAAAGCTTCAATTGGGCTGGAGTCACTCAAAACGGAACAAGTTCTTCTTGCATAAGGGGATCTAATAGTAGTTTCTTTAGTAGATTAAATTGGTTGACCCACTTAAACTCCAAATACCCAGCATTAAACGTGACTATGCCAAACAATGAACAATTTGACAAATTGTACATTTGGGGGGTTCACCACCCGGGTACGGACAAGGACCAAATCTTCCTGTATGCACAATCATCAGGAAGAATCACAGTATCTACCAAAAGAAGCCAACAAGCTGTAATCCCGAATATCGGATCTAGACCCAGAATAAGGGATATCCCTAGCAGAATAAGCATCTATTGGACAATAGTAAAACCGGGAGACATACTTTTGATTAACAGCACAGGGAATCTAATTGCTCCTAGGGGTTACTTCAAAATACGAAGTGGGAAAAGCTCAATAATGAGATCAGATGCACCCATTGGCAAATGCAAGTCTGAATGCATCACTCCAAATGGAAGCATTCCCAATGACAAACCATTCCAAAATGTAAACAGGATCACATACGGGGCCTGTCCCAGATATGTTAAGCAAAGCACTCTGAAATTGGCAACAGGAATGCGAAATGTACCAGAGAGACAAACTAGAGGCATATTTGGCGCAATAGCGGGTTTCATAGAAAATGGTTGGGAGGGAATGGTGGATGGTTGGTACGGCTTCAGGCATCAAAATTCTGAGGGAAGAGGACAAGCAGCAGATCTCAAAAGCACTCAAGCAGCAATCGATCAAATCAATGGGAAGCTGAATCGATTGATCGGGAAAACCAACGAGAAATTCCATCAGATTGAAAAAGAATTCTCAGAAGTAGAAGGGAGAATTCAGGACCTTGAGAAATATGTTGAGGACACAAAAATAGATCTCTGGTCATACAACGCGGAGCTTCTTGTTGCCCTGGAGAACCAACATACAATTGATCTAACTGACTCAGAAATGAACAAACTGTTTGAAAAAACAAAGAAGCAACTGAGGGAAAATGCTGAGGATATGGGCAATGGTTGTTTCAAAATATACCACAAATGTGACAATGCCTGCATAGGATCAATCAGAAATGGAACTTATGACCACGATGTATACAGGGATGAAGCATTAAACAACCGGTTCCAGATCAAGGGAGTTGAGCTGAAGTCAGGGTACAAAGATTGGATCCTATGGATTTCCTTTGCCATATCATGTTTTTTGCTTTGTGTTGCTTTGTTGGGGTTCATCATGTGGGCCTGCCAAAAGGGCAACATTAGGTGCAACATTTGCATTTGA",
 				}
 			]
+		tmp_outgroup = SeqIO.read('source-data/H3N2_outgroup.gb', 'genbank')
+		genome_annotation = tmp_outgroup.features
+		self.cds = {x.qualifiers['gene'][0]:x for x in genome_annotation
+				if 'gene' in x.qualifiers and x.type=='CDS' and 
+				x.qualifiers['gene'][0] in ['SigPep', 'HA1', 'HA2']}
 		self.outgroup = {
 			'strain': 'A/Beijing/32/1992',
 			'db': 'IRD',
@@ -95,7 +101,7 @@ class H3N2_filter(flu_filter):
 			'date': '1992-01-01',
 			'country': 'China',
 			'region': 'China',
-			'seq': 'ATGAAGACTATCATTGCTTTGAGCTACATTTTATGTCTGGTTTTCGCTCAAAAACTTCCCGGAAATGACAACAGCACAGCAACGCTGTGCCTGGGACATCATGCAGTGCCAAACGGAACGCTAGTGAAAACAATCACGAATGATCAAATTGAAGTGACTAATGCTACTGAGCTGGTTCAGAGTTCCTCAACAGGTAGAATATGCGACAGTCCTCACCGAATCCTTGATGGAAAAAACTGCACACTGATAGATGCTCTATTGGGAGACCCTCATTGTGATGGCTTCCAAAATAAGGAATGGGACCTTTTTGTTGAACGCAGCAAAGCTTACAGCAACTGTTACCCTTATGATGTACCGGATTATGCCTCCCTTAGGTCACTAGTTGCCTCATCAGGCACCCTGGAGTTTATCAATGAAGACTTCAATTGGACTGGAGTCGCTCAGGATGGGGGAAGCTATGCTTGCAAAAGGGGATCTGTTAACAGTTTCTTTAGTAGATTGAATTGGTTGCACAAATCAGAATACAAATATCCAGCGCTGAACGTGACTATGCCAAACAATGGCAAATTTGACAAATTGTACATTTGGGGGGTTCACCACCCGAGCACGGACAGAGACCAAACCAGCCTATATGTTCGAGCATCAGGGAGAGTCACAGTCTCTACCAAAAGAAGCCAACAAACTGTAACCCCGAATATCGGGTCTAGACCCTGGGTAAGGGGTCAGTCCAGTAGAATAAGCATCTATTGGACAATAGTAAAACCGGGAGACATACTTTTGATTAATAGCACAGGGAATCTAATTGCTCCTCGGGGTTACTTCAAAATACGAAATGGGAAAAGCTCAATAATGAGGTCAGATGCACCCATTGGCACCTGCAGTTCTGAATGCATCACTCCAAATGGAAGCATTCCCAATGACAAACCTTTTCAAAATGTAAACAGGATCACATATGGGGCCTGCCCCAGATATGTTAAGCAAAACACTCTGAAATTGGCAACAGGGATGCGGAATGTACCAGAGAAACAAACTAGAGGCATATTCGGCGCAATCGCAGGTTTCATAGAAAATGGTTGGGAGGGAATGGTAGACGGTTGGTACGGTTTCAGGCATCAAAATTCTGAGGGCACAGGACAAGCAGCAGATCTTAAAAGCACTCAAGCAGCAATCGACCAAATCAACGGGAAACTGAATAGGTTAATCGAGAAAACGAACGAGAAATTCCATCAAATCGAAAAAGAATTCTCAGAAGTAGAAGGGAGAATTCAGGACCTCGAGAAATATGTTGAAGACACTAAAATAGATCTCTGGTCTTACAACGCGGAGCTTCTTGTTGCCCTGGAGAACCAACATACAATTGATCTTACTGACTCAGAAATGAACAAACTGTTTGAAAAAACAAGGAAGCAACTGAGGGAAAATGCTGAGGACATGGGCAATGGTTGCTTCAAAATATACCACAAATGTGACAATGCCTGCATAGGGTCAATCAGAAATGGAACTTATGACCATGATGTATACAGAGACGAAGCATTAAACAACCGGTTCCAGATCAAAGGTGTTGAGCTGAAGTCAGGATACAAAGATTGGATCCTGTGGATTTCCTTTGCCATATCATGCTTTTTGCTTTGTGTTGTTTTGCTGGGGTTCATCATGTGGGCCTGCCAAAAAGGCAACATTAGGTGTAACATTTGCATTTGA'
+			'seq': str(tmp_outgroup.seq).upper()
 		}
 
 class H3N2_clean(virus_clean):
@@ -185,11 +191,11 @@ class H3N2_refine(tree_refine):
 		'''
 		return ''.join([aa[pos] for pos in receptor_binding_sites])
 
-	def get_HA1(self, aa):
+	def get_total_peptide(self, node):
 		'''
-		return the part of the peptide corresponding to HA1, starts is 329 aa long
+		the concatenation of signal peptide, HA1, HA1
 		'''
-		return aa[:329]
+		return node.aa_seq['SigPep']+node.aa_seq['HA1'] + node.aa_seq['HA2']
 
 	def epitope_distance(self, aaA, aaB):
 		"""Return distance of sequences aaA and aaB by comparing epitope sites"""
@@ -214,10 +220,12 @@ class H3N2_refine(tree_refine):
 
 	def add_H3N2_attributes(self):
 		root = self.tree.seed_node
+		root_total_aa_seq = self.get_total_peptide(root)
 		for node in self.tree.postorder_node_iter():
-			node.ep = self.epitope_distance(node.aa_seq, root.aa_seq)
-			node.ne = self.nonepitope_distance(node.aa_seq, root.aa_seq)
-			node.rb = self.receptor_binding_distance(node.aa_seq, root.aa_seq)
+			total_aa_seq = self.get_total_peptide(node)
+			node.ep = self.epitope_distance(total_aa_seq, root_total_aa_seq)
+			node.ne = self.nonepitope_distance(total_aa_seq, root_total_aa_seq)
+			node.rb = self.receptor_binding_distance(total_aa_seq, root_total_aa_seq)
 
 class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 	"""docstring for H3N2_process, H3N2_filter"""
@@ -268,20 +276,21 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 		if 'frequencies' in steps:
 			print "--- Estimating frequencies at " + time.strftime("%H:%M:%S") + " ---"
 			self.determine_variable_positions()
-			self.estimate_frequencies(tasks = ["mutations", "clades", "tree"])
+			self.estimate_frequencies(tasks = ["mutations","tree"])
 			if 'genotype_frequencies' in steps: 
 					self.estimate_frequencies(tasks = ["genotypes"])
 			self.dump()
 		if 'export' in steps:
 			self.temporal_regional_statistics()
 			# exporting to json, including the H3N2 specific fields
-			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country'], 
+			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession',
+			                       				  'isolate_id', 'lab','db', 'country'], 
 			                       annotations = ['3c2.a', '3c3.a'])
 			self.generate_indexHTML()
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies', 'export']
-	from process import parser, shift_cds
+	from process import parser
 	params = parser.parse_args()
 
 	lt = time.localtime()
@@ -297,10 +306,6 @@ if __name__=="__main__":
 			if tmp_step in steps:
 				print "skipping",tmp_step
 				steps.remove(tmp_step)
-
-	# modify clade designations
-	if not params.ATG:
-		virus_config, epitope_mask, receptor_binding_sites = shift_cds(3*sp, virus_config, epitope_mask, receptor_binding_sites)
 
 	# add all arguments to virus_config (possibly overriding)
 	virus_config.update(params.__dict__)

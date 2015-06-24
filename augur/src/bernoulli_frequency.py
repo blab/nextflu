@@ -246,11 +246,11 @@ class virus_frequencies(object):
 			if self.verbose: print "too few observations"
 			return None, (tps, obs)
 
-	def get_sub_alignment(self, regions=None, nuc=False):
+	def get_sub_alignment(self, regions=None, gene='nuc'):
 		from Bio.Align import MultipleSeqAlignment
 		sub_aln = []
 		all_dates = []
-		for seq in self.nuc_aln if nuc else self.aa_aln:
+		for seq in self.nuc_aln if gene=='nuc' else self.aa_aln[gene]:
 			if regions is None or seq.annotations['region'] in regions:
 				seq_date = seq.annotations['num_date']
 				if seq_date>=self.time_interval[0] and seq_date < self.time_interval[1]:
@@ -258,32 +258,32 @@ class virus_frequencies(object):
 					all_dates.append(seq_date)				 
 		return MultipleSeqAlignment(sub_aln)
 
-	def determine_mutation_frequencies(self, regions=None, threshold=0.01, nuc=False):
+	def determine_mutation_frequencies(self, regions=None, threshold=0.01, gene='nuc'):
 		'''
 		determine the abundance of all single position variants  
 		'''
-		sub_aln = self.get_sub_alignment(regions, nuc=nuc)
-		if nuc:
+		sub_aln = self.get_sub_alignment(regions, gene=gene)
+		if gene=='nuc':
 			alpha, freqs = self.nuc_alphabet, self.nuc_frequencies
 		else:
-			alpha, freqs = self.aa_alphabet, self.aa_frequencies
+			alpha, freqs = self.aa_alphabet, self.aa_frequencies[gene]
 
 		mutation_frequencies = {"pivots":list(self.pivots)}
 		for pos in xrange(sub_aln.get_alignment_length()):
 			for ai, aa in enumerate(alpha):
 				if freqs[ai,pos]>threshold and freqs[ai,pos]<1.0-threshold:
-					mut = str(pos+1)+aa
+					mut = gene+':'+str(pos+1)+aa
 					print "estimating freq of ", mut, "total frequency:", freqs[ai,pos]
 					est_freq, (tps, obs) = self.estimate_genotype_frequency(sub_aln, [(pos, aa)])
 					if est_freq is not None:
 						mutation_frequencies[mut] = list(np.round(logit_inv(est_freq.y),3))
 		return mutation_frequencies
 
-	def determine_genotype_frequencies(self, regions=None, threshold=0.1, nuc=False):
+	def determine_genotype_frequencies(self, regions=None, threshold=0.1, gene='nuc'):
 		'''
 		determine the abundance of all two mutation combinations 
 		'''
-		sub_aln = self.get_sub_alignment(regions, nuc=nuc)
+		sub_aln = self.get_sub_alignment(regions, gene=gene)
 		genotype_frequencies = {"pivots":list(self.pivots)	}
 		relevant_pos = np.where(1.0 - self.aa_frequencies.max(axis=0)>threshold)[0]
 		for i1,pos1 in enumerate(relevant_pos[:-1]):
@@ -300,17 +300,17 @@ class virus_frequencies(object):
 								genotype_frequencies[gt_label] = list(np.round(logit_inv(freq.y),3))
 		return genotype_frequencies
 
-	def determine_clade_frequencies(self, clades, regions=None, nuc=False):
+	def determine_clade_frequencies(self, clades, regions=None, gene='nuc'):
 		'''
 		loop over different clades and determine their frequencies
 		returns a dictionary with clades:frequencies
 		'''
-		sub_aln = self.get_sub_alignment(regions, nuc)
+		sub_aln = self.get_sub_alignment(regions, gene)
 		clade_frequencies = {"pivots":list(self.pivots)}
 
 		for ci, (clade_name, clade_gt) in enumerate(clades.iteritems()):
 			print "estimating frequency of clade", clade_name, clade_gt
-			freq, (tps, obs) = self.estimate_genotype_frequency(sub_aln, [(pos-1, aa) for pos, aa in clade_gt])
+			freq, (tps, obs) = self.estimate_genotype_frequency(sub_aln, [(gene, pos-1, aa) for gene, pos, aa in clade_gt])
 			if freq is not None:
 				clade_frequencies[clade_name.lower()] = list(np.round(logit_inv(freq.y),3))
 		return clade_frequencies
@@ -417,13 +417,15 @@ class virus_frequencies(object):
 		# start estimating frequencies of subclades recursively
 		self.estimate_sub_frequencies(rootnode, all_dates, reverse_order, threshold = threshold, region_name = region_name)
 
-	def all_mutation_frequencies(self, threshold = 0.01, nuc=False):
+	def all_mutation_frequencies(self, threshold = 0.01, gene='nuc'):
 		if not hasattr(self, 'nuc_frequencies'):
 			self.determine_variable_positions()
-		self.frequencies["mutations"]={}
 		for region_label, regions in self.aggregate_regions:
 			print "--- "+"determining mutation frequencies in "+region_label+ " "  + time.strftime("%H:%M:%S") + " ---"
-			self.frequencies["mutations"][region_label] = self.determine_mutation_frequencies(regions, threshold = threshold, nuc=nuc)
+			freqs = self.determine_mutation_frequencies(regions, threshold = threshold, gene=gene)
+			print freqs.keys()
+			self.frequencies["mutations"][region_label].update(freqs)
+			print self.frequencies["mutations"][region_label].keys()
 
 
 	def all_genotypes_frequencies(self, threshold = 0.1):
@@ -435,7 +437,7 @@ class virus_frequencies(object):
 			self.frequencies["genotypes"][region_label] = self.determine_genotype_frequencies(regions, threshold=threshold)
 
 
-	def all_clade_frequencies(self, clades = None, nuc=False):
+	def all_clade_frequencies(self, clades = None, gene='nuc'):
 		if not hasattr(self, 'nuc_frequencies'):
 			self.determine_variable_positions()
 		if clades is None:
@@ -446,7 +448,7 @@ class virus_frequencies(object):
 		self.frequencies["clades"] = {}
 		for region_label, regions in self.aggregate_regions:
 			print "--- "+"determining clade frequencies "+region_label+ " "  + time.strftime("%H:%M:%S") + " ---"
-			self.frequencies["clades"][region_label] = self.determine_clade_frequencies(clades, regions=regions, nuc=nuc)
+			self.frequencies["clades"][region_label] = self.determine_clade_frequencies(clades, regions=regions, gene=gene)
 
 	def all_tree_frequencies(self, threshold = 20):
 		for region_label, regions in self.aggregate_regions:
