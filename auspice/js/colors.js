@@ -266,8 +266,17 @@ function colorByHIDistance(){
 	predictedHI = document.getElementById("HIPrediction").checked;
 	colorBy = 'HI_dist'
 	if (typeof(focusNode)=="undefined"){
+		var ntiters = 0, ntmp;
 		focusNode=sera[0];
+		for (var i=0; i<sera.length; i++){
+			ntmp = Object.keys(sera[i].mean_HI_titers).length;
+			if (ntmp>ntiters){
+				ntiters = ntmp;
+				focusNode = sera[i];
+			}
+		}
 	}
+
 	treeplot.selectAll(".serum")
 		.style("fill", function (d){if (d==focusNode) {return '#FF3300';} else {return '#555555';}})
 		.style("font-size", function (d) {if (d==focusNode) {return "32px";} else {return "24px";}})

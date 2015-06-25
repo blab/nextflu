@@ -28,7 +28,7 @@ function makeLegend(){
             return "Log2 titer distance from root";
         }       
         if (colorBy == "HI_dist") {
-            return "Log2 titer distance from focus";
+            return "Log2 titer distance from "+focusNode.strain;
         }
 		if (colorBy == "dfreq") {
 			var tmp_nmonth = Math.round(12*dfreq_dn*time_step);

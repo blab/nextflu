@@ -76,6 +76,9 @@ function tipVisibility(d) {
 			return "hidden";
 		}
 	}
+	if ((colorBy=='HI_dist')&&(predictedHI==false)&&(d.HI_dist_meas =='NaN')) {
+		return "hidden";
+	}
 	return "visible";
 }
 
@@ -344,11 +347,11 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.attr("y", function(d) {return d.y})
 		.attr('text-anchor', 'middle')
 		.attr('dominant-baseline', 'central')
-		.style("font-size", "24px")
 		.style('font-family', 'FontAwesome')
-		.style("fill", "#555555")
+		.style("font-size", function (d) {if (d==focusNode) {return "32px";} else {return "24px";}})
+		.style("fill", function (d){if (d==focusNode) {return '#FF3300';} else {return '#555555';}})
+		.text(function (d) {if (d==focusNode) {return '\uf05b';} else {return '\uf10c';}})
 		.style("visibility", serumVisibility)
-		.text(function(d) { return '\uf10c'; })
 		.style("cursor", "default")
 		.on('mouseover', function(d) {
 			virusTooltip.show(d, this);

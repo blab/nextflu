@@ -68,7 +68,7 @@ function calcHImeasured(node, rootNode){
 
 function tipHIvalid(d) {
 	var vis = "visible";
-	if ((predictedHI==false)&&(d.HI_dist_meas =='NaN')) {
+	if ((colorBy=='HI_dist')&&(predictedHI==false)&&(d.HI_dist_meas =='NaN')) {
 		vis = "hidden";
 	}
 	return vis;
