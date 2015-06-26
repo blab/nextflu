@@ -143,6 +143,7 @@ def ammend_fasta(fname, lineage, existing_strains, threshold = 10, directory = '
 
 if __name__=="__main__":
 	parser = argparse.ArgumentParser(description = "ammend existing files with downloaded viruses, rerun")
+	parser.add_argument('--annotate', action = "store_true", default = False, help = "annotate, but don't process")	
 	parser.add_argument('--infile', type = str, default = "gisaid_epiflu_sequence.fasta")
 	parser.add_argument('--bin', type = str, default = "python")
 	parser.add_argument('--ATG', action = "store_true", default = False, help = "include full HA sequence starting at ATG")
@@ -208,7 +209,8 @@ if __name__=="__main__":
 				call = map(str, [params.bin, process, '-v', n_viruses, '-y', n_years, 
 				           		 '--prefix', prefix, '--resolution', resolution] + common_args)
 				print call
-				#subprocess.call(call)
+				if not params.annotate:
+					subprocess.call(call)
 				if params.s3:
 					push_fasta_to_s3(lineage, directory = 'data/', bucket = params.fasta_bucket)
 					push_json_to_s3(lineage, resolution, directory = '../auspice/data/', bucket = params.json_bucket)
