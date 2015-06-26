@@ -1,223 +1,268 @@
-B/Hong Kong/259/2010
-B/Stockholm/5/2010
-B/Stockholm/3/2010
-B/Stockholm/2/2010
-B/Laos/1232/2009
-B/Madagascar/7002/2009
-B/Madagascar/6945/2009
-B/Hong Kong/514/2009
-B/Hong Kong/235/2009
-B/Stockholm/1/2010
-B/Stockholm/8/2009
-B/Texas/26/2008
-B/Brisbane/33/2008
-B/Paris/1762/2009
-B/England/393/2008
-B/Victoria/304/2006
-B/Hong Kong/45/2005
-B/Mauritius/515/2009
-B/Singapore/21/2009
-B/Madagascar/4254/2009
-B/Norway/1474/2009
-B/Sabac/1232/2009
-B/OKINAWA/10/2009
-B/IWATE/17/2009
-B/Brazil/2937/2008
-B/Bayern/36/2008
+B/Akita/27/2001
+B/Akita/5/2001
+B/Hong Kong/1351/2002
+B/Hong Kong/1434/2002
+B/Hong Kong/22/2001
+B/Hong Kong/330/2001
+B/Hong Kong/335/2001
+B/India/7600/2001
+B/Malaysia/83077/2001
+B/New York/1/2002
+B/Shandong/7/97
+B/Oman/16296/2001
+B/Philippines/5072/2001
+B/Hawaii/13/2004
+B/Brisbane/32/2002
+B/Taiwan/14/2004
+B/Taiwan/39/2004
+B/Taiwan/74/2004
+B/Taiwan/75/2004
+B/Taiwan/61/2004
+B/Phitsanulok/2053/2004
 B/Malaysia/2506/2004
-B/Brisbane/60/2008
-B/Texas/34/2008
-B/Wisconsin/27/2008
+B/Trieste/19/2002
+B/Lipetsk/17/2003
+B/Hawaii/33/2004
+B/Dakar/31/2002
+B/Mauritius/219/2002
+B/Illinois/13/2005
+B/Arizona/148/2005
+B/Arizona/146/2005
+B/Arizona/164/2005
+B/Arizona/163/2005
+B/Arizona/162/2005
+B/Arizona/140/2005
+B/Arizona/59/2005
+B/Arizona/48/2005
+B/Nepal/1139/2005
+B/Nepal/1136/2005
+B/Nepal/1131/2005
+B/Nepal/1122/2005
+B/Nepal/1120/2005
+B/Nepal/1118/2005
+B/Nepal/1101/2005
+B/Nepal/1092/2005
+B/Nepal/1090/2005
+B/Nepal/1087/2005
+B/Nepal/1080/2005
+B/Nepal/1078/2005
+B/Taiwan/166/2005
+B/Taiwan/110/2005
+B/Taiwan/473/2005
+B/Taiwan/52/2005
+B/Taiwan/70/2005
+B/Taiwan/188/2005
+B/Taiwan/872/2005
+B/Taiwan/121/2005
+B/Taiwan/77/2005
+B/Taiwan/68/2005
+B/Taiwan/117/2005
+B/Ohio/1/2005
+B/Victoria/505/2005
+B/Waikato/28/2005
+B/Wellington/21/2005
+B/Texas/39/2006
+B/Perth/1/2006
+B/New Caledonia/5/2006
+B/Victoria/304/2006
+B/Johannesburg/508/2006
+B/Johannesburg/449/2006
+B/Sydney/12/2006
+B/Perth/14/2006
+B/Philippines/1506/2006
+B/Wellington/1/2006
+B/Sydney/88/2006
+B/Wellington/85/2006
+B/Khabarovsk/26/2007
+B/Astrakhan/88/2007
+B/Osaka/16/2007
+B/Johannesburg/150/2007
+B/Johannesburg/18/2007
+B/Hong Kong/121/2007
+B/Hiroshima/320/2007
+B/Hong Kong/809/2006
+B/Romania/700/2005
+B/Stpetersburg/17/2006
+B/Bangladesh/5278/2006
+B/Turkey/389/2005
+B/Victoria/500/2007
+B/Odessa/394/2007
+B/HONG KONG/998/2008
+B/Hong Kong/45/2005
+B/Madagascar/2866/2006
+B/Johannesburg/403/2005
+B/Egypt/80/2007
+B/Sydney/10/2006
+B/Christchurch/75/2006
+B/Christchurch/4/2006
+B/Victoria/505/2006
+B/Brisbane/8/2006
+B/Sydney/14/2006
+B/Sydney/71/2006
+B/Sydney/74/2006
+B/Sydney/79/2006
+B/Sydney/83/2006
+B/Brisbane/90/2006
 B/Hong Kong/90/2008
 B/Uruguay/12/2008
+B/Brisbane/60/2008
+B/Brisbane/33/2008
+B/Brazil/2937/2008
 B/Florida/16/2008
-B/Hong Kong/121/2007
-B/Odessa/394/2007
-B/Hawaii/33/2004
-B/Bangladesh/5278/2006
-B/Hong Kong/809/2006
-B/Hiroshima/320/2007
-B/Johannesburg/18/2007
-B/Johannesburg/150/2007
-B/Osaka/16/2007
-B/Astrakhan/88/2007
-B/Khabarovsk/26/2007
-B/Ann Arbor/1/1986
-B/Texas/39/2006
-B/Brisbane/32/2002
-B/Taiwan/117/2005
-B/Taiwan/68/2005
-B/Taiwan/77/2005
-B/Taiwan/121/2005
-B/Taiwan/872/2005
-B/Taiwan/188/2005
-B/Taiwan/70/2005
-B/Taiwan/52/2005
-B/Taiwan/473/2005
-B/Taiwan/110/2005
-B/Taiwan/61/2004
-B/Taiwan/75/2004
-B/Taiwan/74/2004
-B/Taiwan/166/2005
-B/Taiwan/39/2004
-B/Nepal/1078/2005
-B/Nepal/1080/2005
-B/Nepal/1087/2005
-B/Nepal/1090/2005
-B/Nepal/1092/2005
-B/Nepal/1101/2005
-B/Nepal/1118/2005
-B/Nepal/1120/2005
-B/Nepal/1122/2005
-B/Nepal/1131/2005
-B/Nepal/1136/2005
-B/Nepal/1139/2005
-B/Arizona/48/2005
-B/Arizona/59/2005
-B/Arizona/140/2005
-B/Arizona/162/2005
-B/Arizona/163/2005
-B/Arizona/164/2005
-B/Arizona/146/2005
-B/Arizona/148/2005
-B/Illinois/13/2005
-B/Hong Kong/330/2001
-B/Hong Kong/1434/2002
-B/Akita/27/2001
-B/Hong Kong/22/2001
-B/Hawaii/13/2004
-B/Oman/16296/2001
-B/Shandong/7/97
-B/New York/1/2002
-B/Malaysia/83077/2001
-B/Hong Kong/1351/2002
-B/Marseille/891/2010
-B/England/105/2010
-B/Cambodia/30/2011
-B/Hong Kong/767/2011
-B/Hong Kong/762/2011
-B/Slovenia/1141/2011
-B/Ghana/850/2011
-B/Minsk/1559/2011
-B/Dominican Republic/5486/2011
-B/Stockholm/18/2011
-B/Santiago/6025/2011
-B/Slovenia/1010/2011
-B/Slovenia/819/2011
-B/Ghana/847/2011
-B/Ghana/735/2011
-B/Ghana/516/2011
-B/Malmoe/2/2011
-B/Stockholm/14/2011
-B/Slovakia/302/2011
-B/Norway/1276/2011
-B/Norway/1188/2011
-B/Serbia/2689/2011
-B/Serbia/1761/2011
-B/Hong Kong/591/2011
-B/Ireland/21653/2011
-B/Stockholm/5/2011
-B/Stockholm/4/2011
-B/Stockholm/11/2011
-B/Stockholm/10/2011
-B/Stockholm/15/2011
-B/Stockholm/8/2011
-B/Stockholm/9/2011
-B/Stockholm/16/2011
-B/Stockholm/6/2011
-B/Stockholm/13/2011
-B/Stockholm/7/2011
-B/Voronezh/20/2011
-B/Valladolid/57/2010
-B/Slovenia/998/2010
-B/Slovenia/46/2011
-B/Moldova/284/2011
-B/Lyon/74/2011
-B/Leon/46/2011
-B/Latvia/3-39620p/2011
-B/Estonia/55784/2011
-B/England/421/2010
-B/Czech Republic/36/2011
-B/Athens/10051/2011
-B/Astrakhan/3/2011
-B/Stockholm/3/2011
-B/Stockholm/1/2011
-B/HIROSHIMA/9/2010
-B/Latvia/12-41046/2010
-B/Hong Kong/2207/2010
-B/Hong Kong/2200/2010
-B/Egypt/65/2010
-B/Egypt/46/2010
-B/Brussels/G0707/2010
-B/Agadir/156/2011
-B/Bolivia/1526/2010
-B/Georgia/28/2010
-B/Stockholm/10/2010
-B/Stockholm/9/2010
-B/La Reunion/845/2010
-B/Zamora/52/2010
-B/Tehran/5277/2010
-B/Switzerland/3822511/2010
-B/Slovakia/1731/2010
-B/Roma/1/2010
-B/Marseille/890/2010
-B/Marseille/889/2010
-B/Madagascar/7766/2010
-B/Lyon/809/2010
-B/Luxembourg/558/2010
-B/Genova/2/2010
-B/England/96/2010
-B/England/78/2010
-B/Stockholm/7/2010
-B/JOHANNESBURG/20/2010
-B/CapeTown/95/2010
-B/Johannesburg/103/2010
-B/Johannesburg/107/2010
-B/Canarias/RR6762/2010
-B/Hong Kong/1889/2010
-B/Hong Kong/1878/2010
-B/Madagascar/2766/2010
-B/Madagascar/82/2010
-B/Madagascar/1184/2010
-B/England/63/2010
-B/England/57/2010
-B/England/27/2010
-B/Norway/459/2010
-B/Panama/307237/2010
-B/Yamaguchi/1/2010
+B/Texas/26/2008
+B/Wisconsin/27/2008
+B/Texas/34/2008
+B/Bayern/36/2008
+B/England/393/2008
+B/IWATE/17/2009
+B/OKINAWA/10/2009
+B/Sabac/1232/2009
+B/Norway/1474/2009
+B/Madagascar/4254/2009
+B/SINGAPORE/21/2009
+B/Belgrade/1094/2009
+B/Mauritius/515/2009
+B/Paris/1762/2009
+B/Laos/1232/2009
+B/Stockholm/8/2009
+B/Stockholm/1/2010
+B/Hong Kong/235/2009
+B/Hong Kong/514/2009
+B/Madagascar/6945/2009
+B/Madagascar/7002/2009
+B/Stockholm/2/2010
+B/Stockholm/3/2010
+B/Stockholm/5/2010
+B/Hong Kong/259/2010
+B/Hong Kong/270/2010
+B/Milano/30/2010
+B/Milano/34/2010
+B/Milano/36/2010
+B/Odessa/ 3886/2010
+B/Ekaterinburg/1/2010
+B/Irkutsk/2/2010
+B/Moscow/1/2010
+B/Moscow/18/2010
+B/Moscow/9/2010
+B/MIE/6/2010
 B/Taiwan/11/2010
 B/Bolivia/104/2010
-B/MIE/6/2010
-B/Moscow/9/2010
-B/Moscow/18/2010
-B/Moscow/1/2010
-B/Irkutsk/2/2010
-B/Ekaterinburg/1/2010
-B/Odessa/ 3886/2010
-B/Milano/36/2010
-B/Milano/34/2010
-B/Milano/30/2010
-B/Hong Kong/270/2010
-B/Johannesburg/3964/2012
-B/Formosa/V2367/2012
-B/Austria/653113/2012
-B/Denmark/24/2011
-B/Denmark/22/2011
-B/Denmark/23/2011
-B/Denmark/16/2011
-B/Denmark/21/2011
-B/Switzerland/5632623/2011
-B/Switzerland/5867933/2012
-B/Israel/17/2011
-B/Israel/15/2011
-B/Israel/14/2011
-B/Ireland/12m2515/2012
-B/Attecoube/GR887/2011
-B/Sachen Anhalt/1/2012
-B/Norway/2429/2011
-B/Norway/2368/2011
-B/Hong Kong/1153/2011
+B/YAMAGUCHI/1/2010
+B/Panama/307237/2010
+B/Norway/459/2010
+B/England/27/2010
+B/England/57/2010
+B/England/63/2010
+B/Madagascar/1184/2010
+B/Madagascar/82/2010
+B/Madagascar/2766/2010
+B/Hong Kong/1878/2010
+B/Hong Kong/1889/2010
+B/Canarias/RR6762/2010
+B/Johannesburg/107/2010
+B/Johannesburg/103/2010
+B/CapeTown/95/2010
+B/HIROSHIMA/9/2010
+B/JOHANNESBURG/20/2010
+B/Bolivia/1526/2010
+B/Georgia/28/2010
+B/Stockholm/7/2010
+B/England/105/2010
+B/England/78/2010
+B/England/96/2010
+B/Genova/2/2010
+B/Luxembourg/558/2010
+B/Lyon/809/2010
+B/Madagascar/7766/2010
+B/Marseille/889/2010
+B/Marseille/890/2010
+B/Marseille/891/2010
+B/Roma/1/2010
+B/Slovakia/1731/2010
+B/Switzerland/3822511/2010
+B/Tehran/5277/2010
+B/Zamora/52/2010
+B/La Reunion/845/2010
+B/Stockholm/9/2010
+B/Stockholm/10/2010
+B/Agadir/156/2011
+B/Brussels/G0707/2010
+B/Egypt/46/2010
+B/Egypt/65/2010
+B/Hong Kong/2200/2010
+B/Hong Kong/2207/2010
+B/Latvia/12-41046/2010
+B/Stockholm/1/2011
+B/Stockholm/3/2011
+B/Astrakhan/3/2011
+B/Athens/10051/2011
+B/Czech Republic/36/2011
+B/England/421/2010
+B/Estonia/55784/2011
+B/Latvia/3-39620p/2011
+B/Leon/46/2011
+B/Lyon/74/2011
+B/Madagascar/1119/2011
+B/Moldova/284/2011
+B/Slovenia/46/2011
+B/Slovenia/998/2010
+B/Valladolid/57/2010
+B/Voronezh/20/2011
+B/Stockholm/7/2011
+B/Malmoe/2/2011
+B/Stockholm/13/2011
+B/Stockholm/6/2011
+B/Stockholm/16/2011
+B/Stockholm/9/2011
+B/Stockholm/8/2011
+B/Stockholm/15/2011
+B/Stockholm/10/2011
+B/Stockholm/11/2011
+B/Stockholm/4/2011
+B/Stockholm/5/2011
+B/Stockholm/14/2011
+B/Ireland/21653/2011
+B/Hong Kong/591/2011
+B/Serbia/1761/2011
+B/Serbia/2689/2011
+B/Norway/1188/2011
+B/Norway/1276/2011
+B/Slovakia/302/2011
+B/Ghana/516/2011
+B/Ghana/735/2011
+B/Ghana/847/2011
+B/Slovenia/819/2011
+B/Slovenia/1010/2011
+B/Santiago/6025/2011
+B/CAMBODIA/30/2011
+B/Stockholm/18/2011
+B/Dominican Republic/5486/2011
+B/Minsk/1559/2011
+B/Ghana/850/2011
+B/Slovenia/1141/2011
+B/Hong Kong/762/2011
+B/Hong Kong/767/2011
 B/Norway/2075/2011
-B/Berlin/146/2011
 B/TOKYO/91107/2011
+B/Berlin/146/2011
+B/Hong Kong/1129/2011
+B/Hong Kong/1153/2011
+B/Norway/2368/2011
+B/Norway/2429/2011
+B/Sachen Anhalt/1/2012
+B/Attecoube/GR887/2011
+B/Ireland/12m2515/2012
+B/Israel/14/2011
+B/Israel/15/2011
+B/Israel/17/2011
+B/Switzerland/5867933/2012
+B/Switzerland/5632623/2011
+B/Denmark/21/2011
+B/Denmark/16/2011
+B/Denmark/23/2011
+B/Denmark/22/2011
+B/Denmark/24/2011
+B/Austria/653113/2012
+B/Formosa/V2367/2012
+B/Johannesburg/3964/2012
 B/South Australia/81/2012

@@ -1,153 +1,157 @@
-B/Fujian/430/2004
-B/Finland/767/2006
-B/Chan Thaburi/218/2003
-B/Taiwan/79/2006
-B/Perth/6/2008
-B/Bangladesh/3333/2007
-B/Johannesburg/1197/2007
-B/Chelyabinsk/306/2007
-B/Soligorsk/140/2007
-B/Jeju/2787/2007
-B/Brisbane/3/2007
-B/Florida/4/2006
-B/Hong Kong/8/1973
-B/Waikato/1/2006
-B/Johannesburg/439/2006
-B/Trieste/23/2005
-B/Macau/131/2004
-B/Taiwan/142/2005
-B/Brisbane/5/2004
-B/Brisbane/4/2004
-B/Christchurch/33/2004
-B/Christchurch/27/2004
-B/Victoria/508/2004
-B/Shanghai/361/2002
-B/Taiwan/165/2005
-B/Taiwan/16/2004
-B/Taiwan/68/2004
-B/Taiwan/52/2004
-B/Taiwan/635/2005
-B/Taiwan/81/2005
-B/Taiwan/637/2005
-B/Taiwan/34/2004
-B/Taiwan/13/2004
-B/Taiwan/69/2004
-B/Taiwan/54/2004
-B/Taiwan/43/2005
-B/Taiwan/102/2005
-B/Arizona/135/2005
-B/Johannesburg/69/2001
-B/Shizuoka/15/2001
-B/Hong Kong/22/1989
-B/Finland/231/2003
-B/Texas/3/2002
-B/New York/47/2001
-B/Taiwan/97271/2001
-B/Hiroshima/23/2001
-B/Yamagata/K535/2001
-B/Yamagata/K521/2001
-B/Yamagata/K520/2001
-B/Yamagata/K515/2001
-B/Yamagata/K508/2001
-B/Yamagata/K501/2001
-B/Yamagata/K490/2001
-B/Yamagata/K298/2001
-B/Kobe/69/2001
-B/Kobe/87/2001
-B/Kobe/79/2001
-B/Kadoma/409/2000
 B/Osaka/1201/2000
-B/Malmoe/1/2011
-B/Serbia/2095/2011
-B/Serbia/1894/2011
-B/Turkey/674/2011
-B/Finland/39/2010
-B/Stockholm/12/2011
-B/Lyon/68/2011
-B/Latvia/2-70/2011
-B/Estonia/55763/2011
-B/Estonia/55669/2011
-B/England/512/2010
-B/England/170/2010
-B/Athens/9784/2011
-B/Stockholm/2/2011
-B/Paris/1850/2010
-B/Niedersachsen/2/2010
-B/Hong Kong/2190/2010
-B/Hong Kong/2188/2010
-B/Finland/33/2010
-B/Brussels/G0710/2010
-B/Bretagne/2278/2010
-B/Berlin/2/2010
-B/Berlin/1/2010
-B/Norway/1181/2010
-B/Tehran/5246/2010
-B/Niedersachsen/1/2010
-B/Stockholm/6/2010
-B/JOHANNESBURG/23/2010
-B/Switzerland/1334249/2008
-B/Johannesburg/40/2010
-B/Latvia/3-1468/2010
-B/Hong Kong/1832/2010
-B/Algeria/G486/2010
-B/Ghana/FS-2112/2010
-B/Latvia/3-1498/2010
-B/Hong Kong/345/2010
-B/Hong Kong/398/2010
-B/Stockholm/4/2009
-B/Turkey/TR-37/2009
-B/Turkey/TR-35/2009
-B/Hong Kong/542/2009
-B/Hong Kong/251/2009
-B/Valladolid/18/2008
-B/Tehran/8/2009
-B/Zahedan/7/2009
-B/Mashad/6/2009
+B/Kadoma/409/2000
+B/Kobe/69/2001
+B/Kobe/79/2001
+B/Kobe/87/2001
+B/Yamagata/K298/2001
+B/Yamagata/K490/2001
+B/Yamagata/K501/2001
+B/Yamagata/K508/2001
+B/Yamagata/K515/2001
+B/Yamagata/K520/2001
+B/Yamagata/K521/2001
+B/Yamagata/K535/2001
+B/Hiroshima/23/2001
+B/Shizuoka/15/2001
+B/Shanghai/361/2002
+B/Taiwan/97271/2001
+B/New York/47/2001
+B/Texas/3/2002
+B/Finland/231/2003
+B/Johannesburg/69/2001
+B/Taiwan/54/2004
+B/Taiwan/69/2004
+B/Taiwan/13/2004
+B/Taiwan/34/2004
+B/Taiwan/52/2004
+B/Taiwan/68/2004
+B/Taiwan/16/2004
+B/Victoria/508/2004
+B/Christchurch/27/2004
+B/Christchurch/33/2004
+B/Brisbane/4/2004
+B/Brisbane/5/2004
+B/Macau/131/2004
+B/Chan Thaburi/218/2003
+B/Fujian/430/2004
+B/Florida/7/2004
 B/Harbin/7/1994
-B/CAPE TOWN/30/2008
+B/Townsville/1/2003
+B/Victoria/509/2004
+B/Brisbane/13/2004
+B/Arizona/135/2005
+B/Taiwan/102/2005
+B/Taiwan/43/2005
+B/Taiwan/637/2005
+B/Taiwan/81/2005
+B/Taiwan/635/2005
+B/Taiwan/165/2005
+B/Taiwan/142/2005
+B/Trieste/23/2005
+B/Florida/4/2006
+B/Johannesburg/439/2006
+B/Waikato/1/2006
+B/Brisbane/3/2007
+B/Jeju/2787/2007
+B/Soligorsk/140/2007
+B/Chelyabinsk/306/2007
+B/Johannesburg/1197/2007
+B/Bangladesh/3333/2007
+B/Taiwan/79/2006
+B/Finland/767/2006
+B/Lyon/1283/2007
+B/Perth/12/2007
+B/Hong Kong/441/2007
+B/Mauritius/481/2007
+B/Johannesburg/90/2007
+B/SRI LANKA/4/2006
+B/Victoria/501/2005
+B/Sydney/511/2006
+B/Perth/6/2008
 B/Santiago/5241/2008
 B/Perth/204/2008
-B/INDIANA/1/2008
+B/ENGLAND/145/2008
+B/TOTTORI/3/2008
 B/Brisbane/9/2008
 B/Brisbane/1/2008
 B/BARCELONA/143/2008
-B/ENGLAND/145/2008
-B/Hong Kong/441/2007
-B/TOTTORI/3/2008
-B/Perth/12/2007
-B/Florida/7/2004
-B/Lyon/1283/2007
-B/Massachusetts/02/2012
-B/SRI LANKA/4/2006
-B/Hong Kong/3577/2012
-B/Novosibirsk/1/2012
-B/Stockholm/12-00971/2012
-B/England/9/2012
-B/Turkey/17/2011
-B/Paris/1900/2011
-B/Paris/1870/2011
-B/Sakai/36/2011
-B/Israel/20/2011
-B/Ireland/12M1522/2012
-B/Yopougon/GR852/2011
-B/Ghana/FS-11-1995/2011
-B/Ghana/FS-11-1994/2011
-B/Ghana/FS-11-1827/2011
-B/Catalonia/S4125/2011
-B/Catalonia/S4251/2011
-B/Hong Kong/1127/2011
-B/Yopougon/GR882/2011
-B/Berlin/147/2011
-B/Sweden/2/2011
-B/Stockholm/19/2011
-B/Netherlands/707/2011
-B/Johannesburg/90/2007
-B/Mauritius/481/2007
+B/INDIANA/1/2008
+B/CAPE TOWN/30/2008
+B/Valladolid/18/2008
+B/Switzerland/1334249/2008
 B/Dakar/6/2008
-B/England/254/2011
-B/England/110/2010
-B/Hong Kong/765/2011
-B/Hong Kong/748/2011
+B/Ulaanbaatar/1798/2008
+B/Mashad/6/2009
+B/Zahedan/7/2009
+B/Tehran/8/2009
+B/Hong Kong/251/2009
+B/Hong Kong/542/2009
+B/Turkey/TR-35/2009
+B/Turkey/TR-37/2009
+B/Stockholm/4/2009
+B/Hong Kong/398/2010
+B/Hong Kong/345/2010
+B/Latvia/3-1468/2010
+B/Latvia/3-1498/2010
+B/Ghana/FS-2112/2010
+B/Algeria/G486/2010
+B/Hong Kong/1832/2010
+B/Johannesburg/23/2010
+B/Johannesburg/40/2010
+B/Stockholm/6/2010
+B/Niedersachsen/1/2010
+B/Tehran/5246/2010
+B/Norway/1181/2010
+B/Berlin/1/2010
+B/Berlin/2/2010
+B/Bretagne/2278/2010
+B/Brussels/G0710/2010
+B/Finland/33/2010
+B/Finland/39/2010
+B/Hong Kong/2188/2010
+B/Hong Kong/2190/2010
+B/Niedersachsen/2/2010
+B/Paris/1850/2010
+B/Stockholm/2/2011
+B/Malmoe/1/2011
+B/Athens/9784/2011
+B/England/170/2010
+B/England/512/2010
+B/Estonia/55669/2011
+B/Estonia/55763/2011
+B/Latvia/2-70/2011
+B/Lyon/68/2011
+B/Stockholm/12/2011
+B/Turkey/674/2011
+B/Serbia/1894/2011
+B/Serbia/2095/2011
 B/Lyon/1179/2011
+B/Hong Kong/748/2011
+B/Hong Kong/765/2011
+B/England/110/2010
+B/Catalonia/S4125/2011
+B/Sweden/2/2011
+B/England/254/2011
+B/SAKAI/36/2011
+B/Stockholm/19/2011
+B/Catalonia/S4251/2011
+B/Netherlands/707/2011
+B/Berlin/147/2011
+B/Yopougon/GR882/2011
+B/Hong Kong/1127/2011
+B/Ghana/FS-11-1827/2011
+B/Ghana/FS-11-1994/2011
+B/Ghana/FS-11-1995/2011
+B/Yopougon/GR852/2011
+B/Paris/1870/2011
+B/Paris/1900/2011
+B/Ireland/12M1522/2012
+B/Israel/20/2011
+B/Turkey/17/2011
+B/England/9/2012
+B/Stockholm/12-00971/2012
+B/Massachusetts/02/2012
+B/Novosibirsk/1/2012
+B/Hong Kong/3577/2012
 B/PHUKET/3073/2013
 B/Hong Kong/3417/2014
