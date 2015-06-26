@@ -51,6 +51,7 @@ of the genotype matches at the specified positions
 function get_frequencies(region, gt){
 	var freq = [];
 	for (var pi=0; pi<pivots.length; pi++){freq[freq.length]=0;}
+	console.log("searching for "+region+' ' + gt);
 	if (frequencies["clades"][region][gt.toLowerCase()]!=undefined) {
 		console.log(gt+" found as clade");
 		for (var pi=0; pi<freq.length; pi++){
@@ -67,6 +68,8 @@ function get_frequencies(region, gt){
 		for (var pi=0; pi<freq.length; pi++){
 			freq[pi]+=frequencies["mutations"][region][gt][pi];
 		}
+	}else{
+		console.log("not found "+gt);		
 	}
 	return freq.map(function (d) {return Math.round(d*100)/100;});
 };
@@ -81,6 +84,7 @@ function make_gt_chart(gt){
 		var region = d[0];
 		var genotype = d[1];
 		var freq = get_frequencies(region, genotype);
+		console.log(region+' '+genotype);
 		if (d3.max(freq)>0) {
 			var tmp_trace = genotype.toString().replace(/,/g, ', ');
 			if (region != "global") {
@@ -282,8 +286,9 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 						tmp.push(["global",d.x+frequencies["entropy"][gene][pos][2][ii]]);
 					}
 					colorBy = "genotype";
-					colorByGenotypePosition([pos], gene);
-					d3.select("#gt-color").property("value", gene + ' ' + (pos+1));
+					console.log("color by genotype: "+gene + ' ' + pos)
+					colorByGenotypePosition([[gene, pos]]);
+					d3.select("#gt-color").property("value", gene + ':' + (pos+1));
 				}
 		    },
 		    onmouseover: function (d){

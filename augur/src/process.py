@@ -183,7 +183,7 @@ class process(virus_frequencies):
 						clade_yval[clade] = base_node.yvalue
 						for region in base_node.freq:
 							try:
-								self.frequencies["clades"][region][clade] = [round(x,3) for x in base_node.freq[region]]
+								self.frequencies["clades"][region][clade.lower()] = [round(x,3) for x in base_node.freq[region]]
 								print "added frequencies",region, clade
 							except:
 								print base_node.freq[region]
