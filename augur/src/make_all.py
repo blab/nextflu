@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 import subprocess,glob, os, argparse
-from Bio import SeqIO
+from Bio import SeqIO, AlignIO
+import numpy as np
+from seqanpy import align_overlap
+
 
 verbose = False
 patterns = {('A / H3N2', ''):'H3N2',
@@ -17,16 +20,25 @@ def determine_lineage(seq):
 	fields = map(lambda x:x.strip(), seq.description.split('|'))
 	tmp_lineage = (fields[2], fields[4])
 	if tmp_lineage in patterns:
+		print fields[0],"\n\tgisaid defined lineage:",tmp_lineage,'->',patterns[tmp_lineage]
 		return fields[0], patterns[tmp_lineage]
 	else:
 		scores = []
 		for olineage, oseq in outgroups.iteritems():
-			SeqIO.write([oseq, seq], "temp_in.fasta", "fasta")
-			os.system("mafft --auto temp_in.fasta > temp_out.fasta")
-			tmp_aln = np.array(AlignIO.read('temp_out.fasta', 'fasta'))
+			tmp_aln = align_overlap(str(oseq.seq), str(seq.seq).replace('-','').upper(),
+						score_gapopen=-10, score_gapext=-1)
+			tmp_aln = np.array([np.fromstring(tmp_aln[1], dtype='|S1'), np.fromstring(tmp_aln[2], dtype='|S1')])
+			#SeqIO.write([oseq, seq], "temp_in.fasta", "fasta")
+			#os.system("mafft --auto temp_in.fasta > temp_out.fasta 2>tmp")
+			#tmp_aln = np.array(AlignIO.read('temp_out.fasta', 'fasta'))
 			scores.append((olineage, (tmp_aln[0]==tmp_aln[1]).sum()))
-		scores.sort(key = lambda x:x[1])
-		return fields[0], scores[-1][0]
+		scores.sort(key = lambda x:x[1], reverse=True)
+		if scores[0][1]>0.85*len(seq):
+			print fields[0], tmp_lineage, len(seq), "\n\t lineage based on similarity:",scores[0][0],"\n\t",scores
+			return fields[0], scores[0][0]
+		else:
+			print fields[0], tmp_lineage, len(seq), "\n\t other: best scores:",scores[0]
+			return fields[0], 'other'
 
 def pull_fasta_from_s3(lineage, directory = 'data/', bucket = 'nextflu-data'):
 	"""Retrieve FASTA files from S3 bucket"""
@@ -83,7 +95,17 @@ def push_json_to_s3(lineage, resolution, directory = '../auspice/data/', bucket 
 	c = boto.connect_cloudfront()
 	c.create_invalidation_request(cloudfront, paths)
 
-def ammend_fasta(fname, lineage, threshold = 10, directory = 'data/'):
+def make_lineage_map(fname, directory='data/'):
+	directory = directory.rstrip('/')+'/'
+	lineage_map = {}
+	seq_fname = directory + fname
+	for si, seq in enumerate(SeqIO.parse(seq_fname, 'fasta')):
+		print "seq",si
+		strain, tmp_lineage = determine_lineage(seq)
+		lineage_map[strain] = tmp_lineage
+	return lineage_map
+
+def ammend_fasta(fname, lineage, lineage_map, threshold = 10, directory = 'data/'):
 	directory = directory.rstrip('/')+'/'
 	updated = False
 
@@ -104,7 +126,9 @@ def ammend_fasta(fname, lineage, threshold = 10, directory = 'data/'):
 		return updated
 	else:
 		for seq in SeqIO.parse(seq_fname, 'fasta'):
-			strain, tmp_lineage = determine_lineage(seq)
+			fields = map(lambda x:x.strip(), seq.description.split('|'))
+			strain = fields[0]
+			tmp_lineage = lineage_map[strain]
 			if tmp_lineage == lineage:
 				if strain not in existing:
 					new_seqs.append(seq)
@@ -142,12 +166,13 @@ if __name__=="__main__":
 	if params.resolutions is None:
 		params.resolutions = ['1y', '3y', '6y', '12y']
 
+	lineage_map = make_lineage_map(params.infile)
 	for lineage in params.lineages:
 		if params.s3:
 			pull_fasta_from_s3(lineage, directory = 'data/', bucket = params.fasta_bucket)
 		if params.all:
 			params.threshold = 0
-		run = ammend_fasta(params.infile, lineage, threshold = params.threshold, directory = 'data/')
+		run = ammend_fasta(params.infile, lineage, lineage_map, threshold = params.threshold, directory = 'data/')
 		if run:
 			for resolution in params.resolutions:
 				print '\n------------------------------\n'
@@ -179,7 +204,7 @@ if __name__=="__main__":
 				call = map(str, [params.bin, process, '-v', n_viruses, '-y', n_years, 
 				           		 '--prefix', prefix, '--resolution', resolution] + common_args)
 				print call
-				subprocess.call(call)
+				#subprocess.call(call)
 				if params.s3:
 					push_fasta_to_s3(lineage, directory = 'data/', bucket = params.fasta_bucket)
 					push_json_to_s3(lineage, resolution, directory = '../auspice/data/', bucket = params.json_bucket)
