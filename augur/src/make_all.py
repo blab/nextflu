@@ -2,8 +2,6 @@
 import subprocess,glob, os, argparse
 from Bio import SeqIO, AlignIO
 import numpy as np
-from seqanpy import align_overlap
-
 
 verbose = False
 patterns = {('A / H3N2', ''):'H3N2',
@@ -25,12 +23,15 @@ def determine_lineage(seq):
 	else:
 		scores = []
 		for olineage, oseq in outgroups.iteritems():
-			tmp_aln = align_overlap(str(oseq.seq), str(seq.seq).replace('-','').upper(),
-						score_gapopen=-10, score_gapext=-1)
-			tmp_aln = np.array([np.fromstring(tmp_aln[1], dtype='|S1'), np.fromstring(tmp_aln[2], dtype='|S1')])
-			#SeqIO.write([oseq, seq], "temp_in.fasta", "fasta")
-			#os.system("mafft --auto temp_in.fasta > temp_out.fasta 2>tmp")
-			#tmp_aln = np.array(AlignIO.read('temp_out.fasta', 'fasta'))
+			if (params.aligner == "seqan"):
+				from seqanpy import align_overlap
+				tmp_aln = align_overlap(str(oseq.seq), str(seq.seq).replace('-','').upper(),
+							score_gapopen=-10, score_gapext=-1)
+				tmp_aln = np.array([np.fromstring(tmp_aln[1], dtype='|S1'), np.fromstring(tmp_aln[2], dtype='|S1')])
+			if (params.aligner == "mafft"):
+				SeqIO.write([oseq, seq], "temp_in.fasta", "fasta")
+				os.system("mafft --auto temp_in.fasta > temp_out.fasta 2>tmp")
+				tmp_aln = np.array(AlignIO.read('temp_out.fasta', 'fasta'))
 			scores.append((olineage, (tmp_aln[0]==tmp_aln[1]).sum()))
 		scores.sort(key = lambda x:x[1], reverse=True)
 		if scores[0][1]>0.85*len(seq):
@@ -153,7 +154,8 @@ if __name__=="__main__":
 	parser.add_argument('--json_bucket', type = str, default = "nextflu-dev", help = "bucket for JSON files")	
 	parser.add_argument('--threshold', type = float, default = 10.0, help = "number of new sequences required to rerun pipeline")
 	parser.add_argument('--lineages', nargs='+', type = str,  help ="lineages to include")
-	parser.add_argument('--resolutions', nargs='+', type = str,  help ="resolutions to include")		
+	parser.add_argument('--resolutions', nargs='+', type = str,  help ="resolutions to include")
+	parser.add_argument('--aligner', type = str, default = "mafft", help = "aligner to use, either mafft or seqan")			
 	parser.add_argument('-r', type = float, default = 1.0)
 	params = parser.parse_args()
 
