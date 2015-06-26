@@ -9,6 +9,9 @@ patterns = {('A / H3N2', ''):'H3N2',
 			('B / H0N0', 'Victoria'):'Vic',
 			('B / H0N0', 'Yamagata'):'Yam',
 			('A / H1N1', 'seasonal'):'H1N1',
+			('A / H7N9', ''):'H7N9',
+			('A / H5N1', ''):'H5N1',
+			('A / H6N1', ''):'H6N1'
 			}
 
 outgroups = {lineage:SeqIO.read('source-data/'+lineage+'_outgroup.gb', 'genbank')
@@ -19,7 +22,7 @@ def determine_lineage(seq):
 	tmp_lineage = (fields[2], fields[4])
 	if tmp_lineage in patterns:
 		print fields[0],"\n\tgisaid defined lineage:",tmp_lineage,'->',patterns[tmp_lineage]
-		return fields[0], patterns[tmp_lineage]
+		return patterns[tmp_lineage]
 	else:
 		scores = []
 		for olineage, oseq in outgroups.iteritems():
@@ -36,10 +39,10 @@ def determine_lineage(seq):
 		scores.sort(key = lambda x:x[1], reverse=True)
 		if scores[0][1]>0.85*len(seq):
 			print fields[0], tmp_lineage, len(seq), "\n\t lineage based on similarity:",scores[0][0],"\n\t",scores
-			return fields[0], scores[0][0]
+			return scores[0][0]
 		else:
 			print fields[0], tmp_lineage, len(seq), "\n\t other: best scores:",scores[0]
-			return fields[0], 'other'
+			return 'other'
 
 def pull_fasta_from_s3(lineage, directory = 'data/', bucket = 'nextflu-data'):
 	"""Retrieve FASTA files from S3 bucket"""
@@ -95,30 +98,25 @@ def push_json_to_s3(lineage, resolution, directory = '../auspice/data/', bucket 
 
 	c = boto.connect_cloudfront()
 	c.create_invalidation_request(cloudfront, paths)
-
-def make_lineage_map(fname, directory='data/'):
+	
+def gather_strains(lineage, directory='data/'):
 	directory = directory.rstrip('/')+'/'
-	lineage_map = {}
+	fname = lineage+'_gisaid_epiflu_sequence.fasta'
+	new_strains = []
 	seq_fname = directory + fname
-	for si, seq in enumerate(SeqIO.parse(seq_fname, 'fasta')):
-		print "seq",si
-		strain, tmp_lineage = determine_lineage(seq)
-		lineage_map[strain] = tmp_lineage
-	return lineage_map
+	if not os.path.isfile(seq_fname):
+		print "File with new sequences does not exist ", seq_fname
+	else:
+		for seq in SeqIO.parse(seq_fname, 'fasta'):
+			fields = map(lambda x:x.strip(), seq.description.split('|'))
+			strain = fields[0]
+			new_strains.append(strain)
+	return new_strains
 
-def ammend_fasta(fname, lineage, lineage_map, threshold = 10, directory = 'data/'):
+def ammend_fasta(fname, lineage, existing_strains, threshold = 10, directory = 'data/'):
 	directory = directory.rstrip('/')+'/'
 	updated = False
-
 	ex_fname = directory+lineage+'_gisaid_epiflu_sequence.fasta'
-	existing = set()
-	if not os.path.isfile(ex_fname):
-		print "No existing file found for",lineage, ex_fname
-	else:
-		for seq in SeqIO.parse(ex_fname, 'fasta'):
-			strain = seq.description.split('|')[0].strip()
-			existing.add(strain)
-	print "Found", len(existing), 'existing for lineage', lineage 
 
 	new_seqs = []
 	seq_fname = directory + fname
@@ -129,9 +127,10 @@ def ammend_fasta(fname, lineage, lineage_map, threshold = 10, directory = 'data/
 		for seq in SeqIO.parse(seq_fname, 'fasta'):
 			fields = map(lambda x:x.strip(), seq.description.split('|'))
 			strain = fields[0]
-			tmp_lineage = lineage_map[strain]
-			if tmp_lineage == lineage:
-				if strain not in existing:
+			if strain not in existing_strains:
+				tmp_lineage = determine_lineage(seq)
+				print tmp_lineage
+				if tmp_lineage == lineage:
 					new_seqs.append(seq)
 
 	print "Found", len(new_seqs), 'new for lineage', lineage
@@ -141,7 +140,6 @@ def ammend_fasta(fname, lineage, lineage_map, threshold = 10, directory = 'data/
 		updated = True
 
 	return updated
-
 
 if __name__=="__main__":
 	parser = argparse.ArgumentParser(description = "ammend existing files with downloaded viruses, rerun")
@@ -168,18 +166,22 @@ if __name__=="__main__":
 	if params.resolutions is None:
 		params.resolutions = ['1y', '3y', '6y', '12y']
 
-	lineage_map = make_lineage_map(params.infile)
+	existing_strains = []
 	for lineage in params.lineages:
-		if params.s3:
+		if params.s3:	
 			pull_fasta_from_s3(lineage, directory = 'data/', bucket = params.fasta_bucket)
+		existing_strains.extend(gather_strains(lineage, directory = 'data/'))
+
+	for lineage in params.lineages:
+		print '\n------------------------------\n'
+		print 'Parsing new sequences for lineage',lineage			
 		if params.all:
 			params.threshold = 0
-		run = ammend_fasta(params.infile, lineage, lineage_map, threshold = params.threshold, directory = 'data/')
+		run = ammend_fasta(params.infile, lineage, existing_strains, threshold = params.threshold, directory = 'data/')
 		if run:
 			for resolution in params.resolutions:
 				print '\n------------------------------\n'
-				print 'Lineage',lineage			
-				print 'Resolution',resolution
+				print 'Processing lineage',lineage,'with resolution',resolution		
 				process = 'src/' + lineage + '_process.py'
 				if resolution == '1y':
 					n_viruses = 100
