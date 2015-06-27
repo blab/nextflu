@@ -129,7 +129,6 @@ def ammend_fasta(fname, lineage, existing_strains, threshold = 10, directory = '
 			strain = fields[0]
 			if strain not in existing_strains:
 				tmp_lineage = determine_lineage(seq)
-				print tmp_lineage
 				if tmp_lineage == lineage:
 					new_seqs.append(seq)
 
