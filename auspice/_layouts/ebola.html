@@ -3,7 +3,7 @@ layout: default
 ---
 
 <div class="row">
-	<div class="col-md-4">
+	<div class="col-md-3">
 		<div class="bigspacer"></div>
 		<div class="logo-container">
 			<div class="bigtitle">
@@ -88,20 +88,22 @@ layout: default
 			</div>					
 		</div>
 	</div>
-	<div class="col-md-8">
+	<div class="col-md-9">
 		<div class="bigspacer"></div>
 		<div class="treeplot-container">
 			<svg id="treeplot"></svg>
 		</div>
 		<div class="casenumber-container">		
 			<div id="casenumberschart"></div>
+		<div class="bigspacer"></div>
+		<div class="entropy-container">		
+			<div id="entropy"></div>
 		</div>
 	</div>
 </div>
 
 <div class="row">
 	<div class="col-md-12">
-		<div class="bigspacer"></div>
 		<div class="bigspacer"></div>
 	</div>
 </div>
@@ -113,7 +115,7 @@ layout: default
 		</div>
 		<div class="spacer"></div>
 		<div class="row">			
-			<div class="col-xs-6 io-container">	
+			<div class="col-xs-6 io-container" style="display: none;">	
 				<form class="form-horizontal form-small">
 					<div class="form-group" style="display: none;">
 						<div class="col-xs-12">
@@ -121,12 +123,15 @@ layout: default
 						</div>
 					</div>
 				</form>	
-			</div>
-			<div class="col-xs-6 io-container">					
-				<div>
-					<button id="plotfreq" type=button  style="display: none;" class="btn btn-default">plot frequencies</button>
+				<div class="col-xs-6 io-container">					
+					<div>
+						<button id="plotfreq" type=button class="btn btn-default">plot frequencies</button>
+					</div>
 				</div>
 			</div>
+			<div class="spacer"></div>
+			Input mutations as position+nucleotide, i.e. <span class="highlight">8926C</span> to plot its frequency through time.
+			<div class="spacer"></div>		
 		</div>
 		<div class="spacer"></div>
 		Click on a variable site to color the tree by the nucleotide at this position.
@@ -155,21 +160,18 @@ layout: default
 		</div>	
 	</div>
 	<div class="col-md-9">
-		<h4>Phylogenetic tree</h4>
-		<p> Use the <a href="/help/#date_slider"><b>date slider</b></a> to highlight viruses sampled within 6 month of the date displayed.
+		<p> Use the <a href="/help/#date_slider"><b>date slider</b></a> to adjust sampling window.
 		<p> Use the <a href="/help/#epitope_mutations"><b>drop down menu</b></a> to color viruses <span class="highlight"><a href="/help/#geo">geographic region</a></span>, sampling date,  or <span class="highlight"><a href="/help/#lbi">local branching index</a></span>.
-		<p> Use the <a href="/help/#genotype"><b>input box</b></a> to specify positions to color viruses by genotype. Nucleotide positions must be 
-		separated by a comma (e.g. <span class="highlight">159,225</span>).
+		<p> <b>Click</b> on variable sites to specify positions to color viruses by genotype.
 		<p> <a href="/help/#mouse_tip"><b>Mouse over</b></a> a tip to show virus name, location and features.
 		<p> <a href="/help/#mouse_branch"><b>Mouse over</b></a> a branch to display the mutations associated with the branch or <b>click</b> on a branch to zoom into its descendent clade.
-
 		<h4>Tree annotation</h4>
 		<p>The <b>local branching index</b> is the exponentially weighted tree length surrounding 
 		a node, which is associated with <a href="http://elifesciences.org/content/3/e03568"> 
 		rapid branching and expansion of clades</a>. A more detailed explanation is available 
 		<a href="https://neherlab.wordpress.com/2014/11/11/now-out-in-elife-predicting-evolution/">here</a>. 
 		Retrospective analysis has shown that LBI correlates with clade growth. 
-		</p>
+		</p><p>
 	</div>
 </div>
 

@@ -97,8 +97,8 @@ function patch_color(d) {
 }
 
 function make_map(){
-    var width = 400,
-        height = 340,
+    var width = 380,
+        height = 320,
         active = d3.select(null);
 
     console.log('enter map');
@@ -122,7 +122,7 @@ function make_map(){
         .attr("height", height);
 
     var g = svg.append("g")
-        .style("stroke-width", "1.5px");
+        .style("stroke-width", "2px");
 
     d3.json("/data/ebov.json", function(error, locations) {
         var locationData = topojson.feature(locations, locations.objects.ebov).features;
@@ -136,7 +136,7 @@ function make_map(){
             .on("mouseover",mouseOverMap)
             .on("mouseout",mouseOutMap);
 
-        g.attr("transform", "translate(260,180) scale(" + 0.7 + ")");
+        g.attr("transform", "translate(260,180) scale(" + 0.65 + ")");
 
       g.append("path")
           .datum(topojson.mesh(locations, locations.objects.ebov, function(a, b) { return a !== b; }))

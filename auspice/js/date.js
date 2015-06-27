@@ -7,7 +7,7 @@ function adjust_freq_by_date() {
 	nDisplayTips = displayRoot.tipCount;
 	console.log("Total tipcount: " + tipCount);
 	nodes.forEach(function (d) {
-		d.frequency = (d.tipCount)/tipCount;
+		d.frequency = (d.tipCount)/(tipCount+0.1);
 	});
 }
 
