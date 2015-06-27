@@ -166,10 +166,12 @@ if __name__=="__main__":
 	if params.resolutions is None:
 		params.resolutions = ['1y', '3y', '6y', '12y']
 
-	existing_strains = []
 	for lineage in params.lineages:
 		if params.s3:	
 			pull_fasta_from_s3(lineage, directory = 'data/', bucket = params.fasta_bucket)
+
+	existing_strains = []
+	for lineage in ['H3N2', 'H1N1pdm', 'Vic', 'Yam']:
 		existing_strains.extend(gather_strains(lineage, directory = 'data/'))
 
 	for lineage in params.lineages:
