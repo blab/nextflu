@@ -580,7 +580,7 @@ def write_strains_with_HI_and_sequence(flutype='H3N2'):
 	good_strains = set()
 	with myopen("data/"+flutype+"_strains_with_HI.fasta", 'w') as outfile, \
 		 myopen("source-data/"+flutype+"_HI_strains.txt", 'w') as HI_strain_outfile, \
-		 myopen("data/"+flutype+"_gisaid_epiflu_sequence.fasta", 'r') as infile:
+		 myopen("data/"+flutype+"_gisaid_epiflu_sequence.fasta.gz", 'r') as infile:
 		for seq_rec in SeqIO.parse(infile, 'fasta'):
 			tmp_name = seq_rec.description.split('|')[0].strip()
 			reduced_name = strain_name_fixing(tmp_name)
