@@ -3,7 +3,7 @@ from collections import defaultdict
 import json
 
 countries = ['Guinea', 'Liberia', 'SierraLeone']
-datestr = '2015-06-03'
+datestr = '2015-06-24'
 case_numbers = {}
 
 for country in countries:
@@ -15,7 +15,7 @@ for country in countries:
                 try:
                     n=int(line['Numeric'].split('.')[0]) 
                 except:
-                    print "not a number:",line['Numeric'] 
+                    print country, "not a number:",line['Numeric'] 
                     continue
                 else:
                     tmp = line['Epi week'].split()[-1][1:-1].split('-')
@@ -25,5 +25,5 @@ for country in countries:
                 case_numbers.update({'x'+country: [round(val[0],2) for val in tmpcases],
                                      country: [val[1] for val in tmpcases]})
 
-with open('../auspice/data/case_numbers.json', 'w') as cn:
+with open('../auspice/data/ebola_case_numbers.json', 'w') as cn:
     json.dump(case_numbers, cn)
