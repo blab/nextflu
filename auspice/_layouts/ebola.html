@@ -93,12 +93,13 @@ layout: default
 		<div class="treeplot-container">
 			<svg id="treeplot"></svg>
 		</div>
-		<div class="casenumber-container">		
-			<div id="casenumberschart"></div>
 		<div class="bigspacer"></div>
 		<div class="entropy-container">		
 			<div id="entropy"></div>
 		</div>
+		<div class="casenumber-container">		
+			<div id="casenumberschart"></div>
+		<div class="bigspacer"></div>
 	</div>
 </div>
 
@@ -108,21 +109,23 @@ layout: default
 	</div>
 </div>
 
-<div class="row">
-	<div class="col-md-4">
-		<div class="io-container title">
-			Variable position
-		</div>
-		<div class="spacer"></div>
-		<div class="row">			
-			<div class="col-xs-6 io-container" style="display: none;">	
-				<form class="form-horizontal form-small">
-					<div class="form-group" style="display: none;">
-						<div class="col-xs-12">
-							<input id="gtspec" type="search" class="form-control" value="{{ page.freqdefault }}">
+<div style="display:none;">
+	<div class="row">
+		<div class="col-md-3">
+			<div class="io-container title">
+				Frequencies
+			</div>
+			<div class="spacer"></div>
+			<div class="row">			
+				<div class="col-xs-6 io-container">	
+					<form class="form-horizontal form-small">
+						<div class="form-group">
+							<div class="col-xs-12">
+								<input id="gtspec" type="search" class="form-control" value="{{ page.freqdefault }}">
+							</div>
 						</div>
-					</div>
-				</form>	
+					</form>	
+				</div>
 				<div class="col-xs-6 io-container">					
 					<div>
 						<button id="plotfreq" type=button class="btn btn-default">plot frequencies</button>
@@ -133,18 +136,13 @@ layout: default
 			Input mutations as position+nucleotide, i.e. <span class="highlight">8926C</span> to plot its frequency through time.
 			<div class="spacer"></div>		
 		</div>
-		<div class="spacer"></div>
-		Click on a variable site to color the tree by the nucleotide at this position.
-		<div class="spacer"></div>
+		<div class="col-md-9">
+			<div class="freqplot-container">		
+				<!-- <div id="gtchart"></div> -->
+			</div>
+	
+		</div>	
 	</div>
-	<div class="col-md-8">
-		<div class="freqplot-container" style="display: none;">		
-			<div id="gtchart"></div>
-		</div>
-		<div class="entropy-container">		
-			<div id="entropy"></div>
-		</div>
-	</div>	
 </div>
 
 <div class="row">
@@ -164,8 +162,7 @@ layout: default
 		<p> Use the <a href="/help/#epitope_mutations"><b>drop down menu</b></a> to color viruses <span class="highlight"><a href="/help/#geo">geographic region</a></span>, sampling date,  or <span class="highlight"><a href="/help/#lbi">local branching index</a></span>.
 		<p> <b>Click</b> on variable sites to specify positions to color viruses by genotype.
 		<p> <a href="/help/#mouse_tip"><b>Mouse over</b></a> a tip to show virus name, location and features.
-		<p> <a href="/help/#mouse_branch"><b>Mouse over</b></a> a branch to display the mutations associated with the branch or <b>click</b> on a branch to zoom into its descendent clade.
-		<h4>Tree annotation</h4>
+		<p> <a href="/help/#mouse_branch"><b>click</b> on a branch to zoom into its descendent clade.
 		<p>The <b>local branching index</b> is the exponentially weighted tree length surrounding 
 		a node, which is associated with <a href="http://elifesciences.org/content/3/e03568"> 
 		rapid branching and expansion of clades</a>. A more detailed explanation is available 
@@ -185,8 +182,8 @@ layout: default
 	<div class="col-md-9">
 		<p>We thank:
 		<table class="table">
-			<col width="79%">
-			<col width="21%">
+			<col width="78%">
+			<col width="22%">
 			<tr>
 				<td>European Mobile Lab (<b>EMLab</b>)</td>
 				<td><a href="http://evident-project.eu/newsevents/ebov-sequences/">Carroll et al. (2015)</a></td>
@@ -219,6 +216,10 @@ layout: default
 				<td>Public Health England (<b>PHE</b>)</td>
 				<td><a href="http://www.eurosurveillance.org/ViewArticle.aspx?ArticleId=21131">Bell et al. (2015)</a></td>
 			</tr>
+			<tr>
+				<td>Institut Pasteur (<b>IP</b>)</td>
+				<td><a href="http://www.pasteur.fr/en/ebov-sequences-guinea">Simon-Loriere et al. (2015)</a></td>
+			</tr>			
 			<tr>
 				<td>National Institute of Allergy and Infectious Diseases (<b>NIAID</b>)</td>
 				<td><a href="http://www.sciencemag.org/content/348/6230/117.abstract">Hoenen et al. (2015)</a></td>
