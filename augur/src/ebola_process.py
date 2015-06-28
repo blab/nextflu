@@ -27,8 +27,8 @@ virus_config.update({
 	# define relevant clades in canonical HA1 numbering (+1)
 	# numbering starting at methionine including the signal peptide
 	'clade_designations': {},
-	'min_mutation_frequency':0.1,
-	'min_genotype_frequency':0.1,
+	'min_mutation_frequency':0.499,
+	'min_genotype_frequency':0.499,
 	'auspice_prefix':'ebola_',
 	'html_vars': {'coloring': 'lbi, dfreq, region, date',
 				   'gtplaceholder': 'Genomic positions...',
