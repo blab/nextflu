@@ -26,7 +26,7 @@ receptor_binding_sites = [159,169,170,172,173,203,207]
 virus_config.update({
 	# data source and sequence parsing/cleaning/processing
 	'virus':'Yam',
-	'alignment_file':'data/Yam_gisaid_epiflu_sequence.fasta',
+	'alignment_file':'data/Yam_gisaid_epiflu_sequence.fasta.gz',
 	'outgroup':'B/Singapore/11/94',
 	'force_include':'source-data/Yam_HI_strains.txt',
 	'force_include_all':True,
@@ -167,7 +167,7 @@ class BYam_process(process, BYam_filter, BYam_clean, BYam_refine, HI_tree):
 			self.filter()
 			if self.force_include is not None and os.path.isfile(self.force_include):
 				with open(self.force_include) as infile:
-					forced_strains = [line.strip().lower() for line in infile]
+					forced_strains = [self.fix_name(line.strip()).upper() for line in infile]
 			else:
 				forced_strains = []
 			self.subsample(viruses_per_month, 

@@ -230,9 +230,12 @@ class flu_filter(virus_filter):
 	def filter_strain_names(self):
 		self.viruses = filter(lambda v: re.match(r'^[AB]/', v['strain']) != None, self.viruses)
 
+	def fix_name(self, name):
+		return name.replace(' ', '').replace('\'','').replace('(','').replace(')','').replace('H3N2','').replace('Human','').replace('human','').replace('//','/')
+
 	def fix_strain_names(self):
 		for v in self.viruses:
-			v['strain'] = v['strain'].replace(' ', '').replace('\'','').replace('(','').replace(')','').replace('H3N2','').replace('Human','').replace('human','').replace('//','/')
+			v['strain'] = self.fix_name(v['strain'])
 
 	def filter_passage(self):
 		self.viruses = filter(lambda v: re.match(r'^E\d+', v.get('passage',''), re.I) == None, self.viruses)

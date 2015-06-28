@@ -136,8 +136,8 @@ if __name__=="__main__":
 			pull_fasta_from_s3(lineage, directory = 'data/', bucket = params.fasta_bucket)
 		if params.all:
 			params.threshold = 0
-		run = ammend_fasta(params.infile, lineage, threshold = params.threshold, directory = 'data/')
-		if run:
+		#run = ammend_fasta(params.infile, lineage, threshold = params.threshold, directory = 'data/')
+		if True:
 			for resolution in params.resolutions:
 				print '\n------------------------------\n'
 				print 'Lineage',lineage			
