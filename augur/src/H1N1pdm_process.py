@@ -1,5 +1,5 @@
 import time, re, os
-from virus_filter import flu_filter
+from virus_filter import flu_filter, fix_name
 from virus_clean import virus_clean
 from tree_refine import tree_refine
 from tree_titer import HI_tree
@@ -137,7 +137,7 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine, HI
 			self.filter()
 			if self.force_include is not None and os.path.isfile(self.force_include):
 				with open(self.force_include) as infile:
-					forced_strains = [self.fix_name(line.strip()).upper() for line in infile]
+					forced_strains = [fix_name(line.strip()).upper() for line in infile]
 			else:
 				forced_strains = []
 			self.subsample(viruses_per_month, 

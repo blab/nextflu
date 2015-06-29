@@ -5,12 +5,17 @@ import time, os, gzip
 from collections import defaultdict
 from matplotlib import pyplot as plt
 from itertools import izip
+from virus_filter import fix_name
 
 def myopen(fname, mode='r'):
 	if fname[-2:]=='gz':
 		return gzip.open(fname, mode)
 	else:
 		return open(fname, mode)
+
+def HI_fix_name(name):
+	tmp_name = fix_name(name)
+	return tmp_name.upper()
 
 class HI_tree(object):
 
@@ -429,8 +434,6 @@ def plot_dHI_distribution(tree):
 
 min_titer = 10.0
 
-def strain_name_fixing(name):
-	return name.replace(' ','').upper().strip().strip('*').lstrip('0123456789')
 def titer_to_number(val):
 	try:
 		if '<' in val:
@@ -464,13 +467,13 @@ def parse_HI_matrix(fname):
 		row1 = csv_reader.next()
 		row2 = csv_reader.next()
 		row3 = csv_reader.next()
-		ref_sera = [[strain_name_fixing(e1+'/'+e2), e3.replace(' ','')] for e1,e2,e3 in zip(row1, row2, row3)[4:]]
+		ref_sera = [[HI_fix_name(e1+'/'+e2), e3.replace(' ','')] for e1,e2,e3 in zip(row1, row2, row3)[4:]]
 		for ri in xrange(len(ref_sera)):
 			abbr = ref_sera[ri][0].split('/')[1].rstrip('01234566789')
 			if abbr in name_abbrev:
-				ref_sera[ri][0] = strain_name_fixing(ref_sera[ri][0].replace(abbr, name_abbrev[abbr]))
+				ref_sera[ri][0] = HI_fix_name(ref_sera[ri][0].replace(abbr, name_abbrev[abbr]))
 			else:
-				ref_sera[ri][0] = strain_name_fixing(ref_sera[ri][0])
+				ref_sera[ri][0] = HI_fix_name(ref_sera[ri][0])
 			# strip numbers
 			tmp = ref_sera[ri][0].split('/')
 			ref_sera[ri][0] = '/'.join([tmp[0], tmp[1].rstrip('0123456789')]+tmp[2:])
@@ -496,16 +499,16 @@ def parse_HI_matrix(fname):
 			if row[0].startswith('TEST'):
 				break
 			else: # load matrices until the test virus section starts
-				ref_strains.append(strain_name_fixing(row[0].strip()))
+				ref_strains.append(HI_fix_name(row[0].strip()))
 				ref_matrix.append([src_id,'ref']+map(strip, row[1:4])+map(titer_to_number, row[4:]))
 
 		test_strains = []
 		test_matrix = []
 		for row in csv_reader: # load test viruses until it is no longer an A/ flu  name
-			if not row[0].startswith('A/'):
+			if not (row[0].startswith('A/') or row[0].startswith('B/')):
 				break
 			else:
-				test_strains.append(strain_name_fixing(row[0].strip()))
+				test_strains.append(HI_fix_name(row[0].strip()))
 				test_matrix.append([src_id,'test']+map(strip,row[1:4])+map(titer_to_number, row[4:]))
 
 		print len(ref_sera), ref_sera
@@ -542,10 +545,10 @@ def read_trevor_table(flutype):
 	#			try:
 					val = titer_to_number(row[6])
 					if not np.isnan(val):
-						strains.add(strain_name_fixing(row[1]))
-						serum = (strain_name_fixing(row[4]), row[3])
+						strains.add(HI_fix_name(row[1]))
+						serum = (HI_fix_name(row[4]), row[3])
 						sera.add(serum)
-						measurements[(strain_name_fixing(row[1]), serum)].append(val)
+						measurements[(HI_fix_name(row[1]), serum)].append(val)
 	#			except:
 	#				print row
 	else:
@@ -583,7 +586,7 @@ def write_strains_with_HI_and_sequence(flutype='H3N2'):
 		 myopen("data/"+flutype+"_gisaid_epiflu_sequence.fasta.gz", 'r') as infile:
 		for seq_rec in SeqIO.parse(infile, 'fasta'):
 			tmp_name = seq_rec.description.split('|')[0].strip()
-			reduced_name = strain_name_fixing(tmp_name)
+			reduced_name = HI_fix_name(tmp_name)
 			if reduced_name in HI_strains and (reduced_name not in good_strains):
 				SeqIO.write(seq_rec, outfile,'fasta')
 				good_strains.add(reduced_name)
@@ -594,12 +597,12 @@ def write_strains_with_HI_and_sequence(flutype='H3N2'):
 def write_flat_HI_titers(flutype = 'H3N2', fname = None):
 	measurements = get_all_titers_flat(flutype)
 	with myopen('source-data/'+flutype+'_HI_strains.txt') as infile:
-		strains = [strain_name_fixing(line.strip()) for line in infile]	
+		strains = [HI_fix_name(line.strip()).upper() for line in infile]	
 	if fname is None:
 		fname = 'source-data/'+flutype+'_HI_titers.txt'
 	with myopen(fname, 'w') as outfile:
 		for (test, ref), val in measurements.iteritems():
-			if strain_name_fixing(test) in strains and strain_name_fixing(ref[0]) in strains:
+			if HI_fix_name(test).upper() in strains and HI_fix_name(ref[0]).upper() in strains:
 				outfile.write(test+'\t'+ref[0]+'\t'+ref[1]+'\t'+'\t'.join(map(str,val))+'\n')
 
 
