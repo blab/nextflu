@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import subprocess,glob, os, argparse
-from Bio import SeqIO
+from Bio import SeqIO, AlignIO
+import numpy as np
 
 verbose = False
 patterns = {('A / H3N2', ''):'H3N2',
@@ -8,7 +9,40 @@ patterns = {('A / H3N2', ''):'H3N2',
 			('B / H0N0', 'Victoria'):'Vic',
 			('B / H0N0', 'Yamagata'):'Yam',
 			('A / H1N1', 'seasonal'):'H1N1',
+			('A / H7N9', ''):'H7N9',
+			('A / H5N1', ''):'H5N1',
+			('A / H6N1', ''):'H6N1'
 			}
+
+outgroups = {lineage:SeqIO.read('source-data/'+lineage+'_outgroup.gb', 'genbank')
+			for lineage in ['H3N2', 'H1N1pdm', 'Vic', 'Yam']}
+
+def determine_lineage(seq):
+	fields = map(lambda x:x.strip(), seq.description.split('|'))
+	tmp_lineage = (fields[2], fields[4])
+	if tmp_lineage in patterns:
+		print fields[0],"\n\tgisaid defined lineage:",tmp_lineage,'->',patterns[tmp_lineage]
+		return patterns[tmp_lineage]
+	else:
+		scores = []
+		for olineage, oseq in outgroups.iteritems():
+			if (params.aligner == "seqan"):
+				from seqanpy import align_overlap
+				tmp_aln = align_overlap(str(oseq.seq), str(seq.seq).replace('-','').upper(),
+							score_gapopen=-10, score_gapext=-1)
+				tmp_aln = np.array([np.fromstring(tmp_aln[1], dtype='|S1'), np.fromstring(tmp_aln[2], dtype='|S1')])
+			if (params.aligner == "mafft"):
+				SeqIO.write([oseq, seq], "temp_in.fasta", "fasta")
+				os.system("mafft --auto temp_in.fasta > temp_out.fasta 2>tmp")
+				tmp_aln = np.array(AlignIO.read('temp_out.fasta', 'fasta'))
+			scores.append((olineage, (tmp_aln[0]==tmp_aln[1]).sum()))
+		scores.sort(key = lambda x:x[1], reverse=True)
+		if scores[0][1]>0.85*len(seq):
+			print fields[0], tmp_lineage, len(seq), "\n\t lineage based on similarity:",scores[0][0],"\n\t",scores
+			return scores[0][0]
+		else:
+			print fields[0], tmp_lineage, len(seq), "\n\t other: best scores:",scores[0]
+			return 'other'
 
 def pull_fasta_from_s3(lineage, directory = 'data/', bucket = 'nextflu-data'):
 	"""Retrieve FASTA files from S3 bucket"""
@@ -64,20 +98,25 @@ def push_json_to_s3(lineage, resolution, directory = '../auspice/data/', bucket 
 
 	c = boto.connect_cloudfront()
 	c.create_invalidation_request(cloudfront, paths)
+	
+def gather_strains(lineage, directory='data/'):
+	directory = directory.rstrip('/')+'/'
+	fname = lineage+'_gisaid_epiflu_sequence.fasta'
+	new_strains = []
+	seq_fname = directory + fname
+	if not os.path.isfile(seq_fname):
+		print "File with new sequences does not exist ", seq_fname
+	else:
+		for seq in SeqIO.parse(seq_fname, 'fasta'):
+			fields = map(lambda x:x.strip(), seq.description.split('|'))
+			strain = fields[0]
+			new_strains.append(strain)
+	return new_strains
 
-def ammend_fasta(fname, lineage, threshold = 10, directory = 'data/'):
+def ammend_fasta(fname, lineage, existing_strains, threshold = 10, directory = 'data/'):
 	directory = directory.rstrip('/')+'/'
 	updated = False
-
 	ex_fname = directory+lineage+'_gisaid_epiflu_sequence.fasta'
-	existing = set()
-	if not os.path.isfile(ex_fname):
-		print "No existing file found for",lineage, ex_fname
-	else:
-		for seq in SeqIO.parse(ex_fname, 'fasta'):
-			strain = seq.description.split('|')[0].strip()
-			existing.add(strain)
-	print "Found", len(existing), 'existing for lineage', lineage 
 
 	new_seqs = []
 	seq_fname = directory + fname
@@ -87,15 +126,11 @@ def ammend_fasta(fname, lineage, threshold = 10, directory = 'data/'):
 	else:
 		for seq in SeqIO.parse(seq_fname, 'fasta'):
 			fields = map(lambda x:x.strip(), seq.description.split('|'))
-			tmp_lineage = (fields[2], fields[4])
-			if tmp_lineage in patterns:
-				if patterns[tmp_lineage]==lineage:
-					strain = fields[0]
-					if strain not in existing:
-						new_seqs.append(seq)
-			else:
-				if verbose:
-					print tmp_lineage,"not found"
+			strain = fields[0]
+			if strain not in existing_strains:
+				tmp_lineage = determine_lineage(seq)
+				if tmp_lineage == lineage:
+					new_seqs.append(seq)
 
 	print "Found", len(new_seqs), 'new for lineage', lineage
 	if len(new_seqs)>=threshold:
@@ -105,9 +140,9 @@ def ammend_fasta(fname, lineage, threshold = 10, directory = 'data/'):
 
 	return updated
 
-
 if __name__=="__main__":
 	parser = argparse.ArgumentParser(description = "ammend existing files with downloaded viruses, rerun")
+	parser.add_argument('--annotate', action = "store_true", default = False, help = "annotate, but don't process")	
 	parser.add_argument('--infile', type = str, default = "gisaid_epiflu_sequence.fasta")
 	parser.add_argument('--bin', type = str, default = "python")
 	parser.add_argument('--ATG', action = "store_true", default = False, help = "include full HA sequence starting at ATG")
@@ -117,7 +152,8 @@ if __name__=="__main__":
 	parser.add_argument('--json_bucket', type = str, default = "nextflu-dev", help = "bucket for JSON files")	
 	parser.add_argument('--threshold', type = float, default = 10.0, help = "number of new sequences required to rerun pipeline")
 	parser.add_argument('--lineages', nargs='+', type = str,  help ="lineages to include")
-	parser.add_argument('--resolutions', nargs='+', type = str,  help ="resolutions to include")		
+	parser.add_argument('--resolutions', nargs='+', type = str,  help ="resolutions to include")
+	parser.add_argument('--aligner', type = str, default = "mafft", help = "aligner to use, either mafft or seqan")			
 	parser.add_argument('-r', type = float, default = 1.0)
 	params = parser.parse_args()
 
@@ -131,16 +167,23 @@ if __name__=="__main__":
 		params.resolutions = ['1y', '3y', '6y', '12y']
 
 	for lineage in params.lineages:
-		if params.s3:
+		if params.s3:	
 			pull_fasta_from_s3(lineage, directory = 'data/', bucket = params.fasta_bucket)
+
+	existing_strains = []
+	for lineage in ['H3N2', 'H1N1pdm', 'Vic', 'Yam']:
+		existing_strains.extend(gather_strains(lineage, directory = 'data/'))
+
+	for lineage in params.lineages:
+		print '\n------------------------------\n'
+		print 'Parsing new sequences for lineage',lineage			
 		if params.all:
 			params.threshold = 0
-		run = ammend_fasta(params.infile, lineage, threshold = params.threshold, directory = 'data/')
+		run = ammend_fasta(params.infile, lineage, existing_strains, threshold = params.threshold, directory = 'data/')
 		if run:
 			for resolution in params.resolutions:
 				print '\n------------------------------\n'
-				print 'Lineage',lineage			
-				print 'Resolution',resolution
+				print 'Processing lineage',lineage,'with resolution',resolution		
 				process = 'src/' + lineage + '_process.py'
 				if resolution == '1y':
 					n_viruses = 100
@@ -167,7 +210,8 @@ if __name__=="__main__":
 				call = map(str, [params.bin, process, '-v', n_viruses, '-y', n_years, 
 				           		 '--prefix', prefix, '--resolution', resolution] + common_args)
 				print call
-				subprocess.call(call)
+				if not params.annotate:
+					subprocess.call(call)
 				if params.s3:
 					push_fasta_to_s3(lineage, directory = 'data/', bucket = params.fasta_bucket)
 					push_json_to_s3(lineage, resolution, directory = '../auspice/data/', bucket = params.json_bucket)
