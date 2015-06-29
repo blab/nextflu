@@ -32,40 +32,85 @@ function makeLegend(){
 			}
 			return tmp_text+')';
 		}
-});
+	});
+	var lower_bound = {};
+	lower_bound[colorScale.domain()[0]] = colorScale.domain()[0];
+	for (var i=1; i<colorScale.domain().length; i++){
+		lower_bound[colorScale.domain()[i]]=colorScale.domain()[i-1];
+	}
 
-  var tmp_leg = legend.selectAll(".legend")
-  .data(colorScale.domain())
-  .enter().append('g')
-  .attr('class', 'legend')
-  .attr('transform', function(d, i) {
-   var stack = 5;
-   var height = legendRectSize + legendSpacing;
-   var fromRight = Math.floor(i / stack);
-   var fromTop = i % stack;
-   var horz = fromRight * 145 + 5;				
-   var vert = fromTop * height + 5;
-   return 'translate(' + horz + ',' + vert + ')';
- });
-  tmp_leg.append('rect')
-  .attr('width', legendRectSize)
-  .attr('height', legendRectSize)
-  .style('fill', function (d) {
-   var col = colorScale(d);
-   return d3.rgb(col).brighter([0.35]).toString();
- })
-  .style('stroke', function (d) {
-   var col = colorScale(d);
-   return d3.rgb(col).toString();
- });
+	var legend_match = function(leg, tip){
+		if ((colorBy=='lbi')||(colorBy=='date')){
+			return (tip.coloring<=leg)&&(tip.coloring>lower_bound[leg]);
+		}else{
+			return tip.coloring==leg;
+		}
+	}
 
-  tmp_leg.append('text')
-  .attr('x', legendRectSize + legendSpacing + 5)
-  .attr('y', legendRectSize - legendSpacing)
-  .text(function(d) {
-   return d.toString().replace(/([a-z])([A-Z])/g, '$1 $2').replace(/,/g, ', ');
- });		
-  return tmp_leg;
+	var tmp_leg = legend.selectAll(".legend")
+	.data(colorScale.domain())
+	.enter().append('g')
+	.attr('class', 'legend')
+	.attr('transform', function(d, i) {
+		var stack = 5;
+		var height = legendRectSize + legendSpacing;
+		var fromRight = Math.floor(i / stack);
+		var fromTop = i % stack;
+		var horz = fromRight * 145 + 5;				
+		var vert = fromTop * height + 5;
+		return 'translate(' + horz + ',' + vert + ')';
+	 });
+	tmp_leg.append('rect')
+	.attr('width', legendRectSize)
+	.attr('height', legendRectSize)
+	.style('fill', function (d) {
+	 	var col = colorScale(d);
+	 	return d3.rgb(col).brighter([0.35]).toString();
+	 })
+	.style('stroke', function (d) {
+   		var col = colorScale(d);
+   		return d3.rgb(col).toString();
+ 	})
+   .on('mouseover', function(leg){
+    	treeplot.selectAll(".tip")
+            .filter(function (d){return legend_match(leg, d);})
+            .attr("r", function(d){return tipRadius*1.7;})
+            .style("fill", function (t) {
+              return d3.rgb(tipFillColor(t)).brighter();
+            });
+		}) 
+  	.on('mouseout', function(leg){
+    	treeplot.selectAll(".tip")
+            .filter(function (d){return legend_match(leg, d);})
+            .attr("r", function(d){return tipRadius;})
+            .style("fill", function (t) {
+              return d3.rgb(tipFillColor(t));
+            });
+	    });
+
+	tmp_leg.append('text')
+	.attr('x', legendRectSize + legendSpacing + 5)
+	.attr('y', legendRectSize - legendSpacing)
+	.text(function(d) {
+		return d.toString().replace(/([a-z])([A-Z])/g, '$1 $2').replace(/,/g, ', ');
+	})
+   .on('mouseover', function(leg){
+    	treeplot.selectAll(".tip")
+            .filter(function (d){return legend_match(leg, d);})
+            .attr("r", function(d){return tipRadius*1.7;})
+            .style("fill", function (t) {
+              return d3.rgb(tipFillColor(t)).brighter();
+            });
+		}) 
+  	.on('mouseout', function(leg){
+    	treeplot.selectAll(".tip")
+            .filter(function (d){return legend_match(leg, d);})
+            .attr("r", function(d){return tipRadius;})
+            .style("fill", function (t) {
+              return d3.rgb(tipFillColor(t));
+            });
+	    });
+	return tmp_leg;
 }
 
 function removeLegend(){
