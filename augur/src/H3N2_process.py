@@ -24,7 +24,7 @@ virus_config.update({
 	'alignment_file':'data/H3N2_gisaid_epiflu_sequence.fasta.gz',
 	'outgroup':'A/Beijing/32/1992',
 	'force_include':'source-data/H3N2_HI_strains.txt',
-	'force_include_all':False,
+	'force_include_all':True,
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
 	'cds':[0,None], # define the HA1 start i n 0 numbering
 	'n_iqd':6,

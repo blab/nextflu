@@ -75,8 +75,10 @@ class HI_tree(object):
 		self.tree.seed_node.mutations= ''
 		for node in self.tree.postorder_node_iter():
 			if node is not self.tree.seed_node:
-				node.mutations = [a+str(pos+1)+b for pos, (a,b) in 
-								enumerate(izip(node.parent_node.aa_seq, node.aa_seq)) if a!=b]
+				node.mutations = []
+				for prot in node.aa_muts:
+					if node.aa_muts[prot]!='':
+						node.mutations.extend(node.aa_muts[prot].split(','))
 
 	def mark_HI_splits(self):
 		# flag all branches on the tree with HI_strain = True if they lead to strain with titer data
@@ -208,9 +210,9 @@ class HI_tree(object):
 		P1 = np.zeros((n_params+HI_sc,n_params+HI_sc))
 		P1[:n_params, :n_params] = self.TgT
 		for ii in xrange(HI_sc, HI_sc+n_sera):
-			P1[ii,ii]+=self.lam_pot*0.5
+			P1[ii,ii]+=self.lam_pot
 		for ii in xrange(HI_sc+n_sera, n_params):
-			P1[ii,ii]+=self.lam_avi*0.5
+			P1[ii,ii]+=self.lam_avi
 		P = matrix(P1)
 
 		# set up cost for auxillary parameter and the linear cross-term

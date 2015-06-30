@@ -22,8 +22,8 @@ def validation_figures(params):
 	plt.savefig(fig_prefix+'dHI_distribution.png')
 
 	####  cHI colored tree  #######################################################
-	plot_tree(myflu.tree)
-	plt.savefig(fig_prefix+'cHI_tree.png')
+#	plot_tree(myflu.tree)
+#	plt.savefig(fig_prefix+'cHI_tree.png')
 
 	####  VIRUS EFFECTS   #######################################################
 	plt.figure()
@@ -65,51 +65,58 @@ def validation_figures(params):
 	plt.legend()
 	plt.savefig(fig_prefix+'HI_titer_asymmetry.png')
 
-	####  Ultrametricity #######################################################
-	symmetrized = {(v,s[0]): (val_fwd, val_bwd, cval_fwd, cval_bwd) for v,s,val_fwd, val_bwd,cval_fwd, cval_bwd in reciprocal_measurements_titers}
-	all_reciprocal = set([v[0] for v in reciprocal_measurements_titers])
-	ultra_deviation = [[],[]]
-	ultra_norm = [[],[]]
+	####  Analyze all cliques #######################################################
+	all_reciprocal = list(set([v[1] for v in reciprocal_measurements_titers]))
+
+	import networkx as nx
 	from random import sample
-	from itertools import product
-	for trial in range(10000):
-		four = sample(all_reciprocal, 4)
-		distances = {}
-		for i1, v1 in enumerate(four):
-			for v2 in four:
-				if (v1,v2) in symmetrized:
-					if v1 != v2:
-						distances[(v1,v2)] = symmetrized[(v1,v2)]
-				else:
-					distances[(v1,v2)] = np.nan
-		if np.nan in distances.values():
-			continue
-		else:
-			for ci in [0,2]:
-				for d12 in distances[(four[0], four[1])][ci:(ci+2)]:
-					for d13 in distances[(four[0], four[2])][ci:(ci+2)]:
-						for d14 in distances[(four[0], four[3])][ci:(ci+2)]:
-							for d23 in distances[(four[1], four[2])][ci:(ci+2)]:
-								for d24 in distances[(four[1], four[3])][ci:(ci+2)]:
-									for d34 in distances[(four[2], four[3])][ci:(ci+2)]:
-										tmp = sorted([d12 + d34, d13 + d24, d14 + d23])
-										ultra_deviation[ci/2].append(tmp[-1]-tmp[-2])
-										ultra_norm[ci/2].append(tmp[-1]-tmp[0])
-										#print tmp
+	G = nx.Graph()
+	G.add_nodes_from(all_reciprocal)
+	for vi,v in enumerate(all_reciprocal):
+		for w in all_reciprocal[:vi]:
+			if ((v[0], w) in myflu.HI_normalized) and ((w[0], v) in myflu.HI_normalized):
+				G.add_edge(v,w)
+	print "generated graph"
+	C = nx.find_cliques(G)
+	print "found cliques"
+	def symm_distance(v,w):
+		res =  myflu.HI_normalized[(v[0], w)] - myflu.virus_effect[v[0]] - myflu.serum_potency[w]
+		res += myflu.HI_normalized[(w[0], v)] - myflu.virus_effect[w[0]] - myflu.serum_potency[v]
+		return res*0.5
+
+	additivity_test = {'test':[], 'control':[]}
+	n_quartets = 1000
+	for clique in C:
+		if len(clique)>8:
+			for i in xrange(n_quartets):
+				Q = sample(clique, 4)
+				dists = []
+				for (a,b) in [((0,1), (2,3)),((0,2), (1,3)), ((0,3), (1,2))]:
+					dists.append(symm_distance(Q[a[0]], Q[a[1]])+symm_distance(Q[b[0]], Q[b[1]]))
+				dists.sort(reverse=True)
+				additivity_test['test'].append(dists[0]-dists[1])
+
+				dists = []
+				for di in range(3):
+					a,b,c,d = sample(clique,4)
+					dists.append(symm_distance(a, b)+symm_distance(c,d))
+				dists.sort(reverse=True)
+				additivity_test['control'].append(dists[0]-dists[1])
+
 	plt.figure()
-	plt.title('deviations from ultra metricity')
-	plt.hist(np.array(ultra_deviation[0])/np.mean(ultra_norm[0]),label = "uncorrected", alpha=0.7,normed=True)
-	plt.hist(np.array(ultra_deviation[1])/np.mean(ultra_norm[1]),label = "corrected", alpha=0.7,normed=True)
+	plt.title('deviations from tree additivity')
+	plt.hist(additivity_test['control'], alpha=0.7,normed=True, bins = np.linspace(0,3,18))
+	plt.hist(additivity_test['test'], alpha=0.7,normed=True, bins = np.linspace(0,3,18))
 	plt.xlabel('deviation')
 	plt.legend()
-	plt.savefig(fig_prefix+'HI_titer_ultrametricity.png')
+	plt.savefig(fig_prefix+'HI_titer_tree_additivity.png')
 
 	#### titer effects ###############################################################
 	dHI_list = []
 	for node in myflu.tree.postorder_node_iter():
 		dHI_list.append((node.dHI, node.mutations, node))
 	dHI_list.sort()
-	return dHI_list
+	return dHI_list, myflu
 
 def scan_regularization(params, grid):
 	virus_config.update(params.__dict__)
@@ -176,7 +183,7 @@ if __name__=="__main__":
 		pass
 	params.__dict__['HI_fname']='source-data/'+params.flutype+'_HI_titers.txt'	
 
-	dHI_list = validation_figures(params)
+	dHI_list,myflu = validation_figures(params)
 	#grid = [0.1, 0.3, 1, 3, 10]
 	#accuracy = scan_regularization(params, grid)
 #
