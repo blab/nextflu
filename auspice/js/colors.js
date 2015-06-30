@@ -190,7 +190,7 @@ function colorByGenotype() {
 		var val, gene;
 		if (pos_fields.length==1){
 			val = parseInt(pos_fields[0])-1;
-			gene='nuc';
+			gene=default_gene;
 		}else if (pos_fields.length==2){
 			val = parseInt(pos_fields[1])-1;
 			gene=pos_fields[0].replace(' ','');

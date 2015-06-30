@@ -215,7 +215,7 @@ class BVic_process(process, BVic_filter, BVic_clean, BVic_refine, HI_tree):
 
 
 if __name__=="__main__":
-	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies','HI', 'export']
+	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','HI', 'export']
 	from process import parser
 	params = parser.parse_args()
 

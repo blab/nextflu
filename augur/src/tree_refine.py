@@ -28,8 +28,8 @@ class tree_refine(object):
 		self.remove_outgroup()
 		self.node_lookup.update({node.taxon.label.lower():node for node in self.tree.leaf_iter()})
 		self.node_lookup.update({node.taxon.label.upper():node for node in self.tree.leaf_iter()})
-		self.ladderize()
 		self.collapse()
+		self.ladderize()
 		self.add_node_attributes()
 		self.add_nuc_mutations()
 		if self.cds is not None:
