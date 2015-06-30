@@ -25,8 +25,8 @@ class tree_refine(object):
 		'''
 		self.node_lookup = {node.taxon.label:node for node in self.tree.leaf_iter()}
 		self.remove_outgroup()
-		self.ladderize()
 		self.collapse()
+		self.ladderize()
 		self.translate_all()
 		self.add_nuc_mutations()
 		self.add_aa_mutations()
