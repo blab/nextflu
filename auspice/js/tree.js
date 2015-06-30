@@ -298,7 +298,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.enter()
 		.append("circle")
 		.attr("class", "tip")
-		.attr("id", function(d) { return (d.strain).replace(/\//g, ""); })
+		.attr("id", function(d) { return ('id'+d.strain).replace(/\//g, "").replace('.',''); })
 		.attr("cx", function(d) { return d.x; })
 		.attr("cy", function(d) { return d.y; })
 		.attr("r", tipRadius)
@@ -535,11 +535,21 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.style("cursor", "pointer")
 		.on("change", restrictToLabFunc);		
 
+	var searchEvent;
 	function onSelect(tip) {
-		d3.select("#"+(tip.strain).replace(/\//g, ""))
+		d3.select("#"+('id'+tip.strain).replace(/\//g, "").replace('.',''))
 			.call(function(d) {
+				console.log('found strain '+tip.strain);
 				virusTooltip.show(tip, d[0][0]);
-			});
+			})
+            .attr("r", function(d){return tipRadius*1.7;})
+            .style("fill", function (d) {
+              searchEvent = setTimeout(function (){
+              	d3.select("#"+('id'+tip.strain).replace(/\//g, "").replace('.',''))
+              	 .attr("r", function(d){return tipRadius;})
+              	 .style("fill", tipFillColor);}, 5000, d);
+              return d3.rgb(tipFillColor(d)).brighter();
+            });
 	}
 
 	var mc = autocomplete(document.getElementById('search'))
