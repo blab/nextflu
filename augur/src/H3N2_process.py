@@ -289,7 +289,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 			self.generate_indexHTML()
 
 if __name__=="__main__":
-	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies', 'export']
+	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies', 'export']
 	from process import parser
 	params = parser.parse_args()
 
