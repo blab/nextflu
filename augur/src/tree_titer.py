@@ -72,7 +72,7 @@ class HI_tree(object):
 		'''
 		add amino acid mutations to the tree
 		'''
-		self.tree.seed_node.mutations= ''
+		self.tree.seed_node.mutations= []
 		for node in self.tree.postorder_node_iter():
 			if node is not self.tree.seed_node:
 				node.mutations = []
@@ -149,7 +149,7 @@ class HI_tree(object):
 						# determine branch indices on path
 						if type(self.min_aamuts)==int:
 							branches = np.unique([c.HI_branch_index for c in path 
-							                     if (hasattr(c, 'HI_branch_index') and len(c.aa_muts)>=self.min_aamuts)])
+							                     if (hasattr(c, 'HI_branch_index') and len(c.mutations)>=self.min_aamuts)])
 						elif self.min_aamuts=='epi':
 							branches = np.unique([c.HI_branch_index for c in path if (hasattr(c, 'HI_branch_index') and c.parent_node.ep<c.ep)])
 						elif self.min_aamuts=='rbs':
@@ -235,12 +235,12 @@ class HI_tree(object):
 		print "squared deviation prior to relax=",self.fit_func()
 		# redo the linear cost relaxing terms that seem to be relevant to avoid 
 		# compression of the fit. 0.2 seems to be a good cut-off, linear tune to zero
-		q1[n_params:] = self.lam_HI*(1-5.0*np.minimum(0.2,sol[:HI_sc]))
-		q = matrix(q1)
-		W = solvers.qp(P,q,G,h)
-		sol = np.array([x for x in W['x']])[:n_params]
-		self.params=sol
-		print "squared deviation after relax=",self.fit_func()
+		#q1[n_params:] = self.lam_HI*(1-5.0*np.minimum(0.2,sol[:HI_sc]))
+		#q = matrix(q1)
+		#W = solvers.qp(P,q,G,h)
+		#sol = np.array([x for x in W['x']])[:n_params]
+		#self.params=sol
+		#print "squared deviation after relax=",self.fit_func()
 		return sol
 
 	def prepare_HI_map(self):
