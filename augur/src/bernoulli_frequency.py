@@ -348,8 +348,11 @@ class virus_frequencies(object):
 					# assign the frequency vector to the node
 					child.freq[region_name] = frequency_left * logit_inv(fe.final_pivot_freq)
 					if debug: print len(child.tips), child.freq[region_name][-5:]
-				else:
+				elif np.sum(obs)==0:
 					child.freq[region_name] = np.zeros_like(self.pivots)
+				else:
+					child.freq[region_name] = frequency_left * np.ones_like(self.pivots)
+
 				child.logit_freq[region_name] = logit_transform(child.freq[region_name])
 
 				# update the frequency remaining to be explained and prune explained observations
