@@ -12,6 +12,7 @@ var nonEpiColorDomain = [2,3,4,5,6,7,8,9,10,11];
 var dateColorDomain = genericDomain;
 var rbsColorDomain = [0,1,2,3,4];
 var dfreqColorDomain = genericDomain.map(function(d){return Math.round(100*(-0.18+d*0.36))/100;});
+var restrictTo = {};
 
 var time_ticks = [2012.5, 2013, 2013.5, 2014, 2014.5, 2015];
 var	time_window;  // layer of one year that is considered current or active

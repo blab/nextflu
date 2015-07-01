@@ -85,6 +85,19 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 						node.__setattr__(attr, v.__getattribute__(attr))
 					except:
 						pass
+		# make an amino acid aligment
+		from Bio.Align import MultipleSeqAlignment
+		from Bio.Seq import Seq
+		from Bio.SeqRecord import SeqRecord
+		if self.cds is not None:
+			tmp_aaseqs = [SeqRecord(Seq(node.aa_seq), id=node.strain, annotations = {'num_date':node.num_date, 'region':node.region}) for node in self.tree.leaf_iter()]
+			tmp_aaseqs.sort(key = lambda x:x.annotations['num_date'])
+			self.aa_aln = MultipleSeqAlignment(tmp_aaseqs)
+		tmp_nucseqs = [SeqRecord(Seq(node.seq), id=node.strain, annotations = {'num_date':node.num_date, 'region':node.region}) for node in self.tree.leaf_iter()]
+		tmp_nucseqs.sort(key = lambda x:x.annotations['num_date'])
+		self.nuc_aln = MultipleSeqAlignment(tmp_nucseqs)
+
+
 
 	def export(self):
 		from bio_draw import muttree_draw
