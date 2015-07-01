@@ -41,7 +41,7 @@ def get_extrapolation_pivots(start=None, dt=0.5):
 
 
 def logit_transform(freq):
-	return np.log(freq/np.maximum(1e-10,(1-freq)))
+	return np.log(np.maximum(freq, 1e-10)/np.maximum(1e-10,(1-freq)))
 
 def logit_inv(logit_freq):
 	logit_freq[logit_freq<-20]=-20
