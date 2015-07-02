@@ -121,8 +121,9 @@ def validation_figures(params):
 def scan_regularization(params, grid):
 	virus_config.update(params.__dict__)
 	# pass all these arguments to the processor: will be passed down as kwargs through all classes
-	myH3N2 = flu_process(**virus_config) 
+	myflu = flu_process(**virus_config) 
 	myflu.load()
+	myflu.refine()
 	fig_prefix = 'figures/'+params.prefix.split('/')[-1]
 
 	####  looping over different combinations of regularizers  ########################
@@ -183,14 +184,17 @@ if __name__=="__main__":
 		pass
 	params.__dict__['HI_fname']='source-data/'+params.flutype+'_HI_titers.txt'	
 
-	dHI_list,myflu = validation_figures(params)
-	#grid = [0.1, 0.3, 1, 3, 10]
-	#accuracy = scan_regularization(params, grid)
-#
-#	#for ii in range(accuracy.shape[-1]):
-#	#	plt.figure()
-#	#	for hi, lam_HI in enumerate(grid):
-#	#		plt.subplot(len(grid)//2+len(grid)%2, 2, hi+1)
-#	#		plt.title('lam_HI='+str(lam_HI))
+	#dHI_list,myflu = validation_figures(params)
+	grid = [0.1, 0.3, 1,3, 10]
+	accuracy = scan_regularization(params, grid)
+	fname = 'validation/'+'_'.join([params.flutype, 'virus' if params.train_strains else 'measurements', 'minaa', str(params.min_aamuts)])
+	with open(fname+'.pkl', 'w') as outfile:
+		cPickle.dump((params, grid, accuracy), outfile)
+
+	#for ii in range(accuracy.shape[-1]):
+	#	plt.figure()
+	#	for hi, lam_HI in enumerate(grid):
+	#		plt.subplot(len(grid)//2+len(grid)%2, 2, hi+1)
+	#		plt.title('lam_HI='+str(lam_HI))
 	#		plt.imshow(accuracy[hi,:,:,ii], interpolation='nearest')
 
