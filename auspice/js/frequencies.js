@@ -204,6 +204,9 @@ d3.json(path + file_prefix + "case_numbers.json", function(error, json){
 	    		step: 4
 	    	}
 		},
+  		color: {
+			pattern: countryColors
+		},		
 		axis: {
 			y: {
 				label: {

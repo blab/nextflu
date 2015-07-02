@@ -34,6 +34,12 @@ var regionColors = [
 "#E35C2C", "#DCAB3C", "#E1512A",
 ]
 
+var countryColors = [
+	"#E59637", // Liberia
+	"#80B974", // Guinea
+	"#4A8CC2", // Sierra Leone
+]
+
 var genotypeColors = ["#60AA9E", "#D9AD3D", "#5097BA", "#E67030", "#8EBC66", "#E59637", "#AABD52", "#DF4327", "#C4B945", "#75B681"]
 
 var epitopeColorScale = d3.scale.linear().clamp([true])
