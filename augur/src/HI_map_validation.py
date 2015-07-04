@@ -3,6 +3,42 @@ import seaborn as sns
 from tree_titer import plot_tree, plot_dHI_distribution
 import cPickle, argparse
 
+
+def titer_vs_distances(params):
+	sns.set_style('darkgrid')
+	virus_config.update(params.__dict__)
+	# pass all these arguments to the processor: will be passed down as kwargs through all classes
+	myflu = flu_process(**virus_config) 
+	myflu.load()
+	fig_prefix = 'figures/'+params.prefix.split('/')[-1]
+
+	####  FIT VALIDATION  #######################################################
+	myflu.map_HI_to_tree(training_fraction=params.training, method = 'nnl1reg', map_to_tree = params.map_to_tree, force_redo=True,
+		lam_HI=params.reg, lam_pot=params.pot, lam_avi=params.avi, subset_strains = params.train_strains)
+
+	dists = []
+	for (test, serum), val in myflu.HI_normalized.iteritems():
+		muts = myflu.get_mutations(serum[0], test)
+		ref_node = myflu.node_lookup[serum[0]]
+		test_node = myflu.node_lookup[test]
+		ref_aaseq = myflu.get_total_peptide(ref_node)
+		test_aaseq = myflu.get_total_peptide(test_node)
+
+		hamming_dist = np.sum(np.fromstring(ref_node.seq, 'S1')!=np.fromstring(test_node.seq, 'S1'))
+		epidist = myflu.epitope_distance(ref_aaseq, test_aaseq)
+		nonepidist = myflu.nonepitope_distance(ref_aaseq, test_aaseq)
+		rbsdist = myflu.receptor_binding_distance(ref_aaseq, test_aaseq)
+		correction = myflu.virus_effect[test] + myflu.serum_potency[serum]
+		if params.map_to_tree:
+			dHI = myflu.predict_HI_tree(test, serum) - correction
+		else:
+			dHI = myflu.predict_HI_mutations(test, serum) - correction
+		val_corrected = val - correction
+
+		dists.append([hamming_dist, len(muts), epidist, rbsdist, dHI, val_corrected, val])
+
+	return np.array(dists), myflu
+
 def validation_figures(params):
 	sns.set_style('darkgrid')
 	virus_config.update(params.__dict__)
@@ -12,7 +48,7 @@ def validation_figures(params):
 	fig_prefix = 'figures/'+params.prefix.split('/')[-1]
 
 	####  FIT VALIDATION  #######################################################
-	myflu.map_HI_to_tree(training_fraction=params.training, method = 'nnl1reg', 
+	myflu.map_HI_to_tree(training_fraction=params.training, method = 'nnl1reg',  map_to_tree = params.map_to_tree,
 		lam_HI=params.reg, lam_pot=params.pot, lam_avi=params.avi, subset_strains = params.train_strains)
 	myflu.validate(plot=True)
 	plt.savefig(fig_prefix+'HI_scatter.png')
@@ -127,26 +163,27 @@ def scan_regularization(params, grid):
 	fig_prefix = 'figures/'+params.prefix.split('/')[-1]
 
 	####  looping over different combinations of regularizers  ########################
-	accuracy = np.zeros((len(grid), len(grid), len(grid), 5))
-	for hi, lam_HI in enumerate(grid):
-		for pi, lam_pot in enumerate(grid):
-			for ai, lam_avi in enumerate(grid):
-				myflu.map_HI_to_tree(training_fraction=params.training, method = 'nnl1reg', 
-				lam_HI=lam_HI, lam_pot=lam_pot, lam_avi=lam_avi, subset_strains = params.train_strains)
-				myflu.validate(plot=False)
-				####  calculated asymmetries 
-				reciprocal_measurements = []
-				for (testvir, serum) in myflu.HI_normalized:
-					tmp_recip = [v for v in myflu.HI_normalized if serum[0]==v[0] and testvir==v[1][0]]
-					for v in tmp_recip:
-						val_fwd = myflu.HI_normalized[(testvir,serum)]
-						val_bwd = myflu.HI_normalized[v]
-						diff_uncorrected = val_fwd - val_bwd
-						diff_corrected = (val_fwd - myflu.serum_potency[serum] - myflu.virus_effect[testvir])\
-										-(val_bwd - myflu.serum_potency[v[1]] - myflu.virus_effect[serum[0]])
-						reciprocal_measurements.append([testvir, serum, diff_uncorrected, diff_corrected])
-				accuracy[hi,pi, ai]=myflu.rms_error, myflu.abs_error, myflu.slope, myflu.intercept, np.std([x[3] for x in reciprocal_measurements])
-				print lam_HI, lam_pot, lam_avi, accuracy[hi,pi,ai]
+	accuracy = np.zeros((len(grid), len(grid), 5))
+	#for hi, lam_HI in enumerate(grid):
+	lam_HI = params.reg
+	for pi, lam_pot in enumerate(grid):
+		for ai, lam_avi in enumerate(grid):
+			myflu.map_HI_to_tree(training_fraction=params.training, method = 'nnl1reg', map_to_tree=False,
+			lam_HI=lam_HI, lam_pot=lam_pot, lam_avi=lam_avi, subset_strains = params.train_strains)
+			myflu.validate(plot=False)
+			####  calculated asymmetries 
+			reciprocal_measurements = []
+			for (testvir, serum) in myflu.HI_normalized:
+				tmp_recip = [v for v in myflu.HI_normalized if serum[0]==v[0] and testvir==v[1][0]]
+				for v in tmp_recip:
+					val_fwd = myflu.HI_normalized[(testvir,serum)]
+					val_bwd = myflu.HI_normalized[v]
+					diff_uncorrected = val_fwd - val_bwd
+					diff_corrected = (val_fwd - myflu.serum_potency[serum] - myflu.virus_effect[testvir])\
+									-(val_bwd - myflu.serum_potency[v[1]] - myflu.virus_effect[serum[0]])
+					reciprocal_measurements.append([testvir, serum, diff_uncorrected, diff_corrected])
+			accuracy[pi, ai]=myflu.rms_error, myflu.abs_error, myflu.slope, myflu.intercept, np.std([x[3] for x in reciprocal_measurements])
+			print lam_HI, lam_pot, lam_avi, accuracy[pi,ai]
 
 	return accuracy
 
@@ -157,9 +194,10 @@ if __name__=="__main__":
 	parser.add_argument('--flutype', type = str, default = 'H3N2', help='flu strain')
 	parser.add_argument('--training', type = float, default = 0.8, help='fraction of data used for training')
 	parser.add_argument('--train_strains', default = False, action = 'store_true', help='subset measurements or strains to train')
-	parser.add_argument('--reg', type = float, default = 1.0, help='regularization parameter')
-	parser.add_argument('--avi', type = float, default = 1.0, help='regularization parameter')
-	parser.add_argument('--pot', type = float, default = 1.0, help='regularization parameter')
+	parser.add_argument('--map_to_tree', default = False, action = 'store_true', help='tree or mutation model')
+	parser.add_argument('--reg', type = float, default = 0.5, help='regularization parameter')
+	parser.add_argument('--avi', type = float, default = 3.0, help='regularization parameter')
+	parser.add_argument('--pot', type = float, default = 0.5, help='regularization parameter')
 	parser.add_argument('--resolution', type = str,  help ="label for the resolution")	
 	parser.add_argument('--min_aamuts', type = str, default = '0', help='minimal number of aminoacid mutations to include branch or epi for epitope or rbs for receptor binding site')
 	params = parser.parse_args()
@@ -184,13 +222,20 @@ if __name__=="__main__":
 		pass
 	params.__dict__['HI_fname']='source-data/'+params.flutype+'_HI_titers.txt'	
 
-	#dHI_list,myflu = validation_figures(params)
-	grid = [0.1, 0.3, 1,3, 10]
-	accuracy = scan_regularization(params, grid)
-	fname = 'validation/'+'_'.join([params.flutype, 'virus' if params.train_strains else 'measurements', 'minaa', str(params.min_aamuts)])
-	with open(fname+'.pkl', 'w') as outfile:
-		cPickle.dump((params, grid, accuracy), outfile)
+#	dists, myflu = titer_vs_distances(params)
 
+	dHI_list,myflu = validation_figures(params)
+#	grid = [0.1, 0.3, 1,3, 10]
+#	accuracy = scan_regularization(params, grid)
+#	fname = 'validation/'+'_'.join([params.flutype, 'virus' if params.train_strains else 'measurements', 'minaa', str(params.min_aamuts), 'lHI', str(params.reg)])
+#	with open(fname+'_seq.pkl', 'w') as outfile:
+#		cPickle.dump((params, grid, accuracy), outfile)
+#
+#	significant_mutations = filter(lambda x:x[1]>0.01, myflu.mutation_effects.items())
+#	significant_mutations.sort(lambda x:x[1])
+#	print significant_mutations
+#	print "total number",len(significant_mutations)
+#
 	#for ii in range(accuracy.shape[-1]):
 	#	plt.figure()
 	#	for hi, lam_HI in enumerate(grid):

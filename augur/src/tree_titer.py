@@ -17,6 +17,7 @@ def HI_fix_name(name):
 	tmp_name = fix_name(name)
 	return tmp_name.upper()
 
+
 class HI_tree(object):
 
 	def __init__(self, HI_fname = 'source-data/HI_titers.txt', min_aamuts = 0,**kwargs):
@@ -101,11 +102,15 @@ class HI_tree(object):
 			if node.HI_info>1:
 				node.HI_branch_index = self.HI_split_count
 				self.HI_split_to_branch[node.HI_branch_index].append(node)
+				# at a bi- or multifurcation, increase the split count and HI index
+				# either individual child branches have enough HI info be counted,
+				# or the pre-order node iteraction will move towards the root 
 				if sum([c.HI_info>0 for c in node.child_nodes()])>1:
 					self.HI_split_count+=1
 				elif node.is_leaf():
 					self.HI_split_count+=1
 
+		self.genetic_params = self.HI_split_count
 		print "# of reference strains:",len(self.sera), "# of branches with HI constraint", self.HI_split_count
 
 	def get_path_no_terminals(self, v1, v2):
@@ -129,6 +134,73 @@ class HI_tree(object):
 			path = None
 		return path
 
+	def get_mutations(self, strain1, strain2):
+		if strain1 in self.node_lookup and strain2 in self.node_lookup:
+			node1 = self.node_lookup[strain1].parent_node
+			node2 = self.node_lookup[strain2].parent_node
+			if node1 is None or node2 is None:
+				return None
+			muts = []
+			for prot in node1.aa_seq:
+				seq1 = node1.aa_seq[prot]
+				seq2 = node2.aa_seq[prot]
+				muts.extend([(prot, aa1+str(pos+1)+aa2) for pos, (aa1, aa2) in enumerate(izip(seq1, seq2)) if aa1!=aa2])
+			return muts
+		else:
+			return None
+
+	def make_seqgraph(self):
+		'''
+		code amino acid differences between sequences into a matrix
+		the matrix has dimensions #measurements x #observed mutations
+		'''
+		seq_graph = []
+		HI_dist = []
+		# list all mutations
+		mutation_counter = defaultdict(int)
+		for (test, ref), val in self.train_HI.iteritems():
+			muts = self.get_mutations(ref[0], test)
+			if muts is None:
+				continue
+			for mut in muts:
+				mutation_counter[mut]+=1
+
+		relevant_muts = [mut for mut, count in mutation_counter.iteritems() if count>5]
+		relevant_muts.sort(key = lambda x:int(x[1][1:-1]))
+
+		self.relevant_muts = relevant_muts
+		self.genetic_params = len(relevant_muts)
+		n_params = self.genetic_params + len(self.sera) + len(self.HI_strains)
+
+		for (test, ref), val in self.train_HI.iteritems():
+			if not np.isnan(val):
+				try:
+					muts = self.get_mutations(ref[0], test)
+					if muts is None:
+						continue
+					tmp = np.zeros(n_params)
+					# determine branch indices on path
+					branches = np.unique([relevant_muts.index(mut) for mut in muts 
+					                     if mut in relevant_muts])
+					if len(branches): tmp[branches] = 1
+					# add serum effect
+					tmp[len(relevant_muts)+self.sera.index(ref)] = 1
+					# add virus effect
+					tmp[len(relevant_muts)+len(self.sera)+self.HI_strains.index(test)] = 1
+					# append model and fit value to lists seq_graph and HI_dist
+					seq_graph.append(tmp)
+					HI_dist.append(val)
+				except:
+					import pdb; pdb.set_trace()
+					print test, ref, "ERROR"
+
+		# convert to numpy arrays and save product of tree graph with its transpose for future use
+		self.HI_dist =  np.array(HI_dist)
+		self.tree_graph = np.array(seq_graph)
+		self.TgT = np.dot(self.tree_graph.T, self.tree_graph)
+		print "Found", self.tree_graph.shape, "measurements x parameters"
+
+
 	def make_treegraph(self):
 		'''
 		code the path between serum and test virus of each HI measurement into a matrix
@@ -149,13 +221,17 @@ class HI_tree(object):
 						# determine branch indices on path
 						if type(self.min_aamuts)==int:
 							branches = np.unique([c.HI_branch_index for c in path 
-							                     if (hasattr(c, 'HI_branch_index') and len(c.mutations)>=self.min_aamuts)])
+							                     if (hasattr(c, 'HI_branch_index') and 
+							                         len(c.mutations)>=self.min_aamuts)])
 						elif self.min_aamuts=='epi':
-							branches = np.unique([c.HI_branch_index for c in path if (hasattr(c, 'HI_branch_index') and c.parent_node.ep<c.ep)])
+							branches = np.unique([c.HI_branch_index for c in path 
+							                     if (hasattr(c, 'HI_branch_index') and c.parent_node.ep<c.ep)])
 						elif self.min_aamuts=='rbs':
-							branches = np.unique([c.HI_branch_index for c in path if (hasattr(c, 'HI_branch_index') and c.parent_node.rb<c.rb)])
+							branches = np.unique([c.HI_branch_index for c in path 
+							                     if (hasattr(c, 'HI_branch_index') and c.parent_node.rb<c.rb)])
 						else:
-							branches = np.unique([c.HI_branch_index for c in path if hasattr(c, 'HI_branch_index') ])
+							branches = np.unique([c.HI_branch_index for c in path 
+							                     if hasattr(c, 'HI_branch_index') ])
 						if len(branches): tmp[branches] = 1
 						# add serum effect
 						tmp[self.HI_split_count+self.sera.index(ref)] = 1
@@ -201,7 +277,7 @@ class HI_tree(object):
 	def fit_nnl1reg(self):
 		from cvxopt import matrix, solvers
 		n_params = self.tree_graph.shape[1]
-		HI_sc = self.HI_split_count
+		HI_sc = self.genetic_params if self.map_to_tree else len(self.relevant_muts)
 		n_sera = len(self.sera)
 		n_v = len(self.HI_strains)
 
@@ -278,10 +354,14 @@ class HI_tree(object):
 							if self.node_lookup[key[0]].num_date<cutoff_date and 
 							   self.node_lookup[key[1][0]].num_date<cutoff_date}
 
-		self.make_treegraph()		
+		if self.map_to_tree:
+			self.make_treegraph()
+		else:
+			self.make_seqgraph()	
 
-	def map_HI_to_tree(self, training_fraction = 1.0, method = 'nnls', lam_HI=5.0, 
-						lam_pot = 5.0, lam_avi = 5.0, cutoff_date = None, subset_strains = False, force_redo = False):
+	def map_HI_to_tree(self, training_fraction = 1.0, method = 'nnls', lam_HI=1.0, map_to_tree = True,
+						lam_pot = 0.5, lam_avi = 3.0, cutoff_date = None, subset_strains = False, force_redo = False):
+		self.map_to_tree = map_to_tree
 		self.training_fraction = training_fraction
 		self.subset_strains=subset_strains
 		self.lam_pot = lam_pot
@@ -303,27 +383,37 @@ class HI_tree(object):
 		print "method",method, "regularized by", self.lam_HI, "squared deviation=",self.fit_func()
 		# for each set of branches with HI constraints, pick the branch with most aa mutations
 		# and assign the dHI to that one, record the number of constraints
-		for node in self.tree.postorder_node_iter():
-			node.dHI=0
-		for HI_split, branches in self.HI_split_to_branch.iteritems():
-			likely_branch = branches[np.argmax([len(b.mutations) for b in branches])]
-			likely_branch.dHI = self.params[HI_split]
-			likely_branch.constraints = self.tree_graph[:,HI_split].sum()
+		if self.map_to_tree:
+			for node in self.tree.postorder_node_iter():
+				node.dHI=0
+			for HI_split, branches in self.HI_split_to_branch.iteritems():
+				likely_branch = branches[np.argmax([len(b.mutations) for b in branches])]
+				likely_branch.dHI = self.params[HI_split]
+				likely_branch.constraints = self.tree_graph[:,HI_split].sum()
 
-		# integrate the HI change dHI into a cumulative antigentic evolution score cHI
-		for node in self.tree.preorder_node_iter():
-			if node!=self.tree.seed_node:
-				node.cHI = node.parent_node.cHI + node.dHI
-		self.serum_potency = {serum:self.params[self.HI_split_count+ii] 
+			# integrate the HI change dHI into a cumulative antigentic evolution score cHI
+			for node in self.tree.preorder_node_iter():
+				if node!=self.tree.seed_node:
+					node.cHI = node.parent_node.cHI + node.dHI
+		else:
+			self.mutation_effects={}
+			for mi, mut in enumerate(self.relevant_muts):
+				self.mutation_effects[mut] = self.params[mi]
+
+		self.serum_potency = {serum:self.params[self.genetic_params+ii] 
 							  for ii, serum in enumerate(self.sera)}
-		self.virus_effect = {strain:self.params[self.HI_split_count+len(self.sera)+ii]
+		self.virus_effect = {strain:self.params[self.genetic_params+len(self.sera)+ii]
 							  for ii, strain in enumerate(self.HI_strains)}
 
 	def validate(self, plot=False):
 		from scipy.stats import linregress, pearsonr
 		self.validation = {}
 		for key, val in self.test_HI.iteritems():
-			pred_HI = self.predict_HI(key[0], key[1])
+			if self.map_to_tree:
+				pred_HI = self.predict_HI_tree(key[0], key[1])
+			else:
+				pred_HI = self.predict_HI_mutations(key[0], key[1])
+
 			if pred_HI is not None:
 				self.validation[key] = (val, pred_HI)
 
@@ -402,14 +492,21 @@ class HI_tree(object):
 			self.node_lookup[ref].mean_potency = np.mean(self.node_lookup[ref].potency.values())
 
 
-
-
-	def predict_HI(self, virus, serum):
+	def predict_HI_tree(self, virus, serum):
 		path = self.get_path_no_terminals(virus,serum[0])
 		if path is not None:
 			return self.serum_potency[serum] + self.virus_effect[virus] + np.sum(b.dHI for b in path)
 		else:
 			return None
+
+	def predict_HI_mutations(self, virus, serum):
+		muts= self.get_mutations(serum[0], virus)
+		if muts is not None:
+			return self.serum_potency[serum] + self.virus_effect[virus] \
+				+ np.sum([self.mutation_effects[mut] for mut in muts if mut in self.mutation_effects])
+		else:
+			return None
+
 
 ######################################################################################
 ####  utility functions for reading and writing HI Tables, plotting trees, etc

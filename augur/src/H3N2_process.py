@@ -289,7 +289,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 			self.dump()
 		if 'HI' in steps:
 			print "--- Adding HI titers to the tree " + time.strftime("%H:%M:%S") + " ---"
-			self.map_HI_to_tree(training_fraction=1.0, method = 'nnl1reg', lam_HI=reg, lam_avi=reg, lam_pot = reg)
+			self.map_HI_to_tree(training_fraction=1.0, method = 'nnl1reg', lam_HI=reg, lam_avi=reg, lam_pot = reg*0.25)
 			self.dump()
 
 		if 'export' in steps:
@@ -315,7 +315,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 			self.check_symmetry(plot=True)
 			plt.savefig(htmlpath+'HI_symmetry.png')
 
-			self.map_HI_to_tree(training_fraction=0.9, method='nnl1reg', lam_HI=reg, lam_avi=reg, lam_pot=reg, force_redo=True)
+			self.map_HI_to_tree(training_fraction=0.9, method='nnl1reg', lam_HI=reg, lam_avi=reg, lam_pot=reg*0.25, force_redo=True)
 			self.validate(plot=True)
 			plt.savefig(htmlpath+'HI_prediction.png')
 
