@@ -172,6 +172,19 @@ layout: default
 		</div>
 	</div>	
 </div>
+<div class="row">
+	<div class="col-md-3">
+		<div class="io-container title">
+			HI mutations
+		</div>
+	</div>
+	<div class="col-md-9">
+		<div id="HA_struct" class="io-container title">
+		</div>
+		<div id="HA_buttons" class="io-container title">
+		</div>
+	</div>
+</div>
 
 <div class="row">
 	<div class="col-md-12">
@@ -316,3 +329,34 @@ layout: default
 </script>
 {{ content }}
 <script src="/js/auspice.js"></script>
+<script src="/js/JSmol.min.js"></script>
+<script type="text/javascript">
+
+$(document).ready(
+	function() {
+	console.log('drawing structure');
+	Info = {
+		width: 500,
+		height: 500,
+		debug: false,
+		j2sPath: "/js/j2s",
+		color: "white",
+		disableJ2SLoadMonitor: true,
+		disableInitialConsole: true,
+		addSelectionOptions: false,
+		use: "HTML5",
+		readyFunction: null,
+		script: "load /data/HA_H1N1_Human_2009_NewYork20.pdb; cpk off; wireframe off; trace;zoom on; zoom 115;set showhydrogens off; color background white; select ligand; trace off; spin on; set frank off; set echo bottom left; color echo gray; font echo 14 arial; echo FluSurver-JSmol; select 154;spacefill 200;color orange; select 239;spacefill 200;color red;"
+	}
+
+	$("#HA_struct").html(Jmol.getAppletHtml("jmolApplet0",Info));
+
+	$("#HA_buttons").html(
+		Jmol.jmolButton(jmolApplet0, "spin on","Spin ON")
+	 +Jmol.jmolButton(jmolApplet0, "spin off","Spin OFF")
+	 +Jmol.jmolButton(jmolApplet0, "write PNGJ flusurver.png","Save IMAGE")
+	 );
+}
+)
+</script>
+

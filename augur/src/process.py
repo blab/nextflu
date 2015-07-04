@@ -74,6 +74,7 @@ class process(virus_frequencies):
 		self.auspice_sequences_fname = 	'../auspice/data/' + self.prefix + self.resolution_prefix + 'sequences.json'
 		self.auspice_frequency_fname = 	'../auspice/data/' + self.prefix + self.resolution_prefix + 'frequencies.json'
 		self.auspice_meta_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'meta.json'
+		self.auspice_HI_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'HI.json'
 		self.nuc_alphabet = 'ACGT-N'
 		self.aa_alphabet = 'ACDEFGHIKLMNPQRSTVWY*X'
 		virus_frequencies.__init__(self, **kwargs)
@@ -241,6 +242,11 @@ class process(virus_frequencies):
 			meta["virus_stats"] = [ [str(y)+'-'+str(m)] + [self.date_region_count[(y,m)][reg] for reg in self.regions]
 									for y,m in sorted(self.date_region_count.keys()) ]
 		write_json(meta, self.auspice_meta_fname, indent=0)
+
+		if not self.map_to_tree:
+			substantial_effects = {k[0]+":"+k[1]:val for k, val in self.mutation_effects.iteritems()
+									if val>0.05}
+			write_json(substantial_effects, self.auspice_HI_fname)
 
 	def generate_indexHTML(self):
 		htmlpath = '../auspice/'

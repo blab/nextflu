@@ -140,14 +140,18 @@ class HI_tree(object):
 			node2 = self.node_lookup[strain2].parent_node
 			if node1 is None or node2 is None:
 				return None
-			muts = []
-			for prot in node1.aa_seq:
-				seq1 = node1.aa_seq[prot]
-				seq2 = node2.aa_seq[prot]
-				muts.extend([(prot, aa1+str(pos+1)+aa2) for pos, (aa1, aa2) in enumerate(izip(seq1, seq2)) if aa1!=aa2])
-			return muts
+			else:
+				return self.get_mutations_nodes(node1, node2)
 		else:
 			return None
+
+	def get_mutations_nodes(self, node1, node2):
+		muts = []
+		for prot in node1.aa_seq:
+			seq1 = node1.aa_seq[prot]
+			seq2 = node2.aa_seq[prot]
+			muts.extend([(prot, aa1+str(pos+1)+aa2) for pos, (aa1, aa2) in enumerate(izip(seq1, seq2)) if aa1!=aa2])
+		return muts
 
 	def make_seqgraph(self):
 		'''
@@ -359,8 +363,8 @@ class HI_tree(object):
 		else:
 			self.make_seqgraph()	
 
-	def map_HI_to_tree(self, training_fraction = 1.0, method = 'nnls', lam_HI=1.0, map_to_tree = True,
-						lam_pot = 0.5, lam_avi = 3.0, cutoff_date = None, subset_strains = False, force_redo = False):
+	def map_HI(self, training_fraction = 1.0, method = 'nnls', lam_HI=1.0, map_to_tree = True,
+			lam_pot = 0.5, lam_avi = 3.0, cutoff_date = None, subset_strains = False, force_redo = False):
 		self.map_to_tree = map_to_tree
 		self.training_fraction = training_fraction
 		self.subset_strains=subset_strains
@@ -404,6 +408,9 @@ class HI_tree(object):
 							  for ii, serum in enumerate(self.sera)}
 		self.virus_effect = {strain:self.params[self.genetic_params+len(self.sera)+ii]
 							  for ii, strain in enumerate(self.HI_strains)}
+		if not self.map_to_tree:
+			self.cHI_mutations()
+
 
 	def validate(self, plot=False):
 		from scipy.stats import linregress, pearsonr
@@ -490,6 +497,11 @@ class HI_tree(object):
 			self.node_lookup[ref].mean_HI_titers = {key:np.mean(titers.values()) for key, titers in 
 			 									self.node_lookup[ref].HI_titers.iteritems()}
 			self.node_lookup[ref].mean_potency = np.mean(self.node_lookup[ref].potency.values())
+
+	def cHI_mutations(self):
+		for node in self.tree.postorder_internal_node_iter():
+			muts = self.get_mutations_nodes(self.tree.seed_node, node)
+			node.cHI = np.sum([self.mutation_effects[mut] for mut in muts if mut in self.mutation_effects])
 
 
 	def predict_HI_tree(self, virus, serum):
