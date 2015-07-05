@@ -265,6 +265,8 @@ function colorByHIDistance(){
 	correctPotency = document.getElementById("serum").checked;
 	predictedHI = document.getElementById("HIPrediction").checked;
 	colorBy = 'HI_dist'
+	console.log("script select 159;  spacefill 200;  color blue;");
+	Jmol.script(myapplett, "script select 159;  spacefill 200;  color blue;");
 	if (typeof(focusNode)=="undefined"){
 		var ntiters = 0, ntmp;
 		focusNode=sera[0];

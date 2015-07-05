@@ -328,9 +328,9 @@ layout: default
 	var default_gene='HA1';
 </script>
 {{ content }}
-<script src="/js/auspice.js"></script>
 <script src="/js/JSmol.min.js"></script>
 <script type="text/javascript">
+var myapplett;
 
 $(document).ready(
 	function() {
@@ -346,7 +346,7 @@ $(document).ready(
 		addSelectionOptions: false,
 		use: "HTML5",
 		readyFunction: null,
-		script: "load /data/HA_H1N1_Human_2009_NewYork20.pdb; cpk off; wireframe off; trace;zoom on; zoom 115;set showhydrogens off; color background white; select ligand; trace off; spin on; set frank off; set echo bottom left; color echo gray; font echo 14 arial; echo FluSurver-JSmol; select 154;spacefill 200;color orange; select 239;spacefill 200;color red;"
+		script: "load /data/5HMG.pdb; cpk off; wireframe off; trace;zoom on; zoom 115;set showhydrogens off; color background white; select ligand; trace off; spin on; set frank off; set echo bottom left; color echo gray; font echo 14 arial;select 154:a,154:c,154:b;spacefill 200;color orange; select 239:a,239:c,239:e;spacefill 200;color red;"
 	}
 
 	$("#HA_struct").html(Jmol.getAppletHtml("jmolApplet0",Info));
@@ -356,7 +356,8 @@ $(document).ready(
 	 +Jmol.jmolButton(jmolApplet0, "spin off","Spin OFF")
 	 +Jmol.jmolButton(jmolApplet0, "write PNGJ flusurver.png","Save IMAGE")
 	 );
-}
-)
+	myapplett = jmolApplet0;
+});
 </script>
 
+<script src="/js/auspice.js"></script>
