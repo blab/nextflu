@@ -4,6 +4,7 @@ var date_select = true;
 {% include_relative d3.min.js %}
 {% include_relative d3.tip.js %}
 {% include_relative c3.min.js %}
+{% include_relative JSmol.min.js %}
 {% include_relative autocomplete.js %}
 {% include_relative globals.js %}
 {% include_relative HI.js %}
@@ -15,3 +16,4 @@ var date_select = true;
 {% include_relative tooltips.js %}
 {% include_relative tree.js %}
 {% include_relative frequencies.js %}
+{% include_relative structure.js %}
