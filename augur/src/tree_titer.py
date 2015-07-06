@@ -387,9 +387,9 @@ class HI_tree(object):
 		print "method",method, "regularized by", self.lam_HI, "squared deviation=",self.fit_func()
 		# for each set of branches with HI constraints, pick the branch with most aa mutations
 		# and assign the dHI to that one, record the number of constraints
+		for node in self.tree.postorder_node_iter():
+			node.dHI=0
 		if self.map_to_tree:
-			for node in self.tree.postorder_node_iter():
-				node.dHI=0
 			for HI_split, branches in self.HI_split_to_branch.iteritems():
 				likely_branch = branches[np.argmax([len(b.mutations) for b in branches])]
 				likely_branch.dHI = self.params[HI_split]
@@ -499,7 +499,7 @@ class HI_tree(object):
 			self.node_lookup[ref].mean_potency = np.mean(self.node_lookup[ref].potency.values())
 
 	def cHI_mutations(self):
-		for node in self.tree.postorder_internal_node_iter():
+		for node in self.tree.postorder_node_iter():
 			muts = self.get_mutations_nodes(self.tree.seed_node, node)
 			node.cHI = np.sum([self.mutation_effects[mut] for mut in muts if mut in self.mutation_effects])
 

@@ -45,6 +45,9 @@ var cHIColorScale = d3.scale.linear()
 	.domain(HIColorDomain)
 	.range(colors[10]);
 
+var dHIColorScale = d3.scale.threshold()
+	.domain([0, 0.1, 0.3, 0.65, 1.0,5.0])
+	.range(['blue', 'green', 'yellow' ,'orange', 'red','red']);
 
 var HIColorScale = function(c){
 	if (c!='NaN'){
@@ -265,8 +268,6 @@ function colorByHIDistance(){
 	correctPotency = document.getElementById("serum").checked;
 	predictedHI = document.getElementById("HIPrediction").checked;
 	colorBy = 'HI_dist'
-	console.log("script select 159;  spacefill 200;  color blue;");
-	Jmol.script(myapplett, "script select 159;  spacefill 200;  color blue;");
 	if (typeof(focusNode)=="undefined"){
 		var ntiters = 0, ntmp;
 		focusNode=sera[0];
@@ -284,7 +285,7 @@ function colorByHIDistance(){
 		.style("font-size", function (d) {if (d==focusNode) {return "32px";} else {return "24px";}})
 		.text(function (d) {if (d==focusNode) {return '\uf05b';} else {return '\uf10c';}});
 
-	calcHIpred(focusNode, rootNode);
+	calcHImutations(focusNode, rootNode);
 	calcHImeasured(focusNode, rootNode);
 
 	console.log("Color by HI Distance from "+focusNode.strain);
