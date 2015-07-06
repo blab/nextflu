@@ -178,11 +178,23 @@ layout: default
 			HI mutations
 		</div>
 	</div>
-	<div class="col-md-9">
+	<div class="col-md-5">
 		<div id="HA_struct" class="io-container title">
 		</div>
 		<div id="HA_buttons" class="io-container title">
 		</div>
+	</div>
+	<div class="col-md-4">
+		<table class="table">
+			<col width="70%">
+			<col width="30%">
+			{% for eff in site.data.H3N2_3y_HI %}
+			<tr>
+				<td>{{ eff[0] }}</td>
+				<td>{{ eff[1] }}</td>
+			</tr>
+			{% endfor %}
+		</table>
 	</div>
 </div>
 

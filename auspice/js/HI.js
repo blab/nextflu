@@ -86,8 +86,7 @@ function get_mutations(node1, node2){
 function calcHImutations(node){
 	console.log(node.strain+ ', mean_potency:'+node.mean_potency);
 	console.log(HI_model);
-	for (var i=0; i<tips.length; i+=1){
-		d = tips[i];
+	nodes.map(function(d){
 		var mutations = get_mutations(node, d);
 		if (correctPotency){
 			d.HI_dist_pred=0;
@@ -103,7 +102,7 @@ function calcHImutations(node){
 		if ((correctVirus==false)&&(typeof d.avidity != "undefined")){
 			d.HI_dist_pred += d.avidity;
 		}
-	}
+	});
 };
 
 function tipHIvalid(d) {
@@ -153,14 +152,10 @@ d3.json(path + file_prefix + "HI.json", function(error, json){
 	for (var key in positions){
 		var gene = key.split(':')[0];
 		var pos = key.split(':')[1];
-		if (gene=='HA1'){
-			console.log(positions[key]);
-			var c = dHIColorScale(positions[key]);
-			structure_HI_mutations+= 'select '+pos+':a;spacefill 200; color ' +c+';';//' '+pos+':c, '+pos+':e,';
-		}
-		//else{
-		//	structure_HI_mutations+= pos+':b,'; //' '+pos+':d, '+pos+':f,';			
-		//}
+		console.log(positions[key]);
+		var c = dHIColorScale(positions[key]);
+		var chain = (gene=='HA1')?'a':'b'; 
+		structure_HI_mutations+= 'select '+pos+':'+chain+';spacefill 200; color ' +c+';';//' '+pos+':c, '+pos+':e,';
 	}
 	//structure_HI_mutations = structure_HI_mutations.substring(0, structure_HI_mutations.length-1);
 	console.log(structure_HI_mutations);

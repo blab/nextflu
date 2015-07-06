@@ -169,7 +169,7 @@ class HI_tree(object):
 			for mut in muts:
 				mutation_counter[mut]+=1
 
-		relevant_muts = [mut for mut, count in mutation_counter.iteritems() if count>5]
+		relevant_muts = [mut for mut, count in mutation_counter.iteritems() if count>15]
 		relevant_muts.sort(key = lambda x:int(x[1][1:-1]))
 
 		self.relevant_muts = relevant_muts
