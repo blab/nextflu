@@ -2,7 +2,7 @@ var myapplett;
 
 function make_structure(){
 	console.log('drawing structure');
-	var jsmolscript =  "load /data/5HMG.pdb; cpk off; wireframe off; trace;zoom on;"
+	var jsmolscript =  "load /data/"+structure+"; cpk off; wireframe off; trace;zoom on;"
 					   +"zoom 115;set showhydrogens off; color background white;" 
 					   +" select ligand; trace off; spin off; set frank off; "
 					   +"set echo bottom left; color echo gray; font echo 14 arial;"

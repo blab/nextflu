@@ -188,7 +188,7 @@ layout: default
 		<table class="table">
 			<col width="70%">
 			<col width="30%">
-			{% for eff in site.data.H3N2_3y_HI %}
+			{% for eff in site.data.HI_mutation_effects[page.virus][page.resolution] %}
 			<tr>
 				<td>{{ eff[0] }}</td>
 				<td>{{ eff[1] }}</td>

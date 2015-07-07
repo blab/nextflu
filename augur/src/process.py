@@ -75,7 +75,7 @@ class process(virus_frequencies):
 		self.auspice_frequency_fname = 	'../auspice/data/' + self.prefix + self.resolution_prefix + 'frequencies.json'
 		self.auspice_meta_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'meta.json'
 		self.auspice_HI_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'HI.json'
-		self.auspice_HI_display_mutations =	 '../auspice/_data/' + self.prefix + self.resolution_prefix + 'HI.json'
+		self.auspice_HI_display_mutations =	 '../auspice/_data/HI_mutation_effects.json'
 		self.nuc_alphabet = 'ACGT-N'
 		self.aa_alphabet = 'ACDEFGHIKLMNPQRSTVWY*X'
 		virus_frequencies.__init__(self, **kwargs)
@@ -245,13 +245,19 @@ class process(virus_frequencies):
 		write_json(meta, self.auspice_meta_fname, indent=0)
 
 		if not self.map_to_tree:
+			try:
+				display_effects = read_json(self.auspice_HI_display_mutations)
+			except:
+				display_effects = {}
+			if self.virus_type not in display_effects: display_effects[self.virus_type]={}
 			substantial_effects = {k[0]+":"+k[1]:val for k, val in self.mutation_effects.iteritems()
 									if val>0.01}
 			write_json(substantial_effects, self.auspice_HI_fname)
-			display_effects = [[k[0]+":"+k[1],round(val,2)] for k, val 
+			tmp = [[k[0]+":"+k[1],round(val,2)] for k, val 
 							in self.mutation_effects.iteritems() if val>0.05]
-			display_effects.sort(key = lambda x:x[1], reverse=True)
-			write_json(display_effects[:12], self.auspice_HI_display_mutations)
+			tmp.sort(key = lambda x:x[1], reverse=True)
+			display_effects[self.virus_type][self.resolution] = tmp[:12]
+			write_json(display_effects, self.auspice_HI_display_mutations)
 
 	def generate_indexHTML(self):
 		htmlpath = '../auspice/'
