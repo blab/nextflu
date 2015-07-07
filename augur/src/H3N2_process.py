@@ -247,7 +247,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 		fitness_model.__init__(self,**kwargs)
 		self.verbose = verbose
 
-	def run(self, steps, viruses_per_month=50, raxml_time_limit = 1.0, reg = 5.0):
+	def run(self, steps, viruses_per_month=50, raxml_time_limit = 1.0, lam_HI=2, lam_avi=2, lam_pot=.1):
 		if 'filter' in steps:
 			print "--- Virus filtering at " + time.strftime("%H:%M:%S") + " ---"
 			self.filter()
@@ -289,8 +289,9 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 			self.dump()
 		if 'HI' in steps:
 			print "--- Adding HI titers to the tree " + time.strftime("%H:%M:%S") + " ---"
+			self.determine_variable_positions()
 			self.map_HI(training_fraction=1.0, method = 'nnl1reg', 
-					lam_HI=reg, lam_avi=reg, lam_pot = reg*0.25, map_to_tree=False)
+					lam_HI=lam_HI, lam_avi=lam_avi, lam_pot=lam_pot, map_to_tree=False)
 			if not self.map_to_tree:
 				self.cHI_mutations()
 			self.dump()
@@ -318,8 +319,8 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 			self.check_symmetry(plot=True)
 			plt.savefig(htmlpath+'HI_symmetry.png')
 
-			self.map_HI(training_fraction=0.9, method='nnl1reg', lam_HI=reg, 
-						lam_avi=reg, lam_pot=reg*0.25, force_redo=True, map_to_tree=False)
+			self.map_HI(training_fraction=0.9, method='nnl1reg',lam_HI=lam_HI, lam_avi=lam_avi, 
+						lam_pot = lam_pot, force_redo=True, map_to_tree=False)
 			self.validate(plot=True)
 			plt.savefig(htmlpath+'HI_prediction.png')
 

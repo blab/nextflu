@@ -169,7 +169,18 @@ class HI_tree(object):
 			for mut in muts:
 				mutation_counter[mut]+=1
 
-		relevant_muts = [mut for mut, count in mutation_counter.iteritems() if count>15]
+		relevant_muts = []
+		min_count=10
+		min_freq = 3.0*min_count/len(self.viruses)
+		for mut, count in mutation_counter.iteritems():
+			gene = mut[0]
+			pos = int(mut[1][1:-1])-1
+			aa1, aa2 = mut[1][0],mut[1][-1]			
+			if count>min_count and \
+				self.aa_frequencies[gene][self.aa_alphabet.index(aa1),pos]>min_freq and\
+				self.aa_frequencies[gene][self.aa_alphabet.index(aa2),pos]>min_freq:
+				relevant_muts.append(mut)
+
 		relevant_muts.sort(key = lambda x:int(x[1][1:-1]))
 
 		self.relevant_muts = relevant_muts
