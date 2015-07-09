@@ -24,6 +24,8 @@ class HI_tree(object):
 		self.HI, tmp = self.read_HI_titers(HI_fname)
 		self.tree_graph = None
 		self.min_aamuts = min_aamuts
+		self.serum_potency = {}
+		self.virus_effect = {}
 
 	def read_HI_titers(self, fname):
 		strains = set()
@@ -98,7 +100,8 @@ class HI_tree(object):
 		self.HI_split_count = 0  # HI measurment split counter
 		self.HI_split_to_branch = defaultdict(list)
 		for node in self.tree.preorder_node_iter():
-			node.dHI, node.cHI, node.constraints =0, 0, 0
+			if self.map_to_tree:
+				node.dHI, node.cHI, node.constraints =0, 0, 0
 			if node.HI_info>1:
 				node.HI_branch_index = self.HI_split_count
 				self.HI_split_to_branch[node.HI_branch_index].append(node)
@@ -176,7 +179,7 @@ class HI_tree(object):
 			gene = mut[0]
 			pos = int(mut[1][1:-1])-1
 			aa1, aa2 = mut[1][0],mut[1][-1]			
-			if count>min_count and \
+			if gene=='HA1' and count>min_count and \
 				self.aa_frequencies[gene][self.aa_alphabet.index(aa1),pos]>min_freq and\
 				self.aa_frequencies[gene][self.aa_alphabet.index(aa2),pos]>min_freq:
 				relevant_muts.append(mut)
@@ -398,9 +401,9 @@ class HI_tree(object):
 		print "method",method, "regularized by", self.lam_HI, "squared deviation=",self.fit_func()
 		# for each set of branches with HI constraints, pick the branch with most aa mutations
 		# and assign the dHI to that one, record the number of constraints
-		for node in self.tree.postorder_node_iter():
-			node.dHI=0
 		if self.map_to_tree:
+			for node in self.tree.postorder_node_iter():
+				node.dHI=0
 			for HI_split, branches in self.HI_split_to_branch.iteritems():
 				likely_branch = branches[np.argmax([len(b.mutations) for b in branches])]
 				likely_branch.dHI = self.params[HI_split]
@@ -415,12 +418,12 @@ class HI_tree(object):
 			for mi, mut in enumerate(self.relevant_muts):
 				self.mutation_effects[mut] = self.params[mi]
 
-		self.serum_potency = {serum:self.params[self.genetic_params+ii] 
-							  for ii, serum in enumerate(self.sera)}
-		self.virus_effect = {strain:self.params[self.genetic_params+len(self.sera)+ii]
-							  for ii, strain in enumerate(self.HI_strains)}
-		if not self.map_to_tree:
-			self.cHI_mutations()
+		self.serum_potency['tree' if self.map_to_tree else 'mutation'] =\
+					{serum:self.params[self.genetic_params+ii] 
+					  for ii, serum in enumerate(self.sera)}
+		self.virus_effect['tree' if self.map_to_tree else 'mutation'] = \
+					{strain:self.params[self.genetic_params+len(self.sera)+ii]
+				  for ii, strain in enumerate(self.HI_strains)}
 
 
 	def validate(self, plot=False, cutoff=0.0):
@@ -461,7 +464,7 @@ class HI_tree(object):
 
 
 
-	def check_symmetry(self, plot=False):
+	def check_symmetry(self, plot=False, model_type = 'tree'):
 		reciprocal_measurements = []
 		reciprocal_measurements_titers = []
 		for (testvir, serum) in self.HI_normalized:
@@ -470,13 +473,13 @@ class HI_tree(object):
 				val_fwd = self.HI_normalized[(testvir,serum)]
 				val_bwd = self.HI_normalized[v]
 				diff_uncorrected = val_fwd - val_bwd
-				diff_corrected = (val_fwd - self.serum_potency[serum] - self.virus_effect[testvir])\
-								-(val_bwd - self.serum_potency[v[1]] - self.virus_effect[serum[0]])
+				diff_corrected = (val_fwd - self.serum_potency[model_type][serum] - self.virus_effect[model_type][testvir])\
+								-(val_bwd - self.serum_potency[model_type][v[1]] - self.virus_effect[model_type][serum[0]])
 				val_bwd = self.HI_normalized[v]
 				reciprocal_measurements.append([testvir, serum, diff_uncorrected, diff_corrected])
 				reciprocal_measurements_titers.append([testvir, serum, val_fwd, val_bwd, 
-				                                      (val_fwd - self.serum_potency[serum] - self.virus_effect[testvir]),
-	                      							  (val_bwd - self.serum_potency[v[1]] - self.virus_effect[serum[0]]),
+				                                      (val_fwd - self.serum_potency[model_type][serum] - self.virus_effect[model_type][testvir]),
+	                      							  (val_bwd - self.serum_potency[model_type][v[1]] - self.virus_effect[model_type][serum[0]]),
 													  ])
 		if plot:
 			import matplotlib.pyplot as plt
@@ -493,19 +496,19 @@ class HI_tree(object):
 			plt.legend()
 
 
-	def add_titers(self):
+	def add_titers(self, model_type='tree'):
 		for ref in self.ref_strains:
 			self.node_lookup[ref].HI_titers= defaultdict(dict)
 			self.node_lookup[ref].HI_titers_raw= defaultdict(dict)
 			self.node_lookup[ref].potency={}
 		for ref in self.sera:
-			self.node_lookup[ref[0]].potency[ref[1]] = self.serum_potency[ref]
+			self.node_lookup[ref[0]].potency[ref[1]] = self.serum_potency[model_type][ref]
 		for (test, ref), val in self.HI_normalized.iteritems():
 			self.node_lookup[ref[0]].HI_titers[self.node_lookup[test].clade][ref[1]] = val
 		for (test, ref), val in self.HI_raw.iteritems():
 			self.node_lookup[ref[0]].HI_titers_raw[self.node_lookup[test].clade][ref[1]] = val
 		for test in self.HI_strains:
-			self.node_lookup[test].avidity = self.virus_effect[test]
+			self.node_lookup[test].avidity = self.virus_effect[model_type][test]
 		for ref in self.ref_strains:
 			self.node_lookup[ref].mean_HI_titers = {key:np.mean(titers.values()) for key, titers in 
 			 									self.node_lookup[ref].HI_titers.iteritems()}
@@ -520,7 +523,8 @@ class HI_tree(object):
 	def predict_HI_tree(self, virus, serum, cutoff=0.0):
 		path = self.get_path_no_terminals(virus,serum[0])
 		if path is not None:
-			return self.serum_potency[serum] + self.virus_effect[virus] \
+			return self.serum_potency['tree'][serum] \
+					+ self.virus_effect['tree'][virus] \
 					+ np.sum([b.dHI for b in path and d.dHI>cutoff])
 		else:
 			return None
@@ -528,7 +532,8 @@ class HI_tree(object):
 	def predict_HI_mutations(self, virus, serum, cutoff=0.0):
 		muts= self.get_mutations(serum[0], virus)
 		if muts is not None:
-			return self.serum_potency[serum] + self.virus_effect[virus] \
+			return self.serum_potency['mutation'][serum] \
+					+ self.virus_effect['mutation'][virus] \
 					+ np.sum([self.mutation_effects[mut] for mut in muts 
 					if mut in self.mutation_effects and self.mutation_effects[mut]>cutoff])
 		else:

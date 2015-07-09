@@ -291,6 +291,8 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 			print "--- Adding HI titers to the tree " + time.strftime("%H:%M:%S") + " ---"
 			self.determine_variable_positions()
 			self.map_HI(training_fraction=1.0, method = 'nnl1reg', 
+					lam_HI=lam_HI, lam_avi=lam_avi, lam_pot=lam_pot, map_to_tree=True)
+			self.map_HI(training_fraction=1.0, method = 'nnl1reg', force_redo=True,
 					lam_HI=lam_HI, lam_avi=lam_avi, lam_pot=lam_pot, map_to_tree=False)
 			if not self.map_to_tree:
 				self.cHI_mutations()
@@ -365,3 +367,41 @@ if __name__=="__main__":
 	else:
 		myH3N2.run(steps, viruses_per_month = virus_config['viruses_per_month'], 
 			raxml_time_limit = virus_config['raxml_time_limit'])
+
+	from random import sample
+	leaf_sample = sample([leaf for leaf in myH3N2.tree.leaf_iter() 
+						  if leaf.num_date>2014], 10)
+
+	trunk_effects = []
+	trunk_muts = []
+	trunk_mut_effects = []
+	for node in leaf_sample:
+		tmp_muts = []
+		tmp_effects = []
+		while node.parent_node is not None:
+			tmp_effects.append(node.dHI)
+			tmp_muts.extend(node.aa_muts.items())
+			node = node.parent_node
+
+		tmp_muts = [x for x in tmp_muts if x[1]!='']
+		tmp_mut_effects = {}
+		for muts in tmp_muts:
+			gene = muts[0]
+			for pos in muts[1].split(','):
+				tmp_mut = (gene, pos)
+				if tmp_mut in myH3N2.mutation_effects:
+					tmp_mut_effects[tmp_mut] = myH3N2.mutation_effects[tmp_mut]
+				else:
+					tmp_mut_effects[tmp_mut] = 0
+
+		trunk_effects.append(tmp_effects)
+		trunk_muts.append(tmp_muts)
+		trunk_mut_effects.append(tmp_mut_effects)
+
+	plt.figure()
+	for eff in trunk_effects:
+		plt.plot(sorted(eff), np.linspace(1,0,len(eff)))
+
+	plt.figure()
+	for eff in trunk_mut_effects:
+		plt.plot(sorted(eff.values()), np.linspace(1,0,len(eff)))
