@@ -341,7 +341,7 @@ if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 
 				 'frequencies','HI', 'export']
 	from process import parser
-
+	import matplotlib.pyplot as plt
 	params = parser.parse_args()
 
 	lt = time.localtime()

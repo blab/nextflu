@@ -133,7 +133,7 @@ class process(virus_frequencies):
 		if os.path.isfile(self.HI_model_fname):
 			try:
 				with open(self.HI_model_fname, 'r') as infile:
-					(self.HI_mutation_effects, 
+					(self.mutation_effects, 
 					 self.virus_effect, 
 				  	 self.serum_potency) = cPickle.load(infile)
 			except:
