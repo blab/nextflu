@@ -423,14 +423,14 @@ class HI_tree(object):
 			self.cHI_mutations()
 
 
-	def validate(self, plot=False):
+	def validate(self, plot=False, cutoff=0.0):
 		from scipy.stats import linregress, pearsonr
 		self.validation = {}
 		for key, val in self.test_HI.iteritems():
 			if self.map_to_tree:
-				pred_HI = self.predict_HI_tree(key[0], key[1])
+				pred_HI = self.predict_HI_tree(key[0], key[1], cutoff=cutoff)
 			else:
-				pred_HI = self.predict_HI_mutations(key[0], key[1])
+				pred_HI = self.predict_HI_mutations(key[0], key[1], cutoff=cutoff)
 
 			if pred_HI is not None:
 				self.validation[key] = (val, pred_HI)
@@ -458,6 +458,8 @@ class HI_tree(object):
 			plt.title('regularization HI/pot/avi ='+str(self.lam_HI)+'/'+str(self.lam_pot)+'/'+str(self.lam_avi)+'\n prediction error: avg abs/rms '\
 						+str(round(self.abs_error, 3))\
 					+'/'+str(round(self.rms_error,3)), fontsize = fs)
+
+
 
 	def check_symmetry(self, plot=False):
 		reciprocal_measurements = []
@@ -515,18 +517,20 @@ class HI_tree(object):
 			node.cHI = np.sum([self.mutation_effects[mut] for mut in muts if mut in self.mutation_effects])
 
 
-	def predict_HI_tree(self, virus, serum):
+	def predict_HI_tree(self, virus, serum, cutoff=0.0):
 		path = self.get_path_no_terminals(virus,serum[0])
 		if path is not None:
-			return self.serum_potency[serum] + self.virus_effect[virus] + np.sum(b.dHI for b in path)
+			return self.serum_potency[serum] + self.virus_effect[virus] \
+					+ np.sum([b.dHI for b in path and d.dHI>cutoff])
 		else:
 			return None
 
-	def predict_HI_mutations(self, virus, serum):
+	def predict_HI_mutations(self, virus, serum, cutoff=0.0):
 		muts= self.get_mutations(serum[0], virus)
 		if muts is not None:
 			return self.serum_potency[serum] + self.virus_effect[virus] \
-				+ np.sum([self.mutation_effects[mut] for mut in muts if mut in self.mutation_effects])
+					+ np.sum([self.mutation_effects[mut] for mut in muts 
+					if mut in self.mutation_effects and self.mutation_effects[mut]>cutoff])
 		else:
 			return None
 

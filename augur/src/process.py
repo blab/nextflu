@@ -254,7 +254,7 @@ class process(virus_frequencies):
 									if val>0.01}
 			write_json(substantial_effects, self.auspice_HI_fname)
 			tmp = [[k[0]+":"+k[1],round(val,2)] for k, val 
-							in self.mutation_effects.iteritems() if val>0.05]
+							in self.mutation_effects.iteritems() if val>0.001]
 			tmp.sort(key = lambda x:x[1], reverse=True)
 			display_effects[self.virus_type][self.resolution] = tmp
 			write_json(display_effects, self.auspice_HI_display_mutations)

@@ -324,7 +324,16 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 			self.validate(plot=True)
 			plt.savefig(htmlpath+'HI_prediction.png')
 
-
+			unexplained_variance = []
+			cvals = np.linspace(0,2,40)
+			for cutoff in cvals:
+				self.validate(plot=False, cutoff=cutoff)
+				unexplained_variance.append([cutoff,self.rms_error**2, np.var(self.validation.values())])
+				print cutoff, unexplained_variance[-1]
+			unexplained_variance=np.array(unexplained_variance)
+			plt.figure()
+			plt.plot(unexplained_variance[:,0], unexplained_variance[:,1]/unexplained_variance[:,2])
+			plt.savefig(htmlpath+'HI_cutoff.png')
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 
