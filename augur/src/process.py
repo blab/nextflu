@@ -64,6 +64,7 @@ class process(virus_frequencies):
 		self.virus_fname = 		self.path + self.prefix + self.resolution_prefix + 'virus.pkl'
 		self.frequency_fname = 	self.path + self.prefix + self.resolution_prefix + 'frequencies.pkl'
 		self.aa_seq_fname = 	self.path + self.prefix + self.resolution_prefix + 'aa_seq.pkl'
+		self.HI_model_fname = 	self.path + self.prefix + self.resolution_prefix + 'HI_model.pkl'
 		if run_dir is None:
 			import random
 			self.run_dir = '_'.join(['temp', time.strftime('%Y%m%d-%H%M%S',time.gmtime()), str(random.randint(0,1000000))])
@@ -106,6 +107,10 @@ class process(virus_frequencies):
 		if hasattr(self, 'aa_aln'):
 			with open(self.aa_seq_fname, 'w') as outfile:
 				cPickle.dump(self.aa_aln, outfile)
+		if hasattr(self, 'mutation_effects'):
+			with open(self.HI_model_fname, 'w') as outfile:
+				cPickle.dump((self.mutation_effects, self.virus_effect, 
+							  self.serum_potency), outfile)
 
 	def load(self):
 		import cPickle
@@ -125,6 +130,14 @@ class process(virus_frequencies):
 		if os.path.isfile(self.aa_seq_fname):
 			with open(self.aa_seq_fname, 'r') as infile:
 				self.aa_aln = cPickle.load(infile)
+		if os.path.isfile(self.HI_model_fname):
+			try:
+				with open(self.HI_model_fname, 'r') as infile:
+					(self.HI_mutation_effects, 
+					 self.virus_effect, 
+				  	 self.serum_potency) = cPickle.load(infile)
+			except:
+				pass
 		try:
 			self.refine()
 		except:
