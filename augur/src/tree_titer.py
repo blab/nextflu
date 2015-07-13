@@ -6,6 +6,7 @@ from collections import defaultdict
 from matplotlib import pyplot as plt
 from itertools import izip
 from virus_filter import fix_name
+import pandas as pd
 
 def myopen(fname, mode='r'):
 	if fname[-2:]=='gz':
@@ -15,13 +16,15 @@ def myopen(fname, mode='r'):
 
 def HI_fix_name(name):
 	tmp_name = fix_name(name)
-	return tmp_name.upper()
+	return tmp_name.upper().lstrip('*')
 
 
 class HI_tree(object):
 
 	def __init__(self, HI_fname = 'source-data/HI_titers.txt', min_aamuts = 0,**kwargs):
-		self.HI, tmp = self.read_HI_titers(HI_fname)
+		self.HI_fname = HI_fname
+		self.HI, tmp, sources = self.read_HI_titers(HI_fname)
+		self.sources = list(sources)
 		self.tree_graph = None
 		self.min_aamuts = min_aamuts
 		self.serum_potency = {}
@@ -29,18 +32,26 @@ class HI_tree(object):
 
 	def read_HI_titers(self, fname):
 		strains = set()
-		measurements = {}
+		measurements = defaultdict(list)
+		sources = set()
 		with myopen(fname, 'r') as infile:
 			for line in infile:
 				entries = line.strip().split()
-				test, ref_virus, serum, val = entries[0], entries[1],entries[2], map(float, entries[3:])
+				test, ref_virus, serum, src_id, val = (entries[0], entries[1],entries[2], 
+														entries[3], float(entries[4]))
 				ref = (ref_virus, serum)
-				if len(val):
-					measurements[(test, (ref_virus, serum))] = val
+				try:
+					measurements[(test, (ref_virus, serum))].append(val)
 					strains.update([test, ref])
-				else:
+					sources.add(src_id)
+				except:
 					print line.strip()
-		return measurements, strains
+		return measurements, strains, sources
+
+	def normalize(self, ref, val):
+		consensus_func = np.median
+		return consensus_func(np.log2(self.HI[(ref[0], ref)])) - consensus_func(np.log2(val))
+
 
 	def normalize_HI(self):
 		'''
@@ -49,7 +60,6 @@ class HI_tree(object):
 		homologous titer. all measurements relative to sera without homologous titer
 		are excluded
 		'''
-		consensus_func = np.mean
 		self.HI_normalized = {}
 		self.HI_raw = {}
 		sera = set()
@@ -62,11 +72,11 @@ class HI_tree(object):
 				if (ref[0],ref) in self.HI:
 					sera.add(ref)
 					ref_strains.add(ref[0])
-					normalized_val = consensus_func(np.log2(self.HI[(ref[0], ref)])) - consensus_func(np.log2(val))
-					self.HI_normalized[(test, ref)] = normalized_val
+					self.HI_normalized[(test, ref)] = self.normalize(ref, val)
 					self.HI_raw[(test, ref)] = np.median(val)
 				else:
 					print "no homologous titer found:", ref
+
 		self.sera = list(sera)
 		self.ref_strains = list(ref_strains)
 		self.HI_strains = list(HI_strains)
@@ -88,7 +98,7 @@ class HI_tree(object):
 		for leaf in self.tree.leaf_iter():
 			if leaf.strain.upper() in self.HI_strains:
 				leaf.serum = leaf.strain.upper() in self.ref_strains
-				leaf.HI_info= 1
+				leaf.HI_info = 1
 			else:
 				leaf.serum, leaf.HI_info=False, 0
 
@@ -101,7 +111,7 @@ class HI_tree(object):
 		self.HI_split_to_branch = defaultdict(list)
 		for node in self.tree.preorder_node_iter():
 			if self.map_to_tree:
-				node.dHI, node.cHI, node.constraints =0, 0, 0
+				node.dHI, node.cHI, node.constraints = 0, 0, 0
 			if node.HI_info>1:
 				node.HI_branch_index = self.HI_split_count
 				self.HI_split_to_branch[node.HI_branch_index].append(node)
@@ -324,9 +334,8 @@ class HI_tree(object):
 		G1[HI_sc:, n_params:] = -np.eye(HI_sc)
 		G = matrix(G1)
 		W = solvers.qp(P,q,G,h)
-		sol = np.array([x for x in W['x']])[:n_params]
-		self.params=sol
-		print "squared deviation prior to relax=",self.fit_func()
+		self.params = np.array([x for x in W['x']])[:n_params]
+		print "rms deviation prior to relax=",np.sqrt(self.fit_func())
 		# redo the linear cost relaxing terms that seem to be relevant to avoid 
 		# compression of the fit. 0.2 seems to be a good cut-off, linear tune to zero
 		#q1[n_params:] = self.lam_HI*(1-5.0*np.minimum(0.2,sol[:HI_sc]))
@@ -334,8 +343,8 @@ class HI_tree(object):
 		#W = solvers.qp(P,q,G,h)
 		#sol = np.array([x for x in W['x']])[:n_params]
 		#self.params=sol
-		#print "squared deviation after relax=",self.fit_func()
-		return sol
+		#print "rms deviation after relax=",np.sqrt(self.fit_func())
+		return self.params
 
 	def prepare_HI_map(self):
 		'''
@@ -426,19 +435,25 @@ class HI_tree(object):
 				  for ii, strain in enumerate(self.HI_strains)}
 
 
-	def validate(self, plot=False, cutoff=0.0):
+	def validate(self, plot=False, cutoff=0.0, validation_set = None, incl_ref_strains='yes'):
+		if validation_set is None:
+			validation_set=self.test_HI
 		from scipy.stats import linregress, pearsonr
 		self.validation = {}
-		for key, val in self.test_HI.iteritems():
+		for key, val in validation_set.iteritems():
 			if self.map_to_tree:
 				pred_HI = self.predict_HI_tree(key[0], key[1], cutoff=cutoff)
 			else:
 				pred_HI = self.predict_HI_mutations(key[0], key[1], cutoff=cutoff)
 
 			if pred_HI is not None:
-				self.validation[key] = (val, pred_HI)
+				if any([incl_ref_strains=='yes', 
+						incl_ref_strains=='no' and (key[0].upper() not in self.ref_strains),
+						incl_ref_strains=='only' and (key[0].upper() in self.ref_strains)]):
+					self.validation[key] = (val, pred_HI)
 
 		a = np.array(self.validation.values())
+		print "number of prediction-measurement pairs",a.shape
 		self.abs_error = np.mean(np.abs(a[:,0]-a[:,1]))
 		self.rms_error = np.sqrt(np.mean((a[:,0]-a[:,1])**2))
 		self.slope, self.intercept, tmpa, tmpb, tmpc = linregress(a[:,0], a[:,1])
@@ -462,7 +477,7 @@ class HI_tree(object):
 						+str(round(self.abs_error, 3))\
 					+'/'+str(round(self.rms_error,3)), fontsize = fs)
 
-
+		return a.shape[0]
 
 	def check_symmetry(self, plot=False, model_type = 'tree'):
 		reciprocal_measurements = []
@@ -520,12 +535,34 @@ class HI_tree(object):
 			node.cHI = np.sum([self.mutation_effects[mut] for mut in muts if mut in self.mutation_effects])
 
 
+	def check_sources(self):
+		self.source_HIs = defaultdict(dict)
+		with myopen(self.HI_fname, 'r') as infile:
+			for line in infile:
+				test, ref_virus, serum, src_id, val_str = line.strip().split()
+				try:
+					val = float(val_str)
+					if not np.isnan(val):
+						self.source_HIs[src_id][test, (ref_virus, serum)] = self.normalize((ref_virus, serum), float(val))
+				except:
+					print test, ref_virus, serum, src_id, float(val)
+
+		self.source_validation = {}
+		for src_id in self.source_HIs:
+			print '\n############### \n',src_id,'\n############### \n'
+			print "number of measurements:",len(self.source_HIs[src_id])
+			try:
+				n_checks = self.validate(validation_set=self.source_HIs[src_id], incl_ref_strains='no')
+				self.source_validation[src_id] = [self.abs_error, self.rms_error, self.slope, self.intercept, n_checks]
+			except:
+				print "skipped due to too few measurements"
+
 	def predict_HI_tree(self, virus, serum, cutoff=0.0):
 		path = self.get_path_no_terminals(virus,serum[0])
 		if path is not None:
 			return self.serum_potency['tree'][serum] \
 					+ self.virus_effect['tree'][virus] \
-					+ np.sum([b.dHI for b in path and d.dHI>cutoff])
+					+ np.sum([b.dHI for b in path if b.dHI>cutoff])
 		else:
 			return None
 
@@ -535,7 +572,7 @@ class HI_tree(object):
 			return self.serum_potency['mutation'][serum] \
 					+ self.virus_effect['mutation'][virus] \
 					+ np.sum([self.mutation_effects[mut] for mut in muts 
-					if mut in self.mutation_effects and self.mutation_effects[mut]>cutoff])
+					if (mut in self.mutation_effects and self.mutation_effects[mut]>cutoff)])
 		else:
 			return None
 
@@ -578,7 +615,6 @@ def titer_to_number(val):
 		return np.nan
 
 def parse_HI_matrix(fname):
-	import pandas as pd
 	from string import strip
 	import csv
 	name_abbrev = {'HK':"HONGKONG", 'SWITZ':"SWITZERLAND", 'VIC':"VICTORIA", 'STOCK':"STOCKHOLM",
@@ -651,9 +687,8 @@ def parse_HI_matrix(fname):
 
 def read_tables(flutype = 'H3N2'):
 	import glob
-	import pandas as pd
 	from itertools import product
-	flist = glob.glob('../../flu_HI_data/'+flutype+'_tables/NIMR*csv')
+	flist = glob.glob('../../HI_titers/'+flutype+'_tables/NIMR*csv')
 	all_names = set()
 	all_measurements = defaultdict(list)
 	HI_matrices = pd.DataFrame()
@@ -665,7 +700,7 @@ def read_tables(flutype = 'H3N2'):
 def read_trevor_table(flutype):
 	trevor_table = 'source-data/'+flutype+'_HI.tsv'
 	import csv
-	measurements = defaultdict(list)
+	measurements = []
 	sera = set()
 	strains = set()
 	if os.path.isfile(trevor_table):
@@ -673,35 +708,34 @@ def read_trevor_table(flutype):
 			table_reader = csv.reader(infile, delimiter="\t")
 			header = table_reader.next()
 			for row in table_reader:
-	#			try:
-					val = titer_to_number(row[6])
-					if not np.isnan(val):
-						strains.add(HI_fix_name(row[1]))
-						serum = (HI_fix_name(row[4]), row[3])
-						sera.add(serum)
-						measurements[(HI_fix_name(row[1]), serum)].append(val)
-	#			except:
-	#				print row
+				val = titer_to_number(row[6])
+				if not np.isnan(val):
+					strains.add(HI_fix_name(row[1]))
+					serum = (HI_fix_name(row[4]), row[3])
+					src_id = row[-1]
+					sera.add(serum)
+					measurements.append([HI_fix_name(row[1]), serum, src_id, val])
 	else:
 		print trevor_table, "not found"
 	print "trevor total:", len(measurements), "measurements"
-	return strains, sera, measurements
+	return strains, sera, pd.DataFrame(measurements)
 
 
 def table_to_flat(HI_table):
-	flat_measurements = defaultdict(list)
+	flat_measurements = list()
 	for ref_serum in HI_table.columns[5:]:
-		sub_set = HI_table[ref_serum][~np.isnan(HI_table[ref_serum])]
-		for virus, val in izip(sub_set.index, sub_set):
-			flat_measurements[(virus, ref_serum)].append(val)
+		sub_set_vals = HI_table[ref_serum][~np.isnan(HI_table[ref_serum])]
+		sub_set_source = HI_table['source'][~np.isnan(HI_table[ref_serum])]
+		for virus, val, src_id in izip(sub_set_vals.index, sub_set_vals, sub_set_source):
+			flat_measurements.append([virus, ref_serum, src_id, val])
 	print "NIMR total:", len(flat_measurements), "measurements"
-	return flat_measurements
+	return pd.DataFrame(flat_measurements)
 
 def get_all_titers_flat(flutype='H3N2'):
 	HI_titers = read_tables(flutype)
 	HI_titers_flat = table_to_flat(HI_titers)
 	HI_trevor = read_trevor_table(flutype)[2]
-	HI_titers_flat.update(HI_trevor)
+	HI_titers_flat = pd.concat((HI_titers_flat, HI_trevor))
 	return HI_titers_flat
 
 
@@ -731,15 +765,22 @@ def write_flat_HI_titers(flutype = 'H3N2', fname = None):
 		strains = [HI_fix_name(line.strip()).upper() for line in infile]	
 	if fname is None:
 		fname = 'source-data/'+flutype+'_HI_titers.txt'
+	written = 0
+	skipped = 0 
 	with myopen(fname, 'w') as outfile:
-		for (test, ref), val in measurements.iteritems():
-			if HI_fix_name(test).upper() in strains and HI_fix_name(ref[0]).upper() in strains:
-				outfile.write(test+'\t'+ref[0]+'\t'+ref[1]+'\t'+'\t'.join(map(str,val))+'\n')
-
+		for ii, rec in measurements.iterrows():
+			test, ref, src_id, val = rec
+			if HI_fix_name(test).upper() in strains and HI_fix_name(rec[1][0]).upper() in strains:
+				outfile.write('\t'.join(map(str, [test, ref[0], ref[1], src_id, val]))+'\n')
+				written+=1
+			else:
+				skipped+=1
+	print "written",written,"records"
+	print "skipped",skipped,"records"
 
 def main(tree, HI_fname='source-data/HI_titers.txt', training_fraction = 1.0, reg=5):
 	print "--- Fitting HI titers at " + time.strftime("%H:%M:%S") + " ---"
-	measurements, strains = read_HI_titers(HI_fname)
+	measurements, strains, sources = read_HI_titers(HI_fname)
 	HI_map = HI_tree(tree, measurements)
 	HI_map.map_HI_to_tree(training_fraction=training_fraction, method = 'nnl1reg', lam=reg)
 	return HI_map

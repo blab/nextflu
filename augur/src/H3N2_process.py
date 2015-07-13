@@ -247,7 +247,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 		fitness_model.__init__(self,**kwargs)
 		self.verbose = verbose
 
-	def run(self, steps, viruses_per_month=50, raxml_time_limit = 1.0, lam_HI=2, lam_avi=2, lam_pot=.1):
+	def run(self, steps, viruses_per_month=50, raxml_time_limit = 1.0, lam_HI=.5, lam_avi=2, lam_pot=.1):
 		if 'filter' in steps:
 			print "--- Virus filtering at " + time.strftime("%H:%M:%S") + " ---"
 			self.filter()
@@ -331,7 +331,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 			for cutoff in cvals:
 				self.validate(plot=False, cutoff=cutoff)
 				unexplained_variance.append([cutoff,self.rms_error**2, np.var(self.validation.values())])
-				print cutoff, unexplained_variance[-1]
+				print "effect cutoff:", cutoff, unexplained_variance[-1]
 			unexplained_variance=np.array(unexplained_variance)
 			plt.figure()
 			plt.plot(unexplained_variance[:,0], unexplained_variance[:,1]/unexplained_variance[:,2])
@@ -400,8 +400,10 @@ if __name__=="__main__":
 
 	plt.figure()
 	for eff in trunk_effects:
+		print "sum of effects on trunk", np.sum(eff)
 		plt.plot(sorted(eff), np.linspace(1,0,len(eff)))
 
 	plt.figure()
 	for eff in trunk_mut_effects:
+		print "sum of mutation effects on trunk:", np.sum(eff.values())
 		plt.plot(sorted(eff.values()), np.linspace(1,0,len(eff)))
