@@ -58,10 +58,11 @@ var virusTooltip = d3.tip()
 					}else{
 						serum_name = tmp_serum.substring(0,17)+'..:';
 					}
-					string += '<li>' + serum_name + ' <span style="float:right">' +  logHI.toFixed(1)+', ' + rawHI.toFixed(0)+ ' (' + homHI.toFixed(0) +")</span></li>";
+					string += '<li>' + serum_name + ' <span style="float:right">' +  logHI.toFixed(1)+',\t' + rawHI.toFixed(0)+ ' \t(' + homHI.toFixed(0) +")</span></li>";
 				}
 			}
-			string += '<li>' + 'predicted:' + ' <span style="float:right">' +  d.HI_dist_pred.toFixed(2) + ', --- (----)'+ "</span></li>";
+			string += '<li>' + 'Tree model:' + ' <span style="float:right">' +  d.HI_dist_tree.toFixed(2) + '\t, --- \t(----)'+ "</span></li>";
+			string += '<li>' + 'Mutations:' + ' <span style="float:right">' +  d.HI_dist_mut.toFixed(2) + '\t, --- \t(----)'+ "</span></li>";
 			string += "</ul></div>";
 		}
 		//else if ((predictedHI==true)&&(typeof focusNode != "undefined")){

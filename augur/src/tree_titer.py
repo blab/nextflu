@@ -407,7 +407,7 @@ class HI_tree(object):
 		elif method=='nnl1reg':  # non-negative fit, branch terms L1 regularized, avidity terms L2 regularized
 			self.params = self.fit_nnl1reg()
 
-		print "method",method, "regularized by", self.lam_HI, "squared deviation=",self.fit_func()
+		print "method",method, "regularized by", self.lam_HI, "rms deviation=",np.sqrt(self.fit_func())
 		# for each set of branches with HI constraints, pick the branch with most aa mutations
 		# and assign the dHI to that one, record the number of constraints
 		if self.map_to_tree:
@@ -515,19 +515,27 @@ class HI_tree(object):
 		for ref in self.ref_strains:
 			self.node_lookup[ref].HI_titers= defaultdict(dict)
 			self.node_lookup[ref].HI_titers_raw= defaultdict(dict)
-			self.node_lookup[ref].potency={}
+			self.node_lookup[ref].potency_mut={}
+			self.node_lookup[ref].potency_tree={}
 		for ref in self.sera:
-			self.node_lookup[ref[0]].potency[ref[1]] = self.serum_potency[model_type][ref]
+			if 'mutation' in self.virus_effect:
+				self.node_lookup[ref[0]].potency_mut[ref[1]] = self.serum_potency['mutation'][ref]
+			if 'tree' in self.virus_effect:
+				self.node_lookup[ref[0]].potency_tree[ref[1]] = self.serum_potency['tree'][ref]
 		for (test, ref), val in self.HI_normalized.iteritems():
 			self.node_lookup[ref[0]].HI_titers[self.node_lookup[test].clade][ref[1]] = val
 		for (test, ref), val in self.HI_raw.iteritems():
 			self.node_lookup[ref[0]].HI_titers_raw[self.node_lookup[test].clade][ref[1]] = val
 		for test in self.HI_strains:
-			self.node_lookup[test].avidity = self.virus_effect[model_type][test]
+			if 'mutation' in self.virus_effect:
+				self.node_lookup[test].avidity_tree = self.virus_effect['mutation'][test]
+			if 'tree' in self.virus_effect:
+				self.node_lookup[test].avidity_mut = self.virus_effect['tree'][test]
 		for ref in self.ref_strains:
 			self.node_lookup[ref].mean_HI_titers = {key:np.mean(titers.values()) for key, titers in 
 			 									self.node_lookup[ref].HI_titers.iteritems()}
-			self.node_lookup[ref].mean_potency = np.mean(self.node_lookup[ref].potency.values())
+			self.node_lookup[ref].mean_potency_tree = np.mean(self.node_lookup[ref].potency_tree.values())
+			self.node_lookup[ref].mean_potency_mut = np.mean(self.node_lookup[ref].potency_mut.values())
 
 	def cHI_mutations(self):
 		for node in self.tree.postorder_node_iter():

@@ -76,7 +76,7 @@ function tipVisibility(d) {
 			return "hidden";
 		}
 	}
-	if ((colorBy=='HI_dist')&&(predictedHI==false)&&(d.HI_dist_meas =='NaN')) {
+	if ((colorBy=='HI_dist')&&(HImodel=='measured')&&(d.HI_dist_meas =='NaN')) {
 		return "hidden";
 	}
 	return "visible";
