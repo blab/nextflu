@@ -95,17 +95,17 @@ function branchStrokeWidth(d) {
 
 function branchLabelText(d) {
 	var tmp_str='';
-	for (tmp_gene in d.aa_muts){
-		if (d.aa_muts[tmp_gene].length){
-			tmp_str+=tmp_gene+":"+d.aa_muts[tmp_gene].replace(/,/g, ', ');
+	if (branch_labels){
+		for (tmp_gene in d.aa_muts){
+			if (d.aa_muts[tmp_gene].length){
+				tmp_str+=tmp_gene+":"+d.aa_muts[tmp_gene].replace(/,/g, ', ');
+			}
+		}
+		if (tmp_str.length>50){
+			tmp_str = tmp_str.substring(0,45)+'...';
 		}
 	}
-	if (tmp_str.length>50){
-		return tmp_str.substring(0,45)+'...';
-	}
-	else {
-		return tmp_str;
-	}
+	return tmp_str;
 }
 
 function tipLabelText(d) {
@@ -275,7 +275,8 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			}
 		});
 
-	if ((typeof branch_labels != "undefined")&&(branch_labels)){
+	function addBranchLabels(){
+		console.log('adding branch labels:'+branch_labels);
 		var mutations = treeplot.selectAll(".branchLabel")
 			.data(nodes)
 			.enter()
@@ -290,7 +291,9 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			})
 			.style("text-anchor", "end")
 			.text(branchLabelText);
-		}
+	}
+
+	addBranchLabels();
 
 	if ((typeof tip_labels != "undefined")&&(tip_labels)){
 		treeplot.selectAll(".tipLabel").data(tips)
@@ -380,6 +383,14 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			rescale(dMin, dMax, lMin, lMax);
 			removeClade();
 		})
+
+	d3.select("#branchlabels")
+		.on("change", function (d){
+			branch_labels = document.getElementById("branchlabels").checked;
+			console.log("changing branch labels: "+branch_labels);
+			treeplot.selectAll(".branchLabel").data(nodes)
+				.text(branchLabelText);
+		});
 
 	function rescale(dMin, dMax, lMin, lMax) {
 
