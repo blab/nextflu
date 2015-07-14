@@ -94,7 +94,12 @@ function branchStrokeWidth(d) {
 }
 
 function branchLabelText(d) {
-	var tmp_str = d.aa_muts.replace(/,/g, ', '); 
+	var tmp_str='';
+	for (tmp_gene in d.aa_muts){
+		if (d.aa_muts[tmp_gene].length){
+			tmp_str+=tmp_gene+":"+d.aa_muts[tmp_gene].replace(/,/g, ', ');
+		}
+	}
 	if (tmp_str.length>50){
 		return tmp_str.substring(0,45)+'...';
 	}
