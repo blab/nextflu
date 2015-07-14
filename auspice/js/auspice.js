@@ -16,3 +16,4 @@ var date_select = true;
 {% include_relative tooltips.js %}
 {% include_relative tree.js %}
 {% include_relative frequencies.js %}
+{% include_relative structure.js %}

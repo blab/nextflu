@@ -293,6 +293,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.text(branchLabelText);
 	}
 
+	branch_labels = document.getElementById("branchlabels").checked;
 	addBranchLabels();
 
 	if ((typeof tip_labels != "undefined")&&(tip_labels)){

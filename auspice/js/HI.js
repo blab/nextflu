@@ -163,5 +163,9 @@ d3.json(path + file_prefix + "HI.json", function(error, json){
 	}
 	//structure_HI_mutations = structure_HI_mutations.substring(0, structure_HI_mutations.length-1);
 	console.log(structure_HI_mutations);
-	make_structure();
+	d3.select('#structurebtn')
+		.on("click", function(d) {
+			make_structure();
+			document.getElementById("structureDiv").style.display='block';
+		});
 });
