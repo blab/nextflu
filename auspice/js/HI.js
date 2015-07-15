@@ -166,6 +166,7 @@ d3.json(path + file_prefix + "HI.json", function(error, json){
 	d3.select('#structurebtn')
 		.on("click", function(d) {
 			make_structure();
-			document.getElementById("structureDiv").style.display='block';
+			document.getElementById("HA_struct").style.display='block';
+			document.getElementById("structurebtn").style.display='none';
 		});
 });

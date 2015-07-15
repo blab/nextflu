@@ -184,22 +184,16 @@ layout: default
 		</div>
 	</div>	
 </div>
+<div class="spacer"></div>
 <div class="row">
 	<div class="col-md-3">
 		<div class="io-container title">
 			HI mutations
 		</div>
 		<div class="col-xs-6 io-container">					
-			<div>
-				<button id="structurebtn" type=button class="btn btn-default">Show structure</button>
-			</div>
 		</div>
 	</div>
-	<div id="structureDiv"  style="display: none">
-	<div class="col-md-5">
-		<div id="HA_struct" class="io-container title">
-		</div>
-	</div>
+	<div>
 	<div class="col-md-4" style="height: 400px; overflow: auto;">
 		<table class="table">
 			<col width="70%">
@@ -211,6 +205,13 @@ layout: default
 			</tr>
 			{% endfor %}
 		</table>
+	</div>
+	<div class="col-md-5" id="structureDiv">
+		<div>
+			<button id="structurebtn" type=button class="btn btn-default">Show structure</button>
+		</div>
+		<div id="HA_struct" class="io-container title" style="display: none">
+		</div>
 	</div>
 	</div>
 </div>

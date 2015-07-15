@@ -1,8 +1,8 @@
 console.log('Enter tree.js');
 
 var freqScale = d3.scale.linear()
-	.domain([0, 1])
-	.range([1.5, 4.5]);
+	.domain([0, 0.05, 0.2, 1])
+	.range([1, 2, 4, 5]);
 
 var dHIScale = d3.scale.linear()
 	.domain([0, 1])
@@ -90,7 +90,7 @@ function branchPoints(d) {
 }
 
 function branchStrokeWidth(d) {
-	return dHIScale(d.target.dHI);
+	return freqScale(d.target.frequency);
 }
 
 function branchLabelText(d) {
@@ -171,6 +171,26 @@ function tree_init(){
 	tree_legend = makeLegend();
 	nDisplayTips = displayRoot.fullTipCount;	
 }
+
+
+function addBranchLabels(){
+	console.log('adding branch labels:'+branch_labels);
+	var mutations = treeplot.selectAll(".branchLabel")
+		.data(nodes)
+		.enter()
+		.append("text")
+		.attr("class", "branchLabel")
+		.style("font-size", branchLabelSize)			
+		.attr("x", function(d) {
+			return d.x - 6;
+		})
+		.attr("y", function(d) {
+			return d.y - 6;
+		})
+		.style("text-anchor", "end")
+		.text(branchLabelText);
+}
+
 
 d3.json(path + file_prefix + "tree.json", function(error, root) {
 
@@ -275,27 +295,6 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			}
 		});
 
-	function addBranchLabels(){
-		console.log('adding branch labels:'+branch_labels);
-		var mutations = treeplot.selectAll(".branchLabel")
-			.data(nodes)
-			.enter()
-			.append("text")
-			.attr("class", "branchLabel")
-			.style("font-size", branchLabelSize)			
-			.attr("x", function(d) {
-				return d.x - 6;
-			})
-			.attr("y", function(d) {
-				return d.y - 3;
-			})
-			.style("text-anchor", "end")
-			.text(branchLabelText);
-	}
-
-	branch_labels = document.getElementById("branchlabels").checked;
-	addBranchLabels();
-
 	if ((typeof tip_labels != "undefined")&&(tip_labels)){
 		treeplot.selectAll(".tipLabel").data(tips)
 			.style("font-size", function(d) { return tipLabelSize(d)+"px"; })			
@@ -372,27 +371,6 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			colorByHIDistance();
 		});
 
-
-	d3.select("#reset")
-		.on("click", function(d) {
-			displayRoot = rootNode;
-			nDisplayTips = displayRoot.fullTipCount;
-			var dMin = d3.min(xValues),
-				dMax = d3.max(xValues),
-				lMin = d3.min(yValues),
-				lMax = d3.max(yValues);
-			rescale(dMin, dMax, lMin, lMax);
-			removeClade();
-		})
-
-	d3.select("#branchlabels")
-		.on("change", function (d){
-			branch_labels = document.getElementById("branchlabels").checked;
-			console.log("changing branch labels: "+branch_labels);
-			treeplot.selectAll(".branchLabel").data(nodes)
-				.text(branchLabelText);
-		});
-
 	function rescale(dMin, dMax, lMin, lMax) {
 
 		var speed = 1500;
@@ -467,8 +445,6 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		}
 	}
 
-	d3.select(window).on('resize', resize); 
-	
 	function resize() {
 	
 		containerWidth = parseInt(d3.select(".treeplot-container").style("width"), 10);
@@ -568,6 +544,9 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	}
 
 
+	branch_labels = document.getElementById("branchlabels").checked;
+	addBranchLabels();
+
 	function onSelect(tip) {
 		d3.select("#"+(tip.strain).replace(/\//g, ""))
 			.call(function(d) {
@@ -575,6 +554,31 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			});
 	}
 
+	d3.select(window).on('resize', resize); 
+
+	d3.select("#reset")
+		.on("click", function(d) {
+			displayRoot = rootNode;
+			nDisplayTips = displayRoot.fullTipCount;
+			var dMin = d3.min(xValues),
+				dMax = d3.max(xValues),
+				lMin = d3.min(yValues),
+				lMax = d3.max(yValues);
+			rescale(dMin, dMax, lMin, lMax);
+			removeClade();
+		})
+
+	d3.select("#branchlabels")
+		.on("change", function (d){
+			branch_labels = document.getElementById("branchlabels").checked;
+			console.log("changing branch labels: "+branch_labels);
+			treeplot.selectAll(".branchLabel").data(nodes)
+				.text(branchLabelText);
+			treeplot.selectAll(".annotation").data(clades)
+				.style("visibility",(branch_labels)?"hidden":"visible");
+		});
+
+	
 	var mc = autocomplete(document.getElementById('search'))
 		.keys(tips)
 		.dataField("strain")
