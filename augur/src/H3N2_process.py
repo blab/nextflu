@@ -149,7 +149,7 @@ class H3N2_clean(virus_clean):
 	def clean_outliers(self):
 		"""Remove single outlying viruses"""
 		remove_viruses = []
-		outlier_strains = ["A/Helsinki/942/2013", "A/India/6352/2012", "A/Pennsylvania/14/2010", "A/HuNan/01/2014", "A/OSAKA/31/2005", "A/Sari/388/2006", "A/Busan/15453/2009"]
+		outlier_strains = ["A/Helsinki/942/2013", "A/India/6352/2012", "A/Pennsylvania/14/2010", "A/HuNan/01/2014", "A/OSAKA/31/2005", "A/Sari/388/2006", "A/Busan/15453/2009", "A/SaoPaulo/36178/2015", "A/Chile/8266/2003", "A/Kenya/170/2011", "A/Kenya/168/2011"]
 		for outlier_strain in outlier_strains:
 			for v in self.viruses:
 				if (v.strain == outlier_strain):
