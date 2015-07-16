@@ -179,7 +179,11 @@ function branchStrokeColor(d) {
 		col = "#AAA";
 	}
 	else {
-		col = colorScale(d.target.coloring);	
+		if (typeof d.target.coloring != "undefined"){
+			col = colorScale(d.target.coloring);
+		}else{
+			col="#AAA";
+		}
 	}
 	var modCol = d3.interpolateRgb(col, "#BBB")(0.6);
 	return d3.rgb(modCol).toString();
@@ -266,7 +270,12 @@ function colorByGenotypePosition (positions) {
 function colorByHIDistance(){
 	correctVirus = document.getElementById("virus").checked;
 	correctPotency = document.getElementById("serum").checked;
-	predictedHI = document.getElementById("HIPrediction").checked;
+	var HIchoices = document.getElementsByName("HImodel");
+	for(var i = 0; i < HIchoices.length; i++){
+	    if(HIchoices[i].checked){
+	        HImodel = HIchoices[i].value;
+	    }
+	}
 	colorBy = 'HI_dist'
 	if (typeof(focusNode)=="undefined"){
 		var ntiters = 0, ntmp;
@@ -285,17 +294,20 @@ function colorByHIDistance(){
 		.style("font-size", function (d) {if (d==focusNode) {return "32px";} else {return "24px";}})
 		.text(function (d) {if (d==focusNode) {return '\uf05b';} else {return '\uf10c';}});
 
-	calcHImutations(focusNode, rootNode);
 	calcHImeasured(focusNode, rootNode);
+	calcHImutations(focusNode, rootNode);
+	calcHItree(focusNode, rootNode);
 
 	console.log("Color by HI Distance from "+focusNode.strain);
-	console.log("Using predictedHI: "+predictedHI);
+	console.log("Using HI model: "+HImodel);
 	console.log("correcting for virus effect: "+correctVirus);
 	console.log("correction for serum effect: "+correctPotency);
 
 	colorScale = HIColorScale;
-	if (HIPrediction){
-		nodes.map(function(d) { d.coloring = d.HI_dist_pred;});
+	if (HImodel=='mutation'){
+		nodes.map(function(d) { d.coloring = d.HI_dist_mut;});
+	}else if (HImodel=='tree'){
+		nodes.map(function(d) { d.coloring = d.HI_dist_tree;});
 	}else{
 		nodes.map(function(d) { d.coloring = d.HI_dist_meas;});		
 	}
@@ -304,7 +316,7 @@ function colorByHIDistance(){
 		.style("stroke", branchStrokeColor);
 		
 	d3.selectAll(".tip")
-		.style("visibility", tipHIvalid)
+		.style("visibility", tipVisibility)
 		.style("fill", tipFillColor)
 		.style("stroke", tipStrokeColor);
 		

@@ -51,17 +51,18 @@ var virusTooltip = d3.tip()
 					var rawHI = focusNode.HI_titers_raw[d.clade][tmp_serum];
 					var logHI = focusNode.HI_titers[d.clade][tmp_serum];
 					if (correctVirus){logHI-=d.avidity;}
-					if (correctPotency){logHI-=focusNode.potency[tmp_serum];}
+					if (correctPotency){logHI-=focusNode.potency_mut[tmp_serum];}
 					var serum_name;
 					if (tmp_serum.length<20){
 						serum_name = tmp_serum+':';
 					}else{
 						serum_name = tmp_serum.substring(0,17)+'..:';
 					}
-					string += '<li>' + serum_name + ' <span style="float:right">' +  logHI.toFixed(1)+', ' + rawHI.toFixed(0)+ ' (' + homHI.toFixed(0) +")</span></li>";
+					string += '<li>' + serum_name + ' <span style="float:right">' +  logHI.toFixed(1)+',\t' + rawHI.toFixed(0)+ ' \t(' + homHI.toFixed(0) +")</span></li>";
 				}
 			}
-			string += '<li>' + 'predicted:' + ' <span style="float:right">' +  d.HI_dist_pred.toFixed(2) + ', --- (----)'+ "</span></li>";
+			string += '<li>' + 'Tree model:' + ' <span style="float:right">' +  d.HI_dist_tree.toFixed(2) + '\t, --- \t(----)'+ "</span></li>";
+			string += '<li>' + 'Mutations:' + ' <span style="float:right">' +  d.HI_dist_mut.toFixed(2) + '\t, --- \t(----)'+ "</span></li>";
 			string += "</ul></div>";
 		}
 		//else if ((predictedHI==true)&&(typeof focusNode != "undefined")){
@@ -72,6 +73,9 @@ var virusTooltip = d3.tip()
 		string += "<div class=\"smallspacer\"></div>";
 		// following may or may not be present
 		string += "<div class=\"smallnote\">";
+		if (typeof d.cHI != "undefined") {
+			string += "Antigenic adv: " + d.cHI.toFixed(1) + "<br>";
+		}
 		if (typeof d.ep != "undefined") {
 			string += "Epitope distance: " + d.ep + "<br>";
 		}

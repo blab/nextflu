@@ -83,13 +83,25 @@ layout: default
 						<label class="col-xs-4 control-label">Or</label>
 						<div class="col-xs-8 controls">
 							<input id="gt-color" type="search" placeholder= "{{ page.gtplaceholder }}"  class="form-control">
+							<input type="checkbox" id="branchlabels" value="virus" checked="unchecked"> branch labels
 						</div>
 					</div>
 					{% if page.coloring contains 'HI' %}
 					<div class="form-group" id="HIcontrols" style="display: none">
-						<input type="checkbox" id="HIPrediction" value="pred"> color by predicted HI<br>
-						<input type="checkbox" id="serum" value="serum"> correct column effect (serum)<br>
-						<input type="checkbox" id="virus" value="virus"> correct row effect (virus)<br>
+						<label class="col-xs-4 control-label">HI coloring:</label><br>
+						<div class="col-xs-8 controls">
+							<form action="" id="HImodel">
+								<input type="radio" name="HImodel" id="HImodel_measured" value="measured" checked="checked"> Measurements<br>
+								<input type="radio" name="HImodel" id="HImodel_tree" value="tree"> Tree model<br>
+								<input type="radio" name="HImodel" id="HImodel_mutation" value="mutation"> Mutation model
+							</form>
+						</div>
+						<label class="col-xs-4 control-label">Corrections:</label><br>
+						<div class="col-xs-8 controls">
+							<div class="bigspacer"></div>
+							<input type="checkbox" id="serum" value="serum"> column (serum)<br>
+							<input type="checkbox" id="virus" value="virus"> row (virus)
+						</div>
 					</div>		
 					{% endif %}	
 				</form>
@@ -172,18 +184,16 @@ layout: default
 		</div>
 	</div>	
 </div>
+<div class="spacer"></div>
 <div class="row">
 	<div class="col-md-3">
 		<div class="io-container title">
 			HI mutations
 		</div>
-	</div>
-	<div class="col-md-5">
-		<div id="HA_struct" class="io-container title">
-		</div>
-		<div id="HA_buttons" class="io-container title">
+		<div class="col-xs-6 io-container">					
 		</div>
 	</div>
+	<div>
 	<div class="col-md-4" style="height: 400px; overflow: auto;">
 		<table class="table">
 			<col width="70%">
@@ -195,6 +205,14 @@ layout: default
 			</tr>
 			{% endfor %}
 		</table>
+	</div>
+	<div class="col-md-5" id="structureDiv">
+		<div>
+			<button id="structurebtn" type=button class="btn btn-default">Show structure</button>
+		</div>
+		<div id="HA_struct" class="io-container title" style="display: none">
+		</div>
+	</div>
 	</div>
 </div>
 
