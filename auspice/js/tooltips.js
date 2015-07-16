@@ -51,7 +51,7 @@ var virusTooltip = d3.tip()
 					var rawHI = focusNode.HI_titers_raw[d.clade][tmp_serum];
 					var logHI = focusNode.HI_titers[d.clade][tmp_serum];
 					if (correctVirus){logHI-=d.avidity;}
-					if (correctPotency){logHI-=focusNode.potency[tmp_serum];}
+					if (correctPotency){logHI-=focusNode.potency_mut[tmp_serum];}
 					var serum_name;
 					if (tmp_serum.length<20){
 						serum_name = tmp_serum+':';
@@ -73,6 +73,9 @@ var virusTooltip = d3.tip()
 		string += "<div class=\"smallspacer\"></div>";
 		// following may or may not be present
 		string += "<div class=\"smallnote\">";
+		if (typeof d.cHI != "undefined") {
+			string += "Antigenic adv: " + d.cHI.toFixed(1) + "<br>";
+		}
 		if (typeof d.ep != "undefined") {
 			string += "Epitope distance: " + d.ep + "<br>";
 		}

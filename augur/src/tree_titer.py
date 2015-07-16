@@ -420,8 +420,10 @@ class HI_tree(object):
 
 			# integrate the HI change dHI into a cumulative antigentic evolution score cHI
 			for node in self.tree.preorder_node_iter():
-				if node!=self.tree.seed_node:
+				if node.parent_node is not None:
 					node.cHI = node.parent_node.cHI + node.dHI
+				else:
+					node.cHI=0
 		else:
 			self.mutation_effects={}
 			for mi, mut in enumerate(self.relevant_muts):
@@ -536,12 +538,6 @@ class HI_tree(object):
 			 									self.node_lookup[ref].HI_titers.iteritems()}
 			self.node_lookup[ref].mean_potency_tree = np.mean(self.node_lookup[ref].potency_tree.values())
 			self.node_lookup[ref].mean_potency_mut = np.mean(self.node_lookup[ref].potency_mut.values())
-
-	def cHI_mutations(self):
-		for node in self.tree.postorder_node_iter():
-			muts = self.get_mutations_nodes(self.tree.seed_node, node)
-			node.cHI = np.sum([self.mutation_effects[mut] for mut in muts if mut in self.mutation_effects])
-
 
 	def check_sources(self):
 		self.source_HIs = defaultdict(dict)

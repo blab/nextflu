@@ -161,7 +161,7 @@ d3.json(path + file_prefix + "HI.json", function(error, json){
 		var chain = (gene=='HA1')?'a':'b'; 
 		structure_HI_mutations+= 'select '+pos+':'+chain+';spacefill 200; color ' +c+';';//' '+pos+':c, '+pos+':e,';
 	}
-	//structure_HI_mutations = structure_HI_mutations.substring(0, structure_HI_mutations.length-1);
+
 	console.log(structure_HI_mutations);
 	d3.select('#structurebtn')
 		.on("click", function(d) {
