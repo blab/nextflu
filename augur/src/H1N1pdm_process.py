@@ -154,7 +154,7 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine, HI
 		fitness_model.__init__(self,**kwargs)
 		self.verbose = verbose
 
-	def run(self, steps, viruses_per_month=50, raxml_time_limit = 1.0, reg=2.0):
+	def run(self, steps, viruses_per_month=50, raxml_time_limit = 1.0, lam_HI=.5, lam_avi=1, lam_pot=.1):
 		if 'filter' in steps:
 			print "--- Virus filtering at " + time.strftime("%H:%M:%S") + " ---"
 			self.filter()
@@ -196,7 +196,10 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine, HI
 			self.dump()
 		if 'HI' in steps:
 			print "--- Adding HI titers to the tree " + time.strftime("%H:%M:%S") + " ---"
-			self.map_HI(training_fraction=1.0, method = 'nnl1reg', lam_HI=reg, lam_avi=reg, lam_pot = reg*0.25, map_to_tree=False)
+			self.map_HI(training_fraction=1.0, method = 'nnl1reg', 
+					lam_HI=lam_HI, lam_avi=lam_avi, lam_pot=lam_pot, map_to_tree=True)
+			self.map_HI(training_fraction=1.0, method = 'nnl1reg', force_redo=True,
+					lam_HI=lam_HI, lam_avi=lam_avi, lam_pot=lam_pot, map_to_tree=False)
 			self.dump()
 		if 'export' in steps:
 			self.add_titers()
@@ -204,8 +207,8 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine, HI
 			# exporting to json, including the H1N1pdm specific fields
 			self.export_to_auspice(tree_fields = [
 				'ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country',
-				'dHI', 'cHI', 'mean_HI_titers','HI_titers','HI_titers_raw', 'serum', 'HI_info', 'avidity', 
-				 'potency', 'mean_potency'], 
+				'dHI', 'cHI', 'mean_HI_titers','HI_titers','HI_titers_raw', 'serum', 'HI_info',
+				'avidity_tree','avidity_mut', 'potency_mut', 'potency_tree', 'mean_potency_mut', 'mean_potency_tree'], 
                    annotations = ['5','6','6b', '6c','7'])
 			self.generate_indexHTML()
 
