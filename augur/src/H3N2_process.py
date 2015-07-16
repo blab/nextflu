@@ -289,6 +289,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 			self.dump()
 		if 'HI' in steps:
 			print "--- Adding HI titers to the tree " + time.strftime("%H:%M:%S") + " ---"
+			self.determine_variable_positions()
 			self.map_HI(training_fraction=1.0, method = 'nnl1reg', 
 					lam_HI=lam_HI, lam_avi=lam_avi, lam_pot=lam_pot, map_to_tree=True)
 			self.map_HI(training_fraction=1.0, method = 'nnl1reg', force_redo=True,

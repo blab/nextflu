@@ -224,6 +224,7 @@ class BYam_process(process, BYam_filter, BYam_clean, BYam_refine, HI_tree):
 			self.dump()
 		if 'HI' in steps:
 			print "--- Adding HI titers to the tree " + time.strftime("%H:%M:%S") + " ---"
+			self.determine_variable_positions()
 			self.map_HI(training_fraction=1.0, method = 'nnl1reg', 
 					lam_HI=lam_HI, lam_avi=lam_avi, lam_pot=lam_pot, map_to_tree=True)
 			self.map_HI(training_fraction=1.0, method = 'nnl1reg', force_redo=True,
@@ -252,8 +253,8 @@ class BYam_process(process, BYam_filter, BYam_clean, BYam_refine, HI_tree):
 			self.check_symmetry(plot=True)
 			plt.savefig(htmlpath+'HI_symmetry.png')
 
-			self.map_HI(training_fraction=0.9, method='nnl1reg', lam_HI=reg, lam_avi=reg, 
-			            lam_pot=reg, force_redo=True, map_to_tree=False)
+			self.map_HI(training_fraction=0.9, method='nnl1reg',lam_HI=lam_HI, lam_avi=lam_avi, 
+						lam_pot = lam_pot, force_redo=True, map_to_tree=False)
 			self.validate(plot=True)
 			plt.savefig(htmlpath+'HI_prediction.png')
 
