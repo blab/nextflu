@@ -118,10 +118,24 @@ class BVic_clean(virus_clean):
 		self.viruses = MultipleSeqAlignment(new_viruses)
 		return new_viruses
 
+	def clean_outlier_strains(self):
+		"""Remove single outlying viruses"""
+		remove_viruses = []
+		outlier_strains = ["B/Bangkok/SI17/2012"]
+		for outlier_strain in outlier_strains:
+			for v in self.viruses:
+				if (v.strain == outlier_strain):
+					remove_viruses.append(v)
+					if self.verbose > 1:
+						print "\tremoving", v.strain					
+		self.viruses = MultipleSeqAlignment([v for v in self.viruses if v not in remove_viruses])
+
 	def clean(self):
 		self.clean_generic()
 		self.clean_outbreaks()
 		print "Number of viruses after outbreak filtering:",len(self.viruses)
+		self.clean_outlier_strains()
+		print "Number of viruses after outlier filtering:",len(self.viruses)		
 
 class BVic_process(process, BVic_filter, BVic_clean, BVic_refine):
 	"""docstring for BVic_process, BVic_filter"""
@@ -184,7 +198,7 @@ class BVic_process(process, BVic_filter, BVic_clean, BVic_refine):
 			self.generate_indexHTML()
 
 if __name__=="__main__":
-	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies', 'export']
+	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies', 'export']
 	from process import parser
 	params = parser.parse_args()
 

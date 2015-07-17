@@ -149,7 +149,7 @@ class H3N2_clean(virus_clean):
 	def clean_outliers(self):
 		"""Remove single outlying viruses"""
 		remove_viruses = []
-		outlier_strains = ["A/Helsinki/942/2013", "A/India/6352/2012", "A/Pennsylvania/14/2010", "A/HuNan/01/2014", "A/OSAKA/31/2005", "A/Sari/388/2006", "A/Busan/15453/2009"]
+		outlier_strains = ["A/Helsinki/942/2013", "A/India/6352/2012", "A/Pennsylvania/14/2010", "A/HuNan/01/2014", "A/OSAKA/31/2005", "A/Sari/388/2006", "A/Busan/15453/2009", "A/SaoPaulo/36178/2015", "A/Chile/8266/2003", "A/Kenya/170/2011", "A/Kenya/168/2011"]
 		for outlier_strain in outlier_strains:
 			for v in self.viruses:
 				if (v.strain == outlier_strain):
@@ -289,7 +289,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 			self.generate_indexHTML()
 
 if __name__=="__main__":
-	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','genotype_frequencies', 'export']
+	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies', 'export']
 	from process import parser
 	params = parser.parse_args()
 
