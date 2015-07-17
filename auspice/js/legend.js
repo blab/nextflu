@@ -32,32 +32,66 @@ function makeLegend(){
 			}
 			return tmp_text+')';
 		}
-});
+	});
 
-  var tmp_leg = legend.selectAll(".legend")
-  .data(colorScale.domain())
-  .enter().append('g')
-  .attr('class', 'legend')
-  .attr('transform', function(d, i) {
-   var stack = 5;
-   var height = legendRectSize + legendSpacing;
-   var fromRight = Math.floor(i / stack);
-   var fromTop = i % stack;
-   var horz = fromRight * 145 + 5;				
-   var vert = fromTop * height + 5;
-   return 'translate(' + horz + ',' + vert + ')';
- });
-  tmp_leg.append('rect')
-  .attr('width', legendRectSize)
-  .attr('height', legendRectSize)
-  .style('fill', function (d) {
-   var col = colorScale(d);
-   return d3.rgb(col).brighter([0.35]).toString();
- })
-  .style('stroke', function (d) {
-   var col = colorScale(d);
-   return d3.rgb(col).toString();
- });
+	// construct a dictionary that maps a legend entry to the preceding interval
+	var lower_bound = {};
+	lower_bound[colorScale.domain()[0]] = colorScale.domain()[0];
+	for (var i=1; i<colorScale.domain().length; i++){
+		lower_bound[colorScale.domain()[i]]=colorScale.domain()[i-1];
+	}
+
+	// function that equates a tip and a legend element
+	// exact match is required for categorical qunantities such as genotypes, regions
+	// continuous variables need to fall into the interal (lower_bound[leg], leg]
+	var legend_match = function(leg, tip){
+		if ((colorBy=='lbi')||(colorBy=='date')||(colorBy=='dfreq')){
+			return (tip.coloring<=leg)&&(tip.coloring>lower_bound[leg]);
+		}else{
+			return tip.coloring==leg;
+		}
+	}
+
+	var tmp_leg = legend.selectAll(".legend")
+	.data(colorScale.domain())
+	.enter().append('g')
+	.attr('class', 'legend')
+	.attr('transform', function(d, i) {
+		var stack = 5;
+		var height = legendRectSize + legendSpacing;
+		var fromRight = Math.floor(i / stack);
+		var fromTop = i % stack;
+		var horz = fromRight * 145 + 5;				
+		var vert = fromTop * height + 5;
+		return 'translate(' + horz + ',' + vert + ')';
+	 });
+	tmp_leg.append('rect')
+	.attr('width', legendRectSize)
+	.attr('height', legendRectSize)
+	.style('fill', function (d) {
+	 	var col = colorScale(d);
+	 	return d3.rgb(col).brighter([0.35]).toString();
+	 })
+	.style('stroke', function (d) {
+   		var col = colorScale(d);
+   		return d3.rgb(col).toString();
+ 	})
+   .on('mouseover', function(leg){
+    	treeplot.selectAll(".tip") //highlight all tips corresponding to legend
+            .filter(function (d){return legend_match(leg, d);})
+            .attr("r", function(d){return tipRadius*1.7;})
+            .style("fill", function (t) {
+              return d3.rgb(tipFillColor(t)).brighter();
+            });
+		}) 
+  	.on('mouseout', function(leg){
+    	treeplot.selectAll(".tip") //undo highlight
+            .filter(function (d){return legend_match(leg, d);})
+            .attr("r", function(d){return tipRadius;})
+            .style("fill", function (t) {
+              return d3.rgb(tipFillColor(t));
+            });
+	    });
 
   tmp_leg.append('text')
   .attr('x', legendRectSize + legendSpacing + 5)
