@@ -275,4 +275,8 @@ if __name__=="__main__":
 		myBYam.load()
 	else:
 		myBYam.run(steps,viruses_per_month = virus_config['viruses_per_month'], 
-			raxml_time_limit = virus_config['raxml_time_limit'])
+			raxml_time_limit = virus_config['raxml_time_limit'],
+				   lam_HI = virus_config['lam_HI'],
+				   lam_avi = virus_config['lam_avi'],
+				   lam_pot = virus_config['lam_pot'],
+				   )

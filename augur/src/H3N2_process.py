@@ -346,7 +346,11 @@ if __name__=="__main__":
 		myH3N2.load()
 	else:
 		myH3N2.run(steps, viruses_per_month = virus_config['viruses_per_month'], 
-			raxml_time_limit = virus_config['raxml_time_limit'])
+				   raxml_time_limit = virus_config['raxml_time_limit'],
+				   lam_HI = virus_config['lam_HI'],
+				   lam_avi = virus_config['lam_avi'],
+				   lam_pot = virus_config['lam_pot'],
+				   )
 
 	from random import sample
 	leaf_sample = sample([leaf for leaf in myH3N2.tree.leaf_iter() 
