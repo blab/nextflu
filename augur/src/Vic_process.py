@@ -46,6 +46,7 @@ virus_config.update({
 				  'gtplaceholder': 'HA1 positions...',
 				  'freqdefault': '1A, 1B'},
 	'js_vars': {'LBItau': 0.0005, 'LBItime_window': 0.5, 'dfreq_dn':2},
+	'layout':'auspice_HI',
 	})
 
 
@@ -205,20 +206,7 @@ class BVic_process(process, BVic_filter, BVic_clean, BVic_refine, HI_tree):
 
 		if 'HIvalidate' in steps:
 			print "--- generating validation figures " + time.strftime("%H:%M:%S") + " ---"
-			import matplotlib.pyplot as plt
-			htmlpath = '../auspice/'
-			if self.virus_type is not None: 
-				htmlpath+=self.virus_type+'/'
-			if self.resolution is not None: 
-				htmlpath+=self.resolution+'/'
-
-			self.check_symmetry(plot=True)
-			plt.savefig(htmlpath+'HI_symmetry.png')
-
-			self.map_HI(training_fraction=0.9, method='nnl1reg',lam_HI=lam_HI, lam_avi=lam_avi, 
-						lam_pot = lam_pot, force_redo=True, map_to_tree=False)
-			self.validate(plot=True)
-			plt.savefig(htmlpath+'HI_prediction.png')
+			self.generate_validation_figures()
 
 
 if __name__=="__main__":

@@ -313,26 +313,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 
 		if 'HIvalidate' in steps:
 			print "--- generating validation figures " + time.strftime("%H:%M:%S") + " ---"
-			import matplotlib.pyplot as plt
-			htmlpath = '../auspice/'
-			if self.virus_type is not None: 
-				htmlpath+=self.virus_type+'/'
-			if self.resolution is not None: 
-				htmlpath+=self.resolution+'/'
-
-			self.check_symmetry(plot=True)
-			plt.savefig(htmlpath+'HI_symmetry.png')
-
-			self.map_HI(training_fraction=0.9, method='nnl1reg',lam_HI=lam_HI, lam_avi=lam_avi, 
-						lam_pot = lam_pot, force_redo=True, map_to_tree=False, subset_strains=True)
-			self.validate(plot=True)
-			plt.savefig(htmlpath+'HI_prediction_virus.png')
-
-			self.map_HI(training_fraction=0.9, method='nnl1reg',lam_HI=lam_HI, lam_avi=lam_avi, 
-						lam_pot = lam_pot, force_redo=True, map_to_tree=False)
-			self.validate(plot=True)
-			plt.savefig(htmlpath+'HI_prediction.png')
-
+			self.generate_validation_figures()
 
 
 if __name__=="__main__":

@@ -443,6 +443,26 @@ class HI_tree(object):
 					{strain:self.params[self.genetic_params+len(self.sera)+ii]
 				  for ii, strain in enumerate(self.HI_strains)}
 
+	def generate_validation_figures(self):
+		import matplotlib.pyplot as plt
+		htmlpath = '../auspice/'
+		if self.virus_type is not None: 
+			htmlpath+=self.virus_type+'/'
+		if self.resolution is not None: 
+			htmlpath+=self.resolution+'/'
+
+		self.check_symmetry(plot=True)
+		plt.savefig(htmlpath+'HI_symmetry.png')
+
+		self.map_HI(training_fraction=0.9, method='nnl1reg',lam_HI=lam_HI, lam_avi=lam_avi, 
+					lam_pot = lam_pot, force_redo=True, map_to_tree=False, subset_strains=True)
+		self.validate(plot=True)
+		plt.savefig(htmlpath+'HI_prediction_virus.png')
+
+		self.map_HI(training_fraction=0.9, method='nnl1reg',lam_HI=lam_HI, lam_avi=lam_avi, 
+					lam_pot = lam_pot, force_redo=True, map_to_tree=False)
+		self.validate(plot=True)
+		plt.savefig(htmlpath+'HI_prediction.png')
 
 	def validate(self, plot=False, cutoff=0.0, validation_set = None, incl_ref_strains='yes'):
 		if validation_set is None:
