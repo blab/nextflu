@@ -1,3 +1,5 @@
+import matplotlib as mpl
+mpl.use('pdf')
 import time, re, os
 from virus_filter import flu_filter, fix_name
 from virus_clean import virus_clean

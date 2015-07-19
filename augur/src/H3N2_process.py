@@ -1,3 +1,5 @@
+import matplotlib as mpl
+#mpl.use('pdf')
 import time, argparse,re,os
 from virus_filter import flu_filter, fix_name
 from virus_clean import virus_clean
@@ -43,6 +45,8 @@ virus_config.update({
 				   'gtplaceholder': 'HA1 positions...',
 					'freqdefault': '3c2.a, 3c3.a'},
 	'js_vars': {'LBItau': 0.0005, 'LBItime_window': 0.5, 'dfreq_dn':2},
+	'excluded_tables': ['NIMR_Sep2012_08.csv'], #, 'nimr-sep-2010-table8', 'nimr-sep-2010-table8','NIMR_Sep2012_11.csv'],
+	'layout':'auspice_HI'
 	})
 
 
@@ -304,7 +308,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 				'ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country',
 				'dHI', 'cHI', 'mean_HI_titers','HI_titers','HI_titers_raw', 'serum', 'HI_info',
 				'avidity_tree','avidity_mut', 'potency_mut', 'potency_tree', 'mean_potency_mut', 'mean_potency_tree'], 
-	               annotations = ['3c2.a', '3c3.a'])
+				   annotations = ['3c2.a', '3c3.a'])
 			self.generate_indexHTML()
 
 		if 'HIvalidate' in steps:
@@ -320,26 +324,23 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 			plt.savefig(htmlpath+'HI_symmetry.png')
 
 			self.map_HI(training_fraction=0.9, method='nnl1reg',lam_HI=lam_HI, lam_avi=lam_avi, 
+						lam_pot = lam_pot, force_redo=True, map_to_tree=False, subset_strains=True)
+			self.validate(plot=True)
+			plt.savefig(htmlpath+'HI_prediction_virus.png')
+
+			self.map_HI(training_fraction=0.9, method='nnl1reg',lam_HI=lam_HI, lam_avi=lam_avi, 
 						lam_pot = lam_pot, force_redo=True, map_to_tree=False)
 			self.validate(plot=True)
 			plt.savefig(htmlpath+'HI_prediction.png')
 
-			unexplained_variance = []
-			cvals = np.linspace(0,2,40)
-			for cutoff in cvals:
-				self.validate(plot=False, cutoff=cutoff)
-				unexplained_variance.append([cutoff,self.rms_error**2, np.var(self.validation.values())])
-				print "effect cutoff:", cutoff, unexplained_variance[-1]
-			unexplained_variance=np.array(unexplained_variance)
-			plt.figure()
-			plt.plot(unexplained_variance[:,0], unexplained_variance[:,1]/unexplained_variance[:,2])
-			plt.savefig(htmlpath+'HI_cutoff.png')
+
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 
 				 'frequencies','HI', 'export']
 	from process import parser
 	import matplotlib.pyplot as plt
+	plt.ion()
 	params = parser.parse_args()
 
 	lt = time.localtime()
@@ -397,11 +398,43 @@ if __name__=="__main__":
 		trunk_mut_effects.append(tmp_mut_effects)
 
 	plt.figure()
-	for eff in trunk_effects:
+	for eff in trunk_effects[:1]:
 		print "sum of effects on trunk", np.sum(eff)
-		plt.plot(sorted(eff), np.linspace(1,0,len(eff)))
+		tmp_eff = np.array(eff)
+		plt.hist(tmp_eff[tmp_eff>1e-4],  bins=np.linspace(0,2,21), 
+		         label='tree: '+str(np.round(np.mean(tmp_eff>1e-4), 2)), alpha=0.5)
+#		plt.plot(sorted(eff), np.linspace(1,0,len(eff)))
+
+#	plt.figure()
+	for eff in trunk_mut_effects[:1]:
+		print "sum of mutation effects on trunk:", np.sum(eff.values())
+		tmp_eff = np.array(eff.values())
+		plt.hist(tmp_eff[tmp_eff>1e-4],  bins=np.linspace(0,2,21), 
+		         label='mutations: '+str(np.round(np.mean(tmp_eff>1e-4), 2)), alpha=0.5)
+#		plt.plot(sorted(eff.values()), np.linspace(1,0,len(eff)))
+	plt.legend()
+	plt.savefig("trunk_effectsize_histogram.png")
+
+	unexplained_variance = []
+	cvals = np.linspace(0,2,40)
+	for cutoff in cvals:
+		myH3N2.validate(plot=False, cutoff=cutoff)
+		unexplained_variance.append([cutoff,myH3N2.rms_error**2, np.var(myH3N2.validation.values())])
+		print "effect cutoff:", cutoff, unexplained_variance[-1]
+	unexplained_variance=np.array(unexplained_variance)
+	plt.figure()
+	plt.plot(unexplained_variance[:,0], unexplained_variance[:,1]/unexplained_variance[:,2])
 
 	plt.figure()
-	for eff in trunk_mut_effects:
-		print "sum of mutation effects on trunk:", np.sum(eff.values())
-		plt.plot(sorted(eff.values()), np.linspace(1,0,len(eff)))
+	slopes = []
+	tmp_pivots = myH3N2.tree.seed_node.pivots
+	for node in myH3N2.tree.postorder_internal_node_iter():
+		tmp_freq = node.freq['global']
+		if tmp_freq is not None and tmp_freq[0]<0.2 and np.max(tmp_freq)>0.4:
+			ii = np.argmax(tmp_freq>0.3)
+			slope = (tmp_freq[ii]-tmp_freq[ii-1])/(tmp_pivots[ii]-tmp_pivots[ii-1])
+			offset = tmp_pivots[ii-1] + (0.3-tmp_freq[ii-1])/slope
+			slopes.append([node.dHI, slope])
+			plt.plot(tmp_pivots-offset, tmp_freq, c=mpl.cm.jet(node.dHI/1.0))
+
+	slopes = np.array(slopes)

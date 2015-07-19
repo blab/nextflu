@@ -23,6 +23,10 @@ class HI_tree(object):
 
 	def __init__(self, HI_fname = 'source-data/HI_titers.txt', min_aamuts = 0,**kwargs):
 		self.HI_fname = HI_fname
+		if "excluded_tables" in kwargs:
+			self.excluded_tables = kwargs["excluded_tables"]
+		else:
+			self.excluded_tables = []
 		self.HI, tmp, sources = self.read_HI_titers(HI_fname)
 		self.sources = list(sources)
 		self.tree_graph = None
@@ -40,16 +44,17 @@ class HI_tree(object):
 				test, ref_virus, serum, src_id, val = (entries[0], entries[1],entries[2], 
 														entries[3], float(entries[4]))
 				ref = (ref_virus, serum)
-				try:
-					measurements[(test, (ref_virus, serum))].append(val)
-					strains.update([test, ref])
-					sources.add(src_id)
-				except:
-					print line.strip()
+				if src_id not in self.excluded_tables:
+					try:
+						measurements[(test, (ref_virus, serum))].append(val)
+						strains.update([test, ref])
+						sources.add(src_id)
+					except:
+						print line.strip()
 		return measurements, strains, sources
 
 	def normalize(self, ref, val):
-		consensus_func = np.median
+		consensus_func = np.mean
 		return consensus_func(np.log2(self.HI[(ref[0], ref)])) - consensus_func(np.log2(val))
 
 
@@ -358,7 +363,9 @@ class HI_tree(object):
 		if self.training_fraction<1.0:
 			self.test_HI, self.train_HI = {}, {}
 			if self.subset_strains:
-				training_strains = sample(self.HI_strains, int(self.training_fraction*len(self.HI_strains)))
+				tmp = set(self.HI_strains)
+				tmp.difference_update(self.ref_strains)
+				training_strains = sample(tmp, int(self.training_fraction*len(tmp)))
 				for tmpstrain in self.ref_strains:
 					if tmpstrain not in training_strains:
 						training_strains.append(tmpstrain)

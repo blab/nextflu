@@ -50,7 +50,7 @@ var virusTooltip = d3.tip()
 					var homHI = focusNode.HI_titers_raw[focusNode.clade][tmp_serum];
 					var rawHI = focusNode.HI_titers_raw[d.clade][tmp_serum];
 					var logHI = focusNode.HI_titers[d.clade][tmp_serum];
-					if (correctVirus){logHI-=d.avidity;}
+					if (correctVirus){logHI-=d.avidity_mut;}
 					if (correctPotency){logHI-=focusNode.potency_mut[tmp_serum];}
 					var serum_name;
 					if (tmp_serum.length<20){

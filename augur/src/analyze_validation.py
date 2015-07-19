@@ -10,7 +10,7 @@ for flu in ['H3N2', 'H1N1pdm', 'Vic', 'Yam']:
     for minaa in [0]: #,1,'epi']:
         for hi, lam_HI in enumerate(grid):
             for training in ['measurements', 'virus']:
-                fname = 'validation/'+'_'.join([flu, training, 'minaa', str(minaa),'lHI',str(lam_HI)])+'_seq.pkl'
+                fname = 'validation/'+'_'.join([flu, training, 'minaa', str(minaa),'lHI',str(lam_HI)])+'_tree.pkl'
                 try:
                     with open(fname) as infile:
                         params,tmp_grid, acc = cPickle.load(infile)
