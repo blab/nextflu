@@ -276,23 +276,24 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		}
 		var dy = yScale.domain()[1]-yScale.domain()[0];
 		displayRoot = d.target;
-		nDisplayTips = displayRoot.fullTipCount;
 		var dMin = 0.5 * (minimumAttribute(d.target, "xvalue", d.target.xvalue) + minimumAttribute(d.source, "xvalue", d.source.xvalue)),
 			dMax = maximumAttribute(d.target, "xvalue", d.target.xvalue),
 			lMin = minimumAttribute(d.target, "yvalue", d.target.yvalue),
 			lMax = maximumAttribute(d.target, "yvalue", d.target.yvalue);
 		if (dMax == dMin || lMax == lMin) {
 			displayRoot = d.source;
-			nDisplayTips = displayRoot.fullTipCount;
 			dMin = minimumAttribute(d.source, "xvalue", d.source.xvalue),
 			dMax = maximumAttribute(d.source, "xvalue", d.source.xvalue),
 			lMin = minimumAttribute(d.source, "yvalue", d.source.yvalue),
 			lMax = maximumAttribute(d.source, "yvalue", d.source.yvalue);			
-			rescale(dMin, dMax, lMin, lMax);
 		}
 		if ((lMax-lMin)>0.8*dy){
 			lMin = lMax - dy*0.7 
 		}
+		var visibleXvals = tips.filter(function (d){return (d.yvalue>=lMin)&&(d.yvalue<lMax)}).map(function(d){return +d.xvalue;});
+		nDisplayTips = visibleXvals.length;
+		dMax = Math.max.apply(Math, visibleXvals);
+		console.log("nodes in view: "+nDisplayTips+' max Xval: '+dMax);
 		rescale(dMin, dMax, lMin, lMax);
 	}
 
