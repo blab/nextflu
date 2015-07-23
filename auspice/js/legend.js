@@ -41,18 +41,21 @@ function makeLegend(){
 	});
 
 	// construct a dictionary that maps a legend entry to the preceding interval
-	var lower_bound = {};
-	lower_bound[colorScale.domain()[0]] = colorScale.domain()[0];
+	var lower_bound = {}, upper_bound = {};
+	lower_bound[colorScale.domain()[0]] = -100000000;
+    lower_bound[colorScale.domain()[0]] = colorScale.domain()[0];
 	for (var i=1; i<colorScale.domain().length; i++){
 		lower_bound[colorScale.domain()[i]]=colorScale.domain()[i-1];
+        upper_bound[colorScale.domain()[i]]=colorScale.domain()[i];
 	}
+    upper_bound[colorScale.domain()[colorScale.domain().length-1]]=10000000;
 
 	// function that equates a tip and a legend element
 	// exact match is required for categorical qunantities such as genotypes, regions
 	// continuous variables need to fall into the interal (lower_bound[leg], leg]
 	var legend_match = function(leg, tip){
-		if ((colorBy=='lbi')||(colorBy=='date')||(colorBy=='dfreq')){
-			return (tip.coloring<=leg)&&(tip.coloring>lower_bound[leg]);
+		if ((colorBy=='lbi')||(colorBy=='date')||(colorBy=='dfreq')||(colorBy=='HI_dist')||(colorBy=='cHI')){
+			return (tip.coloring<=upper_bound[leg])&&(tip.coloring>lower_bound[leg]);
 		}else{
 			return tip.coloring==leg;
 		}

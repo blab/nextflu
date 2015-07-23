@@ -120,7 +120,7 @@ function tipLabelText(d) {
 function branchLabelSize(d) {
 	var n = nDisplayTips;
 	if (d.fullTipCount>n/15) {
-		return "12px";
+		return "8px";
 	}
 	else {
 		return "0px";
