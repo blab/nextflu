@@ -175,44 +175,11 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		return +d.yvalue;
 	});
 
-	if ((typeof tip_labels != "undefined")&&(tip_labels)){
-		var maxTextWidth = 0;
-		var labels = treeplot.selectAll(".tipLabel")
-			.data(tips)
-			.enter()
-			.append("text")
-			.attr("class","tipLabel")
-			.style("font-size", function(d) { return tipLabelSize(d)+"px"; })		
-			.text(tipLabelText)
-			.each(function(d) {
-				var textWidth = tipLabelWidth(d);
-				if (textWidth>maxTextWidth) {
-					maxTextWidth = textWidth;
-				}
-			});
-		right_margin = maxTextWidth + 10;
-	}
-
-	var xScale = d3.scale.linear()
-		.domain([d3.min(xValues), d3.max(xValues)])
-		.range([left_margin, treeWidth - right_margin]);
-
-	var yScale = d3.scale.linear()
-		.domain([d3.min(yValues), d3.max(yValues)])
-		.range([top_margin, treeHeight - bottom_margin]);
-	console.log(treeHeight +" " + top_margin);
-
-	nodes.forEach(function (d) {
-		d.x = xScale(d.xvalue);
-		d.y = yScale(d.yvalue);
-	});
-
 	var clade_freq_event;
 	var link = treeplot.selectAll(".link")
 		.data(links)
 		.enter().append("polyline")
 		.attr("class", "link")
-		.attr("points", branchPoints)
 		.style("stroke-width", branchStrokeWidth)
 		.style("stroke", branchStrokeColor)		
 		.style("cursor", "pointer")
@@ -234,21 +201,17 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.append("text")
 			.attr("class", "branchLabel")
 			.style("font-size", branchLabelSize)			
-			.attr("x", function(d) {
-				return d.x - 6;
-			})
-			.attr("y", function(d) {
-				return d.y - 3;
-			})
 			.style("text-anchor", "end")
 			.text(branchLabelText);
 		}
 
 	if ((typeof tip_labels != "undefined")&&(tip_labels)){
 		treeplot.selectAll(".tipLabel").data(tips)
-			.style("font-size", function(d) { return tipLabelSize(d)+"px"; })			
-			.attr("x", function(d) { return d.x+10; })
-			.attr("y", function(d) { return d.y+4; });			
+			.enter()
+			.append("text")
+			.attr("class","tipLabel")
+			.style("font-size", function(d) {console.log(tipLabelText(d)); return tipLabelSize(d)+"px"; })
+			.text(tipLabelText);
 	}
 
 	var tipCircles = treeplot.selectAll(".tip")
@@ -257,8 +220,6 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.append("circle")
 		.attr("class", "tip")
 		.attr("id", function(d) { return (d.strain).replace(/\//g, ""); })
-		.attr("cx", function(d) { return d.x; })
-		.attr("cy", function(d) { return d.y; })
 		.attr("r", tipRadius)
 		.style("visibility", tipVisibility)
 		.style("fill", tipFillColor)
@@ -281,8 +242,6 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.enter()
 		.append("text")
 		.attr("class", "vaccine")
-		.attr("x", function(d) {return d.x})
-		.attr("y", function(d) {return d.y})
 		.attr('text-anchor', 'middle')
 		.attr('dominant-baseline', 'central')
 		.style("font-size", "28px")
@@ -422,7 +381,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 				})
 				.attr("y", function(d) {
 					return yScale(d[2]) - 6;
-				});			
+				});
 		}
 	}
 
@@ -483,18 +442,18 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.enter()
 			.append("text")
 			.attr("class", "annotation")
-			.attr("x", function(d) {
-				return xScale(d[1]) - 6;
-			})
-			.attr("y", function(d) {
-				return yScale(d[2]) - 6;
-			})
 			.style("text-anchor", "end")
 			.text(function (d) {
 				return d[0];
 			});
 		}
+	var xScale = d3.scale.linear()
+		.domain([d3.min(xValues), d3.max(xValues)]);
+	var yScale = d3.scale.linear()
+		.domain([d3.min(yValues), d3.max(yValues)]);
+	setMargins();
 
+	resize();
 });
 
 d3.json(path + file_prefix + "sequences.json", function(error, json) {
