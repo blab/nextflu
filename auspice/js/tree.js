@@ -180,13 +180,7 @@ function addBranchLabels(){
 		.enter()
 		.append("text")
 		.attr("class", "branchLabel")
-		.style("font-size", branchLabelSize)			
-		.attr("x", function(d) {
-			return d.x - 6;
-		})
-		.attr("y", function(d) {
-			return d.y - 6;
-		})
+		.style("font-size", branchLabelSize)
 		.style("text-anchor", "end")
 		.text(branchLabelText);
 }
@@ -401,7 +395,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.attr("y", function(d) { return d.y; });
 
 		treeplot.selectAll(".serum").data(sera)
-			.transition().duration(speed)
+			.transition().duration(dt)
 			.attr("x", function(d) {return d.x})
 			.attr("y", function(d) {return d.y})
 
@@ -522,6 +516,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.append("text")
 			.attr("class", "annotation")
 			.style("text-anchor", "end")
+			.style("visibility",(branch_labels)?"hidden":"visible")
 			.text(function (d) {
 				return d[0];
 			});
