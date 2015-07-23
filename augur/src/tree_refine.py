@@ -56,8 +56,13 @@ class tree_refine(object):
 			print "outgroup",self.outgroup['strain'], "not found"
 		while len(self.tree.seed_node.child_nodes())==1:
 			print "ROOT had one child only, moving root up!"
+			if hasattr(self.tree.seed_node, pivots):
+				tmp_pivots = self.tree.seed_node.pivots
+			else:
+				tmp_pivots=None
 			self.tree.seed_node = self.tree.seed_node.child_nodes()[0]
 			self.tree.seed_node.parent_node = None
+			self.tree.seed_node.pivots = tmp_pivots
 		self.tree.seed_node.edge_length = 0.001
 
 	def collapse(self):

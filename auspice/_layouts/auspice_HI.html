@@ -19,7 +19,7 @@ layout: default
 					<label class="control-label">Virus</label>
 					<select id="virus_select" class="form-control" onChange="document.location = this.value" value="GO">
 						{% for entry in site.data.viruses %}
-						<option value="/{{entry.virus}}/{{page.resolution}}/" 
+						<option value="/{{entry.virus}}/" 
 							{% if page.virus == entry.virus %} selected="selected" {% endif %}
 							>{{ entry.name }}</option>
 						{% endfor %}
@@ -305,24 +305,26 @@ layout: default
 		</div>	
 		<div class="spacer"></div>	
 	</div>
+	<div class="col-md-9">
 	<div class="col-md-4">
 	 <figure>
-		<img src="/{{ page.virus }}/{{ page.resolution }}/HI_prediction.png" width="500" align="middle">
+		<img src="/{{ page.virus }}/{{ page.resolution }}/HI_prediction_tree.png" width="500" align="middle">
   		<figcaption>Predicted log2 HI titer distance vs measured HI titer distance. The model was trained on 90% of the data and the remaining 10% are shown here. The average absolution deviation and the RMS deviation are given in the figure title. </figcaption>
 	 </figure>
 	 </div>
 	<div class="col-md-4">
 	 <figure>
-		<img src="/{{ page.virus }}/{{ page.resolution }}/HI_prediction_virus.png" width="500" align="middle">
+		<img src="/{{ page.virus }}/{{ page.resolution }}/HI_prediction_virus_tree.png" width="500" align="middle">
   		<figcaption>Predicted log2 HI titer distance vs measured HI titer distance. Here, the titers are predicted relative to all available sera and no measurements involving these viruses were used for training. The prediction errors are larger in this case, since no virus avidities could be trained. </figcaption>
 	 </figure> 
 	 </div>
-	 <div class="bigspacer"></div>	
+	 <div class="bigspacer"></div>
 	<div class="col-md-4">
 	 <figure>
 		<img src="/{{ page.virus }}/{{ page.resolution }}/HI_symmetry.png" width="700" align="middle">
   		<figcaption>Within our model, titer distance is <it>serum effect + distance + virus effect</it>. Subtracting the respective serum and virus effect from reciprocal HI titer measurements should result in the same <it>distance</it>. The figure shows the difference between reciprocal titers before and after subtraction of the serum and virus effect. The standard deviation of the corrected difference is much smaller than the prior to correction, consistent with an approximately symmetric distance.</figcaption>
 	 </figure> 
+	</div>
 	</div>
 </div>
 
@@ -331,7 +333,7 @@ layout: default
 	<div class="col-md-3"></div>
 	<div class="col-md-9">
 		<hr>
-		Built with love by <a href="http://bedford.io">Trevor Bedford</a> and 
+		Built by <a href="http://bedford.io">Trevor Bedford</a> and 
 		<a href="https://neherlab.wordpress.com/">Richard Neher</a>. This work is made possible by the 
 		<a href="http://gisaid.org" target="_blank">GISAID Initiative</a> and the open sharing of genetic data by 
 		influenza research groups from all over the world. <a href="/acknowledgements/">We gratefully acknowledge their 

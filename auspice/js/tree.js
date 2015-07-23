@@ -598,6 +598,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.enter()
 			.append("text")
 			.attr("class", "annotation")
+			.style("visibility",(branch_labels)?"hidden":"visible")
 			.attr("x", function(d) {
 				return xScale(d[1]) - 6;
 			})

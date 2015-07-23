@@ -214,7 +214,7 @@ if __name__=="__main__":
 					n_viruses = 10
 					n_years = 12
 				prefix = lineage + '_'
-				call = map(str, [params.bin, process, '-v', n_viruses, '-y', n_years, 
+				call = map(str, [params.bin, process, '-v', n_viruses, '-y', n_years, '--start','HI',
 				           		 '--prefix', prefix, '--resolution', resolution] + common_args)
 				print call
 				if not params.annotate:

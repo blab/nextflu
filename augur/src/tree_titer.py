@@ -451,18 +451,37 @@ class HI_tree(object):
 		if self.resolution is not None: 
 			htmlpath+=self.resolution+'/'
 
-		self.check_symmetry(plot=True)
-		plt.savefig(htmlpath+'HI_symmetry.png')
+		lam_pot = self.lam_pot
+		lam_avi = self.lam_avi
+		lam_HI =  self.lam_HI
+		# summary figures using previously determined models
+		for map_to_tree, model in [(True, 'tree'), (False,'mutation')]:
+			self.check_symmetry(plot=True,model_type=model)
+			plt.savefig(htmlpath+'HI_symmetry_'+model+'.png')
 
-		self.map_HI(training_fraction=0.9, method='nnl1reg',lam_HI=lam_HI, lam_avi=lam_avi, 
-					lam_pot = lam_pot, force_redo=True, map_to_tree=False, subset_strains=True)
-		self.validate(plot=True)
-		plt.savefig(htmlpath+'HI_prediction_virus.png')
+			plt.figure()
+			plt.subplot(121)
+			plt.hist(self.virus_effect[model].values(), bins=np.linspace(-2,2,21), normed=True)
+			plt.xlabel('avidity')
+			plt.subplot(122)
+			plt.hist(self.serum_potency[model].values(), bins=10, normed=True)
+			plt.xlabel('potency')
+			plt.savefig(htmlpath+'HI_effects_'+model+'.png')
 
-		self.map_HI(training_fraction=0.9, method='nnl1reg',lam_HI=lam_HI, lam_avi=lam_avi, 
-					lam_pot = lam_pot, force_redo=True, map_to_tree=False)
-		self.validate(plot=True)
-		plt.savefig(htmlpath+'HI_prediction.png')
+
+		for map_to_tree, model in [(True, 'tree'), (False,'mutation')]:
+			self.map_HI(training_fraction=0.9, method='nnl1reg',lam_HI=lam_HI, lam_avi=lam_avi, 
+						lam_pot = lam_pot, force_redo=True, map_to_tree=map_to_tree, subset_strains=True)
+
+			self.validate(plot=True)
+			plt.savefig(htmlpath+'HI_prediction_virus_'+model+'.png')
+
+			self.map_HI(training_fraction=0.9, method='nnl1reg',lam_HI=lam_HI, lam_avi=lam_avi, 
+						lam_pot = lam_pot, force_redo=True, map_to_tree=map_to_tree)
+			self.validate(plot=True)
+			plt.savefig(htmlpath+'HI_prediction_'+model+'.png')
+
+
 
 	def validate(self, plot=False, cutoff=0.0, validation_set = None, incl_ref_strains='yes'):
 		if validation_set is None:
@@ -502,9 +521,13 @@ class HI_tree(object):
 			plt.ylabel("predicted log2 distance", fontsize = fs)
 			plt.xlabel("measured log2 distance" , fontsize = fs)
 			ax.tick_params(axis='both', labelsize=fs)
-			plt.title('regularization HI/pot/avi ='+str(self.lam_HI)+'/'+str(self.lam_pot)+'/'+str(self.lam_avi)+'\n prediction error: avg abs/rms '\
+			plt.ylim([-3,7])
+			plt.xlim([-3,7])
+			plt.text(-2.5,6, ('tree model' if self.map_to_tree else 'mutation model')
+			         +'\nregularization:'+str(self.lam_HI)+'/'+str(self.lam_pot)+'/'+str(self.lam_avi)+'(HI/pot/avi)'
+			         +'\nprediction error: '\
 						+str(round(self.abs_error, 3))\
-					+'/'+str(round(self.rms_error,3)), fontsize = fs)
+					+'/'+str(round(self.rms_error,3))+'(abs/rms)', fontsize = fs)
 
 		return a.shape[0]
 
@@ -540,7 +563,7 @@ class HI_tree(object):
 			plt.legend()
 
 
-	def add_titers(self, model_type='tree'):
+	def add_titers(self):
 		for ref in self.ref_strains:
 			self.node_lookup[ref].HI_titers= defaultdict(dict)
 			self.node_lookup[ref].HI_titers_raw= defaultdict(dict)
