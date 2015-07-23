@@ -496,11 +496,21 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	}
 
 
+	var searchEvent;
 	function onSelect(tip) {
-		d3.select("#"+(tip.strain).replace(/\//g, ""))
+		var strainName = (tip.strain).replace(/\//g, "");
+		d3.select("#"+strainName)
 			.call(function(d) {
 				virusTooltip.show(tip, d[0][0]);
-			});
+			})
+            .attr("r", function(d){return tipRadius*1.7;})
+            .style("fill", function (d) {
+              searchEvent = setTimeout(function (){
+              	d3.select("#"+strainName)
+              	 .attr("r", function(d){return tipRadius;})
+              	 .style("fill", tipFillColor);}, 5000, d);
+              return d3.rgb(tipFillColor(d)).brighter();
+            });
 	}
 
 	var mc = autocomplete(document.getElementById('search'))
