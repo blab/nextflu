@@ -253,17 +253,21 @@ class flu_filter(virus_filter):
 			if "country" not in v:
 				v['country'] = 'Unknown'
 				try:
-					label = re.match(r'^[AB]/([^/]+)/', v['strain']).group(1).lower()	# check first for whole geo match
+					label = re.match(r'^[AB]/([^/]+)/', v['strain']).group(1).lower()						# check first for whole geo match
 					if label in label_to_country:
 						v['country'] = label_to_country[label]
 					else:
-						label = re.match(r'^[AB]/([^\-^\/]+)[\-\/]', v['strain']).group(1).lower()		# check for partial geo match
-						if label in label_to_country:
-							v['country'] = label_to_country[label]
+						label = re.match(r'^[AB]/([^\-^\/]+)[\-\/]', v['strain']).group(1).lower()			# check for partial geo match
+					if label in label_to_country:
+						v['country'] = label_to_country[label]
+					else:
+						label = re.match(r'^[AB]/([A-Z][a-z]+)[A-Z]', v['strain']).group(1).lower()			# check for partial geo match
+					if label in label_to_country:
+						v['country'] = label_to_country[label]							
 					if v['country'] == 'Unknown':
 						print "couldn't parse location for", v['strain']
 				except:
-					print "couldn't parse", v['strain']
+					print "couldn't parse location for", v['strain']
 
 		reader = csv.DictReader(open("source-data/geo_regions.tsv"), delimiter='\t')		# list of dicts
 		country_to_region = {}
