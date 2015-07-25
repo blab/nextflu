@@ -2,6 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import cPickle
+plt.ion()
 
 val_data = []
 res='12y'

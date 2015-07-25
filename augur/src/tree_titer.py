@@ -8,6 +8,9 @@ from itertools import izip
 from virus_filter import fix_name
 import pandas as pd
 
+fs = 18
+plt.locator_params(nbins=4)
+
 def myopen(fname, mode='r'):
 	if fname[-2:]=='gz':
 		return gzip.open(fname, mode)
@@ -188,8 +191,8 @@ class HI_tree(object):
 				mutation_counter[mut]+=1
 
 		relevant_muts = []
-		min_count=10
-		min_freq = 3.0*min_count/len(self.viruses)
+		min_count= 10
+		min_freq = 1.0*min_count/len(self.viruses)
 		for mut, count in mutation_counter.iteritems():
 			gene = mut[0]
 			pos = int(mut[1][1:-1])-1
@@ -460,12 +463,21 @@ class HI_tree(object):
 			plt.savefig(htmlpath+'HI_symmetry_'+model+'.png')
 
 			plt.figure()
-			plt.subplot(121)
+			ax = plt.subplot(121)
 			plt.hist(self.virus_effect[model].values(), bins=np.linspace(-2,2,21), normed=True)
-			plt.xlabel('avidity')
-			plt.subplot(122)
+			plt.xlabel('avidity', fontsize=fs)
+			plt.text(0.05, 0.93,  ('tree model' if model=='tree' else 'mutation model'), 
+			         weight='bold', fontsize=fs, transform=plt.gca().transAxes)
+			ax.set_xticks([-2,-1,0,1,2])
+			ax.set_yticks([0, 0.2, 0.4, 0.6, 0.8])
+			ax.tick_params(axis='both', labelsize=fs)
+			ax = plt.subplot(122)
 			plt.hist(self.serum_potency[model].values(), bins=10, normed=True)
-			plt.xlabel('potency')
+			plt.xlabel('potency', fontsize=fs)
+			plt.tight_layout()
+			ax.set_xticks([-4,-2,0,2,4])
+			ax.set_yticks([0, 0.1, 0.2, 0.3, 0.4])
+			ax.tick_params(axis='both', labelsize=fs)
 			plt.savefig(htmlpath+'HI_effects_'+model+'.png')
 
 
@@ -481,7 +493,7 @@ class HI_tree(object):
 			self.validate(plot=True)
 			plt.savefig(htmlpath+'HI_prediction_'+model+'.png')
 
-
+		self.save_trunk_cHI()
 
 	def validate(self, plot=False, cutoff=0.0, validation_set = None, incl_ref_strains='yes'):
 		if validation_set is None:
@@ -513,7 +525,6 @@ class HI_tree(object):
 			import matplotlib.pyplot as plt
 			import seaborn as sns
 			sns.set_style('darkgrid')
-			fs = 16
 			plt.figure()
 			ax = plt.subplot(111)
 			plt.plot([-1,6], [-1,6], 'k')
@@ -523,12 +534,12 @@ class HI_tree(object):
 			ax.tick_params(axis='both', labelsize=fs)
 			plt.ylim([-3,7])
 			plt.xlim([-3,7])
-			plt.text(-2.5,6, ('tree model' if self.map_to_tree else 'mutation model')
-			         +'\nregularization:'+str(self.lam_HI)+'/'+str(self.lam_pot)+'/'+str(self.lam_avi)+'(HI/pot/avi)'
-			         +'\nprediction error: '\
-						+str(round(self.abs_error, 3))\
-					+'/'+str(round(self.rms_error,3))+'(abs/rms)', fontsize = fs)
-
+			plt.text(-2.5,6.3, ('tree model' if self.map_to_tree else 'mutation model'), weight='bold', fontsize=fs)
+			plt.text(-2.5,5,'regularization:\nprediction error:', fontsize = fs)
+			plt.text(0.5,5, str(self.lam_HI)+'/'+str(self.lam_pot)+'/'+str(self.lam_avi)+' (HI/pot/avi)'
+			         +'\n'+str(round(self.abs_error, 2))\
+					 +'/'+str(round(self.rms_error, 2))+' (abs/rms)', fontsize = fs)
+			plt.tight_layout()
 		return a.shape[0]
 
 	def check_symmetry(self, plot=False, model_type = 'tree'):
@@ -552,15 +563,16 @@ class HI_tree(object):
 			import matplotlib.pyplot as plt
 			import seaborn as sns
 			sns.set_style('darkgrid')
-			fs = 16
 			plt.figure()
 			ax = plt.subplot(111)
-			plt.title('asymmetry in reciprocal titers', fontsize = 16)
-			plt.hist([x[2] for x in reciprocal_measurements],alpha=0.7, label="raw asymmetry", normed=True)
-			plt.hist([x[3] for x in reciprocal_measurements],alpha=0.7, label="corrected", normed=True)
+			plt.text(0.05, 0.93,  ('tree model' if model_type=='tree' else 'mutation model'), 
+			         weight='bold', fontsize=fs, transform=plt.gca().transAxes)
+			plt.hist([x[2] for x in reciprocal_measurements],alpha=0.7, label="raw log2 titers", normed=True)
+			plt.hist([x[3] for x in reciprocal_measurements],alpha=0.7, label="tree component", normed=True)
 			plt.xlabel('distance asymmetry', fontsize=fs)
 			ax.tick_params(axis='both', labelsize=fs)
-			plt.legend()
+			plt.legend(fontsize=fs)
+			plt.tight_layout()
 
 
 	def add_titers(self):
@@ -610,6 +622,35 @@ class HI_tree(object):
 				self.source_validation[src_id] = [self.abs_error, self.rms_error, self.slope, self.intercept, n_checks]
 			except:
 				print "skipped due to too few measurements"
+
+	def save_trunk_cHI(self):
+		cHI_trunk = []
+		trunk_muts = []
+		co=0.5
+		tmp_pivots = self.tree.seed_node.pivots
+		for node in self.tree.postorder_internal_node_iter():
+			if node.trunk:
+				tmp_freq = node.freq['global']
+				if tmp_freq[0]>0.5:
+					continue
+				ii = np.argmax(tmp_freq>co)
+				slope = (tmp_freq[ii]-tmp_freq[ii-1])/(tmp_pivots[ii]-tmp_pivots[ii-1])
+				tp = tmp_pivots[ii-1] + (co-tmp_freq[ii-1])/slope
+
+				tmp_muts = [x for x in node.aa_muts.items() if x[1]!='']
+				for muts in tmp_muts:
+					gene = muts[0]
+					for pos in muts[1].split(','):
+						tmp_mut = (gene, pos)
+						if tmp_mut in self.mutation_effects:
+							trunk_muts.append([tp,self.mutation_effects[tmp_mut]])
+				cHI_trunk.append([tp, node.cHI] )
+
+		cHI_trunk = np.array(cHI_trunk)[::-1]
+		trunk_muts = np.array(trunk_muts)[::-1]
+		np.savetxt('data/'+self.prefix+self.resolution+'_cHI.txt', cHI_trunk)
+		np.savetxt('data/'+self.prefix+self.resolution+'_trunk_muts.txt', trunk_muts)
+
 
 	def predict_HI_tree(self, virus, serum, cutoff=0.0):
 		path = self.get_path_no_terminals(virus,serum[0])

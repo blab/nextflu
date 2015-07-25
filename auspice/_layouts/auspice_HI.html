@@ -123,11 +123,6 @@ layout: default
 				{% endfor %}
 
 				<div id="search"></div>
-				<div class="spacer"></div>
-				<div>
-					<button id="reset" class="btn btn-default">reset layout</button>
-				</div>
-				<div class="spacer"></div>
 			</div>					
 		</div>
 	</div>
@@ -135,6 +130,12 @@ layout: default
 		<div class="bigspacer"></div>
 		<div class="treeplot-container">
 			<svg id="treeplot"></svg>
+		</div>
+		<div align="right">
+			click (repeatedly) on a branch to zoom <button id="reset" class="btn btn-default">reset layout</button>
+		</div>
+		<div class="entropy-container">		
+			<div id="entropy"></div>
 		</div>
 	</div>
 </div>
@@ -176,9 +177,6 @@ layout: default
 		<div class="spacer"></div>
 	</div>
 	<div class="col-md-9">
-		<div class="entropy-container">		
-			<div id="entropy"></div>
-		</div>
 		<div class="freqplot-container">		
 			<div id="gtchart"></div>
 		</div>
@@ -188,23 +186,25 @@ layout: default
 <div class="row">
 	<div class="col-md-3">
 		<div class="io-container title">
-			HI mutations
+			Mutations
 		</div>
 		<div class="col-xs-6 io-container">					
 		</div>
 	</div>
 	<div>
 	<div class="col-md-4" style="height: 500px; overflow: auto;">
-		<table class="table">
+		<table class="table table-striped">
 			<col width="70%">
 			<col width="30%">
+			<thead><tr><td>Mutation</td><td>HI effect</td></tr></thead>
+			<tbody>
 			{% for eff in site.data.HI_mutation_effects[page.virus][page.resolution] %}
 			<tr>
 				<td>{{ eff[0] }}</td>
 				<td>{{ eff[1] }}</td>
 			</tr>
 			{% endfor %}
-		</table>
+		</tbody></table>
 	</div>
 	<div class="col-md-5" id="structureDiv">
 		<div>
@@ -228,7 +228,7 @@ layout: default
 			Feature explanation
 		</div>	
 	</div>
-	<div class="col-md-9">
+	<div class="col-md-9" align="justify">
 		<h4>Phylogenetic tree</h4>
 		<p> Use the <a href="/help/#date_slider"><b>date slider</b></a> to highlight viruses sampled within 12 month of the date displayed.
 		<p> Use the <a href="/help/#epitope_mutations"><b>drop down menu</b></a> to color viruses by number of <span class="highlight"><a href="/help/#epitope_mutations">epitope mutations</a></span>, 
@@ -266,7 +266,7 @@ layout: default
 		</div>	
 		<div class="spacer"></div>	
 	</div>
-	<div class="col-md-9">
+	<div class="col-md-9" align="justify">
 		<p> <b>Epitope mutations</b> are based on 
 		<a href="http://www.nature.com/nature/journal/v289/n5796/abs/289366a0.html">HA structure and exposed residues</a>. 
 		Multiple recent mutations at epitope
@@ -306,25 +306,62 @@ layout: default
 		<div class="spacer"></div>	
 	</div>
 	<div class="col-md-9">
-	<div class="col-md-4">
-	 <figure>
-		<img src="/{{ page.virus }}/{{ page.resolution }}/HI_prediction_tree.png" width="500" align="middle">
-  		<figcaption>Predicted log2 HI titer distance vs measured HI titer distance. The model was trained on 90% of the data and the remaining 10% are shown here. The average absolution deviation and the RMS deviation are given in the figure title. </figcaption>
-	 </figure>
-	 </div>
-	<div class="col-md-4">
-	 <figure>
-		<img src="/{{ page.virus }}/{{ page.resolution }}/HI_prediction_virus_tree.png" width="500" align="middle">
-  		<figcaption>Predicted log2 HI titer distance vs measured HI titer distance. Here, the titers are predicted relative to all available sera and no measurements involving these viruses were used for training. The prediction errors are larger in this case, since no virus avidities could be trained. </figcaption>
-	 </figure> 
-	 </div>
-	 <div class="bigspacer"></div>
-	<div class="col-md-4">
-	 <figure>
-		<img src="/{{ page.virus }}/{{ page.resolution }}/HI_symmetry.png" width="700" align="middle">
-  		<figcaption>Within our model, titer distance is <it>serum effect + distance + virus effect</it>. Subtracting the respective serum and virus effect from reciprocal HI titer measurements should result in the same <it>distance</it>. The figure shows the difference between reciprocal titers before and after subtraction of the serum and virus effect. The standard deviation of the corrected difference is much smaller than the prior to correction, consistent with an approximately symmetric distance.</figcaption>
-	 </figure> 
-	</div>
+		<div class="row">
+			<div class="col-md-6">
+	 			<figure>
+					<img src="/{{ page.virus }}/{{ page.resolution }}/HI_prediction_tree.png" width="500" align="middle">
+				 </figure>
+	 		</div>
+			<div class="col-md-6">
+	 			<figure>
+					<img src="/{{ page.virus }}/{{ page.resolution }}/HI_prediction_virus_tree.png" width="500" align="middle">
+	 			</figure> 
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-6">
+	 			<figure>
+					<img src="/{{ page.virus }}/{{ page.resolution }}/HI_prediction_mutation.png" width="500" align="middle">
+				 </figure>
+	 		</div>
+			<div class="col-md-6">
+	 			<figure>
+					<img src="/{{ page.virus }}/{{ page.resolution }}/HI_prediction_virus_mutation.png" width="500" align="middle">
+	 			</figure> 
+			</div>
+		</div>
+<div align="justify">
+Predicted log2 HI titer distance vs measured HI titer distance for the tree model (top) and mutation model (bottom). Validation is done either (left) by excluding 10% of all measurements, or (right) 10% of all viruses from the training data. The model is then used to predict the excluded data. The prediction errors are indicted in the figure. When predicting titers for viruses that were completely absent from the training data (right), prediction errors are larger since no virus avidities could be trained. 
+</div>
+<!--	 	<div class="bigspacer"></div>
+		<div class="row">
+			<div class="col-md-6">
+	 			<figure>
+					<img src="/{{ page.virus }}/{{ page.resolution }}/HI_symmetry_tree.png" width="500" align="middle">
+				 </figure>
+	 		</div>
+			<div class="col-md-6">
+	 			<figure>
+					<img src="/{{ page.virus }}/{{ page.resolution }}/HI_symmetry_mutation.png" width="500" align="middle">
+	 			</figure> 
+			</div>
+Within our model, titer distance is <it>serum effect + distance + virus effect</it>. Subtracting the respective serum and virus effect from reciprocal HI titer measurements should result in the same <it>distance</it>. The figure shows the difference between reciprocal titers before and after subtraction of the serum and virus effect. The standard deviation of the corrected difference is much smaller than the prior to correction, consistent with an approximately symmetric distance. 
+		</div>-->
+		<div class="row">
+			<div class="col-md-6">
+	 			<figure>
+					<img src="/{{ page.virus }}/{{ page.resolution }}/HI_effects_tree.png" width="500" align="middle">
+				 </figure>
+	 		</div>
+			<div class="col-md-6">
+	 			<figure>
+					<img src="/{{ page.virus }}/{{ page.resolution }}/HI_effects_mutation.png" width="500" align="middle">
+				 </figure>
+	 		</div>
+		</div>
+<div align="justify">
+The distribution of estimated virus avidites and serum potencies for the tree (left) and mutation (right) model.
+</div>
 	</div>
 </div>
 

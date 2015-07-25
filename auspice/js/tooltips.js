@@ -39,12 +39,13 @@ var virusTooltip = d3.tip()
 			}
 		}			
 		string += "</div>";
-		
 		// following may or may not be present
 		if ((typeof focusNode != "undefined")){
-			string += "<div class=\"smallspacer\"></div>";				
-			string += "HI rel to "+focusNode.strain+":<br><div class=\"smallnote\"><ul>";
-			string += '<li>Serum <span style="float:right">log2, raw (self)</span></li>';
+			string += "<div class=\"smallspacer\"></div>";
+			string += "HI rel to "+focusNode.strain;
+			string += "<div class=\"smallspacer\"></div>";
+			string += "<div class=\"smallnote\">"
+			string += '<table class="table table-condensed"><thead><tr><td>Serum</td><td>&#916log<sub>2</sub></td><td>heterol.</td><td>autol.</td></tr></thead><tbody>';
 			if (typeof focusNode.HI_titers[d.clade] != "undefined"){
 				for (var tmp_serum in focusNode.HI_titers[d.clade]){
 					var homHI = focusNode.HI_titers_raw[focusNode.clade][tmp_serum];
@@ -54,21 +55,17 @@ var virusTooltip = d3.tip()
 					if (correctPotency){logHI-=focusNode.potency_mut[tmp_serum];}
 					var serum_name;
 					if (tmp_serum.length<20){
-						serum_name = tmp_serum+':';
+						serum_name = tmp_serum;
 					}else{
-						serum_name = tmp_serum.substring(0,17)+'..:';
+						serum_name = tmp_serum.substring(0,17)+'...';
 					}
-					string += '<li>' + serum_name + ' <span style="float:right">' +  logHI.toFixed(1)+',\t' + rawHI.toFixed(0)+ ' \t(' + homHI.toFixed(0) +")</span></li>";
+					string += '<tr><td>' + serum_name + '</td><td>' +  logHI.toFixed(1)+'</td><td>' + rawHI.toFixed(0)+ '</td><td>' + homHI.toFixed(0) +"</td></tr>";
 				}
 			}
-			string += '<li>' + 'Tree model:' + ' <span style="float:right">' +  d.HI_dist_tree.toFixed(2) + '\t, --- \t(----)'+ "</span></li>";
-			string += '<li>' + 'Mutations:' + ' <span style="float:right">' +  d.HI_dist_mut.toFixed(2) + '\t, --- \t(----)'+ "</span></li>";
-			string += "</ul></div>";
+			string += '<tr><td>' + 'Tree model' + '</td><td>' +  d.HI_dist_tree.toFixed(2) + '</td><td> --- </td><td>---</td></tr>';
+			string += '<tr><td>' + 'Mutations' + '</td><td>' +  d.HI_dist_mut.toFixed(2) + '</td><td> --- </td><td>---</td></tr>';
+			string += "</tbody></table></div>";
 		}
-		//else if ((predictedHI==true)&&(typeof focusNode != "undefined")){
-		//	string += "<div class=\"smallspacer\"></div>";		
-		//	string += "HI rel to "+d.strain+":<br>Pred. log2: "+d.HI_dist_pred.toFixed(2)+"<br>";
-		//}
 
 		string += "<div class=\"smallspacer\"></div>";
 		// following may or may not be present
@@ -78,9 +75,6 @@ var virusTooltip = d3.tip()
 		}
 		if (typeof d.ep != "undefined") {
 			string += "Epitope distance: " + d.ep + "<br>";
-		}
-		if (typeof d.ne != "undefined") {
-			string += "Non-epitope distance: " + d.ne + "<br>";
 		}
 		if (typeof d.rb != "undefined") {
 			string += "Receptor binding distance: " + d.rb + "<br>";

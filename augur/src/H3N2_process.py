@@ -1,6 +1,7 @@
+import time, argparse,re,os, socket
 import matplotlib as mpl
-mpl.use('pdf')
-import time, argparse,re,os
+if socket.gethostname() not in ['olt', 'rneher-iMac']:
+	mpl.use('pdf')
 from virus_filter import flu_filter, fix_name
 from virus_clean import virus_clean
 from tree_refine import tree_refine
@@ -387,7 +388,7 @@ if __name__=="__main__":
 		print "sum of effects on trunk", np.sum(eff)
 		tmp_eff = np.array(eff)
 		plt.hist(tmp_eff[tmp_eff>1e-4],  bins=np.linspace(0,2,21), 
-		         label='tree: '+str(np.round(np.mean(tmp_eff>1e-4), 2)), alpha=0.5)
+				 label='tree: '+str(np.round(np.mean(tmp_eff>1e-4), 2)), alpha=0.5)
 #		plt.plot(sorted(eff), np.linspace(1,0,len(eff)))
 
 #	plt.figure()
@@ -395,7 +396,7 @@ if __name__=="__main__":
 		print "sum of mutation effects on trunk:", np.sum(eff.values())
 		tmp_eff = np.array(eff.values())
 		plt.hist(tmp_eff[tmp_eff>1e-4],  bins=np.linspace(0,2,21), 
-		         label='mutations: '+str(np.round(np.mean(tmp_eff>1e-4), 2)), alpha=0.5)
+				 label='mutations: '+str(np.round(np.mean(tmp_eff>1e-4), 2)), alpha=0.5)
 #		plt.plot(sorted(eff.values()), np.linspace(1,0,len(eff)))
 	plt.legend()
 	plt.savefig("trunk_effectsize_histogram.png")

@@ -120,7 +120,7 @@ function tipLabelText(d) {
 function branchLabelSize(d) {
 	var n = nDisplayTips;
 	if (d.fullTipCount>n/15) {
-		return "8px";
+		return "10px";
 	}
 	else {
 		return "0px";
@@ -239,7 +239,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.enter()
 			.append("text")
 			.attr("class","tipLabel")
-			.style("font-size", function(d) {console.log(tipLabelText(d)); return tipLabelSize(d)+"px"; })
+			.style("font-size", function(d) {return tipLabelSize(d)+"px"; })
 			.text(tipLabelText);
 	}
 
@@ -256,7 +256,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.on('mouseover', function(d) {
 			virusTooltip.show(d, this);
 		})
-		.on('click', function(d) {
+		.on('dblclick', function(d) {
 			if ((typeof d.db != "undefined") && (d.db == "GISAID") && (typeof d.accession != "undefined")) {
 				var url = "http://gisaid.org/EPI/"+d.accession;
 				console.log("opening url "+url);
@@ -437,6 +437,16 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		transform(0);
 	}
 	
+	function resetLayout(){
+		displayRoot = rootNode;
+		nDisplayTips = displayRoot.fullTipCount;
+		var dMin = d3.min(xValues),
+			dMax = d3.max(xValues),
+			lMin = d3.min(yValues),
+			lMax = d3.max(yValues);
+		rescale(dMin, dMax, lMin, lMax);
+		removeClade();
+	}
 
 	function restrictToFunc(rt) {
 		restrictTo[rt] = document.getElementById(rt).value;
@@ -484,16 +494,10 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	d3.select(window).on('resize', resize); 
 
 	d3.select("#reset")
-		.on("click", function(d) {
-			displayRoot = rootNode;
-			nDisplayTips = displayRoot.fullTipCount;
-			var dMin = d3.min(xValues),
-				dMax = d3.max(xValues),
-				lMin = d3.min(yValues),
-				lMax = d3.max(yValues);
-			rescale(dMin, dMax, lMin, lMax);
-			removeClade();
-		})
+		.on("click", resetLayout)
+
+	d3.select("#treeplot")
+		.on("dblclick", resetLayout);
 
 	d3.select("#branchlabels")
 		.on("change", function (d){
