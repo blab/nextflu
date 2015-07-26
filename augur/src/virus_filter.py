@@ -16,8 +16,20 @@ def myopen(fname, mode='r'):
 		return open(fname, mode)
 
 def fix_name(name):
-	return name.replace(' ', '').replace('\'','').replace('(','').replace(')','').replace('H3N2','').replace('Human','').replace('human','').replace('//','/')
-
+	tmp_name = name.replace(' ', '').replace('\'','').replace('(','').replace(')','').replace('H3N2','').replace('Human','').replace('human','').replace('//','/')
+	fields = tmp_name.split('/')
+	if len(fields[-1])==2:
+		try:
+			y = int(fields[-1])
+			if y>16:
+				y=1900+y
+			else:
+				y=2000+y
+			return '/'.join(fields[:-1])+'/'+str(y)
+		except:
+			return tmp_name
+	else:
+		return tmp_name
 
 class virus_filter(object):
 
@@ -111,7 +123,7 @@ class virus_filter(object):
 			self.viruses = filter(lambda v: re.match(r'\d\d\d\d', v['date']) is not None, self.viruses)
 			for v in self.viruses:
 				if re.match(r'\d\d\d\d-\d\d-\d\d', v['date']) is None:
-					v['date'] = v['date'][:4]
+					v['date'] = v['date'][:4]+'-07-01'
 
 	def subsample(self, viruses_per_month, prioritize = None, all_priority=False, region_specific = True):
 		'''

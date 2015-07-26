@@ -40,7 +40,7 @@ var rbsColorDomain = genericDomain;
 var dateColorDomain = genericDomain;
 var epiColorDomain = genericDomain;
 var dfreqColorDomain = genericDomain.map(function(d){return Math.round(100*(-0.18+d*0.36))/100;});
-var HIColorDomain = genericDomain.map(function(d){return Math.round(100*(d*5.0))/100;});
+var HIColorDomain = genericDomain.map(function(d){return Math.round(100*(d*3.6))/100;});
 var time_step;
 
 

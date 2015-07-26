@@ -56,7 +56,7 @@ class tree_refine(object):
 			print "outgroup",self.outgroup['strain'], "not found"
 		while len(self.tree.seed_node.child_nodes())==1:
 			print "ROOT had one child only, moving root up!"
-			if hasattr(self.tree.seed_node, pivots):
+			if hasattr(self.tree.seed_node, 'pivots'):
 				tmp_pivots = self.tree.seed_node.pivots
 			else:
 				tmp_pivots=None

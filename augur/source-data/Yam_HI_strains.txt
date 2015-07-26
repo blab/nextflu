@@ -1,5 +1,13 @@
+B/Kadoma/122/99
+B/Kadoma/122/1999
+B/Kadoma/506/99
+B/Kadoma/506/1999
 B/Osaka/1201/2000
 B/Kadoma/409/2000
+B/Lusaka/270/99
+B/Lusaka/270/1999
+B/Lusaka/432/99
+B/Lusaka/432/1999
 B/Kobe/69/2001
 B/Kobe/79/2001
 B/Kobe/87/2001
@@ -13,10 +21,51 @@ B/Yamagata/K521/2001
 B/Yamagata/K535/2001
 B/Hiroshima/23/2001
 B/Shizuoka/15/2001
+B/Tokyo/942/96
+B/Tokyo/942/1996
+B/Harbin/7/94
+B/Harbin/7/1994
+B/Shiga/T30/98
+B/Shiga/T30/1998
+B/Yamanashi/166/98
+B/Yamanashi/166/1998
+B/Sichuan/379/99
+B/Sichuan/379/1999
+B/Quebec/1/01
+B/Quebec/1/2001
+B/Quebec/2/01
+B/Quebec/2/2001
+B/Quebec/3/01
+B/Quebec/3/2001
+B/Quebec/4/01
+B/Quebec/4/2001
+B/Quebec/6/01
+B/Quebec/6/2001
+B/Quebec/7/01
+B/Quebec/7/2001
+B/Quebec/8/01
+B/Quebec/8/2001
+B/Quebec/9/01
+B/Quebec/9/2001
+B/Bucharest/795/03
+B/Bucharest/795/2003
 B/Shanghai/361/2002
+B/Oslo/71/04
+B/Oslo/71/2004
+B/England/23/04
+B/England/23/2004
+B/Genova/30/02
+B/Genova/30/2002
+B/Milano/66/04
+B/Milano/66/2004
+B/Roma/4/02
+B/Roma/4/2002
 B/Taiwan/97271/2001
 B/New York/47/2001
+B/NewYork/47/2001
 B/Texas/3/2002
+B/Genoa/56/02
+B/Genoa/56/2002
 B/Finland/231/2003
 B/Johannesburg/69/2001
 B/Taiwan/54/2004
@@ -33,9 +82,17 @@ B/Brisbane/4/2004
 B/Brisbane/5/2004
 B/Macau/131/2004
 B/Chan Thaburi/218/2003
+B/ChanThaburi/218/2003
 B/Fujian/430/2004
 B/Florida/7/2004
-B/Harbin/7/1994
+B/Genoa/12/02
+B/Genoa/12/2002
+B/Genoa/48/02
+B/Genoa/48/2002
+B/Genoa/5/02
+B/Genoa/5/2002
+B/Trieste/7/02
+B/Trieste/7/2002
 B/Townsville/1/2003
 B/Victoria/509/2004
 B/Brisbane/13/2004
@@ -62,9 +119,13 @@ B/Finland/767/2006
 B/Lyon/1283/2007
 B/Perth/12/2007
 B/Hong Kong/441/2007
+B/HongKong/441/2007
+B/Egypt/144/05
+B/Egypt/144/2005
 B/Mauritius/481/2007
 B/Johannesburg/90/2007
 B/SRI LANKA/4/2006
+B/SRILANKA/4/2006
 B/Victoria/501/2005
 B/Sydney/511/2006
 B/Perth/6/2008
@@ -77,6 +138,7 @@ B/Brisbane/1/2008
 B/BARCELONA/143/2008
 B/INDIANA/1/2008
 B/CAPE TOWN/30/2008
+B/CAPETOWN/30/2008
 B/Valladolid/18/2008
 B/Switzerland/1334249/2008
 B/Dakar/6/2008
@@ -85,19 +147,25 @@ B/Mashad/6/2009
 B/Zahedan/7/2009
 B/Tehran/8/2009
 B/Hong Kong/251/2009
+B/HongKong/251/2009
 B/Hong Kong/542/2009
+B/HongKong/542/2009
 B/Turkey/TR-35/2009
 B/Turkey/TR-37/2009
 B/Stockholm/4/2009
 B/Wisconsin/01/2010
 B/Hong Kong/398/2010
+B/HongKong/398/2010
 B/Hong Kong/345/2010
+B/HongKong/345/2010
 B/Latvia/3-1468/2010
 B/Latvia/3-1498/2010
 B/Ghana/FS-2112/2010
 B/Algeria/G486/2010
 B/Hong Kong/1832/2010
+B/HongKong/1832/2010
 B/Hong Kong/1895//2010
+B/HongKong/1895/2010
 B/Johannesburg/23/2010
 B/Johannesburg/40/2010
 B/Stockholm/6/2010
@@ -111,7 +179,9 @@ B/Brussels/G0710/2010
 B/Finland/33/2010
 B/Finland/39/2010
 B/Hong Kong/2188/2010
+B/HongKong/2188/2010
 B/Hong Kong/2190/2010
+B/HongKong/2190/2010
 B/Niedersachsen/2/2010
 B/Nordrhein-Westfalen/1/2010
 B/Paris/1850/2010
@@ -132,7 +202,9 @@ B/Serbia/1894/2011
 B/Serbia/2095/2011
 B/Lyon/1179/2011
 B/Hong Kong/748/2011
+B/HongKong/748/2011
 B/Hong Kong/765/2011
+B/HongKong/765/2011
 B/England/110/2010
 B/Catalonia/S4125/2011
 B/Sweden/2/2011
@@ -144,6 +216,7 @@ B/Netherlands/707/2011
 B/Berlin/147/2011
 B/Yopougon/GR882/2011
 B/Hong Kong/1127/2011
+B/HongKong/1127/2011
 B/Ghana/FS-11-1827/2011
 B/Ghana/FS-11-1994/2011
 B/Ghana/FS-11-1995/2011
@@ -172,6 +245,7 @@ B/England/267/2012
 B/England/386/2012
 B/England/538/2012
 B/Hradec Kralove/29/2012
+B/HradecKralove/29/2012
 B/Santiago/39712/2012
 B/Lisboa/1/2012
 B/Lisboa/5/2012
@@ -179,6 +253,7 @@ B/Lisboa/6/2012
 B/Denmark/3/2012
 B/Denmark/8/2012
 B/St. Petersburg/24/2012
+B/St.Petersburg/24/2012
 B/Taiwan/1367/2012
 B/Milano/05/2012
 B/Milano/16/2012
@@ -190,12 +265,19 @@ B/Ghana/DILI-12-102/2012
 B/Ghana/FS-12-808/2012
 B/Ghana/FS-12-831/2012
 B/Guyane/1307/2012 (B/Guadeloupe/55/2012)
+B/Guyane/1307/2012B/Guadeloupe/55/2012
 B/Hong Kong/3569/2012
+B/HongKong/3569/2012
 B/Hong Kong/3577/2012
+B/HongKong/3577/2012
 B/Hong Kong/3579/2012
+B/HongKong/3579/2012
 B/Hong Kong/3581/2012
+B/HongKong/3581/2012
 B/Hong Kong/3583/2012
+B/HongKong/3583/2012
 B/Hong Kong/3585/2012
+B/HongKong/3585/2012
 B/Lorraine/1408/2012
 B/SENDAI/6/2012
 B/Ghana/DILI-12-098/2012
@@ -205,6 +287,7 @@ B/MALAYSIA/412/2012
 B/Stockholm/14/2012
 B/Denmark/24/2012
 B/Buenos Aires/8833/2012
+B/BuenosAires/8833/2012
 B/Johannesburg/242/2012
 B/Johannesburg/3009/2012
 B/Johannesburg/3166/2012
@@ -217,6 +300,7 @@ B/Norway/1249/2012
 B/Norway/1836/2012
 B/Norway/1864/2012
 B/New Mexico/04/2012
+B/NewMexico/04/2012
 B/Denmark/26/2012
 B/Denmark/27/2012
 B/Denmark/31/2012
@@ -240,6 +324,7 @@ B/England/709/2012
 B/WELLINGTON/3/2012
 B/Norway/2182/2012
 B/Ghana/ARI 1648/2012
+B/Ghana/ARI1648/2012
 B/Ghana/DILI-0396/2012
 B/Ghana/DILI-0859/2012
 B/Saarland/2/2012
@@ -249,12 +334,14 @@ B/Blida/143/2012
 B/Caen/1808/2012
 B/Guyane/308/2012
 B/Hong Kong/3611/2012
+B/HongKong/3611/2012
 B/Ireland/88486/2012
 B/Ireland/90999/2012
 B/Latvia/12-32427p/2012
 B/Milano/36/2012
 B/Milano/44/2012
 B/Navarra/304/2012
+B/Netherlands/521/2012
 B/Nordrhein-Westfalen/5/2012
 B/Norway/2256/2012
 B/Norway/2281/2012
@@ -263,6 +350,7 @@ B/Norway/2476/2012
 B/PaisVasco/284/2012
 B/Parma/03/2012
 B/Pays de Loire/1791/2012
+B/PaysdeLoire/1791/2012
 B/Roma/02/2012
 B/Milano/08/2012
 B/Antananarivo/5020/2012
@@ -282,6 +370,7 @@ B/Cameroon/12V-6180/2012
 B/Cameroon/13V-013/2012
 B/Mahajanga/5196/2012
 B/Pais Vasco/13005/2012
+B/PaisVasco/13005/2012
 B/Switzerland/7659215/2012
 B/Switzerland/7659230/2012
 B/Trieste/02/2012
@@ -302,6 +391,7 @@ B/Estonia/74419/2013
 B/Ireland/02490/2013
 B/Israel/1/2013
 B/Latvia/1-40275p/2013
+B/Netherlands/039/2013
 B/Malta/MV14117/2013
 B/Malta/MV14378/2013
 B/Malta/MV14443/2013
@@ -311,6 +401,8 @@ B/Cairo/161/2013
 B/England/213/2013
 B/England/286/2013
 B/Ireland/00329/2013
+B/Novosibirsk/5/13
+B/Novosibirsk/5/2013
 B/Bulgaria/178/2013
 B/Bulgaria/298/2013
 B/Bulgaria/348/2013
@@ -341,21 +433,28 @@ B/SAPPORO/21/2013
 B/Paris/1168/2013
 B/Picardie/1175/2013
 B/Paris/1305/2013
+B/Guyane/138/13
+B/Guyane/138/2013
 B/Caen/1430/2013
 B/Paris/1451/2013
 B/Haute Normandie/1459/2013
+B/HauteNormandie/1459/2013
 B/Pays de Loire/1494/2013
+B/PaysdeLoire/1494/2013
 B/Pays de Loire/1534/2013
+B/PaysdeLoire/1534/2013
 B/Nord Pas de Calais/1539/2013
+B/NordPasdeCalais/1539/2013
 B/Paris/1574/2013
 B/Haute Normandie/1584/2013
+B/HauteNormandie/1584/2013
 B/Guatemala/260/2013
 B/Cameroon/13V-1549 GVFI/2013
+B/Cameroon/13V-1549GVFI/2013
 B/Cameroon/13V-2198/2013
 B/Cameroon/13V-2891/2013
 B/Cameroon/13V-3209/2013
 B/Guangxi-Xixiangtang/1311/2013
-B/Guyane/138/2013
 B/Lithuania/6530/2013
 B/Lithuania/6663/2013
 B/Lithuania/6931/2013
@@ -381,9 +480,13 @@ B/Chongqing-Yuzhong/11616/2013
 B/Paris/2375/2013
 B/Shandong-Mudan/1374/2013
 B/Franche Comte/2166/2013
+B/FrancheComte/2166/2013
 B/Hong Kong/424/2013
+B/HongKong/424/2013
 B/Hong Kong/432/2013
+B/HongKong/432/2013
 B/Hong Kong/436/2013
+B/HongKong/436/2013
 B/Ireland/13M95631/2013
 B/Ireland/13M98449/2013
 B/Paris/2535/2013
@@ -415,6 +518,7 @@ B/Cameroon/7430/2013
 B/Cameroon/7435/2013
 B/Catalonia/2151450NS/2014
 B/Cote d'Ivoire/1875/2013
+B/CotedIvoire/1875/2013
 B/Croatia/2547/2013
 B/Croatia/5/2014
 B/Madagascar/03256/2013
@@ -455,8 +559,11 @@ B/Austria/784502/2014
 B/Austria/784609/2014
 B/Bucuresti/1772-1324/2014
 B/Hong Kong/3417/2014
+B/HongKong/3417/2014
 B/Hong Kong/3419/2014
+B/HongKong/3419/2014
 B/Hong Kong/3423/2014
+B/HongKong/3423/2014
 B/Iceland/78/2014
 B/Guangdong-Liwan/1133/2014
 B/Centre/1663/2014
@@ -472,19 +579,27 @@ B/Moscow/13/2014
 B/Moscow/23/2014
 B/Moscow/9/2014
 B/South Africa/4380/2014
+B/SouthAfrica/4380/2014
 B/South Africa/68/2014
+B/SouthAfrica/68/2014
 B/Brisbane/9/2014
 B/Cameroon/1640/2014
 B/Hungary/378/2014
 B/Hungary/379/2014
 B/La Reunion/ 2047/14
+B/LaReunion/2047/2014
 B/La Reunion/ 2062/14
+B/LaReunion/2062/2014
 B/La Reunion/ 2068/14
+B/LaReunion/2068/2014
 B/La Reunion/ 2072/14
+B/LaReunion/2072/2014
 B/Norway/1877/2014
 B/Norway/2011/2014
 B/Buenos Aires/1114825/2014
+B/BuenosAires/1114825/2014
 B/Buenos Aires/455/2014
+B/BuenosAires/455/2014
 B/Cameroon/1044/2014
 B/Cameroon/2082/2014
 B/Cameroon/598/2014
@@ -492,8 +607,11 @@ B/Chaco/5277/2014
 B/Estonia/86059/2014
 B/Norway/2045/2014
 B/Santa Fe/1079/2014
+B/SantaFe/1079/2014
 B/Santa Fe/1149/2014
+B/SantaFe/1149/2014
 B/Santa Fe/1252/2014
+B/SantaFe/1252/2014
 B/Egypt/GAB3930/2014
 B/Egypt/ALX6641/2014
 B/Egypt/ALX3964/2014
@@ -510,13 +628,17 @@ B/Asturias/1952/2014
 B/Baden-Wurttemberg/2/2014
 B/Bretagne/2216/2014
 B/Castilla La Mancha/1986/2014
+B/CastillaLaMancha/1986/2014
 B/Castilla La Mancha/2082/2014
+B/CastillaLaMancha/2082/2014
 B/Castilla La Mancha/2083/2014
+B/CastillaLaMancha/2083/2014
 B/Centre/2213/2014
 B/England/515/2014
 B/England/522/2014
 B/Madrid/SO12928/2014
 B/Pais Vasco/1978/2014
+B/PaisVasco/1978/2014
 B/Paris/2052/2014
 B/Paris/2058/2014
 B/Paris/2232/2014
@@ -530,8 +652,11 @@ B/Lyon/2423/2014
 B/Lyon/2455/2014
 B/Netherlands/382/2014
 B/Hong Kong/3783/2014
+B/HongKong/3783/2014
 B/Hong Kong/3787/2014
+B/HongKong/3787/2014
 B/Hong Kong/3788/2014
+B/HongKong/3788/2014
 B/Austria/830502/2014
 B/Greece/8/2014
 B/Latvia/12-016677/2014

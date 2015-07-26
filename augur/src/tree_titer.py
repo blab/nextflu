@@ -8,8 +8,10 @@ from itertools import izip
 from virus_filter import fix_name
 import pandas as pd
 
-fs = 18
+fs = 12
 plt.locator_params(nbins=4)
+fmts = ['.pdf','.svg','.png']
+figheight = 4
 
 def myopen(fname, mode='r'):
 	if fname[-2:]=='gz':
@@ -459,26 +461,26 @@ class HI_tree(object):
 		lam_HI =  self.lam_HI
 		# summary figures using previously determined models
 		for map_to_tree, model in [(True, 'tree'), (False,'mutation')]:
-			self.check_symmetry(plot=True,model_type=model)
-			plt.savefig(htmlpath+'HI_symmetry_'+model+'.png')
-
-			plt.figure()
-			ax = plt.subplot(121)
-			plt.hist(self.virus_effect[model].values(), bins=np.linspace(-2,2,21), normed=True)
-			plt.xlabel('avidity', fontsize=fs)
-			plt.text(0.05, 0.93,  ('tree model' if model=='tree' else 'mutation model'), 
-			         weight='bold', fontsize=fs, transform=plt.gca().transAxes)
-			ax.set_xticks([-2,-1,0,1,2])
-			ax.set_yticks([0, 0.2, 0.4, 0.6, 0.8])
-			ax.tick_params(axis='both', labelsize=fs)
-			ax = plt.subplot(122)
-			plt.hist(self.serum_potency[model].values(), bins=10, normed=True)
-			plt.xlabel('potency', fontsize=fs)
-			plt.tight_layout()
-			ax.set_xticks([-4,-2,0,2,4])
-			ax.set_yticks([0, 0.1, 0.2, 0.3, 0.4])
-			ax.tick_params(axis='both', labelsize=fs)
-			plt.savefig(htmlpath+'HI_effects_'+model+'.png')
+			try:
+				self.check_symmetry(plot=True,model_type=model)
+				for fmt in fmts: plt.savefig(htmlpath+'HI_symmetry_'+model+fmt)
+				plt.figure(figsize=(1.3*figheight,figheight))
+				ax = plt.subplot(121)
+				plt.hist(self.virus_effect[model].values(), bins=np.linspace(-2,2,21), normed=True)
+				plt.xlabel('avidity', fontsize=fs)
+				plt.text(0.05, 0.93,  ('tree model' if model=='tree' else 'mutation model'), 
+				         weight='bold', fontsize=fs, transform=plt.gca().transAxes)
+				ax.set_xticks([-2,-1,0,1,2])
+				ax.tick_params(axis='both', labelsize=fs)
+				ax = plt.subplot(122)
+				plt.hist(self.serum_potency[model].values(), bins=10, normed=True)
+				plt.xlabel('potency', fontsize=fs)
+				plt.tight_layout()
+				ax.set_xticks([-4,-2,0,2,4])
+				ax.tick_params(axis='both', labelsize=fs)
+				for fmt in fmts: plt.savefig(htmlpath+'HI_effects_'+model+fmt)
+			except:
+				print "can't check HI_symmetry"
 
 
 		for map_to_tree, model in [(True, 'tree'), (False,'mutation')]:
@@ -486,12 +488,12 @@ class HI_tree(object):
 						lam_pot = lam_pot, force_redo=True, map_to_tree=map_to_tree, subset_strains=True)
 
 			self.validate(plot=True)
-			plt.savefig(htmlpath+'HI_prediction_virus_'+model+'.png')
+			for fmt in fmts: plt.savefig(htmlpath+'HI_prediction_virus_'+model+fmt)
 
 			self.map_HI(training_fraction=0.9, method='nnl1reg',lam_HI=lam_HI, lam_avi=lam_avi, 
 						lam_pot = lam_pot, force_redo=True, map_to_tree=map_to_tree)
 			self.validate(plot=True)
-			plt.savefig(htmlpath+'HI_prediction_'+model+'.png')
+			for fmt in fmts: plt.savefig(htmlpath+'HI_prediction_'+model+fmt)
 
 		self.save_trunk_cHI()
 
@@ -525,20 +527,20 @@ class HI_tree(object):
 			import matplotlib.pyplot as plt
 			import seaborn as sns
 			sns.set_style('darkgrid')
-			plt.figure()
+			plt.figure(figsize=(figheight,figheight))
 			ax = plt.subplot(111)
 			plt.plot([-1,6], [-1,6], 'k')
 			plt.scatter(a[:,0], a[:,1])
 			plt.ylabel("predicted log2 distance", fontsize = fs)
 			plt.xlabel("measured log2 distance" , fontsize = fs)
 			ax.tick_params(axis='both', labelsize=fs)
-			plt.ylim([-3,7])
+			plt.ylim([-3,8])
 			plt.xlim([-3,7])
-			plt.text(-2.5,6.3, ('tree model' if self.map_to_tree else 'mutation model'), weight='bold', fontsize=fs)
-			plt.text(-2.5,5,'regularization:\nprediction error:', fontsize = fs)
-			plt.text(0.5,5, str(self.lam_HI)+'/'+str(self.lam_pot)+'/'+str(self.lam_avi)+' (HI/pot/avi)'
+			plt.text(-2.5,7.3, ('tree model' if self.map_to_tree else 'mutation model'), weight='bold', fontsize=fs)
+			plt.text(-2.5,6,'regularization:\nprediction error:', fontsize = fs-2)
+			plt.text(1.2,6, str(self.lam_HI)+'/'+str(self.lam_pot)+'/'+str(self.lam_avi)+' (HI/pot/avi)'
 			         +'\n'+str(round(self.abs_error, 2))\
-					 +'/'+str(round(self.rms_error, 2))+' (abs/rms)', fontsize = fs)
+					 +'/'+str(round(self.rms_error, 2))+' (abs/rms)', fontsize = fs-2)
 			plt.tight_layout()
 		return a.shape[0]
 
@@ -563,7 +565,7 @@ class HI_tree(object):
 			import matplotlib.pyplot as plt
 			import seaborn as sns
 			sns.set_style('darkgrid')
-			plt.figure()
+			plt.figure(figsize=(1.3*figheight, figheight))
 			ax = plt.subplot(111)
 			plt.text(0.05, 0.93,  ('tree model' if model_type=='tree' else 'mutation model'), 
 			         weight='bold', fontsize=fs, transform=plt.gca().transAxes)
@@ -629,6 +631,7 @@ class HI_tree(object):
 		co=0.5
 		tmp_pivots = self.tree.seed_node.pivots
 		for node in self.tree.postorder_internal_node_iter():
+			node.num_date = np.min([c.num_date for c in node.child_nodes()])
 			if node.trunk:
 				tmp_freq = node.freq['global']
 				if tmp_freq[0]>0.5:
@@ -651,6 +654,21 @@ class HI_tree(object):
 		np.savetxt('data/'+self.prefix+self.resolution+'_cHI.txt', cHI_trunk)
 		np.savetxt('data/'+self.prefix+self.resolution+'_trunk_muts.txt', trunk_muts)
 
+		from random import sample
+		n_leafs = 10
+		leaf_sample = sample([leaf for leaf in self.tree.leaf_iter() 
+							  if leaf.num_date>2014.5], n_leafs)
+
+		cHI_trunk = []
+		for node in leaf_sample:
+			tmp = []
+			while node.parent_node is not None:
+				tmp.append([node.num_date, node.cHI])
+				node = node.parent_node
+			cHI_trunk.append(np.array(tmp)[::-1])
+		import cPickle as pickle
+		with open('data/'+self.prefix+self.resolution+'_cHI_path.pkl', 'w') as ofile:
+			pickle.dump(cHI_trunk, ofile)
 
 	def predict_HI_tree(self, virus, serum, cutoff=0.0):
 		path = self.get_path_no_terminals(virus,serum[0])
@@ -838,7 +856,7 @@ def write_strains_with_HI_and_sequence(flutype='H3N2'):
 	HI_titers = read_tables(flutype)
 	HI_trevor = read_trevor_table(flutype)
 	HI_strains = set(HI_titers.index)
-	HI_strains.update([v[0] for v in HI_trevor[2]])
+	HI_strains.update(HI_trevor[0])
 	from Bio import SeqIO
 	good_strains = set()
 	with myopen("data/"+flutype+"_strains_with_HI.fasta", 'w') as outfile, \
@@ -851,6 +869,8 @@ def write_strains_with_HI_and_sequence(flutype='H3N2'):
 				SeqIO.write(seq_rec, outfile,'fasta')
 				good_strains.add(reduced_name)
 				HI_strain_outfile.write(tmp_name+'\n')
+				if fix_name(tmp_name)!=tmp_name:
+					HI_strain_outfile.write(fix_name(tmp_name)+'\n')
 				#print seq_rec.name
 
 

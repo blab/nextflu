@@ -1,4 +1,6 @@
 var	vaccineChoice = {};
+vaccineChoice['A/Sydney/5/1997'] = "1997-09-25";
+vaccineChoice['A/Moscow/10/1999'] = "1999-09-25";
 vaccineChoice['A/Fujian/411/2002'] = "2003-09-25";
 vaccineChoice['A/California/7/2004'] = "2005-02-21";
 vaccineChoice['A/Wisconsin/67/2005'] = "2006-02-21";
