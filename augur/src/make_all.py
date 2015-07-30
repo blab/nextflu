@@ -11,7 +11,8 @@ patterns = {('A / H3N2', ''):'H3N2',
 			('A / H1N1', 'seasonal'):'H1N1',
 			('A / H7N9', ''):'H7N9',
 			('A / H5N1', ''):'H5N1',
-			('A / H6N1', ''):'H6N1'
+			('A / H6N1', ''):'H6N1',
+			('A / H5N6', ''):'H5N6'			
 			}
 
 outgroups = {lineage:SeqIO.read('source-data/'+lineage+'_outgroup.gb', 'genbank')
