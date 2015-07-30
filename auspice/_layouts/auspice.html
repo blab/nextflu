@@ -175,26 +175,28 @@ layout: default
 	</div>
 	<div class="col-md-9">
 		<h4>Phylogenetic tree</h4>
-		<p> Use the <a href="/help/#date_slider"><b>date slider</b></a> to highlight viruses sampled within 12 month of the date displayed.
+		<p> Use the <a href="/help/#date_slider"><b>date slider</b></a> to select viruses sampled within the time interval indicated. The size of the interval can be changed by grabing the left end of the bar with the mouse, to move the interval, use the right end of the slider.
 		<p> Use the <a href="/help/#epitope_mutations"><b>drop down menu</b></a> to color viruses by number of <span class="highlight"><a href="/help/#epitope_mutations">epitope mutations</a></span>, 
 		<span class="highlight"><a href="/help/#nonepitope_mutations">non-epitope mutations</a></span> or 
 		<span class="highlight"><a href="/help/#rbs">receptor binding mutations</a></span>
 		relative to root, or to color viruses by <span class="highlight"><a href="/help/#lbi">local branching index</a></span> or 
 		<span class="highlight"><a href="/help/#geo">geographic region</a></span>.
 		<p> Use the <a href="/help/#genotype"><b>input box</b></a> to specify positions to color viruses by genotype. Amino acid positions must be 
-		separated by a comma (e.g. <span class="highlight">159,225</span>).
+		separated by a comma (e.g. <span class="highlight">159,225</span>). The default is <span class="highlight">HA1</span>, to color by amino acid sequence in other regions use <span class="highlight">HA2:18</span> or <span class="highlight">SigPep:6</span>. To color by nucleotide sequence, use <span class="highlight">nuc:527</span>.
 		<p> <a href="/help/#mouse_tip"><b>Mouse over</b></a> a tip to show virus name, location and features.
 		<p> <a href="/help/#mouse_branch"><b>Mouse over</b></a> a branch to graph the frequency of the correponding clade trajectory below or <b>click</b>
-		on a branch to zoom into its descendent clade.
+		on a branch to zoom into its descendent clade. The tool tip will show amino acid mutations on this branch.
+		<p> To <b>restrict</b> the displayed viruses to <b>certain geographic regions</b>, select the region in the drop down menu labeled <span class="highlight">region</span>. 
 		<h4>Frequencies</h4>
 		Enter a mutation or genotype above (e.g. <span class="highlight">225D</span>) and click 
-		<b>plot frequencies</b> to show estimated frequency of this mutation through time. Complex genotypes can be specified by combining mutations as 
-		<span class="highlight">159Y/225D</span>. In addition, geographic regions can be specified by adding AS 
+		<b>plot frequencies</b> to show estimated frequency of this mutation through time. In addition, geographic regions can be specified by adding AS 
 		(Asia), NA (North America), EU (Europe), or OC (Oceania) as <span class="highlight">159S/225D/AS</span>.
 		Several genotypes can be entered simultaneously when separated by commas (e.g. 
 		<span class="highlight">225D, 159S/225D/AS</span> will graph the global frequency of 225D and the frequency 
 		of strains containing both 159S and 225D in Asia). Instead of a genotype, the common clades 3c3, 3c3.a, 3c2, 3c2.a can be used. Positions with very little variation are omitted. Beware 
-		that region specific frequencies are noisy. <a href="/help/#frequencies">Click here for help with the interface.</a>		
+		that region specific frequencies are noisy. <a href="/help/#frequencies">Click here for help with the interface.</a>
+		<h4>Variability</h4>
+		The second plot shows the variation in the multiple sequence alignment used to construct the tree. High bars indicated variable positions. Clicking on those bars will color the tree by amino acid at this position and plot the frequencies of the corresponding amino acids. 
 	</div>	
 </div>
 
@@ -232,7 +234,7 @@ layout: default
 		</p><p>
 		<b>Frequencies</b> are estimated as maximum likelihood trajectories that penalize rapid changes in 
 		frequency and slope. The frequencies of large clades or abundant genotypes have sufficiently 
-		many observations to by robust, while rare mutations or combinations thereof can't be reliably
+		many observations to by robust, while frequencies of rare mutations can't be reliably
 		estimated.
 	</div>
 </div>
