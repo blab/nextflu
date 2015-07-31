@@ -565,7 +565,7 @@ class HI_tree(object):
 			import matplotlib.pyplot as plt
 			import seaborn as sns
 			sns.set_style('darkgrid')
-			plt.figure(figsize=(1.3*figheight, figheight))
+			plt.figure(figsize=(figheight, figheight))
 			ax = plt.subplot(111)
 			plt.text(0.05, 0.93,  ('tree model' if model_type=='tree' else 'mutation model'), 
 			         weight='bold', fontsize=fs, transform=plt.gca().transAxes)

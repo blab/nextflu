@@ -3,8 +3,9 @@ import seaborn as sns
 from tree_titer import plot_tree, plot_dHI_distribution
 import cPickle, argparse
 
-fs=18
-
+fs=14
+figheight=4
+fmts = ['.pdf', '.png','.svg']
 def titer_vs_distances(params):
 	sns.set_style('darkgrid')
 	virus_config.update(params.__dict__)
@@ -144,16 +145,17 @@ def validation_figures(params):
 				dists.sort(reverse=True)
 				additivity_test['control'].append(dists[0]-dists[1])
 
-	plt.figure()
+	plt.figure(figsize=(figheight,figheight))
 	ax=plt.subplot(111)
 	plt.hist(additivity_test['control'], alpha=0.7,normed=True, bins = np.linspace(0,3,18), 
-	         label = 'Control, mean='+str(np.round(np.mean(additivity_test['control']),2)))
+	         label = 'control, mean='+str(np.round(np.mean(additivity_test['control']),2)))
 	plt.hist(additivity_test['test'], alpha=0.7,normed=True, bins = np.linspace(0,3,18),
-	         label = 'Quartett, mean='+str(np.round(np.mean(additivity_test['test']),2)))
+	         label = 'quartett, mean='+str(np.round(np.mean(additivity_test['test']),2)))
 	ax.tick_params(axis='both', labelsize=fs)
-	plt.xlabel('deviation', fontsize = fs)
+	plt.xlabel('difference between top two', fontsize = fs)
 	plt.legend(fontsize=fs)
-	plt.savefig(fig_prefix+'HI_titer_tree_additivity.png')
+	plt.tight_layout()
+	for fmt in fmts: plt.savefig(fig_prefix+'HI_titer_tree_additivity'+fmt)
 
 	#### titer effects ###############################################################
 	dHI_list = []

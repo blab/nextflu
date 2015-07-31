@@ -49,17 +49,37 @@ function calcHItree(node, rootNode){
 };
 
 function calcHImeasured(node, rootNode){
-	console.log(node.strain+ ', mean_potency:'+node.mean_potency);
+	console.log(node.strain+ ', mean_potency: '+node.mean_potency_mut);
+	console.log("correcting for virus effect: "+correctVirus);
+	console.log("correction for serum effect: "+correctPotency);
 	for (var i=0; i<tips.length; i+=1){
 		d = tips[i];
-		if (typeof(node.mean_HI_titers[d.clade])!="undefined"){
-			d.HI_dist_meas = node.mean_HI_titers[d.clade]
+		// if (typeof(node.mean_HI_titers[d.clade])!="undefined"){
+		// 	d.HI_dist_meas = node.mean_HI_titers[d.clade]
+		// 	if (correctVirus){
+		// 		d.HI_dist_meas -= d.avidity_mut;
+		// 	}
+		// 	if (correctPotency){
+		// 		d.HI_dist_meas -= node.mean_potency_mut;
+		// 	}
+		if (typeof(node.HI_titers[d.clade])!="undefined"){
+			var tmp_HI=0;
+			var serum_count=0;
+			for (var tmp_serum in node.HI_titers[d.clade]){
+				if (correctPotency){
+					tmp_HI += node.HI_titers[d.clade][tmp_serum]-node.potency_mut[tmp_serum];
+				}else{
+					tmp_HI += node.HI_titers[d.clade][tmp_serum];					
+				}
+				serum_count+=1;
+			}
+			d.HI_dist_meas = tmp_HI/serum_count
 			if (correctVirus){
 				d.HI_dist_meas -= d.avidity_mut;
 			}
-			if (correctPotency){
-				d.HI_dist_meas -= node.mean_potency_mut;
-			}
+//			if (correctPotency){
+//				d.HI_dist_meas -= node.mean_potency_mut;
+//			}
 		}else{
 			d.HI_dist_meas = 'NaN';
 		}
