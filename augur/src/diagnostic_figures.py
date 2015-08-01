@@ -86,7 +86,7 @@ def cumulative_antigenic(myflu, n=10):
 ######################################
 def slope_vs_dHI(myflu):
     plt.figure(figsize=(1.6*figheight, figheight))
-    plt.subplot('121')
+    ax = plt.subplot('121')
     slopes = []
     cutoff_freq = 0.25
     tmp_pivots = myflu.tree.seed_node.pivots
@@ -106,7 +106,7 @@ def slope_vs_dHI(myflu):
     ax.tick_params(axis='both', labelsize=fs)
     slopes = np.array(slopes)
 
-    plt.subplot('122')
+    ax = plt.subplot('122')
     plt.scatter(slopes[:,0], slopes[:,1])
     plt.xlabel('frequency slope', fontsize=fs)
     plt.ylabel('titer drop', fontsize=fs)
