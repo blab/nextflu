@@ -168,8 +168,9 @@ d3.json(path + file_prefix + "HI.json", function(error, json){
 	for (var mut in positions){
 		tmp = positions[mut];
 		var avg=0;
-		for (var i=0; i<tmp.length; i+=1){avg+=tmp[i];}
-		positions[mut] = avg/tmp.length;
+//		for (var i=0; i<tmp.length; i+=1){avg+=tmp[i];}
+//		positions[mut] = avg/tmp.length;
+		positions[mut] = d3.max(tmp);
 	}
 	console.log(Object.keys(positions));
 	structure_HI_mutations = ""
@@ -177,7 +178,7 @@ d3.json(path + file_prefix + "HI.json", function(error, json){
 		var gene = key.split(':')[0];
 		var pos = key.split(':')[1];
 		console.log(positions[key]);
-		var c = dHIColorScale(positions[key]);
+		var c = '[x'+dHIColorScale(positions[key]).substring(1,7).toUpperCase()+']';
 		var chain = (gene=='HA1')?'a':'b'; 
 		structure_HI_mutations+= 'select '+pos+':'+chain+';spacefill 200; color ' +c+';';//' '+pos+':c, '+pos+':e,';
 	}

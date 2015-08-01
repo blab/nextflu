@@ -275,19 +275,22 @@ class process(virus_frequencies):
 			display_effects[self.virus_type][self.resolution] = tmp
 			write_json(display_effects, self.auspice_HI_display_mutations)
 
-	def generate_indexHTML(self):
+	def htmlpath(self):
 		htmlpath = '../auspice/'
 		if self.virus_type is not None: 
 			htmlpath+=self.virus_type+'/'
 		if self.resolution is not None: 
 			htmlpath+=self.resolution+'/'
+		return htmlpath
 
-		if not os.path.isdir(htmlpath): os.makedirs(htmlpath)
+	def generate_indexHTML(self):
+
+		if not os.path.isdir(self.htmlpath()): os.makedirs(self.htmlpath())
 		if "layout" in self.kwargs:
 			tmp_layout=self.kwargs["layout"]
 		else:
 			tmp_layout="auspice"
-		with open(htmlpath+'index.html','w') as out:
+		with open(self.htmlpath()+'index.html','w') as out:
 			out.write("---\ntitle: nextflu / "+self.virus_type+" / "+self.resolution_prefix.rstrip('_')
 					  +"\nlayout: "+tmp_layout
 					  +"\nvirus: "+self.virus_type+"\nresolution: "+self.resolution_prefix.rstrip('_')+"\n")

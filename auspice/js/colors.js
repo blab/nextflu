@@ -45,9 +45,10 @@ var cHIColorScale = d3.scale.linear()
 	.domain(HIColorDomain)
 	.range(colors[10]);
 
-var dHIColorScale = d3.scale.threshold()
-	.domain([0, 0.1, 0.3, 0.65, 1.0,5.0])
-	.range(['blue', 'green', 'yellow' ,'orange', 'red','red']);
+var dHIColorScale = d3.scale.linear().clamp([true])
+	.domain(genericDomain.map(function (d){return 1.5*d;}))
+	.range(colors[10]);
+//	.range(['blue', 'green', 'yellow' ,'orange', 'red','red']);
 
 var HIColorScale = function(c){
 	if (c!='NaN'){
