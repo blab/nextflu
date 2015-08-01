@@ -3,44 +3,10 @@ import seaborn as sns
 from tree_titer import plot_tree, plot_dHI_distribution
 import cPickle, argparse
 
-fs=18
+fs=14
+figheight=4
+fmts = ['.pdf', '.png','.svg']
 
-def titer_vs_distances(params):
-	sns.set_style('darkgrid')
-	virus_config.update(params.__dict__)
-	# pass all these arguments to the processor: will be passed down as kwargs through all classes
-	myflu = flu_process(**virus_config) 
-	myflu.load()
-	myflu.determine_variable_positions()
-	fig_prefix = 'figures/'+params.prefix.split('/')[-1]
-	mtype = "tree" if params.map_to_tree else "mutation"
-
-	####  FIT VALIDATION  #######################################################
-	myflu.map_HI(training_fraction=params.training, method = 'nnl1reg', map_to_tree = params.map_to_tree, force_redo=True,
-		lam_HI=params.reg, lam_pot=params.pot, lam_avi=params.avi, subset_strains = params.train_strains)
-
-	dists = []
-	for (test, serum), val in myflu.HI_normalized.iteritems():
-		muts = myflu.get_mutations(serum[0], test)
-		ref_node = myflu.node_lookup[serum[0]]
-		test_node = myflu.node_lookup[test]
-		ref_aaseq = myflu.get_total_peptide(ref_node)
-		test_aaseq = myflu.get_total_peptide(test_node)
-
-		hamming_dist = np.sum(np.fromstring(ref_node.seq, 'S1')!=np.fromstring(test_node.seq, 'S1'))
-		epidist = myflu.epitope_distance(ref_aaseq, test_aaseq)
-		nonepidist = myflu.nonepitope_distance(ref_aaseq, test_aaseq)
-		rbsdist = myflu.receptor_binding_distance(ref_aaseq, test_aaseq)
-		correction = myflu.virus_effect[mtype][test] + myflu.serum_potency[mtype][serum]
-		if params.map_to_tree:
-			dHI = myflu.predict_HI_tree(test, serum) - correction
-		else:
-			dHI = myflu.predict_HI_mutations(test, serum) - correction
-		val_corrected = val - correction
-
-		dists.append([hamming_dist, len(muts), epidist, rbsdist, dHI, val_corrected, val])
-
-	return np.array(dists), myflu
 
 def validation_figures(params):
 	sns.set_style('darkgrid')
@@ -144,16 +110,17 @@ def validation_figures(params):
 				dists.sort(reverse=True)
 				additivity_test['control'].append(dists[0]-dists[1])
 
-	plt.figure()
+	plt.figure(figsize=(figheight,figheight))
 	ax=plt.subplot(111)
 	plt.hist(additivity_test['control'], alpha=0.7,normed=True, bins = np.linspace(0,3,18), 
-	         label = 'Control, mean='+str(np.round(np.mean(additivity_test['control']),2)))
+	         label = 'control, mean='+str(np.round(np.mean(additivity_test['control']),2)))
 	plt.hist(additivity_test['test'], alpha=0.7,normed=True, bins = np.linspace(0,3,18),
-	         label = 'Quartett, mean='+str(np.round(np.mean(additivity_test['test']),2)))
+	         label = 'quartett, mean='+str(np.round(np.mean(additivity_test['test']),2)))
 	ax.tick_params(axis='both', labelsize=fs)
-	plt.xlabel('deviation', fontsize = fs)
+	plt.xlabel('difference between top two', fontsize = fs)
 	plt.legend(fontsize=fs)
-	plt.savefig(fig_prefix+'HI_titer_tree_additivity.png')
+	plt.tight_layout()
+	for fmt in fmts: plt.savefig(fig_prefix+'HI_titer_tree_additivity'+fmt)
 
 	#### titer effects ###############################################################
 	dHI_list = []

@@ -314,7 +314,13 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 			self.generate_indexHTML()
 
 		if 'HIvalidate' in steps:
+			from diagnostic_figures import slope_vs_dHI, tree_additivity_symmetry, fmts
+
 			print "--- generating validation figures " + time.strftime("%H:%M:%S") + " ---"
+			for model in ['tree', 'mutation']:
+				tree_additivity_symmetry(self, model)
+				for fmt in fmts: plt.savefig(self.htmlpath()+'HI_symmetry_'+model+fmt)
+			self.slopes = slope_vs_dHI(self)
 			self.generate_validation_figures()
 
 
@@ -354,74 +360,3 @@ if __name__=="__main__":
 				   lam_pot = virus_config['lam_pot'],
 				   )
 
-	from random import sample
-	leaf_sample = sample([leaf for leaf in myH3N2.tree.leaf_iter() 
-						  if leaf.num_date>2014], 10)
-
-	trunk_effects = []
-	trunk_muts = []
-	trunk_mut_effects = []
-	for node in leaf_sample:
-		tmp_muts = []
-		tmp_effects = []
-		while node.parent_node is not None:
-			tmp_effects.append(node.dHI)
-			tmp_muts.extend(node.aa_muts.items())
-			node = node.parent_node
-
-		tmp_muts = [x for x in tmp_muts if x[1]!='']
-		tmp_mut_effects = {}
-		for muts in tmp_muts:
-			gene = muts[0]
-			for pos in muts[1].split(','):
-				tmp_mut = (gene, pos)
-				if tmp_mut in myH3N2.mutation_effects:
-					tmp_mut_effects[tmp_mut] = myH3N2.mutation_effects[tmp_mut]
-				else:
-					tmp_mut_effects[tmp_mut] = 0
-
-		trunk_effects.append(tmp_effects)
-		trunk_muts.append(tmp_muts)
-		trunk_mut_effects.append(tmp_mut_effects)
-
-	plt.figure()
-	for eff in trunk_effects[:1]:
-		print "sum of effects on trunk", np.sum(eff)
-		tmp_eff = np.array(eff)
-		plt.hist(tmp_eff[tmp_eff>1e-4],  bins=np.linspace(0,2,21), 
-				 label='tree: '+str(np.round(np.mean(tmp_eff>1e-4), 2)), alpha=0.5)
-#		plt.plot(sorted(eff), np.linspace(1,0,len(eff)))
-
-#	plt.figure()
-	for eff in trunk_mut_effects[:1]:
-		print "sum of mutation effects on trunk:", np.sum(eff.values())
-		tmp_eff = np.array(eff.values())
-		plt.hist(tmp_eff[tmp_eff>1e-4],  bins=np.linspace(0,2,21), 
-				 label='mutations: '+str(np.round(np.mean(tmp_eff>1e-4), 2)), alpha=0.5)
-#		plt.plot(sorted(eff.values()), np.linspace(1,0,len(eff)))
-	plt.legend()
-	plt.savefig("trunk_effectsize_histogram.png")
-
-	unexplained_variance = []
-	cvals = np.linspace(0,2,40)
-	for cutoff in cvals:
-		myH3N2.validate(plot=False, cutoff=cutoff)
-		unexplained_variance.append([cutoff,myH3N2.rms_error**2, np.var(myH3N2.validation.values())])
-		print "effect cutoff:", cutoff, unexplained_variance[-1]
-	unexplained_variance=np.array(unexplained_variance)
-	plt.figure()
-	plt.plot(unexplained_variance[:,0], unexplained_variance[:,1]/unexplained_variance[:,2])
-
-	plt.figure()
-	slopes = []
-	tmp_pivots = myH3N2.tree.seed_node.pivots
-	for node in myH3N2.tree.postorder_internal_node_iter():
-		tmp_freq = node.freq['global']
-		if tmp_freq is not None and tmp_freq[0]<0.2 and np.max(tmp_freq)>0.4:
-			ii = np.argmax(tmp_freq>0.3)
-			slope = (tmp_freq[ii]-tmp_freq[ii-1])/(tmp_pivots[ii]-tmp_pivots[ii-1])
-			offset = tmp_pivots[ii-1] + (0.3-tmp_freq[ii-1])/slope
-			slopes.append([node.dHI, slope])
-			plt.plot(tmp_pivots-offset, tmp_freq, c=mpl.cm.jet(node.dHI/1.0))
-
-	slopes = np.array(slopes)

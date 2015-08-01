@@ -7,11 +7,7 @@ from matplotlib import pyplot as plt
 from itertools import izip
 from virus_filter import fix_name
 import pandas as pd
-
-fs = 12
-plt.locator_params(nbins=4)
-fmts = ['.pdf','.svg','.png']
-figheight = 4
+from diagnostic_figures import fs, fmts, figheight
 
 def myopen(fname, mode='r'):
 	if fname[-2:]=='gz':
@@ -321,7 +317,7 @@ class HI_tree(object):
 
 		# set up the quadratic matrix containing the deviation term (linear xterm below)
 		# and the l2-regulatization of the avidities and potencies
-		P1 = np.zeros((n_params+HI_sc,n_params+HI_sc))
+		P1 = np.zeros((n_params,n_params))
 		P1[:n_params, :n_params] = self.TgT
 		for ii in xrange(HI_sc, HI_sc+n_sera):
 			P1[ii,ii]+=self.lam_pot
@@ -330,18 +326,16 @@ class HI_tree(object):
 		P = matrix(P1)
 
 		# set up cost for auxillary parameter and the linear cross-term
-		q1 = np.zeros(n_params+HI_sc)
-		q1[:n_params] = -np.dot( self.HI_dist, self.tree_graph)
-		q1[n_params:] = self.lam_HI
+		q1 = np.zeros(n_params)
+		q1[:n_params] = -np.dot(self.HI_dist, self.tree_graph) 
+		q1[:HI_sc] += self.lam_HI
 		q = matrix(q1)
 
 		# set up linear constraint matrix to enforce positivity of the
 		# dHIs and bounding of dHI by the auxillary parameter
-		h = matrix(np.zeros(2*HI_sc)) 	# Gw <=h
-		G1 = np.zeros((2*HI_sc,n_params+HI_sc))
+		h = matrix(np.zeros(HI_sc)) 	# Gw <=h
+		G1 = np.zeros((HI_sc,n_params))
 		G1[:HI_sc, :HI_sc] = -np.eye(HI_sc)
-		G1[HI_sc:, :HI_sc] = np.eye(HI_sc)
-		G1[HI_sc:, n_params:] = -np.eye(HI_sc)
 		G = matrix(G1)
 		W = solvers.qp(P,q,G,h)
 		self.params = np.array([x for x in W['x']])[:n_params]
@@ -450,11 +444,6 @@ class HI_tree(object):
 
 	def generate_validation_figures(self):
 		import matplotlib.pyplot as plt
-		htmlpath = '../auspice/'
-		if self.virus_type is not None: 
-			htmlpath+=self.virus_type+'/'
-		if self.resolution is not None: 
-			htmlpath+=self.resolution+'/'
 
 		lam_pot = self.lam_pot
 		lam_avi = self.lam_avi
@@ -462,8 +451,6 @@ class HI_tree(object):
 		# summary figures using previously determined models
 		for map_to_tree, model in [(True, 'tree'), (False,'mutation')]:
 			try:
-				self.check_symmetry(plot=True,model_type=model)
-				for fmt in fmts: plt.savefig(htmlpath+'HI_symmetry_'+model+fmt)
 				plt.figure(figsize=(1.3*figheight,figheight))
 				ax = plt.subplot(121)
 				plt.hist(self.virus_effect[model].values(), bins=np.linspace(-2,2,21), normed=True)
@@ -478,9 +465,9 @@ class HI_tree(object):
 				plt.tight_layout()
 				ax.set_xticks([-4,-2,0,2,4])
 				ax.tick_params(axis='both', labelsize=fs)
-				for fmt in fmts: plt.savefig(htmlpath+'HI_effects_'+model+fmt)
+				for fmt in fmts: plt.savefig(self.htmlpath()+'HI_effects_'+model+fmt)
 			except:
-				print "can't check HI_symmetry"
+				print "can't plot effect distributions"
 
 
 		for map_to_tree, model in [(True, 'tree'), (False,'mutation')]:
@@ -488,12 +475,12 @@ class HI_tree(object):
 						lam_pot = lam_pot, force_redo=True, map_to_tree=map_to_tree, subset_strains=True)
 
 			self.validate(plot=True)
-			for fmt in fmts: plt.savefig(htmlpath+'HI_prediction_virus_'+model+fmt)
+			for fmt in fmts: plt.savefig(self.htmlpath()+'HI_prediction_virus_'+model+fmt)
 
 			self.map_HI(training_fraction=0.9, method='nnl1reg',lam_HI=lam_HI, lam_avi=lam_avi, 
 						lam_pot = lam_pot, force_redo=True, map_to_tree=map_to_tree)
 			self.validate(plot=True)
-			for fmt in fmts: plt.savefig(htmlpath+'HI_prediction_'+model+fmt)
+			for fmt in fmts: plt.savefig(self.htmlpath()+'HI_prediction_'+model+fmt)
 
 		self.save_trunk_cHI()
 
@@ -543,38 +530,6 @@ class HI_tree(object):
 					 +'/'+str(round(self.rms_error, 2))+' (abs/rms)', fontsize = fs-2)
 			plt.tight_layout()
 		return a.shape[0]
-
-	def check_symmetry(self, plot=False, model_type = 'tree'):
-		reciprocal_measurements = []
-		reciprocal_measurements_titers = []
-		for (testvir, serum) in self.HI_normalized:
-			tmp_recip = [v for v in self.HI_normalized if serum[0]==v[0] and testvir==v[1][0]]
-			for v in tmp_recip:
-				val_fwd = self.HI_normalized[(testvir,serum)]
-				val_bwd = self.HI_normalized[v]
-				diff_uncorrected = val_fwd - val_bwd
-				diff_corrected = (val_fwd - self.serum_potency[model_type][serum] - self.virus_effect[model_type][testvir])\
-								-(val_bwd - self.serum_potency[model_type][v[1]] - self.virus_effect[model_type][serum[0]])
-				val_bwd = self.HI_normalized[v]
-				reciprocal_measurements.append([testvir, serum, diff_uncorrected, diff_corrected])
-				reciprocal_measurements_titers.append([testvir, serum, val_fwd, val_bwd, 
-				                                      (val_fwd - self.serum_potency[model_type][serum] - self.virus_effect[model_type][testvir]),
-	                      							  (val_bwd - self.serum_potency[model_type][v[1]] - self.virus_effect[model_type][serum[0]]),
-													  ])
-		if plot:
-			import matplotlib.pyplot as plt
-			import seaborn as sns
-			sns.set_style('darkgrid')
-			plt.figure(figsize=(1.3*figheight, figheight))
-			ax = plt.subplot(111)
-			plt.text(0.05, 0.93,  ('tree model' if model_type=='tree' else 'mutation model'), 
-			         weight='bold', fontsize=fs, transform=plt.gca().transAxes)
-			plt.hist([x[2] for x in reciprocal_measurements],alpha=0.7, label="raw log2 titers", normed=True)
-			plt.hist([x[3] for x in reciprocal_measurements],alpha=0.7, label="tree component", normed=True)
-			plt.xlabel('distance asymmetry', fontsize=fs)
-			ax.tick_params(axis='both', labelsize=fs)
-			plt.legend(fontsize=fs)
-			plt.tight_layout()
 
 
 	def add_titers(self):
@@ -655,9 +610,11 @@ class HI_tree(object):
 		np.savetxt('data/'+self.prefix+self.resolution+'_trunk_muts.txt', trunk_muts)
 
 		from random import sample
-		n_leafs = 10
-		leaf_sample = sample([leaf for leaf in self.tree.leaf_iter() 
-							  if leaf.num_date>2014.5], n_leafs)
+		n_leafs = 1
+		leaf_sample = []
+		for y in range(int(self.time_interval[0]), int(self.time_interval[1])):
+			leaf_sample.extend(sample([leaf for leaf in self.tree.leaf_iter()
+							  if leaf.num_date>y and leaf.num_date<y+1], n_leafs))
 
 		cHI_trunk = []
 		for node in leaf_sample:

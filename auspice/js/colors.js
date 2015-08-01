@@ -45,9 +45,10 @@ var cHIColorScale = d3.scale.linear()
 	.domain(HIColorDomain)
 	.range(colors[10]);
 
-var dHIColorScale = d3.scale.threshold()
-	.domain([0, 0.1, 0.3, 0.65, 1.0,5.0])
-	.range(['blue', 'green', 'yellow' ,'orange', 'red','red']);
+var dHIColorScale = d3.scale.linear().clamp([true])
+	.domain(genericDomain.map(function (d){return 1.5*d;}))
+	.range(colors[10]);
+//	.range(['blue', 'green', 'yellow' ,'orange', 'red','red']);
 
 var HIColorScale = function(c){
 	if (c!='NaN'){
@@ -294,14 +295,14 @@ function colorByHIDistance(){
 		.style("font-size", function (d) {if (d==focusNode) {return "32px";} else {return "24px";}})
 		.text(function (d) {if (d==focusNode) {return '\uf05b';} else {return '\uf10c';}});
 
+	console.log("Using HI model: "+HImodel);
+	console.log("Color by HI Distance from "+focusNode.strain);
+	console.log("correcting for virus effect: "+correctVirus);
+	console.log("correction for serum effect: "+correctPotency);
+
 	calcHImeasured(focusNode, rootNode);
 	calcHImutations(focusNode, rootNode);
 	calcHItree(focusNode, rootNode);
-
-	console.log("Color by HI Distance from "+focusNode.strain);
-	console.log("Using HI model: "+HImodel);
-	console.log("correcting for virus effect: "+correctVirus);
-	console.log("correction for serum effect: "+correctPotency);
 
 	colorScale = HIColorScale;
 	if (HImodel=='mutation'){
