@@ -64,6 +64,7 @@ Thumbs.db
 # graphics output #
 ###################
 *png
+*svg
 
 # cluster log #
 *.sh.*
