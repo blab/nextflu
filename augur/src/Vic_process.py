@@ -234,7 +234,7 @@ if __name__=="__main__":
 	if params.interval is not None and len(params.interval)==2 and params.interval[0]<params.interval[1]:
 		params.time_interval = (params.interval[0], params.interval[1])
 	dt= params.time_interval[1]-params.time_interval[0]
-	params.pivots_per_year = 12.0 if dt<5 else 6.0 if dt<10 else 3.0
+	params.pivots_per_year = 12.0 if dt<5 else 6.0
 	steps = all_steps[all_steps.index(params.start):(all_steps.index(params.stop)+1)] + ["HIvalidate"]
 	if params.skip is not None:
 		for tmp_step in params.skip:

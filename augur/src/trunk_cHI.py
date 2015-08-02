@@ -40,8 +40,8 @@ plt.savefig('cHI_trunk.png')
 flist = glob.glob('data/*'+res+'_cHI_path.pkl')
 flist.extend(glob.glob('data/*'+'7y'+'_cHI_path.pkl'))
 
-plt.figure(figsize=(1.4*figheight, figheight))
-ax=plt.subplot(111)
+plt.figure(figsize=(2*figheight, figheight))
+ax=plt.subplot(121)
 cols = {flu:col for flu, col in zip(['H3N2', 'H1N1pdm', 'Yam', 'Vic'], sns.color_palette(n_colors=4))}
 all_path = defaultdict(list)
 for fname in flist:
@@ -49,23 +49,34 @@ for fname in flist:
     with open(fname) as ifile:
         cHI_path = pickle.load(ifile)
     # add multiple path from leaves to the root
+    if flu=='H3N2':
+        ax = plt.subplot(121)
+    else:
+        ax = plt.subplot(122)        
     for p in cHI_path:
-        all_path[flu].extend(p)
-        plt.plot(p[-1,0], p[-1,1], 'o', ls='none', c=cols[flu])
-        plt.plot(p[:,0], p[:,1], ls='-', c=cols[flu], alpha=0.2)
+        all_path[flu].extend([p[-1,:]])
+        ax.plot(p[-1,0], p[-1,1], 'o', ls='none', c=cols[flu])
+        ax.plot(p[:,0], p[:,1], ls='-', c=cols[flu], alpha=0.2)
 
 # add linear regression for each flu type and add labels
 for flu in all_path:
+    if flu=='H3N2':
+        ax = plt.subplot(121)
+    else:
+        ax = plt.subplot(122)        
     R = linregress(np.array(all_path[flu]))
-    t = np.array([1990,2015])
-    plt.plot(t,R[1]+R[0]*t, c = cols[flu], lw=2, ls='-',
+    t = np.array([2007 if flu=='H1N1pdm' else 1993,2015])
+    ax.plot(t,R[1]+R[0]*t, c = cols[flu], lw=2, ls='--',
              label= flu+r', $\mu='+str(np.round(R[0],2))+'$')
-plt.xlim([1995,2017])
-plt.ylim([-0.5, 19])
-ax.tick_params(axis='both', labelsize=fs)
-plt.ylabel(r'cumulative antigenic change $[\log_2]$', fontsize=fs)
-plt.xlabel(r'year', fontsize=fs)
-plt.legend(loc=2, fontsize = fs-2)
+#plt.ylim([-0.5, 19])
+for ai,ax in enumerate([plt.subplot(121), plt.subplot(122)]):
+    ax.tick_params(axis='both', labelsize=fs)
+    ax.set_xlim([1995,2017])
+    ax.set_ylim([-0.5, 4 if ai else 19])
+    ax.set_yticks(range(4) if ai else [0,5,10,15])
+    if ai==0: ax.set_ylabel(r'cumulative antigenic change $[\log_2]$', fontsize=fs)
+    ax.set_xlabel(r'year', fontsize=fs)
+    ax.legend(loc=2, fontsize = fs-2)
 plt.tight_layout()
 
 for fmt in fmts: plt.savefig('cHI_path'+fmt)
