@@ -96,7 +96,11 @@ def slope_vs_dHI(myflu):
             ii = np.argmax(tmp_freq>cutoff_freq)
             slope = (tmp_freq[ii]-tmp_freq[ii-1])/(tmp_pivots[ii]-tmp_pivots[ii-1])
             offset = tmp_pivots[ii-1] + (cutoff_freq-tmp_freq[ii-1])/slope
-            slopes.append([node.dHI, slope, np.max(tmp_freq)])
+            if ii+3<len(tmp_freq):
+                dfreq = tmp_freq[ii+3]-tmp_freq[ii]
+            else:
+                dfreq = 0
+            slopes.append([node.dHI, slope, np.max(tmp_freq), dfreq])
             plt.plot(tmp_pivots-offset, tmp_freq, lw=2, c=cm.jet(node.dHI/2.0), alpha=min(1.0, max(node.dHI, 0.3)))
 
     plt.xlabel('time', fontsize=fs)
