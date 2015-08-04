@@ -243,6 +243,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.text(tipLabelText);
 	}
 
+
 	var tipCircles = treeplot.selectAll(".tip")
 		.data(tips)
 		.enter()
@@ -266,6 +267,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
   		})		
 		.on('mouseout', virusTooltip.hide);
 
+
 	var vaccineCircles = treeplot.selectAll(".vaccine")
 		.data(vaccines)
 		.enter()
@@ -283,6 +285,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		})
 		.on('mouseout', virusTooltip.hide);
 
+	var serumWidth = 10;
 	var serumCircles = treeplot.selectAll(".serum")
 		.data(sera)
 		.enter()
@@ -291,11 +294,11 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.attr('text-anchor', 'middle')
 		.attr('dominant-baseline', 'central')
 		.style('font-family', 'FontAwesome')
-		.style("font-size", function (d) {if (d==focusNode) {return "32px";} else {return "24px";}})
 		.style("fill", function (d){if (d==focusNode) {return '#FF3300';} else {return '#555555';}})
-		.text(function (d) {if (d==focusNode) {return '\uf05b';} else {return '\uf10c';}})
+		.style("font-size", function (d) {if (d==focusNode) {return "30px";} else {return "16px";}})
+		.text(function (d) {if (d==focusNode) {return '\uf05b';} else {return '\uf0c8';}})
 		.style("visibility", serumVisibility)
-		.style("cursor", "default")
+		.style("cursor", "crosshair")
 		.on('mouseover', function(d) {
 			virusTooltip.show(d, this);
 		})
@@ -305,6 +308,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			document.getElementById("coloring").value = "HI_dist";
 			colorByHIDistance();
 		});
+
 
 	/*
 	 * zoom into the tree upon click onto a branch

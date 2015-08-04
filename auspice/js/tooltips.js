@@ -42,7 +42,7 @@ var virusTooltip = d3.tip()
 		// following may or may not be present
 		if ((typeof focusNode != "undefined")){
 			string += "<div class=\"smallspacer\"></div>";
-			string += "HI rel to "+focusNode.strain;
+			string += "HI against serum from "+focusNode.strain;
 			string += "<div class=\"smallspacer\"></div>";
 			string += "<div class=\"smallnote\">"
 			string += '<table class="table table-condensed"><thead><tr><td>Serum</td><td>&#916log<sub>2</sub></td><td>heterol.</td><td>autol.</td></tr></thead><tbody>';

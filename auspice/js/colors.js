@@ -291,10 +291,10 @@ function colorByHIDistance(){
 	}
 
 	treeplot.selectAll(".serum")
-		.style("fill", function (d){if (d==focusNode) {return '#FF3300';} else {return '#555555';}})
-		.style("font-size", function (d) {if (d==focusNode) {return "32px";} else {return "24px";}})
-		.text(function (d) {if (d==focusNode) {return '\uf05b';} else {return '\uf10c';}});
-
+	.style("fill", function (d){if (d==focusNode) {return '#FF3300';} else {return '#555555';}})
+		.style("font-size", function (d) {if (d==focusNode) {return "30px";} else {return "16px";}})
+		.text(function (d) {if (d==focusNode) {return '\uf05b';} else {return '\uf0c8';}});
+	
 	console.log("Using HI model: "+HImodel);
 	console.log("Color by HI Distance from "+focusNode.strain);
 	console.log("correcting for virus effect: "+correctVirus);
