@@ -295,7 +295,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.attr('dominant-baseline', 'central')
 		.style('font-family', 'FontAwesome')
 		.style("fill", function (d){if (d==focusNode) {return '#FF3300';} else {return '#555555';}})
-		.style("font-size", function (d) {if (d==focusNode) {return "30px";} else {return "16px";}})
+		.style("font-size", function (d) {if (d==focusNode) {return "30px";} else {return "12px";}})
 		.text(function (d) {if (d==focusNode) {return '\uf05b';} else {return '\uf0c8';}})
 		.style("visibility", serumVisibility)
 		.style("cursor", "crosshair")

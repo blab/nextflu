@@ -292,7 +292,7 @@ function colorByHIDistance(){
 
 	treeplot.selectAll(".serum")
 	.style("fill", function (d){if (d==focusNode) {return '#FF3300';} else {return '#555555';}})
-		.style("font-size", function (d) {if (d==focusNode) {return "30px";} else {return "16px";}})
+		.style("font-size", function (d) {if (d==focusNode) {return "30px";} else {return "12px";}})
 		.text(function (d) {if (d==focusNode) {return '\uf05b';} else {return '\uf0c8';}});
 	
 	console.log("Using HI model: "+HImodel);
