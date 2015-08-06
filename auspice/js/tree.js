@@ -12,6 +12,8 @@ var tipRadius = 4.0;
 var left_margin = 10;
 var bottom_margin = 10;
 var top_margin = 10;
+var branchLabelVisFraction = 0.05;
+
 if ((typeof branch_labels != "undefined")&&(branch_labels)) {top_margin +=15;}
 var right_margin = 10;
 
@@ -98,6 +100,9 @@ function branchLabelText(d) {
 	if (branch_labels){
 		for (tmp_gene in d.aa_muts){
 			if (d.aa_muts[tmp_gene].length){
+				if (tmp_str!=''){
+					tmp_str+=', ';
+				}
 				tmp_str+=tmp_gene+":"+d.aa_muts[tmp_gene].replace(/,/g, ', ');
 			}
 		}
@@ -119,7 +124,7 @@ function tipLabelText(d) {
 
 function branchLabelSize(d) {
 	var n = nDisplayTips;
-	if (d.fullTipCount>n/15) {
+	if (d.fullTipCount>n*branchLabelVisFraction) {
 		return "10px";
 	}
 	else {
