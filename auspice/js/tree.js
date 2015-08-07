@@ -472,8 +472,8 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		var tmp = document.getElementById("treeplot-container");
 		var svg_tmp = tmp.getElementsByTagName("svg")[0];
 		// Extract the data as SVG text string
-		var svg_xml = (new XMLSerializer).serializeToString(svg_tmp);
-		var blob = new Blob([svg_xml.replace("cursor: pointer;", "")], {type: "text/plain;charset=utf-8"});
+		var svg_xml = (new XMLSerializer).serializeToString(svg_tmp).replace(/cursor: pointer;/g, "");
+		var blob = new Blob([svg_xml], {type: "text/plain;charset=utf-8"});
 		saveAs(blob,'tree.svg');
 	}
 	d3.select("#svgexport")
