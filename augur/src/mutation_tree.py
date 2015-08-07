@@ -4,7 +4,7 @@ from virus_clean import virus_clean
 from virus_filter import flu_filter
 from collections import defaultdict
 from process import process, virus_config
-from Bio import SeqIO
+from Bio import SeqIO, AlignIO
 from Bio.Seq import Seq
 from Bio.Align import MultipleSeqAlignment
 import numpy as np
@@ -31,6 +31,7 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 		self.formats = formats
 		self.outdir = outdir.rstrip('/')+'/'
 		self.auspice_tree_fname = 		self.outdir + 'tree.json'
+		self.auspice_align_fname = 		self.outdir + 'aln.fasta'
 		self.auspice_sequences_fname = 	self.outdir + 'sequences.json'
 		self.auspice_frequencies_fname = None
 		self.auspice_meta_fname = 		self.outdir + 'meta.json'
@@ -155,7 +156,10 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 
 		Phylo.write(tmp_tree, self.outdir+'tree.nwk', 'newick')
 
-		self.export_to_auspice(tree_fields = ['aa_muts','num_date']+self.fasta_fields.values())
+		if self.cds is None:
+			self.export_to_auspice(tree_fields = ['nuc_muts','num_date']+self.fasta_fields.values(), seq='nuc')
+		else:
+			self.export_to_auspice(tree_fields = ['aa_muts','num_date']+self.fasta_fields.values())
 
 	def make_strain_names_unique(self):
 		strain_to_seq = defaultdict(list)
@@ -170,6 +174,7 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 
 	def run(self, raxml_time_limit):
 		self.align()
+		AlignIO.write(self.viruses, self.auspice_align_fname, 'fasta')
 		self.remove_insertions()
 		print "--- Tree	 infer at " + time.strftime("%H:%M:%S") + " ---"
 		self.infer_tree(raxml_time_limit)
