@@ -33,7 +33,7 @@ function parse_gt_string(gt){
 			}
 		}
 		if (typeof region == "undefined") region="global";
-		// sort of this is a multi mutation genotype
+		// sort if this is a multi mutation genotype
 		if (positions.length>1){
 			positions.sort(function (a,b){
 				return parseInt(a.substring(0,a.length-1)) - parseInt(b.substring(0,b.length-1));
@@ -63,10 +63,21 @@ function get_frequencies(region, gt){
 		for (var pi=0; pi<freq.length; pi++){
 			freq[pi]+=frequencies["genotypes"][region][gt][pi];
 		}
-	}else if (frequencies["mutations"][region][gt]!=undefined) {
-		console.log(gt+" found as mutation");
-		for (var pi=0; pi<freq.length; pi++){
-			freq[pi]+=frequencies["mutations"][region][gt][pi];
+	}else if (frequencies["mutations"] !== undefined){
+		var tmp_mut = gt.split(':');
+		var mut ="";
+		if (tmp_mut.length==1){
+			mut = default_gene+":"+gt; 
+		}else{
+			mut = gt;
+		}
+		if (frequencies["mutations"][region][mut]!==undefined) {
+			console.log(gt+" found as mutation");
+			for (var pi=0; pi<freq.length; pi++){
+				freq[pi]+=frequencies["mutations"][region][mut][pi];
+			}
+		}else{
+			console.log("not found "+gt);
 		}
 	}else{
 		console.log("not found "+gt);		
