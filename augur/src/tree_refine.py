@@ -19,15 +19,17 @@ class tree_refine(object):
 		self.max_length = max_length
 		self.dt = dt
 
-	def refine_generic(self):
+	def refine_generic(self, remove_outgroup=True):
 		'''
 		run through the generic refining methods, 
 		will add strain attributes to nodes and translate the sequences -> produces aa_aln
 		'''
 		self.node_lookup = {node.taxon.label:node for node in self.tree.leaf_iter()}
-		self.remove_outgroup()
+		if remove_outgroup:
+			self.remove_outgroup()
 		self.node_lookup.update({node.taxon.label.lower():node for node in self.tree.leaf_iter()})
 		self.node_lookup.update({node.taxon.label.upper():node for node in self.tree.leaf_iter()})
+
 		self.collapse()
 		self.ladderize()
 		self.add_node_attributes()

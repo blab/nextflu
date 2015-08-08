@@ -228,6 +228,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.style("stroke-width", branchStrokeWidth)
 		.style("stroke", branchStrokeColor)		
 		.style("cursor", "pointer")
+		.style("fill", "none")
 		.on('mouseover', function (d){
 			linkTooltip.show(d.target, this);
 			if ((colorBy!="genotype")&(typeof addClade !="undefined")){
@@ -551,6 +552,18 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	setMargins();
 
 	resize();
+
+	function exportTreeSVG(){
+		var tmp = document.getElementById("treeplot-container");
+		var svg_tmp = tmp.getElementsByTagName("svg")[0];
+		// Extract the data as SVG text string
+		var svg_xml = (new XMLSerializer).serializeToString(svg_tmp).replace(/cursor: pointer;/g, "");
+		var blob = new Blob([svg_xml], {type: "text/plain;charset=utf-8"});
+		saveAs(blob,'tree.svg');
+	}
+	d3.select("#svgexport")
+		.on("click", exportTreeSVG);
+
 });
 
 d3.json(path + file_prefix + "sequences.json", function(error, json) {

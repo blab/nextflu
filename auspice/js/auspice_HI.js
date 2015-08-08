@@ -5,6 +5,7 @@ var date_select = true;
 {% include_relative d3.tip.js %}
 {% include_relative c3.min.js %}
 {% include_relative JSmol.min.js %}
+{% include_relative FileSaver.js %}
 {% include_relative autocomplete.js %}
 {% include_relative globals.js %}
 {% include_relative HI.js %}
