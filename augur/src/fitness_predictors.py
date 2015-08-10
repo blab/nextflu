@@ -1,12 +1,36 @@
 import dendropy, time
 import numpy as np
-from seq_util import epitope_distance, translate
-from seq_util import nonepitope_distance
+from itertools import izip
+from seq_util import translate
 from io_util import read_json
 from io_util import write_json
 from tree_util import json_to_dendropy
 from tree_util import dendropy_to_json
 from fitness_tolerance import load_mutational_tolerance, calc_fitness_tolerance
+
+epitope_mask = np.fromstring("00000000000000000000000000000000000000000000000000000000000011111011011001010011000100000001001011110011100110101000001100000100000001000110101011111101011010111110001010011111000101011011111111010010001111101110111001010001110011111111000000111110000000101010101110000000000011100100000001011011100000000000001001011000110111111000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", dtype='S1')
+
+def epitope_sites(aa):
+	aaa = np.fromstring(aa, 'S1')
+	return ''.join(aaa[epitope_mask[:len(aa)]=='1'])
+
+def nonepitope_sites(aa):
+	aaa = np.fromstring(aa, 'S1')
+	return ''.join(aaa[epitope_mask[:len(aa)]=='0'])
+	
+def epitope_distance(aaA, aaB):
+	"""Return distance of sequences aaA and aaB by comparing epitope sites"""
+	epA = epitope_sites(aaA)
+	epB = epitope_sites(aaB)
+	distance = sum(a != b for a, b in izip(epA, epB))
+	return distance
+
+def nonepitope_distance(aaA, aaB):
+	"""Return distance of sequences aaA and aaB by comparing non-epitope sites"""
+	neA = nonepitope_sites(aaA)
+	neB = nonepitope_sites(aaB)
+	distance = sum(a != b for a, b in izip(neA, neB))
+	return distance
 
 def calc_epitope_distance(tree, attr='ep', ref = None):
 	'''

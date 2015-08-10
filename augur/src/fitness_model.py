@@ -155,10 +155,10 @@ class fitness_model(object):
 			self.clades_for_season[(s,t)] = []
 			for node in self.tree.postorder_node_iter():
 				if node.frequencies[s]>=min_freq and node.frequencies[s]<max_freq:
-					if max([c.frequencies[s] for c in node.child_nodes()])<node.frequencies[s]:
-						self.clades_for_season[(s,t)].append(node)
-					else:
-						if self.verbose: print "clade fully contained in daughter clade"
+				#	if max([c.frequencies[s] for c in node.child_nodes()])<node.frequencies[s]:
+					self.clades_for_season[(s,t)].append(node)
+				#	else:
+				#		if self.verbose: print "clade fully contained in daughter clade"
 
 
 	def model_fit(self, params):
