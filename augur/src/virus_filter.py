@@ -123,7 +123,7 @@ class virus_filter(object):
 			self.viruses = filter(lambda v: re.match(r'\d\d\d\d', v['date']) is not None, self.viruses)
 			for v in self.viruses:
 				if re.match(r'\d\d\d\d-\d\d-\d\d', v['date']) is None:
-					v['date'] = v['date'][:4]+'-07-01'
+					v['date'] = v['date'][:4]+'-'+format(np.random.randint(12)+1, '02d')+'-01' 
 
 	def subsample(self, viruses_per_month, prioritize = None, all_priority=False, region_specific = True):
 		'''

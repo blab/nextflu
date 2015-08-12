@@ -25,7 +25,8 @@ virus_config.update({
 	# data source and sequence parsing/cleaning/processing
 	'virus':'H3N2',
 	'alignment_file':'data/H3N2_gisaid_epiflu_sequence.fasta.gz',
-	'outgroup':'A/Beijing/32/1992',
+	'outgroup':'A/Texas/1/1977',
+#	'outgroup':'A/Beijing/32/1992',
 	'force_include':'source-data/H3N2_HI_strains.txt',
 	'force_include_all':True,
 	'date_spec':'year',
@@ -53,7 +54,7 @@ virus_config.update({
 
 
 class H3N2_filter(flu_filter):
-	def __init__(self,min_length = 987, **kwargs):
+	def __init__(self,min_length = 900, **kwargs):
 		'''
 		parameters
 		min_length  -- minimal length for a sequence to be acceptable
@@ -99,20 +100,29 @@ class H3N2_filter(flu_filter):
 					"seq": "ATGAAGACTATCATTGCTTTGAGCTACATTCTATGTCTGGTTTTCGCTCAAAAACTTCCTGGAAATGACAATAGCACGGCAACGCTGTGCCTTGGGCACCATGCAGTACCAAACGGAACGATAGTGAAAACAATCACGAATGACCGAATTGAAGTTACTAATGCTACTGAGCTGGTTCAGAATTCCTCAATAGGTGAAATATGCGACAGTCCTCATCAGATCCTTGATGGAGAAAACTGCACACTAATAGATGCTCTATTGGGAGACCCTCAGTGTGATGGCTTTCAAAATAAGAAATGGGACCTTTTTGTTGAACGAAGCAAAGCCTACAGCAACTGTTACCCTTATGATGTGCCGGATTATGCCTCCCTTAGGTCACTAGTTGCCTCATCCGGCACACTGGAGTTTAACAATGAAAGCTTCAATTGGGCTGGAGTCACTCAAAACGGAACAAGTTCTTCTTGCATAAGGGGATCTAATAGTAGTTTCTTTAGTAGATTAAATTGGTTGACCCACTTAAACTCCAAATACCCAGCATTAAACGTGACTATGCCAAACAATGAACAATTTGACAAATTGTACATTTGGGGGGTTCACCACCCGGGTACGGACAAGGACCAAATCTTCCTGTATGCACAATCATCAGGAAGAATCACAGTATCTACCAAAAGAAGCCAACAAGCTGTAATCCCGAATATCGGATCTAGACCCAGAATAAGGGATATCCCTAGCAGAATAAGCATCTATTGGACAATAGTAAAACCGGGAGACATACTTTTGATTAACAGCACAGGGAATCTAATTGCTCCTAGGGGTTACTTCAAAATACGAAGTGGGAAAAGCTCAATAATGAGATCAGATGCACCCATTGGCAAATGCAAGTCTGAATGCATCACTCCAAATGGAAGCATTCCCAATGACAAACCATTCCAAAATGTAAACAGGATCACATACGGGGCCTGTCCCAGATATGTTAAGCAAAGCACTCTGAAATTGGCAACAGGAATGCGAAATGTACCAGAGAGACAAACTAGAGGCATATTTGGCGCAATAGCGGGTTTCATAGAAAATGGTTGGGAGGGAATGGTGGATGGTTGGTACGGCTTCAGGCATCAAAATTCTGAGGGAAGAGGACAAGCAGCAGATCTCAAAAGCACTCAAGCAGCAATCGATCAAATCAATGGGAAGCTGAATCGATTGATCGGGAAAACCAACGAGAAATTCCATCAGATTGAAAAAGAATTCTCAGAAGTAGAAGGGAGAATTCAGGACCTTGAGAAATATGTTGAGGACACAAAAATAGATCTCTGGTCATACAACGCGGAGCTTCTTGTTGCCCTGGAGAACCAACATACAATTGATCTAACTGACTCAGAAATGAACAAACTGTTTGAAAAAACAAAGAAGCAACTGAGGGAAAATGCTGAGGATATGGGCAATGGTTGTTTCAAAATATACCACAAATGTGACAATGCCTGCATAGGATCAATCAGAAATGGAACTTATGACCACGATGTATACAGGGATGAAGCATTAAACAACCGGTTCCAGATCAAGGGAGTTGAGCTGAAGTCAGGGTACAAAGATTGGATCCTATGGATTTCCTTTGCCATATCATGTTTTTTGCTTTGTGTTGCTTTGTTGGGGTTCATCATGTGGGCCTGCCAAAAGGGCAACATTAGGTGCAACATTTGCATTTGA",
 				}
 			]
-		tmp_outgroup = SeqIO.read('source-data/H3N2_outgroup.gb', 'genbank')
+		tmp_outgroup = SeqIO.read('source-data/H3N2_77_outgroup.gb', 'genbank')
 		genome_annotation = tmp_outgroup.features
 		self.cds = {x.qualifiers['gene'][0]:x for x in genome_annotation
 				if 'gene' in x.qualifiers and x.type=='CDS' and 
 				x.qualifiers['gene'][0] in ['SigPep', 'HA1', 'HA2']}
 		self.outgroup = {
-			'strain': 'A/Beijing/32/1992',
+			'strain': 'A/Texas/1/1977',
 			'db': 'IRD',
-			'accession': 'U26830',
-			'date': '1992-01-01',
-			'country': 'China',
-			'region': 'China',
+			'accession': 'CY113261.1',
+			'date': '1977-07-01',
+			'country': 'US',
+			'region': 'NorthAmerica',
 			'seq': str(tmp_outgroup.seq).upper()
 		}
+#		self.outgroup = {
+#			'strain': 'A/Beijing/32/1992',
+#			'db': 'IRD',
+#			'accession': 'U26830',
+#			'date': '1992-01-01',
+#			'country': 'China',
+#			'region': 'China',
+#			'seq': str(tmp_outgroup.seq).upper()
+#		}
 
 class H3N2_clean(virus_clean):
 	def __init__(self,**kwargs):
@@ -123,7 +133,11 @@ class H3N2_clean(virus_clean):
 		virus_hashes = set()
 		new_viruses = []
 		for v in self.viruses:
-			geo = re.search(r'A/([^/]+)/', v.strain).group(1)
+			try:
+				geo = re.search(r'A/([^/]+)/', v.strain).group(1)
+			except:
+				print "clean outbreaks:, couldn't parse geo of ",v.strain
+				continue
 			if geo:
 				vhash = (geo, v.date, str(v.seq))
 				if vhash not in virus_hashes:
@@ -148,7 +162,7 @@ class H3N2_clean(virus_clean):
 		for reassortant_seq in reassortant_seqs:
 			for v in self.viruses:
 				dist = distance(Seq(reassortant_seq), v)
-				if (dist < 0.02):
+				if (dist < 0.02) and v.num_date>2005:
 					remove_viruses.append(v)
 					if self.verbose>1:
 						print "\tremoving", v.strain				
@@ -169,10 +183,10 @@ class H3N2_clean(virus_clean):
 		
 	def clean(self):
 		self.clean_generic()
-		self.clean_outbreaks()
-		print "Number of viruses after outbreak filtering:",len(self.viruses)
-		self.clean_reassortants()
-		print "Number of viruses after reassortant filtering:",len(self.viruses)
+		#self.clean_outbreaks()
+		#print "Number of viruses after outbreak filtering:",len(self.viruses)
+		#self.clean_reassortants()
+		#print "Number of viruses after reassortant filtering:",len(self.viruses)
 		self.clean_outliers()
 		print "Number of viruses after outlier filtering:",len(self.viruses)
 
@@ -293,12 +307,14 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 			if 'genotype_frequencies' in steps: 
 					self.estimate_frequencies(tasks = ["genotypes"])
 			self.dump()
+
+		method = 'nnl1reg'
 		if 'HI' in steps:
 			print "--- Adding HI titers to the tree " + time.strftime("%H:%M:%S") + " ---"
 			self.determine_variable_positions()
-			self.map_HI(training_fraction=1.0, method = 'nnl1reg', 
+			self.map_HI(training_fraction=1.0, method = method, 
 					lam_HI=lam_HI, lam_avi=lam_avi, lam_pot=lam_pot, map_to_tree=True)
-			self.map_HI(training_fraction=1.0, method = 'nnl1reg', force_redo=True,
+			self.map_HI(training_fraction=1.0, method = method, force_redo=True,
 					lam_HI=lam_HI, lam_avi=lam_avi, lam_pot=lam_pot, map_to_tree=False)
 			self.dump()
 
@@ -314,14 +330,23 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 			self.generate_indexHTML()
 
 		if 'HIvalidate' in steps:
-			from diagnostic_figures import slope_vs_dHI, tree_additivity_symmetry, fmts
+			from diagnostic_figures import slope_vs_dHI, tree_additivity_symmetry, fmts, slope_vs_mutation
 
 			print "--- generating validation figures " + time.strftime("%H:%M:%S") + " ---"
+			print "-- number of non-zero branch parameters: ",np.sum([n.dHI>1e-3 for n in self.tree.postorder_node_iter()])
+			print "-- number of non-zero mutation parameters: ",np.sum([val>1e-3 for val in self.mutation_effects.values()])
 			for model in ['tree', 'mutation']:
-				tree_additivity_symmetry(self, model)
-				for fmt in fmts: plt.savefig(self.htmlpath()+'HI_symmetry_'+model+fmt)
-			self.slopes = slope_vs_dHI(self)
-			self.generate_validation_figures()
+				try:
+					tree_additivity_symmetry(self, model)
+					for fmt in fmts: plt.savefig(self.htmlpath()+'HI_symmetry_'+model+fmt)
+				except:
+					print("Can't generate symmetry/additivity figures")
+			try:
+				self.slopes_dHI = slope_vs_dHI(self)
+				self.slopes_muts = slope_vs_mutation(self)
+			except:
+				print("Couldn't derive slopes, probably to small time interval")
+			self.generate_validation_figures(method)
 
 
 if __name__=="__main__":

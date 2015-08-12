@@ -260,20 +260,20 @@ class process(virus_frequencies):
 									for y,m in sorted(self.date_region_count.keys()) ]
 		write_json(meta, self.auspice_meta_fname, indent=0)
 
-		if not self.map_to_tree:
-			try:
-				display_effects = read_json(self.auspice_HI_display_mutations)
-			except:
-				display_effects = {}
-			if self.virus_type not in display_effects: display_effects[self.virus_type]={}
-			substantial_effects = {k[0]+":"+k[1]:val for k, val in self.mutation_effects.iteritems()
-									if val>0.01}
-			write_json(substantial_effects, self.auspice_HI_fname)
-			tmp = [[k[0]+":"+k[1],round(val,2)] for k, val 
-							in self.mutation_effects.iteritems() if val>0.001]
-			tmp.sort(key = lambda x:x[1], reverse=True)
-			display_effects[self.virus_type][self.resolution] = tmp
-			write_json(display_effects, self.auspice_HI_display_mutations)
+		try:
+			display_effects = read_json(self.auspice_HI_display_mutations)
+		except:
+			display_effects = {}
+		if self.virus_type not in display_effects: display_effects[self.virus_type]={}
+		substantial_effects = {k[0]+":"+k[1]:val for k, val in self.mutation_effects.iteritems()
+								if val>0.01}
+		write_json(substantial_effects, self.auspice_HI_fname)
+		tmp = [[k[0]+":"+k[1],round(val,2)] for k, val 
+						in self.mutation_effects.iteritems() if val>0.001]
+		tmp.sort(key = lambda x:x[1], reverse=True)
+		display_effects[self.virus_type][self.resolution] = tmp
+		write_json(display_effects, self.auspice_HI_display_mutations)
+
 
 	def htmlpath(self):
 		htmlpath = '../auspice/'
@@ -284,7 +284,6 @@ class process(virus_frequencies):
 		return htmlpath
 
 	def generate_indexHTML(self):
-
 		if not os.path.isdir(self.htmlpath()): os.makedirs(self.htmlpath())
 		if "layout" in self.kwargs:
 			tmp_layout=self.kwargs["layout"]
@@ -305,13 +304,18 @@ class process(virus_frequencies):
 			out.write('var time_window = '+str(2*dt//3)+';\n')
 			out.write('var time_ticks=['+', '.join(map(str, np.arange(np.ceil(self.time_interval[0]), np.ceil(self.time_interval[1]), step)))+'];\n')
 			if "js_vars" in self.kwargs:
-				for vname, val in self.kwargs['js_vars'].iteritems():
+				for vname, val in sorted(self.kwargs['js_vars'].items(), key=lambda x:x[1], reverse = True):
 					if isinstance(val, basestring):
 						out.write('var '+vname+' = "'+val+'";\n')
 					else:						
 						out.write('var '+vname+' = '+str(val)+';\n')
 			out.write('{%include '+self.virus_type+'_meta.js %}\n')
 			out.write('</script>\n\n')
+
+	def export_HI_mutation_effects(self):
+		with open(self.htmlpath()+'HI_mutation_effects.tsv') as ofile:
+			for mut, val in self.mutation_effects.iteritems():
+				ofile.write(mut+'\t'+str(np.round(val,4))+'\n')
 
 	def align(self, fast=False):
 		'''

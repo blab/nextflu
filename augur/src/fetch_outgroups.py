@@ -3,10 +3,11 @@ from StringIO import StringIO
 
 Entrez.email = "richard.neher@tuebingen.mpg.de"     # Always tell NCBI who you are
 
-outgroups = {'H3N2':'U26830',
-             'H1N1pdm':'AF455680',
-             'Vic':'CY018813',
-             'Yam':'CY019707'
+outgroups = {#'H3N2':'U26830',
+             'H3N2_77':'CY113261.1',
+             #'H1N1pdm':'AF455680',
+             #'Vic':'CY018813',
+             #'Yam':'CY019707'
              }
 
 for virus, genbank_id in outgroups.iteritems(): 

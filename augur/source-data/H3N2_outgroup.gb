@@ -48,7 +48,7 @@ FEATURES             Location/Qualifiers
      CDS             1..49
                      /product="Signal peptide"
                      /gene="SigPep"
-     CDS             49..1036
+     CDS             49..1035
                      /product="HA1 protein"
                      /gene="HA1"
      CDS             1036..1699

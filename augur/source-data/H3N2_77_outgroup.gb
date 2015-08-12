@@ -1,0 +1,103 @@
+LOCUS       CY113261                1732 bp    DNA              VRL 27-SEP-2012
+DEFINITION  Influenza A virus (A/Texas/1/1977(H3N2)) hemagglutinin (HA) gene,
+            complete cds.
+ACCESSION   CY113261
+VERSION     CY113261.1  GI:383277077
+KEYWORDS    .
+SOURCE      Influenza A virus (A/Texas/1/1977(H3N2))
+  ORGANISM  Influenza A virus (A/Texas/1/1977(H3N2))
+            Viruses; ssRNA viruses; ssRNA negative-strand viruses;
+            Orthomyxoviridae; Influenzavirus A.
+REFERENCE   1  (bases 1 to 1732)
+  AUTHORS   Wentworth,D.E., Dugan,V., Halpin,R., Lin,X., Bera,J., Ghedin,E.,
+            Fedorova,N., Overton,L., Tsitrin,T., Stockwell,T., Amedeo,P.,
+            Bishop,B., Chen,H., Edworthy,P., Gupta,N., Katzel,D., Li,K.,
+            Schobel,S., Shrivastava,S., Thovarai,V., Wang,S., Westgeest,K.B.,
+            van Beek,R., Bestebroer,T.M., de Jong,J.C., Rimmelzwaan,G.F.,
+            Osterhaus,A.D.M.E., Fouchier,R.A.M., Bao,Y., Sanders,R.,
+            Dernovoy,D., Kiryutin,B., Lipman,D.J. and Tatusova,T.
+  TITLE     The NIAID Influenza Genome Sequencing Project
+  JOURNAL   Unpublished
+REFERENCE   2  (bases 1 to 1732)
+  CONSRTM   The NIAID Influenza Genome Sequencing Consortium
+  TITLE     Direct Submission
+  JOURNAL   Submitted (27-SEP-2012) on behalf of JCVI/Erasmus Medical
+            College/NCBI, National Center for Biotechnology Information, NIH,
+            Bethesda, MD 20894, USA
+COMMENT     This work was supported by the National Institute of Allergy and
+            Infectious Diseases (NIAID), Genome Sequencing Centers for
+            Infectious Diseases (GSCID) program.
+FEATURES             Location/Qualifiers
+     source          1..1732
+                     /mol_type="viral cRNA"
+                     /lab_host="xMDCK1 passage(s)"
+                     /db_xref="taxon:444318"
+                     /collection_date="1977"
+                     /segment="4"
+                     /serotype="H3N2"
+                     /strain="A/Texas/1/1977"
+                     /host="human"
+                     /country="USA: Texas"
+                     /bio_material="CEIRS#CIP047TE177#"
+                     /organism="Influenza A virus (A/Texas/1/1977(H3N2))"
+     misc_feature    1..1732
+                     /db_xref="IRD:NIGSP_CEIRS_CIP047_RFH3_00043.HA"
+     gene            15..1715
+                     /gene="HA"
+     CDS             15..1715
+                     /function="receptor binding and fusion protein"
+                     /product="hemagglutinin"
+                     /codon_start=1
+                     /db_xref="GI:383277078"
+                     /translation="MKTIIALSYIFCQVLAQNLPGNDNSTATLCLGHHAVPNGTLVKTI
+                     TNDQIEVTNATELVQSSSTGRICDSPHRILDGKNCTLIDALLGDPHCDGFQNEKWDLFV
+                     ERSKAFSNCYPYDVPDYASLRSLVASSGTLEFINEGFNWTGVTQNGGSYACKRGPDNSF
+                     FSRLNWLYKSESTYPVLNVTMPNNDNFDKLYIWGVHHPSTDKEQTNLYVQASGRVTVST
+                     KRSQQTIIPNVGSRPWVRGLSSGISIYWTIVKPGDILLINSNGNLIAPRGYFKIRTGKS
+                     SIMRSDAPIGTCSSECITPNGSIPNDKPFQNVNKITYGACPKYVKQNTLKLATGMRNVP
+                     EKQTRGIFGAIAGFIENGWEGMIDGWYGFRHQNSEGTGQAADLKSTQAAIDQINGKLNR
+                     VIEKTNEKFHQIEKEFSEVEGRIQDLEKYVEDTKIDLWSYNAELLVALENQHTIDLTDS
+                     EMNKLFEKTRRQLRENAEDMGNGCFKIYHKCDNACIGSIRNGTYDHDVYRDEALNNRFQ
+                     IKGVELKSGYKDWILWISFAISCFLLCVVLLGFIMWACQKGNIRCNICI"
+                     /gene="HA"
+                     /protein_id="AFG99105.1"
+     CDS             15..62
+                     /product="Signal peptide"
+                     /gene="SigPep"
+     CDS             63..1049
+                     /product="HA1 protein"
+                     /gene="HA1"
+     CDS             1050..1712
+                     /product="HA2 protein"
+                     /gene="HA2"
+ORIGIN
+        1 taattctatt aaccatgaag actatcattg ctttgagcta cattttctgt caggttctcg
+       61 cccaaaacct tccaggaaat gacaacagca cagcaacgct gtgcctggga catcatgcag
+      121 tgccaaacgg aacgctagtg aaaacaatca cgaatgatca gattgaagtg actaatgcta
+      181 ctgagctggt tcagagttcc tcaacaggta gaatatgcga cagtcctcat cgaatccttg
+      241 atgggaaaaa ctgcacactg atagatgctc tattggggga ccctcattgt gatggctttc
+      301 aaaatgagaa atgggacctt tttgttgaac gcagcaaagc tttcagcaac tgttaccctt
+      361 atgatgtgcc agattatgcc tcccttaggt cactagttgc ctcgtcaggc accctggagt
+      421 ttatcaatga aggcttcaat tggactgggg tcactcagaa tgggggaagc tatgcttgca
+      481 aaaggggacc tgataacagt ttcttcagta gactgaactg gttgtacaaa tcagaaagca
+      541 catatccagt gctgaacgtg actatgccaa acaatgacaa ttttgacaaa ctgtacattt
+      601 ggggagttca ccacccgagc acggacaaag aacaaaccaa cctatatgtt caagcatcag
+      661 ggagagtcac agtctccacc aagagaagcc agcaaactat aatcccgaat gtcgggtcta
+      721 gaccctgggt aaggggtctg tctagtggaa taagcatcta ttggacaata gtaaaaccgg
+      781 gagacatact gttaattaat agtaatggga acctaattgc tcctcggggt tacttcaaaa
+      841 tacgcactgg gaaaagctca ataatgaggt cagatgcacc cattggcacc tgcagttctg
+      901 aatgcatcac tccaaatgga agcattccca atgacaagcc ctttcaaaac gtaaacaaga
+      961 tcacatatgg ggcatgtccc aagtatgtta agcaaaacac tctgaagttg gcaacaggga
+     1021 tgcggaatgt accagagaaa caaactagag gcatattcgg cgcaatagca ggtttcatag
+     1081 aaaatggttg ggagggaatg atagacggtt ggtacggttt caggcatcaa aattctgagg
+     1141 gcacaggaca agcagcagat cttaaaagca ctcaagcagc catcgaccaa atcaatggga
+     1201 aactgaatag ggtaatcgag aaaacgaacg agaaattcca tcaaatcgaa aaggaattct
+     1261 cagaagtaga agggagaatt caggacctcg agaaatacgt tgaagacact aaaatagatc
+     1321 tctggtctta caatgcggag cttcttgtcg ctctggagaa ccaacataca attgatctga
+     1381 ctgactcgga aatgaacaaa ctgtttgaaa aaacaaggag gcaactgagg gaaaatgctg
+     1441 aggacatggg caatggttgc ttcaaaatat accacaaatg tgacaatgct tgcatagggt
+     1501 caatcagaaa tggaacttat gaccatgatg tatacagaga cgaagcatta aacaaccggt
+     1561 ttcagatcaa aggtgttgag ctgaagtcag gatacaaaga ctggatcctg tggatttcct
+     1621 ttgccatatc atgctttttg ctttgtgttg ttttgctggg gttcatcatg tgggcctgcc
+     1681 aaaaaggcaa cattaggtgc aacatttgca tttgagtgta ttaattaaaa ac
+//

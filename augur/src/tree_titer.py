@@ -81,7 +81,8 @@ class HI_tree(object):
 					self.HI_normalized[(test, ref)] = self.normalize(ref, val)
 					self.HI_raw[(test, ref)] = np.median(val)
 				else:
-					print "no homologous titer found:", ref
+					pass
+					#print "no homologous titer found:", ref
 
 		self.sera = list(sera)
 		self.ref_strains = list(ref_strains)
@@ -288,11 +289,40 @@ class HI_tree(object):
 		return np.mean( (self.HI_dist - np.dot(self.tree_graph, self.params))**2 )
 
 	def fit_l1reg(self):
-		from cvxopt import matrix
-		from l1regls import l1regls
-		A = matrix(self.tree_graph)
-		b = matrix(self.HI_dist)
-		return np.array([x for x in l1regls(A/np.sqrt(self.lam_HI),b/np.sqrt(self.lam_HI))])
+		from cvxopt import matrix, solvers
+		n_params = self.tree_graph.shape[1]
+		HI_sc = self.genetic_params if self.map_to_tree else len(self.relevant_muts)
+		n_sera = len(self.sera)
+		n_v = len(self.HI_strains)
+
+		# set up the quadratic matrix containing the deviation term (linear xterm below)
+		# and the l2-regulatization of the avidities and potencies
+		P1 = np.zeros((n_params+HI_sc,n_params+HI_sc))
+		P1[:n_params, :n_params] = self.TgT
+		for ii in xrange(HI_sc, HI_sc+n_sera):
+			P1[ii,ii]+=self.lam_pot
+		for ii in xrange(HI_sc+n_sera, n_params):
+			P1[ii,ii]+=self.lam_avi
+		P = matrix(P1)
+
+		# set up cost for auxillary parameter and the linear cross-term
+		q1 = np.zeros(n_params+HI_sc)
+		q1[:n_params] = -np.dot( self.HI_dist, self.tree_graph)
+		q1[n_params:] = self.lam_HI
+		q = matrix(q1)
+
+		# set up linear constraint matrix to regularize the HI parametesr
+		h = matrix(np.zeros(2*HI_sc)) 	# Gw <=h
+		G1 = np.zeros((2*HI_sc,n_params+HI_sc))
+		G1[:HI_sc, :HI_sc] = -np.eye(HI_sc)
+		G1[:HI_sc:, n_params:] = -np.eye(HI_sc)
+		G1[HI_sc:, :HI_sc] = np.eye(HI_sc)
+		G1[HI_sc:, n_params:] = -np.eye(HI_sc)
+		G = matrix(G1)
+		W = solvers.qp(P,q,G,h)
+		self.params = np.array([x for x in W['x']])[:n_params]
+		print "rms deviation prior to relax=",np.sqrt(self.fit_func())
+		return self.params
 
 	def fit_nnls(self):
 		from scipy.optimize import nnls
@@ -442,7 +472,7 @@ class HI_tree(object):
 					{strain:self.params[self.genetic_params+len(self.sera)+ii]
 				  for ii, strain in enumerate(self.HI_strains)}
 
-	def generate_validation_figures(self):
+	def generate_validation_figures(self, method = 'nnl1reg'):
 		import matplotlib.pyplot as plt
 
 		lam_pot = self.lam_pot
@@ -471,13 +501,13 @@ class HI_tree(object):
 
 
 		for map_to_tree, model in [(True, 'tree'), (False,'mutation')]:
-			self.map_HI(training_fraction=0.9, method='nnl1reg',lam_HI=lam_HI, lam_avi=lam_avi, 
+			self.map_HI(training_fraction=0.9, method=method,lam_HI=lam_HI, lam_avi=lam_avi, 
 						lam_pot = lam_pot, force_redo=True, map_to_tree=map_to_tree, subset_strains=True)
 
 			self.validate(plot=True)
 			for fmt in fmts: plt.savefig(self.htmlpath()+'HI_prediction_virus_'+model+fmt)
 
-			self.map_HI(training_fraction=0.9, method='nnl1reg',lam_HI=lam_HI, lam_avi=lam_avi, 
+			self.map_HI(training_fraction=0.9, method=method,lam_HI=lam_HI, lam_avi=lam_avi, 
 						lam_pot = lam_pot, force_redo=True, map_to_tree=map_to_tree)
 			self.validate(plot=True)
 			for fmt in fmts: plt.savefig(self.htmlpath()+'HI_prediction_'+model+fmt)

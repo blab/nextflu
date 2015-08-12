@@ -90,14 +90,16 @@ def slope_vs_dHI(myflu):
     slopes = []
     cutoff_freq = 0.25
     tmp_pivots = myflu.tree.seed_node.pivots
+    dt = tmp_pivots[1]-tmp_pivots[0]
+    y1 = int(1.0/dt)
     for node in myflu.tree.postorder_internal_node_iter():
         tmp_freq = node.freq['global']
-        if tmp_freq is not None and tmp_freq[0]<cutoff_freq-0.05 and np.max(tmp_freq)>cutoff_freq+0.05:
+        if tmp_freq is not None and tmp_freq[0]<cutoff_freq-0.05 and np.max(tmp_freq)>cutoff_freq+0.25:
             ii = np.argmax(tmp_freq>cutoff_freq)
             slope = (tmp_freq[ii]-tmp_freq[ii-1])/(tmp_pivots[ii]-tmp_pivots[ii-1])
             offset = tmp_pivots[ii-1] + (cutoff_freq-tmp_freq[ii-1])/slope
-            if ii+3<len(tmp_freq):
-                dfreq = tmp_freq[ii+3]-tmp_freq[ii]
+            if ii+y1<len(tmp_freq):
+                dfreq = tmp_freq[ii+y1]-tmp_freq[ii]
             else:
                 dfreq = 0
             slopes.append([node.dHI, slope, np.max(tmp_freq), dfreq])
@@ -111,14 +113,79 @@ def slope_vs_dHI(myflu):
     slopes = np.array(slopes)
 
     ax = plt.subplot('122')
-    plt.scatter(slopes[:,0], slopes[:,1])
+    plt.scatter(slopes[:,1], slopes[:,0])
     plt.xlabel('frequency slope', fontsize=fs)
     plt.ylabel('titer drop', fontsize=fs)
     ax.tick_params(axis='both', labelsize=fs)
     plt.tight_layout()
     from scipy.stats import spearmanr
-    print("spearman correlation",spearmanr(slopes[:,:2]))
-    print("spearman correlation",spearmanr(slopes[:,0],slopes[:,2]))
+    print("spearman correlation HI/slope:",spearmanr(slopes[:,:2]))
+    print("spearman correlation HI/max:",spearmanr(slopes[:,0],slopes[:,2]))
+    print("spearman correlation HI/delta1Y:",spearmanr(slopes[:,0],slopes[:,3]))
+    return slopes
+
+######################################
+#### make a figure that compares 
+#### trunk frequency increase to dHI
+######################################
+def slope_vs_mutation(myflu):
+    plt.figure(figsize=(1.6*figheight, figheight))
+    ax = plt.subplot('121')
+    slopes = []
+    cutoff_freq = 0.25
+    pivots = myflu.tree.seed_node.pivots
+    dt = pivots[1]-pivots[0]
+    y3 = int(3.0/dt)
+    y1 = int(1.0/dt)
+    for mut in myflu.mutation_effects:
+        HI = myflu.mutation_effects[mut]
+        mutlabel = mut[0]+':'+mut[1][1:]
+        prevmutlabel = mut[0]+':'+mut[1][1:-1]+mut[1][0]
+        if mutlabel in myflu.frequencies["mutations"]["global"] and\
+           prevmutlabel in myflu.frequencies["mutations"]["global"]:
+            mut_freq = np.array(myflu.frequencies["mutations"]["global"][mutlabel])
+            prevmut_freq = np.array(myflu.frequencies["mutations"]["global"][prevmutlabel])
+        else:
+            continue
+        # find sweeps
+        dfreq = mut_freq[y3:]-mut_freq[:-y3]
+        tmp_sweeps = [ii for ii,dx  in enumerate(dfreq[:-1]) if dx>0.5 and dfreq[ii+1]<0.5]
+        sweeps=[]
+        for ii, si in enumerate(tmp_sweeps):
+            # check that one mutation goes up, the prev down
+            if np.min((mut_freq+prevmut_freq)[si:si+y3])>0.8:
+                if ii==0 or np.min(mut_freq[tmp_sweeps[ii-1]:si])<0.2:
+                    sweeps.append(si)
+        for si in sweeps:
+            tmp_freq = mut_freq[max(0,si-y3):(si+2*y3)]
+            tmp_pivots = pivots[max(0,si-y3):(si+2*y3)]
+            ii = np.argmax(tmp_freq>cutoff_freq)
+            slope = (tmp_freq[ii]-tmp_freq[ii-1])/(tmp_pivots[ii]-tmp_pivots[ii-1])
+            offset = tmp_pivots[ii-1] + (cutoff_freq-tmp_freq[ii-1])/slope
+            if ii+y1<len(tmp_freq):
+                dfreq = tmp_freq[ii+y1]-tmp_freq[ii]
+            else:
+                dfreq = 0
+            slopes.append([HI, slope, np.max(tmp_freq), dfreq])
+            plt.plot(tmp_pivots-offset, tmp_freq, lw=2, c=cm.jet(HI/2.0), alpha=min(1.0, max(HI, 0.3)))
+
+    plt.xlabel('time', fontsize=fs)
+    plt.ylabel('frequency', fontsize=fs)
+    plt.xlim([-1,2])
+    plt.ylim([-0.01,1.1])
+    ax.tick_params(axis='both', labelsize=fs)
+    slopes = np.array(slopes)
+
+    ax = plt.subplot('122')
+    plt.scatter(slopes[:,1], slopes[:,0])
+    plt.xlabel('frequency slope', fontsize=fs)
+    plt.ylabel('titer drop', fontsize=fs)
+    ax.tick_params(axis='both', labelsize=fs)
+    plt.tight_layout()
+    from scipy.stats import spearmanr
+    print("spearman correlation HI/slope:",spearmanr(slopes[:,:2]))
+    print("spearman correlation HI/max:",spearmanr(slopes[:,0],slopes[:,2]))
+    print("spearman correlation HI/delta1Y:",spearmanr(slopes[:,0],slopes[:,3]))
     return slopes
 
 
@@ -231,7 +298,7 @@ def titer_vs_distances(myflu, mtype='tree'):
     dists = np.array(dists)
     fig, axs = plt.subplots(1,4, sharey=True,figsize=(3*figheight, figheight))
 
-    for ai, (ax, ci, col_name) in enumerate(izip(axs, [1, 2, 3, 4],
+    for ai, (ax, ci, col_name) in enumerate(izip(axs, [0, 2, 3, 4],
                                             ['amino acid distance', 'epitope distance', 
                                             'RBS distance', mtype+' model'])):
 
