@@ -18,7 +18,7 @@ figheight = 4
 def cumulative_antigenic(myflu, n=10):
     from random import sample
     leaf_sample = sample([leaf for leaf in myflu.tree.leaf_iter() 
-                          if leaf.num_date>2014], 10)
+                          if leaf.num_date>2014], n)
 
 
     trunk_effects = []

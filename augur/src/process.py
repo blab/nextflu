@@ -313,9 +313,9 @@ class process(virus_frequencies):
 			out.write('</script>\n\n')
 
 	def export_HI_mutation_effects(self):
-		with open(self.htmlpath()+'HI_mutation_effects.tsv') as ofile:
+		with open(self.htmlpath()+'HI_mutation_effects.tsv','w') as ofile:
 			for mut, val in self.mutation_effects.iteritems():
-				ofile.write(mut+'\t'+str(np.round(val,4))+'\n')
+				ofile.write(mut[0]+':'+mut[1]+'\t'+str(np.round(val,4))+'\n')
 
 	def align(self, fast=False):
 		'''
@@ -365,7 +365,7 @@ class process(virus_frequencies):
 				time.sleep(10)
 			process.terminate()
 
-			checkpoint_files = [file for file in glob.glob("RAxML_checkpoint*")]
+			checkpoint_files = glob.glob("RAxML_checkpoint*")
 			if os.path.isfile('RAxML_result.topology'):
 				checkpoint_files.append('RAxML_result.topology')
 			if len(checkpoint_files) > 0:

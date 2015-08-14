@@ -42,7 +42,7 @@ class HI_tree(object):
 		with myopen(fname, 'r') as infile:
 			for line in infile:
 				entries = line.strip().split()
-				test, ref_virus, serum, src_id, val = (entries[0], entries[1],entries[2], 
+				test, ref_virus, serum, src_id, val = (entries[0], entries[1],entries[2],
 														entries[3], float(entries[4]))
 				ref = (ref_virus, serum)
 				if src_id not in self.excluded_tables:
@@ -56,13 +56,12 @@ class HI_tree(object):
 
 	def normalize(self, ref, val):
 		consensus_func = np.mean
-		return consensus_func(np.log2(self.HI[(ref[0], ref)])) - consensus_func(np.log2(val))
-
+		return consensus_func(np.log2(self.autologous_titers[ref]['val'])) - consensus_func(np.log2(val))
 
 	def normalize_HI(self):
 		'''
-		convert the HI measurements into the log2 difference between the average 
-		HI titer measured between test virus and reference serum and the average 
+		convert the HI measurements into the log2 difference between the average
+		HI titer measured between test virus and reference serum and the average
 		homologous titer. all measurements relative to sera without homologous titer
 		are excluded
 		'''
@@ -71,11 +70,31 @@ class HI_tree(object):
 		sera = set()
 		ref_strains = set()
 		HI_strains = set()
+		all_per_serum = defaultdict(list)
+		autologous = defaultdict(list)
 		for (test, ref), val in self.HI.iteritems():
 			if test.upper() in self.node_lookup and ref[0].upper() in self.node_lookup:
 				HI_strains.add(test.upper())
 				HI_strains.add(ref[0].upper())
-				if (ref[0],ref) in self.HI:
+				all_per_serum[ref].append(val)
+				if ref[0]==test:
+					autologous[ref].append(val)
+
+		self.autologous_titers = {}
+		for serum in all_per_serum:
+			if serum in autologous:
+				self.autologous_titers[serum] = {'val':autologous[serum], 'autologous':True}
+				print("autologous titer found for",serum)
+			else:
+				if len(all_per_serum[serum])>10:
+					self.autologous_titers[serum] = {'val':np.max(all_per_serum[serum]), 'autologous':False}
+					print(serum,": using max titer instead of autologous,", np.max(all_per_serum[serum]))
+				else:
+					print("discarding",serum,"since there are only ",len(all_per_serum[serum]),'measurements')
+
+		for (test, ref), val in self.HI.iteritems():
+			if test.upper() in self.node_lookup and ref[0].upper() in self.node_lookup:
+				if ref in self.autologous_titers:
 					sera.add(ref)
 					ref_strains.add(ref[0])
 					self.HI_normalized[(test, ref)] = self.normalize(ref, val)
@@ -124,7 +143,7 @@ class HI_tree(object):
 				self.HI_split_to_branch[node.HI_branch_index].append(node)
 				# at a bi- or multifurcation, increase the split count and HI index
 				# either individual child branches have enough HI info be counted,
-				# or the pre-order node iteraction will move towards the root 
+				# or the pre-order node iteraction will move towards the root
 				if sum([c.HI_info>0 for c in node.child_nodes()])>1:
 					self.HI_split_count+=1
 				elif node.is_leaf():
@@ -135,7 +154,7 @@ class HI_tree(object):
 
 	def get_path_no_terminals(self, v1, v2):
 		'''
-		returns the path between two tips in the tree excluding the terminal branches. 
+		returns the path between two tips in the tree excluding the terminal branches.
 		'''
 		if v1 in self.node_lookup and v2 in self.node_lookup:
 			p1 = [self.node_lookup[v1]]
@@ -195,7 +214,7 @@ class HI_tree(object):
 		for mut, count in mutation_counter.iteritems():
 			gene = mut[0]
 			pos = int(mut[1][1:-1])-1
-			aa1, aa2 = mut[1][0],mut[1][-1]			
+			aa1, aa2 = mut[1][0],mut[1][-1]
 			if gene=='HA1' and count>min_count and \
 				self.aa_frequencies[gene][self.aa_alphabet.index(aa1),pos]>min_freq and\
 				self.aa_frequencies[gene][self.aa_alphabet.index(aa2),pos]>min_freq:
@@ -215,7 +234,7 @@ class HI_tree(object):
 						continue
 					tmp = np.zeros(n_params)
 					# determine branch indices on path
-					branches = np.unique([relevant_muts.index(mut) for mut in muts 
+					branches = np.unique([relevant_muts.index(mut) for mut in muts
 					                     if mut in relevant_muts])
 					if len(branches): tmp[branches] = 1
 					# add serum effect
@@ -255,17 +274,17 @@ class HI_tree(object):
 						tmp = np.zeros(n_params)
 						# determine branch indices on path
 						if type(self.min_aamuts)==int:
-							branches = np.unique([c.HI_branch_index for c in path 
-							                     if (hasattr(c, 'HI_branch_index') and 
+							branches = np.unique([c.HI_branch_index for c in path
+							                     if (hasattr(c, 'HI_branch_index') and
 							                         len(c.mutations)>=self.min_aamuts)])
 						elif self.min_aamuts=='epi':
-							branches = np.unique([c.HI_branch_index for c in path 
+							branches = np.unique([c.HI_branch_index for c in path
 							                     if (hasattr(c, 'HI_branch_index') and c.parent_node.ep<c.ep)])
 						elif self.min_aamuts=='rbs':
-							branches = np.unique([c.HI_branch_index for c in path 
+							branches = np.unique([c.HI_branch_index for c in path
 							                     if (hasattr(c, 'HI_branch_index') and c.parent_node.rb<c.rb)])
 						else:
-							branches = np.unique([c.HI_branch_index for c in path 
+							branches = np.unique([c.HI_branch_index for c in path
 							                     if hasattr(c, 'HI_branch_index') ])
 						if len(branches): tmp[branches] = 1
 						# add serum effect
@@ -357,7 +376,7 @@ class HI_tree(object):
 
 		# set up cost for auxillary parameter and the linear cross-term
 		q1 = np.zeros(n_params)
-		q1[:n_params] = -np.dot(self.HI_dist, self.tree_graph) 
+		q1[:n_params] = -np.dot(self.HI_dist, self.tree_graph)
 		q1[:HI_sc] += self.lam_HI
 		q = matrix(q1)
 
@@ -370,7 +389,7 @@ class HI_tree(object):
 		W = solvers.qp(P,q,G,h)
 		self.params = np.array([x for x in W['x']])[:n_params]
 		print "rms deviation prior to relax=",np.sqrt(self.fit_func())
-		# redo the linear cost relaxing terms that seem to be relevant to avoid 
+		# redo the linear cost relaxing terms that seem to be relevant to avoid
 		# compression of the fit. 0.2 seems to be a good cut-off, linear tune to zero
 		#q1[n_params:] = self.lam_HI*(1-5.0*np.minimum(0.2,sol[:HI_sc]))
 		#q = matrix(q1)
@@ -414,13 +433,13 @@ class HI_tree(object):
 
 		if self.cutoff_date is not None:
 			self.train_HI = {key:val for key,val in self.train_HI.iteritems()
-							if self.node_lookup[key[0]].num_date<cutoff_date and 
+							if self.node_lookup[key[0]].num_date<cutoff_date and
 							   self.node_lookup[key[1][0]].num_date<cutoff_date}
 
 		if self.map_to_tree:
 			self.make_treegraph()
 		else:
-			self.make_seqgraph()	
+			self.make_seqgraph()
 
 	def map_HI(self, training_fraction = 1.0, method = 'nnls', lam_HI=1.0, map_to_tree = True,
 			lam_pot = 0.5, lam_avi = 3.0, cutoff_date = None, subset_strains = False, force_redo = False):
@@ -466,7 +485,7 @@ class HI_tree(object):
 				self.mutation_effects[mut] = self.params[mi]
 
 		self.serum_potency['tree' if self.map_to_tree else 'mutation'] =\
-					{serum:self.params[self.genetic_params+ii] 
+					{serum:self.params[self.genetic_params+ii]
 					  for ii, serum in enumerate(self.sera)}
 		self.virus_effect['tree' if self.map_to_tree else 'mutation'] = \
 					{strain:self.params[self.genetic_params+len(self.sera)+ii]
@@ -485,7 +504,7 @@ class HI_tree(object):
 				ax = plt.subplot(121)
 				plt.hist(self.virus_effect[model].values(), bins=np.linspace(-2,2,21), normed=True)
 				plt.xlabel('avidity', fontsize=fs)
-				plt.text(0.05, 0.93,  ('tree model' if model=='tree' else 'mutation model'), 
+				plt.text(0.05, 0.93,  ('tree model' if model=='tree' else 'mutation model'),
 				         weight='bold', fontsize=fs, transform=plt.gca().transAxes)
 				ax.set_xticks([-2,-1,0,1,2])
 				ax.tick_params(axis='both', labelsize=fs)
@@ -501,13 +520,13 @@ class HI_tree(object):
 
 
 		for map_to_tree, model in [(True, 'tree'), (False,'mutation')]:
-			self.map_HI(training_fraction=0.9, method=method,lam_HI=lam_HI, lam_avi=lam_avi, 
+			self.map_HI(training_fraction=0.9, method=method,lam_HI=lam_HI, lam_avi=lam_avi,
 						lam_pot = lam_pot, force_redo=True, map_to_tree=map_to_tree, subset_strains=True)
 
 			self.validate(plot=True)
 			for fmt in fmts: plt.savefig(self.htmlpath()+'HI_prediction_virus_'+model+fmt)
 
-			self.map_HI(training_fraction=0.9, method=method,lam_HI=lam_HI, lam_avi=lam_avi, 
+			self.map_HI(training_fraction=0.9, method=method,lam_HI=lam_HI, lam_avi=lam_avi,
 						lam_pot = lam_pot, force_redo=True, map_to_tree=map_to_tree)
 			self.validate(plot=True)
 			for fmt in fmts: plt.savefig(self.htmlpath()+'HI_prediction_'+model+fmt)
@@ -526,7 +545,7 @@ class HI_tree(object):
 				pred_HI = self.predict_HI_mutations(key[0], key[1], cutoff=cutoff)
 
 			if pred_HI is not None:
-				if any([incl_ref_strains=='yes', 
+				if any([incl_ref_strains=='yes',
 						incl_ref_strains=='no' and (key[0].upper() not in self.ref_strains),
 						incl_ref_strains=='only' and (key[0].upper() in self.ref_strains)]):
 					self.validation[key] = (val, pred_HI)
@@ -574,16 +593,22 @@ class HI_tree(object):
 			if 'tree' in self.virus_effect:
 				self.node_lookup[ref[0]].potency_tree[ref[1]] = self.serum_potency['tree'][ref]
 		for (test, ref), val in self.HI_normalized.iteritems():
-			self.node_lookup[ref[0]].HI_titers[self.node_lookup[test].clade][ref[1]] = val
+			try:
+				self.node_lookup[ref[0]].HI_titers[self.node_lookup[test].clade][ref[1]] = val
+			except:
+				print("Can't assign",test, ref)
 		for (test, ref), val in self.HI_raw.iteritems():
-			self.node_lookup[ref[0]].HI_titers_raw[self.node_lookup[test].clade][ref[1]] = val
+			try:
+				self.node_lookup[ref[0]].HI_titers_raw[self.node_lookup[test].clade][ref[1]] = val
+			except:
+				print("Can't assign",test, ref)				   
 		for test in self.HI_strains:
 			if 'mutation' in self.virus_effect:
 				self.node_lookup[test].avidity_tree = self.virus_effect['mutation'][test]
 			if 'tree' in self.virus_effect:
 				self.node_lookup[test].avidity_mut = self.virus_effect['tree'][test]
 		for ref in self.ref_strains:
-			self.node_lookup[ref].mean_HI_titers = {key:np.mean(titers.values()) for key, titers in 
+			self.node_lookup[ref].mean_HI_titers = {key:np.mean(titers.values()) for key, titers in
 			 									self.node_lookup[ref].HI_titers.iteritems()}
 			self.node_lookup[ref].mean_potency_tree = np.mean(self.node_lookup[ref].potency_tree.values())
 			self.node_lookup[ref].mean_potency_mut = np.mean(self.node_lookup[ref].potency_mut.values())
@@ -643,8 +668,8 @@ class HI_tree(object):
 		n_leafs = 1
 		leaf_sample = []
 		for y in range(int(self.time_interval[0]), int(self.time_interval[1])):
-			leaf_sample.extend(sample([leaf for leaf in self.tree.leaf_iter()
-							  if leaf.num_date>y and leaf.num_date<y+1], n_leafs))
+			tmp_leafs = [leaf for leaf in self.tree.leaf_iter() if leaf.num_date>y and leaf.num_date<y+1]
+			leaf_sample.extend(sample(tmp_leafs, min(n_leafs, len(tmp_leafs))))
 
 		cHI_trunk = []
 		for node in leaf_sample:
@@ -671,7 +696,7 @@ class HI_tree(object):
 		if muts is not None:
 			return self.serum_potency['mutation'][serum] \
 					+ self.virus_effect['mutation'][virus] \
-					+ np.sum([self.mutation_effects[mut] for mut in muts 
+					+ np.sum([self.mutation_effects[mut] for mut in muts
 					if (mut in self.mutation_effects and self.mutation_effects[mut]>cutoff)])
 		else:
 			return None
@@ -686,12 +711,12 @@ def plot_tree(tree):
 	from tree_util import to_Biopython, color_BioTree_by_attribute
 	btree = to_Biopython(tree)
 	color_BioTree_by_attribute(btree,"cHI", transform = lambda x:x)
-	Phylo.draw(btree, label_func = lambda  x: 'X' if x.serum else '' if x.HI_info else '', 
+	Phylo.draw(btree, label_func = lambda  x: 'X' if x.serum else '' if x.HI_info else '',
 		show_confidence= False) #, branch_labels = lambda x:x.mutations)
 
 def plot_dHI_distribution(tree):
 	plt.figure()
-	mut_dHI = sorted([(c.dHI, c.mutations) for c in tree.postorder_node_iter() if c.HI_info], 
+	mut_dHI = sorted([(c.dHI, c.mutations) for c in tree.postorder_node_iter() if c.HI_info],
 					reverse=True, key=lambda x:x[0])
 	thres = [0,1,2,3,100]
 	for lower, upper in zip(thres[:-1], thres[1:]):
@@ -720,7 +745,7 @@ def parse_HI_matrix(fname):
 	name_abbrev = {'HK':"HONGKONG", 'SWITZ':"SWITZERLAND", 'VIC':"VICTORIA", 'STOCK':"STOCKHOLM",
 					'STHAFR':"SOUTHAFRICA", 'SAFRICA':"SOUTHAFRICA", "ENG":"ENGLAND", "NIB-85":"A/ALMATY/2958/2013", 'NOR':'NORWAY',
 					'NTHCAROL':"NORTHCAROLINA",'ALA':"ALABAMA", 'NY':"NEWYORK", "GLAS":"GLASGOW", "AL":"ALABAMA",
-					"NETH":"NETHERLANDS", "FIN":"FINLAND", "BRIS":"BRISBANE", "MARY":"MARYLAND",	
+					"NETH":"NETHERLANDS", "FIN":"FINLAND", "BRIS":"BRISBANE", "MARY":"MARYLAND",
 					"ST.P'BURG":"ST.PETERSBURG", 'CAL':'CALIFORNIA', 'AUCK':'AUCKLAND', "C'CHURCH":'CHRISTCHURCH',
 					'CHCH':'CHRISTCHURCH', 'ASTR':'ASTRAKHAN', 'ASTRAK':'ASTRAKHAN', 'ST.P':"ST.PETERSBURG",
 					'JHB':'JOHANNESBURG', 'FOR':'FORMOSA','MAL':'MALAYSIA', 'STHAUS':'SOUTHAUSTRALIA',
@@ -762,7 +787,7 @@ def parse_HI_matrix(fname):
 
 		ref_strains = []
 		ref_matrix = []
-		for row in csv_reader: 
+		for row in csv_reader:
 			if row[0].startswith('TEST'):
 				break
 			else: # load matrices until the test virus section starts
@@ -864,11 +889,11 @@ def write_strains_with_HI_and_sequence(flutype='H3N2'):
 def write_flat_HI_titers(flutype = 'H3N2', fname = None):
 	measurements = get_all_titers_flat(flutype)
 	with myopen('source-data/'+flutype+'_HI_strains.txt') as infile:
-		strains = [HI_fix_name(line.strip()).upper() for line in infile]	
+		strains = [HI_fix_name(line.strip()).upper() for line in infile]
 	if fname is None:
 		fname = 'source-data/'+flutype+'_HI_titers.txt'
 	written = 0
-	skipped = 0 
+	skipped = 0
 	with myopen(fname, 'w') as outfile:
 		for ii, rec in measurements.iterrows():
 			test, ref, src_id, val = rec
