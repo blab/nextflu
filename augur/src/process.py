@@ -23,31 +23,31 @@ parser.add_argument('--prefix', type = str, default = '', help='prefix of file d
 parser.add_argument('--test', default = False, action="store_true",  help ="don't run the pipeline")
 parser.add_argument('--start', default = 'filter', type = str,  help ="start pipeline at specified step")
 parser.add_argument('--stop', default = 'export', type=str,  help ="run to end")
-parser.add_argument('--skip', nargs='+', type = str,  help ="analysis steps to skip")	
-parser.add_argument('--ATG', action="store_true", default=False, help ="include full HA sequence starting at ATG")	
-parser.add_argument('--resolution', type = str,  help ="label for the resolution")	
+parser.add_argument('--skip', nargs='+', type = str,  help ="analysis steps to skip")
+parser.add_argument('--ATG', action="store_true", default=False, help ="include full HA sequence starting at ATG")
+parser.add_argument('--resolution', type = str,  help ="label for the resolution")
 
 
 virus_config = {
 	'date_format':{'fields':'%Y-%m-%d', 'reg':r'\d\d\d\d-\d\d-\d\d'},
 	'fasta_fields':{0:'strain', 1:'isolate_id', 3:'passage', 5:'date', 7:'lab', 8:"accession"},
 	# frequency estimation parameters
-	'aggregate_regions': [  ("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
+	'aggregate_regions': [  ("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]),
 							("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ],
 	'frequency_stiffness':5.0,
-	'verbose':2, 
+	'verbose':2,
 	'tol':1e-4, #tolerance for frequency optimization
-	'pc':1e-3, #pseudocount for frequencies 
+	'pc':1e-3, #pseudocount for frequencies
 	'extra_pivots': 12,  # number of pivot point for or after the last observations of a mutations
 	'inertia':0.7,		# fraction of frequency change carry over in the stiffness term
 	'n_iqd':3,     # standard deviations from clock
-	'min_mutation_frequency':0.1, 
-	'min_genotype_frequency':0.1,	
+	'min_mutation_frequency':0.1,
+	'min_genotype_frequency':0.1,
 }
 
 class process(virus_frequencies):
 	"""generic template class for processing virus sequences into trees"""
-	def __init__(self, path = 'data/', prefix = 'virus', time_interval = (2012.0, 2015.0), 
+	def __init__(self, path = 'data/', prefix = 'virus', time_interval = (2012.0, 2015.0),
 	             run_dir = None, virus = None, resolution = None, date_format={'fields':'%Y-%m-%d', 'reg':r'\d\d\d\d-\d\d-\d\d'},
 				 min_mutation_frequency = 0.01, min_genotype_frequency = 0.1, **kwargs):
 		self.path = path
@@ -112,7 +112,7 @@ class process(virus_frequencies):
 				cPickle.dump(self.aa_aln, outfile)
 		if hasattr(self, 'mutation_effects'):
 			with open(self.HI_model_fname, 'w') as outfile:
-				cPickle.dump((self.mutation_effects, self.virus_effect, 
+				cPickle.dump((self.mutation_effects, self.virus_effect,
 							  self.serum_potency), outfile)
 
 	def load(self):
@@ -136,8 +136,8 @@ class process(virus_frequencies):
 		if os.path.isfile(self.HI_model_fname):
 			try:
 				with open(self.HI_model_fname, 'r') as infile:
-					(self.mutation_effects, 
-					 self.virus_effect, 
+					(self.mutation_effects,
+					 self.virus_effect,
 				  	 self.serum_potency) = cPickle.load(infile)
 			except:
 				pass
@@ -156,10 +156,10 @@ class process(virus_frequencies):
 		for node in self.tree:
 			if hasattr(node, "clade") and hasattr(node, "seq"):
 				elems[node.clade] = {}
-				elems[node.clade]['nuc'] = {pos:state for pos, (state, ancstate) in 
+				elems[node.clade]['nuc'] = {pos:state for pos, (state, ancstate) in
 								enumerate(izip(node.seq, self.tree.seed_node.seq)) if state!=ancstate}
 				for anno, aa_seq in node.aa_seq.iteritems():
-					elems[node.clade][anno] = {pos:state for pos, (state, ancstate) in 
+					elems[node.clade][anno] = {pos:state for pos, (state, ancstate) in
 								enumerate(izip(aa_seq, self.tree.seed_node.aa_seq[anno])) if state!=ancstate}
 
 		elems['root'] = {}
@@ -179,14 +179,14 @@ class process(virus_frequencies):
 					try:
 						node["freq"][reg] = [round(x,3) for x in node["freq"][reg]]
 					except:
-						node["freq"][reg] = "undefined"				
+						node["freq"][reg] = "undefined"
 
 		if hasattr(self,"clade_designations"):
 			# find basal node of clade and assign clade x and y values based on this basal node
 			clade_present = {}
 			clade_xval = {}
 			clade_yval = {}
-			self.frequencies['clades'] = {reg:{"pivots":list(self.tree.seed_node.pivots)} 
+			self.frequencies['clades'] = {reg:{"pivots":list(self.tree.seed_node.pivots)}
 											for reg in self.tree.seed_node.freq}
 
 			for clade, gt in self.clade_designations.iteritems():
@@ -210,17 +210,17 @@ class process(virus_frequencies):
 						clade_present[clade] = False
 						print "clade",clade, gt, "not in tree"
 			# append clades, coordinates and genotype to meta
-			self.tree_json["clade_annotations"] = [(clade, clade_xval[clade],clade_yval[clade], 
+			self.tree_json["clade_annotations"] = [(clade, clade_xval[clade],clade_yval[clade],
 								"/".join([gene+':'+str(pos)+aa for gene, pos, aa in gt]))
-							for clade, gt in self.clade_designations.iteritems() 
+							for clade, gt in self.clade_designations.iteritems()
 							if clade in annotations and clade_present[clade] == True]
 		write_json(self.tree_json, self.auspice_tree_fname, indent=None)
 		try:
 			read_json(self.auspice_tree_fname)
 		except:
-			print "Read failed, rewriting with indents"	
+			print "Read failed, rewriting with indents"
 			write_json(self.tree_json, self.auspice_tree_fname, indent=1)
-			
+
 		# Include genotype frequencies
 		if hasattr(self, 'frequencies'):
 			if not hasattr(self, 'aa_entropy') and not hasattr(self, 'nuc_entropy'):
@@ -232,16 +232,16 @@ class process(virus_frequencies):
 				for anno, alnS in self.aa_entropy.iteritems():
 					self.frequencies["location"][anno] = [int(self.cds[anno].location.start),\
 															int(self.cds[anno].location.start)]
-					self.frequencies["entropy"][anno] = [ [pos, S, muts] for pos,S,muts in 
+					self.frequencies["entropy"][anno] = [ [pos, S, muts] for pos,S,muts in
 						izip(xrange(alnS.shape[0]), alnS,self.variable_aa_identities[anno]) ]
 			elif seq=='nuc' and hasattr(self, 'nuc_entropy'):
-				self.frequencies["entropy"] = [ [pos, S, muts] for pos,S,muts in 
+				self.frequencies["entropy"] = [ [pos, S, muts] for pos,S,muts in
 						izip(xrange(self.nuc_entropy.shape[0]), self.nuc_entropy,self.variable_nuc_identities) ]
 
 			write_json(self.frequencies, self.auspice_frequency_fname)
 
 		# Write out metadata
-		print "Writing out metadata"		
+		print "Writing out metadata"
 		meta = {}
 		meta["updated"] = time.strftime("X%d %b %Y").replace('X0','X').replace('X','')
 		try:
@@ -253,7 +253,7 @@ class process(virus_frequencies):
 			meta["commit"] = str(commit_id)
 		except ImportError:
 			meta["commit"] = "unknown"
-		
+
 		if hasattr(self,"date_region_count"):
 			meta["regions"] = self.regions
 			meta["virus_stats"] = [ [str(y)+'-'+str(m)] + [self.date_region_count[(y,m)][reg] for reg in self.regions]
@@ -263,9 +263,9 @@ class process(virus_frequencies):
 
 	def htmlpath(self):
 		htmlpath = '../auspice/'
-		if self.virus_type is not None: 
+		if self.virus_type is not None:
 			htmlpath+=self.virus_type+'/'
-		if self.resolution is not None: 
+		if self.resolution is not None:
 			htmlpath+=self.resolution+'/'
 		return htmlpath
 
@@ -293,7 +293,7 @@ class process(virus_frequencies):
 				for vname, val in sorted(self.kwargs['js_vars'].items(), key=lambda x:x[1], reverse = True):
 					if isinstance(val, basestring):
 						out.write('var '+vname+' = "'+val+'";\n')
-					else:						
+					else:
 						out.write('var '+vname+' = '+str(val)+';\n')
 			out.write('{%include '+self.virus_type+'_meta.js %}\n')
 			out.write('</script>\n\n')
@@ -304,7 +304,7 @@ class process(virus_frequencies):
 		table_effects = []
 		with open(self.htmlpath()+'HI_mutation_effects.tsv','w') as ofile:
 			for mut, val in self.mutation_effects.iteritems():
-				mut_str = '/'.join([x[0]+':'+x[1] for x in self.mutation_clusters[mut]])
+				mut_str = '/'.join([x[1] for x in self.mutation_clusters[mut]])
 				ofile.write(mut_str+'\t'+str(np.round(val,4))+'\n')
 				if val>0.001:
 					table_effects.append((mut_str,round(val,2)))
@@ -315,7 +315,7 @@ class process(virus_frequencies):
 			display_effects = {}
 
 		# effects for use in the js are indext by first mutation in cluster
-		model_effects = {mut[0]+':'+mut[1]:val for mut, val in 
+		model_effects = {mut[0]+':'+mut[1]:val for mut, val in
 						 self.mutation_effects.iteritems() if val>0.01}
 		write_json(model_effects, self.auspice_HI_fname)
 
@@ -348,7 +348,7 @@ class process(virus_frequencies):
 
 	def infer_tree(self, raxml_time_limit):
 		'''
-		builds a tree from the alignment using fasttree and RAxML. raxml runs for 
+		builds a tree from the alignment using fasttree and RAxML. raxml runs for
 		raxml_time_limit and is terminated thereafter. raxml_time_limit can be 0.
 		'''
 		self.make_run_dir()
@@ -469,14 +469,14 @@ class process(virus_frequencies):
 		if 'mutations' in tasks:
 			self.frequencies["mutations"]={reg:{} for reg, _ in self.aggregate_regions}
 			for gene in self.cds:
-				self.all_mutation_frequencies(threshold = self.min_mutation_frequency, gene=gene) 
+				self.all_mutation_frequencies(threshold = self.min_mutation_frequency, gene=gene)
 		if 'nuc_mutations' in tasks:
-			self.all_mutation_frequencies(threshold = self.min_mutation_frequency, gene='nuc') 
+			self.all_mutation_frequencies(threshold = self.min_mutation_frequency, gene='nuc')
 		if 'genotypes' in tasks:
-			self.all_genotypes_frequencies(threshold = self.min_genotype_frequency) 
+			self.all_genotypes_frequencies(threshold = self.min_genotype_frequency)
 		if 'clades' in tasks:
-			self.all_clade_frequencies() 
+			self.all_clade_frequencies()
 		if 'nuc_clades' in tasks:
-			self.all_clade_frequencies(gene='nuc') 
+			self.all_clade_frequencies(gene='nuc')
 		if 'tree' in tasks:
-			self.all_tree_frequencies() 
+			self.all_tree_frequencies()

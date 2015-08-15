@@ -20,6 +20,9 @@ def mutation_list(flu = 'H3N2'):
     mutation_effects = {}
     for fname in flist:
         interval = fname.split('/')[-2]
+        years = map(int, interval.split('to'))
+        if years[1]-years[0] not in [10,11]:
+            continue
         tmp_effects = {}
         with open(fname) as infile:
             for line in infile:
@@ -31,22 +34,26 @@ def mutation_list(flu = 'H3N2'):
     for r in M.iterrows():
         vals = np.array([x for x in r[1] if not np.isnan(x)])
         mutation_statistics.append((r, vals.max(), vals.mean(), vals.std()))
-    mutation_statistics.sort(key=lambda x:x[1])
+    mutation_statistics.sort(key=lambda x:x[1], reverse=True)
     N = pd.DataFrame.from_items([(x[0][0],x[0][1]) for x in mutation_statistics]).transpose()
-    nrows=0
-    for r in N.iterrows():
-        tmp = '\t'.join([r[0]]+map(str,[x for x in r[1]]))
-        print tmp
-        if nrows>20:
-            break
-    return N.transpose()
+
+    sep = ' & '
+    le = '\\\\ \n'
+    ndigits = 2
+    with open('HI_mutation_effects_all.tsv', 'w') as ofile:
+        ofile.write("mutation\t"+sep.join(N.columns)+le)
+        for r in N.iterrows():
+            tmp = sep.join([r[0]]+map(str,[round(x,ndigits) for x in r[1]])).replace('nan','---')
+            print tmp
+            ofile.write(tmp+le)
+    return N
 
 ######################################
 #### make a figure that plots the cumulative antigenic change vs time
 ######################################
 def cumulative_antigenic(myflu, n=10):
     from random import sample
-    leaf_sample = sample([leaf for leaf in myflu.tree.leaf_iter() 
+    leaf_sample = sample([leaf for leaf in myflu.tree.leaf_iter()
                           if leaf.num_date>2014], n)
 
 
@@ -82,13 +89,13 @@ def cumulative_antigenic(myflu, n=10):
     for eff in trunk_effects[:1]:
         print "sum of effects on trunk", np.sum(eff)
         tmp_eff = np.array(eff)
-        plt.hist(tmp_eff[tmp_eff>1e-4],  bins=np.linspace(0,2,21), 
+        plt.hist(tmp_eff[tmp_eff>1e-4],  bins=np.linspace(0,2,21),
                  label='tree: '+str(np.round(np.mean(tmp_eff>1e-4), 2)), alpha=0.5)
 
     for eff in trunk_mut_effects[:1]:
         print "sum of mutation effects on trunk:", np.sum(eff.values())
         tmp_eff = np.array(eff.values())
-        plt.hist(tmp_eff[tmp_eff>1e-4],  bins=np.linspace(0,2,21), 
+        plt.hist(tmp_eff[tmp_eff>1e-4],  bins=np.linspace(0,2,21),
                  label='mutations: '+str(np.round(np.mean(tmp_eff>1e-4), 2)), alpha=0.5)
 
     plt.xlabel('effect size')
@@ -110,7 +117,7 @@ def cumulative_antigenic(myflu, n=10):
 
 
 ######################################
-#### make a figure that compares 
+#### make a figure that compares
 #### trunk frequency increase to dHI
 ######################################
 def slope_vs_dHI(myflu):
@@ -154,7 +161,7 @@ def slope_vs_dHI(myflu):
     return slopes
 
 ######################################
-#### make a figure that compares 
+#### make a figure that compares
 #### trunk frequency increase to dHI
 ######################################
 def slope_vs_mutation(myflu):
@@ -234,13 +241,13 @@ def tree_additivity_symmetry(myflu, mtype='tree'):
                             -(val_bwd - myflu.serum_potency[mtype][v[1]] - myflu.virus_effect[mtype][serum[0]])
             val_bwd = myflu.HI_normalized[v]
             reciprocal_measurements.append([testvir, serum, diff_uncorrected, diff_corrected])
-            reciprocal_measurements_titers.append([testvir, serum, val_fwd, val_bwd, 
+            reciprocal_measurements_titers.append([testvir, serum, val_fwd, val_bwd,
                                                   (val_fwd - myflu.serum_potency[mtype][serum] - myflu.virus_effect[mtype][testvir]),
                                                   (val_bwd - myflu.serum_potency[mtype][v[1]] - myflu.virus_effect[mtype][serum[0]]),
                                                   ])
     plt.figure(figsize=(1.6*figheight, figheight))
     ax = plt.subplot(121)
-    plt.text(0.05, 0.93,  ('tree model' if mtype=='tree' else 'mutation model'), 
+    plt.text(0.05, 0.93,  ('tree model' if mtype=='tree' else 'mutation model'),
              weight='bold', fontsize=fs, transform=plt.gca().transAxes)
     plt.hist([x[2] for x in reciprocal_measurements],alpha=0.7, label="raw", normed=True)
     plt.hist([x[3] for x in reciprocal_measurements],alpha=0.7, label="tree", normed=True)
@@ -288,7 +295,7 @@ def tree_additivity_symmetry(myflu, mtype='tree'):
                 additivity_test['control'].append(dists[0]-dists[1])
 
     ax=plt.subplot(122)
-    plt.hist(additivity_test['control'], alpha=0.7,normed=True, bins = np.linspace(0,3,18), 
+    plt.hist(additivity_test['control'], alpha=0.7,normed=True, bins = np.linspace(0,3,18),
              label = 'control, mean='+str(np.round(np.mean(additivity_test['control']),2)))
     plt.hist(additivity_test['test'], alpha=0.7,normed=True, bins = np.linspace(0,3,18),
              label = 'quartett, mean='+str(np.round(np.mean(additivity_test['test']),2)))
@@ -303,6 +310,7 @@ def tree_additivity_symmetry(myflu, mtype='tree'):
 ######################################
 def titer_vs_distances(myflu, mtype='tree'):
     from scipy.stats import pearsonr
+    from matplotlib import cm
     dists = []
     for (test, serum), val in myflu.HI_normalized.iteritems():
         muts = myflu.get_mutations(serum[0], test)
@@ -325,17 +333,18 @@ def titer_vs_distances(myflu, mtype='tree'):
         dists.append([hamming_dist, len(muts), epidist, rbsdist, dHI, val_corrected, val])
 
     dists = np.array(dists)
-    fig, axs = plt.subplots(1,4, sharey=True,figsize=(3*figheight, figheight))
+    fig, axs = plt.subplots(1,3,figsize=(3*figheight, figheight))
 
-    for ai, (ax, ci, col_name) in enumerate(izip(axs, [0, 2, 3, 4],
-                                            ['amino acid distance', 'epitope distance', 
-                                            'RBS distance', mtype+' model'])):
+    for ai, (ax, ci, col_name, gridsize) in enumerate(izip(axs, [2, 3, 4],
+                                            ['epitope distance',
+                                            'RBS distance', mtype+' model'], [20,6,20])):
 
         C = pearsonr(dists[:,ci], dists[:,-2])
-        ax.scatter(dists[:,ci], dists[:,-2],s=1, label = u'$r='+str(np.round(C[0],2))+'$')
+        ax.hexbin(dists[:,ci], dists[:,-2], gridsize=gridsize, cmap = cm.YlOrRd_r, bins='log') #,s=1, label = u'$r='+str(np.round(C[0],2))+'$')
         ax.tick_params(axis='both', labelsize=fs)
         ax.set_xlabel(col_name, fontsize=fs)
-        ax.legend(loc=4, fontsize=fs)
+        ax.set_title(u'$r='+str(np.round(C[0],2))+'$', fontsize=fs)
+        #ax.legend(loc=4, fontsize=fs)
     axs[0].set_ylabel('HI genetic component', fontsize=fs)
-    plt.tight_layout()
+    plt.tight_layout(pad=0.3, w_pad=0.5)
     return dists

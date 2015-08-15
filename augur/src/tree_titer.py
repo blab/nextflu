@@ -615,7 +615,9 @@ class HI_tree(object):
 			self.node_lookup[ref].HI_titers_raw= defaultdict(dict)
 			self.node_lookup[ref].potency_mut={}
 			self.node_lookup[ref].potency_tree={}
+			self.node_lookup[ref].autologous_titers = {}
 		for ref in self.sera:
+			self.node_lookup[ref[0]].autologous_titers[ref[1]] = np.median(self.autologous_titers[ref]['val'])
 			if 'mutation' in self.virus_effect:
 				self.node_lookup[ref[0]].potency_mut[ref[1]] = self.serum_potency['mutation'][ref]
 			if 'tree' in self.virus_effect:
@@ -629,7 +631,7 @@ class HI_tree(object):
 			try:
 				self.node_lookup[ref[0]].HI_titers_raw[self.node_lookup[test].clade][ref[1]] = val
 			except:
-				print("Can't assign",test, ref)				   
+				print("Can't assign",test, ref)
 		for test in self.HI_strains:
 			if 'mutation' in self.virus_effect:
 				self.node_lookup[test].avidity_tree = self.virus_effect['mutation'][test]

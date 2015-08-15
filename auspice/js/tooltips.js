@@ -3,17 +3,17 @@ var virusTooltip = d3.tip()
 	.attr('class', 'd3-tip')
 	.offset([0, 12])
 	.html(function(d) {
-	
+
 		string = "";
-				
+
 		// safe to assume the following attributes
 		if (typeof d.strain != "undefined") {
 			string += d.strain;
 		}
 		string += "<div class=\"smallspacer\"></div>";
-		
-		string += "<div class=\"smallnote\">";		
-		
+
+		string += "<div class=\"smallnote\">";
+
 		// check if vaccine strain
 		if (vaccineStrains.indexOf(d.strain) != -1) {
 			string += "Vaccine strain<br>";
@@ -22,7 +22,7 @@ var virusTooltip = d3.tip()
 			string += "First chosen " + vaccine_date.toLocaleString("en-us", { month: "short" }) + " " + vaccine_date.getFullYear() + "<br>";
 			string += "<div class=\"smallspacer\"></div>";
 		}
-		
+
 		if (typeof d.country != "undefined") {
 			string += d.country.replace(/([A-Z])/g, ' $1');
 		}
@@ -37,7 +37,7 @@ var virusTooltip = d3.tip()
 				string += "<br>Source: " + d.lab.substring(0,25);
 				if (d.lab.length>25) string += '...';
 			}
-		}			
+		}
 		string += "</div>";
 		// following may or may not be present
 		if ((typeof focusNode != "undefined")){
@@ -48,7 +48,7 @@ var virusTooltip = d3.tip()
 			string += '<table class="table table-condensed"><thead><tr><td>Serum</td><td>&#916log<sub>2</sub></td><td>heterol.</td><td>autol.</td></tr></thead><tbody>';
 			if (typeof focusNode.HI_titers[d.clade] != "undefined"){
 				for (var tmp_serum in focusNode.HI_titers[d.clade]){
-					var homHI = focusNode.HI_titers_raw[focusNode.clade][tmp_serum];
+					var autoHI = focusNode.autologous_titers[tmp_serum];
 					var rawHI = focusNode.HI_titers_raw[d.clade][tmp_serum];
 					var logHI = focusNode.HI_titers[d.clade][tmp_serum];
 					if (correctVirus){logHI-=d.avidity_mut;}
@@ -59,7 +59,7 @@ var virusTooltip = d3.tip()
 					}else{
 						serum_name = tmp_serum.substring(0,17)+'...';
 					}
-					string += '<tr><td>' + serum_name + '</td><td>' +  logHI.toFixed(1)+'</td><td>' + rawHI.toFixed(0)+ '</td><td>' + homHI.toFixed(0) +"</td></tr>";
+					string += '<tr><td>' + serum_name + '</td><td>' +  logHI.toFixed(1)+'</td><td>' + rawHI.toFixed(0)+ '</td><td>' + autoHI.toFixed(0) +"</td></tr>";
 				}
 			}
 			string += '<tr><td>' + 'Tree model' + '</td><td>' +  d.HI_dist_tree.toFixed(2) + '</td><td> --- </td><td>---</td></tr>';

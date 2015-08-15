@@ -1,3 +1,7 @@
+'''
+script that regresses cumulative evolution of antigenic
+change on the cHI_trunk against time.
+'''
 import matplotlib.pyplot as plt
 import numpy as np
 import glob
@@ -9,7 +13,7 @@ sns.set_style('darkgrid')
 
 fs=14
 fmts = ['.pdf', '.svg', '.png']
-res = '20y'
+res = '1985to2016'
 figheight=4
 
 #############################################
@@ -23,7 +27,7 @@ for fname in flist:
     cHI_trunk = np.loadtxt(fname)
     # regress against time
     R = linregress(cHI_trunk)
-    plt.plot(cHI_trunk[:,0], cHI_trunk[:,1], '-o', 
+    plt.plot(cHI_trunk[:,0], cHI_trunk[:,1], '-o',
              label= flu+r', $\mu='+str(np.round(R[0],2))+'\pm'+str(np.round(R[-1],2))+'$')
 
 ax.tick_params(axis='both', labelsize=fs)
@@ -37,8 +41,8 @@ plt.savefig('cHI_trunk.png')
 ############################################
 ### alternative figure tracing cHI along lineages
 ############################################
-flist = glob.glob('data/*'+res+'_cHI_path.pkl')
-flist.extend(glob.glob('data/*'+'7y'+'_cHI_path.pkl'))
+flist = ['data/H3N2_1985to2016_cHI_path.pkl', 'data/H1N1pdm_7y_cHI_path.pkl',
+        'data/Yam_20y_cHI_path.pkl', 'data/Vic_20y_cHI_path.pkl' ]
 
 plt.figure(figsize=(2*figheight, figheight))
 ax=plt.subplot(121)
@@ -52,7 +56,7 @@ for fname in flist:
     if flu=='H3N2':
         ax = plt.subplot(121)
     else:
-        ax = plt.subplot(122)        
+        ax = plt.subplot(122)
     for p in cHI_path:
         all_path[flu].extend([p[-1,:]])
         ax.plot(p[-1,0], p[-1,1], 'o', ls='none', c=cols[flu])
@@ -63,7 +67,7 @@ for flu in all_path:
     if flu=='H3N2':
         ax = plt.subplot(121)
     else:
-        ax = plt.subplot(122)        
+        ax = plt.subplot(122)
     R = linregress(np.array(all_path[flu]))
     t = np.array([2007 if flu=='H1N1pdm' else 1993,2015])
     ax.plot(t,R[1]+R[0]*t, c = cols[flu], lw=2, ls='--',
@@ -71,9 +75,9 @@ for flu in all_path:
 #plt.ylim([-0.5, 19])
 for ai,ax in enumerate([plt.subplot(121), plt.subplot(122)]):
     ax.tick_params(axis='both', labelsize=fs)
-    ax.set_xlim([1995,2017])
-    ax.set_ylim([-0.5, 4 if ai else 19])
-    ax.set_yticks(range(4) if ai else [0,5,10,15])
+    ax.set_xlim([1995 if ai else 1985,2017])
+    ax.set_ylim([-0.5, 4 if ai else 25])
+    ax.set_yticks(range(4) if ai else [0,5,10,15, 20, 25])
     if ai==0: ax.set_ylabel(r'cumulative antigenic change $[\log_2]$', fontsize=fs)
     ax.set_xlabel(r'year', fontsize=fs)
     ax.legend(loc=2, fontsize = fs-2)

@@ -174,7 +174,9 @@ class H3N2_clean(virus_clean):
 		remove_viruses = []
 		outlier_strains = ["A/Helsinki/942/2013", "A/India/6352/2012", "A/Pennsylvania/14/2010", "A/HuNan/01/2014",
 						   "A/OSAKA/31/2005", "A/Sari/388/2006", "A/Busan/15453/2009", "A/SaoPaulo/36178/2015",
-						   "A/Chile/8266/2003", "A/Kenya/170/2011", "A/Kenya/168/2011"]
+						   "A/Chile/8266/2003", "A/Kenya/170/2011", "A/Kenya/168/2011", "A/Pennsylvania/40/2010",
+						   "A/Pennsylvania/09/2011","A/Indiana/21/2013","A/Indiana/06/2013", "A/Indiana/11/2013",
+						   "A/Indiana/13/2012", "A/Indiana/08/2012", "A/Ohio/34/2012"]
 		for outlier_strain in outlier_strains:
 			for v in self.viruses:
 				if (v.strain == outlier_strain):
@@ -327,7 +329,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 			self.export_to_auspice(tree_fields = [
 				'ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country',
 				'dHI', 'cHI', 'mean_HI_titers','HI_titers','HI_titers_raw', 'serum', 'HI_info',
-				'avidity_tree','avidity_mut', 'potency_mut', 'potency_tree', 'mean_potency_mut', 'mean_potency_tree'],
+				'avidity_tree','avidity_mut', 'potency_mut', 'potency_tree', 'mean_potency_mut', 'mean_potency_tree', 'autologous_titers'],
 				   annotations = ['3c2.a', '3c3.a'])
 			self.generate_indexHTML()
 			self.export_HI_mutation_effects()
@@ -354,7 +356,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine',
-				 'frequencies','HI', 'export']
+				 'frequencies','HI', 'export']+ ['HIvalidate']
 	from process import parser
 	import matplotlib.pyplot as plt
 	plt.ion()
@@ -367,7 +369,7 @@ if __name__=="__main__":
 		params.time_interval = (params.interval[0], params.interval[1])
 	dt= params.time_interval[1]-params.time_interval[0]
 	params.pivots_per_year = 12.0 if dt<5 else 6.0
-	steps = all_steps[all_steps.index(params.start):(all_steps.index(params.stop)+1)] + ['HIvalidate']
+	steps = all_steps[all_steps.index(params.start):(all_steps.index(params.stop)+1)]
 	if params.skip is not None:
 		for tmp_step in params.skip:
 			if tmp_step in steps:
