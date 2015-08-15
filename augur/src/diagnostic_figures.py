@@ -10,7 +10,36 @@ fs = 12
 plt.locator_params(nbins=4)
 fmts = ['.pdf','.svg','.png']
 figheight = 4
-
+######################################
+#### make list of mutation effects across different periods
+######################################
+def mutation_list(flu = 'H3N2'):
+    from glob import glob
+    import pandas as pd
+    flist = glob('../auspice/'+flu+'/*to*/HI_mutation_effects.tsv')
+    mutation_effects = {}
+    for fname in flist:
+        interval = fname.split('/')[-2]
+        tmp_effects = {}
+        with open(fname) as infile:
+            for line in infile:
+                mut, val = line.strip().split('\t')
+                tmp_effects[mut]=float(val)
+        mutation_effects[interval]=tmp_effects
+    M = pd.DataFrame(mutation_effects)
+    mutation_statistics = []
+    for r in M.iterrows():
+        vals = np.array([x for x in r[1] if not np.isnan(x)])
+        mutation_statistics.append((r, vals.max(), vals.mean(), vals.std()))
+    mutation_statistics.sort(key=lambda x:x[1])
+    N = pd.DataFrame.from_items([(x[0][0],x[0][1]) for x in mutation_statistics]).transpose()
+    nrows=0
+    for r in N.iterrows():
+        tmp = '\t'.join([r[0]]+map(str,[x for x in r[1]]))
+        print tmp
+        if nrows>20:
+            break
+    return N.transpose()
 
 ######################################
 #### make a figure that plots the cumulative antigenic change vs time
