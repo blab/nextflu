@@ -117,8 +117,8 @@
 		</div>
 		<div class="row">
 			<div class="col-md-12">
-				<div class="bigspacer"></div>
-				<div class="bigspacer"></div>
+			<div class="hugespacer"></div>
+			<div id="aln"></div>
 			</div>
 		</div>
 
@@ -147,10 +147,24 @@
 			</div>
 		</div>
 
+
 		<script src="js/muttree.js"></script>
-
+		<script src="js/msa.min.js"></script>
+		<script>
+		var rootDiv = document.getElementById('aln');
+		/* global rootDiv */
+		var msa = require("msa");
+		var opts = {
+		  el: rootDiv,
+		  importURL: "./aln.fasta",
+		  //bootstrapMenu: true, // simplified behavior to add the menu bar, you can also create your own menu instance
+		  colorscheme: {"scheme": "nucleotide"},
+		};
+		var m = new msa(opts);
+		m.g.on('all',function(name,data){var obj = {name: name, data: data};if(inIframe()){ parent.postMessage(obj, "*") }})
+		function inIframe(){try{return window.self!==window.top}catch(e){return true}}
+		</script>
     	</div>
-
 	</body>
 
 </html>
