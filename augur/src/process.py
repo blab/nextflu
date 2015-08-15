@@ -260,20 +260,6 @@ class process(virus_frequencies):
 									for y,m in sorted(self.date_region_count.keys()) ]
 		write_json(meta, self.auspice_meta_fname, indent=0)
 
-		try:
-			display_effects = read_json(self.auspice_HI_display_mutations)
-		except:
-			display_effects = {}
-		if self.virus_type not in display_effects: display_effects[self.virus_type]={}
-		substantial_effects = {k[0]+":"+k[1]:val for k, val in self.mutation_effects.iteritems()
-								if val>0.01}
-		write_json(substantial_effects, self.auspice_HI_fname)
-		tmp = [[k[0]+":"+k[1],round(val,2)] for k, val 
-						in self.mutation_effects.iteritems() if val>0.001]
-		tmp.sort(key = lambda x:x[1], reverse=True)
-		display_effects[self.virus_type][self.resolution] = tmp
-		write_json(display_effects, self.auspice_HI_display_mutations)
-
 
 	def htmlpath(self):
 		htmlpath = '../auspice/'
@@ -313,9 +299,31 @@ class process(virus_frequencies):
 			out.write('</script>\n\n')
 
 	def export_HI_mutation_effects(self):
+		from io_util import write_json, read_json
+		# make a tab delimited file with the mutaton effects
+		table_effects = []
 		with open(self.htmlpath()+'HI_mutation_effects.tsv','w') as ofile:
 			for mut, val in self.mutation_effects.iteritems():
-				ofile.write(mut[0]+':'+mut[1]+'\t'+str(np.round(val,4))+'\n')
+				mut_str = '/'.join([x[0]+':'+x[1] for x in self.mutation_clusters[mut]])
+				ofile.write(mut_str+'\t'+str(np.round(val,4))+'\n')
+				if val>0.001:
+					table_effects.append((mut_str,round(val,2)))
+		# export mutation effects to JSON
+		try: #they are added to a larger json fir different lineages and resultions
+			display_effects = read_json(self.auspice_HI_display_mutations)
+		except: # if file doesn't yet exist, create and empty dictionary
+			display_effects = {}
+
+		# effects for use in the js are indext by first mutation in cluster
+		model_effects = {mut[0]+':'+mut[1]:val for mut, val in 
+						 self.mutation_effects.iteritems() if val>0.01}
+		write_json(model_effects, self.auspice_HI_fname)
+
+		if self.virus_type not in display_effects: display_effects[self.virus_type]={}
+		table_effects.sort(key = lambda x:x[1], reverse=True)
+		display_effects[self.virus_type][self.resolution] = table_effects
+		write_json(display_effects, self.auspice_HI_display_mutations)
+
 
 	def align(self, fast=False):
 		'''

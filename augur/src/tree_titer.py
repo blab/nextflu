@@ -192,7 +192,7 @@ class HI_tree(object):
 			muts.extend([(prot, aa1+str(pos+1)+aa2) for pos, (aa1, aa2) in enumerate(izip(seq1, seq2)) if aa1!=aa2])
 		return muts
 
-	def make_seqgraph(self):
+	def make_seqgraph(self, colin_thres = 5):
 		'''
 		code amino acid differences between sequences into a matrix
 		the matrix has dimensions #measurements x #observed mutations
@@ -251,9 +251,37 @@ class HI_tree(object):
 		# convert to numpy arrays and save product of tree graph with its transpose for future use
 		self.HI_dist =  np.array(HI_dist)
 		self.tree_graph = np.array(seq_graph)
+		if colin_thres is not None:
+			self.collapse_colinear_mutations(colin_thres)
 		self.TgT = np.dot(self.tree_graph.T, self.tree_graph)
 		print "Found", self.tree_graph.shape, "measurements x parameters"
 
+	def collapse_colinear_mutations(self, colin_thres):
+		'''
+		find colinear columns of the design matrix, collapse them into clusters
+		'''
+		TT = self.tree_graph[:,:self.genetic_params].T
+		mutation_clusters = []
+		n_measurements = self.tree_graph.shape[0]
+		for col, mut in izip(TT, self.relevant_muts):
+			col_found = False
+			for cluster in mutation_clusters:
+				if np.sum(col==cluster[0])>=n_measurements-colin_thres:
+					cluster[1].append(mut)
+					col_found=True
+					print("adding",mut,"to cluster ",cluster[1])
+					break
+			if not col_found:
+				mutation_clusters.append([col, [mut]])
+		print("dimensions of old design matrix",self.tree_graph.shape)
+		self.tree_graph = np.hstack((np.array([c[0] for c in mutation_clusters]).T,
+									 self.tree_graph[:,self.genetic_params:]))
+		self.genetic_params = len(mutation_clusters)
+		# use the first mutation of a cluster to index the effect
+		# make a dictionary that maps this effect to the cluster
+		self.mutation_clusters = {c[1][0]:c[1] for c in mutation_clusters}
+		self.relevant_muts = [c[1][0] for c in mutation_clusters]
+		print("dimensions of new design matrix",self.tree_graph.shape)
 
 	def make_treegraph(self):
 		'''
