@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set_style('darkgrid')
 
+colors = sns.color_palette(['#a6cee3','#1f78b4','#b2df8a','#33a02c','#fb9a99',
+                         '#e31a1c','#fdbf6f','#ff7f00','#cab2d6'])
 
 fs = 12
 plt.locator_params(nbins=4)
@@ -18,35 +20,42 @@ def mutation_list(flu = 'H3N2'):
     import pandas as pd
     flist = glob('../auspice/'+flu+'/*to*/HI_mutation_effects.tsv')
     mutation_effects = {}
+    mutation_counts = {}
     for fname in flist:
         interval = fname.split('/')[-2]
         years = map(int, interval.split('to'))
         if years[1]-years[0] not in [10,11]:
             continue
-        tmp_effects = {}
+        tmp_effects, tmp_counts = {},{}
         with open(fname) as infile:
             for line in infile:
-                mut, val = line.strip().split('\t')
-                tmp_effects[mut]=float(val)
+                mut, val, count = line.strip().split('\t')
+                tmp_effects[mut] = float(val)
+                tmp_counts[mut] =  int(count)
         mutation_effects[interval]=tmp_effects
+        mutation_counts[interval]=tmp_counts
     M = pd.DataFrame(mutation_effects)
+    C = pd.DataFrame(mutation_counts)
     mutation_statistics = []
-    for r in M.iterrows():
+    for r,c in izip(M.iterrows(), C.iterrows()):
         vals = np.array([x for x in r[1] if not np.isnan(x)])
-        mutation_statistics.append((r, vals.max(), vals.mean(), vals.std()))
-    mutation_statistics.sort(key=lambda x:x[1], reverse=True)
+        mutation_statistics.append((r, c, vals.max(), vals.mean(), vals.std()))
+    mutation_statistics.sort(key=lambda x:x[2], reverse=True)
     N = pd.DataFrame.from_items([(x[0][0],x[0][1]) for x in mutation_statistics]).transpose()
+    D = pd.DataFrame.from_items([(x[1][0],x[1][1]) for x in mutation_statistics]).transpose()
 
-    sep = ' & '
-    le = '\\\\ \n'
+    sep = '\t'
+    le = '\n'
+#    sep = ' & '
+#    le = '\\\\ \n'
     ndigits = 2
     with open('HI_mutation_effects_all.tsv', 'w') as ofile:
         ofile.write("mutation\t"+sep.join(N.columns)+le)
-        for r in N.iterrows():
-            tmp = sep.join([r[0]]+map(str,[round(x,ndigits) for x in r[1]])).replace('nan','---')
+        for r,c in izip(N.iterrows(), D.iterrows()):
+            tmp = sep.join([r[0]]+map(str,[(round(x,ndigits),y) for x,y in izip(r[1], c[1])])).replace('nan','---')
             print tmp
             ofile.write(tmp+le)
-    return N
+    return N, D
 
 ######################################
 #### make a figure that plots the cumulative antigenic change vs time
@@ -89,19 +98,19 @@ def cumulative_antigenic(myflu, n=10):
     for eff in trunk_effects[:1]:
         print "sum of effects on trunk", np.sum(eff)
         tmp_eff = np.array(eff)
-        plt.hist(tmp_eff[tmp_eff>1e-4],  bins=np.linspace(0,2,21),
-                 label='tree: '+str(np.round(np.mean(tmp_eff>1e-4), 2)), alpha=0.5)
+        plt.hist(tmp_eff[tmp_eff>1e-2],  bins=np.linspace(0,4,21),
+                 label='fraction non-neg tree: '+str(np.round(np.mean(tmp_eff>1e-4), 2)), alpha=0.5)
 
     for eff in trunk_mut_effects[:1]:
         print "sum of mutation effects on trunk:", np.sum(eff.values())
         tmp_eff = np.array(eff.values())
-        plt.hist(tmp_eff[tmp_eff>1e-4],  bins=np.linspace(0,2,21),
-                 label='mutations: '+str(np.round(np.mean(tmp_eff>1e-4), 2)), alpha=0.5)
+        plt.hist(tmp_eff[tmp_eff>1e-4],  bins=np.linspace(0,4,21),
+                 label='fractio non-neg mutations: '+str(np.round(np.mean(tmp_eff>1e-4), 2)), alpha=0.5)
 
     plt.xlabel('effect size')
     plt.ylabel('number of counts')
     plt.legend()
-    plt.savefig("trunk_effectsize_histogram.png")
+    plt.savefig(myflu.htmlpath()+ "trunk_effectsize_histogram.png")
 
     unexplained_variance = []
     cvals = np.linspace(0,2,40)
@@ -128,18 +137,23 @@ def slope_vs_dHI(myflu):
     tmp_pivots = myflu.tree.seed_node.pivots
     dt = tmp_pivots[1]-tmp_pivots[0]
     y1 = int(1.0/dt)
+    y3 = int(3.0/dt)
     for node in myflu.tree.postorder_internal_node_iter():
         tmp_freq = node.freq['global']
-        if tmp_freq is not None and tmp_freq[0]<cutoff_freq-0.05 and np.max(tmp_freq)>cutoff_freq+0.25:
+        if tmp_freq is not None and tmp_freq[0]<cutoff_freq and np.max(tmp_freq)>cutoff_freq:
             ii = np.argmax(tmp_freq>cutoff_freq)
             slope = (tmp_freq[ii]-tmp_freq[ii-1])/(tmp_pivots[ii]-tmp_pivots[ii-1])
             offset = tmp_pivots[ii-1] + (cutoff_freq-tmp_freq[ii-1])/slope
-            if ii+y1<len(tmp_freq):
-                dfreq = tmp_freq[ii+y1]-tmp_freq[ii]
+            dfreq_sum = tmp_freq[ii:ii+y3].sum()
+            if ii+y3<len(tmp_freq):
+                dfreq_y1 = tmp_freq[ii+y1]-tmp_freq[ii]
+                dfreq_y3 = tmp_freq[ii+y3]-tmp_freq[ii]
             else:
-                dfreq = 0
-            slopes.append([node.dHI, slope, np.max(tmp_freq), dfreq])
-            plt.plot(tmp_pivots-offset, tmp_freq, lw=2, c=cm.jet(node.dHI/2.0), alpha=min(1.0, max(node.dHI, 0.3)))
+                dfreq_y1 = 0
+                dfreq_y3 = 0
+            HI=node.dHI
+            slopes.append([HI, slope, np.max(tmp_freq), dfreq_y1, dfreq_y3, dfreq_sum])
+            plt.plot(tmp_pivots-offset, tmp_freq, lw=2, c=cm.jet(np.sqrt(HI)/2.0), alpha=min(1.0, max(HI, 0.3)))
 
     plt.xlabel('time', fontsize=fs)
     plt.ylabel('frequency', fontsize=fs)
@@ -158,6 +172,8 @@ def slope_vs_dHI(myflu):
     print("spearman correlation HI/slope:",spearmanr(slopes[:,:2]))
     print("spearman correlation HI/max:",spearmanr(slopes[:,0],slopes[:,2]))
     print("spearman correlation HI/delta1Y:",spearmanr(slopes[:,0],slopes[:,3]))
+    print("spearman correlation HI/delta3Y:",spearmanr(slopes[:,0],slopes[:,4]))
+    print("spearman correlation HI/freqsum:",spearmanr(slopes[:,0],slopes[:,5]))
     return slopes
 
 ######################################
@@ -184,26 +200,31 @@ def slope_vs_mutation(myflu):
         else:
             continue
         # find sweeps
+        cutoff = 0.25 # minimal change over 3 years
         dfreq = mut_freq[y3:]-mut_freq[:-y3]
-        tmp_sweeps = [ii for ii,dx  in enumerate(dfreq[:-1]) if dx>0.5 and dfreq[ii+1]<0.5]
+        #tmp_sweeps = [ii for ii,dx  in enumerate(dfreq[:-1]) if dx>cutoff and dfreq[ii+1]<cutoff]
+        tmp_sweeps = [ii for ii,dx  in enumerate(mut_freq[:-y3]) if dx<cutoff and mut_freq[ii+1]>cutoff]
         sweeps=[]
         for ii, si in enumerate(tmp_sweeps):
             # check that one mutation goes up, the prev down
             if np.min((mut_freq+prevmut_freq)[si:si+y3])>0.8:
-                if ii==0 or np.min(mut_freq[tmp_sweeps[ii-1]:si])<0.2:
-                    sweeps.append(si)
+                #if ii==0 or np.min(mut_freq[tmp_sweeps[ii-1]:si])<0.2:
+                sweeps.append(si)
         for si in sweeps:
             tmp_freq = mut_freq[max(0,si-y3):(si+2*y3)]
             tmp_pivots = pivots[max(0,si-y3):(si+2*y3)]
             ii = np.argmax(tmp_freq>cutoff_freq)
             slope = (tmp_freq[ii]-tmp_freq[ii-1])/(tmp_pivots[ii]-tmp_pivots[ii-1])
             offset = tmp_pivots[ii-1] + (cutoff_freq-tmp_freq[ii-1])/slope
-            if ii+y1<len(tmp_freq):
-                dfreq = tmp_freq[ii+y1]-tmp_freq[ii]
+            dfreq_sum = tmp_freq[ii:ii+y3].sum()
+            if ii+y3<len(tmp_freq):
+                dfreq_y1 = tmp_freq[ii+y1]-tmp_freq[ii]
+                dfreq_y3 = tmp_freq[ii+y3]-tmp_freq[ii]
             else:
-                dfreq = 0
-            slopes.append([HI, slope, np.max(tmp_freq), dfreq])
-            plt.plot(tmp_pivots-offset, tmp_freq, lw=2, c=cm.jet(HI/2.0), alpha=min(1.0, max(HI, 0.3)))
+                dfreq_y1 = 0
+                dfreq_y3 = 0
+            slopes.append([HI, slope, np.max(tmp_freq), dfreq_y1, dfreq_y3, dfreq_sum])
+            plt.plot(tmp_pivots-offset, tmp_freq, lw=2, c=cm.jet(np.sqrt(HI)/2.0), alpha=min(1.0, max(HI, 0.3)))
 
     plt.xlabel('time', fontsize=fs)
     plt.ylabel('frequency', fontsize=fs)
@@ -222,6 +243,8 @@ def slope_vs_mutation(myflu):
     print("spearman correlation HI/slope:",spearmanr(slopes[:,:2]))
     print("spearman correlation HI/max:",spearmanr(slopes[:,0],slopes[:,2]))
     print("spearman correlation HI/delta1Y:",spearmanr(slopes[:,0],slopes[:,3]))
+    print("spearman correlation HI/delta3Y:",spearmanr(slopes[:,0],slopes[:,4]))
+    print("spearman correlation HI/freqsum:",spearmanr(slopes[:,0],slopes[:,5]))
     return slopes
 
 
@@ -304,6 +327,48 @@ def tree_additivity_symmetry(myflu, mtype='tree'):
     plt.legend(fontsize=fs)
     plt.tight_layout()
 
+######################################
+#### plot large effect mutations
+######################################
+def large_effect_mutations(myflu, ax=None, cols = None):
+    from matplotlib import cm
+    if ax is None:
+        plt.figure(figsize=(figheight, figheight))
+        ax = plt.subplot('111')
+    if cols is None:
+        cols = {}
+    cutoff_freq = 0.25
+    HI_cutoff = 0.3
+    pivots = myflu.tree.seed_node.pivots
+    dt = pivots[1]-pivots[0]
+    y3 = int(3.0/dt)
+    y1 = int(1.0/dt)
+    color_cycle=0
+    for mut in myflu.mutation_effects:
+        HI = myflu.mutation_effects[mut]
+        if HI>HI_cutoff:
+            mutlabel = mut[0]+':'+mut[1][1:]
+            if mutlabel in myflu.frequencies["mutations"]["global"]:
+                mut_freq = np.array(myflu.frequencies["mutations"]["global"][mutlabel])
+            else:
+                print("no frequencies for ",mut, 'HI', HI)
+                continue
+
+            if mut_freq[0]<cutoff_freq:
+                print("Plotting ",mut, 'max: ',mut_freq.max(), 'HI', HI)
+                if mut not in cols:
+                    cols[mut] = colors[color_cycle%len(colors)]
+                    color_cycle+=1
+
+                c = cols[mut]
+                ax.plot(pivots, mut_freq, lw=2, ls = '--' if mut_freq.max()>0.9 else '-',c=cm.jet(min(np.sqrt(HI-HI_cutoff*0.8),1.5)/1.5))
+
+    ax.set_xlabel('time', fontsize=fs)
+    ax.set_ylabel('frequency', fontsize=fs)
+    #plt.xlim([-1,2])
+    ax.set_ylim([-0.01,1.1])
+    ax.tick_params(axis='both', labelsize=fs)
+    return cols
 
 ######################################
 #### analyze correlations between titer distances and sequence/model distances

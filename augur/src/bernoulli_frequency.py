@@ -1,4 +1,4 @@
-# estimates clade frequencies 
+# estimates clade frequencies
 from scipy.interpolate import interp1d
 import time
 import numpy as np
@@ -21,7 +21,7 @@ def running_average(obs, ws):
 				tmp_vals[-ws//2+1:]*=float(ws)/np.arange(ws-1,ws//2,-1.0)
 		else:
 			tmp_vals[:ws//2]*=float(ws)/np.arange(ws//2+1,ws)
-			tmp_vals[-ws//2:]*=float(ws)/np.arange(ws,ws//2,-1.0)			
+			tmp_vals[-ws//2:]*=float(ws)/np.arange(ws,ws//2,-1.0)
 	except:
 		import pdb; pdb.set_trace()
 	return tmp_vals
@@ -64,7 +64,7 @@ def extrapolation(freq_interp,x):
 		else:
 			return float(freq_interp(x))
 
-	if np.isscalar(x): 
+	if np.isscalar(x):
 		return ep(freq_interp,x)
 	else:
 		return np.array([ep(freq_interp,tmp_x) for tmp_x in x])
@@ -74,11 +74,11 @@ class frequency_estimator(object):
 	estimates a smooth frequency trajectory given a series of time stamped
 	0/1 observations. The most likely set of frequencies at specified pivot values
 	is deterimned by numerical minimization. Likelihood consist of a bernoulli sampling
-	term as well as a term penalizing rapid frequency shifts. this term is motivated by 
+	term as well as a term penalizing rapid frequency shifts. this term is motivated by
 	genetic drift, i.e., sampling variation.
 	'''
 
-	def __init__(self, observations, pivots = None, extra_pivots = 5, stiffness = 20.0, 
+	def __init__(self, observations, pivots = None, extra_pivots = 5, stiffness = 20.0,
 				inertia = 0.0, logit=False, verbose = 0, dfreq_pc = 1e-2, pc=1e-3, tol=1e-3, **kwarks):
 		self.tps = np.array([x[0] for x in observations])
 		self.obs = np.array([x[1]>0 for x in observations])
@@ -126,7 +126,7 @@ class frequency_estimator(object):
 		dfreq = np.diff(freq)
 		dt = np.diff(self.pivot_tps)
 		tmp_freq = fix_freq(freq,self.dfreq_pc)
-		# return wright fisher diffusion likelihood for frequency change. 
+		# return wright fisher diffusion likelihood for frequency change.
 		# return -0.25*self.stiffness*np.sum(dfreq**2/np.diff(self.pivot_tps)/pq(fix_freq(freq[:-1],self.dfreq_pc)))
 		return -0.25*self.stiffness*(np.sum((dfreq[1:] - self.inertia*dfreq[:-1])**2/(dt[1:]*pq(tmp_freq[1:-1])))
 									+dfreq[0]**2/(dt[0]*pq(tmp_freq[0])))
@@ -140,7 +140,7 @@ class frequency_estimator(object):
 			estfreq = fix_freq(freq(self.tps), self.pc)
 		stiffness_LH = self.stiffLH(pivots)
 		bernoulli_LH = np.sum(np.log(estfreq[self.obs])) + np.sum(np.log((1-estfreq[~self.obs])))
-		LH = stiffness_LH + bernoulli_LH 
+		LH = stiffness_LH + bernoulli_LH
 		if self.verbose>2: print "LH:",bernoulli_LH,stiffness_LH
 		if self.logit:
 			return -LH/len(self.obs) + logit_regularizer(pivots, self.reg)
@@ -196,7 +196,7 @@ class frequency_estimator(object):
 			if self.verbose: print "neg logLH using",len(self.pivot_tps),"pivots:", self.logLH(self.pivot_freq)
 
 		self.final_pivot_freq=np.zeros_like(self.final_pivot_tps)
-		self.final_pivot_freq[first_pivot:last_pivot]=self.pivot_freq			
+		self.final_pivot_freq[first_pivot:last_pivot]=self.pivot_freq
 		self.final_pivot_freq[:first_pivot] = self.final_pivot_freq[first_pivot]
 		self.final_pivot_freq[last_pivot:] = self.final_pivot_freq[last_pivot-1]
 		self.frequency_estimate = interp1d(self.final_pivot_tps, self.final_pivot_freq, kind=self.interpolation_type, bounds_error=False)
@@ -204,7 +204,7 @@ class frequency_estimator(object):
 
 class virus_frequencies(object):
 	def __init__(self, time_interval = (2012.0, 2015.1),
-				frequency_stiffness = 10.0, pivots_per_year = 12.0, 
+				frequency_stiffness = 10.0, pivots_per_year = 12.0,
 				clade_designations={}, aggregate_regions = None,
 				extra_pivots = 5, **kwarks):
 		self.stiffness = frequency_stiffness
@@ -221,7 +221,7 @@ class virus_frequencies(object):
 
 	def estimate_genotype_frequency(self, aln, gt, threshold = 10, min_observations = -1):
 		'''
-		estimate the frequency of a particular genotype specified 
+		estimate the frequency of a particular genotype specified
 		gt   --		[(position, amino acid), ....]
 		'''
 		all_dates = [seq.annotations['num_date'] for seq in aln]
@@ -235,15 +235,15 @@ class virus_frequencies(object):
 		obs = np.array(observations)[leaf_order]
 
 		if len(tps)>threshold and np.sum(obs)>min_observations and np.sum(obs)<len(obs)-min_observations:
-			if self.verbose: 
-				print "# of time points",len(tps), "# observations",sum(obs) 
+			if self.verbose:
+				print "# of time points",len(tps), "# observations",sum(obs)
 			fe = frequency_estimator(zip(tps, obs), pivots=self.pivots, extra_pivots = self.extra_pivots,
-			               stiffness=self.stiffness*float(len(observations))/len(self.viruses), 
+			               stiffness=self.stiffness*float(len(observations))/len(self.viruses),
 		                   logit=True, **self.kwarks)
 			fe.learn()
 			return fe.frequency_estimate, (tps,obs)
 		else:
-			if self.verbose: print "too few observations"
+			if self.verbose: print "too few observations", len(tps), sum(obs)
 			return None, (tps, obs)
 
 	def get_sub_alignment(self, regions=None, gene='nuc'):
@@ -255,12 +255,12 @@ class virus_frequencies(object):
 				seq_date = seq.annotations['num_date']
 				if seq_date>=self.time_interval[0] and seq_date < self.time_interval[1]:
 					sub_aln.append(seq)
-					all_dates.append(seq_date)				 
+					all_dates.append(seq_date)
 		return MultipleSeqAlignment(sub_aln)
 
 	def determine_mutation_frequencies(self, regions=None, threshold=0.01, gene='nuc'):
 		'''
-		determine the abundance of all single position variants  
+		determine the abundance of all single position variants
 		'''
 		sub_aln = self.get_sub_alignment(regions, gene=gene)
 		if gene=='nuc':
@@ -279,9 +279,36 @@ class virus_frequencies(object):
 						mutation_frequencies[mut] = list(np.round(logit_inv(est_freq.y),3))
 		return mutation_frequencies
 
+	def determine_HI_mutation_frequencies(self, regions=None, threshold=0.3, gene='HA1'):
+		'''
+		determine the abundance of all single position variants
+		'''
+		sub_aln = self.get_sub_alignment(regions, gene=gene)
+		if gene=='nuc':
+			alpha, freqs = self.nuc_alphabet, self.nuc_frequencies
+		else:
+			alpha, freqs = self.aa_alphabet, self.aa_frequencies[gene]
+
+		mutation_frequencies = {"pivots":list(self.pivots)}
+		for mut, HI in self.mutation_effects.iteritems():
+			if HI<threshold:
+				continue
+			if mut[0]!=gene:
+				print(mut,"has wrong gene")
+				continue
+			pos = int(mut[1][1:-1])-1
+			for aa in [mut[1][0], mut[1][-1]]:
+				ai = alpha.index(aa)
+				mut_label = gene+':'+str(pos+1)+aa
+				print "estimating freq of ", mut_label, "total frequency:", freqs[ai,pos]
+				est_freq, (tps, obs) = self.estimate_genotype_frequency(sub_aln, [(pos, aa)])
+				if est_freq is not None:
+					mutation_frequencies[mut_label] = list(np.round(logit_inv(est_freq.y),3))
+		return mutation_frequencies
+
 	def determine_genotype_frequencies(self, regions=None, threshold=0.1, gene='nuc'):
 		'''
-		determine the abundance of all two mutation combinations 
+		determine the abundance of all two mutation combinations
 		'''
 		sub_aln = self.get_sub_alignment(regions, gene=gene)
 		genotype_frequencies = {"pivots":list(self.pivots)	}
@@ -321,8 +348,8 @@ class virus_frequencies(object):
 		start_index = max(0,np.searchsorted(tps, self.time_interval[0]))
 		stop_index = min(np.searchsorted(tps, self.time_interval[1]), all_dates.shape[0]-1)
 		tps = tps[start_index:stop_index]
-		# we estimate frequencies of subclades, they will be multiplied by the 
-		# frequency of the parent node and corrected for the frequency of sister clades 
+		# we estimate frequencies of subclades, they will be multiplied by the
+		# frequency of the parent node and corrected for the frequency of sister clades
 		# already fit
 		if node.freq[region_name] is None:
 			frequency_left=None
@@ -341,7 +368,7 @@ class virus_frequencies(object):
 				# make n pivots a year, interpolate frequencies
 				# FIXME: adjust stiffness to total number of observations in a more robust manner
 				if np.sum(obs)>0 and np.sum(obs)<len(tps):
-					fe = frequency_estimator(zip(tps, obs), pivots=self.pivots, stiffness=self.stiffness*len(all_dates)/2000.0, 
+					fe = frequency_estimator(zip(tps, obs), pivots=self.pivots, stiffness=self.stiffness*len(all_dates)/2000.0,
 											logit=True, extra_pivots = self.extra_pivots, **self.kwarks)
 					fe.learn()
 
@@ -367,7 +394,7 @@ class virus_frequencies(object):
 			last_child = children_by_size[-1]
 			last_child.freq[region_name] = np.array(frequency_left)
 			last_child.logit_freq[region_name] = logit_transform(last_child.freq[region_name])
-		else:  # broke out of loop because clades too small. 
+		else:  # broke out of loop because clades too small.
 			for child in children_by_size[ci:]: # assign freqs of all remaining clades to None.
 				child.freq[region_name] = None
 				child.logit_freq[region_name] = None
@@ -410,7 +437,7 @@ class virus_frequencies(object):
 		reverse_order = np.argsort(leaf_order)
 		all_dates = all_dates[leaf_order]
 
-		if regions is None: 
+		if regions is None:
 			region_name="global"
 		elif region_name is None:
 			region_name = ",".join(regions)
