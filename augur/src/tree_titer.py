@@ -200,18 +200,18 @@ class HI_tree(object):
 		seq_graph = []
 		HI_dist = []
 		# list all mutations
-		mutation_counter = defaultdict(int)
+		self.mutation_counter = defaultdict(int)
 		for (test, ref), val in self.train_HI.iteritems():
 			muts = self.get_mutations(ref[0], test)
 			if muts is None:
 				continue
 			for mut in muts:
-				mutation_counter[mut]+=1
+				self.mutation_counter[mut]+=1
 
 		relevant_muts = []
 		min_count= 10
 		min_freq = 1.0*min_count/len(self.viruses)
-		for mut, count in mutation_counter.iteritems():
+		for mut, count in self.mutation_counter.iteritems():
 			gene = mut[0]
 			pos = int(mut[1][1:-1])-1
 			aa1, aa2 = mut[1][0],mut[1][-1]

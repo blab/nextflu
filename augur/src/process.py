@@ -305,7 +305,7 @@ class process(virus_frequencies):
 		with open(self.htmlpath()+'HI_mutation_effects.tsv','w') as ofile:
 			for mut, val in self.mutation_effects.iteritems():
 				mut_str = '/'.join([x[1] for x in self.mutation_clusters[mut]])
-				ofile.write(mut_str+'\t'+str(np.round(val,4))+'\n')
+				ofile.write(mut_str+'\t'+str(np.round(val,4))+'\t'+str(self.mutation_counter[mut])+'\n')
 				if val>0.001:
 					table_effects.append((mut_str,round(val,2)))
 		# export mutation effects to JSON
