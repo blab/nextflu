@@ -25,7 +25,7 @@ virus_config.update({
 	'force_include_all':False,
 	'max_global':True,   # sample as evenly as possible from different geographic regions 
 	'cds':[0,None], # define the HA1 start i n 0 numbering
-	'n_iqd':6,
+	'n_iqd':8,
 	'min_mutation_frequency':0.1,
 	# define relevant clades in canonical HA1 numbering (+1)
 	# numbering starting at HA1 start, adding sp to obtain numbering from methionine
