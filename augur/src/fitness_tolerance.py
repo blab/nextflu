@@ -20,15 +20,15 @@ def calc_fitness_tolerance(aa_seq, aa_prob, aa, indices, beta = 1.0):
 	'''
 	determine the indices of aligned amino acids and sum the logged probabilities
 	'''
-	H3_aa_indices = [aa.index(aa_seq[p]) if aa_seq[p] in aa else -1 for p in indices]
-	return np.sum(np.log(aa_prob[(np.arange(len(indices)), H3_aa_indices)])*beta)
+	H3_aa_indices = np.array([aa.index(aa_seq[p]) if aa_seq[p] in aa else -1 for p in indices])
+	return np.sum((H3_aa_indices!=-1)*np.log(aa_prob[(np.arange(len(indices)), H3_aa_indices)])*beta)
 
 def assign_fitness(nodes):
 	'''
 	loops over all viruses, translates their sequences and calculates the virus fitness
 	'''
 	aa, sites, wt_aa, aa_prob = load_mutational_tolerance()
-	aln = AlignIO.read('source-data/H1_H3.fasta', 'fasta')
+	aln = AlignIO.read('source-data/H1_H3_77.fasta', 'fasta')
 	# returns true whenever neither of the sequences have a gap
 	aligned = (np.array(aln)!='-').min(axis=0)
 	# map alignment positions to sequence positions, subset to aligned amino acids
@@ -40,13 +40,14 @@ def assign_fitness(nodes):
 	aa_prob=aa_prob[indices['H1'],:]
 	# attach another column for non-canonical amino acids
 	aa_prob = np.hstack((aa_prob, 1e-5*np.ones((aa_prob.shape[0],1))))
+	print("AA preference matrix:",aa_prob.shape)
 	if isinstance(nodes, list):
 		for node in nodes:
-			node['tol'] = calc_fitness_tolerance(Seq.translate(node['seq']), 
+			node['tol'] = calc_fitness_tolerance(Seq.translate(node['seq']),
 															aa_prob, aa, indices['H3'])
 	elif isinstance(nodes, dendropy.Tree):
 		for node in nodes.postorder_node_iter():
-			node.tol = calc_fitness_tolerance(Seq.translate(node.seq), 
+			node.tol = calc_fitness_tolerance(node.aa_seq['SigPep']+node.aa_seq['HA1']+node.aa_seq['HA2'],
 															aa_prob, aa, indices['H3'])
 
 
@@ -60,7 +61,7 @@ def main(in_fname='data/tree_refine.json', tree=True):
 	assign_fitness(viruses)
 
 	if tree:
-		out_fname = "data/tree_tolerance.json"		
+		out_fname = "data/tree_tolerance.json"
 		write_json(dendropy_to_json(viruses.seed_node), out_fname)
 	else:
 		out_fname = "data/virus_tolerance.json"

@@ -320,7 +320,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 					lam_HI=lam_HI, lam_avi=lam_avi, lam_pot=lam_pot, map_to_tree=True)
 			self.map_HI(training_fraction=1.0, method = method, force_redo=True,
 					lam_HI=lam_HI, lam_avi=lam_avi, lam_pot=lam_pot, map_to_tree=False)
-			freqs = self.determine_HI_mutation_frequencies()
+			freqs = self.determine_HI_mutation_frequencies(threshold = 0.1)
 			self.frequencies["mutations"]["global"].update(freqs)
 			self.dump()
 

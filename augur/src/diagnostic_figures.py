@@ -361,7 +361,7 @@ def large_effect_mutations(myflu, ax=None, cols = None):
                     color_cycle+=1
 
                 c = cols[mut]
-                ax.plot(pivots, mut_freq, lw=2, ls = '--' if mut_freq.max()>0.9 else '-',c=cm.jet(min(np.sqrt(HI-HI_cutoff*0.8),1.5)/1.5))
+                ax.plot(pivots, mut_freq, lw=2, ls = '--' if mut_freq.max()>0.9 else '-',c=cm.YlOrRd_r(min(np.sqrt(HI-HI_cutoff*0.8),1.5)/1.5))
 
     ax.set_xlabel('time', fontsize=fs)
     ax.set_ylabel('frequency', fontsize=fs)
