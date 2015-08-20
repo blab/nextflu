@@ -15,7 +15,7 @@ figheight = 4
 ######################################
 #### make list of mutation effects across different periods
 ######################################
-def mutation_list(flu = 'H3N2'):
+def mutation_list(flu = 'H3N2', format='tsv', nconstraints=False):
     from glob import glob
     import pandas as pd
     flist = glob('../auspice/'+flu+'/*to*/HI_mutation_effects.tsv')
@@ -24,7 +24,7 @@ def mutation_list(flu = 'H3N2'):
     for fname in flist:
         interval = fname.split('/')[-2]
         years = map(int, interval.split('to'))
-        if years[1]-years[0] not in [10,11]:
+        if years[1]-years[0] not in [10,11]: # skip all non-10year interval
             continue
         tmp_effects, tmp_counts = {},{}
         with open(fname) as infile:
@@ -44,15 +44,20 @@ def mutation_list(flu = 'H3N2'):
     N = pd.DataFrame.from_items([(x[0][0],x[0][1]) for x in mutation_statistics]).transpose()
     D = pd.DataFrame.from_items([(x[1][0],x[1][1]) for x in mutation_statistics]).transpose()
 
-    sep = '\t'
-    le = '\n'
-#    sep = ' & '
-#    le = '\\\\ \n'
+    if format=='tex':
+        sep = ' & '
+        le = '\\\\ \n'
+    else:
+        sep = '\t'
+        le = '\n'
     ndigits = 2
     with open('HI_mutation_effects_all.tsv', 'w') as ofile:
         ofile.write("mutation\t"+sep.join(N.columns)+le)
         for r,c in izip(N.iterrows(), D.iterrows()):
-            tmp = sep.join([r[0]]+map(str,[(round(x,ndigits),y) for x,y in izip(r[1], c[1])])).replace('nan','---')
+            if nconstraints:
+                tmp = sep.join([r[0]]+map(str,[(round(x,ndigits),y) for x,y in izip(r[1], c[1])])).replace('nan','---')
+            else:
+                tmp = sep.join([r[0]]+map(str,[round(x,ndigits) for x,y in izip(r[1], c[1])])).replace('nan','---')
             print tmp
             ofile.write(tmp+le)
     return N, D
