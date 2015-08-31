@@ -35,7 +35,7 @@ virus_config.update({
 	'force_include':'source-data/H1N1pdm_HI_strains.txt',
 	'force_include_all':True,
 	'date_spec':'year',
-	'max_global':True,   # sample as evenly as possible from different geographic regions 
+	'max_global':True,   # sample as evenly as possible from different geographic regions
 
 	'cds':[0,None], # define the HA start i n 0 numbering
 
@@ -82,7 +82,7 @@ class H1N1pdm_filter(flu_filter):
 		tmp_outgroup = SeqIO.read('source-data/H1N1pdm_outgroup.gb', 'genbank')
 		genome_annotation = tmp_outgroup.features
 		self.cds = {x.qualifiers['gene'][0]:x for x in genome_annotation
-				if 'gene' in x.qualifiers and x.type=='CDS' and 
+				if 'gene' in x.qualifiers and x.type=='CDS' and
 				x.qualifiers['gene'][0] in ['SigPep', 'HA1', 'HA2']}
 		self.outgroup = {
 			'strain': 'A/Swine/Indiana/P12439/00',
@@ -118,7 +118,7 @@ class H1N1pdm_clean(virus_clean):
 		from seq_util import hamming_distance as distance
 		"""Remove outlier viruses"""
 		remove_viruses = []
-		
+
 		outlier_seqs = [
 			"ATGAAAGCAATACTAGTAGTCCTGCTATATACATTTACAACCGCAAATGCCGACACATTATGTATAGGTTATCATGCAAACAATTCAACTGACACCGTAGACACAGTACTAGAAAAGAATGTAACAGTAACACACTCTGTCAACCTTCTAGAAAACAGGCATAATGGGAAACTATGTAAACTAAGAGGGGTAGCTCCATTGCATTTGGGTAAATGTAACATTGCTGGCTGGCTTCTGGGAAATCCAGAGTGTGAATCACTCTCCACAGCAAGCTCATGGTCCTACATTGTGGAAACATCTAATTCAGACAATGGGACGTGTTACCCAGGAGATTTCATCAATTATGAGGAGCTAAGAGAGCAGTTGAGCTCAGTGTCATCATTTGAAAGATTTGAGATATTCCCCAAGACAAGTTCATGGCCCAATCATGACACGAACAGAGGTGTGACGGCAGCATGTCCTCATGCTGGGGCAAACAGCTTCTACAGAAATTTAGTATGGCTAGTAAAAAAGGGAAATTCATACCCAAAGATCAACAAATCCTACATTAACAATAAAGAGAAGGAAGTTCTCGTGCTATGGGCCATTCACCATCCATCTACCAGTGCCGACCAACAAAGTCTCTACCAAAATGCAGATGCCTATGTGTTTGTGGGGTCATCAAGATACAGCAGGAAGTTCGAGCCAGAAATAGCAACAAGACCTAAGGTGAGAGACCAAGCAGGGAGAATGAACTATTACTGGACACTAGTAGAGCCTGGTGACAAGATAACATTCGAAGCAACTGGAAATCTAGTGGCACCGAGATATGCCTTCGCATTGAAAAGAAATTCTGGATCTGGTATTATCATTTCAGATACATCAGTCCACGATTGTGATACGACTTGTCAGACACCCAATGGTGCTATAAACACCAGCCTCCCATTTCAAAATATACATCCAGTCACAATTGGAGAATGTCCAAAATATGTAAAAAGTACTAAACTGAGAATGGCCACAGGTTTAAGGAATATCCCGTCTATCCAATCTAGAGGCCTGTTTGGTGCCATTGCTGGCTTTATCGAAGGGGGTTGGACAGGAATGATAGATGGATGGTACGGTTATCACCATCAAAATGAGCAGGGATCAGGATATGCAGCCGACCTGAAGAGCACACAGAATGCCATTGACGGGATCACTAACAAGGTAAACTCTGTTATTGAAAAGATGAACACACAATTCACGGCAGTAGGTAAAGAGTTCAGCCACTTGGAAAGAAGAATAGAGAATTTAAATAAAAAAGTAGATGATGGTTTTCTAGATATTTGGACTTACAATGCCGAACTATTGGTTCTATTGGAAAATGAAAGAACTTTGGATTACCACGACTCAAATGTGAAAAACTTGTATGAAAAAGTAAGAAGCCAACTAAAAAACAATGCCAAGGAAATTGGAAATGGCTGCTTTGAATTTTACCACAAATGTGATGACATGTGCATGGAAAGCGTCAAAAATGGAACTTATGATTACCCTAAATACTCAGAGGAAGCAAAACTAAACAGAGAAGAAATAGATGGGGTAAAGTTGGAATCAACAAGGATTTACCAAATTTTGGCTATCTATTCAACGGTCGCCAGTTCATTGGTACTGGTAGTCTCCCTGGGGGCAATCAGTTTCTGGATGTGCTCTAATGGGTCGCTACAGTGCAGAATATGTATTTAA",
 			"----------------------TGATATATACATTTACAACCGCAAATGCAGACACATTATGTATAGGTTATCATGCGAACAACTCAACTGACACCGTAGACACAGTACTAGAAAAGAATGTAACAGTAACACACTCTGTTAACCTTCTAGAAGACAGGCATAATGGGAAACTATGTAAACTAAGAGGGGTAGCTCCATTGCATTTGGGTAAATGTAACATTGCTGGCTGGCTCCTGGGAAATCCAGAGTGTGAATCACTCTTCACAGCAAGCTCATGGTCCTACATTGTGGAAACATCTAATTCAGACAATGGGACGTGTTACCCAGGAGATTTCATCAATTATGAGGAGCTAAGAGAGCAGTTGAGCTCAGTGTCATCATTTGAAAGATTTGAGATATTCCCCAAGACAAGTTCATGGCCCAATCATGACACGAACAGAGGTGTGACGGCGGCATGCCCTCATGCTGGAACAAATAGCTTCTACAGAAATTTAATATGGCTGGTCAAAAAAGGAAATTCATACCCAAAGATCAGCAAATCCTACATTAACAATAAGGAGAAGGAAGTTCTCGTGCTATGGGGCATTCACCATCCATCTACCAGTGCCGACCAACAAAGTCTCTATCAGAATGCAGATGCCTATGTTTTTGTGGGGTCATCAAGATACAGCAGGAAGTTCGAGCCAGAAATAGCAACAAGACCCAAGGTGAGGGACCAAGCAGGGAGAATGAACTATTACTGGACACTAGTAGAGCCTGGAGACAAAATAACATTCGAAGCAACTGGAAATCTAGTGGCACCGAGATATGCCTTCGCATTGAAAAGAAATTCTGGATCTGGTATTATCATTTCAGATACACCAATCCACGATTGTAATACGACTTGTCAGACACCCAAGGGTGCTATAAACACCAGCCTCCCATTTCAAAATATACATCCAGTCACAATTGGAGAATGTCCAAAGTATGTAAAAAGCACAAAATTGAGAATGGCCACAGGATTAAGGAATATCCCGTCTATTCAATCTAGGGGCCTGTTTGGGGCCATTGCCGGCTTTATTGAGGGGGGATGGACAGGAATGATAGATGGATGGTACGGTTATCACCATCAAAATGAGCAGGGATCAGGATATGCAGCAGACCTGAAGAGCACACAGAATGCCATTGACGGGATCACTAACAAGGTAAATTCTGTTATTGAAAAGATGAACACACAATTCACAGCAGTAGGTACAGAGTTCAGCCACTTGGAAAAAAGAATAGAGAATTTAAATAAGAAGGTTGATGATGGTTTTCTGGATATTTGGACTTACAATGCCGAACTGTTGGTTCTGTTGGAAAATGAAAGAACTTTGGATTACCACGACTCAAATGTGAAAACCTTATATGAAAAGGTGAGAAGCCAACTAAGAAACAATGCCAAGGAAATTGGAAATGGCTGCTTTGAATTTTACCACAAATGTGATGACACGTGCATGGAAAGCGTCAGAAATGGGACTTATGATTACCCAAAATACTCAGAAGAAGCAAAACTAAACAGAGAGGAAATAGATGGGGTAAAGCTGGAATCAACAAGGATTTTCCAAATTTTGGCGATCTATTCAACTGCCGCCAGTTCATTGGTACTGGTAGTCTCCCTGGGGGCAATCAGTTTCTGGATGTGCTCTAATGGGTCTCTACAGTGCAGAATATGTATTTAA",
@@ -131,7 +131,7 @@ class H1N1pdm_clean(virus_clean):
 				if (dist < 0.02):
 					remove_viruses.append(v)
 					if self.verbose>1:
-						print "\tremoving", v.strain				
+						print "\tremoving", v.strain
 
 		self.viruses = MultipleSeqAlignment([v for v in self.viruses if v not in remove_viruses])
 
@@ -144,7 +144,7 @@ class H1N1pdm_clean(virus_clean):
 				if (v.strain == outlier_strain):
 					remove_viruses.append(v)
 					if self.verbose > 1:
-						print "\tremoving", v.strain					
+						print "\tremoving", v.strain
 		self.viruses = MultipleSeqAlignment([v for v in self.viruses if v not in remove_viruses])
 
 	def clean(self):
@@ -152,12 +152,12 @@ class H1N1pdm_clean(virus_clean):
 		self.clean_outbreaks()
 		print "Number of viruses after outbreak filtering:",len(self.viruses)
 		self.clean_outliers()
-		self.clean_outlier_strains()		
+		self.clean_outlier_strains()
 		print "Number of viruses after outlier filtering:",len(self.viruses)
 
 class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine, HI_tree, fitness_model):
 	"""docstring for H1N1pdm_process, H1N1pdm_filter"""
-	def __init__(self,verbose = 0, force_include = None, 
+	def __init__(self,verbose = 0, force_include = None,
 				force_include_all = False, max_global= True, **kwargs):
 		self.force_include = force_include
 		self.force_include_all = force_include_all
@@ -179,8 +179,8 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine, HI
 					forced_strains = [fix_name(line.strip()).upper() for line in infile]
 			else:
 				forced_strains = []
-			self.subsample(viruses_per_month, 
-				prioritize=forced_strains, all_priority=self.force_include_all, 
+			self.subsample(viruses_per_month,
+				prioritize=forced_strains, all_priority=self.force_include_all,
 				region_specific = self.max_global)
 			self.dump()
 		else:
@@ -207,13 +207,13 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine, HI
 			print "--- Estimating frequencies at " + time.strftime("%H:%M:%S") + " ---"
 			self.determine_variable_positions()
 			self.estimate_frequencies(tasks = ["mutations","tree"])
-			if 'genotype_frequencies' in steps: 
+			if 'genotype_frequencies' in steps:
 					self.estimate_frequencies(tasks = ["genotypes"])
 			self.dump()
 		if 'HI' in steps:
 			print "--- Adding HI titers to the tree " + time.strftime("%H:%M:%S") + " ---"
 			self.determine_variable_positions()
-			self.map_HI(training_fraction=1.0, method = 'nnl1reg', 
+			self.map_HI(training_fraction=1.0, method = 'nnl1reg',
 					lam_HI=lam_HI, lam_avi=lam_avi, lam_pot=lam_pot, map_to_tree=True)
 			self.map_HI(training_fraction=1.0, method = 'nnl1reg', force_redo=True,
 					lam_HI=lam_HI, lam_avi=lam_avi, lam_pot=lam_pot, map_to_tree=False)
@@ -225,9 +225,10 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine, HI
 			self.export_to_auspice(tree_fields = [
 				'ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country',
 				'dHI', 'cHI', 'mean_HI_titers','HI_titers','HI_titers_raw', 'serum', 'HI_info',
-				'avidity_tree','avidity_mut', 'potency_mut', 'potency_tree', 'mean_potency_mut', 'mean_potency_tree'], 
+				'avidity_tree','avidity_mut', 'potency_mut', 'potency_tree', 'mean_potency_mut', 'mean_potency_tree', 'autologous_titers'],
                    annotations = ['5','6','6b', '6c','7'])
 			self.generate_indexHTML()
+			self.export_HI_mutation_effects()
 
 		if 'HIvalidate' in steps:
 			print "--- generating validation figures " + time.strftime("%H:%M:%S") + " ---"
@@ -235,14 +236,14 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine, HI
 
 
 if __name__=="__main__":
-	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 
+	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine',
 				'frequencies', 'HI', 'export']
 	from process import parser
 	params = parser.parse_args()
 
 	lt = time.localtime()
 	num_date = round(lt.tm_year+(lt.tm_yday-1.0)/365.0,2)
-	params.time_interval = (num_date-params.years_back, num_date) 
+	params.time_interval = (num_date-params.years_back, num_date)
 	if params.interval is not None and len(params.interval)==2 and params.interval[0]<params.interval[1]:
 		params.time_interval = (params.interval[0], params.interval[1])
 	dt= params.time_interval[1]-params.time_interval[0]
@@ -258,11 +259,11 @@ if __name__=="__main__":
 	# add all arguments to virus_config (possibly overriding)
 	virus_config.update(params.__dict__)
 	# pass all these arguments to the processor: will be passed down as kwargs through all classes
-	myH1N1pdm = H1N1pdm_process(**virus_config) 
+	myH1N1pdm = H1N1pdm_process(**virus_config)
 	if params.test:
 		myH1N1pdm.load()
 	else:
-		myH1N1pdm.run(steps, viruses_per_month = virus_config['viruses_per_month'], 
+		myH1N1pdm.run(steps, viruses_per_month = virus_config['viruses_per_month'],
 				raxml_time_limit = virus_config['raxml_time_limit'],
 				   lam_HI = virus_config['lam_HI'],
 				   lam_avi = virus_config['lam_avi'],

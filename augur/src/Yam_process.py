@@ -33,7 +33,7 @@ virus_config.update({
 	'force_include':'source-data/Yam_HI_strains.txt',
 	'force_include_all':True,
 	'date_spec':'year',
-	'max_global':True,   # sample as evenly as possible from different geographic regions 
+	'max_global':True,   # sample as evenly as possible from different geographic regions
 	'cds':[11,None], # define the translation start i n 0 numbering
 	# define relevant clades in canonical HA1 numbering (+1)
 	# numbering starting at methionine including the signal peptide
@@ -47,7 +47,7 @@ virus_config.update({
 	'html_vars': {'coloring': 'lbi, dfreq, region, date, cHI, HI_dist',
 				  'gtplaceholder': 'HA1 positions...',
 				  'freqdefault': '2, 3, 3a'},
-	'js_vars': {'LBItau': 0.0005, 'LBItime_window': 0.5, 'dfreq_dn':2},	
+	'js_vars': {'LBItau': 0.0005, 'LBItime_window': 0.5, 'dfreq_dn':2},
 	'layout':'auspice_HI',
 	})
 
@@ -65,13 +65,13 @@ class BYam_filter(flu_filter):
 				'strain':    	'B/Beijing/184/93',
 				'isolate_id':	'EPI_ISL_969',
 				'date':    		'1993-07-01', #(Month and day unknown)
-				'region':   	'China', 
+				'region':   	'China',
 				'seq':     		'GATCGAATCTGTACTGGGATAACATCTTCAAACTCACCTCATGTGGTCAAAACAGCTACTCAAGGGGAGGTCAATGTGACTGGTGTGATACCACTGACAACAACACCAACAAAATCTCATTTTGGAAATCTCAAAGGAACAAAGACCAGAGGGAAACTATGCCCAAACTGTCTCAACTGCACAGATCTGGATGTGGCCTTGGGCAGACCAATGTGTGTGGGGACCACACCTTCGGCAAAAGCTTCAATACTCCACGAAGTCAGACCTGTTACATCCGGGTGCTTTCCTATAATGCACGACAGAACAAAAATCAGACAGCTACCCAATCTTCTCAGAGGATATGAAAATATCAGATTATCAACCCAAAACGTTATCAACGCAGAAAAGGCACCAGGAGGACCCTACAGGCTTGGAACCTCAGGATCTTGCCCTAACGCTACCAGTAGAAGCGGATTTTTCGCAACAATGGCTTGGGCTGTCCCAAGGGACAACAACAAAACAGCAACAAATCCACTAACAGTAGAAGTACCATACATTTGTACAAAAGGAGAAGACCAAATTACTGTTTGGGGGTTCCATTCTGATAACAAAATCCAAATGAAAAACCTCTATGGAGACTCAAATCCTCAAAAGTTCACCTCATCTGCTAATGGAGTAACCACACATTATGTTTCTCAGATTGGCGGCTTCCCAGATCAAACAGAAGACGGAGGGCTACCACAAAGCGGCAGAATTGTTGTTGATTACATGGTGCAAAAACCTGGGAAAACAGGAACAATTGTCTATCAAAGAGGTGTTTTGTTGCCTCAAAAGGTGTGGTGCGCGAGTGGCAGGAGCAAAGTAATAAAAGGGTCCTTGCCTTTAATTGGTGAAGCAGATTGCCTTCACGAAAAATACGGTGGATTAAACAAAAGCAAGCCTTACTACACAGGAGAACATGCAAAAGCCATAGGAAATTGCCCAATATGGGTGAAAACACCTTTGAAGCTTGCCAATGGAACCAAATATAGACCTCCTGCAAAACTATTAAAGGAAAGG',
 			},
-			{	
+			{
 				'strain':    	'B/Sichuan/379/99',
 				'isolate_id': 	'EPI_ISL_21113',
-				'date':    		'1999-07-01', # (Month and day unknown)	
+				'date':    		'1999-07-01', # (Month and day unknown)
 				'region':   	'China',
 				'seq':     		'GAGGCAATAATTGTACTACTCATGGTAGTAACATCCAATGCAGATCGAATCTGCACTGGGATAACATCGTCAAACTCACCTCATGTGGTCAAAACAGCTACTCAAGGGGAGGTCAATGTAACTGGTGCGATACCACTGACAACAACACCAACAAAATCTCATTTTGCAAATCTCAAAGGAACAAAGACCAGAGGGAAACTATGCCCAACCTGTCTCAACTGCACAGATCTGGATGTGGCCTTGGGCAGACCAATGTGTGTGGGGATCACACCTTCGGCAAAAGCTTCAATACTCCACGAAATCAAACCTGTTACATCCGGATGCTTTCCTATAATGCACGACAGAACAAAAATCAGACAGCTACCCAATCTTCTCAGAGGATATGAAAAAATCAGATTATCAACCCAAAACGTTATCAACGCAGAAAAGGCACCAGGAGGACCTTACAGACTTGGAACTTCAGGATCTTGCCCTAACGCTACCAGTAAAAGCGGATTTTTCGCAACAATGGCTTGGGCTGTCCCAAGGGACAACAACAAAACAGCAACGAATCCACTAACAGTAGAAGTACCACACATCTGTACAAAAGAAGAAGACCAAATTACTGTTTGGGGGTTCCATTCTGATGACAAAACCCAAATGAAAAACCTCTATGGAGACTCAAATCCTCAAAAGTTCACCTCATCTGCTAATGGAATAACCACACATTATGTTTCTCAGATTGGCGGCTTCCCGGACCAAACAGAGGACGGAGGGCTACCACAAAGCGGCAGAATTGTTGTTGATTACATGGTGCAAAAACCTGGGAAAACAGGAACAATTGTCTATCAAAGAGGGATTTTGTTGCCTCAAAAGGTGTGGTGCGCGAGTGGTAGGAGCAAAGTAATAAAAGGGTCCTTGCCTTTAATTGGTGAAGCAGATTGCCTTCATGAAAAATACGGTGGATTAAACAAAAGCAAGCCTTACTACACAGGAGAACATGCAAAAGCCATAGGAAATTGCCCAATATGGGTGAAAACACCTTTGAAGCTTGCCAATGGAACCAAATATAGACCTCCTGCAAAACTATTAAAGGAAAGGGGTTTCT',
 			},
@@ -114,7 +114,7 @@ class BYam_filter(flu_filter):
 		tmp_outgroup = SeqIO.read('source-data/Yam_outgroup.gb', 'genbank')
 		genome_annotation = tmp_outgroup.features
 		self.cds = {x.qualifiers['gene'][0]:x for x in genome_annotation
-				if 'gene' in x.qualifiers and x.type=='CDS' and 
+				if 'gene' in x.qualifiers and x.type=='CDS' and
 				x.qualifiers['gene'][0] in ['SigPep', 'HA1', 'HA2']}
 		self.outgroup = {
 				'strain':'B/Singapore/11/94',
@@ -149,7 +149,7 @@ class BYam_clean(virus_clean):
 		from seq_util import hamming_distance as distance
 		"""Remove outlier viruses"""
 		remove_viruses = []
-		
+
 		outlier_seqs = [
 			"-----------ATGAAGGCCATAATTGTACTACTCATGGTAGTAACATCCAATGCAGATCGAATCTGCACTGGGATAACATCTTCAAACTCACCTCATGTGGTCAAAACAGCTACTCAAGGGGAGGTCAATGTGACTGGCGTGATACCACTGACAACAACACCAACAAAATCTTATTTTGCAAATCTCAAAGGAACAAGGACCAGAGGGAAACTATGTCCGGACTGTCTCAACTGTACAGATCTGGATGTGGCCTTGGGCAGGCCAATGTGTGTGGGGACCACACCTTCTGCTAAAGCTTCAATACTCCACGAAGTCAGACCTGTTACATCCGGGTGCTTTCCTATAATGCACGACAGAACAAAAATCAGGCAACTACCCAATCTTCTCAGAGGATATGAAAATATCAGGTTATCAACCCAAAACGTTATCGATGCAGAAAAAGCACCAGGAGGACCTTACAGACTTGGAACCTCAGGATCTTGCCCTAACGCTACCAGTAAAATCGGATTTTTCGCAACAATGGCTTGGGCTGTCCCAAAGGACAACTACAAAAATGCAACGAACCCACTAACAGTAGAAGTACCATACATTTGTGCAGAAGGGGAAGACCAAATTACTGTTTGGGGGTTCCATTCAGATAACAAAACCCAAATGAAGAACCTCTATGGAGACTCAAATCCTCAAAAGTTCACCTCATCTGCTAATGGAGTAACCACACATTATGTTTCTCAGATTGGCGACTTTCCAGATCAAACAGAAGACGGAGGACTACCACAAAGCGGCAGAATTGTTGTTGATTACATGGTGCAAAGACCTGGGAAAACAGGAACAATTGTCTATCAAAGAGGCGTTTTGTTGCCTCAAAAGGTGTGGTGCGCGAGTGGCAGGAGCAAAGTAATAAAAGGGTCATTGCCTTTAATTGGTGAAGCAGATTGCCTTCATGAAAAATACGGTGGATTAAACAAAAGCAAGCCTTACTACACAGGAGAACATGCAAAGGCCATAGGAAATTGCCCAATATGGGTGAAGACACCCTTGAAGCTGGCCAATGGAACCAAATATAGACCTCCTGCAAAACTATTAAAGGAAAGGGGTTTCTTCGGAGCTATTGCTGGTTTCTTAGAAGGAGGATGGGAAGGAATGATTGCAGGTTGGCACGGATACACGTCCCATGGGGCACATGGAGTAGCGGTGGCAGCAGACCTTAAGAGCACTCAAGAGGCCATAAACAAGATAACAAAAAATCTCAACTCTTTGAGTGAGCTGGAAGTAAAGAATCTTCAAAGACTAAGCGGTGCCATGGATGAACTCCACAACGAAATACTAGAACTAGACGAGAAAGTGGATGATCTCAGAGCTGATACAATAAGCTCACAAATAGAACTCGCAGTCCTGCTTTCCAATGAAGGAATAATAAACAGTGAAGATGAACATCTCTTGGCTCTTGAAAGAAAGCTGAAGAAAATGCTGGGCCCCTCTGCTGTAGAGATAGGGAATGGATGCTTTGAAACCAAACACAAGTGCAACCAGACCTGTCTCGACAGAATAGCTGCTGGTACCTTTGATGCAGGAGAATTTTCTCTCCCCACCTTTGATTCACTGAATATTACTGCTGCATCTTTAAATGACGATGGATTGGATAATCATACTATACTGCTTTACTACTCAACTGCTGCCTCCAGTTTGGCTGTAACACTGATGATAGCTATCTTTGTTGTTTATATGGTCTCCAGAGACAATGTTTCTTGCTCCATCTGTCTATAA--------------------------------------------------------------------------",
 			"-----------------------------------------------------------------------------ACATCGTCAAACTCACCTCAAGTGGTCAAAACAGCTCCTCAAGGGGAGGACAACGTCACTGGCGTGATACCACTGACAACAACACCAACAAAATCTTATTTTGCAAATCTCAAAGGAACAAGGACCAGAGGGAAACTATGCCCAGACTGTCTCAACTGTACAGATCTGGATGTGGCCTTGGGCAGACCAATGTGCACGGGGAAAATACCCTCGGCAAGAGTTTCAATACTCCATGAAGTCAGACCTGTTACATCTGGGTGCTTTCCTATAATGCACGACAGAACAAAAATTAGACAACTACCCAACCTTCTCAGAGGATATGAAAATATCAGGTTATCAACCCACAACGTTATCAATGCAGAAAATGCACCAGGAGGACCCTACAGACTTGGAACCTCAGGATCTTGCCCTAACGCTACCAGTAGAAACGGATTTTTCGCAACAATGGCTTGGGCTGTCCCAAAGGACAACAACAAAAATGCAACGAATCCACTAACAGTAGAAGTACCATACATTTGTACAGAAGGGGAAGACCAAATTACTGTTTGGGGGTTCCATTCAGATAACAAAACCCAAATGAAGAGCCTCTATGGAGACTCAAATCCTCAAAAGTTCACCTCATCTGCTAATGGAGTAACCACACATTATGTTTCTCAGATTGGCGACTTCCCAGATCAAACAGAAGACGGAGGATTACCACAAAGCGGCAGAATTGTTGTTGATTACATGATGCAAAAACCTGGGAAAACAGGAACAATTGTCTATCAAAGAGGTGTTTTGTTGCCTCAAAAGGTGTGGTGCGCGAGTGGCAGGAGCAAAGTAATAAAAGGGTCATTGCCTTTAATTGGTGAAGCAGATTGCCTTCATGAAGAATACGGTGGATTAAACAAAAGCAAGCCTTACTACACAGGAAAACATGCAAAAGCCATAGGAAATTGCCCAATATGGGTAAAAACACCTTTAAAGCTTGCCAATGGAACCAAATATAGACCTCCTGCAAAACTATTGAAGGAAAGGGGTTTCTTCGGAGCTATTGCTGGTTTCCTAGAAGGAGGATGGGAAGGAATGATTGCAGGTTGGCACGGATACACATCTCACGGAGCACATGGAGTGGCAGTGGCGGCAGACCTTAAAAGTACACAAGAAGCTATAAATAAGATAACAAAAAATCTCAATTCTTTGAGTGAGCTAGAAGTAAAGAACCTTCAAAGACTAAGTGGTGCCATGGATGAACTCCACAACGAAATACTCGAGCTGGATGAGAAAGTGGATGATCTCAGAGCTGACACTATAAGCTCACAAATAGAACTTGCAGTCTTGCTTTCCAACGAAGGAATAATAAACAGTGAAGACGAGCATCTATTGGCACTTGAGAGAAAACTAAAGAAAATGCTGGGTCCCTCTGCTGTAGACATAGGAAACGGATGCTTCGAAACCAAACACAAATGCAACCAGACCTGCTTAGACAGGATAGCTGCTGGCACCTTTAATGCAGGAGAATTTTCCCTCCCCACTTTTGATTCATTGAACATTACTGCTGCATCTTTAAATGATGATGGATTGGATAACCATACTATACTGCTCTATTACTCAACTGCTGCTTCTAGTTTGGCTGTAACATTAATGCTAGCTATTTTTATTGTTTATATGGTCTCCAGAG-------------------------------------------------------------------------------------------------------"
@@ -161,7 +161,7 @@ class BYam_clean(virus_clean):
 				if (dist < 0.02):
 					remove_viruses.append(v)
 					if self.verbose>1:
-						print "\tremoving", v.strain				
+						print "\tremoving", v.strain
 
 		self.viruses = MultipleSeqAlignment([v for v in self.viruses if v not in remove_viruses])
 
@@ -170,11 +170,11 @@ class BYam_clean(virus_clean):
 		self.clean_outbreaks()
 		print "Number of viruses after outbreak filtering:",len(self.viruses)
 		self.clean_outliers()
-		print "Number of viruses after outlier filtering:",len(self.viruses)		
+		print "Number of viruses after outlier filtering:",len(self.viruses)
 
 class BYam_process(process, BYam_filter, BYam_clean, BYam_refine, HI_tree):
 	"""docstring for BYam_process, BYam_filter"""
-	def __init__(self,verbose = 0, force_include = None, 
+	def __init__(self,verbose = 0, force_include = None,
 				force_include_all = False, max_global= True, **kwargs):
 		self.force_include = force_include
 		self.force_include_all = force_include_all
@@ -195,8 +195,8 @@ class BYam_process(process, BYam_filter, BYam_clean, BYam_refine, HI_tree):
 					forced_strains = [fix_name(line.strip()).upper() for line in infile]
 			else:
 				forced_strains = []
-			self.subsample(viruses_per_month, 
-				prioritize=forced_strains, all_priority=self.force_include_all, 
+			self.subsample(viruses_per_month,
+				prioritize=forced_strains, all_priority=self.force_include_all,
 				region_specific = self.max_global)
 			self.dump()
 		else:
@@ -223,13 +223,13 @@ class BYam_process(process, BYam_filter, BYam_clean, BYam_refine, HI_tree):
 			print "--- Estimating frequencies at " + time.strftime("%H:%M:%S") + " ---"
 			self.determine_variable_positions()
 			self.estimate_frequencies(tasks = ["mutations", "tree"])
-			if 'genotype_frequencies' in steps: 
+			if 'genotype_frequencies' in steps:
 					self.estimate_frequencies(tasks = ["genotypes"])
 			self.dump()
 		if 'HI' in steps:
 			print "--- Adding HI titers to the tree " + time.strftime("%H:%M:%S") + " ---"
 			self.determine_variable_positions()
-			self.map_HI(training_fraction=1.0, method = 'nnl1reg', 
+			self.map_HI(training_fraction=1.0, method = 'nnl1reg',
 					lam_HI=lam_HI, lam_avi=lam_avi, lam_pot=lam_pot, map_to_tree=True)
 			self.map_HI(training_fraction=1.0, method = 'nnl1reg', force_redo=True,
 					lam_HI=lam_HI, lam_avi=lam_avi, lam_pot=lam_pot, map_to_tree=False)
@@ -241,9 +241,10 @@ class BYam_process(process, BYam_filter, BYam_clean, BYam_refine, HI_tree):
 			self.export_to_auspice(tree_fields = [
 				'ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country',
 				'dHI', 'cHI', 'mean_HI_titers','HI_titers','HI_titers_raw', 'serum', 'HI_info',
-				'avidity_tree','avidity_mut', 'potency_mut', 'potency_tree', 'mean_potency_mut', 'mean_potency_tree'], 
+				'avidity_tree','avidity_mut', 'potency_mut', 'potency_tree', 'mean_potency_mut', 'mean_potency_tree', 'autologous_titers'],
 				annotations = ['2', '3', '3a'])
 			self.generate_indexHTML()
+			self.export_HI_mutation_effects()
 
 		if 'HIvalidate' in steps:
 			print "--- generating validation figures " + time.strftime("%H:%M:%S") + " ---"
@@ -256,7 +257,7 @@ if __name__=="__main__":
 
 	lt = time.localtime()
 	num_date = round(lt.tm_year+(lt.tm_yday-1.0)/365.0,2)
-	params.time_interval = (num_date-params.years_back, num_date) 
+	params.time_interval = (num_date-params.years_back, num_date)
 	if params.interval is not None and len(params.interval)==2 and params.interval[0]<params.interval[1]:
 		params.time_interval = (params.interval[0], params.interval[1])
 	dt= params.time_interval[1]-params.time_interval[0]
@@ -271,11 +272,11 @@ if __name__=="__main__":
 	# add all arguments to virus_config (possibly overriding)
 	virus_config.update(params.__dict__)
 	# pass all these arguments to the processor: will be passed down as kwargs through all classes
-	myBYam = BYam_process(**virus_config) 
+	myBYam = BYam_process(**virus_config)
 	if params.test:
 		myBYam.load()
 	else:
-		myBYam.run(steps,viruses_per_month = virus_config['viruses_per_month'], 
+		myBYam.run(steps,viruses_per_month = virus_config['viruses_per_month'],
 			raxml_time_limit = virus_config['raxml_time_limit'],
 				   lam_HI = virus_config['lam_HI'],
 				   lam_avi = virus_config['lam_avi'],

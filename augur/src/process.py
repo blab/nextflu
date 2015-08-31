@@ -126,7 +126,7 @@ class process(virus_frequencies):
 				try:
 					self.sequence_lookup = {v.strain:v for v in self.viruses}
 				except:
-					pass
+					print("Load virus: Could not make sequence look up")
 		if os.path.isfile(self.frequency_fname):
 			with open(self.frequency_fname, 'r') as infile:
 				self.frequencies = cPickle.load(infile)
@@ -276,7 +276,7 @@ class process(virus_frequencies):
 		else:
 			tmp_layout="auspice"
 		with open(self.htmlpath()+'index.html','w') as out:
-			out.write("---\ntitle: nextflu / "+self.virus_type+" / "+self.resolution_prefix.rstrip('_')
+			out.write("---\ntitle: HI.nextflu / "+self.virus_type+" / "+self.resolution_prefix.rstrip('_')
 					  +"\nlayout: "+tmp_layout
 					  +"\nvirus: "+self.virus_type+"\nresolution: "+self.resolution_prefix.rstrip('_')+"\n")
 			if "html_vars"  in self.kwargs:

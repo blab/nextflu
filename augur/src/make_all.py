@@ -12,7 +12,7 @@ patterns = {('A / H3N2', ''):'H3N2',
 			('A / H7N9', ''):'H7N9',
 			('A / H5N1', ''):'H5N1',
 			('A / H6N1', ''):'H6N1',
-			('A / H5N6', ''):'H5N6'			
+			('A / H5N6', ''):'H5N6'
 			}
 
 outgroups = {lineage:SeqIO.read('source-data/'+lineage+'_outgroup.gb', 'genbank')
@@ -76,7 +76,7 @@ def push_fasta_to_s3(lineage, directory = 'data/', bucket = 'nextflu-data'):
 	k.key = fasta
 	k.set_contents_from_filename(directory+fasta)
 	print fasta,"uploaded"
-	
+
 def push_json_to_s3(lineage, resolution, directory = '../auspice/data/', bucket = 'nextflu-dev', cloudfront = 'E1XKGZG0ZTX4YN'):
 	"""Upload JSON files to S3 bucket"""
 	"""Boto expects environmental variables AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY"""
@@ -87,7 +87,7 @@ def push_json_to_s3(lineage, resolution, directory = '../auspice/data/', bucket 
 	b = conn.get_bucket(bucket)
 	k = boto.s3.key.Key(b)
 
-	paths = []	
+	paths = []
 
 	print "Uploading JSONs for", lineage, resolution
 	for postfix in ['tree.json', 'sequences.json', 'frequencies.json', 'meta.json']:
@@ -99,7 +99,7 @@ def push_json_to_s3(lineage, resolution, directory = '../auspice/data/', bucket 
 
 	c = boto.connect_cloudfront()
 	c.create_invalidation_request(cloudfront, paths)
-	
+
 def gather_strains(lineage, directory='data/'):
 	directory = directory.rstrip('/')+'/'
 	fname = lineage+'_gisaid_epiflu_sequence.fasta'
@@ -143,33 +143,33 @@ def ammend_fasta(fname, lineage, existing_strains, threshold = 10, directory = '
 
 if __name__=="__main__":
 	parser = argparse.ArgumentParser(description = "ammend existing files with downloaded viruses, rerun")
-	parser.add_argument('--annotate', action = "store_true", default = False, help = "annotate, but don't process")	
+	parser.add_argument('--annotate', action = "store_true", default = False, help = "annotate, but don't process")
 	parser.add_argument('--infile', type = str, default = "gisaid_epiflu_sequence.fasta")
 	parser.add_argument('--bin', type = str, default = "python")
 	parser.add_argument('--ATG', action = "store_true", default = False, help = "include full HA sequence starting at ATG")
 	parser.add_argument('--all', action = "store_true", default = False)
 	parser.add_argument('--s3', action = "store_true", default = False, help = "push/pull FASTA and JSON files to/from S3")
-	parser.add_argument('--fasta_bucket', type = str, default = "nextflu-data", help = "bucket for FASTA files")		
-	parser.add_argument('--json_bucket', type = str, default = "nextflu-dev", help = "bucket for JSON files")	
+	parser.add_argument('--fasta_bucket', type = str, default = "nextflu-data", help = "bucket for FASTA files")
+	parser.add_argument('--json_bucket', type = str, default = "nextflu-dev", help = "bucket for JSON files")
 	parser.add_argument('--threshold', type = float, default = 10.0, help = "number of new sequences required to rerun pipeline")
 	parser.add_argument('--lineages', nargs='+', type = str,  help ="lineages to include")
 	parser.add_argument('--resolutions', nargs='+', type = str,  help ="resolutions to include")
-	parser.add_argument('--aligner', type = str, default = "mafft", help = "aligner to use, either mafft or seqan")			
+	parser.add_argument('--aligner', type = str, default = "mafft", help = "aligner to use, either mafft or seqan")
 	parser.add_argument('-r', type = float, default = 1.0)
 	params = parser.parse_args()
 
 	common_args = ['--skip', 'genotype_frequencies', '-r', params.r, '--lam_HI', 1, '--lam_pot', 0.3, '--lam_avi', 2]
 	if params.ATG: common_args.append('--ATG')
-	
+
 	if params.lineages is None:
 		params.lineages = ['H3N2', 'H1N1pdm', 'Vic', 'Yam']
-		
-	if params.resolutions is None:		
+
+	if params.resolutions is None:
 #		params.resolutions = ['1y', '3y', '6y', '12y']
 		params.resolutions = ['3y', '6y', '20y']
 
 	for lineage in params.lineages:
-		if params.s3:	
+		if params.s3:
 			pull_fasta_from_s3(lineage, directory = 'data/', bucket = params.fasta_bucket)
 
 	existing_strains = []
@@ -178,14 +178,14 @@ if __name__=="__main__":
 
 	for lineage in params.lineages:
 		print '\n------------------------------\n'
-		print 'Parsing new sequences for lineage',lineage			
+		print 'Parsing new sequences for lineage',lineage
 		if params.all:
 			params.threshold = 0
 		#run = ammend_fasta(params.infile, lineage, existing_strains, threshold = params.threshold, directory = 'data/')
 		if True:
 			for resolution in params.resolutions:
 				print '\n------------------------------\n'
-				print 'Processing lineage',lineage,'with resolution',resolution		
+				print 'Processing lineage',lineage,'with resolution',resolution
 				process = 'src/' + lineage + '_process.py'
 				if resolution == '1y':
 					n_viruses = 100
@@ -210,12 +210,12 @@ if __name__=="__main__":
 					n_years = 20
 				if resolution == '10y':
 					n_viruses = 10
-					n_years = 10				
+					n_years = 10
 				if resolution == '12y':
 					n_viruses = 10
 					n_years = 12
 				prefix = lineage + '_'
-				call = map(str, [params.bin, process, '-v', n_viruses, '-y', n_years, '--start','filter',
+				call = map(str, [params.bin, process, '-v', n_viruses, '-y', n_years, '--start','HI',
 				           		 '--prefix', prefix, '--resolution', resolution] + common_args)
 				print call
 				if not params.annotate:

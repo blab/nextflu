@@ -65,8 +65,8 @@ class virus_clean(object):
 
 	def distance_from_outgroup(self):
 		from seq_util import hamming_distance
-		outgroup_seq = self.sequence_lookup[self.outgroup['strain']].seq
-		return np.array([hamming_distance(x.seq, outgroup_seq) for x in self.viruses if x.strain])
+		outgroup_seq = self.sequence_lookup[self.outgroup['strain']].seq[:1000]
+		return np.array([hamming_distance(x.seq[:1000], outgroup_seq) for x in self.viruses if x.strain])
 
 	def clean_distances(self):
 		"""Remove viruses that don't follow a loose clock """

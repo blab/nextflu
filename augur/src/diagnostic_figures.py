@@ -146,9 +146,7 @@ def slope_vs_dHI(myflu):
     for node in myflu.tree.postorder_internal_node_iter():
         tmp_freq = node.freq['global']
         if tmp_freq is not None and tmp_freq[0]<cutoff_freq and np.max(tmp_freq)>cutoff_freq:
-            ii = np.argmax(tmp_freq>cutoff_freq)
-            slope = (tmp_freq[ii]-tmp_freq[ii-1])/(tmp_pivots[ii]-tmp_pivots[ii-1])
-            offset = tmp_pivots[ii-1] + (cutoff_freq-tmp_freq[ii-1])/slope
+            ii, offset, slope = get_slope(tmp_freq, tmp_pivots, cutoff_freq)
             dfreq_sum = tmp_freq[ii:ii+y3].sum()
             if ii+y3<len(tmp_freq):
                 dfreq_y1 = tmp_freq[ii+y1]-tmp_freq[ii]
@@ -180,6 +178,12 @@ def slope_vs_dHI(myflu):
     print("spearman correlation HI/delta3Y:",spearmanr(slopes[:,0],slopes[:,4]))
     print("spearman correlation HI/freqsum:",spearmanr(slopes[:,0],slopes[:,5]))
     return slopes
+
+def get_slope(freq, pivots, threshold):
+    ii = np.argmax(freq>threshold)
+    slope = (freq[ii]-freq[ii-1])/(pivots[ii]-pivots[ii-1])
+    offset = pivots[ii-1] + (threshold-freq[ii-1])/slope
+    return ii, offset, slope
 
 ######################################
 #### make a figure that compares
@@ -218,9 +222,7 @@ def slope_vs_mutation(myflu):
         for si in sweeps:
             tmp_freq = mut_freq[max(0,si-y3):(si+2*y3)]
             tmp_pivots = pivots[max(0,si-y3):(si+2*y3)]
-            ii = np.argmax(tmp_freq>cutoff_freq)
-            slope = (tmp_freq[ii]-tmp_freq[ii-1])/(tmp_pivots[ii]-tmp_pivots[ii-1])
-            offset = tmp_pivots[ii-1] + (cutoff_freq-tmp_freq[ii-1])/slope
+            ii, offset, slope = get_slope(tmp_freq, tmp_pivots, cutoff_freq)
             dfreq_sum = tmp_freq[ii:ii+y3].sum()
             if ii+y3<len(tmp_freq):
                 dfreq_y1 = tmp_freq[ii+y1]-tmp_freq[ii]
@@ -366,7 +368,7 @@ def large_effect_mutations(myflu, ax=None, cols = None):
                     color_cycle+=1
 
                 c = cols[mut]
-                ax.plot(pivots, mut_freq, lw=2, ls = '--' if mut_freq.max()>0.9 else '-',c=cm.YlOrRd_r(min(np.sqrt(HI-HI_cutoff*0.8),1.5)/1.5))
+                ax.plot(pivots, mut_freq, lw=2, ls = '--' if mut_freq.max()>0.9 else '-',c=cm.cool(min(np.sqrt(HI-HI_cutoff*0.8),1.5)/1.5))
 
     ax.set_xlabel('time', fontsize=fs)
     ax.set_ylabel('frequency', fontsize=fs)
@@ -418,3 +420,5 @@ def titer_vs_distances(myflu, mtype='tree'):
     axs[0].set_ylabel('HI genetic component', fontsize=fs)
     plt.tight_layout(pad=0.3, w_pad=0.5)
     return dists
+
+

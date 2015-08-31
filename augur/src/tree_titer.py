@@ -461,9 +461,25 @@ class HI_tree(object):
 
 		if self.cutoff_date is not None:
 			self.train_HI = {key:val for key,val in self.train_HI.iteritems()
-							if self.node_lookup[key[0]].num_date<cutoff_date and
-							   self.node_lookup[key[1][0]].num_date<cutoff_date}
+							if self.node_lookup[key[0]].num_date<=self.cutoff_date and
+							   self.node_lookup[key[1][0]].num_date<=self.cutoff_date and
+							   self.node_lookup[key[0]].num_date>self.cutoff_date-6 and
+							   self.node_lookup[key[1][0]].num_date>self.cutoff_date-6}
+			sera = set()
+			ref_strains = set()
+			HI_strains = set()
 
+			for test,ref in self.train_HI:
+				if test.upper() in self.node_lookup and ref[0].upper() in self.node_lookup:
+					HI_strains.add(test)
+					HI_strains.add(ref[0])
+					sera.add(ref)
+					ref_strains.add(ref[0])
+
+			self.sera = list(sera)
+			self.ref_strains = list(ref_strains)
+			self.HI_strains = list(HI_strains)
+			
 		if self.map_to_tree:
 			self.make_treegraph()
 		else:
@@ -490,7 +506,8 @@ class HI_tree(object):
 		elif method=='nnl1reg':  # non-negative fit, branch terms L1 regularized, avidity terms L2 regularized
 			self.params = self.fit_nnl1reg()
 
-		print "method",method, "regularized by", self.lam_HI, "rms deviation=",np.sqrt(self.fit_func())
+		self.fit_error = np.sqrt(self.fit_func())
+		print("method",method, "regularized by", self.lam_HI, "rms deviation=", self.fit_error)
 		# for each set of branches with HI constraints, pick the branch with most aa mutations
 		# and assign the dHI to that one, record the number of constraints
 		if self.map_to_tree:
