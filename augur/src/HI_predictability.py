@@ -342,12 +342,12 @@ def seq_dist(seq, af):
     ind = np.array([alpha.index(nuc) for nuc in seq])
     return 1.0-np.mean(af[ind, np.arange(len(seq))])
 
-LBI_HI_by_date = []
-best_scores = []
-best_LBI = []
-best_HI = []
+cutoffs = [0.01, 0.03, 0.05, 0.1]
+LBI_HI_by_date = {cutoff:[] or cutoff in cutoffs}
+best_scores = {cutoff:[] or cutoff in cutoffs}
+best_LBI = {cutoff:[] or cutoff in cutoffs}
+best_HI = {cutoff:[] or cutoff in cutoffs}
 best_HI_vs_HI_of_best = []
-cutoff = 0.03
 for year in range(1990, 2015):
     print("#############################################")
     print("### YEAR:",year)
@@ -364,61 +364,67 @@ for year in range(1990, 2015):
 
     #current season May until Feb
     select_nodes_in_season(myH3N2.tree, (year-7.0/12, year+2.0/12))
+    af = allele_freqs([node.seq for node in myH3N2.tree.leaf_iter() if node.alive])
+    avg_dist = af_dist(af, future_af)
     max_LBI = calc_LBI(myH3N2.tree, LBI_tau = 0.001)
     total_alive = 1.0*myH3N2.tree.seed_node.n_alive
     # take nodes with at least 5% and not fixed
     #nodes = [node for node in myH3N2.tree.leaf_iter() if node.alive]
-    nodes = [node for node in myH3N2.tree.postorder_node_iter()
-            if node.alive and node.n_alive/total_alive>cutoff and node.n_alive/total_alive<0.95]
-    tmp_dist = np.array([seq_dist(node.seq, future_af) for node in nodes])
-    current_cHI = np.mean([n.cHI for n in nodes])
-    best = np.argmin(tmp_dist)
-    best_scores.append([year, nodes[best].lb/max_LBI, nodes[best].cHI-current_cHI])
-    all_LBI = np.array([n.lb for n in nodes])
-    best_LBI_node = nodes[np.argmax(all_LBI)]
-    best_HI_node = nodes[np.argmax([n.cHI for n in nodes])]
-    min_dist = tmp_dist[best]
-    af = allele_freqs([node.seq for node in nodes])
-    avg_dist = af_dist(af, future_af)
+    for cutoff in cutoffs:
+        nodes = [node for node in myH3N2.tree.postorder_node_iter()
+                if node.alive and node.n_alive/total_alive>cutoff and node.n_alive/total_alive<0.95]
+        tmp_dist = np.array([seq_dist(node.seq, future_af) for node in nodes])
+        current_cHI = np.mean([n.cHI for n in nodes])
+        best = np.argmin(tmp_dist)
+        best_scores.append([year, nodes[best].lb/max_LBI, nodes[best].cHI-current_cHI])
+        all_LBI = np.array([n.lb for n in nodes])
+        best_LBI_node = nodes[np.argmax(all_LBI)]
+        best_HI_node = nodes[np.argmax([n.cHI for n in nodes])]
+        min_dist = tmp_dist[best]
 
-    best_LBI.append((year, best_LBI_node.lb/max_LBI, best_LBI_node.cHI-current_cHI,
-                    (seq_dist(best_LBI_node.seq, future_af)-min_dist)/(avg_dist-min_dist),
-                    seq_dist(best_LBI_node.seq, future_af)/avg_dist, min_dist, avg_dist))
-    best_HI.append((year, best_HI_node.lb/max_LBI, best_HI_node.cHI-current_cHI,
-                    (seq_dist(best_HI_node.seq, future_af)-min_dist)/(avg_dist-min_dist),
-                    seq_dist(best_HI_node.seq, future_af)/avg_dist, min_dist, avg_dist))
-    best_HI_vs_HI_of_best.append((year, best_HI_node.cHI - current_cHI, nodes[best].cHI - current_cHI))
-    print(year, "avg_dist", avg_dist)
-    for node in nodes:
-        node_freq = node.n_alive/total_alive
-        if node.freq["global"] is not None:
-            tmp_freq = np.array(node.freq["global"])
-            ii = pivots.searchsorted(year+0.2)
-            nii= pivots.searchsorted(year+1.0)
-            LBI_HI_by_date.append((node, year, node.lb/max_LBI, node.cHI-current_cHI,
-                                        (seq_dist(node.seq, future_af)-min_dist)/(avg_dist-min_dist),node_freq,
-                                        tmp_freq[ii], tmp_freq[nii], tmp_freq))
-        else:
-            #print("missing frequency", year, node.n_alive)
-            LBI_HI_by_date.append((node, year, node.lb/max_LBI, node.cHI-current_cHI,
-                                        (seq_dist(node.seq, future_af)-min_dist)/(avg_dist-min_dist), node_freq,
-                                        0,0,0))
+        best_LBI[cutoff].append((year, best_LBI_node.lb/max_LBI, best_LBI_node.cHI-current_cHI,
+                        (seq_dist(best_LBI_node.seq, future_af)-min_dist)/(avg_dist-min_dist),
+                        seq_dist(best_LBI_node.seq, future_af)/avg_dist, min_dist, avg_dist))
+        best_HI[cutoff].append((year, best_HI_node.lb/max_LBI, best_HI_node.cHI-current_cHI,
+                        (seq_dist(best_HI_node.seq, future_af)-min_dist)/(avg_dist-min_dist),
+                        seq_dist(best_HI_node.seq, future_af)/avg_dist, min_dist, avg_dist))
+        best_HI_vs_HI_of_best[cutoff].append((year, best_HI_node.cHI - current_cHI, nodes[best].cHI - current_cHI))
+        print(year, "avg_dist", avg_dist)
+        for node in nodes:
+            node_freq = node.n_alive/total_alive
+            if node.freq["global"] is not None:
+                tmp_freq = np.array(node.freq["global"])
+                ii = pivots.searchsorted(year+0.2)
+                nii= pivots.searchsorted(year+1.0)
+                LBI_HI_by_date[cutoff].append((node, year, node.lb/max_LBI, node.cHI-current_cHI,
+                                            (seq_dist(node.seq, future_af)-min_dist)/(avg_dist-min_dist),node_freq,
+                                            tmp_freq[ii], tmp_freq[nii], tmp_freq))
+            else:
+                #print("missing frequency", year, node.n_alive)
+                LBI_HI_by_date[cutoff].append((node, year, node.lb/max_LBI, node.cHI-current_cHI,
+                                            (seq_dist(node.seq, future_af)-min_dist)/(avg_dist-min_dist), node_freq,
+                                            0,0,0))
 
 # make an array out of all values excluding the node and frequency vector
-best_scores = np.array(best_scores)
-best_LBI = np.array(best_LBI)
-best_HI = np.array(best_HI)
-best_HI_vs_HI_of_best = np.array(best_HI_vs_HI_of_best)
-clades = []
-for cl in LBI_HI_by_date:
-    clades.append(cl[1:-1])
-clades = np.array(clades)
+clades = {}
+for cutoff in cutoffs
+    best_scores[cutoff] = np.array(best_scores[cutoff])
+    best_LBI[cutoff] = np.array(best_LBI[cutoff])
+    best_HI[cutoff] = np.array(best_HI[cutoff])
+    best_HI_vs_HI_of_best[cutoff] = np.array(best_HI_vs_HI_of_best[cutoff])
+    tmp = []
+    for cl in LBI_HI_by_date[cutoff]:
+        tmp.append(cl[1:-1])
+    clades[cutoff] = np.array(tmp)
+
 ############
+cutoff = 0.01
 plt.figure(figsize=(2.4*figheight,figheight))
 ax=plt.subplot(121)
-ax.plot(best_LBI[:,0],best_LBI[:,-3], label='LBI',lw=2)
-ax.plot(best_HI[:,0],best_HI[:,-3], label='HI',lw=2)
-ax.plot(best_HI[:,0],best_HI[:,-2]/best_HI[:,-1], label='best',lw=2)
+ax.plot(best_LBI[cutoff][:,0],best_LBI[cutoff][:,-3], label='LBI',lw=2)
+ax.plot(best_HI[0.05][:,0],best_HI[0.05][:,-3], label='cHI >0.05',lw=2)
+ax.plot(best_HI[0.01][:,0],best_HI[0.01][:,-3], label='cHI >0.01',lw=2)
+ax.plot(best_HI[cutoff][:,0],best_HI[cutoff][:,-2]/best_HI[:,-1], label='best',lw=2)
 ax.plot([1990, 2015], [1.0, 1.0], lw=3, c='k', ls='--')
 ax.tick_params(labelsize=fs)
 add_panel_label(ax, "B", x_offset=-0.12)
@@ -480,7 +486,9 @@ if save_figs:
 ################################################################
 plt.figure(figsize = (1.2*figheight, figheight))
 ax=plt.subplot(111)
-plt.scatter(best_HI_vs_HI_of_best[:,1], best_HI_vs_HI_of_best[:,2], s=50*best_HI[:,-3])
+for col, cutoff in zip(['b', 'r', 'g'], [0.01, 0.05, 0.1]):
+    plt.scatter(best_HI_vs_HI_of_best[cutoff][:,1], 
+        best_HI_vs_HI_of_best[cutoff][:,2], label = '>'+str(cutoff)) #, s=50*best_HI[:,-3])
 plt.plot([0,3],[0,3])
 plt.tick_params(labelsize=fs)
 plt.xlabel(r'maximal $cHI-\langle cHI\rangle_{year}$', fontsize=fs)
