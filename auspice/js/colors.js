@@ -1,8 +1,8 @@
 // 2 color	["#5097BA", "#DF4327"]
 
 var colors = [
-	[], 
-	["#8EBC66"], 
+	[],
+	["#8EBC66"],
 	["#5EA9A1", "#E0A23A"],
 	["#5CA7A4", "#A4BE56", "#E39B39"],
 	["#5AA5A7", "#8ABB6A", "#C3BA46", "#E69237"],
@@ -15,11 +15,11 @@ var colors = [
 	["#4E95BD", "#5DA8A3", "#70B487", "#87BB6D", "#A0BE58", "#BABC4A", "#D0B440", "#E0A23A", "#E68634", "#E35F2D", "#DD3425"],
 	["#4D92BF", "#5AA5A8", "#6BB18D", "#80B974", "#98BD5E", "#B1BD4E", "#C8B944", "#DAAC3D", "#E59738", "#E67732", "#E14F2A", "#DB2522"]
 ];
-var genotypeColors = ["#60AA9E", "#D9AD3D", "#5097BA", "#E67030", "#8EBC66", "#E59637", "#AABD52", "#DF4327", "#C4B945", "#75B681"]
+var genotypeColors = ["#60AA9E", "#D9AD3D", "#5097BA", "#E67030", "#8EBC66", "#E59637", "#AABD52", "#DF4327", "#C4B945", "#75B681"];
 
 var epitopeColorScale = d3.scale.linear().clamp([true])
 	.domain(epiColorDomain)
-	.range(colors[10]);		
+	.range(colors[10]);
 
 var nonepitopeColorScale = d3.scale.linear().clamp([true])
 	.domain(nonEpiColorDomain)
@@ -63,7 +63,7 @@ function adjust_coloring_by_date() {
 		nodes.forEach(function (d) {
 			d.coloring = d.num_date;
 		});
-	}	
+	}
 }
 
 function stateAtPosition(clade, gene, pos){
@@ -75,7 +75,7 @@ function stateAtPosition(clade, gene, pos){
 }
 
 function colorByTrait() {
-	
+
 	colorBy = document.getElementById("coloring").value;
 	console.log(colorBy);
 
@@ -110,16 +110,16 @@ function colorByTrait() {
 
 	treeplot.selectAll(".link")
 		.style("stroke", branchStrokeColor);
-		
+
 	d3.selectAll(".tip")
 		.style("visibility", tipVisibility)
 		.style("fill", tipFillColor)
 		.style("stroke", tipStrokeColor);
-		
+
 	if (typeof tree_legend != undefined){
 		removeLegend();
 	}
-	tree_legend = makeLegend();	 				
+	tree_legend = makeLegend();
 }
 
 function tipStrokeColor(d) {
@@ -138,7 +138,7 @@ function branchStrokeColor(d) {
 		col = "#AAA";
 	}
 	else {
-		col = colorScale(d.target.coloring);	
+		col = colorScale(d.target.coloring);
 	}
 	var modCol = d3.interpolateRgb(col, "#BBB")(0.6);
 	return d3.rgb(modCol).toString();
@@ -173,7 +173,7 @@ function colorByGenotype() {
 	}
 	else {
 		d3.select("#coloring").each(colorByTrait);
-		gt = parse_gt_string(freqdefault);			
+		gt = parse_gt_string(freqdefault);
 		make_gt_chart(gt);
 		document.getElementById("gtspec").value = freqdefault;
 	}
@@ -201,7 +201,7 @@ function colorByGenotypePosition (positions) {
 	console.log("genotypes passed filtering:"+filtered_gts);
 	colorScale = d3.scale.ordinal()
 		.domain(filtered_gts)
-		.range(genotypeColors);			
+		.range(genotypeColors);
 	treeplot.selectAll(".link")
 		.style("stroke", branchStrokeColor);
 	treeplot.selectAll(".tip")
