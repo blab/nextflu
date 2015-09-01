@@ -343,11 +343,11 @@ def seq_dist(seq, af):
     return 1.0-np.mean(af[ind, np.arange(len(seq))])
 
 cutoffs = [0.01, 0.03, 0.05, 0.1]
-LBI_HI_by_date = {cutoff:[] or cutoff in cutoffs}
-best_scores = {cutoff:[] or cutoff in cutoffs}
-best_LBI = {cutoff:[] or cutoff in cutoffs}
-best_HI = {cutoff:[] or cutoff in cutoffs}
-best_HI_vs_HI_of_best = []
+LBI_HI_by_date = {cutoff:[] for cutoff in cutoffs}
+best_scores = {cutoff:[] for cutoff in cutoffs}
+best_LBI = {cutoff:[] for cutoff in cutoffs}
+best_HI = {cutoff:[] for cutoff in cutoffs}
+best_HI_vs_HI_of_best = {cutoff:[] for cutoff in cutoffs}
 for year in range(1990, 2015):
     print("#############################################")
     print("### YEAR:",year)
@@ -376,7 +376,7 @@ for year in range(1990, 2015):
         tmp_dist = np.array([seq_dist(node.seq, future_af) for node in nodes])
         current_cHI = np.mean([n.cHI for n in nodes])
         best = np.argmin(tmp_dist)
-        best_scores.append([year, nodes[best].lb/max_LBI, nodes[best].cHI-current_cHI])
+        best_scores[cutoff].append([year, nodes[best].lb/max_LBI, nodes[best].cHI-current_cHI])
         all_LBI = np.array([n.lb for n in nodes])
         best_LBI_node = nodes[np.argmax(all_LBI)]
         best_HI_node = nodes[np.argmax([n.cHI for n in nodes])]
@@ -407,7 +407,7 @@ for year in range(1990, 2015):
 
 # make an array out of all values excluding the node and frequency vector
 clades = {}
-for cutoff in cutoffs
+for cutoff in cutoffs:
     best_scores[cutoff] = np.array(best_scores[cutoff])
     best_LBI[cutoff] = np.array(best_LBI[cutoff])
     best_HI[cutoff] = np.array(best_HI[cutoff])
@@ -424,7 +424,7 @@ ax=plt.subplot(121)
 ax.plot(best_LBI[cutoff][:,0],best_LBI[cutoff][:,-3], label='LBI',lw=2)
 ax.plot(best_HI[0.05][:,0],best_HI[0.05][:,-3], label='cHI >0.05',lw=2)
 ax.plot(best_HI[0.01][:,0],best_HI[0.01][:,-3], label='cHI >0.01',lw=2)
-ax.plot(best_HI[cutoff][:,0],best_HI[cutoff][:,-2]/best_HI[:,-1], label='best',lw=2)
+ax.plot(best_HI[cutoff][:,0],best_HI[cutoff][:,-2]/best_HI[cutoff][:,-1], label='best',lw=2)
 ax.plot([1990, 2015], [1.0, 1.0], lw=3, c='k', ls='--')
 ax.tick_params(labelsize=fs)
 add_panel_label(ax, "B", x_offset=-0.12)
@@ -460,7 +460,7 @@ symbs = ['o','d','v','^','<']
 #
 #ax = axs[2]
 ax = plt.subplot(122)
-ax.hist(best_scores[:,-1])
+ax.hist(best_scores[0.05][:,-1])
 #for yi, (year, lbi, cHI) in enumerate(best_scores):
 #    lstr = str(year) if (year>=2006) else None
 #    ax.scatter([lbi], [cHI], c=cols[yi%5], marker=symbs[yi//5], s=50, label=lstr)
@@ -488,13 +488,13 @@ plt.figure(figsize = (1.2*figheight, figheight))
 ax=plt.subplot(111)
 for col, cutoff in zip(['b', 'r', 'g'], [0.01, 0.05, 0.1]):
     plt.scatter(best_HI_vs_HI_of_best[cutoff][:,1], 
-        best_HI_vs_HI_of_best[cutoff][:,2], label = '>'+str(cutoff)) #, s=50*best_HI[:,-3])
+        best_HI_vs_HI_of_best[cutoff][:,2], label = '>'+str(cutoff), s=50, c=col) #, s=50*best_HI[:,-3])
 plt.plot([0,3],[0,3])
 plt.tick_params(labelsize=fs)
 plt.xlabel(r'maximal $cHI-\langle cHI\rangle_{year}$', fontsize=fs)
 plt.ylabel(r'successful $cHI-\langle cHI\rangle_{year}$', fontsize=fs)
 plt.xticks([0,1,2,3,4])
-plt.yticks([0,1,2,3])
+plt.yticks([-1, 0,1,2,3])
 plt.tight_layout()
 if save_figs:
     plt.savefig('best_HI_vs_HI_of_best.pdf')
