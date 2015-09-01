@@ -48,7 +48,7 @@
 //	      prevPicked = null;
 //	    }
 //	    viewer.requestRedraw();
-//	});	
+//	});
 //	pv.io.fetchPdb("/data/"+structure, function(structure) {
 //	  // display the protein as cartoon, coloring the secondary structure
 //	  // elements in a rainbow gradient.
@@ -58,8 +58,8 @@
 //    	  var go = viewer.cartoon('structure', structure);
 //      	// adjust center of view and zoom such that all structures can be seen.
 //      	viewer.autoZoom();
-//	   });
-//	});	
+//	   });o
+//	});
 //}
 //
 //var myapplett;
@@ -67,11 +67,12 @@
 function make_structure(){
 	console.log('drawing structure');
 	var jsmolscript =  "load /data/"+structure+"; cpk off; wireframe off; cartoon ONLY; trace;zoom on;"
-					   +"zoom 115;set showhydrogens off; color background white;" 
+					   +"zoom 115;set showhydrogens off; color background white;"
 					   +" select ligand; trace off; spin off; set frank off; "
 					   +"set echo bottom left; color echo gray; font echo 14 arial;"
-					   +structure_HI_mutations;
-//					   +"spacefill 200;color orange;";
+					   +structure_HI_mutations
+					   +" select (chain==C); color [xFFFFFF]; select (chain==D); color [xFFFFFF];"
+					   +" select (chain==E); color [xFFFFFF]; select (chain==F); color [xFFFFFF];";
 	console.log(jsmolscript);
 	Info = {
 		width: 500,
