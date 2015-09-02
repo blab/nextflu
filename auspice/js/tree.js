@@ -1,8 +1,8 @@
 console.log('Enter tree.js');
 
-var freqScale = d3.scale.linear()
+var freqScale = d3.scale.sqrt()
 	.domain([0, 1])
-	.range([1.5, 4.5]);
+	.range([1, 10]);
 
 var tipRadius = 4.0;
 var left_margin = 10;
@@ -182,6 +182,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.attr("class", "link")
 		.style("stroke-width", branchStrokeWidth)
 		.style("stroke", branchStrokeColor)		
+		.style("stroke-linejoin", "round")
 		.style("cursor", "pointer")
 		.on('mouseover', function (d){
 			linkTooltip.show(d.target, this);
@@ -380,7 +381,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			treeplot.selectAll(".annotation").data(clades)
 				.transition().duration(dt)
 				.attr("x", function(d) {
-					return xScale(d[1]) - 6;
+					return xScale(d[1]) - 10;
 				})
 				.attr("y", function(d) {
 					return yScale(d[2]) - 6;
