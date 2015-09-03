@@ -128,7 +128,7 @@ class H1N1pdm_clean(virus_clean):
 	def clean_outlier_strains(self):
 		"""Remove single outlying viruses"""
 		remove_viruses = []
-		outlier_strains = ["A/Kenya/264/2012"]
+		outlier_strains = ["A/Kenya/264/2012", "A/Iowa/39/2015", "A/Asturias/RR6898/2010", "A/Wisconsin/28/2011"]
 		for outlier_strain in outlier_strains:
 			for v in self.viruses:
 				if (v.strain == outlier_strain):

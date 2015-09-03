@@ -7,7 +7,7 @@ var freqScale = d3.scale.sqrt()
 var tipRadius = 4.0;
 var left_margin = 10;
 var bottom_margin = 10;
-var top_margin = 10;
+var top_margin = 20;
 if ((typeof branch_labels != "undefined")&&(branch_labels)) {top_margin +=15;}
 var right_margin = 10;
 
