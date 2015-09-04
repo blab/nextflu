@@ -18,6 +18,9 @@ virus_config.update({
 	'verbose':3
 	})
 
+def alignment(s1,s2):
+	from seqanpy import overlap_align as aln
+	return aln(s1,s2)[0]
 
 class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 	"""docstring for mutation_tree"""
