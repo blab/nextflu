@@ -15,7 +15,6 @@ virus_config.update({
 	# data source and sequence parsing/cleaning/processing
 	'fasta_fields':{0:'strain', 1:'date', 2:'isolate_id', 3:'passage', 4:'subtype', 5:'ori_lab', 6:'sub_lab', 7:'submitter'},
 	'cds':[0,None], # define the HA start i n 0 numbering
-	'auspice_prefix':'H1N1pdm_',
 	'verbose':3
 	})
 
@@ -38,13 +37,16 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 
 		if os.path.isfile(outgroup):
 			tmp = [{'strain':seq.name, 'seq':str(record.seq).upper(), 'desc':seq.description}
-								for seq in SeqIO.parse(outgroup, 'fasta') ]			
+								for seq in SeqIO.parse(outgroup, 'fasta') ]
 			if len(tmp):
 				self.outgroup = tmp[0]
 				if len(tmp)>1:
 					print "More than one sequence in ", outgroup, "taking first"
 				if self.verbose:
 					print "using outgroup found in file ", outgroup
+		elif outgroup=='auto':
+			print "automatically determine outgroup"
+			self.auto_outgroup()
 		elif isinstance(outgroup, basestring):
 			seq_names = [x['strain'] for x in self.viruses]
 			if outgroup in seq_names:
@@ -52,19 +54,35 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 				if self.verbose:
 					print "using outgroup found in alignment", outgroup
 			else:
-				standard_outgroups = [{'strain':seq.name, 'seq':str(seq.seq).upper(), 'desc':seq.description}
-										for seq in SeqIO.parse(std_outgroup_file, 'fasta') ]
-				outgroup_names = [x['strain'] for x in standard_outgroups]
-				if outgroup in outgroup_names:
-					self.outgroup = standard_outgroups[outgroup_names.index(outgroup)]
+				standard_outgroups = {seq.name:{'seq':str(seq.seq).upper(), 'desc':seq.description}
+										for seq in SeqIO.parse(std_outgroup_file, 'fasta')}
+				if outgroup in standard_outgroups:
+					self.outgroup = standard_outgroups[outgroup]
 					if self.verbose:
 						print "using standard outgroup", outgroup
 				else:
 					raise ValueError("outgroup %s not found" % outgroup)
 					return
+
 		self.viruses.append(self.outgroup)
 		self.filter_geo(prune=False)
 		self.make_strain_names_unique()
+
+	def auto_outgroup(self):
+		from random import sample
+		nvir = 5
+		earliest_date = np.min([v.date for v in self.viruses])
+		representatives = sample(self.viruses.values(), min(nvir, len(representatives)))
+		standard_outgroups = {seq.name:{'seq':str(seq.seq).upper(), 'desc':seq.description, 'date':get_date(seq.description)}
+								for seq in SeqIO.parse(std_outgroup_file, 'fasta')}
+
+		scores = []
+		for ogname, og in standard_outgroups.iteritems():
+			scores.append((og,{'score':np.mean([alignment(og['seq']), rep['seq'])/len(rep['seq']) for rep in representatives],
+							  'date':og['date']}))
+
+		scores.sort(key = lambda x: -x[1]['score']+np.sign(x[1]['date']-earliest_date)*0.1)
+
 
 	def refine(self):
 		self.node_lookup = {node.taxon.label:node for node in self.tree.leaf_iter()}
@@ -199,7 +217,7 @@ if __name__=="__main__":
 	else:
 		if len(params.cds)==2:
 			virus_config['cds']=params.cds
-		elif len(params.cds)==1:			
+		elif len(params.cds)==1:
 			virus_config['cds']=(params.cds[0], None)
 		else:
 			raise ValueError("Expecting a cds of length 1 (start only) or 2, got "+str(params.cds))
