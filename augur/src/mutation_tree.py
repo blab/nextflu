@@ -112,6 +112,7 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
  			if standard_outgroups[og]['date']<earliest_date-5 or np.mean([y[-1] for y in hits])<0.8:
  				break
 		self.outgroup = standard_outgroups[og]
+		self.cds = [0,len(self.outgroup['seq'])]
 		print("chosen outgroup",self.outgroup['strain'])
 
 	def refine(self):
