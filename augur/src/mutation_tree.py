@@ -2,10 +2,12 @@ import time, re, os, argparse,shutil
 from tree_refine import tree_refine
 from virus_clean import virus_clean
 from virus_filter import flu_filter
+from date_util import numerical_date
 from collections import defaultdict
 from process import process, virus_config
 from Bio import SeqIO, AlignIO
 from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
 from Bio.Align import MultipleSeqAlignment
 import numpy as np
 from itertools import izip
@@ -18,9 +20,18 @@ virus_config.update({
 	'verbose':3
 	})
 
-def alignment(s1,s2):
-	from seqanpy import overlap_align as aln
-	return aln(s1,s2)[0]
+def get_date(strain):
+	try:
+		year = int(strain.split()[0].split('/')[-1])
+	except:
+		print("cannot parse year of ", strain)
+		return 1900
+
+	if year<18:
+		year +=2000
+	elif year<100:
+		year+=1900
+	return year
 
 class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 	"""docstring for mutation_tree"""
@@ -49,7 +60,7 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 					print "using outgroup found in file ", outgroup
 		elif outgroup=='auto':
 			print "automatically determine outgroup"
-			self.auto_outgroup()
+			self.auto_outgroup_blast()
 		elif isinstance(outgroup, basestring):
 			seq_names = [x['strain'] for x in self.viruses]
 			if outgroup in seq_names:
@@ -71,21 +82,37 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 		self.filter_geo(prune=False)
 		self.make_strain_names_unique()
 
-	def auto_outgroup(self):
+	def auto_outgroup_blast(self):
 		from random import sample
-		nvir = 5
-		earliest_date = np.min([v.date for v in self.viruses])
-		representatives = sample(self.viruses.values(), min(nvir, len(representatives)))
-		standard_outgroups = {seq.name:{'seq':str(seq.seq).upper(), 'desc':seq.description, 'date':get_date(seq.description)}
+		from Bio.Blast.Applications import NcbiblastnCommandline
+		from Bio.Blast import NCBIXML
+
+		nvir = 10
+		earliest_date = np.min([numerical_date(v["date"]) for v in self.viruses])
+		representatives = [SeqRecord(Seq(v['seq']), id=v['strain']) for v in sample(self.viruses, min(nvir, nvir))]
+		standard_outgroups = {seq.name:{'seq':str(seq.seq).upper(), 'strain':seq.name, 'desc':seq.description, 'date':get_date(seq.description)}
 								for seq in SeqIO.parse(std_outgroup_file, 'fasta')}
 
-		scores = []
-		for ogname, og in standard_outgroups.iteritems():
-			scores.append((og,{'score':np.mean([alignment(og['seq']), rep['seq'])/len(rep['seq']) for rep in representatives],
-							  'date':og['date']}))
-
-		scores.sort(key = lambda x: -x[1]['score']+np.sign(x[1]['date']-earliest_date)*0.1)
-
+		SeqIO.write(representatives, 'representatives.fasta', 'fasta')
+		blast_out = self.outdir+"outgroup_blast.xml"
+		blast_cline = NcbiblastnCommandline(query="representatives.fasta", db=std_outgroup_file, evalue=0.01,
+		                                     outfmt=5, out=blast_out)
+		stdout, stderr = blast_cline()
+		with open(blast_out, 'r') as bfile:
+			og_blast = NCBIXML.parse(bfile)
+			by_og = defaultdict(list)
+			for rep in og_blast:
+				for hit in rep.alignments:
+					for aln in hit.hsps:
+						by_og[hit.hit_def].append((rep.query, aln.score, aln.score/aln.align_length, 1.0*aln.identities/aln.align_length))
+		by_og = by_og.items()
+ 		# sort by number of hits, then mean score
+ 		by_og.sort(key = lambda x:(len(x[1]), np.mean([y[-2] for y in x[1]])), reverse=True)
+ 		for og, hits in by_og:
+ 			if standard_outgroups[og]['date']<earliest_date-5 or np.mean([y[-1] for y in hits])<0.8:
+ 				break
+		self.outgroup = standard_outgroups[og]
+		print("chosen outgroup",self.outgroup['strain'])
 
 	def refine(self):
 		self.node_lookup = {node.taxon.label:node for node in self.tree.leaf_iter()}
@@ -190,7 +217,6 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 			if len(strain_list)>1:
 				for ii, virus in enumerate(strain_list):
 					virus['strain']+='-'+str(ii+1)
-
 
 
 	def run(self, raxml_time_limit):
