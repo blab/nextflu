@@ -35,11 +35,12 @@ def get_date(strain):
 
 class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 	"""docstring for mutation_tree"""
-	def __init__(self, aln_fname, outgroup, outdir = './', formats = ['pdf','svg','png'], verbose = 0, **kwargs):
+	def __init__(self, aln_fname, outgroup, include_ref_strains = True, outdir = './', formats = ['pdf','svg','png'], verbose = 0, **kwargs):
 		process.__init__(self, **kwargs)
 		flu_filter.__init__(self, alignment_file = aln_fname, **kwargs)
 		tree_refine.__init__(self, **kwargs)
 		virus_clean.__init__(self, **kwargs)
+		self.include_ref_strains = include_ref_strains
 		self.verbose = verbose
 		self.formats = formats
 		self.outdir = outdir.rstrip('/')+'/'
@@ -87,15 +88,16 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 		from Bio.Blast.Applications import NcbiblastnCommandline
 		from Bio.Blast import NCBIXML
 
+		self.make_run_dir()
 		nvir = 10
 		earliest_date = np.min([numerical_date(v["date"]) for v in self.viruses])
 		representatives = [SeqRecord(Seq(v['seq']), id=v['strain']) for v in sample(self.viruses, min(nvir, nvir))]
 		standard_outgroups = {seq.name:{'seq':str(seq.seq).upper(), 'strain':seq.name, 'desc':seq.description, 'date':get_date(seq.description)}
 								for seq in SeqIO.parse(std_outgroup_file, 'fasta')}
 
-		SeqIO.write(representatives, 'representatives.fasta', 'fasta')
-		blast_out = self.outdir+"outgroup_blast.xml"
-		blast_cline = NcbiblastnCommandline(query="representatives.fasta", db=std_outgroup_file, evalue=0.01,
+		SeqIO.write(representatives, self.run_dir+'representatives.fasta', 'fasta')
+		blast_out = self.run_dir+"outgroup_blast.xml"
+		blast_cline = NcbiblastnCommandline(query=self.run_dir+"representatives.fasta", db=std_outgroup_file, evalue=0.01,
 		                                     outfmt=5, out=blast_out)
 		stdout, stderr = blast_cline()
 		with open(blast_out, 'r') as bfile:
@@ -111,6 +113,8 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
  		for og, hits in by_og:
  			if standard_outgroups[og]['date']<earliest_date-5 or np.mean([y[-1] for y in hits])<0.8:
  				break
+ 			if self.include_ref_strains:
+	 			self.viruses.append(standard_outgroups[og])
 		self.outgroup = standard_outgroups[og]
 		self.cds = [0,len(self.outgroup['seq'])]
 		print("chosen outgroup",self.outgroup['strain'])
