@@ -272,6 +272,7 @@ if __name__=="__main__":
 	muttree.export()
 
 	shutil.copy2('../auspice/_site/js/muttree.js', muttree.outdir+'js/muttree.js')
+	shutil.copy2('../auspice/_site/js/msa.min.js', muttree.outdir+'js/msa.min.js')
 	shutil.copy2('../auspice/_site/muttree/index.html', muttree.outdir+'index.html')
 	shutil.copy2('../auspice/_site/css/style.css', muttree.outdir+'css/style.css')
 
