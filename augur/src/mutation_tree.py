@@ -2,10 +2,12 @@ import time, re, os, argparse,shutil
 from tree_refine import tree_refine
 from virus_clean import virus_clean
 from virus_filter import flu_filter
+from date_util import numerical_date
 from collections import defaultdict
 from process import process, virus_config
 from Bio import SeqIO, AlignIO
 from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
 from Bio.Align import MultipleSeqAlignment
 import numpy as np
 from itertools import izip
@@ -15,18 +17,30 @@ virus_config.update({
 	# data source and sequence parsing/cleaning/processing
 	'fasta_fields':{0:'strain', 1:'date', 2:'isolate_id', 3:'passage', 4:'subtype', 5:'ori_lab', 6:'sub_lab', 7:'submitter'},
 	'cds':[0,None], # define the HA start i n 0 numbering
-	'auspice_prefix':'H1N1pdm_',
 	'verbose':3
 	})
 
+def get_date(strain):
+	try:
+		year = int(strain.split()[0].split('/')[-1])
+	except:
+		print("cannot parse year of ", strain)
+		return 1900
+
+	if year<18:
+		year +=2000
+	elif year<100:
+		year+=1900
+	return year
 
 class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 	"""docstring for mutation_tree"""
-	def __init__(self, aln_fname, outgroup, outdir = './', formats = ['pdf','svg','png'], verbose = 0, **kwargs):
+	def __init__(self, aln_fname, outgroup, include_ref_strains = True, outdir = './', formats = ['pdf','svg','png'], verbose = 0, **kwargs):
 		process.__init__(self, **kwargs)
 		flu_filter.__init__(self, alignment_file = aln_fname, **kwargs)
 		tree_refine.__init__(self, **kwargs)
 		virus_clean.__init__(self, **kwargs)
+		self.include_ref_strains = include_ref_strains
 		self.verbose = verbose
 		self.formats = formats
 		self.outdir = outdir.rstrip('/')+'/'
@@ -38,13 +52,16 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 
 		if os.path.isfile(outgroup):
 			tmp = [{'strain':seq.name, 'seq':str(record.seq).upper(), 'desc':seq.description}
-								for seq in SeqIO.parse(outgroup, 'fasta') ]			
+								for seq in SeqIO.parse(outgroup, 'fasta') ]
 			if len(tmp):
 				self.outgroup = tmp[0]
 				if len(tmp)>1:
 					print "More than one sequence in ", outgroup, "taking first"
 				if self.verbose:
 					print "using outgroup found in file ", outgroup
+		elif outgroup=='auto':
+			print "automatically determine outgroup"
+			self.auto_outgroup_blast()
 		elif isinstance(outgroup, basestring):
 			seq_names = [x['strain'] for x in self.viruses]
 			if outgroup in seq_names:
@@ -52,19 +69,55 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 				if self.verbose:
 					print "using outgroup found in alignment", outgroup
 			else:
-				standard_outgroups = [{'strain':seq.name, 'seq':str(seq.seq).upper(), 'desc':seq.description}
-										for seq in SeqIO.parse(std_outgroup_file, 'fasta') ]
-				outgroup_names = [x['strain'] for x in standard_outgroups]
-				if outgroup in outgroup_names:
-					self.outgroup = standard_outgroups[outgroup_names.index(outgroup)]
+				standard_outgroups = {seq.name:{'seq':str(seq.seq).upper(), 'desc':seq.description}
+										for seq in SeqIO.parse(std_outgroup_file, 'fasta')}
+				if outgroup in standard_outgroups:
+					self.outgroup = standard_outgroups[outgroup]
 					if self.verbose:
 						print "using standard outgroup", outgroup
 				else:
 					raise ValueError("outgroup %s not found" % outgroup)
 					return
+
 		self.viruses.append(self.outgroup)
 		self.filter_geo(prune=False)
 		self.make_strain_names_unique()
+
+	def auto_outgroup_blast(self):
+		from random import sample
+		from Bio.Blast.Applications import NcbiblastnCommandline
+		from Bio.Blast import NCBIXML
+
+		self.make_run_dir()
+		nvir = 10
+		earliest_date = np.min([numerical_date(v["date"]) for v in self.viruses])
+		representatives = [SeqRecord(Seq(v['seq']), id=v['strain']) for v in sample(self.viruses, min(nvir, nvir))]
+		standard_outgroups = {seq.name:{'seq':str(seq.seq).upper(), 'strain':seq.name, 'desc':seq.description, 'date':get_date(seq.description)}
+								for seq in SeqIO.parse(std_outgroup_file, 'fasta')}
+
+		SeqIO.write(representatives, self.run_dir+'representatives.fasta', 'fasta')
+		blast_out = self.run_dir+"outgroup_blast.xml"
+		blast_cline = NcbiblastnCommandline(query=self.run_dir+"representatives.fasta", db=std_outgroup_file, evalue=0.01,
+		                                     outfmt=5, out=blast_out)
+		stdout, stderr = blast_cline()
+		with open(blast_out, 'r') as bfile:
+			og_blast = NCBIXML.parse(bfile)
+			by_og = defaultdict(list)
+			for rep in og_blast:
+				for hit in rep.alignments:
+					for aln in hit.hsps:
+						by_og[hit.hit_def].append((rep.query, aln.score, aln.score/aln.align_length, 1.0*aln.identities/aln.align_length))
+		by_og = by_og.items()
+ 		# sort by number of hits, then mean score
+ 		by_og.sort(key = lambda x:(len(x[1]), np.mean([y[-2] for y in x[1]])), reverse=True)
+ 		for og, hits in by_og:
+ 			if standard_outgroups[og]['date']<earliest_date-5 or np.mean([y[-1] for y in hits])<0.8:
+ 				break
+ 			if self.include_ref_strains:
+	 			self.viruses.append(standard_outgroups[og])
+		self.outgroup = standard_outgroups[og]
+		self.cds = [0,len(self.outgroup['seq'])]
+		print("chosen outgroup",self.outgroup['strain'])
 
 	def refine(self):
 		self.node_lookup = {node.taxon.label:node for node in self.tree.leaf_iter()}
@@ -171,7 +224,6 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 					virus['strain']+='-'+str(ii+1)
 
 
-
 	def run(self, raxml_time_limit):
 		self.align()
 		AlignIO.write(self.viruses, self.auspice_align_fname, 'fasta')
@@ -199,7 +251,7 @@ if __name__=="__main__":
 	else:
 		if len(params.cds)==2:
 			virus_config['cds']=params.cds
-		elif len(params.cds)==1:			
+		elif len(params.cds)==1:
 			virus_config['cds']=(params.cds[0], None)
 		else:
 			raise ValueError("Expecting a cds of length 1 (start only) or 2, got "+str(params.cds))
