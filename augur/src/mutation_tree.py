@@ -46,6 +46,7 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 		self.outdir = outdir.rstrip('/')+'/'
 		self.auspice_tree_fname = 		self.outdir + 'tree.json'
 		self.auspice_align_fname = 		self.outdir + 'aln.fasta'
+		self.auspice_aa_align_fname = 		self.outdir + 'aa_aln.fasta'
 		self.auspice_sequences_fname = 	self.outdir + 'sequences.json'
 		self.auspice_frequencies_fname = None
 		self.auspice_meta_fname = 		self.outdir + 'meta.json'
@@ -234,7 +235,10 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 		self.infer_ancestral()  # -> every node has a sequence
 		print "--- Tree refine at " + time.strftime("%H:%M:%S") + " ---"
 		self.refine()
-
+		aa_aln = MultipleSeqAlignment([])
+		for node in self.tree.leaf_iter():
+			aa_aln.append(SeqRecord(id=node.strain, seq=Seq(node.aa_seq)))
+		AlignIO.write(aa_aln, self.auspice_aa_align_fname, 'fasta')
 
 
 if __name__=="__main__":
