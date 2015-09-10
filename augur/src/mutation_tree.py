@@ -40,6 +40,7 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 		flu_filter.__init__(self, alignment_file = aln_fname, **kwargs)
 		tree_refine.__init__(self, **kwargs)
 		virus_clean.__init__(self, **kwargs)
+		self.midpoint_rooting = False
 		self.include_ref_strains = include_ref_strains
 		self.verbose = verbose
 		self.formats = formats
@@ -116,6 +117,8 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
  				break
  			if self.include_ref_strains:
 	 			self.viruses.append(standard_outgroups[og])
+	 	if np.mean([y[-1] for y in hits])<0.8:
+	 		self.midpoint_rooting = True
 		self.outgroup = standard_outgroups[og]
 		self.cds = [0,len(self.outgroup['seq'])]
 		print("chosen outgroup",self.outgroup['strain'])

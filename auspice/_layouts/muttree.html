@@ -117,11 +117,14 @@
 		</div>
 		<div class="row">
 			<div class="col-md-12">
-			<div class="hugespacer"></div>
-			<h3>Amino acid alignment in reference coordinates</h3>
+			<div class="bigspacer"></div>
+			<h4>FluSurver Link</h4>
+			<div id="FluSurverLink"><div id="FluSurverContent">select column in alignment</div></div>
+			<div class="bigspacer"></div>
+			<h4>Amino acid alignment in reference coordinates</h4>
 			<div id="aa_aln"></div>
-			<div class="hugespacer"></div>
-			<h3>Input nucleotide alignment</h3>
+			<div class="bigspacer"></div>
+			<h4>Input nucleotide alignment</h4>
 			<div id="aln"></div>
 			</div>
 		</div>
@@ -162,7 +165,7 @@
 		  el: rootDiv,
 		  importURL: "./aa_aln.fasta",
 		  //bootstrapMenu: true, // simplified behavior to add the menu bar, you can also create your own menu instance
-		  vis: {seqlogo: true},
+		  //vis: {seqlogo: true},
 		  colorscheme: {"scheme": "clustal2"},
 		};
 		var m = new msa(opts);
