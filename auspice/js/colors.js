@@ -201,15 +201,6 @@ function colorByGenotypePosition (positions) {
 		removeLegend();
 	}
 	tree_legend = makeLegend();
-
-	if ((positions.length==1)&&(filtered_gts.length>1)){
-		var tmp_gts=[];
-		for (var ii=0; ii<filtered_gts.length; ii+=1){
-			tmp_gts.push(["global", filtered_gts[ii]])
-		}
-		make_gt_chart(tmp_gts);
-		document.getElementById("gtspec").value = tmp_gts.map( function (d) {return d[1];}).join(', ');
-	}
 }
 
 d3.select("#coloring")

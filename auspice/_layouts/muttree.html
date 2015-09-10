@@ -118,6 +118,10 @@
 		<div class="row">
 			<div class="col-md-12">
 			<div class="hugespacer"></div>
+			<h3>Amino acid alignment in reference coordinates</h3>
+			<div id="aa_aln"></div>
+			<div class="hugespacer"></div>
+			<h3>Input nucleotide alignment</h3>
 			<div id="aln"></div>
 			</div>
 		</div>
@@ -151,7 +155,25 @@
 		<script src="js/muttree.js"></script>
 		<script src="js/msa.min.js"></script>
 		<script>
-		console.log('alignment viewer');
+		var rootDiv = document.getElementById('aa_aln');
+		/* global rootDiv */
+		var msa = require("msa");
+		var opts = {
+		  el: rootDiv,
+		  importURL: "./aa_aln.fasta",
+		  //bootstrapMenu: true, // simplified behavior to add the menu bar, you can also create your own menu instance
+		  vis: {seqlogo: true},
+		  colorscheme: {"scheme": "clustal2"},
+		};
+		var m = new msa(opts);
+		m.g.on('all',function(name,data){var obj = {name: name, data: data};if(inIframe()){ parent.postMessage(obj, "*") }});
+		m.g.on("column:click", function(data){
+				colorBy = "genotype";colorByGenotypePosition([data['rowPos']]);});
+		m.g.on("residue:click", function(data){console.log(data);});
+		function inIframe(){try{return window.self!==window.top}catch(e){return true}}
+		</script>
+
+		<script>
 		var rootDiv = document.getElementById('aln');
 		/* global rootDiv */
 		var msa = require("msa");
