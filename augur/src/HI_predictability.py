@@ -421,10 +421,10 @@ for cutoff in cutoffs:
 cutoff = 0.01
 plt.figure(figsize=(2.4*figheight,figheight))
 ax=plt.subplot(121)
+ax.plot(best_HI[cutoff][:,0],best_HI[cutoff][:,-2]/best_HI[cutoff][:,-1], label='best',lw=2, c='k')
 ax.plot(best_LBI[cutoff][:,0],best_LBI[cutoff][:,-3], label='LBI',lw=2)
 ax.plot(best_HI[0.05][:,0],best_HI[0.05][:,-3], label='cHI >0.05',lw=2)
 ax.plot(best_HI[0.01][:,0],best_HI[0.01][:,-3], label='cHI >0.01',lw=2)
-ax.plot(best_HI[cutoff][:,0],best_HI[cutoff][:,-2]/best_HI[cutoff][:,-1], label='best',lw=2)
 ax.plot([1990, 2015], [1.0, 1.0], lw=3, c='k', ls='--')
 ax.tick_params(labelsize=fs)
 add_panel_label(ax, "B", x_offset=-0.12)
@@ -486,8 +486,8 @@ if save_figs:
 ################################################################
 plt.figure(figsize = (1.2*figheight, figheight))
 ax=plt.subplot(111)
-for col, cutoff in zip(['b', 'r', 'g'], [0.01, 0.05, 0.1]):
-    plt.scatter(best_HI_vs_HI_of_best[cutoff][:,1], 
+for col, cutoff in zip(['b', 'g'], [0.01, 0.05]):
+    plt.scatter(best_HI_vs_HI_of_best[cutoff][:,1],
         best_HI_vs_HI_of_best[cutoff][:,2], label = '>'+str(cutoff), s=50, c=col) #, s=50*best_HI[:,-3])
 plt.plot([0,3],[0,3])
 plt.tick_params(labelsize=fs)
@@ -495,6 +495,7 @@ plt.xlabel(r'maximal $cHI-\langle cHI\rangle_{year}$', fontsize=fs)
 plt.ylabel(r'successful $cHI-\langle cHI\rangle_{year}$', fontsize=fs)
 plt.xticks([0,1,2,3,4])
 plt.yticks([-1, 0,1,2,3])
+plt.legend(loc=2)
 plt.tight_layout()
 if save_figs:
     plt.savefig('best_HI_vs_HI_of_best.pdf')

@@ -62,6 +62,87 @@ def mutation_list(flu = 'H3N2', format='tsv', nconstraints=False):
             ofile.write(tmp+le)
     return N, D
 
+def mutation_list_by_position(flu = 'H3N2', format='tsv', nconstraints=False):
+    from glob import glob
+    import pandas as pd
+    from collections import defaultdict
+    flist = glob('../auspice/'+flu+'/*to*/HI_mutation_effects.tsv')
+
+    mutation_effects = defaultdict(list)
+    intervals = []
+    for fname in flist:
+        interval = fname.split('/')[-2]
+        years = map(int, interval.split('to'))
+        if years[1]-years[0] not in [10,11]: # skip all non-10year interval
+            continue
+        intervals.append(interval)
+        with open(fname) as infile:
+            for line in infile:
+                mut, val, count = line.strip().split('\t')
+                positions = map(lambda x:int(x[1:-1]), mut.split('/'))
+                for pos in positions:
+                    mutation_effects[pos].append((interval, mut, float(val), int(count)))
+
+    positions_by_length = sorted(mutation_effects.items(), key=lambda x:len(x[1]), reverse=True)
+    if format=='tex':
+        sep = ' & '
+        le = '\\\\ \n'
+    else:
+        sep = '\t'
+        le = '\n'
+    ndigits = 2
+    intervals.sort()
+    with open("effects_by_position.tsv", 'w') as ofile:
+        for pos, muts in positions_by_length:
+            avg_all = np.mean([x[2] for x in muts])
+            avg_alone = np.mean([x[2] for x in muts if len(x[1].split('/'))==1])
+            ofile.write("#######################\nPosition "+str(pos)+' avg: ' +str(round(avg_all,2))+' avg_alone: ' +str(round(avg_alone,2))+'\n')
+            tmp = {(x[1],x[0]):x for x in muts}
+            unique_muts = set([x[1] for x in muts])
+            for mut in unique_muts:
+                ofile.write(mut+sep)
+                for interval in intervals:
+                    if (mut, interval) in tmp:
+                        ofile.write(str((tmp[(mut,interval)][2],tmp[(mut,interval)][3]))+sep)
+                    else:
+                        ofile.write('---'+sep)
+                ofile.write('\n')
+
+######################################
+### make big mutation trajectory figure
+######################################
+def trajectory_figure(flu = 'H3N2', res = '1985to2016'):
+    import cPickle as pickle
+    from collections import defaultdict
+    freqs = pickle.load(open('data/'+'_'.join([flu, res, 'frequencies.pkl'])))
+    freqs = freqs['mutations']['global']
+    freqs_by_position = defaultdict(list)
+    for mut, freq in freqs.iteritems():
+        if mut=='pivots':
+            pivots = freq
+        else:
+            freqs_by_position[(mut.split(':')[0], int(mut.split(':')[1][:-1]))].append((mut,freq))
+    all_muts = sorted(freqs_by_position.items(), reverse=True,
+                      key = lambda x:sum([np.sum(np.abs(np.diff(y[1]))) for y in x[1]]))
+
+    ncols=5
+    nrows=6
+    fig, axs = plt.subplots(nrows, ncols, sharey=True, sharex=True, figsize = (22,30))
+    for mi, (pos, freqs) in enumerate(sorted(all_muts[:nrows*ncols])):
+        ax = axs[mi//ncols, mi%ncols]
+        for mut, freq in freqs:
+            ax.plot(pivots, freq, label = mut[-1])
+        ax.set_xlim([1985,2022])
+        ax.legend(loc=4, title = pos[0]+' '+str(pos[1]), fontsize=10)
+        if mi%ncols==0:
+            ax.set_ylabel('frequency')
+            ax.set_yticks([0,0.2, 0.4, 0.6, 0.8])
+            ax.tick_params(labelsize=14)
+        if mi//ncols==nrows-1:
+            ax.set_xlabel('year')
+            ax.tick_params(labelsize=14)
+    plt.tight_layout(w_pad=0.01, h_pad=0.01)
+
 ######################################
 #### make a figure that plots the cumulative antigenic change vs time
 ######################################

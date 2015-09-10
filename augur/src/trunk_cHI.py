@@ -15,6 +15,8 @@ fs=14
 fmts = ['.pdf', '.svg', '.png']
 res = '1985to2016'
 figheight=4
+def add_panel_label(ax,label, x_offset=-0.1):
+    ax.text(x_offset, 0.95, label, transform=ax.transAxes, fontsize=fs*1.5)
 
 #############################################
 ### plot the cumulative antigenic change
@@ -77,11 +79,13 @@ for ai,ax in enumerate([plt.subplot(121), plt.subplot(122)]):
     ax.tick_params(axis='both', labelsize=fs)
     ax.set_xlim([1995 if ai else 1985,2017])
     ax.set_ylim([-0.5, 4 if ai else 25])
-    ax.set_yticks(range(4) if ai else [0,5,10,15, 20, 25])
+    ax.set_yticks(range(4) if ai else [0,5,10,15, 20])
     if ai==0: ax.set_ylabel(r'cumulative antigenic change $[\log_2]$', fontsize=fs)
     ax.set_xlabel(r'year', fontsize=fs)
     ax.legend(loc=2, fontsize = fs-2)
 plt.tight_layout()
+add_panel_label(plt.subplot(121), "A", x_offset=-0.12)
+add_panel_label(plt.subplot(122), "B", x_offset=-0.12)
 
 for fmt in fmts: plt.savefig('cHI_path'+fmt)
 

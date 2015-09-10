@@ -1,5 +1,5 @@
 var virusTooltip = d3.tip()
-	.direction('e')
+	.direction('se')
 	.attr('class', 'd3-tip')
 	.offset([0, 12])
 	.html(function(d) {

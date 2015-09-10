@@ -19,7 +19,7 @@ layout: default
 					<label class="control-label">Virus</label>
 					<select id="virus_select" class="form-control" onChange="document.location = this.value" value="GO">
 						{% for entry in site.data.viruses %}
-						<option value="/{{entry.virus}}/" 
+						<option value="/{{entry.virus}}/"
 							{% if page.virus == entry.virus %} selected="selected" {% endif %}
 							>{{ entry.name }}</option>
 						{% endfor %}
@@ -32,7 +32,7 @@ layout: default
 					<label class="control-label">Time</label>
 					<select id="resolution_select" class="form-control" onChange="document.location = this.value" value="GO">
 					{% for entry in site.data.viruses %}
-						{% if page.virus == entry.virus %} 
+						{% if page.virus == entry.virus %}
 							{% for res in entry.resolutions %}
 								<option value="/{{ entry.virus }}/{{ res }}"
 								{% if page.resolution == res %} selected="selected" {% endif %}
@@ -42,13 +42,13 @@ layout: default
 					{% endfor %}
 					</select>
 				</div>
-			</form>	
+			</form>
 		</div>
-		<div class="bigspacer"></div>	
+		<div class="bigspacer"></div>
 		<div class="io-container title">
 			HA phylogeny
 		</div>
-		<div class="spacer"></div>		
+		<div class="spacer"></div>
 		<div class="row">
 			<div class="col-xs-6 io-container">
 				<div>
@@ -60,7 +60,7 @@ layout: default
 				</div>
 				<div class="spacer"></div>
 			</div>
-			<div class="col-xs-6 io-container">			
+			<div class="col-xs-6 io-container">
 				<form class="form-horizontal form-small">
 					<div class="form-group">
 							<label class="col-xs-4 control-label">Color by</label>
@@ -74,7 +74,7 @@ layout: default
 									<option value={{color_option[0] }}>{{ color_option[1] }}</option>
 									{% endif %}
 									{% endif %}
-								{% endfor %}														
+								{% endfor %}
 								<option value="--">--</option>
 								</select>
 							</div>
@@ -91,9 +91,9 @@ layout: default
 						<label class="col-xs-4 control-label">HI color:</label><br>
 						<div class="col-xs-8 controls">
 							<form action="" id="HImodel">
-								<input type="radio" name="HImodel" id="HImodel_measured" value="measured"> Measurements<br>
-								<input type="radio" name="HImodel" id="HImodel_tree" value="tree"> Tree model<br>
-								<input type="radio" name="HImodel" id="HImodel_mutation" checked="checked" value="mutation"> Mutation model
+								<input type="radio" name="HImodel" id="HImodel_measured" value="measured"> measurements<br>
+								<input type="radio" name="HImodel" id="HImodel_tree" value="tree"> tree model<br>
+								<input type="radio" name="HImodel" id="HImodel_mutation" checked="checked" value="mutation"> substit. model
 							</form>
 						</div>
 						<label class="col-xs-4 control-label">Corrections:</label><br>
@@ -102,11 +102,11 @@ layout: default
 							<input type="checkbox" id="serum" value="serum" checked="checked"> serum potency<br>
 							<input type="checkbox" id="virus" value="virus"> virus avidity
 						</div>
-					</div>		
-					{% endif %}	
+					</div>
+					{% endif %}
 				</form>
 				<div class="spacer"></div>
-				
+
 				{% for res in site.data.restrictions %}
 				<form class="form-horizontal form-small">
 					<div class="form-group">
@@ -123,7 +123,7 @@ layout: default
 				{% endfor %}
 
 				<div id="search"></div>
-			</div>					
+			</div>
 		</div>
 	</div>
 	<div class="col-md-9">
@@ -135,7 +135,7 @@ layout: default
 			click (repeatedly) on a branch to zoom <button id="reset" class="btn btn-default">reset layout</button>
 			<button id="svgexport" class="btn btn-default">export tree (svg)</button>
 		</div>
-		<div class="entropy-container">		
+		<div class="entropy-container">
 			<div id="entropy"></div>
 		</div>
 	</div>
@@ -154,17 +154,17 @@ layout: default
 			Frequencies
 		</div>
 		<div class="spacer"></div>
-		<div class="row">			
-			<div class="col-xs-6 io-container">	
+		<div class="row">
+			<div class="col-xs-6 io-container">
 				<form class="form-horizontal form-small">
 					<div class="form-group">
 						<div class="col-xs-12">
 							<input id="gtspec" type="search" class="form-control" value="{{ page.freqdefault }}">
 						</div>
 					</div>
-				</form>	
+				</form>
 			</div>
-			<div class="col-xs-6 io-container">					
+			<div class="col-xs-6 io-container">
 				<div>
 					<button id="plotfreq" type=button class="btn btn-default">plot frequencies</button>
 					<div class="spacer"></div>
@@ -173,17 +173,17 @@ layout: default
 			</div>
 		</div>
 		<div class="spacer"></div>
-		Input mutations as position+amino acid, i.e. <span class="highlight">159Y</span>, clades as clade name, 
-		i.e. <span class="highlight">3c2.a</span> and add locations as <span class="highlight">/AS</span>, 
-		<span class="highlight">/NA</span>, <span class="highlight">/EU</span>, <span class="highlight">/OC</span>, 
+		Input mutations as position+amino acid, i.e. <span class="highlight">159Y</span>, clades as clade name,
+		i.e. <span class="highlight">3c2.a</span> and add locations as <span class="highlight">/AS</span>,
+		<span class="highlight">/NA</span>, <span class="highlight">/EU</span>, <span class="highlight">/OC</span>,
 		i.e. <span class="highlight">159Y/AS</span>. By default, positions are interpreted as residues in HA1. You can specify the subunit as <span class="highlight">HA2:18V</span>. Alternatively, simply click on variable positions in the graph below.
 		<div class="spacer"></div>
 	</div>
 	<div class="col-md-9">
-		<div class="freqplot-container">		
+		<div class="freqplot-container">
 			<div id="gtchart"></div>
 		</div>
-	</div>	
+	</div>
 </div>
 <div class="spacer"></div>
 <div class="row">
@@ -191,7 +191,7 @@ layout: default
 		<div class="io-container title">
 			Mutations
 		</div>
-		<div class="col-xs-6 io-container">					
+		<div class="col-xs-6 io-container">
 		</div>
 	</div>
 	<div>
@@ -229,54 +229,54 @@ layout: default
 	<div class="col-md-3">
 		<div class="io-container title">
 			Feature explanation
-		</div>	
+		</div>
 	</div>
 	<div class="col-md-9" align="justify">
 		<h4>HI data</h4>
-		<p>HI data can be displayed as color on the tree or viewed via the tool tips that 
-		show when moving the mouse over a circle corresponding to a virus. To explore the HI titer data, 
-		select <span class="highlight">HI distance from focus</span> in the 
-		<span class="highlight">color by</span> menu and click on one of the available 
-		reference viruses indicated by grey squares. The tree will then be colored 
+		<p>HI data can be displayed as color on the tree or viewed via the tool tips that
+		show when moving the mouse over a circle corresponding to a virus. To explore the HI titer data,
+		select <span class="highlight">HI distance from focus</span> in the
+		<span class="highlight">color by</span> menu and click on one of the available
+		reference viruses indicated by grey squares. The tree will then be colored
 		by log2 distance from this reference virus. The coloring either reflects the
-		the direct measurements of HI titers provided by the WHO collaborating centers 
-		(notably the annual and interim reports by the 
-		<a href="http://www.crick.ac.uk/research/worldwide-influenza-centre/annual-and-interim-reports/">NIMR</a> in London), or models that are fit to these data. Whether the raw data, the tree model 
-		and the mutation model are used to color the tree can be chosen via the radio button on the left.  
-		If more than one measurement is available, we take the average over all available measurements. 
-		In the process of fitting the models, column (serum potency) and row 
-		(virus avidities) effects are estimated. These corrections can be 
+		the direct measurements of HI titers provided by the WHO collaborating centers
+		(notably the annual and interim reports by the
+		<a href="http://www.crick.ac.uk/research/worldwide-influenza-centre/annual-and-interim-reports/">NIMR</a> in London), or models that are fit to these data. Whether the raw data, the tree model
+		and the mutation model are used to color the tree can be chosen via the radio button on the left.
+		If more than one measurement is available, we take the average over all available measurements.
+		In the process of fitting the models, column (serum potency) and row
+		(virus avidities) effects are estimated. These corrections can be
 		subtracted from the raw measurements to remove noise.
 		To see all measurements of a virus relative to the chosen reference
 		virus, put the mouse over that virus and a info box (tooltip) will pop
 		up with a table that lists all measurements (and the autologous titers
 		for the sera to facilitate interpretation) and the model predictions.</p>
-		<p>The tree can also be colored by cumulative antigenic change 
+		<p>The tree can also be colored by cumulative antigenic change
 		-- similar to dimension 1 in antigenic cartography.</p>
 		<h4>Phylogenetic tree</h4>
 		<p> Use the <a href="/help/#date_slider"><b>date slider</b></a> to select viruses sampled within the time interval indicated. The size of the interval can be changed by grabing the left end of the bar with the mouse, to move the interval, use the right end of the slider.</p>
-		<p> Use the <a href="/help/#epitope_mutations"><b>drop down menu</b></a> to color viruses by number of <span class="highlight"><a href="/help/#epitope_mutations">epitope mutations</a></span>, 
-		<span class="highlight"><a href="/help/#nonepitope_mutations">non-epitope mutations</a></span> or 
+		<p> Use the <a href="/help/#epitope_mutations"><b>drop down menu</b></a> to color viruses by number of <span class="highlight"><a href="/help/#epitope_mutations">epitope mutations</a></span>,
+		<span class="highlight"><a href="/help/#nonepitope_mutations">non-epitope mutations</a></span> or
 		<span class="highlight"><a href="/help/#rbs">receptor binding mutations</a></span>
-		relative to root, or to color viruses by <span class="highlight"><a href="/help/#lbi">local branching index</a></span> or 
+		relative to root, or to color viruses by <span class="highlight"><a href="/help/#lbi">local branching index</a></span> or
 		<span class="highlight"><a href="/help/#geo">geographic region</a></span>.
-		<p> Use the <a href="/help/#genotype"><b>input box</b></a> to specify positions to color viruses by genotype. Amino acid positions must be 
+		<p> Use the <a href="/help/#genotype"><b>input box</b></a> to specify positions to color viruses by genotype. Amino acid positions must be
 		separated by a comma (e.g. <span class="highlight">159,225</span>). The default is <span class="highlight">HA1</span>, to color by amino acid sequence in other regions use <span class="highlight">HA2:18</span> or <span class="highlight">SigPep:6</span>. To color by nucleotide sequence, use <span class="highlight">nuc:527</span>.
 		<p> <a href="/help/#mouse_tip"><b>Mouse over</b></a> a tip to show virus name, location and features.
 		<p> <a href="/help/#mouse_branch"><b>Mouse over</b></a> a branch to graph the frequency of the correponding clade trajectory below or <b>click</b>
 		on a branch to zoom into its descendent clade. The tool tip will show amino acid mutations on this branch.
-		<p> To <b>restrict</b> the displayed viruses to <b>certain geographic regions</b>, select the region in the drop down menu labeled <span class="highlight">region</span>. 
+		<p> To <b>restrict</b> the displayed viruses to <b>certain geographic regions</b>, select the region in the drop down menu labeled <span class="highlight">region</span>.
 		<h4>Frequencies</h4>
-		Enter a mutation or genotype above (e.g. <span class="highlight">225D</span>) and click 
-		<b>plot frequencies</b> to show estimated frequency of this mutation through time. In addition, geographic regions can be specified by adding AS 
+		Enter a mutation or genotype above (e.g. <span class="highlight">225D</span>) and click
+		<b>plot frequencies</b> to show estimated frequency of this mutation through time. In addition, geographic regions can be specified by adding AS
 		(Asia), NA (North America), EU (Europe), or OC (Oceania) as <span class="highlight">159S/225D/AS</span>.
-		Several genotypes can be entered simultaneously when separated by commas (e.g. 
-		<span class="highlight">225D, 159S/225D/AS</span> will graph the global frequency of 225D and the frequency 
-		of strains containing both 159S and 225D in Asia). Instead of a genotype, the common clades 3c3, 3c3.a, 3c2, 3c2.a can be used. Positions with very little variation are omitted. Beware 
+		Several genotypes can be entered simultaneously when separated by commas (e.g.
+		<span class="highlight">225D, 159S/225D/AS</span> will graph the global frequency of 225D and the frequency
+		of strains containing both 159S and 225D in Asia). Instead of a genotype, the common clades 3c3, 3c3.a, 3c2, 3c2.a can be used. Positions with very little variation are omitted. Beware
 		that region specific frequencies are noisy. <a href="/help/#frequencies">Click here for help with the interface.</a>
 		<h4>Variability</h4>
-		The second plot shows the variation in the multiple sequence alignment used to construct the tree. High bars indicated variable positions. Clicking on those bars will color the tree by amino acid at this position and plot the frequencies of the corresponding amino acids. 
-	</div>	
+		The second plot shows the variation in the multiple sequence alignment used to construct the tree. High bars indicated variable positions. Clicking on those bars will color the tree by amino acid at this position and plot the frequencies of the corresponding amino acids.
+	</div>
 </div>
 
 <div class="row">
@@ -289,30 +289,30 @@ layout: default
 	<div class="col-md-3">
 		<div class="io-container title">
 			Rationale and details
-		</div>	
-		<div class="spacer"></div>	
+		</div>
+		<div class="spacer"></div>
 	</div>
 	<div class="col-md-9" align="justify">
-		<p> <b>Epitope mutations</b> are based on 
-		<a href="http://www.nature.com/nature/journal/v289/n5796/abs/289366a0.html">HA structure and exposed residues</a>. 
+		<p> <b>Epitope mutations</b> are based on
+		<a href="http://www.nature.com/nature/journal/v289/n5796/abs/289366a0.html">HA structure and exposed residues</a>.
 		Multiple recent mutations at epitope
 		sites have been <a href="http://www.nature.com/nature/journal/v507/n7490/abs/nature13087.html">
 		suggested</a> to be predictive for strains dominating future seasons. Similarly, mutations
-		outside of these epitopes -- termed <b>non-epitope sites</b> --- tend to be damaging and are suggested to 
+		outside of these epitopes -- termed <b>non-epitope sites</b> --- tend to be damaging and are suggested to
 		be predictive of clade contraction.</p>
-		<p>Antigenic evolution has been <a href="http://www.sciencemag.org/content/342/6161/976.abs">shown</a> 
-		to depend primarily on substitutions surrounding the receptor binding site of HA1. 
+		<p>Antigenic evolution has been <a href="http://www.sciencemag.org/content/342/6161/976.abs">shown</a>
+		to depend primarily on substitutions surrounding the receptor binding site of HA1.
 		These seven positions (145, 155, 156, 158, 159, 189, 193 in HA1 numbering) are referred to here
-		as <b>receptor binding positions</b> and changes at these positions could correspond to 
+		as <b>receptor binding positions</b> and changes at these positions could correspond to
 		large changes in antigenic properties.</p>
-		<p>The <b>local branching index</b> is the exponentially weighted tree length surrounding 
-		a node, which is associated with <a href="http://elifesciences.org/content/3/e03568"> 
-		rapid branching and expansion of clades</a>. A more detailed explanation is available 
-		<a href="https://neherlab.wordpress.com/2014/11/11/now-out-in-elife-predicting-evolution/">here</a>. 
-		Retrospective analysis has shown that LBI correlates with clade growth. 
+		<p>The <b>local branching index</b> is the exponentially weighted tree length surrounding
+		a node, which is associated with <a href="http://elifesciences.org/content/3/e03568">
+		rapid branching and expansion of clades</a>. A more detailed explanation is available
+		<a href="https://neherlab.wordpress.com/2014/11/11/now-out-in-elife-predicting-evolution/">here</a>.
+		Retrospective analysis has shown that LBI correlates with clade growth.
 		</p><p>
-		<b>Frequencies</b> are estimated as maximum likelihood trajectories that penalize rapid changes in 
-		frequency and slope. The frequencies of large clades or abundant genotypes have sufficiently 
+		<b>Frequencies</b> are estimated as maximum likelihood trajectories that penalize rapid changes in
+		frequency and slope. The frequencies of large clades or abundant genotypes have sufficiently
 		many observations to by robust, while frequencies of rare mutations can't be reliably
 		estimated.
 	</div>
@@ -328,8 +328,8 @@ layout: default
 	<div class="col-md-3">
 		<div class="io-container title">
 			Validation of HI model
-		</div>	
-		<div class="spacer"></div>	
+		</div>
+		<div class="spacer"></div>
 	</div>
 	<div class="col-md-9">
 		<div class="row">
@@ -341,7 +341,7 @@ layout: default
 			<div class="col-md-6">
 	 			<figure>
 					<img src="/{{ page.virus }}/{{ page.resolution }}/HI_prediction_virus_tree.png" width="500" align="middle">
-	 			</figure> 
+	 			</figure>
 			</div>
 		</div>
 		<div class="row">
@@ -353,11 +353,11 @@ layout: default
 			<div class="col-md-6">
 	 			<figure>
 					<img src="/{{ page.virus }}/{{ page.resolution }}/HI_prediction_virus_mutation.png" width="500" align="middle">
-	 			</figure> 
+	 			</figure>
 			</div>
 		</div>
 <div align="justify">
-Predicted log2 HI titer distance vs measured HI titer distance for the tree model (top) and mutation model (bottom). Validation is done either (left) by excluding 10% of all measurements, or (right) 10% of all viruses from the training data. The model is then used to predict the excluded data. The prediction errors are indicted in the figure. When predicting titers for viruses that were completely absent from the training data (right), prediction errors are larger since no virus avidities could be trained. 
+Predicted log2 HI titer distance vs measured HI titer distance for the tree model (top) and mutation model (bottom). Validation is done either (left) by excluding 10% of all measurements, or (right) 10% of all viruses from the training data. The model is then used to predict the excluded data. The prediction errors are indicted in the figure. When predicting titers for viruses that were completely absent from the training data (right), prediction errors are larger since no virus avidities could be trained.
 </div>
 <!--	 	<div class="bigspacer"></div>
 		<div class="row">
@@ -369,9 +369,9 @@ Predicted log2 HI titer distance vs measured HI titer distance for the tree mode
 			<div class="col-md-6">
 	 			<figure>
 					<img src="/{{ page.virus }}/{{ page.resolution }}/HI_symmetry_mutation.png" width="500" align="middle">
-	 			</figure> 
+	 			</figure>
 			</div>
-Within our model, titer distance is <it>serum effect + distance + virus effect</it>. Subtracting the respective serum and virus effect from reciprocal HI titer measurements should result in the same <it>distance</it>. The figure shows the difference between reciprocal titers before and after subtraction of the serum and virus effect. The standard deviation of the corrected difference is much smaller than the prior to correction, consistent with an approximately symmetric distance. 
+Within our model, titer distance is <it>serum effect + distance + virus effect</it>. Subtracting the respective serum and virus effect from reciprocal HI titer measurements should result in the same <it>distance</it>. The figure shows the difference between reciprocal titers before and after subtraction of the serum and virus effect. The standard deviation of the corrected difference is much smaller than the prior to correction, consistent with an approximately symmetric distance.
 		</div>-->
 		<div class="row">
 			<div class="col-md-6">
@@ -396,22 +396,22 @@ The distribution of estimated virus avidites and serum potencies for the tree (l
 	<div class="col-md-3"></div>
 	<div class="col-md-9">
 		<hr>
-		Built by <a href="http://bedford.io">Trevor Bedford</a> and 
-		<a href="https://neherlab.wordpress.com/">Richard Neher</a>. This work is made possible by the 
-		<a href="http://gisaid.org" target="_blank">GISAID Initiative</a> and the open sharing of genetic data by 
-		influenza research groups from all over the world. <a href="/acknowledgements/">We gratefully acknowledge their 
-		contributions.</a> 
-		<p>The recent HI titer data was generated by John McCauley, Rod Daniels and colleagues 
-		at the <a href="http://www.crick.ac.uk/research/worldwide-influenza-centre">Worldwide Influenza Centre at the Francis Crick Institute</a>.</p> 
-		Give us a shout at <a href="https://twitter.com/trvrb" target="_blank">@trvrb</a> or 
-		<a href="https://twitter.com/richardneher" target="_blank">@richardneher</a> with questions or comments. All 
-		<a href="http://github.com/blab/nextflu" target="_blank">source code</a> is freely available under the terms of the 
-		<a href="http://github.com/blab/nextflu/blob/master/LICENSE.txt" target="_blank">GNU Affero General Public License</a>. 
-		A <a href="/methods/">detailed description of methods</a> is also available. Data  updated <span id="updated"></span> and processed 
-		with commit <span id="commit"></span>.		
+		Built by <a href="http://bedford.io">Trevor Bedford</a> and
+		<a href="https://neherlab.wordpress.com/">Richard Neher</a>. This work is made possible by the
+		<a href="http://gisaid.org" target="_blank">GISAID Initiative</a> and the open sharing of genetic data by
+		influenza research groups from all over the world. <a href="/acknowledgements/">We gratefully acknowledge their
+		contributions.</a>
+		<p>The recent HI titer data was generated by John McCauley, Rod Daniels and colleagues
+		at the <a href="http://www.crick.ac.uk/research/worldwide-influenza-centre">Worldwide Influenza Centre at the Francis Crick Institute</a>.</p>
+		Give us a shout at <a href="https://twitter.com/trvrb" target="_blank">@trvrb</a> or
+		<a href="https://twitter.com/richardneher" target="_blank">@richardneher</a> with questions or comments. All
+		<a href="http://github.com/blab/nextflu" target="_blank">source code</a> is freely available under the terms of the
+		<a href="http://github.com/blab/nextflu/blob/master/LICENSE.txt" target="_blank">GNU Affero General Public License</a>.
+		A <a href="/methods/">detailed description of methods</a> is also available. Data  updated <span id="updated"></span> and processed
+		with commit <span id="commit"></span>.
 		</p>
 		<p>
-		Please cite: <a href="http://dx.doi.org/10.1093/bioinformatics/btv381">Neher RA, Bedford T. 2015. nextflu: real-time tracking of 
+		Please cite: <a href="http://dx.doi.org/10.1093/bioinformatics/btv381">Neher RA, Bedford T. 2015. nextflu: real-time tracking of
 		seasonal influenza virus evolution in humans. Bioinformatics 10.1093/bioinformatics/btv381</a>.
 		</p>
 	</div>
@@ -420,7 +420,7 @@ The distribution of estimated virus avidites and serum potencies for the tree (l
 <div class="row">
 	<div class="col-md-3"></div>
 	<div class="col-md-9">
-		<hr>		
+		<hr>
 		<div class="center text-gray smallnote">
 			&copy; 2015 Trevor Bedford and Richard Neher
 		</div>

@@ -22,7 +22,7 @@ parser.add_argument('--path', type = str, default = 'data/', help='path of file 
 parser.add_argument('--prefix', type = str, default = '', help='prefix of file dumps including auspice')
 parser.add_argument('--test', default = False, action="store_true",  help ="don't run the pipeline")
 parser.add_argument('--start', default = 'filter', type = str,  help ="start pipeline at specified step")
-parser.add_argument('--stop', default = 'export', type=str,  help ="run to end")
+parser.add_argument('--stop', default = 'HIvalidate', type=str,  help ="run to end")
 parser.add_argument('--skip', nargs='+', type = str,  help ="analysis steps to skip")
 parser.add_argument('--ATG', action="store_true", default=False, help ="include full HA sequence starting at ATG")
 parser.add_argument('--resolution', type = str,  help ="label for the resolution")
