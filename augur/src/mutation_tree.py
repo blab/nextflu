@@ -145,7 +145,8 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 						for mut in node.aa_muts.split(','):
 							anc,pos,der = mut[0], int(mut[1:-1]), mut[-1]
 							ii = divides.searchsorted(pos)-1
-							tmp[ii].append(anc+str(pos-divides[ii])+der)
+							if ii>0:
+								tmp[ii].append(anc+str(pos-divides[ii])+der)
 						for ii, anno in enumerate(self.anno):
 							if len(tmp[ii]):
 								node.alt_aa_muts+=anno[0]+': '+','.join(tmp[ii])+" "
