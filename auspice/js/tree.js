@@ -250,9 +250,10 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.attr('text-anchor', 'middle')
 		.attr('dominant-baseline', 'central')
 		.style("font-size", "28px")
-		.style('font-family', 'FontAwesome')
+		.style("font-weight",900)
+		.style('font-family', 'sans-serif')
 		.style("fill", "#555555")
-		.text(function(d) { return '\uf00d'; })
+		.text(function(d) { return 'x';}) //'\uf00d'; })
 		.style("cursor", "default")
 		.on('mouseover', function(d) {
 			virusTooltip.show(d, this);
