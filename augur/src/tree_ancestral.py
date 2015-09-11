@@ -21,20 +21,20 @@ import copy, time
 
 class ancestral_sequences:
 	'''
-	class that generates a biopython tree dressed with ancestral sequences 
+	class that generates a biopython tree dressed with ancestral sequences
 	and the marginal probabilities of different states in the tree
 	NOTE: THIS TREATS ANYTHING OTHER THAN ACGT AS MISSING DATA. NO GAPHANDLING
 	should be extended to handle ambiguous symbols correctly.
 	'''
 
-	def __init__(self, tree, aln, alphabet = 'ACGT', sub_matrix = None, 
+	def __init__(self, tree, aln, alphabet = 'ACGT', sub_matrix = None,
 				 eps_branch_length = 1e-7, copy_tree = False,
 				 attrname='seq', seqtype='Seq'):
 		'''
 		arguments:
 		tree  -- a biopython tree
 		aln   -- a biopython alignment with the same names as the terminal nodes
-		
+
 		keyword arguments:
 		alphabet   -- allows character states
 		sub_matrix -- substitution matrix. defaults to flat matrix
@@ -59,7 +59,7 @@ class ancestral_sequences:
 			# every mutation equally likely. subtract diagonal, normalize to rate 1.
 			# this matrix is symmetric
 			self.sub_matrix = (np.ones((self.nstates, self.nstates))-
-							   self.nstates*np.eye(self.nstates))*1.0/(self.nstates-1)        
+							   self.nstates*np.eye(self.nstates))*1.0/(self.nstates-1)
 			self.calc_eigendecomp()
 
 		names_to_seqs = {seq.id:seq  for seq in aln}
@@ -96,11 +96,11 @@ class ancestral_sequences:
 		# there is no parental information to the root (the root node is artificial)
 		# hence init the message with ones
 		self.T.seed_node.up_message = self.get_state_array()
-	
-	
+
+
 	def get_state_array(self):
 		'''
-		provide a unified function that returns an all one array 
+		provide a unified function that returns an all one array
 		for messages and probabilities of the right size
 		'''
 		return np.ones((self.seq_len,self.nstates))
@@ -111,7 +111,7 @@ class ancestral_sequences:
 		note that this assumes that the substitution matrix is symmetric
 		'''
 		self.evals, self.evecs = np.linalg.eigh(self.sub_matrix)
-	
+
 	def calc_state_probabilites(self,P, t):
 		'''
 		input: initial state, time interval
@@ -126,11 +126,11 @@ class ancestral_sequences:
 		normalize the distribution of states at each position such that the sum equals one
 		'''
 		clade.prob/=np.repeat(np.array([np.sum(clade.prob, axis=1)]).T, self.nstates, axis=1)
-		
+
 		if np.isnan(np.sum(clade.prob[:])):
 			print "encountered nan in ancestral inference in clade ", clade.taxon.label
 			print np.isnan(clade.prob).nonzero()
-			
+
 	def log_normalize(self, clade):
 		'''
 		convert the unnormalized and logarithmic probabilites array to linear and then normaliz
@@ -182,7 +182,7 @@ class ancestral_sequences:
 					if child2 != child:
 						#multiply with the down message from each of the children, but skip child 1
 						clade.prob+=np.log(child2.down_message)
-				
+
 				# normalize, adjust for modifications along the branch, and save.
 				self.log_normalize(clade)
 				child.up_message = self.calc_state_probabilites(clade.prob, child.edge_length)
@@ -199,7 +199,7 @@ class ancestral_sequences:
 		if clade.is_internal():
 			clade.prob[:]=np.log(clade.up_message)
 			for child in clade.child_nodes():
-				clade.prob+=np.log(child.down_message)			
+				clade.prob+=np.log(child.down_message)
 			# normalize and continue for all children
 			self.log_normalize(clade)
 			#print clade.taxon.label, np.max(1.0-np.max(clade.prob, axis=1))
@@ -213,7 +213,7 @@ class ancestral_sequences:
 			missing_seq = clade.prob.sum(axis=1)==0
 			clade.prob[missing_seq] = clade.up_message[missing_seq]
 
-			
+
 	def calc_most_likely_sequences(self, clade):
 		'''
 		recursively calculate the most likely sequences for each node
@@ -226,12 +226,13 @@ class ancestral_sequences:
 
 		# repeat for all children
 		for child in clade.child_nodes():
-			self.calc_most_likely_sequences(child)
+			if child.is_internal():
+				self.calc_most_likely_sequences(child)
 
 
 	def calc_ancestral_sequences(self):
 		'''
-		given the initialized instance, calculates the most likely ancestral sequences 
+		given the initialized instance, calculates the most likely ancestral sequences
 		and the marginal probabilities for each position at each internal node.
 		'''
 		print "--- Forward pass at " + time.strftime("%H:%M:%S") + " ---"
@@ -243,8 +244,8 @@ class ancestral_sequences:
 		print "--- Most likely nucleotides at " + time.strftime("%H:%M:%S") + " ---"
 		self.calc_most_likely_sequences(self.T.seed_node)
 		self.cleanup_tree()
-		
-	
+
+
 	def cleanup_tree(self, attrnames=['prob', 'down_message', 'up_message']):
 		'''Clean up pollution attributes of leaves'''
 		nodes = self.T.postorder_node_iter()

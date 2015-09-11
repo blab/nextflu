@@ -10,17 +10,17 @@ class tree_refine(object):
 	def __init__(self,cds = (0,None), max_length = 0.01, dt=1, **kwargs):
 		'''
 		parameters:
-		cds 		-- coding region		
+		cds 		-- coding region
 		max_length  -- maximal length of external branches
 		dt 			-- time interval used to define the trunk of the tree
 		'''
-		self.cds = cds 
+		self.cds = cds
 		self.max_length = max_length
 		self.dt = dt
 
 	def refine_generic(self):
 		'''
-		run through the generic refining methods, 
+		run through the generic refining methods,
 		will add strain attributes to nodes and translate the sequences -> produces aa_aln
 		'''
 		self.node_lookup = {node.taxon.label:node for node in self.tree.leaf_iter()}
@@ -107,8 +107,8 @@ class tree_refine(object):
 		if hasattr(self.tree.seed_node, 'aa_seq'):
 			for node in self.tree.postorder_internal_node_iter():
 				for child in node.child_nodes():
-					child.aa_muts = ','.join([anc+str(pos)+der for pos,anc, der in 
-							zip(range(1,len(node.aa_seq)+1), node.aa_seq, child.aa_seq) if anc!=der])
+					child.aa_muts = ','.join([anc+str(pos)+der for pos,anc, der in
+							zip(range(1,len(node.aa_seq)+1), node.aa_seq, child.aa_seq) if (anc!=der) and (der!='-' or child.is_internal())])
 			self.tree.seed_node.aa_muts=""
 		else:
 			print "no translation available"
@@ -116,8 +116,8 @@ class tree_refine(object):
 	def add_nuc_mutations(self):
 		for node in self.tree.postorder_internal_node_iter():
 			for child in node.child_nodes():
-				child.nuc_muts = ','.join([anc+str(pos)+der for pos,anc, der in 
-						zip(range(1,len(node.seq)+1), node.seq, child.seq) if anc!=der])
+				child.nuc_muts = ','.join([anc+str(pos)+der for pos,anc, der in
+						zip(range(1,len(node.seq)+1), node.seq, child.seq) if (anc!=der) and (der!='-' or child.is_internal())])
 		self.tree.seed_node.nuc_muts=""
 
 	def get_yvalue(self, node):
@@ -162,7 +162,7 @@ class tree_refine(object):
 			if node.num_date>most_recent_date:
 				most_recent_date=node.num_date
 		for node in self.tree.postorder_node_iter():
-			node.trunk_count=0		
+			node.trunk_count=0
 
 		# Mark ancestry of recent tips
 		number_recent = 0

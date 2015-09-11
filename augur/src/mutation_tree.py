@@ -93,6 +93,7 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 		self.make_run_dir()
 		nvir = 10
 		earliest_date = np.min([numerical_date(v["date"]) for v in self.viruses])
+		all_strains = [v["strain"] for v in self.viruses]
 		representatives = [SeqRecord(Seq(v['seq']), id=v['strain']) for v in sample(self.viruses, min(nvir, nvir))]
 		standard_outgroups = {seq.name:{'seq':str(seq.seq).upper(), 'strain':seq.name, 'desc':seq.description, 'date':get_date(seq.description)}
 								for seq in SeqIO.parse(std_outgroup_file, 'fasta')}
@@ -115,11 +116,12 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
  		for og, hits in by_og:
  			if standard_outgroups[og]['date']<earliest_date-5 or np.mean([y[-1] for y in hits])<0.8:
  				break
- 			if self.include_ref_strains:
+ 			if self.include_ref_strains and (og not in all_strains):
 	 			self.viruses.append(standard_outgroups[og])
 	 	if np.mean([y[-1] for y in hits])<0.8:
 	 		self.midpoint_rooting = True
 		self.outgroup = standard_outgroups[og]
+		self.outgroup['strain']+='OG'
 		self.cds = [0,len(self.outgroup['seq'])]
 		print("chosen outgroup",self.outgroup['strain'])
 

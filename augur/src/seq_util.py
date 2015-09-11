@@ -9,7 +9,14 @@ def hamming_distance(seq1, seq2):
 def translate(nuc):
 	"""Translate nucleotide sequence to amino acid"""
 	from Bio import Seq
-	return Seq.translate(nuc) #returns string when argument is a string, Bio.Seq otherwise
+	tmp_aa = Seq.translate(nuc.replace('-','N')) #returns string when argument is a string, Bio.Seq otherwise
+	aa_seq = ""
+	for i,aa in enumerate(tmp_aa):
+		if nuc[i*3:(i+1)*3]=='---':
+			aa_seq+='-'
+		else:
+			aa_seq+=aa
+	return aa_seq
 
 def json_to_Bio_alignment(seq_json):
 	from Bio.Align import MultipleSeqAlignment
