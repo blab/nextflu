@@ -71,7 +71,11 @@ var linkTooltip = d3.tip()
 			string += "Frequency: " + (100 * d.frequency).toFixed(1) + "%"
 		}
 		if ((typeof d.aa_muts !="undefined")&&(d.aa_muts.length)){
-			string+="<br>Mutations: "+d.aa_muts.replace(/,/g, ', ');
+			if (alt_aa){
+				string+="<br>Mutations: "+d.alt_aa_muts.replace(/,/g, ', ');
+			}else{
+				string+="<br>Mutations: "+d.aa_muts.replace(/,/g, ', ');				
+			}
 		}else if ((typeof d.nuc_muts !="undefined")&&(d.nuc_muts.length)){
 			string+="<br>Mutations: "+d.nuc_muts.replace(/,/g, ', ');
 		}

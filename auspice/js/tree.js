@@ -76,7 +76,11 @@ function branchStrokeWidth(d) {
 
 function branchLabelText(d) {
 	if (d.aa_muts!==undefined){
-		var tmp_str = d.aa_muts.replace(/,/g, ', '); 
+		if (alt_aa){
+			var tmp_str = d.alt_aa_muts.replace(/,/g, ', '); 
+		}else{
+			var tmp_str = d.aa_muts.replace(/,/g, ', '); 			
+		}
 	}else{
 		var tmp_str = d.nuc_muts.replace(/,/g, ', '); 		
 	}
@@ -473,6 +477,22 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	}
 	d3.select("#svgexport")
 		.on("click", exportTreeSVG);
+
+	d3.select("#alt_aa")
+		.on("change", updateBranchLabels);
+
+	if (typeof root.alt_aa_muts == "undefined"){
+		document.getElementById("alt_aa_div").style.display = 'none';
+	} 
+
+	function updateBranchLabels(){
+		alt_aa = document.getElementById("alt_aa").checked;
+		if ((typeof branch_labels != "undefined")&&(branch_labels)){
+			treeplot.selectAll(".branchLabel").data(nodes)
+			.text(branchLabelText);
+		}
+
+	}
 
 });
 

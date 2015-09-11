@@ -3,6 +3,7 @@ var path = '';
 var dfreq_dn = 2;
 var branch_labels = true;
 var tip_labels = true;
+var alt_aa=false;
 
 var vaccineChoice = {};
 vaccineChoice['A/Fujian/411/2002'] = "2003-09-25";

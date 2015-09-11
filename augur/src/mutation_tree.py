@@ -80,7 +80,7 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 				else:
 					raise ValueError("outgroup %s not found" % outgroup)
 					return
-
+		self.anno = sorted((('SP',0), ('HA1',16), ('HA2',329+16)), key=lambda x:x[1])
 		self.viruses.append(self.outgroup)
 		self.filter_geo(prune=False)
 		self.make_strain_names_unique()
@@ -136,6 +136,20 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 		if self.cds is not None:
 			self.translate_all()
 			self.add_aa_mutations()
+			if self.anno is not None:
+				divides = np.array([x[1] for x in self.anno])
+				for node in self.tree.postorder_node_iter():
+					node.alt_aa_muts = ""
+					tmp = defaultdict(list)
+					if len(node.aa_muts):
+						for mut in node.aa_muts.split(','):
+							anc,pos,der = mut[0], int(mut[1:-1]), mut[-1]
+							ii = divides.searchsorted(pos)-1
+							tmp[ii].append(anc+str(pos-divides[ii])+der)
+						for ii, anno in enumerate(self.anno):
+							if len(tmp[ii]):
+								node.alt_aa_muts+=anno[0]+': '+','.join(tmp[ii])+" "
+
 		self.layout()
 		for v in self.viruses:
 			if v.strain in self.node_lookup:
@@ -218,7 +232,7 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 		if self.cds is None:
 			self.export_to_auspice(tree_fields = ['nuc_muts','num_date']+self.fasta_fields.values(), seq='nuc')
 		else:
-			self.export_to_auspice(tree_fields = ['aa_muts','num_date']+self.fasta_fields.values())
+			self.export_to_auspice(tree_fields = ['aa_muts','alt_aa_muts','num_date']+self.fasta_fields.values())
 
 	def make_strain_names_unique(self):
 		strain_to_seq = defaultdict(list)
@@ -240,10 +254,11 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 		self.infer_ancestral()  # -> every node has a sequence
 		print "--- Tree refine at " + time.strftime("%H:%M:%S") + " ---"
 		self.refine()
-		aa_aln = MultipleSeqAlignment([])
-		for node in self.tree.leaf_iter():
-			aa_aln.append(SeqRecord(id=node.strain, seq=Seq(node.aa_seq)))
-		AlignIO.write(aa_aln, self.auspice_aa_align_fname, 'fasta')
+		if self.cds:
+			aa_aln = MultipleSeqAlignment([])
+			for node in self.tree.leaf_iter():
+				aa_aln.append(SeqRecord(id=node.strain, seq=Seq(node.aa_seq)))
+			AlignIO.write(aa_aln, self.auspice_aa_align_fname, 'fasta')
 
 
 if __name__=="__main__":
