@@ -338,7 +338,7 @@ class HI_tree(object):
 		self.weights = np.sqrt(weights)*self.weights
 		self.HI_dist =  np.array(HI_dist)
 		self.tree_graph = np.array(tree_graph)*self.weights
-		self.TgT = np.dot(self.tree_graph.T, self.tree_graph*self.weights**2)
+		self.TgT = np.dot(self.tree_graph.T, self.tree_graph)
 		print "Found", self.tree_graph.shape, "measurements x parameters"
 
 	def fit_func(self):
