@@ -9,7 +9,11 @@ def hamming_distance(seq1, seq2):
 def translate(nuc):
 	"""Translate nucleotide sequence to amino acid"""
 	from Bio import Seq
-	tmp_aa = Seq.translate(nuc.replace('-','N')) #returns string when argument is a string, Bio.Seq otherwise
+	try:
+		tmp_aa = Seq.translate(nuc.replace('-','N')) #returns string when argument is a string, Bio.Seq otherwise
+	except:
+		print("translation failed",nuc)
+		tmp_aa = 'X'*len(nuc)//3
 	aa_seq = ""
 	for i,aa in enumerate(tmp_aa):
 		if nuc[i*3:(i+1)*3]=='---':
