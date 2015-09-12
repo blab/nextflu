@@ -80,7 +80,16 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 				else:
 					raise ValueError("outgroup %s not found" % outgroup)
 					return
-		self.anno = sorted((('SP',0), ('HA1',16), ('HA2',329+16)), key=lambda x:x[1])
+		if "anno:" in self.outgroup['desc']:
+			anno = [x for x in self.outgroup['desc'].split() if "anno:" in x][0]
+			anno = (anno.split(':')[1]).split('_')
+			tmp = [(anno[2*i], int(anno[2*i+1])) for i in range(len(anno)/2)]
+			self.anno = sorted(tmp, key=lambda x:x[1])
+			print("Using annotation",self.anno)
+		else:
+			self.anno = None
+			print("No annotation found")
+		#self.anno = sorted((('SP',0), ('HA1',16), ('HA2',329+16)), key=lambda x:x[1])
 		self.viruses.append(self.outgroup)
 		self.filter_geo(prune=False)
 		self.make_strain_names_unique()
