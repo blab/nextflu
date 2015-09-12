@@ -30,6 +30,7 @@ class HI_tree(object):
 			self.excluded_tables = []
 		self.HI, tmp, sources = self.read_HI_titers(HI_fname)
 		self.sources = list(sources)
+		self.serum_Kc = 0.02
 		self.tree_graph = None
 		self.min_aamuts = min_aamuts
 		self.serum_potency = {}
@@ -67,6 +68,7 @@ class HI_tree(object):
 		'''
 		self.HI_normalized = {}
 		self.HI_raw = {}
+		self.measurements_per_serum = defaultdict(int)
 		sera = set()
 		ref_strains = set()
 		HI_strains = set()
@@ -99,6 +101,7 @@ class HI_tree(object):
 					ref_strains.add(ref[0])
 					self.HI_normalized[(test, ref)] = self.normalize(ref, val)
 					self.HI_raw[(test, ref)] = np.median(val)
+					self.measurements_per_serum[ref]+=1
 				else:
 					pass
 					#print "no homologous titer found:", ref
@@ -199,6 +202,7 @@ class HI_tree(object):
 		'''
 		seq_graph = []
 		HI_dist = []
+		weights = []
 		# list all mutations
 		self.mutation_counter = defaultdict(int)
 		for (test, ref), val in self.train_HI.iteritems():
@@ -244,13 +248,15 @@ class HI_tree(object):
 					# append model and fit value to lists seq_graph and HI_dist
 					seq_graph.append(tmp)
 					HI_dist.append(val)
+					weights = 1.0/(1.0 + self.serum_Kc*self.measurements_per_serum[ref])
 				except:
 					import pdb; pdb.set_trace()
 					print test, ref, "ERROR"
 
 		# convert to numpy arrays and save product of tree graph with its transpose for future use
+		self.weights = np.sqrt(weights)*self.weights
 		self.HI_dist =  np.array(HI_dist)
-		self.tree_graph = np.array(seq_graph)
+		self.tree_graph = np.array(seq_graph)*self.weights
 		if colin_thres is not None:
 			self.collapse_colinear_mutations(colin_thres)
 		self.TgT = np.dot(self.tree_graph.T, self.tree_graph)
@@ -291,6 +297,7 @@ class HI_tree(object):
 		'''
 		tree_graph = []
 		HI_dist = []
+		weights = []
 		n_params = self.HI_split_count + len(self.sera) + len(self.HI_strains)
 		for (test, ref), val in self.train_HI.iteritems():
 			if not np.isnan(val):
@@ -322,14 +329,16 @@ class HI_tree(object):
 						# append model and fit value to lists tree_graph and HI_dist
 						tree_graph.append(tmp)
 						HI_dist.append(val)
+						weights = 1.0/(1.0 + self.serum_Kc*self.measurements_per_serum[ref])
 				except:
 					import pdb; pdb.set_trace()
 					print test, ref, "ERROR"
 
 		# convert to numpy arrays and save product of tree graph with its transpose for future use
+		self.weights = np.sqrt(weights)*self.weights
 		self.HI_dist =  np.array(HI_dist)
-		self.tree_graph = np.array(tree_graph)
-		self.TgT = np.dot(self.tree_graph.T, self.tree_graph)
+		self.tree_graph = np.array(tree_graph)*self.weights
+		self.TgT = np.dot(self.tree_graph.T, self.tree_graph*self.weights**2)
 		print "Found", self.tree_graph.shape, "measurements x parameters"
 
 	def fit_func(self):
@@ -388,7 +397,7 @@ class HI_tree(object):
 	def fit_nnl1reg(self):
 		from cvxopt import matrix, solvers
 		n_params = self.tree_graph.shape[1]
-		HI_sc = self.genetic_params if self.map_to_tree else len(self.relevant_muts)
+		HI_sc = self.genetic_params
 		n_sera = len(self.sera)
 		n_v = len(self.HI_strains)
 
