@@ -1,7 +1,7 @@
 var legendRectSize = 15;
 var legendSpacing = 4;
 function makeLegend(){
-	
+
 	d3.select("#legend-title").text(function(d){
 		if (colorBy == "ep") {
 			return "Epitope mutations";
@@ -23,7 +23,7 @@ function makeLegend(){
 		}
 		if (colorBy == "date") {
 			return "Date";
-		}		
+		}
 		if (colorBy == "dfreq") {
 			var tmp_nmonth = Math.round(12*dfreq_dn*time_step);
 			var tmp_text = "Freq. change ("+tmp_nmonth+" month";
@@ -61,7 +61,7 @@ function makeLegend(){
 		var height = legendRectSize + legendSpacing;
 		var fromRight = Math.floor(i / stack);
 		var fromTop = i % stack;
-		var horz = fromRight * 145 + 5;				
+		var horz = fromRight * 145 + 5;
 		var vert = fromTop * height + 5;
 		return 'translate(' + horz + ',' + vert + ')';
 	 });
@@ -83,7 +83,7 @@ function makeLegend(){
             .style("fill", function (t) {
               return d3.rgb(tipFillColor(t)).brighter();
             });
-		}) 
+		})
   	.on('mouseout', function(leg){
     	treeplot.selectAll(".tip") //undo highlight
             .filter(function (d){return legend_match(leg, d);})
@@ -96,11 +96,20 @@ function makeLegend(){
   tmp_leg.append('text')
   .attr('x', legendRectSize + legendSpacing + 5)
   .attr('y', legendRectSize - legendSpacing)
-  .text(function(d) {
-   return d.toString().replace(/([a-z])([A-Z])/g, '$1 $2').replace(/,/g, ', ');
- });		
+  .text(legendText);
   return tmp_leg;
 }
+
+var months = {1:'Jan', 2:'Feb', 3:'Mar', 4:'Apr', 5:'May',6:'Jun', 7:'Jul', 8:'Aug', 9:'Sep', 10:'Oct', 11:'Nov', 12:'Dec'}
+function legendText(d){
+    if (colorBy=='date'){
+        var dstr = Math.floor(d).toString();
+        var month = Math.round((d-Math.floor(d))*12)+1;
+        return 'to '+months[month] +' ' + dstr;
+    }else{
+        return d.toString().replace(/([a-z])([A-Z])/g, '$1 $2').replace(/,/g, ', ');
+    }
+ }
 
 function removeLegend(){
 	legend.selectAll('.legend')
