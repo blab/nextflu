@@ -382,6 +382,7 @@ if __name__=="__main__":
 
 	# add all arguments to virus_config (possibly overriding)
 	virus_config.update(params.__dict__)
+	virus_config['serum_Kc'] = 0.01
 	# pass all these arguments to the processor: will be passed down as kwargs through all classes
 	myH3N2 = H3N2_process(**virus_config)
 	if params.test:

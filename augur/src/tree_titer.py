@@ -22,7 +22,7 @@ def HI_fix_name(name):
 
 class HI_tree(object):
 
-	def __init__(self, HI_fname = 'source-data/HI_titers.txt', min_aamuts = 0,**kwargs):
+	def __init__(self, HI_fname = 'source-data/HI_titers.txt',serum_Kc = 0.0,  min_aamuts = 0,**kwargs):
 		self.HI_fname = HI_fname
 		if "excluded_tables" in kwargs:
 			self.excluded_tables = kwargs["excluded_tables"]
@@ -30,7 +30,7 @@ class HI_tree(object):
 			self.excluded_tables = []
 		self.HI, tmp, sources = self.read_HI_titers(HI_fname)
 		self.sources = list(sources)
-		self.serum_Kc = 0.02
+		self.serum_Kc = serum_Kc
 		self.tree_graph = None
 		self.min_aamuts = min_aamuts
 		self.serum_potency = {}
@@ -254,8 +254,8 @@ class HI_tree(object):
 					print test, ref, "ERROR"
 
 		# convert to numpy arrays and save product of tree graph with its transpose for future use
-		self.weights = np.sqrt(weights)*self.weights
-		self.HI_dist =  np.array(HI_dist)
+		self.weights = np.sqrt(weights)
+		self.HI_dist =  np.array(HI_dist)*self.weights
 		self.tree_graph = np.array(seq_graph)*self.weights
 		if colin_thres is not None:
 			self.collapse_colinear_mutations(colin_thres)
@@ -335,8 +335,8 @@ class HI_tree(object):
 					print test, ref, "ERROR"
 
 		# convert to numpy arrays and save product of tree graph with its transpose for future use
-		self.weights = np.sqrt(weights)*self.weights
-		self.HI_dist =  np.array(HI_dist)
+		self.weights = np.sqrt(weights)
+		self.HI_dist =  np.array(HI_dist)*self.weights
 		self.tree_graph = np.array(tree_graph)*self.weights
 		self.TgT = np.dot(self.tree_graph.T, self.tree_graph)
 		print "Found", self.tree_graph.shape, "measurements x parameters"
@@ -488,7 +488,7 @@ class HI_tree(object):
 			self.sera = list(sera)
 			self.ref_strains = list(ref_strains)
 			self.HI_strains = list(HI_strains)
-			
+
 		if self.map_to_tree:
 			self.make_treegraph()
 		else:
