@@ -26,7 +26,7 @@ var drag = d3.behavior.drag()
 		d3.selectAll(".date-input-edge").style("stroke", "#CCC");
 		dragend();
 	});
-	
+
 var dragMin = d3.behavior.drag()
 	.on("drag", draggedMin)
 	.on("dragstart", function() {
@@ -41,7 +41,7 @@ var dragMin = d3.behavior.drag()
 		d3.selectAll(".date-input-window").style("stroke", "#CCC");
 		d3.selectAll(".date-input-edge").style("stroke", "#CCC");
 		dragend();
-	});	
+	});
 
 
 function calcNodeAges(tw){
@@ -66,8 +66,8 @@ function dragged(d) {
 	d.x = dateScale(d.date);
 	var startDate = new Date(d.date);
 	startDate.setDate(startDate.getDate() - (time_window * 365.25));
-	d.x2 = dateScale(startDate);	
-	
+	d.x2 = dateScale(startDate);
+
 	d3.selectAll(".date-input-text")
 		.attr("dx", function(d) {return 0.5*d.x})
 		.text(function(d) {
@@ -81,7 +81,7 @@ function dragged(d) {
 		.attr("x2", function(d) {return d.x2});
 	d3.selectAll(".date-input-edge")
 		.attr("x1", function(d) {return d.x2;})
-		.attr("x2", function(d) {return d.x2});		
+		.attr("x2", function(d) {return d.x2});
 
 	globalDate = d.date;
 
@@ -112,12 +112,12 @@ function draggedMin(d) {
 
 	var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
 	time_window = (globalDate.getTime() - d.date.getTime()) / oneYear;
-	
+
 	d3.selectAll(".date-input-window")
 		.attr("x2", function(d) {return d.x2});
 	d3.selectAll(".date-input-edge")
 		.attr("x1", function(d) {return d.x2;})
-		.attr("x2", function(d) {return d.x2});		
+		.attr("x2", function(d) {return d.x2});
 
 	calcNodeAges(LBItime_window);
 	treeplot.selectAll(".link")
@@ -140,7 +140,7 @@ function draggedMin(d) {
 }
 
 function dragend() {
-	var num_date = globalDate/1000/3600/24/365.25+1970;	
+	var num_date = globalDate/1000/3600/24/365.25+1970;
 
 	updateColorDomains(num_date);
 	initHIColorDomain();
@@ -166,27 +166,27 @@ function dragend() {
 	}
 
 	if (colorBy!="genotype"){
-		d3.selectAll(".link")
+		treeplot.selectAll(".link")
 			.transition().duration(500)
 			.attr("points", branchPoints)
 			.style("stroke-width", branchStrokeWidth)
-			.style("stroke", branchStrokeColor);				
+			.style("stroke", branchStrokeColor);
 
-		d3.selectAll(".tip")
+		treeplot.selectAll(".tip")
 			.transition().duration(500)
 			.style("visibility", tipVisibility)
 			.style("fill", tipFillColor)
 			.style("stroke", tipStrokeColor);
-				
+
 	}
-	
+
 	if ((typeof tip_labels != "undefined")&&(tip_labels)) {
 		nDisplayTips = displayRoot.fullTipCount;
-		d3.selectAll(".tipLabel")
+		treeplot.selectAll(".tipLabel")
 			.transition().duration(1000)
 			.style("font-size", tipLabelSize);
-	}	
-	
+	}
+
 }
 
 
@@ -200,18 +200,18 @@ function date_init(){
 	earliestDate = new Date(d3.min(dateValues));
 	earliestDate.setDate(earliestDate.getDate() + 1);
 	globalDate = new Date(d3.max(dateValues));
-			
+
 	dateScale = d3.time.scale()
 		.domain([earliestDate, globalDate])
 		.range([5, 205])
-		.clamp([true]);	
-	
+		.clamp([true]);
+
 	niceDateScale = d3.time.scale()
 		.domain([earliestDate, globalDate])
 		.range([5, 205])
 		.clamp([true])
 		.nice(d3.time.month);
-	
+
 	counterData = {}
 	counterData['date'] = globalDate
 	counterData['x'] = dateScale(globalDate)
@@ -229,7 +229,7 @@ function date_init(){
 		.append("text")
 		.attr("class", "date-input-text")
 		.attr("text-anchor", "left")
-		.attr("dx", function(d) {return 0.5*d.x})		
+		.attr("dx", function(d) {return 0.5*d.x})
 		.attr("dy", "1.0em")
 		.text(function(d) {
 			var format = d3.time.format("%Y %b %-d");
@@ -271,25 +271,25 @@ function date_init(){
 		.append("line")
 		.attr("class", "date-input-window")
 		.attr("x1", function(d) { return d.x; })
-		.attr("x2", function(d) { return d.x2; })	
+		.attr("x2", function(d) { return d.x2; })
 		.attr("y1", 35)
-		.attr("y2", 35)		
+		.attr("y2", 35)
 		.style("stroke", "#CCC")
 		.style("stroke-width", 5);
-		
+
 	var edge = d3.select("#date-input").selectAll(".date-input-edge")
 		.data([counterData])
 		.enter()
 		.append("line")
 		.attr("class", "date-input-edge")
 		.attr("x1", function(d) { return d.x2; })
-		.attr("x2", function(d) { return d.x2; })	
+		.attr("x2", function(d) { return d.x2; })
 		.attr("y1", 30)
 		.attr("y2", 40)
 		.style("stroke", "#CCC")
-		.style("stroke-width", 3)	
+		.style("stroke-width", 3)
 		.style("cursor", "pointer")
-		.call(dragMin);		
+		.call(dragMin);
 
 	var marker = d3.select("#date-input").selectAll(".date-input-marker")
 		.data([counterData])
@@ -300,7 +300,7 @@ function date_init(){
 		.attr("cy", 35)
 		.attr("r", 6)
 		.style("fill", "#CCC")
-		.style("stroke", "#777")		
+		.style("stroke", "#777")
 		.style("cursor", "pointer")
 		.call(drag);
 

@@ -1,7 +1,7 @@
 var legendRectSize = 15;
 var legendSpacing = 4;
 function makeLegend(){
-	
+
 	d3.select("#legend-title").text(function(d){
 		if (colorBy == "ep") {
 			return "Epitope mutations";
@@ -23,10 +23,10 @@ function makeLegend(){
 		}
 		if (colorBy == "date") {
 			return "Date";
-		}		
+		}
         if (colorBy == "cHI") {
             return "Log2 titer distance from root";
-        }       
+        }
         if (colorBy == "HI_dist") {
             return "Log2 titer distance from "+focusNode.strain;
         }
@@ -43,13 +43,12 @@ function makeLegend(){
 	// construct a dictionary that maps a legend entry to the preceding interval
 	var lower_bound = {}, upper_bound = {};
 	lower_bound[colorScale.domain()[0]] = -100000000;
-    lower_bound[colorScale.domain()[0]] = colorScale.domain()[0];
+    upper_bound[colorScale.domain()[0]] = colorScale.domain()[0];
 	for (var i=1; i<colorScale.domain().length; i++){
 		lower_bound[colorScale.domain()[i]]=colorScale.domain()[i-1];
         upper_bound[colorScale.domain()[i]]=colorScale.domain()[i];
 	}
     upper_bound[colorScale.domain()[colorScale.domain().length-1]]=10000000;
-
 	// function that equates a tip and a legend element
 	// exact match is required for categorical qunantities such as genotypes, regions
 	// continuous variables need to fall into the interal (lower_bound[leg], leg]
@@ -70,7 +69,7 @@ function makeLegend(){
 		var height = legendRectSize + legendSpacing;
 		var fromRight = Math.floor(i / stack);
 		var fromTop = i % stack;
-		var horz = fromRight * 145 + 5;				
+		var horz = fromRight * 145 + 5;
 		var vert = fromTop * height + 5;
 		return 'translate(' + horz + ',' + vert + ')';
 	 });
@@ -92,7 +91,7 @@ function makeLegend(){
             .style("fill", function (t) {
               return d3.rgb(tipFillColor(t)).brighter();
             });
-		}) 
+		})
   	.on('mouseout', function(leg){
     	treeplot.selectAll(".tip") //undo highlight
             .filter(function (d){return legend_match(leg, d);})
@@ -115,7 +114,7 @@ function makeLegend(){
             .style("fill", function (t) {
               return d3.rgb(tipFillColor(t)).brighter();
             });
-		}) 
+		})
   	.on('mouseout', function(leg){
     	treeplot.selectAll(".tip")
             .filter(function (d){return legend_match(leg, d);})

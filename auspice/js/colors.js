@@ -1,8 +1,8 @@
 // 2 color	["#5097BA", "#DF4327"]
 
 var colors = [
-	[], 
-	["#8EBC66"], 
+	[],
+	["#8EBC66"],
 	["#5EA9A1", "#E0A23A"],
 	["#5CA7A4", "#A4BE56", "#E39B39"],
 	["#5AA5A7", "#8ABB6A", "#C3BA46", "#E69237"],
@@ -19,7 +19,7 @@ var genotypeColors = ["#60AA9E", "#D9AD3D", "#5097BA", "#E67030", "#8EBC66", "#E
 
 var epitopeColorScale = d3.scale.linear().clamp([true])
 	.domain(epiColorDomain)
-	.range(colors[10]);		
+	.range(colors[10]);
 
 var nonepitopeColorScale = d3.scale.linear().clamp([true])
 	.domain(nonEpiColorDomain)
@@ -58,6 +58,7 @@ var HIColorScale = function(c){
 	}
 }
 HIColorScale.domain = HIColorScale_valid.domain;
+HIColorScale.range = HIColorScale_valid.range;
 
 var regionColorScale = d3.scale.ordinal()
 	.domain(regions.map(function(d){return d[0];}))
@@ -89,7 +90,7 @@ function adjust_coloring_by_date() {
 		nodes.forEach(function (d) {
 			d.coloring = d.num_date;
 		});
-	}	
+	}
 }
 
 function stateAtPosition(clade, gene, pos){
@@ -101,7 +102,7 @@ function stateAtPosition(clade, gene, pos){
 }
 
 function colorByTrait() {
-	
+
 	colorBy = document.getElementById("coloring").value;
 	if (colorBy=="--"){
 		document.getElementById("coloring").value = "ep";
@@ -152,16 +153,16 @@ function colorByTrait() {
 
 	treeplot.selectAll(".link")
 		.style("stroke", branchStrokeColor);
-		
+
 	d3.selectAll(".tip")
 		.style("visibility", tipVisibility)
 		.style("fill", tipFillColor)
 		.style("stroke", tipStrokeColor);
-		
+
 	if (typeof tree_legend != undefined){
 		removeLegend();
 	}
-	tree_legend = makeLegend();	 				
+	tree_legend = makeLegend();
 }
 
 function tipStrokeColor(d) {
@@ -219,7 +220,7 @@ function colorByGenotype() {
 	}
 	else {
 		d3.select("#coloring").each(colorByTrait);
-		gt = parse_gt_string(freqdefault);			
+		gt = parse_gt_string(freqdefault);
 		make_gt_chart(gt);
 		document.getElementById("gtspec").value = freqdefault;
 	}
@@ -247,7 +248,7 @@ function colorByGenotypePosition (positions) {
 	console.log("genotypes passed filtering:"+filtered_gts);
 	colorScale = d3.scale.ordinal()
 		.domain(filtered_gts)
-		.range(genotypeColors);			
+		.range(genotypeColors);
 	treeplot.selectAll(".link")
 		.style("stroke", branchStrokeColor);
 	treeplot.selectAll(".tip")
@@ -293,8 +294,8 @@ function colorByHIDistance(){
 	treeplot.selectAll(".serum")
 	.style("fill", function (d){if (d==focusNode) {return '#FF3300';} else {return '#555555';}})
 		.style("font-size", function (d) {if (d==focusNode) {return "30px";} else {return "12px";}})
-		.text(function (d) {if (d==focusNode) {return '\uf05b';} else {return '\uf0c8';}});
-	
+		.text(function (d) {if (d==focusNode) {return '\uf05b';} else {return serumSymbol;}});
+
 	console.log("Using HI model: "+HImodel);
 	console.log("Color by HI Distance from "+focusNode.strain);
 	console.log("correcting for virus effect: "+correctVirus);
@@ -310,21 +311,21 @@ function colorByHIDistance(){
 	}else if (HImodel=='tree'){
 		nodes.map(function(d) { d.coloring = d.HI_dist_tree;});
 	}else{
-		nodes.map(function(d) { d.coloring = d.HI_dist_meas;});		
+		nodes.map(function(d) { d.coloring = d.HI_dist_meas;});
 	}
 
 	treeplot.selectAll(".link")
 		.style("stroke", branchStrokeColor);
-		
-	d3.selectAll(".tip")
+
+	treeplot.selectAll(".tip")
 		.style("visibility", tipVisibility)
 		.style("fill", tipFillColor)
 		.style("stroke", tipStrokeColor);
-		
+
 	if (typeof tree_legend != undefined){
 		removeLegend();
 	}
-	tree_legend = makeLegend();	 				
+	tree_legend = makeLegend();
 }
 
 

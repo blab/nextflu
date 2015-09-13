@@ -54,22 +54,14 @@ function calcHImeasured(node, rootNode){
 	console.log("correction for serum effect: "+correctPotency);
 	for (var i=0; i<tips.length; i+=1){
 		d = tips[i];
-		// if (typeof(node.mean_HI_titers[d.clade])!="undefined"){
-		// 	d.HI_dist_meas = node.mean_HI_titers[d.clade]
-		// 	if (correctVirus){
-		// 		d.HI_dist_meas -= d.avidity_mut;
-		// 	}
-		// 	if (correctPotency){
-		// 		d.HI_dist_meas -= node.mean_potency_mut;
-		// 	}
 		if (typeof(node.HI_titers[d.clade])!="undefined"){
 			var tmp_HI=0;
 			var serum_count=0;
 			for (var tmp_serum in node.HI_titers[d.clade]){
-				if (correctPotency){
+				if (correctPotency&&(d.strain!=focusNode.strain)){
 					tmp_HI += node.HI_titers[d.clade][tmp_serum]-node.potency_mut[tmp_serum];
 				}else{
-					tmp_HI += node.HI_titers[d.clade][tmp_serum];					
+					tmp_HI += node.HI_titers[d.clade][tmp_serum];
 				}
 				serum_count+=1;
 			}
@@ -77,9 +69,6 @@ function calcHImeasured(node, rootNode){
 			if (correctVirus){
 				d.HI_dist_meas -= d.avidity_mut;
 			}
-//			if (correctPotency){
-//				d.HI_dist_meas -= node.mean_potency_mut;
-//			}
 		}else{
 			d.HI_dist_meas = 'NaN';
 		}
@@ -105,7 +94,6 @@ function get_mutations(node1, node2){
 
 function calcHImutations(node){
 	console.log(node.strain+ ', mean_potency:'+node.mean_potency_mut);
-	console.log(HI_model);
 	nodes.map(function(d){
 		var mutations = get_mutations(node, d);
 		if (correctPotency){
@@ -124,14 +112,6 @@ function calcHImutations(node){
 		}
 	});
 };
-
-//function tipHIvalid(d) {
-//	var vis = "visible";
-//	if ((colorBy=='HI_dist')&&(HImodel=='measured')&&(d.HI_dist_meas =='NaN')) {
-//		vis = "hidden";
-//	}
-//	return vis;
-//}
 
 function getSera(tree_tips){
 	return tree_tips.filter(function (d){return d.serum;})
@@ -179,7 +159,7 @@ d3.json(path + file_prefix + "HI.json", function(error, json){
 		var pos = key.split(':')[1];
 		console.log(positions[key]);
 		var c = '[x'+dHIColorScale(positions[key]).substring(1,7).toUpperCase()+']';
-		var chain = (gene=='HA1')?'a':'b'; 
+		var chain = (gene=='HA1')?'a':'b';
 		structure_HI_mutations+= 'select '+pos+':'+chain+';spacefill 200; color ' +c+';';//' '+pos+':c, '+pos+':e,';
 	}
 

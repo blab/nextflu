@@ -59,7 +59,7 @@ var virusTooltip = d3.tip()
 					}else{
 						serum_name = tmp_serum.substring(0,17)+'...';
 					}
-					string += '<tr><td>' + serum_name + '</td><td>' +  logHI.toFixed(1)+'</td><td>' + rawHI.toFixed(0)+ '</td><td>' + autoHI.toFixed(0) +"</td></tr>";
+					string += '<tr><td>' + serum_name + '</td><td>' +  logHI.toFixed(2) + '</td><td>' + rawHI.toFixed(0)+ '</td><td>' + autoHI.toFixed(0) +"</td></tr>";
 				}
 			}
 			string += '<tr><td>' + 'Tree model' + '</td><td>' +  d.HI_dist_tree.toFixed(2) + '</td><td> --- </td><td>---</td></tr>';

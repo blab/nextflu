@@ -20,15 +20,15 @@ var right_margin = 10;
 function initDateColorDomain(intAttributes){
 	var numDateValues = tips.map(function(d) {return d.num_date;})
 	var minDate = d3.min(numDateValues.filter(function (d){return d!="undefined";}));
-	var maxDate = d3.max(numDateValues.filter(function (d){return d!="undefined";}));	
+	var maxDate = d3.max(numDateValues.filter(function (d){return d!="undefined";}));
 	if (typeof time_window == "undefined"){
 		time_window = maxDate-minDate;
 		console.log("defining time window as " + time_window);
-	} 
+	}
 	if (time_window>1){
 		dateColorDomain = genericDomain.map(function (d){return Math.round(10*(maxDate - (1.0-d)*time_window))/10;});
 	}else{
-		dateColorDomain = genericDomain.map(function (d){return Math.round(100*(maxDate - (1.0-d)*time_window))/100;});		
+		dateColorDomain = genericDomain.map(function (d){return Math.round(100*(maxDate - (1.0-d)*time_window))/100;});
 	}
 	console.log('setting date domain '+dateColorDomain);
 	dateColorScale.domain(dateColorDomain);
@@ -37,7 +37,7 @@ function initDateColorDomain(intAttributes){
 function initHIColorDomain(){
 	var numHIValues = tips.filter(function(d) {return tipVisibility(d)=='visible';}).map(function(d) {return d.cHI;})
 	var minHI = d3.min(numHIValues.filter(function (d){return d!="undefined";}));
-	var maxHI = d3.max(numHIValues.filter(function (d){return d!="undefined";}));	
+	var maxHI = d3.max(numHIValues.filter(function (d){return d!="undefined";}));
 	var cHIColorDomain = genericDomain.map(function (d){return Math.round(10*(maxHI - (1.0-d)*(maxHI-minHI)))/10;});
 	console.log('setting cHI domain '+cHIColorDomain);
 	cHIColorScale.domain(cHIColorDomain);
@@ -47,14 +47,14 @@ function initColorDomain(attr, tmpCS){
 	//var vals = tips.filter(function(d) {return tipVisibility(d)=='visible';}).map(function(d) {return d[attr];});
 	var vals = tips.map(function(d) {return d[attr];});
 	var minval = d3.min(vals);
-	var maxval = d3.max(vals);	
+	var maxval = d3.max(vals);
 	var rangeIndex = Math.min(10, maxval - minval + 1);
 	var domain = [];
 	if (maxval-minval<20)
 	{
 		for (var i=maxval - rangeIndex + 1; i<=maxval; i+=1){domain.push(i);}
 	}else{
-		for (var i=1.0*minval; i<=maxval; i+=(maxval-minval)/9.0){domain.push(Math.round(10*i)/10);}		
+		for (var i=1.0*minval; i<=maxval; i+=(maxval-minval)/9.0){domain.push(Math.round(10*i)/10);}
 	}
 	tmpCS.range(colors[rangeIndex]);
 	tmpCS.domain(domain);
@@ -156,10 +156,10 @@ function tipLabelWidth(d) {
 function tree_init(){
 	calcFullTipCounts(rootNode);
 	calcBranchLength(rootNode);
-	rootNode.branch_length= 0.01;	
+	rootNode.branch_length= 0.01;
 	rootNode.dfreq = 0.0;
 	if (typeof rootNode.pivots != "undefined"){
-		time_step = rootNode.pivots[1]-rootNode.pivots[0];		
+		time_step = rootNode.pivots[1]-rootNode.pivots[0];
 	}else{
 		time_step = 1.0/12;
 	}
@@ -174,7 +174,7 @@ function tree_init(){
 	colorByTrait();
 	adjust_freq_by_date();
 	tree_legend = makeLegend();
-	nDisplayTips = displayRoot.fullTipCount;	
+	nDisplayTips = displayRoot.fullTipCount;
 }
 
 
@@ -226,7 +226,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.enter().append("polyline")
 		.attr("class", "link")
 		.style("stroke-width", branchStrokeWidth)
-		.style("stroke", branchStrokeColor)		
+		.style("stroke", branchStrokeColor)
 		.style("cursor", "pointer")
 		.style("fill", "none")
 		.on('mouseover', function (d){
@@ -237,7 +237,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			})
 		.on('mouseout', function(d) {
 			linkTooltip.hide(d);
-			if (typeof addClade !="undefined") {clearTimeout(clade_freq_event);};})		
+			if (typeof addClade !="undefined") {clearTimeout(clade_freq_event);};})
 		.on('click', zoom);
 
 	if ((typeof tip_labels != "undefined")&&(tip_labels)){
@@ -270,7 +270,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 				var win = window.open(url, '_blank');
   				win.focus();
   			}
-  		})		
+  		})
 		.on('mouseout', virusTooltip.hide);
 
 
@@ -302,7 +302,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.style('font-family', 'FontAwesome')
 		.style("fill", function (d){if (d==focusNode) {return '#FF3300';} else {return '#555555';}})
 		.style("font-size", function (d) {if (d==focusNode) {return "30px";} else {return "12px";}})
-		.text(function (d) {if (d==focusNode) {return '\uf05b';} else {return '\uf0c8';}})
+		.text(function (d) {if (d==focusNode) {return '\uf05b';} else {return serumSymbol;}})
 		.style("visibility", serumVisibility)
 		.style("cursor", "crosshair")
 		.on('mouseover', function(d) {
@@ -334,10 +334,10 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			dMin = minimumAttribute(d.source, "xvalue", d.source.xvalue),
 			dMax = maximumAttribute(d.source, "xvalue", d.source.xvalue),
 			lMin = minimumAttribute(d.source, "yvalue", d.source.yvalue),
-			lMax = maximumAttribute(d.source, "yvalue", d.source.yvalue);			
+			lMax = maximumAttribute(d.source, "yvalue", d.source.yvalue);
 		}
 		if ((lMax-lMin)>0.8*dy){
-			lMin = lMax - dy*0.7 
+			lMin = lMax - dy*0.7
 		}
 		var visibleXvals = tips.filter(function (d){return (d.yvalue>=lMin)&&(d.yvalue<lMax)}).map(function(d){return +d.xvalue;});
 		nDisplayTips = visibleXvals.length;
@@ -352,7 +352,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	function setMargins(){
 		containerWidth = parseInt(d3.select(".treeplot-container").style("width"), 10);
 		treeWidth = containerWidth;
-		treeHeight = treePlotHeight(treeWidth);			
+		treeHeight = treePlotHeight(treeWidth);
 		d3.select("#treeplot")
 			.attr("width", treeWidth)
 			.attr("height", treeHeight);
@@ -367,7 +367,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 					}
 				});
 			right_margin = maxTextWidth + 10;
-		}							
+		}
 		xScale.range([left_margin, treeWidth - right_margin]);
 		yScale.range([top_margin, treeHeight - bottom_margin]);
 	}
@@ -416,16 +416,16 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		if ((typeof tip_labels != "undefined")&&(tip_labels)){
 			treeplot.selectAll(".tipLabel").data(tips)
 				.transition().duration(dt)
-				.style("font-size", function(d) {return tipLabelSize(d)+"px"; })			
+				.style("font-size", function(d) {return tipLabelSize(d)+"px"; })
 				.attr("x", function(d) { return d.x+10; })
 				.attr("y", function(d) { return d.y+4; });
-		}	
-			
+		}
+
 		if ((typeof branch_labels != "undefined")&&(branch_labels)){
 			console.log('shift branch_labels');
 			treeplot.selectAll(".branchLabel").data(nodes)
 				.transition().duration(dt)
-				.style("font-size", branchLabelSize)				
+				.style("font-size", branchLabelSize)
 				.attr("x", function(d) {  return d.x - 6;})
 				.attr("y", function(d) {  return d.y - 3;});
 		}
@@ -446,7 +446,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		setMargins();
 		transform(0);
 	}
-	
+
 	function resetLayout(){
 		displayRoot = rootNode;
 		nDisplayTips = displayRoot.fullTipCount;
@@ -460,7 +460,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 
 	function restrictToFunc(rt) {
 		restrictTo[rt] = document.getElementById(rt).value;
-		console.log("restriction to "+rt+" "+restrictTo[rt]);	
+		console.log("restriction to "+rt+" "+restrictTo[rt]);
 		d3.selectAll(".tip")
 			.style("visibility", tipVisibility);
 	}
@@ -477,7 +477,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 							return function(){
 								return restrictToFunc(restrictor);
 							}
-						})(rt));		
+						})(rt));
 	}
 
 
@@ -501,7 +501,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
             });
 	}
 
-	d3.select(window).on('resize', resize); 
+	d3.select(window).on('resize', resize);
 
 	d3.select("#reset")
 		.on("click", resetLayout)
@@ -519,7 +519,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 				.style("visibility",(branch_labels)?"hidden":"visible");
 		});
 
-	
+
 	var mc = autocomplete(document.getElementById('search'))
 		.keys(tips)
 		.dataField("strain")
