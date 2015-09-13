@@ -45,7 +45,7 @@ var virusTooltip = d3.tip()
 			string += "HI against serum from "+focusNode.strain;
 			string += "<div class=\"smallspacer\"></div>";
 			string += "<div class=\"smallnote\">"
-			string += '<table class="table table-condensed"><thead><tr><td>Serum</td><td>&#916log<sub>2</sub></td><td>heterol.</td><td>autol.</td></tr></thead><tbody>';
+			string += '<table class="table table-condensed"><thead><tr><td>Serum</td><td>&#916log<sub>2</sub></td><td>heterol.</td><td>homol.</td></tr></thead><tbody>';
 			if (typeof focusNode.HI_titers[d.clade] != "undefined"){
 				for (var tmp_serum in focusNode.HI_titers[d.clade]){
 					var autoHI = focusNode.autologous_titers[tmp_serum];
