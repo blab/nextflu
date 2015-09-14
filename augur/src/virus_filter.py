@@ -27,7 +27,7 @@ class virus_filter(object):
 		self.strain_lookup = {}
 		self.outgroup = None
 		self.date_spec = date_spec
-		
+
 	def parse_fasta(self, fasta):
 		"""Parse FASTA file with default header formating"""
 		viruses = []
@@ -40,12 +40,13 @@ class virus_filter(object):
 				words = map(lambda x:x.strip(),record.description.replace(">","").split('|'))
 				v = {key: words[ii] if ii<len(words) else "" for ii, key in self.fasta_fields.iteritems()}
 				v['seq']= str(record.seq)
+				v['desc'] = record.description
 				viruses.append(v)
 			handle.close()
-		return viruses		
-		
+		return viruses
+
 	def filter(self):
-		self.filter_generic()			
+		self.filter_generic()
 
 	def filter_generic(self, prepend_strains = None):
 		'''
@@ -67,20 +68,20 @@ class virus_filter(object):
 		print len(self.viruses), "after filtering for unique strains"
 
 	def sort_length(self):
-		'''	
+		'''
 		Sort by length, but randomize viruses of a given length
-		'''	
+		'''
 		from random import shuffle
 		shuffle(self.viruses)
 		self.viruses.sort(key = lambda v: len(v['seq']), reverse = True)
 
 	def filter_unique(self):
-		'''		
+		'''
 		Keep only the first isolate of a strain
-		'''	
+		'''
 		filtered_viruses = []
 		for v in self.viruses:
-			label = v['strain'].lower() 
+			label = v['strain'].lower()
 			if not label in self.strain_lookup:
 				filtered_viruses.append(v)
 				self.strain_lookup[label]=v
@@ -111,8 +112,8 @@ class virus_filter(object):
 		else:
 			select_func = self.select_viruses_global
 
-		priority_viruses = self.viruses_by_date_region([v for v in self.viruses if v['strain'].lower() in prioritize]) 
-		other_viruses = self.viruses_by_date_region([v for v in self.viruses if v['strain'].lower() not in prioritize]) 
+		priority_viruses = self.viruses_by_date_region([v for v in self.viruses if v['strain'].lower() in prioritize])
+		other_viruses = self.viruses_by_date_region([v for v in self.viruses if v['strain'].lower() not in prioritize])
 
 		filtered_viruses = []
 		first_year = int(np.floor(self.time_interval[0]))
@@ -123,11 +124,11 @@ class virus_filter(object):
 		print "Selecting " + str(viruses_per_month), "viruses per month"
 		y = first_year
 		for m in range(first_month,13):
-			filtered_viruses.extend(select_func(priority_viruses,other_viruses, 
+			filtered_viruses.extend(select_func(priority_viruses,other_viruses,
 												y, m, viruses_per_month, regions, all_priority=all_priority))
 		for y in range(first_year+1,int(np.floor(self.time_interval[1]))+1):
 			for m in range(1,13):
-				filtered_viruses.extend(select_func(priority_viruses,other_viruses, 
+				filtered_viruses.extend(select_func(priority_viruses,other_viruses,
 												y, m, viruses_per_month, regions, all_priority=all_priority))
 				if y+float(m)/12.0>self.time_interval[1]:
 					break
@@ -192,21 +193,21 @@ class virus_filter(object):
 
 class flu_filter(virus_filter):
 
-	def __init__(self, alignment_file='', fasta_fields=None, **kwargs):	
+	def __init__(self, alignment_file='', fasta_fields=None, **kwargs):
 		virus_filter.__init__(self, alignment_file = alignment_file, fasta_fields = fasta_fields, **kwargs)
 		self.add_gisaid_metadata()
 		self.fix_strain_names()
 		self.vaccine_strains=[]
 
 	def filter(self):
-		self.filter_generic(prepend_strains = self.vaccine_strains)	
+		self.filter_generic(prepend_strains = self.vaccine_strains)
 		self.filter_strain_names()
 		print len(self.viruses), "with proper strain names"
 		self.filter_passage()
 		print len(self.viruses), "without egg passage"
 		self.filter_geo()
 		print len(self.viruses), "with geographic information"
-		
+
 	def add_gisaid_metadata(self):
 		for v in self.viruses:
 			v['db']="GISAID"
@@ -254,8 +255,8 @@ class flu_filter(virus_filter):
 			if v['country'] in country_to_region:
 				v['region'] = country_to_region[v['country']]
 			if v['country'] != 'Unknown' and v['region'] == 'Unknown':
-				print "couldn't parse region for", v['strain'], "country:", v["country"]		
-		
+				print "couldn't parse region for", v['strain'], "country:", v["country"]
+
 		if prune:
 			self.viruses = filter(lambda v: v['region'] != 'Unknown', self.viruses)
 
