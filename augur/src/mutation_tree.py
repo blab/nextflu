@@ -35,7 +35,7 @@ def get_date(strain):
 
 class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 	"""docstring for mutation_tree"""
-	def __init__(self, aln_fname, outgroup, include_ref_strains = True, outdir = './', formats = ['pdf','svg','png'], verbose = 0, **kwargs):
+	def __init__(self, aln_fname, outgroup, include_ref_strains = True, outdir = './', formats = ['pdf','png'], verbose = 0, **kwargs):
 		process.__init__(self, **kwargs)
 		flu_filter.__init__(self, alignment_file = aln_fname, **kwargs)
 		tree_refine.__init__(self, **kwargs)
@@ -196,7 +196,10 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 		def branch_label_func(n):
 			max_muts = 5
 			if hasattr(n,'aa_muts'):
-				muts = n.aa_muts
+				if alt:
+					muts = n.alt_aa_muts
+				else:
+					muts = n.aa_muts
 			else:
 				muts = n.nuc_muts
 			tmp = muts.split(',')
@@ -212,32 +215,46 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 		from tree_util import to_Biopython
 		tmp_tree = to_Biopython(self.tree)
 		tmp_tree.ladderize()
-		fig = plt.figure('Tree')
-		plt.close()
-		fig = plt.figure('Tree', figsize = (15,2+len(self.viruses)/5))
-		ax = plt.subplot('111')
 
-		muttree_draw(tmp_tree, axes=ax, show_confidence=False, do_show=False,
-			label_func = lambda x: x.name,
-			branch_labels = branch_label_func
-			)
-		ax.invert_yaxis()
-		tl = np.diff(ax.get_xticks())[0]
-		lengthbar = tl/2
-		plt.plot( [0,lengthbar],[len(self.viruses),len(self.viruses)], lw=10, c='k')
-		plt.text(lengthbar/2, len(self.viruses)+0.1, str(lengthbar),horizontalalignment='center',fontsize=16)
-		ax.set_axis_off()
-		for fmt in self.formats:
-			plt.savefig(self.outdir+'tree.'+fmt)
+		for alt in [False] if self.anno is None else [False, True]:
+			fig = plt.figure('Tree', figsize = (15,2+len(self.viruses)/5))
+			ax = plt.subplot('111')
+			muttree_draw(tmp_tree, axes=ax, show_confidence=False, do_show=False,
+				label_func = lambda x: x.name,
+				branch_labels = branch_label_func
+				)
+			ax.invert_yaxis()
+			tl = np.diff(ax.get_xticks())[0]
+			lengthbar = tl/2
+			plt.plot( [0,lengthbar],[len(self.viruses),len(self.viruses)], lw=10, c='k')
+			plt.text(lengthbar/2, len(self.viruses)+0.1, str(lengthbar),horizontalalignment='center',fontsize=16)
+			ax.set_axis_off()
+			for fmt in self.formats:
+				if alt:
+					plt.savefig(self.outdir+'tree_alt.'+fmt)
+				else:
+					plt.savefig(self.outdir+'tree.'+fmt)
 
-		for t in tmp_tree.find_clades():
-			if t.name is None:
-				t.name=''
-			muts = t.aa_muts if hasattr(t,'aa_muts') else t.nuc_muts
-			if len(t.name) and len(muts): t.name+='-'
-			t.name+='_'.join(muts.split(','))
+			for t in tmp_tree.find_clades():
+				t.label = t.name # save original name
+				if hasattr(t,"strain"):
+					t.name = t.strain
+				else:
+					t.name = ""
+				if alt:
+					muts = t.alt_aa_muts if hasattr(t,'alt_aa_muts') else t.nuc_muts
+				else:
+					muts = t.aa_muts if hasattr(t,'aa_muts') else t.nuc_muts
+				if len(t.name) and len(muts): t.name+='-'
+				t.name+='_'.join(muts.split(',')).replace(' ','')
 
-		Phylo.write(tmp_tree, self.outdir+'tree.nwk', 'newick')
+			if alt:
+				Phylo.write(tmp_tree, self.outdir+'tree_alt.nwk', 'newick')
+			else:
+				Phylo.write(tmp_tree, self.outdir+'tree.nwk', 'newick')
+			for t in tmp_tree.find_clades(): # revert to original name
+				t.name = t.label
+			plt.close('Tree')
 
 		if self.cds is None:
 			self.export_to_auspice(tree_fields = ['nuc_muts','num_date']+self.fasta_fields.values(), seq='nuc')

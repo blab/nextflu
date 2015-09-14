@@ -14,16 +14,13 @@ var right_margin = 10;
 function initDateColorDomain(intAttributes){
 	var numDateValues = tips.map(function(d) {return d.num_date;})
 	var minDate = d3.min(numDateValues.filter(function (d){return d!="undefined";}));
-	var maxDate = d3.max(numDateValues.filter(function (d){return d!="undefined";}));	
+	var maxDate = d3.max(numDateValues.filter(function (d){return d!="undefined";}));
 	if (typeof time_window == "undefined"){
 		time_window = maxDate-minDate;
 		console.log("defining time window as " + time_window);
-	} 
-	if (time_window>1){
-		dateColorDomain = genericDomain.map(function (d){return Math.round(10*(maxDate - (1.0-d)*time_window))/10;});
-	}else{
-		dateColorDomain = genericDomain.map(function (d){return Math.round(100*(maxDate - (1.0-d)*time_window))/100;});		
 	}
+	dateColorDomain = genericDomain.map(function (d){return Math.round(1000*(maxDate - (1.0-d)*time_window))/1000;});
+
 	console.log('setting date domain '+dateColorDomain);
 	dateColorScale.domain(dateColorDomain);
 }
@@ -33,14 +30,14 @@ function initColorDomain(attr, tmpCS){
 	//var vals = tips.filter(function(d) {return tipVisibility(d)=='visible';}).map(function(d) {return d[attr];});
 	var vals = tips.map(function(d) {return d[attr];});
 	var minval = d3.min(vals);
-	var maxval = d3.max(vals);	
+	var maxval = d3.max(vals);
 	var rangeIndex = Math.min(10, maxval - minval + 1);
 	var domain = [];
 	if (maxval-minval<20)
 	{
 		for (var i=maxval - rangeIndex + 1; i<=maxval; i+=1){domain.push(i);}
 	}else{
-		for (var i=1.0*minval; i<=maxval; i+=(maxval-minval)/9.0){domain.push(i);}		
+		for (var i=1.0*minval; i<=maxval; i+=(maxval-minval)/9.0){domain.push(i);}
 	}
 	tmpCS.range(colors[rangeIndex]);
 	tmpCS.domain(domain);
@@ -77,12 +74,12 @@ function branchStrokeWidth(d) {
 function branchLabelText(d) {
 	if (d.aa_muts!==undefined){
 		if (alt_aa){
-			var tmp_str = d.alt_aa_muts.replace(/,/g, ', '); 
+			var tmp_str = d.alt_aa_muts.replace(/,/g, ', ');
 		}else{
-			var tmp_str = d.aa_muts.replace(/,/g, ', '); 			
+			var tmp_str = d.aa_muts.replace(/,/g, ', ');
 		}
 	}else{
-		var tmp_str = d.nuc_muts.replace(/,/g, ', '); 		
+		var tmp_str = d.nuc_muts.replace(/,/g, ', ');
 	}
 	if (tmp_str.length>50){
 		return tmp_str.substring(0,45)+'...';
@@ -135,10 +132,10 @@ function tipLabelWidth(d) {
 function tree_init(){
 	calcFullTipCounts(rootNode);
 	calcBranchLength(rootNode);
-	rootNode.branch_length= 0.01;	
+	rootNode.branch_length= 0.01;
 	rootNode.dfreq = 0.0;
 	if (typeof rootNode.pivots != "undefined"){
-		time_step = rootNode.pivots[1]-rootNode.pivots[0];		
+		time_step = rootNode.pivots[1]-rootNode.pivots[0];
 	}else{
 		time_step = 1.0/12;
 	}
@@ -153,7 +150,7 @@ function tree_init(){
 	colorByTrait();
 	adjust_freq_by_date();
 	tree_legend = makeLegend();
-	nDisplayTips = displayRoot.fullTipCount;	
+	nDisplayTips = displayRoot.fullTipCount;
 }
 
 d3.json(path + file_prefix + "tree.json", function(error, root) {
@@ -189,7 +186,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.enter().append("polyline")
 		.attr("class", "link")
 		.style("stroke-width", branchStrokeWidth)
-		.style("stroke", branchStrokeColor)		
+		.style("stroke", branchStrokeColor)
 		.style("cursor", "pointer")
 		.style("fill", "none")
 		.on('mouseover', function (d){
@@ -200,7 +197,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			})
 		.on('mouseout', function(d) {
 			linkTooltip.hide(d);
-			if (typeof addClade !="undefined") {clearTimeout(clade_freq_event);};})		
+			if (typeof addClade !="undefined") {clearTimeout(clade_freq_event);};})
 		.on('click', zoom);
 
 	if ((typeof branch_labels != "undefined")&&(branch_labels)){
@@ -209,7 +206,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.enter()
 			.append("text")
 			.attr("class", "branchLabel")
-			.style("font-size", branchLabelSize)			
+			.style("font-size", branchLabelSize)
 			.style("text-anchor", "end")
 			.text(branchLabelText);
 		}
@@ -242,8 +239,8 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 				console.log("opening url "+url);
 				var win = window.open(url, '_blank');
   				win.focus();
-  			}	
-  		})		
+  			}
+  		})
 		.on('mouseout', virusTooltip.hide);
 
 	var vaccineCircles = treeplot.selectAll(".vaccine")
@@ -295,10 +292,10 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			dMin = minimumAttribute(d.source, "xvalue", d.source.xvalue),
 			dMax = maximumAttribute(d.source, "xvalue", d.source.xvalue),
 			lMin = minimumAttribute(d.source, "yvalue", d.source.yvalue),
-			lMax = maximumAttribute(d.source, "yvalue", d.source.yvalue);			
+			lMax = maximumAttribute(d.source, "yvalue", d.source.yvalue);
 		}
 		if ((lMax-lMin)>0.8*dy){
-			lMin = lMax - dy*0.7 
+			lMin = lMax - dy*0.7
 		}
 		var visibleXvals = tips.filter(function (d){return (d.yvalue>=lMin)&&(d.yvalue<lMax)}).map(function(d){return +d.xvalue;});
 		nDisplayTips = visibleXvals.length;
@@ -313,7 +310,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	function setMargins(){
 		containerWidth = parseInt(d3.select(".treeplot-container").style("width"), 10);
 		treeWidth = containerWidth;
-		treeHeight = treePlotHeight(treeWidth);			
+		treeHeight = treePlotHeight(treeWidth);
 		d3.select("#treeplot")
 			.attr("width", treeWidth)
 			.attr("height", treeHeight);
@@ -328,7 +325,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 					}
 				});
 			right_margin = maxTextWidth + 10;
-		}							
+		}
 		xScale.range([left_margin, treeWidth - right_margin]);
 		yScale.range([top_margin, treeHeight - bottom_margin]);
 	}
@@ -372,16 +369,16 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		if ((typeof tip_labels != "undefined")&&(tip_labels)){
 			treeplot.selectAll(".tipLabel").data(tips)
 				.transition().duration(dt)
-				.style("font-size", function(d) {return tipLabelSize(d)+"px"; })			
+				.style("font-size", function(d) {return tipLabelSize(d)+"px"; })
 				.attr("x", function(d) { return d.x+10; })
 				.attr("y", function(d) { return d.y+4; });
-		}	
-			
+		}
+
 		if ((typeof branch_labels != "undefined")&&(branch_labels)){
 			console.log('shift branch_labels');
 			treeplot.selectAll(".branchLabel").data(nodes)
 				.transition().duration(dt)
-				.style("font-size", branchLabelSize)				
+				.style("font-size", branchLabelSize)
 				.attr("x", function(d) {  return d.x - 6;})
 				.attr("y", function(d) {  return d.y - 3;});
 		}
@@ -398,16 +395,16 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		}
 	}
 
-	d3.select(window).on('resize', resize); 
-	
+	d3.select(window).on('resize', resize);
+
 	function resize() {
 		setMargins();
 		transform(0);
 	}
-	
+
 	function restrictToFunc(rt) {
 		restrictTo[rt] = document.getElementById(rt).value;
-		console.log("restriction to "+rt+" "+restrictTo[rt]);	
+		console.log("restriction to "+rt+" "+restrictTo[rt]);
 		d3.selectAll(".tip")
 			.style("visibility", tipVisibility);
 	}
@@ -424,7 +421,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 							return function(){
 								return restrictToFunc(restrictor);
 							}
-						})(rt));		
+						})(rt));
 	}
 
 
@@ -483,7 +480,9 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 
 	if (typeof root.alt_aa_muts == "undefined"){
 		document.getElementById("alt_aa_div").style.display = 'none';
-	} 
+	}else{
+		updateBranchLabels();
+	}
 
 	function updateBranchLabels(){
 		alt_aa = document.getElementById("alt_aa").checked;
@@ -491,7 +490,12 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			treeplot.selectAll(".branchLabel").data(nodes)
 			.text(branchLabelText);
 		}
-
+		var downloadButtons = document.getElementById("download");
+		if (alt_aa){
+			downloadButtons.innerHTML = '<a href="tree_alt.png"><button type="button" class="btn btn-default">png</button></a> <a href="tree_alt.pdf"><button type="button" class="btn btn-default">pdf</button></a><a href="tree_alt.nwk"><button type="button" class="btn btn-default">newick</button></a> <button type="button" class="btn btn-default" id="svgexport">SVG</button>';
+		}else{
+			downloadButtons.innerHTML = '<a href="tree.png"><button type="button" class="btn btn-default">png</button></a> <a href="tree.pdf"><button type="button" class="btn btn-default">pdf</button></a><a href="tree.nwk"><button type="button" class="btn btn-default">newick</button></a> <button type="button" class="btn btn-default" id="svgexport">SVG</button>';
+		}
 	}
 
 });
