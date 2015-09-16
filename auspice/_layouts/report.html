@@ -3,10 +3,12 @@ layout: default
 ---
 
 <div class="row">
-	<div class="col-md-3">
+	<div class="col-md-8">
 		<div class="logo-container">
 			<div class="bigtitle">
-				<span class="c2">n</span><span class="c3">e</span><span class="c4">x</span><span class="c5">t</span><span class="c6">f</span><span class="c7">l</span><span class="c8">u</span>
+				<a href="/" class="nounderline">
+					<span class="c2">n</span><span class="c3">e</span><span class="c4">x</span><span class="c5">t</span><span class="c6">f</span><span class="c7">l</span><span class="c8">u</span>
+				</a>
 			</div>
 			<div class="subtitle-box">
 				Real-time tracking of seasonal influenza virus evolution in humans
@@ -14,13 +16,29 @@ layout: default
 			<div class="spacer"></div>
 		</div>
 	</div>
-	<div class="col-md-9">
-		<div class="bigspacer"></div>
-		<div class="treeplot-container">
-			{{ content }}
-		</div>
+	<div class="col-md-4">
 	</div>
 </div>
+
+<div class="row">
+	<div class="col-md-12">
+		<div class="mediumtitle">
+			{{ page.title }}
+		</div>
+		<div class="smallspacer"></div>
+		<div class="smalltitle">
+			{{ page.date | date: "%B %-d, %Y" }}
+		</div>			
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<div class="bigspacer"></div>
+	</div>
+</div>
+
+{{ content }}
 
 <div class="row">
 	<div class="col-md-3"></div>
