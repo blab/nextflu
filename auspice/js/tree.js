@@ -288,7 +288,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			lMin = minimumAttribute(d.source, "yvalue", d.source.yvalue),
 			lMax = maximumAttribute(d.source, "yvalue", d.source.yvalue);			
 		}
-		if ((lMax-lMin)>0.8*dy){
+		if ((lMax-lMin)>0.999*dy){
 			lMin = lMax - dy*0.7 
 		}
 		var visibleXvals = tips.filter(function (d){return (d.yvalue>=lMin)&&(d.yvalue<lMax)}).map(function(d){return +d.xvalue;});
