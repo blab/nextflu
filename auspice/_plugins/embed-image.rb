@@ -28,7 +28,9 @@ module Jekyll
 				html += "<div class=\"col-lg-#{border}\"></div>"
 			end
 			html += "<div class=\"col-lg-#{width}\">"
+			html += "<a href=\"#{url}\" target=\"_blank\">"
 			html += "<img src=\"#{url}\" class=\"img-responsive\"/>"
+			html += "</a>"
 			html += "</div>"
 			if border > 0 then
 				html += "<div class=\"col-lg-#{border}\"></div>"
