@@ -31,7 +31,7 @@ virus_config = {
 	# frequency estimation parameters
 	'aggregate_regions': [  ("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]), 
 							("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ],
-	'frequency_stiffness':5.0,
+	'frequency_stiffness':10.0,
 	'verbose':2, 
 	'tol':2e-4, #tolerance for frequency optimization
 	'pc':1e-3, #pseudocount for frequencies 
@@ -429,4 +429,4 @@ class process(virus_frequencies):
 		if 'nuc_clades' in tasks:
 			self.all_clade_frequencies(gene='nuc') 
 		if 'tree' in tasks:
-			self.all_tree_frequencies() 
+			self.all_tree_frequencies(threshold = 5) 
