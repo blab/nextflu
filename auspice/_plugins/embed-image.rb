@@ -22,7 +22,7 @@ module Jekyll
 			border = (12-width)/2
 			
 			html = ""
-			html += "<div class=\"spacer\"></div>"
+			html += "<div class=\"bigspacer\"></div>"
 			html += "<div class=\"row\">"
 			if border > 0 then
 				html += "<div class=\"col-lg-#{border}\"></div>"
@@ -36,7 +36,7 @@ module Jekyll
 				html += "<div class=\"col-lg-#{border}\"></div>"
 			end
 			html += "</div>"
-			html += "<div class=\"spacer\"></div>"			
+			html += "<div class=\"bigspacer\"></div>"			
 			html 
 			
 		end
