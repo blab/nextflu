@@ -429,4 +429,4 @@ class process(virus_frequencies):
 		if 'nuc_clades' in tasks:
 			self.all_clade_frequencies(gene='nuc') 
 		if 'tree' in tasks:
-			self.all_tree_frequencies(threshold = 5) 
+			self.all_tree_frequencies(threshold = 20) 
