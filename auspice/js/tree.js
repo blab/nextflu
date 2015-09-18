@@ -402,6 +402,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		console.log("restriction to "+rt+" "+restrictTo[rt]);	
 		d3.selectAll(".tip")
 			.style("visibility", tipVisibility);
+		dragend();		
 	}
 
 	for (rt in restrictTo){

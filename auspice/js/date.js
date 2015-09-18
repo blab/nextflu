@@ -52,8 +52,13 @@ function calcNodeAges(tw){
 		d.diff = diffYears;
 		if (d.diff > 0 && d.diff < tw){
 			d.current  = true;
-		}else{
+		} else{
 			d.current = false;
+		}
+		for (var k in restrictTo){
+			if (d[k]!=restrictTo[k] && restrictTo[k]!="all"){
+				d.current = false;
+			}
 		}
 	});
 };
