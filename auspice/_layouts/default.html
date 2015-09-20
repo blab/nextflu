@@ -11,7 +11,10 @@
 		<link href="/css/style.css" rel="stylesheet" media="screen">
 		
 		<!-- Favicon -->
-		<link rel="shortcut icon" href="/images/favicon.png"/>			
+		<link rel="shortcut icon" href="/images/favicon.png"/>		
+		
+		<script type="text/javascript" src="/js/bootstrap/jquery-1.7.2.min.js"></script>
+		<script type="text/javascript" src="/js/bootstrap/dropdown.js"></script>	
 		
 		<!-- Typekit -->
 		<script>
@@ -39,6 +42,41 @@
 	<body>
 
 		<div class="container">
+		
+			<div class="row">
+				<div class="col-md-8 pull-right">
+					<ul class="nav nav-tabs pull-right">
+						<li role="presentation"><a href="/methods/">Methods</a></li>				
+						<li role="presentation"><a href="/help/">Help</a></li>
+						<li role="presentation" class="dropdown">
+							<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+								Reports <span class="caret"></span>
+							</a>
+							<ul class="dropdown-menu">
+								<li><a href="/reports/sep-2015/">Sep 2015</a></li>
+							</ul>
+						</li>
+					</ul>
+				</div>		
+				<div class="col-md-4">
+					<div class="logo-container">
+						<a href="/" class="nounderline">
+							<div class="bigtitle">
+								<span class="c2">n</span><span class="c3">e</span><span class="c4">x</span><span class="c5">t</span><span class="c6">f</span><span class="c7">l</span><span class="c8">u</span>
+							</div>
+						</a>
+					</div>
+					<div class="subtitle-container">
+						Real-time tracking of seasonal influenza virus evolution in humans
+					</div>
+					<div class="bigspacer"></div>
+				</div>
+				<div class="col-md-4">
+					<div class="logo-container">
+					
+					</div>
+				</div>
+			</div>
 
 		{{ content }}
 
