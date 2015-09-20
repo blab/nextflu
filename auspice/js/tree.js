@@ -312,7 +312,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.on('click', function (d){
 			focusNode = d;
 			document.getElementById("coloring").value = "HI_dist";
-			colorByHIDistance();
+			newFocus();
 		});
 
 

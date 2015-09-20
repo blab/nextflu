@@ -143,7 +143,7 @@ function colorByTrait() {
 		nodes.map(function(d) { d.coloring = d.cHI; });
 	}
 	else if (colorBy == "HI_dist") {
-		colorByHIDistance();
+		newFocus();
 		return;
 	}
 	else if (colorBy == "date") {
@@ -269,16 +269,7 @@ function colorByGenotypePosition (positions) {
 	}
 }
 
-function colorByHIDistance(){
-	correctVirus = document.getElementById("virus").checked;
-	correctPotency = document.getElementById("serum").checked;
-	var HIchoices = document.getElementsByName("HImodel");
-	for(var i = 0; i < HIchoices.length; i++){
-	    if(HIchoices[i].checked){
-	        HImodel = HIchoices[i].value;
-	    }
-	}
-	colorBy = 'HI_dist'
+function newFocus(){
 	if (typeof(focusNode)=="undefined"){
 		var ntiters = 0, ntmp;
 		focusNode=sera[0];
@@ -290,6 +281,43 @@ function colorByHIDistance(){
 			}
 		}
 	}
+	// add checkboxes to include/exclude sera
+	var seraDiv = document.getElementById("sera");
+	var htmlStr = "";
+	activeSera = {};
+	console.log(focusNode);
+	for (var serum in focusNode.potency_mut){
+		var serumID = serum.split("/").join("");
+		htmlStr+='<input type="checkbox" id="' + serumID + '" name="' + serum + '" checked="checked"> ' + serum +"<br>";
+		activeSera[serum]=true;
+	}
+	seraDiv.innerHTML = htmlStr;
+	console.log(seraDiv);
+	for (var serum in focusNode.potency_mut){
+		var serumID = serum.split("/").join("");
+		d3.select("#"+serumID)
+			.on("change", function(elem){
+					for (var tmpserum in focusNode.potency_mut){
+						var tmpserumID = tmpserum.split("/").join("");
+						activeSera[tmpserum]=document.getElementById(tmpserumID).checked;
+					}
+					colorByHIDistance()});
+		}
+
+	colorByHIDistance();
+}
+
+function colorByHIDistance(){
+	correctVirus = document.getElementById("virus").checked;
+	correctPotency = document.getElementById("serum").checked;
+	var HIchoices = document.getElementsByName("HImodel");
+	console.log(activeSera);
+	for(var i = 0; i < HIchoices.length; i++){
+	    if(HIchoices[i].checked){
+	        HImodel = HIchoices[i].value;
+	    }
+	}
+	colorBy = 'HI_dist'
 
 	treeplot.selectAll(".serum")
 	.style("fill", function (d){if (d==focusNode) {return '#FF3300';} else {return '#555555';}})

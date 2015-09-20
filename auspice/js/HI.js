@@ -2,6 +2,7 @@ var HImodel = 'measured';
 var correctVirus = true;
 var correctPotency = true;
 var focusNode;
+var activeSera = {};
 /**
  * for each node, accumulate HI difference along branches
 **/
@@ -58,16 +59,22 @@ function calcHImeasured(node, rootNode){
 			var tmp_HI=0;
 			var serum_count=0;
 			for (var tmp_serum in node.HI_titers[d.clade]){
-				if (correctPotency&&(d.strain!=focusNode.strain)){
-					tmp_HI += node.HI_titers[d.clade][tmp_serum]-node.potency_mut[tmp_serum];
-				}else{
-					tmp_HI += node.HI_titers[d.clade][tmp_serum];
+				if (activeSera[tmp_serum]){
+					if (correctPotency&&(d.strain!=focusNode.strain)){
+						tmp_HI += node.HI_titers[d.clade][tmp_serum]-node.potency_mut[tmp_serum];
+					}else{
+						tmp_HI += node.HI_titers[d.clade][tmp_serum];
+					}
+					serum_count+=1;
 				}
-				serum_count+=1;
 			}
-			d.HI_dist_meas = tmp_HI/serum_count
-			if (correctVirus){
-				d.HI_dist_meas -= d.avidity_mut;
+			if (serum_count){
+				d.HI_dist_meas = tmp_HI/serum_count
+				if (correctVirus){
+					d.HI_dist_meas -= d.avidity_mut;
+				}
+			}else{
+				d.HI_dist_meas = 'NaN';				
 			}
 		}else{
 			d.HI_dist_meas = 'NaN';
