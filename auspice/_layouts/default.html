@@ -46,9 +46,25 @@
 			<div class="row">
 				<div class="col-md-8 pull-right">
 					<ul class="nav nav-tabs pull-right">
-						<li role="presentation"><a href="/methods/">Methods</a></li>				
-						<li role="presentation"><a href="/help/">Help</a></li>
-						<li role="presentation" class="dropdown">
+						{% if page.categories.first == 'methods' %}
+						<li class="active" role="presentation">
+						{% else %}
+						<li role="presentation">
+						{% endif %}
+							<a href="/methods/">Methods</a>
+						</li>
+						{% if page.categories.first == 'help' %}
+						<li class="active" role="presentation">
+						{% else %}
+						<li role="presentation">
+						{% endif %}						
+							<a href="/help/">Help</a>
+						</li>
+						{% if page.categories.first == 'reports' %}
+						<li class="active dropdown" role="presentation">
+						{% else %}
+						<li class="dropdown" role="presentation">
+						{% endif %}							
 							<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
 								Reports <span class="caret"></span>
 							</a>
