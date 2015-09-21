@@ -14,7 +14,7 @@ if (document.getElementById("gtspec") != null){
 }
 
 function treePlotHeight(width) {
-	return 400 + 0.35*width;
+	return 400 + 0.30*width;
 }
 var containerWidth = parseInt(d3.select(".treeplot-container").style("width"), 10);
 var treeWidth = containerWidth;
