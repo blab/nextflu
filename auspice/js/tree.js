@@ -8,16 +8,16 @@ var dHIScale = d3.scale.linear()
 var freqScale = d3.scale.sqrt()
 	.domain([0, 1])
 	.range([1, 10]);
-\
+
 var tipRadius = 4.0;
 var left_margin = 10;
+var right_margin = 10;
 var bottom_margin = 10;
 
 var branchLabelVisFraction = 0.05;
 var top_margin = 12;
 
-if ((typeof branch_labels != "undefined")&&(branch_labels)) {top_margin +=15;}
-var right_margin = 10;
+if ((typeof branch_labels != "undefined")&&(branch_labels)) {top_margin +=5;}
 
 function initDateColorDomain(intAttributes){
 	var numDateValues = tips.map(function(d) {return d.num_date;})
@@ -430,8 +430,8 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			treeplot.selectAll(".branchLabel").data(nodes)
 				.transition().duration(dt)
 				.style("font-size", branchLabelSize)
-				.attr("x", function(d) {  return d.x - 6;})
-				.attr("y", function(d) {  return d.y - 3;});
+				.attr("x", function(d) {  return d.x - 9;})
+				.attr("y", function(d) {  return d.y - 6;});
 		}
 
 		if (typeof clades !="undefined"){
