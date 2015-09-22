@@ -46,12 +46,39 @@
 			<div class="row">
 				<div class="col-md-8 pull-right">
 					<ul class="nav nav-tabs pull-right">
-						{% if page.categories.first == 'app' %}
-						<li class="active" role="presentation">
-						{% else %}
-						<li role="presentation">
-						{% endif %}
-							<a href="/">App</a>
+						<li class="dropdown" role="presentation">
+							<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+							{% if page.categories.first == 'app' %}
+							{{ page.virus }}
+							{% else %}
+								Virus 
+							{% endif %}
+							<span class="caret"></span>
+							</a>
+							<ul class="dropdown-menu">
+								{% for entry in site.data.viruses %}
+									<li><a href="/{{entry.virus}}/"> {{ entry.name }}</a></li>
+								{% endfor %}
+							</ul>
+						</li>
+						<li class="dropdown" role="presentation">
+							<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+							{% if page.categories.first == 'app' %}
+							{{ page.resolution }}
+							{% else %}
+								Time
+							{% endif %}
+							<span class="caret"></span>
+							</a>
+							<ul class="dropdown-menu">
+								{% for entry in site.data.viruses %}
+									{% if page.virus == entry.virus %}
+										{% for res in entry.resolutions %}
+											<li><a href="/{{ entry.virus }}/{{ res }}">{{ res }}</a></li>
+										{% endfor %}
+								{% endif %}
+								{% endfor %}
+							</ul>
 						</li>
 						{% if page.categories.first == 'methods' %}
 						<li class="active" role="presentation">
