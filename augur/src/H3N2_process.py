@@ -46,7 +46,7 @@ virus_config.update({
 	'auspice_prefix':'H3N2_',
 	'html_vars': {'coloring': 'ep, ne, rb, lbi, dfreq, region, date, cHI, HI_dist',
 				   'gtplaceholder': 'HA1 positions...',
-					'freqdefault': '3c2.a, 3c3.a'},
+					'freqdefault': '3c2.a, 3c3.a, 3c3.b'},
 	'js_vars': {'LBItau': 0.0005, 'LBItime_window': 0.5, 'dfreq_dn':2},
 	'excluded_tables': ['NIMR_Sep2012_08.csv'], #, 'nimr-sep-2010-table8', 'nimr-sep-2010-table8','NIMR_Sep2012_11.csv'],
 	'layout':'auspice_HI'
@@ -334,7 +334,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 				'ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country',
 				'dHI', 'cHI', 'mean_HI_titers','HI_titers','HI_titers_raw', 'serum', 'HI_info',
 				'avidity_tree','avidity_mut', 'potency_mut', 'potency_tree', 'mean_potency_mut', 'mean_potency_tree', 'autologous_titers'],
-				   annotations = ['3c2.a', '3c3.a'])
+				   annotations = ['3c2.a', '3c3.a', '3c3.b'])
 			self.generate_indexHTML()
 			self.export_HI_mutation_effects()
 

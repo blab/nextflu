@@ -22,7 +22,7 @@ def determine_lineage(seq):
 	fields = map(lambda x:x.strip(), seq.description.split('|'))
 	tmp_lineage = (fields[2], fields[4])
 	if tmp_lineage in patterns:
-		print fields[0],"\n\tgisaid defined lineage:",tmp_lineage,'->',patterns[tmp_lineage]
+#		print fields[0],"\n\tgisaid defined lineage:",tmp_lineage,'->',patterns[tmp_lineage]
 		return patterns[tmp_lineage]
 	else:
 		scores = []

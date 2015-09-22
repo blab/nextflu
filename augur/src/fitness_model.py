@@ -142,7 +142,6 @@ class fitness_model(object):
 
 			self.predictor_arrays[s]-=m
 			self.predictor_arrays[s]/=self.global_std
-			#self.predictor_arrays[s]/=stddev
 
 	def model_fit(self, params):
 		# walk through season pairs

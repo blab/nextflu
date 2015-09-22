@@ -14,7 +14,7 @@ if (document.getElementById("gtspec") != null){
 }
 
 function treePlotHeight(width) {
-	return 400 + 0.35*width;
+	return 400 + 0.30*width;
 }
 var containerWidth = parseInt(d3.select(".treeplot-container").style("width"), 10);
 var treeWidth = containerWidth;
@@ -38,9 +38,8 @@ var epiColorDomain = genericDomain;
 var nonEpiColorDomain = genericDomain;
 var rbsColorDomain = genericDomain;
 var dateColorDomain = genericDomain;
-var epiColorDomain = genericDomain;
-var dfreqColorDomain = genericDomain.map(function(d){return Math.round(100*(-0.18+d*0.36))/100;});
 var HIColorDomain = genericDomain.map(function(d){return Math.round(100*(d*3.6))/100;});
+var dfreqColorDomain = genericDomain.map(function(d){return Math.round(100*(0.2+d*1.8))/100;});
 var time_step;
 
 

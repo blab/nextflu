@@ -1,18 +1,20 @@
 console.log('Enter tree.js');
 
-var freqScale = d3.scale.linear()
-	.domain([0, 0.05, 0.2, 1])
-	.range([1, 2, 4, 5]);
 
 var dHIScale = d3.scale.linear()
 	.domain([0, 1])
 	.range([2.0, 4.5]);
 
+var freqScale = d3.scale.sqrt()
+	.domain([0, 1])
+	.range([1, 10]);
+\
 var tipRadius = 4.0;
 var left_margin = 10;
 var bottom_margin = 10;
-var top_margin = 10;
+
 var branchLabelVisFraction = 0.05;
+var top_margin = 12;
 
 if ((typeof branch_labels != "undefined")&&(branch_labels)) {top_margin +=15;}
 var right_margin = 10;
@@ -226,7 +228,8 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.enter().append("polyline")
 		.attr("class", "link")
 		.style("stroke-width", branchStrokeWidth)
-		.style("stroke", branchStrokeColor)
+		.style("stroke", branchStrokeColor)		
+		.style("stroke-linejoin", "round")
 		.style("cursor", "pointer")
 		.style("fill", "none")
 		.on('mouseover', function (d){
@@ -336,8 +339,9 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			lMin = minimumAttribute(d.source, "yvalue", d.source.yvalue),
 			lMax = maximumAttribute(d.source, "yvalue", d.source.yvalue);
 		}
-		if ((lMax-lMin)>0.8*dy){
-			lMin = lMax - dy*0.7
+
+		if ((lMax-lMin)>0.999*dy){
+			lMin = lMax - dy*0.7 
 		}
 		var visibleXvals = tips.filter(function (d){return (d.yvalue>=lMin)&&(d.yvalue<lMax)}).map(function(d){return +d.xvalue;});
 		nDisplayTips = visibleXvals.length;
@@ -434,7 +438,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			treeplot.selectAll(".annotation").data(clades)
 				.transition().duration(dt)
 				.attr("x", function(d) {
-					return xScale(d[1]) - 6;
+					return xScale(d[1]) - 10;
 				})
 				.attr("y", function(d) {
 					return yScale(d[2]) - 6;
@@ -463,6 +467,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		console.log("restriction to "+rt+" "+restrictTo[rt]);
 		d3.selectAll(".tip")
 			.style("visibility", tipVisibility);
+		dragend();		
 	}
 
 	for (rt in restrictTo){

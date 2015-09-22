@@ -1,18 +1,15 @@
 ---
 layout: default
+categories: 
+ - app
 ---
 
 <div class="row">
 	<div class="col-md-3">
-		<div class="logo-container">
-			<div class="bigtitle">
-				<span class="c2">n</span><span class="c3">e</span><span class="c4">x</span><span class="c5">t</span><span class="c6">f</span><span class="c7">l</span><span class="c8">u</span>
-			</div>
-			<div class="subtitle-box">
-				Real-time tracking of seasonal influenza virus evolution in humans
-			</div>
-			<div class="spacer"></div>
+		<div class="subtitle-container note">
+			Real-time tracking of seasonal influenza <br> virus evolution in humans
 		</div>
+		<div class="bigspacer"></div>
 		<div class="io-container">
 			<form class="form-inline form-small">
 				<div class="form-group">
@@ -149,7 +146,6 @@ layout: default
 <div class="row">
 	<div class="col-md-12">
 		<div class="bigspacer"></div>
-		<div class="bigspacer"></div>
 	</div>
 </div>
 
@@ -237,6 +233,7 @@ layout: default
 		</div>
 	</div>
 	<div class="col-md-9" align="justify">
+		 <a href="/help/#frequencies">Click here</a> for help with the nextflu interface or watch the tutorial video below.<p>
 		<h4>HI data</h4>
 		<p>HI data can be displayed as color on the tree or viewed via the tool tips that
 		show when moving the mouse over a circle corresponding to a virus. To explore the HI titer data,
@@ -275,12 +272,17 @@ layout: default
 		Enter a mutation or genotype above (e.g. <span class="highlight">225D</span>) and click
 		<b>plot frequencies</b> to show estimated frequency of this mutation through time. In addition, geographic regions can be specified by adding AS
 		(Asia), NA (North America), EU (Europe), or OC (Oceania) as <span class="highlight">159S/225D/AS</span>.
-		Several genotypes can be entered simultaneously when separated by commas (e.g.
-		<span class="highlight">225D, 159S/225D/AS</span> will graph the global frequency of 225D and the frequency
-		of strains containing both 159S and 225D in Asia). Instead of a genotype, the common clades 3c3, 3c3.a, 3c2, 3c2.a can be used. Positions with very little variation are omitted. Beware
-		that region specific frequencies are noisy. <a href="/help/#frequencies">Click here for help with the interface.</a>
+		Several genotypes can be entered simultaneously when separated by commas (e.g. 
+		<span class="highlight">225D, 159S/225D/AS</span> will graph the global frequency of 225D and the frequency 
+		of strains containing both 159S and 225D in Asia). Instead of a genotype, the common clades 3c3, 3c3.a, 3c2, 3c2.a can be used. Positions with very little variation are omitted. Beware 
+		that region specific frequencies are noisy.
 		<h4>Variability</h4>
 		The second plot shows the variation in the multiple sequence alignment used to construct the tree. High bars indicated variable positions. Clicking on those bars will color the tree by amino acid at this position and plot the frequencies of the corresponding amino acids.
+		<h4>Video tutorial</h4>
+		<div class="embed-responsive embed-responsive-16by9">
+			<iframe allowfullscreen src="http://www.youtube.com/embed/_MZk1DDNjMA?autoplay=0">
+			</iframe>
+		</div>
 	</div>
 </div>
 

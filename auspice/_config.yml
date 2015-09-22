@@ -1,3 +1,19 @@
+name: nextflu
+description: Real-time tracking of seasonal influenza virus evolution in humans
+url: http://nextflu.org
+
+markdown: redcarpet
+highlighter: pygments
+permalink: /:categories/:title/
+
+redcarpet: 
+  extensions:
+   - tables
+   - no_intra_emphasis
+   - autolink
+   - superscript
+   - strikethrough
+
 exclude:
   - "*.sh"
   - "Gemfile"

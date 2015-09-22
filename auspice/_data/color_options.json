@@ -3,10 +3,10 @@
  ["ep", "epitope mutations"],
  ["ne","non epitope mutations"],
  ["rb","receptor binding mutations"],
+ ["dfreq","frequency change"], 
  ["lbi","local branching index"],
  ["region","geographic region"],
- ["date","sampling date"],
- ["dfreq","frequency change"],
+ ["date","sampling date"], 
  ["host","host"],
  ["subtype","subtype"],
 ]

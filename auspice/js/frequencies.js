@@ -10,7 +10,8 @@ function calcDfreq(node, freq_ii){
 			if (typeof node.children[i1].freq != "undefined") {
 				if (node.children[i1].freq["global"] != "undefined"){
 					var tmp_freq = node.children[i1].freq["global"]
-					node.children[i1].dfreq = 0.5*(tmp_freq[freq_ii] - tmp_freq[freq_ii-dfreq_dn])/(tmp_freq[freq_ii] + tmp_freq[freq_ii-dfreq_dn] + 0.1);
+					//node.children[i1].dfreq = 0.5*(tmp_freq[freq_ii] - tmp_freq[freq_ii-dfreq_dn])/(tmp_freq[freq_ii] + tmp_freq[freq_ii-dfreq_dn] + 0.2);
+					node.children[i1].dfreq = (tmp_freq[freq_ii] + 0.01)/(tmp_freq[freq_ii-dfreq_dn] + 0.03);
 				} else {
 					node.children[i1].dfreq = node.dfreq;
 				}
@@ -57,8 +58,7 @@ function get_frequencies(region, gt){
 		for (var pi=0; pi<freq.length; pi++){
 			freq[pi]+=frequencies["clades"][region][gt.toLowerCase()][pi];
 		}
-	}
-	else if ((typeof frequencies["genotypes"] !="undefined") && (frequencies["genotypes"][region][gt]!=undefined)) {
+	}else if ((typeof frequencies["genotypes"] !="undefined") && (frequencies["genotypes"][region][gt]!=undefined)) {
 		console.log(gt+" found as genotype");
 		for (var pi=0; pi<freq.length; pi++){
 			freq[pi]+=frequencies["genotypes"][region][gt][pi];
@@ -67,7 +67,7 @@ function get_frequencies(region, gt){
 		var tmp_mut = gt.split(':');
 		var mut ="";
 		if (tmp_mut.length==1){
-			mut = default_gene+":"+gt; 
+			mut = default_gene+":"+gt;
 		}else{
 			mut = gt;
 		}
@@ -80,7 +80,7 @@ function get_frequencies(region, gt){
 			console.log("not found "+gt);
 		}
 	}else{
-		console.log("not found "+gt);		
+		console.log("not found "+gt);
 	}
 	return freq.map(function (d) {return Math.round(d*100)/100;});
 };
@@ -125,7 +125,7 @@ function addClade(d) {
 		var plot_data = [['x'].concat(rootNode["pivots"])];
 		var reg = "global";
 		if ((typeof d.target.freq !="undefined" )&&(d.target.freq[reg] != "undefined")){
-			plot_data[plot_data.length] = [reg].concat(d.target.freq[reg]);				
+			plot_data[plot_data.length] = [reg].concat(d.target.freq[reg]);
 		}
 		if (plot_data.length > 1) {
 			if (plot_data[1][0] == "global") {
@@ -174,26 +174,26 @@ var gt_chart = c3.generate({
 		y: {
 			label: {
 				text: 'frequency',
-				position: 'outer-middle'	
+				position: 'outer-middle'
 			},
 			tick: {
 				values: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0],
 				outer: false
 			},
-            min: 0,			
-			max: 1	
+            min: 0,
+			max: 1
 		},
 		x: {
 			label: {
 				text: 'time',
-				position: 'outer-center'	
+				position: 'outer-center'
 			},
 			tick: {
 				values: time_ticks,
-				outer: false				
+				outer: false
 			}
 		}
-	},			
+	},
 	data: {
 		x: 'x',
 		columns: [],
@@ -261,14 +261,14 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 			width = parseInt(d3.select(".entropy-container").style("width"), 10);
 			height = 250;
 			entropy_chart.resize({height: height, width: width});
-		},		
+		},
 		legend: {show: false},
 		color: {pattern: ["#AAA"]},
 		axis: {
 			y: {
 				label: {
 					text: 'variability',
-					position: 'outer-middle'	
+					position: 'outer-middle'
 				},
 				tick: {
 					values: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6],
@@ -279,7 +279,7 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 			x: {
 				label: {
 					text: 'position',
-					position: 'outer-center'	
+					position: 'outer-center'
 				},
 				tick: {
 					outer: false,
@@ -290,12 +290,12 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 					})
 				}
 			},
-		},			
+		},
 		data: {
 			xs: chart_xaxis,
 			json: chart_data,
 			types: chart_types,
-			onclick: function (d,i) { 
+			onclick: function (d,i) {
             	gene = posToAA[d.x][0];
             	var pos = posToAA[d.x][1];
 				if (frequencies["entropy"][gene][pos][2].length>1){
@@ -349,7 +349,7 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 
 	d3.select("#plotfreq")
 		.on("click", function (){
-			gt = parse_gt_string(document.getElementById("gtspec").value);			
+			gt = parse_gt_string(document.getElementById("gtspec").value);
 			make_gt_chart(gt);
 		});
 	d3.select("#downloadfreq")

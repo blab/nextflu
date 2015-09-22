@@ -105,7 +105,11 @@ function makeLegend(){
 	.attr('x', legendRectSize + legendSpacing + 5)
 	.attr('y', legendRectSize - legendSpacing)
 	.text(function(d) {
-		return d.toString().replace(/([a-z])([A-Z])/g, '$1 $2').replace(/,/g, ', ');
+		var label = d.toString().replace(/([a-z])([A-Z])/g, '$1 $2').replace(/,/g, ', ');
+		if (colorBy == "dfreq") {
+			label += "\u00D7";
+		}
+		return label;
 	})
    .on('mouseover', function(leg){
     	treeplot.selectAll(".tip")

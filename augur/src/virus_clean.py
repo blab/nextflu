@@ -63,15 +63,19 @@ class virus_clean(object):
 		outgroup_date = self.sequence_lookup[self.outgroup['strain']].num_date
 		return np.array([x.num_date-outgroup_date for x in self.viruses  if x.strain])
 
-	def distance_from_outgroup(self):
+	def distance_from_outgroup(self, start=0, stop=0):
 		from seq_util import hamming_distance
-		outgroup_seq = self.sequence_lookup[self.outgroup['strain']].seq[:1000]
-		return np.array([hamming_distance(x.seq[:1000], outgroup_seq) for x in self.viruses if x.strain])
+		outgroup_seq = self.sequence_lookup[self.outgroup['strain']].seq
+		if stop==0:
+			stop=len(outgroup_seq)
+		outgroup_seq = outgroup_seq[start:stop]
+		return np.array([hamming_distance(x.seq[start:stop], outgroup_seq) 
+			   for x in self.viruses if x.strain])
 
 	def clean_distances(self):
 		"""Remove viruses that don't follow a loose clock """
 		times = self.times_from_outgroup()
-		distances = self.distance_from_outgroup()
+		distances = self.distance_from_outgroup(stop=987)
 		slope, intercept, r_value, p_value, std_err = stats.linregress(times, distances)
 		residuals = slope*times + intercept - distances
 		r_iqd = stats.scoreatpercentile(residuals,75) - stats.scoreatpercentile(residuals,25)

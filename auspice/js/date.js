@@ -52,8 +52,13 @@ function calcNodeAges(tw){
 		d.diff = diffYears;
 		if (d.diff > 0 && d.diff < tw){
 			d.current  = true;
-		}else{
+		} else{
 			d.current = false;
+		}
+		for (var k in restrictTo){
+			if (d[k]!=restrictTo[k] && restrictTo[k]!="all"){
+				d.current = false;
+			}
 		}
 	});
 };
@@ -85,7 +90,7 @@ function dragged(d) {
 
 	globalDate = d.date;
 
-	calcNodeAges(LBItime_window);
+	calcNodeAges(time_window);
 	treeplot.selectAll(".link")
 		.style("stroke", function(d){return "#ccc";})
 
@@ -119,7 +124,7 @@ function draggedMin(d) {
 		.attr("x1", function(d) {return d.x2;})
 		.attr("x2", function(d) {return d.x2});
 
-	calcNodeAges(LBItime_window);
+	calcNodeAges(time_window);
 	treeplot.selectAll(".link")
 		.style("stroke", function(d){return "#ccc";})
 
@@ -151,7 +156,7 @@ function dragend() {
 	}
 	console.log("changed frequency index to "+freq_ii+" date cut off is "+num_date);
 	console.log("recalculating node ages");
-	calcNodeAges(LBItime_window);
+	calcNodeAges(time_window);
 	console.log("adjusting node colors");
 	adjust_coloring_by_date();
 	console.log("updating frequencies");
