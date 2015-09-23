@@ -35,9 +35,9 @@ virus_config = {
 	'aggregate_regions': [  ("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]),
 							("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ],
 	'frequency_stiffness':10.0,
-	'verbose':2, 
+	'verbose':2,
 	'tol':2e-4, #tolerance for frequency optimization
-	'pc':1e-3, #pseudocount for frequencies 
+	'pc':1e-3, #pseudocount for frequencies
 
 	'extra_pivots': 12,  # number of pivot point for or after the last observations of a mutations
 	'inertia':0.5,		# fraction of frequency change carry over in the stiffness term
@@ -80,6 +80,7 @@ class process(virus_frequencies):
 		self.auspice_frequency_fname = 	'../auspice/data/' + self.prefix + self.resolution_prefix + 'frequencies.json'
 		self.auspice_meta_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'meta.json'
 		self.auspice_HI_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'HI.json'
+		self.accession_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'accession_numbers.tsv'
 		self.auspice_HI_display_mutations =	 '../auspice/_data/HI_mutation_effects.json'
 		self.nuc_alphabet = 'ACGT-N'
 		self.aa_alphabet = 'ACDEFGHIKLMNPQRSTVWY*X'
@@ -260,7 +261,7 @@ class process(virus_frequencies):
 			meta["virus_stats"] = [ [str(y)+'-'+str(m)] + [self.date_region_count[(y,m)][reg] for reg in self.regions]
 									for y,m in sorted(self.date_region_count.keys()) ]
 		write_json(meta, self.auspice_meta_fname, indent=0)
-
+		self.export_accession_numbers()
 
 	def htmlpath(self):
 		htmlpath = '../auspice/'
@@ -324,6 +325,14 @@ class process(virus_frequencies):
 		table_effects.sort(key = lambda x:x[1], reverse=True)
 		display_effects[self.virus_type][self.resolution] = table_effects
 		write_json(display_effects, self.auspice_HI_display_mutations)
+
+	def export_accession_numbers(self):
+		with open(self.accession_fname,'w') as ofile:
+			for n in self.tree.leaf_nodes():
+				try:
+					ofile.write('\t'.join(map(str, [n.strain, n.accession]))+'\n')
+				except:
+					print(n.strain,"has not accession number")
 
 
 	def align(self, fast=False):
@@ -480,5 +489,5 @@ class process(virus_frequencies):
 		if 'nuc_clades' in tasks:
 			self.all_clade_frequencies(gene='nuc')
 		if 'tree' in tasks:
-			self.all_tree_frequencies(threshold = 20) 
+			self.all_tree_frequencies(threshold = 20)
 
