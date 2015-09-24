@@ -57,7 +57,6 @@
 					</a>			
 				</div>
 				<div class="collapse navbar-collapse" id="navbar-collapse">
-					{% if page.categories.first == 'app' %}
 					<ul class="nav navbar-nav navbar-left">
 						<li role="presentation"><p>/</p></li>
 						<li class="dropdown">
@@ -73,10 +72,11 @@
 								{% for entry in site.data.viruses %}
 									{% if page.virus == entry.virus %}
 									<li class="disabled">
+										<a>{{ entry.virus }}</a>
 									{% else %}
 									<li>
-									{% endif %}
 										<a href="/{{ entry.virus }}/{{ page.resolution }}">{{ entry.virus }}</a>
+									{% endif %}
 									</li>
 								{% endfor %}
 							</ul>
@@ -97,10 +97,11 @@
 										{% for res in entry.resolutions %}
 											{% if page.resolution == res %}
 											<li class="disabled">
+												<a>{{ res }}</a>
 											{% else %}
 											<li>
-											{% endif %}
 												<a href="/{{ entry.virus }}/{{ res }}">{{ res }}</a>
+											{% endif %}
 											</li>
 										{% endfor %}
 									{% endif %}
@@ -108,7 +109,6 @@
 							</ul>
 						</li>						
 					</ul>
-					{% endif %}
 					<ul class="nav navbar-nav navbar-right nav-tabs">
 						{% if page.categories.first == 'methods' %}
 						<li class="active" role="presentation">
