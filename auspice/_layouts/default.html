@@ -57,13 +57,13 @@
 				</div>
 				<div class="collapse navbar-collapse" id="navbar-collapse">
 					<ul class="nav navbar-nav navbar-left nav-pills">
-						<!-- <li role="presentation"><p>/</p></li> -->
+						<li role="presentation"><p>/</p></li>
 						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
 								{% if page.categories.first == 'app' %}
-								/ &nbsp; {{ page.virus }}
+								{{ page.virus }}
 								{% else %}
-								/ &nbsp; Virus 
+								Virus 
 								{% endif %}
 								<span class="caret"></span>
 							</a>
@@ -82,13 +82,13 @@
 							</ul>
 						</li>
 						{% if page.categories.first == 'app' %}						
-						<!-- <li role="presentation"><p>/</p></li> -->
+						<li role="presentation"><p>/</p></li>
 						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
 								{% if page.categories.first == 'app' %}
-								/ &nbsp; {{ page.resolution }}
+								{{ page.resolution }}
 								{% else %}
-								/ &nbsp; Time 
+								Time 
 								{% endif %}
 								<span class="caret"></span>
 							</a>
