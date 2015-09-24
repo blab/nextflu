@@ -142,10 +142,11 @@
 								{% for report in site.categories.reports %}
 								{% if page.linktitle == report.linktitle %}
 								<li class="disabled" role="presentation">
+									<a>{{ report.linktitle }}</a>
 								{% else %}
 								<li role="presentation">
-								{% endif %}	
 									<a href="{{ report.url }}">{{ report.linktitle }}</a>
+								{% endif %}	
 								</li>
 								{% endfor %}
 							</ul>
