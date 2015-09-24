@@ -13,8 +13,7 @@
 		<!-- Favicon -->
 		<link rel="shortcut icon" href="/images/favicon.png"/>		
 		
-		<script type="text/javascript" src="/js/bootstrap/jquery-1.7.2.min.js"></script>
-		<script type="text/javascript" src="/js/bootstrap/dropdown.js"></script>	
+		<script type="text/javascript" src="/js/bootstrap.js"></script>		
 		
 		<!-- Typekit -->
 		<script>
@@ -70,6 +69,7 @@
 								<span class="caret"></span>
 							</a>
 							<ul class="dropdown-menu">
+								<li class="dropdown-header">Virus</li>
 								{% for entry in site.data.viruses %}
 									{% if page.virus == entry.virus %}
 									<li class="disabled">
@@ -92,6 +92,7 @@
 								<span class="caret"></span>
 							</a>
 							<ul class="dropdown-menu">
+								<li class="dropdown-header">Resolution</li>
 								{% for entry in site.data.viruses %}
 									{% if page.virus == entry.virus %}
 										{% for res in entry.resolutions %}
