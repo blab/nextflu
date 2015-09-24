@@ -49,7 +49,7 @@
 						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
 					</button>				
-					<a class="navbar-brand nounderline" href="/">
+					<a class="navbar-brand" href="/">
 						<div class="navtitle">
 							<span class="c2">n</span><span class="c3">e</span><span class="c4">x</span><span class="c5">t</span><span class="c6">f</span><span class="c7">l</span><span class="c8">u</span>
 						</div>
@@ -81,6 +81,7 @@
 								{% endfor %}
 							</ul>
 						</li>
+						{% if page.categories.first == 'app' %}						
 						<li role="presentation"><p>/</p></li>
 						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
@@ -108,7 +109,8 @@
 									{% endif %}
 								{% endfor %}
 							</ul>
-						</li>						
+						</li>
+						{% endif %}										
 					</ul>
 					<ul class="nav navbar-nav navbar-right nav-tabs">
 						{% if page.categories.first == 'methods' %}
