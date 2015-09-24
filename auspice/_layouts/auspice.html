@@ -9,41 +9,9 @@ categories:
 		<div class="subtitle-container note">
 			Real-time tracking of seasonal influenza <br> virus evolution in humans
 		</div>
-		<div class="bigspacer"></div>
-		<div class="io-container">
-			<form class="form-inline form-small">
-				<div class="form-group">
-					<label class="control-label">Virus</label>
-					<select id="virus_select" class="form-control" onChange="document.location = this.value" value="GO">
-						{% for entry in site.data.viruses %}
-						<option value="/{{entry.virus}}/{{page.resolution}}/" 
-							{% if page.virus == entry.virus %} selected="selected" {% endif %}
-							>{{ entry.name }}</option>
-						{% endfor %}
-					</select>
-				</div>
-			</form>
-			<div class="spacer"></div>
-			<form class="form-inline form-small">
-				<div class="form-group">
-					<label class="control-label">Time</label>
-					<select id="resolution_select" class="form-control" onChange="document.location = this.value" value="GO">
-					{% for entry in site.data.viruses %}
-						{% if page.virus == entry.virus %} 
-							{% for res in entry.resolutions %}
-								<option value="/{{ entry.virus }}/{{ res }}"
-								{% if page.resolution == res %} selected="selected" {% endif %}
-								>{{ res }}</option>
-							{% endfor %}
-					{% endif %}
-					{% endfor %}
-					</select>
-				</div>
-			</form>	
-		</div>
 		<div class="bigspacer"></div>	
 		<div class="io-container title">
-			HA phylogeny
+			Phylogeny
 		</div>
 		<div class="spacer"></div>		
 		<div class="row">
