@@ -15,8 +15,7 @@ var right_margin = 10;
 var bottom_margin = 10;
 
 var branchLabelVisFraction = 0.05;
-var top_margin = 12;
-
+var top_margin = 20;
 if ((typeof branch_labels != "undefined")&&(branch_labels)) {top_margin +=5;}
 
 function initDateColorDomain(intAttributes){
@@ -228,7 +227,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.enter().append("polyline")
 		.attr("class", "link")
 		.style("stroke-width", branchStrokeWidth)
-		.style("stroke", branchStrokeColor)		
+		.style("stroke", branchStrokeColor)
 		.style("stroke-linejoin", "round")
 		.style("cursor", "pointer")
 		.style("fill", "none")
@@ -341,7 +340,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		}
 
 		if ((lMax-lMin)>0.999*dy){
-			lMin = lMax - dy*0.7 
+			lMin = lMax - dy*0.7
 		}
 		var visibleXvals = tips.filter(function (d){return (d.yvalue>=lMin)&&(d.yvalue<lMax)}).map(function(d){return +d.xvalue;});
 		nDisplayTips = visibleXvals.length;
@@ -467,7 +466,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		console.log("restriction to "+rt+" "+restrictTo[rt]);
 		d3.selectAll(".tip")
 			.style("visibility", tipVisibility);
-		dragend();		
+		dragend();
 	}
 
 	for (rt in restrictTo){
