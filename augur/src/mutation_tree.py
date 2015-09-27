@@ -71,8 +71,7 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 				if self.verbose:
 					print "using outgroup found in alignment", outgroup
 			else:
-				standard_outgroups = {seq.name:{'seq':str(seq.seq).upper(), 'desc':seq.description}
-										for seq in SeqIO.parse(std_outgroup_file, 'fasta')}
+				standard_outgroups = self.load_standard_outgroups()
 				if outgroup in standard_outgroups:
 					self.outgroup = standard_outgroups[outgroup]
 					if self.verbose:
@@ -94,6 +93,12 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 		self.filter_geo(prune=False)
 		self.make_strain_names_unique()
 
+	def load_standard_outgroups(self):
+		return {seq.name:{'seq':str(seq.seq).upper(), 'strain':seq.name, 'desc':seq.description,
+						'date':get_date(seq.description)}
+				for seq in SeqIO.parse(std_outgroup_file, 'fasta')}
+
+
 	def auto_outgroup_blast(self):
 		from random import sample
 		from Bio.Blast.Applications import NcbiblastnCommandline
@@ -104,9 +109,7 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 		earliest_date = np.min([numerical_date(v["date"]) for v in self.viruses])
 		all_strains = [v["strain"] for v in self.viruses]
 		representatives = [SeqRecord(Seq(v['seq']), id=v['strain']) for v in sample(self.viruses, min(nvir, nvir))]
-		standard_outgroups = {seq.name:{'seq':str(seq.seq).upper(), 'strain':seq.name, 'desc':seq.description, 'date':get_date(seq.description)}
-								for seq in SeqIO.parse(std_outgroup_file, 'fasta')}
-
+		standard_outgroups = self.load_standard_outgroups()
 		SeqIO.write(representatives, self.run_dir+'representatives.fasta', 'fasta')
 		blast_out = self.run_dir+"outgroup_blast.xml"
 		blast_cline = NcbiblastnCommandline(query=self.run_dir+"representatives.fasta", db=std_outgroup_file, evalue=0.01,
@@ -127,6 +130,7 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
  				break
  			if self.include_ref_strains and (og not in all_strains):
 	 			self.viruses.append(standard_outgroups[og])
+	 			print("including reference strain ",og)
 	 	if np.mean([y[-1] for y in hits])<0.8:
 	 		self.midpoint_rooting = True
 		self.outgroup = standard_outgroups[og]
@@ -324,7 +328,7 @@ if __name__=="__main__":
 
 	shutil.copy2('../auspice/_site/js/muttree.js', muttree.outdir+'js/muttree.js')
 	shutil.copy2('../auspice/_site/js/msa.min.js', muttree.outdir+'js/msa.min.js')
-	shutil.copy2('../auspice/_site/muttree/index.html', muttree.outdir+'index.html')
+	shutil.copy2('../auspice/_site/images/gisaid_nextflu.png', muttree.outdir+'gisaid_nextflu.png')
 	shutil.copy2('../auspice/_site/css/style.css', muttree.outdir+'css/style.css')
 
 
