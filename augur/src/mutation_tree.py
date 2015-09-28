@@ -12,7 +12,8 @@ from Bio.Align import MultipleSeqAlignment
 import numpy as np
 from itertools import izip
 
-std_outgroup_file = 'source-data/outgroups.fasta'
+std_outgroup_file_blast = 'source-data/outgroups.fasta'
+std_outgroup_file_nuc = 'source-data/vaccrefMix_HAanno_nuc_Sep2015.fa'
 virus_config.update({
 	# data source and sequence parsing/cleaning/processing
 	'fasta_fields':{0:'strain', 1:'date', 2:'isolate_id', 3:'passage', 4:'subtype', 5:'ori_lab', 6:'sub_lab', 7:'submitter'},
@@ -22,7 +23,7 @@ virus_config.update({
 
 def get_date(strain):
 	try:
-		year = int(strain.split()[0].split('/')[-1])
+		year = int(strain.split('|')[2][:4])
 	except:
 		print("cannot parse year of ", strain)
 		return 1900
@@ -94,14 +95,15 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 		self.make_strain_names_unique()
 
 	def load_standard_outgroups(self):
-		return {seq.name:{'seq':str(seq.seq).upper(), 'strain':seq.name, 'desc':seq.description,
+		return {'|'.join(seq.description.split('|')[:2]).replace(' ',''):{'seq':seq.description.split('|')[0],
+					'seq':str(seq.seq).upper(), 'strain':seq.description.split('|')[1].replace(' ',''), 'desc':seq.description,
 						'date':get_date(seq.description)}
-				for seq in SeqIO.parse(std_outgroup_file, 'fasta')}
+				for seq in SeqIO.parse(std_outgroup_file_nuc, 'fasta')}
 
 
 	def auto_outgroup_blast(self):
 		from random import sample
-		from Bio.Blast.Applications import NcbiblastnCommandline
+		from Bio.Blast.Applications import NcbiblastxCommandline
 		from Bio.Blast import NCBIXML
 
 		self.make_run_dir()
@@ -112,7 +114,7 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 		standard_outgroups = self.load_standard_outgroups()
 		SeqIO.write(representatives, self.run_dir+'representatives.fasta', 'fasta')
 		blast_out = self.run_dir+"outgroup_blast.xml"
-		blast_cline = NcbiblastnCommandline(query=self.run_dir+"representatives.fasta", db=std_outgroup_file, evalue=0.01,
+		blast_cline = NcbiblastxCommandline(query=self.run_dir+"representatives.fasta", db=std_outgroup_file_blast, evalue=0.01,
 		                                     outfmt=5, out=blast_out)
 		stdout, stderr = blast_cline()
 		with open(blast_out, 'r') as bfile:
@@ -328,7 +330,7 @@ if __name__=="__main__":
 
 	shutil.copy2('../auspice/_site/js/muttree.js', muttree.outdir+'js/muttree.js')
 	shutil.copy2('../auspice/_site/js/msa.min.js', muttree.outdir+'js/msa.min.js')
-	shutil.copy2('../auspice/_site/images/gisaid_nextflu.png', muttree.outdir+'gisaid_nextflu.png')
+	shutil.copy2('../auspice/_site/muttree/index.html', muttree.outdir+'index.html')
 	shutil.copy2('../auspice/_site/css/style.css', muttree.outdir+'css/style.css')
 
 
