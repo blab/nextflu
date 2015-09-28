@@ -553,8 +553,6 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.domain([d3.min(xValues), d3.max(xValues)]);
 	var yScale = d3.scale.linear()
 		.domain([d3.min(yValues), d3.max(yValues)]);
-	setMargins();
-
 	resize();
 
 	function exportTreeSVG(){

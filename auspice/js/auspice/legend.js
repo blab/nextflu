@@ -2,7 +2,7 @@ var legendRectSize = 15;
 var legendSpacing = 4;
 function makeLegend(){
 
-	d3.select("#legend-title").text(function(d){
+	d3.select("#legend-title").html(function(d){
 		if (colorBy == "ep") {
 			return "Epitope mutations";
 		}
@@ -25,10 +25,10 @@ function makeLegend(){
 			return "Date";
 		}
         if (colorBy == "cHI") {
-            return "Log2 titer distance from root";
+            return "log<sub>2</sub> titer distance from root";
         }
         if (colorBy == "HI_dist") {
-            return "Log2 titer distance from "+focusNode.strain;
+            return "log<sub>2</sub> titer distance from "+focusNode.strain;
         }
 		if (colorBy == "dfreq") {
 			var tmp_nmonth = Math.round(12*dfreq_dn*time_step);
