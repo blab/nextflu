@@ -12,7 +12,7 @@ def validation_figures(params):
 	sns.set_style('darkgrid')
 	virus_config.update(params.__dict__)
 	# pass all these arguments to the processor: will be passed down as kwargs through all classes
-	myflu = flu_process(**virus_config) 
+	myflu = flu_process(**virus_config)
 	myflu.load()
 	myflu.determine_variable_positions()
 	fig_prefix = 'figures/'+params.prefix.split('/')[-1]
@@ -59,7 +59,7 @@ def validation_figures(params):
 							-(val_bwd - myflu.serum_potency[mtype][v[1]] - myflu.virus_effect[mtype][serum[0]])
 			val_bwd = myflu.HI_normalized[v]
 			reciprocal_measurements.append([testvir, serum, diff_uncorrected, diff_corrected])
-			reciprocal_measurements_titers.append([testvir, serum, val_fwd, val_bwd, 
+			reciprocal_measurements_titers.append([testvir, serum, val_fwd, val_bwd,
 			                                      (val_fwd - myflu.serum_potency[mtype][serum] - myflu.virus_effect[mtype][testvir]),
                       							  (val_bwd - myflu.serum_potency[mtype][v[1]] - myflu.virus_effect[mtype][serum[0]]),
 												  ])
@@ -112,10 +112,10 @@ def validation_figures(params):
 
 	plt.figure(figsize=(figheight,figheight))
 	ax=plt.subplot(111)
-	plt.hist(additivity_test['control'], alpha=0.7,normed=True, bins = np.linspace(0,3,18), 
+	plt.hist(additivity_test['control'], alpha=0.7,normed=True, bins = np.linspace(0,3,18),
 	         label = 'control, mean='+str(np.round(np.mean(additivity_test['control']),2)))
 	plt.hist(additivity_test['test'], alpha=0.7,normed=True, bins = np.linspace(0,3,18),
-	         label = 'quartett, mean='+str(np.round(np.mean(additivity_test['test']),2)))
+	         label = 'quartet, mean='+str(np.round(np.mean(additivity_test['test']),2)))
 	ax.tick_params(axis='both', labelsize=fs)
 	plt.xlabel('difference between top two', fontsize = fs)
 	plt.legend(fontsize=fs)
@@ -140,14 +140,14 @@ def scan_regularization(params, grid):
 	lam_HI = params.reg
 	for pi, lam_pot in enumerate(grid):
 		for ai, lam_avi in enumerate(grid):
-			myflu = flu_process(**virus_config) 
+			myflu = flu_process(**virus_config)
 			myflu.load()
 			myflu.refine()
 			myflu.determine_variable_positions()
 			myflu.map_HI(training_fraction=params.training, method = 'nnl1reg', map_to_tree=False,
 			lam_HI=lam_HI, lam_pot=lam_pot, lam_avi=lam_avi, subset_strains = params.train_strains)
 			myflu.validate(plot=False)
-			####  calculated asymmetries 
+			####  calculated asymmetries
 			reciprocal_measurements = []
 			for (testvir, serum) in myflu.HI_normalized:
 				tmp_recip = [v for v in myflu.HI_normalized if serum[0]==v[0] and testvir==v[1][0]]
@@ -174,7 +174,7 @@ if __name__=="__main__":
 	parser.add_argument('--reg', type = float, default = 1.0, help='regularization parameter')
 	parser.add_argument('--avi', type = float, default = 2.0, help='regularization parameter')
 	parser.add_argument('--pot', type = float, default = 0.3, help='regularization parameter')
-	parser.add_argument('--resolution', type = str,  help ="label for the resolution")	
+	parser.add_argument('--resolution', type = str,  help ="label for the resolution")
 	parser.add_argument('--min_aamuts', type = str, default = '0', help='minimal number of aminoacid mutations to include branch or epi for epitope or rbs for receptor binding site')
 	params = parser.parse_args()
 	if params.flutype=='H3N2':
@@ -196,14 +196,14 @@ if __name__=="__main__":
 		params.min_aamuts = int(params.min_aamuts)
 	except:
 		pass
-	params.__dict__['HI_fname']='source-data/'+params.flutype+'_HI_titers.txt'	
+	params.__dict__['HI_fname']='source-data/'+params.flutype+'_HI_titers.txt'
 
 #	dists, myflu = titer_vs_distances(params)
 
 	dHI_list,myflu = validation_figures(params)
 #	grid = [0.1, 0.3, 1,3, 10]
 #	accuracy = scan_regularization(params, grid)
-#	fname = 'validation/'+'_'.join([params.flutype, 'virus' if params.train_strains else 'measurements', 
+#	fname = 'validation/'+'_'.join([params.flutype, 'virus' if params.train_strains else 'measurements',
 #	                               'minaa', str(params.min_aamuts), 'lHI', str(params.reg),
 #	                               'tree' if params.map_to_tree else 'mutation'])
 #	with open(fname+'.pkl', 'w') as outfile:

@@ -88,5 +88,7 @@ function make_structure(){
 		script:	jsmolscript}
 
 	myapplett = $("#HA_struct").html(Jmol.getAppletHtml("jmolApplet0",Info));
+	var structCaption = document.getElementById('struct_caption');
+	struct_caption.innerHTML='JSmol rendering of <a target="_blank" href="http://www.rcsb.org/pdb/explore/explore.do?structureId='+structure.substring(0,4)+'">'+structure.substring(0,4)+'</a>';
 }
 

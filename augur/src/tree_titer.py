@@ -241,8 +241,9 @@ class HI_tree(object):
 					branches = np.unique([relevant_muts.index(mut) for mut in muts
 					                     if mut in relevant_muts])
 					if len(branches): tmp[branches] = 1
-					# add serum effect
-					tmp[len(relevant_muts)+self.sera.index(ref)] = 1
+					# add serum effect for heterologous viruses
+					if test!=ref[0]:
+						tmp[len(relevant_muts)+self.sera.index(ref)] = 1
 					# add virus effect
 					tmp[len(relevant_muts)+len(self.sera)+self.HI_strains.index(test)] = 1
 					# append model and fit value to lists seq_graph and HI_dist
@@ -322,8 +323,9 @@ class HI_tree(object):
 							branches = np.unique([c.HI_branch_index for c in path
 							                     if hasattr(c, 'HI_branch_index') ])
 						if len(branches): tmp[branches] = 1
-						# add serum effect
-						tmp[self.HI_split_count+self.sera.index(ref)] = 1
+						# add serum effect for heterologous viruses
+						if ref[0]!=test:
+							tmp[self.HI_split_count+self.sera.index(ref)] = 1
 						# add virus effect
 						tmp[self.HI_split_count+len(self.sera)+self.HI_strains.index(test)] = 1
 						# append model and fit value to lists tree_graph and HI_dist
@@ -445,13 +447,13 @@ class HI_tree(object):
 		self.normalize_HI()
 		self.add_mutations()
 		self.mark_HI_splits()
-		if self.training_fraction<1.0:
+		if self.training_fraction<1.0: # validation mode, set aside a fraction of measurements to validate the fit
 			self.test_HI, self.train_HI = {}, {}
-			if self.subset_strains:
+			if self.subset_strains:    # exclude a fraction of test viruses
 				tmp = set(self.HI_strains)
-				tmp.difference_update(self.ref_strains)
+				tmp.difference_update(self.ref_strains) # don't use references viruses in the set to sample from
 				training_strains = sample(tmp, int(self.training_fraction*len(tmp)))
-				for tmpstrain in self.ref_strains:
+				for tmpstrain in self.ref_strains:      # add all reference viruses to the training set
 					if tmpstrain not in training_strains:
 						training_strains.append(tmpstrain)
 				for key, val in self.HI_normalized.iteritems():
@@ -459,7 +461,7 @@ class HI_tree(object):
 						self.train_HI[key]=val
 					else:
 						self.test_HI[key]=val
-			else:
+			else: # simply use a fraction of all measurements for testing
 				for key, val in self.HI_normalized.iteritems():
 					if np.random.uniform()>self.training_fraction:
 						self.test_HI[key]=val
@@ -468,12 +470,13 @@ class HI_tree(object):
 		else:
 			self.train_HI = self.HI_normalized
 
+		prev_years = 6 # number of years prior to cut-off to use when fitting date censored data
 		if self.cutoff_date is not None:
 			self.train_HI = {key:val for key,val in self.train_HI.iteritems()
 							if self.node_lookup[key[0]].num_date<=self.cutoff_date and
 							   self.node_lookup[key[1][0]].num_date<=self.cutoff_date and
-							   self.node_lookup[key[0]].num_date>self.cutoff_date-6 and
-							   self.node_lookup[key[1][0]].num_date>self.cutoff_date-6}
+							   self.node_lookup[key[0]].num_date>self.cutoff_date-prev_years and
+							   self.node_lookup[key[1][0]].num_date>self.cutoff_date-prev_years}
 			sera = set()
 			ref_strains = set()
 			HI_strains = set()
@@ -554,6 +557,7 @@ class HI_tree(object):
 		# summary figures using previously determined models
 		for map_to_tree, model in [(True, 'tree'), (False,'mutation')]:
 			try:
+				# figures showing the histograms of virus and serum effects
 				plt.figure(figsize=(1.3*figheight,figheight))
 				ax = plt.subplot(121)
 				plt.hist(self.virus_effect[model].values(), bins=np.linspace(-2,2,21), normed=True)
@@ -569,6 +573,19 @@ class HI_tree(object):
 				ax.set_xticks([-4,-2,0,2,4])
 				ax.tick_params(axis='both', labelsize=fs)
 				for fmt in fmts: plt.savefig(self.htmlpath()+'HI_effects_'+model+fmt)
+
+				# write model statistics
+				with open(self.htmlpath()+'parameters_'+model+'.txt', 'w') as ofile:
+					ofile.write('total number of viruses:\t'+str(len(self.viruses))+'\n')
+					ofile.write('number of test viruses:\t'+str(len(self.virus_effect[model]))+'\n')
+					ofile.write('number of reference viruses:\t'+str(len(self.ref_strains))+'\n')
+					ofile.write('number of antisera:\t'+str(len(self.sera))+'\n')
+					ofile.write('number of HI measurements:\t'+str(len(self.HI_normalized))+'\n')
+					ofile.write('number of genetic parameters:\t'+str(self.HI_split_count if model=='tree' else len(self.relevant_muts))+'\n')
+					ofile.write('number of positive genetic parameters:\t'
+					            +str(sum([n.dHI>0.001 for n in self.tree.postorder_internal_node_iter()]) if model=='tree'
+					                 else sum([x>0.001 for x in self.mutation_effects.values()]))+'\n')
+
 			except:
 				print "can't plot effect distributions"
 
@@ -621,8 +638,8 @@ class HI_tree(object):
 			ax = plt.subplot(111)
 			plt.plot([-1,6], [-1,6], 'k')
 			plt.scatter(a[:,0], a[:,1])
-			plt.ylabel("predicted log2 distance", fontsize = fs)
-			plt.xlabel("measured log2 distance" , fontsize = fs)
+			plt.ylabel(r"predicted $\log_2$ distance", fontsize = fs)
+			plt.xlabel(r"measured $\log_2$ distance" , fontsize = fs)
 			ax.tick_params(axis='both', labelsize=fs)
 			plt.ylim([-3,8])
 			plt.xlim([-3,7])
@@ -636,34 +653,38 @@ class HI_tree(object):
 
 
 	def add_titers(self):
-		for ref in self.ref_strains:
+		'''
+		write the HI models into the tree structure that is going to be exported
+		to auspice for display in the browser
+		'''
+		for ref in self.ref_strains: # add empty data structures
 			self.node_lookup[ref].HI_titers= defaultdict(dict)
 			self.node_lookup[ref].HI_titers_raw= defaultdict(dict)
 			self.node_lookup[ref].potency_mut={}
 			self.node_lookup[ref].potency_tree={}
 			self.node_lookup[ref].autologous_titers = {}
-		for ref in self.sera:
+		for ref in self.sera: # add serum potencies to reference viruses
 			self.node_lookup[ref[0]].autologous_titers[ref[1]] = np.median(self.autologous_titers[ref]['val'])
 			if 'mutation' in self.virus_effect:
 				self.node_lookup[ref[0]].potency_mut[ref[1]] = self.serum_potency['mutation'][ref]
 			if 'tree' in self.virus_effect:
 				self.node_lookup[ref[0]].potency_tree[ref[1]] = self.serum_potency['tree'][ref]
-		for (test, ref), val in self.HI_normalized.iteritems():
+		for (test, ref), val in self.HI_normalized.iteritems(): # add normalized HI titers for coloring on tree
 			try:
 				self.node_lookup[ref[0]].HI_titers[self.node_lookup[test].clade][ref[1]] = val
 			except:
 				print("Can't assign",test, ref)
-		for (test, ref), val in self.HI_raw.iteritems():
+		for (test, ref), val in self.HI_raw.iteritems(): # add the raw titer values for display in tool tips
 			try:
 				self.node_lookup[ref[0]].HI_titers_raw[self.node_lookup[test].clade][ref[1]] = val
 			except:
 				print("Can't assign",test, ref)
-		for test in self.HI_strains:
+		for test in self.HI_strains: # add the virus avidities to each node with HI information
 			if 'mutation' in self.virus_effect:
 				self.node_lookup[test].avidity_tree = self.virus_effect['mutation'][test]
 			if 'tree' in self.virus_effect:
 				self.node_lookup[test].avidity_mut = self.virus_effect['tree'][test]
-		for ref in self.ref_strains:
+		for ref in self.ref_strains: # add average potencies and titers to each reference virus (not actually used in auspice right now).
 			self.node_lookup[ref].mean_HI_titers = {key:np.mean(titers.values()) for key, titers in
 			 									self.node_lookup[ref].HI_titers.iteritems()}
 			self.node_lookup[ref].mean_potency_tree = np.mean(self.node_lookup[ref].potency_tree.values())

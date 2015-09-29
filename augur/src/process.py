@@ -42,7 +42,7 @@ virus_config = {
 	'extra_pivots': 12,  # number of pivot point for or after the last observations of a mutations
 	'inertia':0.5,		# fraction of frequency change carry over in the stiffness term
 	'n_iqd':3,     # standard deviations from clock
-	'min_mutation_frequency':0.1,
+	'min_mutation_frequency':0.02,
 	'min_genotype_frequency':0.1,
 }
 
@@ -330,10 +330,9 @@ class process(virus_frequencies):
 		with open(self.accession_fname,'w') as ofile:
 			for n in self.tree.leaf_nodes():
 				try:
-					ofile.write('\t'.join(map(str, [n.strain, n.accession]))+'\n')
+					ofile.write('\t'.join(map(str, [n.strain, n.accession, n.lab]))+'\n')
 				except:
-					print(n.strain,"has not accession number")
-
+					print(n.strain,"has no accession number")
 
 	def align(self, fast=False):
 		'''

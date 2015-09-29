@@ -1,3 +1,4 @@
+from glob import glob
 from itertools import izip
 from matplotlib import cm
 import numpy as np
@@ -12,11 +13,28 @@ fs = 12
 plt.locator_params(nbins=4)
 fmts = ['.pdf','.svg','.png']
 figheight = 4
+####################################
+##### merge accession number files
+####################################
+def make_combined_accession_number_lists():
+    for flu in ['H3N2', 'H1N1pdm', 'Vic', 'Yam']:
+        flist = glob.glob('../auspice/data/'+flu+'*accession_numbers.tsv')
+        all_accessions=set()
+        for fname in flist:
+            with open(fname) as infile:
+                all_accessions.update([tuple(line.split('\t')[:2]) for line in infile])
+
+        with open('../auspice/data/'+flu+'_all_accession_numbers.tsv', 'w') as ofile:
+            for strain, acc in all_accessions:
+                ofile.write(strain+'\t'+acc+'\n')
+
+
+
+
 ######################################
 #### make list of mutation effects across different periods
 ######################################
 def mutation_list(flu = 'H3N2', format='tsv', nconstraints=False):
-    from glob import glob
     import pandas as pd
     flist = glob('../auspice/'+flu+'/*to*/HI_mutation_effects.tsv')
     mutation_effects = {}
@@ -144,7 +162,8 @@ def trajectory_figure(flu = 'H3N2', res = '1985to2016'):
     plt.tight_layout(w_pad=0.01, h_pad=0.01)
 
 ######################################
-#### make a figure that plots the cumulative antigenic change vs time
+#### calculate effect size distribution on the trunk of the tree
+#### calculate titer variance explained using different cutoffs of trunk effects
 ######################################
 def cumulative_antigenic(myflu, n=10):
     from random import sample
@@ -211,133 +230,10 @@ def cumulative_antigenic(myflu, n=10):
     plt.xlabel('effect size cutoff')
 
 
-######################################
-#### make a figure that compares
-#### trunk frequency increase to dHI
-######################################
-def slope_vs_dHI(myflu):
-    plt.figure(figsize=(1.6*figheight, figheight))
-    ax = plt.subplot('121')
-    slopes = []
-    cutoff_freq = 0.25
-    tmp_pivots = myflu.tree.seed_node.pivots
-    dt = tmp_pivots[1]-tmp_pivots[0]
-    y1 = int(1.0/dt)
-    y3 = int(3.0/dt)
-    for node in myflu.tree.postorder_internal_node_iter():
-        tmp_freq = node.freq['global']
-        if tmp_freq is not None and tmp_freq[0]<cutoff_freq and np.max(tmp_freq)>cutoff_freq:
-            ii, offset, slope = get_slope(tmp_freq, tmp_pivots, cutoff_freq)
-            dfreq_sum = tmp_freq[ii:ii+y3].sum()
-            if ii+y3<len(tmp_freq):
-                dfreq_y1 = tmp_freq[ii+y1]-tmp_freq[ii]
-                dfreq_y3 = tmp_freq[ii+y3]-tmp_freq[ii]
-            else:
-                dfreq_y1 = 0
-                dfreq_y3 = 0
-            HI=node.dHI
-            slopes.append([HI, slope, np.max(tmp_freq), dfreq_y1, dfreq_y3, dfreq_sum])
-            plt.plot(tmp_pivots-offset, tmp_freq, lw=2, c=cm.jet(np.sqrt(HI)/2.0), alpha=min(1.0, max(HI, 0.3)))
-
-    plt.xlabel('time', fontsize=fs)
-    plt.ylabel('frequency', fontsize=fs)
-    plt.xlim([-1,2])
-    plt.ylim([-0.01,1.1])
-    ax.tick_params(axis='both', labelsize=fs)
-    slopes = np.array(slopes)
-
-    ax = plt.subplot('122')
-    plt.scatter(slopes[:,1], slopes[:,0])
-    plt.xlabel('frequency slope', fontsize=fs)
-    plt.ylabel('titer drop', fontsize=fs)
-    ax.tick_params(axis='both', labelsize=fs)
-    plt.tight_layout()
-    from scipy.stats import spearmanr
-    print("spearman correlation HI/slope:",spearmanr(slopes[:,:2]))
-    print("spearman correlation HI/max:",spearmanr(slopes[:,0],slopes[:,2]))
-    print("spearman correlation HI/delta1Y:",spearmanr(slopes[:,0],slopes[:,3]))
-    print("spearman correlation HI/delta3Y:",spearmanr(slopes[:,0],slopes[:,4]))
-    print("spearman correlation HI/freqsum:",spearmanr(slopes[:,0],slopes[:,5]))
-    return slopes
-
-def get_slope(freq, pivots, threshold):
-    ii = np.argmax(freq>threshold)
-    slope = (freq[ii]-freq[ii-1])/(pivots[ii]-pivots[ii-1])
-    offset = pivots[ii-1] + (threshold-freq[ii-1])/slope
-    return ii, offset, slope
-
-######################################
-#### make a figure that compares
-#### trunk frequency increase to dHI
-######################################
-def slope_vs_mutation(myflu):
-    plt.figure(figsize=(1.6*figheight, figheight))
-    ax = plt.subplot('121')
-    slopes = []
-    cutoff_freq = 0.25
-    pivots = myflu.tree.seed_node.pivots
-    dt = pivots[1]-pivots[0]
-    y3 = int(3.0/dt)
-    y1 = int(1.0/dt)
-    for mut in myflu.mutation_effects:
-        HI = myflu.mutation_effects[mut]
-        mutlabel = mut[0]+':'+mut[1][1:]
-        prevmutlabel = mut[0]+':'+mut[1][1:-1]+mut[1][0]
-        if mutlabel in myflu.frequencies["mutations"]["global"] and\
-           prevmutlabel in myflu.frequencies["mutations"]["global"]:
-            mut_freq = np.array(myflu.frequencies["mutations"]["global"][mutlabel])
-            prevmut_freq = np.array(myflu.frequencies["mutations"]["global"][prevmutlabel])
-        else:
-            continue
-        # find sweeps
-        cutoff = 0.25 # minimal change over 3 years
-        dfreq = mut_freq[y3:]-mut_freq[:-y3]
-        #tmp_sweeps = [ii for ii,dx  in enumerate(dfreq[:-1]) if dx>cutoff and dfreq[ii+1]<cutoff]
-        tmp_sweeps = [ii for ii,dx  in enumerate(mut_freq[:-y3]) if dx<cutoff and mut_freq[ii+1]>cutoff]
-        sweeps=[]
-        for ii, si in enumerate(tmp_sweeps):
-            # check that one mutation goes up, the prev down
-            if np.min((mut_freq+prevmut_freq)[si:si+y3])>0.8:
-                #if ii==0 or np.min(mut_freq[tmp_sweeps[ii-1]:si])<0.2:
-                sweeps.append(si)
-        for si in sweeps:
-            tmp_freq = mut_freq[max(0,si-y3):(si+2*y3)]
-            tmp_pivots = pivots[max(0,si-y3):(si+2*y3)]
-            ii, offset, slope = get_slope(tmp_freq, tmp_pivots, cutoff_freq)
-            dfreq_sum = tmp_freq[ii:ii+y3].sum()
-            if ii+y3<len(tmp_freq):
-                dfreq_y1 = tmp_freq[ii+y1]-tmp_freq[ii]
-                dfreq_y3 = tmp_freq[ii+y3]-tmp_freq[ii]
-            else:
-                dfreq_y1 = 0
-                dfreq_y3 = 0
-            slopes.append([HI, slope, np.max(tmp_freq), dfreq_y1, dfreq_y3, dfreq_sum])
-            plt.plot(tmp_pivots-offset, tmp_freq, lw=2, c=cm.jet(np.sqrt(HI)/2.0), alpha=min(1.0, max(HI, 0.3)))
-
-    plt.xlabel('time', fontsize=fs)
-    plt.ylabel('frequency', fontsize=fs)
-    plt.xlim([-1,2])
-    plt.ylim([-0.01,1.1])
-    ax.tick_params(axis='both', labelsize=fs)
-    slopes = np.array(slopes)
-
-    ax = plt.subplot('122')
-    plt.scatter(slopes[:,1], slopes[:,0])
-    plt.xlabel('frequency slope', fontsize=fs)
-    plt.ylabel('titer drop', fontsize=fs)
-    ax.tick_params(axis='both', labelsize=fs)
-    plt.tight_layout()
-    from scipy.stats import spearmanr
-    print("spearman correlation HI/slope:",spearmanr(slopes[:,:2]))
-    print("spearman correlation HI/max:",spearmanr(slopes[:,0],slopes[:,2]))
-    print("spearman correlation HI/delta1Y:",spearmanr(slopes[:,0],slopes[:,3]))
-    print("spearman correlation HI/delta3Y:",spearmanr(slopes[:,0],slopes[:,4]))
-    print("spearman correlation HI/freqsum:",spearmanr(slopes[:,0],slopes[:,5]))
-    return slopes
 
 
 ######################################
-#### make a figure that shows histogram of distance asymmetries and deviations from quartett tests
+#### make a figure that shows histogram of distance asymmetries and deviations from quartet tests
 ######################################
 def tree_additivity_symmetry(myflu, mtype='tree'):
     reciprocal_measurements = []
@@ -409,7 +305,7 @@ def tree_additivity_symmetry(myflu, mtype='tree'):
     plt.hist(additivity_test['control'], alpha=0.7,normed=True, bins = np.linspace(0,3,18),
              label = 'control, mean='+str(np.round(np.mean(additivity_test['control']),2)))
     plt.hist(additivity_test['test'], alpha=0.7,normed=True, bins = np.linspace(0,3,18),
-             label = 'quartett, mean='+str(np.round(np.mean(additivity_test['test']),2)))
+             label = 'quartet, mean='+str(np.round(np.mean(additivity_test['test']),2)))
     ax.tick_params(axis='both', labelsize=fs)
     plt.xlabel(r'$\Delta$ top two distance sums', fontsize = fs)
     plt.legend(fontsize=fs)

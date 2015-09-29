@@ -1,3 +1,9 @@
+######
+# script that explores the predictive power of inferred antigenic change
+# It tree and mutation models inferred in intervals of 10years for H3N2
+#
+######
+
 from collections import defaultdict
 from diagnostic_figures import large_effect_mutations, figheight
 from itertools import izip
@@ -76,6 +82,9 @@ def calc_LBI(tree, LBI_tau = 0.0005, attr = 'lb'):
             max_LBI=tmp_LBI
     return max_LBI
 
+''' mutation model
+goes over different intervals and fits the HI model
+'''
 mut_models = False
 save_figs = False
 if mut_models:
@@ -83,6 +92,7 @@ if mut_models:
     fig, axs = plt.subplots(1,len(resolutions), sharey=True, figsize=(4*figheight, 1.3*figheight))
     cols={}
     HI_distributions_mutations = []
+    #### make a plot of trajectories colored by HI effect
     for res,ax in izip(resolutions,axs):
         params['pivots_per_year'] = 6.0
         params['resolution']=res
@@ -102,8 +112,8 @@ if mut_models:
                    lam_pot = virus_config['lam_pot'],
                    )
 
-        cols = large_effect_mutations(myH3N2, ax, cols)
-        for mut in myH3N2.mutation_effects:
+        cols = large_effect_mutations(myH3N2, ax, cols) # plot the mutation trajectories into a multi panel figure
+        for mut in myH3N2.mutation_effects: # for each mutation, make a list of mutation, effect and frequency trajectory
             HI = myH3N2.mutation_effects[mut]
             mutlabel = mut[0]+':'+mut[1][1:]
             if mutlabel in myH3N2.frequencies["mutations"]["global"]:
@@ -113,17 +123,19 @@ if mut_models:
                 continue
         print(len(HI_distributions_mutations))
     if save_figs:
-        plt.savefig("trajectories_mutations.pdf")
+        plt.savefig("prediction_figures/"+"trajectories_mutations.pdf")
 
     ### make cumulative distribution of HI titers that fix or don't
-    freq_thres = 0.5
+    freq_thres = 0.5    # minimal freq
+    HI_threshold =0.1   # minimal HI effect
     fixed  = np.array([ HI for res, mut, HI, freq in HI_distributions_mutations
-                      if freq[0]<0.1 and freq.max()>freq_thres and HI>0.1])
+                      if freq[0]<0.1 and freq.max()>freq_thres and HI>HI_threshold]) # condition on initially rare
     failed = np.array([ HI for res, mut, HI, freq in HI_distributions_mutations
-                      if freq[0]<0.1 and freq.max()<freq_thres and HI>0.1])
+                      if freq[0]<0.1 and freq.max()<freq_thres and HI>HI_threshold])
 
     D, p = ks_2samp(fixed, failed)
-    print("KS stat:", D, "p-val:",p)
+    print("HI distribution of fixed and failed, KS stat:", D, "p-val:",p)
+    # plt cumulative distributions
     plt.figure()
     plt.plot(sorted(fixed), np.linspace(0,1,len(fixed)), label = '>'+str(freq_thres)+' n='+str(len(fixed)))
     plt.plot(sorted(failed), np.linspace(0,1,len(failed)), label = '<'+str(freq_thres)+' n='+str(len(failed)))
@@ -131,27 +143,44 @@ if mut_models:
     plt.ylabel('cumulative distribution')
     plt.legend(loc=4)
     if save_figs:
-        plt.savefig("cumulative_HI_mutations.pdf")
+        plt.savefig("prediction_figures/"+"cumulative_HI_mutations.pdf")
 
-    ### make plot with fraction successful depending on HI effect
-    plt.figure()
-    HI_threshold = np.array([0.0, 0.3, 0.8, 1.5, 4])
-    HI_binc = 0.5*(HI_threshold[:-1]+HI_threshold[1:])
-    HI_max = np.array([[HI, freq.max()] for res, mut, HI, freq in HI_distributions_mutations if freq[0]<0.1])
-    for freq_thres in [0.25, 0.5, 0.75, 0.95]:
+    ################################################################
+    ##### fraction successful
+    ################################################################
+
+    plt.figure(figsize = (1.6*figheight, figheight))
+    ax3 = plt.subplot(1,1,1)
+    HI_max = np.array([[HI, freq.max()] for res, mut, HI, freq in HI_distributions_mutations if freq[0]<0.1 and freq.max()>0.1])
+    nreps=100
+    HI_threshold = np.array([0.0, 0.3, 0.8, 1.5, 4]) #defining HI categories
+    for fi,freq_thres in enumerate([0.25, 0.5, 0.75, 0.95]):
         frac_success = []
+        stddev_success = []
         for HI_lower, HI_upper in zip(HI_threshold[:-1], HI_threshold[1:]):
             ind = (HI_max[:,0]>=HI_lower)&(HI_max[:,0]<HI_upper)
+            vals = HI_max[ind,1]
+            tmp = []
+            for rep in xrange(nreps):
+                tmp_vals = vals[np.random.randint(len(vals), size=len(vals)/2)]
+                tmp.append((tmp_vals>freq_thres).mean())
+            stddev_success.append(np.std(tmp))
             print(HI_lower, ind.sum())
             frac_success.append((HI_max[ind,1]>freq_thres).mean())
-        plt.plot(HI_binc, frac_success, '-o', label = "max freq >"+str(freq_thres))
+        ax3.errorbar(np.arange(len(frac_success))+0.5+0.03*fi, frac_success,stddev_success, label = "max freq >"+str(freq_thres), lw=2)
 
-    plt.legend(loc=2)
+    ax3.set_xlabel('HI effect', fontsize=fs)
+    ax3.set_ylabel('fraction reaching frequency threshold', fontsize=fs)
+    ax3.tick_params(labelsize=fs)
+    ax3.set_xticks(np.arange(len(HI_binc))+0.5)
+    ax3.set_xticklabels([str(lower)+'-'+str(upper) for lower, upper in zip(HI_threshold[:-1], HI_threshold[1:])])
+    plt.legend(loc=8, fontsize=fs)
     plt.ylim([0,1])
-    plt.xlabel('HI effect bins 0.1-0.3, 0.3-0.8, 0.8-1.5, >1.5')
-    plt.ylabel('fraction reaching frequency threshold')
+    plt.xlim([0,len(HI_binc)])
+
+    plt.tight_layout()
     if save_figs:
-        plt.savefig('fraction_successful.pdf')
+        plt.savefig("prediction_figures/"+'fraction_successful.pdf')
 
     ### make cumulative HI on backbone
     HI_backbone = np.array([HI for res, mut, HI, freq in HI_distributions_mutations if freq[0]<0.1 and freq.max()>0.75])
@@ -164,23 +193,26 @@ if mut_models:
     plt.tick_params(labelsize=fs)
     plt.tight_layout()
     if save_figs:
-        plt.savefig('cumulative_HI_effects.pdf')
+        plt.savefig("prediction_figures/"+'cumulative_HI_effects.pdf')
 
-### repeat for tree model
+''' analyze the tree model
+This uses the 30 year span and investigates whether antigenic advance (as measured by cHI)
+is predictive of clade success.
+'''
 res = '1985to2016'
 params['pivots_per_year'] = 3.0
 params['resolution']=res
 params['time_interval'] = map(float, res.split('to'))
 
 if params['time_interval'][1]>2015:
-    params['time_interval'][1]=2015.8
+    params['time_interval'][1]=2015.8 # set the upper time limit to past the last sequence
 
 # add all arguments to virus_config (possibly overriding)
 virus_config.update(params)
 # pass all these arguments to the processor: will be passed down as kwargs through all classes
 myH3N2 = H3N2_process(**virus_config)
 myH3N2.load()
-# assign dates
+# assign dates to internal nodes as minimum for children. this is needed to calculate the recent
 for node in myH3N2.tree.postorder_internal_node_iter():
     node.num_date = np.min([c.num_date for c in node.child_nodes()])
 
@@ -237,7 +269,7 @@ plt.xlabel('HI effect')
 plt.ylabel('cumulative distribution')
 plt.legend(loc=4)
 if save_figs:
-    plt.savefig("cumulative_HI_tree.pdf")
+    plt.savefig("prediction_figures/"+"cumulative_HI_tree.pdf")
 
 ################################################################
 #### plot tree frequencies
@@ -265,7 +297,7 @@ ax1.tick_params(labelsize=fs)
 plt.tight_layout()
 add_panel_label(ax1, "A", x_offset=-0.07)
 if save_figs:
-    plt.savefig("trajectories_tree.pdf")
+    plt.savefig("prediction_figures/"+"trajectories_tree.pdf")
 
 
 ################################################################
@@ -317,7 +349,7 @@ if save_figs:
 #
 #plt.tight_layout()
 #if save_figs:
-#    plt.savefig('combined_HI_dynamics.pdf')
+#    plt.savefig("prediction_figures/"+'combined_HI_dynamics.pdf')
 #
 #
 
@@ -479,7 +511,7 @@ ax.tick_params(labelsize=fs)
 
 plt.tight_layout()
 if save_figs:
-    plt.savefig('LBI_and_HI_vs_distance.pdf')
+    plt.savefig("prediction_figures/"+'LBI_and_HI_vs_distance.pdf')
 
 #################################################################
 ### plot best HI vs HI of best
@@ -498,7 +530,7 @@ plt.yticks([-1, 0,1,2,3])
 plt.legend(loc=2)
 plt.tight_layout()
 if save_figs:
-    plt.savefig('best_HI_vs_HI_of_best.pdf')
+    plt.savefig("prediction_figures/"+'best_HI_vs_HI_of_best.pdf')
 
 
 ################################################################
@@ -527,40 +559,5 @@ for li,lbi_cutoff in enumerate([0.2, 0.1]):
 
 plt.tight_layout()
 if save_figs:
-    plt.savefig('LBI_HI.pdf')
+    plt.savefig("prediction_figures/"+'LBI_HI.pdf')
 
-################################################################
-##### fraction successful
-################################################################
-
-plt.figure(figsize = (1.6*figheight, figheight))
-ax3 = plt.subplot(1,1,1)
-HI_max = np.array([[HI, freq.max()] for res, mut, HI, freq in HI_distributions_mutations if freq[0]<0.1 and freq.max()>0.1])
-nreps=100
-for fi,freq_thres in enumerate([0.25, 0.5, 0.75, 0.95]):
-    frac_success = []
-    stddev_success = []
-    for HI_lower, HI_upper in zip(HI_threshold[:-1], HI_threshold[1:]):
-        ind = (HI_max[:,0]>=HI_lower)&(HI_max[:,0]<HI_upper)
-        vals = HI_max[ind,1]
-        tmp = []
-        for rep in xrange(nreps):
-            tmp_vals = vals[np.random.randint(len(vals), size=len(vals)/2)]
-            tmp.append((tmp_vals>freq_thres).mean())
-        stddev_success.append(np.std(tmp))
-        print(HI_lower, ind.sum())
-        frac_success.append((HI_max[ind,1]>freq_thres).mean())
-    ax3.errorbar(np.arange(len(frac_success))+0.5+0.03*fi, frac_success,stddev_success, label = "max freq >"+str(freq_thres), lw=2)
-
-ax3.set_xlabel('HI effect', fontsize=fs)
-ax3.set_ylabel('fraction reaching frequency threshold', fontsize=fs)
-ax3.tick_params(labelsize=fs)
-ax3.set_xticks(np.arange(len(HI_binc))+0.5)
-ax3.set_xticklabels([str(lower)+'-'+str(upper) for lower, upper in zip(HI_threshold[:-1], HI_threshold[1:])])
-plt.legend(loc=8, fontsize=fs)
-plt.ylim([0,1])
-plt.xlim([0,len(HI_binc)])
-
-plt.tight_layout()
-if save_figs:
-    plt.savefig('fraction_successful.pdf')

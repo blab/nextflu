@@ -251,7 +251,7 @@ class BYam_process(process, BYam_filter, BYam_clean, BYam_refine, HI_tree):
 			self.generate_validation_figures()
 
 if __name__=="__main__":
-	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','HI', 'export']
+	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','HI', 'export']+ ['HIvalidate']
 	from process import parser
 	params = parser.parse_args()
 
