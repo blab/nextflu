@@ -30,7 +30,7 @@ virus_config.update({
 	'virus':'Yam',
 	'alignment_file':'data/Yam_gisaid_epiflu_sequence.fasta.gz',
 	'outgroup':'B/Singapore/11/94',
-	'force_include':'source-data/Yam_HI_strains.txt',
+	'force_include':'data/Yam_HI_strains.txt',
 	'force_include_all':True,
 	'date_spec':'year',
 	'max_global':True,   # sample as evenly as possible from different geographic regions
@@ -43,7 +43,7 @@ virus_config.update({
 		'3a': [('HA1', 37,'A'), ('HA1', 298, 'E'), ('HA1', 48,'R'), ('HA1', 105, 'P'), ('HA1', 150, 'I')],
 	},
 	'auspice_prefix':'Yam_',
-	'HI_fname':'source-data/Yam_HI_titers.txt',
+	'HI_fname':'data/Yam_HI_titers.txt',
 	'html_vars': {'coloring': 'lbi, dfreq, region, date, cHI, HI_dist',
 				  'gtplaceholder': 'HA1 positions...',
 				  'freqdefault': '2, 3, 3a'},

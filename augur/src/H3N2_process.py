@@ -27,7 +27,7 @@ virus_config.update({
 	'alignment_file':'data/H3N2_gisaid_epiflu_sequence.fasta.gz',
 	'outgroup':'A/Texas/1/1977',
 #	'outgroup':'A/Beijing/32/1992',
-	'force_include':'source-data/H3N2_HI_strains.txt',
+	'force_include':'data/H3N2_HI_strains.txt',
 	'force_include_all':True,
 	'date_spec':'year',
 	'max_global':True,   # sample as evenly as possible from different geographic regions
@@ -42,7 +42,7 @@ virus_config.update({
 						   "3c2":   [('HA1', 144,'N'), ('HA1',159,'F'), ('HA1',225,'N'), ('HA2', 160,'N'), ('HA1', 142, 'R')],
 						   "3c3.b": [('HA1',  83,'R'), ('HA1',261,'Q'), ('HA1',62,'K'),  ('HA1', 122,'D')]
 							},
-	'HI_fname':'source-data/H3N2_HI_titers.txt',
+	'HI_fname':'data/H3N2_HI_titers.txt',
 	'auspice_prefix':'H3N2_',
 	'html_vars': {'coloring': 'ep, ne, rb, lbi, dfreq, region, date, cHI, HI_dist',
 				   'gtplaceholder': 'HA1 positions...',

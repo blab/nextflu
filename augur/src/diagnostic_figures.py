@@ -17,19 +17,16 @@ figheight = 4
 ##### merge accession number files
 ####################################
 def make_combined_accession_number_lists():
-    for flu in ['H3N2', 'H1N1pdm', 'Vic', 'Yam']:
-        flist = glob.glob('../auspice/data/'+flu+'*accession_numbers.tsv')
-        all_accessions=set()
-        for fname in flist:
-            with open(fname) as infile:
-                all_accessions.update([tuple(line.split('\t')[:2]) for line in infile])
+for flu in ['H3N2', 'H1N1pdm', 'Vic', 'Yam']:
+    flist = glob.glob('../auspice/data/'+flu+'*accession_numbers.tsv')
+    all_accessions=set()
+    for fname in flist:
+        with open(fname) as infile:
+            all_accessions.update([tuple(line.split('\t')[:2]) for line in infile])
 
-        with open('../auspice/data/'+flu+'_all_accession_numbers.tsv', 'w') as ofile:
-            for strain, acc in all_accessions:
-                ofile.write(strain+'\t'+acc+'\n')
-
-
-
+    with open('../auspice/data/'+flu+'_all_accession_numbers.tsv', 'w') as ofile:
+        for strain, acc in all_accessions:
+            ofile.write(strain+'\t'+acc+'\n')
 
 ######################################
 #### make list of mutation effects across different periods

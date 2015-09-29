@@ -22,7 +22,7 @@ def HI_fix_name(name):
 
 class HI_tree(object):
 
-	def __init__(self, HI_fname = 'source-data/HI_titers.txt',serum_Kc = 0.0,  min_aamuts = 0,**kwargs):
+	def __init__(self, HI_fname = 'data/HI_titers.txt',serum_Kc = 0.0,  min_aamuts = 0,**kwargs):
 		self.HI_fname = HI_fname
 		if "excluded_tables" in kwargs:
 			self.excluded_tables = kwargs["excluded_tables"]
@@ -900,7 +900,7 @@ def read_tables(flutype = 'H3N2'):
 	return HI_matrices
 
 def read_trevor_table(flutype):
-	trevor_table = 'source-data/'+flutype+'_HI.tsv'
+	trevor_table = 'data/'+flutype+'_HI.tsv'
 	import csv
 	measurements = []
 	sera = set()
@@ -949,7 +949,7 @@ def write_strains_with_HI_and_sequence(flutype='H3N2'):
 	from Bio import SeqIO
 	good_strains = set()
 	with myopen("data/"+flutype+"_strains_with_HI.fasta", 'w') as outfile, \
-		 myopen("source-data/"+flutype+"_HI_strains.txt", 'w') as HI_strain_outfile, \
+		 myopen("data/"+flutype+"_HI_strains.txt", 'w') as HI_strain_outfile, \
 		 myopen("data/"+flutype+"_gisaid_epiflu_sequence.fasta.gz", 'r') as infile:
 		for seq_rec in SeqIO.parse(infile, 'fasta'):
 			tmp_name = seq_rec.description.split('|')[0].strip()
@@ -965,10 +965,10 @@ def write_strains_with_HI_and_sequence(flutype='H3N2'):
 
 def write_flat_HI_titers(flutype = 'H3N2', fname = None):
 	measurements = get_all_titers_flat(flutype)
-	with myopen('source-data/'+flutype+'_HI_strains.txt') as infile:
+	with myopen('data/'+flutype+'_HI_strains.txt') as infile:
 		strains = [HI_fix_name(line.strip()).upper() for line in infile]
 	if fname is None:
-		fname = 'source-data/'+flutype+'_HI_titers.txt'
+		fname = 'data/'+flutype+'_HI_titers.txt'
 	written = 0
 	skipped = 0
 	with myopen(fname, 'w') as outfile:
@@ -982,7 +982,7 @@ def write_flat_HI_titers(flutype = 'H3N2', fname = None):
 	print "written",written,"records"
 	print "skipped",skipped,"records"
 
-def main(tree, HI_fname='source-data/HI_titers.txt', training_fraction = 1.0, reg=5):
+def main(tree, HI_fname='data/HI_titers.txt', training_fraction = 1.0, reg=5):
 	print "--- Fitting HI titers at " + time.strftime("%H:%M:%S") + " ---"
 	measurements, strains, sources = read_HI_titers(HI_fname)
 	HI_map = HI_tree(tree, measurements)

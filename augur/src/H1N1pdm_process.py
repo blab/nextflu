@@ -32,7 +32,7 @@ virus_config.update({
 	'virus':'H1N1pdm',
 	'alignment_file':'data/H1N1pdm_gisaid_epiflu_sequence.fasta.gz',
 	'outgroup':'A/Swine/Indiana/P12439/00',
-	'force_include':'source-data/H1N1pdm_HI_strains.txt',
+	'force_include':'data/H1N1pdm_HI_strains.txt',
 	'force_include_all':True,
 	'date_spec':'year',
 	'max_global':True,   # sample as evenly as possible from different geographic regions
@@ -52,7 +52,7 @@ virus_config.update({
 		'7': [('HA1', 143,'G'),  ('HA1', 97, 'D'), ('HA1', 197, 'T')],
 		'8': [('HA1', 186,'T'),  ('HA1', 272,'A')],
 		},
-	'HI_fname':'source-data/H1N1pdm_HI_titers.txt',
+	'HI_fname':'data/H1N1pdm_HI_titers.txt',
 	'auspice_prefix':'H1N1pdm_',
 	'html_vars': {'coloring': 'ep, ne, rb, lbi, dfreq, region, date, cHI, HI_dist',
 				  'gtplaceholder': 'HA1 positions...',
