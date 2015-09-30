@@ -20,23 +20,26 @@ plt.ion()
 fig_fontsize=14
 fs =fig_fontsize
 params = {
-    'lam_HI':1,
-    'lam_avi':2,
+    'lam_HI':1.0,
+    'lam_avi':2.0,
     'lam_pot':0.3,
     'prefix':'H3N2_',
 }
+
 def add_panel_label(ax,label, x_offset=-0.1):
+    '''add one letter labels to the upper left corner of a figure A, B, C etc '''
     ax.text(x_offset, 0.95, label, transform=ax.transAxes, fontsize=fig_fontsize*1.5)
 
 def select_nodes_in_season(tree, interval):
-    for node in tree.leaf_iter():
+    '''mark all nodes in a time interval specified by decimalized years, e.g. 2012.34 '''
+    for node in tree.leaf_iter(): # mark leafs
         if node.num_date>=interval[0] and node.num_date<interval[1]:
             node.alive=True
             node.n_alive = 1
         else:
             node.alive=False
             node.n_alive = 0
-    for node in tree.postorder_internal_node_iter():
+    for node in tree.postorder_internal_node_iter(): # go over all internal nodes: alive iff at least one child alive
         node.alive = any([n.alive for n in node.child_nodes()])
         node.n_alive = np.sum([n.n_alive for n in node.child_nodes()])
 
@@ -85,8 +88,8 @@ def calc_LBI(tree, LBI_tau = 0.0005, attr = 'lb'):
 ''' mutation model
 goes over different intervals and fits the HI model
 '''
-mut_models = False
-save_figs = False
+mut_models = True
+save_figs = True
 if mut_models:
     resolutions = ['1985to1995','1990to2000','1995to2005','2000to2010','2005to2016']
     fig, axs = plt.subplots(1,len(resolutions), sharey=True, figsize=(4*figheight, 1.3*figheight))
@@ -153,7 +156,8 @@ if mut_models:
     ax3 = plt.subplot(1,1,1)
     HI_max = np.array([[HI, freq.max()] for res, mut, HI, freq in HI_distributions_mutations if freq[0]<0.1 and freq.max()>0.1])
     nreps=100
-    HI_threshold = np.array([0.0, 0.3, 0.8, 1.5, 4]) #defining HI categories
+    HI_threshold = np.array([0.0, 0.3, 0.7, 1.2, 4]) #defining HI categories
+    HI_binc = 0.5*(HI_threshold[:-1] + HI_threshold[1:])
     for fi,freq_thres in enumerate([0.25, 0.5, 0.75, 0.95]):
         frac_success = []
         stddev_success = []
@@ -300,6 +304,10 @@ if save_figs:
     plt.savefig("prediction_figures/"+"trajectories_tree.pdf")
 
 
+'''
+the following is obsolete code that was used to plot the fraction of successful clades
+vs their antigenic effect
+'''
 ################################################################
 ##### add fraction successful
 ################################################################
@@ -354,13 +362,15 @@ if save_figs:
 #
 
 #########################################################################
-##### cut by dates
+##### the following implements bona fide prediction by estimating HI models
+##### and LBI for viruses sampled up to a time cutoff and examining the next season
 #########################################################################
 
 gof_by_year = []
 
 alpha = 'ACGT'
 def allele_freqs(seqs):
+    ''' alignment -> nucleotide frequencies '''
     tmp_seqs = np.array([np.fromstring(seq, 'S1') for seq in seqs])
     af = np.zeros((4,tmp_seqs.shape[1]))
     for ni,nuc in enumerate(alpha):
@@ -368,22 +378,29 @@ def allele_freqs(seqs):
     return af
 
 def af_dist(af1, af2):
-    return 1-(af1*af2).sum(axis=0).mean(axis=0)
+    ''' average distance between two population characterized by nucleotide frequencies af1 and af2'''
+    return 1-(af1*af2).sum(axis=0).mean(axis=0) # distance == 1-probability of being the same
 
 def seq_dist(seq, af):
-    ind = np.array([alpha.index(nuc) for nuc in seq])
-    return 1.0-np.mean(af[ind, np.arange(len(seq))])
+    ''' average distance betweeen a populiation characterized by nucleotide frequencies and a sequence'''
+    ind = np.array([alpha.index(nuc) for nuc in seq]) #calculate the indices in the frequency array that correspond to the sequence state
+    return 1.0-np.mean(af[ind, np.arange(len(seq))])  #1 - probability of being the same
 
+# frequency cutoffs for a clade to be included
 cutoffs = [0.01, 0.03, 0.05, 0.1]
+# set up dictionaries to remember the highest scoring clades for sets defined by each of the cutoffs
 LBI_HI_by_date = {cutoff:[] for cutoff in cutoffs}
 best_scores = {cutoff:[] for cutoff in cutoffs}
 best_LBI = {cutoff:[] for cutoff in cutoffs}
 best_HI = {cutoff:[] for cutoff in cutoffs}
 best_HI_vs_HI_of_best = {cutoff:[] for cutoff in cutoffs}
+
+# loop over all years we want to include
 for year in range(1990, 2015):
     print("#############################################")
     print("### YEAR:",year)
     print("#############################################")
+    # train the HI model and remember some basic figures about the fit
     myH3N2.map_HI(training_fraction = 1.0, method = 'nnl1reg', lam_HI=params['lam_HI'], map_to_tree = True,
             lam_pot = params['lam_pot'], lam_avi = params['lam_avi'], cutoff_date = year+2./12.0, subset_strains = False, force_redo = True)
 
@@ -394,34 +411,41 @@ for year in range(1990, 2015):
     future_seqs = [node.seq for node in myH3N2.tree.leaf_iter() if node.alive]
     future_af = allele_freqs(future_seqs)
 
-    #current season May until Feb
+    #current season May until Feb (all previously selected nodes will be erased)
     select_nodes_in_season(myH3N2.tree, (year-7.0/12, year+2.0/12))
     af = allele_freqs([node.seq for node in myH3N2.tree.leaf_iter() if node.alive])
     avg_dist = af_dist(af, future_af)
     max_LBI = calc_LBI(myH3N2.tree, LBI_tau = 0.001)
     total_alive = 1.0*myH3N2.tree.seed_node.n_alive
-    # take nodes with at least 5% and not fixed
-    #nodes = [node for node in myH3N2.tree.leaf_iter() if node.alive]
+    # loop over the different frequency cut-offs
     for cutoff in cutoffs:
+        # make a list of nodes (clades) that are used for prediction. frequency needs to be >cutoff and <0.95
         nodes = [node for node in myH3N2.tree.postorder_node_iter()
                 if node.alive and node.n_alive/total_alive>cutoff and node.n_alive/total_alive<0.95]
-        tmp_dist = np.array([seq_dist(node.seq, future_af) for node in nodes])
+        # determine the minimal distance to future, the average cumulative antigenic advance, and the best possible node
+        all_distance_to_future = np.array([seq_dist(node.seq, future_af) for node in nodes])
+        best = np.argmin(all_distance_to_future)
+        min_dist = all_distance_to_future[best]
         current_cHI = np.mean([n.cHI for n in nodes])
-        best = np.argmin(tmp_dist)
-        best_scores[cutoff].append([year, nodes[best].lb/max_LBI, nodes[best].cHI-current_cHI])
+        # determine the nodes with the highest LBI and the highest HI
         all_LBI = np.array([n.lb for n in nodes])
         best_LBI_node = nodes[np.argmax(all_LBI)]
         best_HI_node = nodes[np.argmax([n.cHI for n in nodes])]
-        min_dist = tmp_dist[best]
 
+        # remember the LBI and HI of the best node
+        best_scores[cutoff].append([year, nodes[best].lb/max_LBI, nodes[best].cHI-current_cHI])
+        # remember the LBI and HI, normalized (d/avg_d), standardized (d-min_d)/(avg_d-min_d), and min_d, avg_d for node with highest LBI
         best_LBI[cutoff].append((year, best_LBI_node.lb/max_LBI, best_LBI_node.cHI-current_cHI,
                         (seq_dist(best_LBI_node.seq, future_af)-min_dist)/(avg_dist-min_dist),
                         seq_dist(best_LBI_node.seq, future_af)/avg_dist, min_dist, avg_dist))
+        # remember the LBI and HI, normalized (d/avg_d), standardized (d-min_d)/(avg_d-min_d), and min_d, avg_d for node with highest HI
         best_HI[cutoff].append((year, best_HI_node.lb/max_LBI, best_HI_node.cHI-current_cHI,
                         (seq_dist(best_HI_node.seq, future_af)-min_dist)/(avg_dist-min_dist),
                         seq_dist(best_HI_node.seq, future_af)/avg_dist, min_dist, avg_dist))
+        # remember HI of the node closest to the future and the HI of the node iwth the highest HI
         best_HI_vs_HI_of_best[cutoff].append((year, best_HI_node.cHI - current_cHI, nodes[best].cHI - current_cHI))
         print(year, "avg_dist", avg_dist)
+        # make a list of the LBI, cHI, and distances for every node in the set belonging to cutoffs. (used for scattering LBI vs HI)
         for node in nodes:
             node_freq = node.n_alive/total_alive
             if node.freq["global"] is not None:
@@ -437,7 +461,7 @@ for year in range(1990, 2015):
                                             (seq_dist(node.seq, future_af)-min_dist)/(avg_dist-min_dist), node_freq,
                                             0,0,0))
 
-# make an array out of all values excluding the node and frequency vector
+# make an array out of all values for slicing and plotting
 clades = {}
 for cutoff in cutoffs:
     best_scores[cutoff] = np.array(best_scores[cutoff])
@@ -446,13 +470,17 @@ for cutoff in cutoffs:
     best_HI_vs_HI_of_best[cutoff] = np.array(best_HI_vs_HI_of_best[cutoff])
     tmp = []
     for cl in LBI_HI_by_date[cutoff]:
-        tmp.append(cl[1:-1])
+        tmp.append(cl[1:-1]) # exclude node (entry 0) and frequencies (entry -1) since they aren't numbers
     clades[cutoff] = np.array(tmp)
 
+############
+# make figure that shows the distance to future season for all years
+# comparing LBI and HI at different cutoffs
 ############
 cutoff = 0.01
 plt.figure(figsize=(2.4*figheight,figheight))
 ax=plt.subplot(121)
+# -2 == mindist, -1 == avg_dits -3 == dist/avg_dist
 ax.plot(best_HI[cutoff][:,0],best_HI[cutoff][:,-2]/best_HI[cutoff][:,-1], label='best',lw=2, c='k')
 ax.plot(best_LBI[cutoff][:,0],best_LBI[cutoff][:,-3], label='LBI',lw=2)
 ax.plot(best_HI[0.05][:,0],best_HI[0.05][:,-3], label='cHI >0.05',lw=2)
@@ -466,8 +494,23 @@ ax.set_yticks([0,0.5, 1.0, 1.5])
 plt.legend(loc=2, fontsize=fs)
 
 ############
+# second panel showing the distribytion of HI values of the best nodes
+############
 cols = sns.color_palette(n_colors=5)
 symbs = ['o','d','v','^','<']
+ax = plt.subplot(122)
+ax.hist(best_scores[0.05][:,-1])
+add_panel_label(ax, "C")
+ax.set_yticks([0,2,4,6, 8])
+ax.set_ylim([0,10])
+ax.set_ylabel("#years", fontsize=fs)
+ax.set_xlabel(r'$cHI-\langle cHI\rangle_{year}$', fontsize=fs)
+ax.tick_params(labelsize=fs)
+
+plt.tight_layout()
+if save_figs:
+    plt.savefig("prediction_figures/"+'LBI_and_HI_vs_distance.pdf')
+
 #fig, axs = plt.subplots(1,3, figsize=(3.0*figheight, figheight))
 #lbi_cutoff = 0.2
 #for ax, qi in izip(axs,[1,2]):
@@ -491,8 +534,6 @@ symbs = ['o','d','v','^','<']
 #    add_panel_label(ax, "C" if qi==2 else "B", x_offset=-0.12)
 #
 #ax = axs[2]
-ax = plt.subplot(122)
-ax.hist(best_scores[0.05][:,-1])
 #for yi, (year, lbi, cHI) in enumerate(best_scores):
 #    lstr = str(year) if (year>=2006) else None
 #    ax.scatter([lbi], [cHI], c=cols[yi%5], marker=symbs[yi//5], s=50, label=lstr)
@@ -501,17 +542,7 @@ ax.hist(best_scores[0.05][:,-1])
 #ax.set_xlim([0, 1.1])
 #ax.set_xticks([0, 0.25, 0.5, 0.75, 1])
 #ax.set_yticks([-0.5, 0, 0.5, 1, 1.5])
-add_panel_label(ax, "C")
-ax.set_yticks([0,2,4,6, 8])
-ax.set_ylim([0,10])
-ax.set_ylabel("#years", fontsize=fs)
-ax.set_xlabel(r'$cHI-\langle cHI\rangle_{year}$', fontsize=fs)
-ax.tick_params(labelsize=fs)
 #ax.legend()
-
-plt.tight_layout()
-if save_figs:
-    plt.savefig("prediction_figures/"+'LBI_and_HI_vs_distance.pdf')
 
 #################################################################
 ### plot best HI vs HI of best
@@ -534,17 +565,18 @@ if save_figs:
 
 
 ################################################################
-###
+### scatter plot of LBI vs HI
 ################################################################
 plt.figure(figsize=(2.4*figheight, figheight))
 mycmap=cm.Set1
+cutoff = 0.01
 for li,lbi_cutoff in enumerate([0.2, 0.1]):
     ax = plt.subplot(1,2,li+1)
-    ind = clades[:,-3]>lbi_cutoff #restrict to clades larger than cutoff
+    ind = clades[cutoff][:,-3]>lbi_cutoff #restrict to clades larger than cutoff
     if ind.sum()==0:
         continue
     ax.set_title('clades >'+str(lbi_cutoff)+' frequency')
-    ax.scatter(clades[ind,1], clades[ind,2], c=mycmap((clades[ind,0]-1990)/25.0), s=80*(1-clades[ind,3])**2)
+    ax.scatter(clades[cutoff][ind,1], clades[cutoff][ind,2], c=mycmap((clades[cutoff][ind,0]-1990)/25.0), s=80*(1-clades[cutoff][ind,3])**2)
     ax.set_ylabel(r'$cHI-\langle cHI\rangle_{year}$', fontsize=fs)
     ax.set_xlabel(r'$LBI/\max(LBI)$', fontsize=fs)
     ax.tick_params(labelsize=fs)

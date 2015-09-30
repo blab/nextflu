@@ -177,6 +177,7 @@ class HI_tree(object):
 		return path
 
 	def get_mutations(self, strain1, strain2):
+		''' return amino acid mutations between viruses specified by strain names as tuples (HA1, F159S) '''
 		if strain1 in self.node_lookup and strain2 in self.node_lookup:
 			node1 = self.node_lookup[strain1].parent_node
 			node2 = self.node_lookup[strain2].parent_node
@@ -203,7 +204,7 @@ class HI_tree(object):
 		seq_graph = []
 		HI_dist = []
 		weights = []
-		# list all mutations
+		# count how often each mutation separates a reference test virus pair
 		self.mutation_counter = defaultdict(int)
 		for (test, ref), val in self.train_HI.iteritems():
 			muts = self.get_mutations(ref[0], test)
@@ -212,6 +213,7 @@ class HI_tree(object):
 			for mut in muts:
 				self.mutation_counter[mut]+=1
 
+		# make a list of mutations deemed relevant via frequency thresholds
 		relevant_muts = []
 		min_count= 10
 		min_freq = 1.0*min_count/len(self.viruses)
@@ -225,22 +227,23 @@ class HI_tree(object):
 				relevant_muts.append(mut)
 
 		relevant_muts.sort(key = lambda x:int(x[1][1:-1]))
-
 		self.relevant_muts = relevant_muts
 		self.genetic_params = len(relevant_muts)
 		n_params = self.genetic_params + len(self.sera) + len(self.HI_strains)
 
+		# loop over all measurements and encode the HI model as [0,1,0,1,0,0..] vector:
+		# 1-> mutation present, 0 not present, same for serum and virus effects
 		for (test, ref), val in self.train_HI.iteritems():
 			if not np.isnan(val):
 				try:
 					muts = self.get_mutations(ref[0], test)
 					if muts is None:
 						continue
-					tmp = np.zeros(n_params)
+					tmp = np.zeros(n_params) # zero vector, ones will be filled in
 					# determine branch indices on path
-					branches = np.unique([relevant_muts.index(mut) for mut in muts
+					mutation_indices = np.unique([relevant_muts.index(mut) for mut in muts
 					                     if mut in relevant_muts])
-					if len(branches): tmp[branches] = 1
+					if len(mutation_indices): tmp[mutation_indices] = 1
 					# add serum effect for heterologous viruses
 					if test!=ref[0]:
 						tmp[len(relevant_muts)+self.sera.index(ref)] = 1
@@ -249,7 +252,8 @@ class HI_tree(object):
 					# append model and fit value to lists seq_graph and HI_dist
 					seq_graph.append(tmp)
 					HI_dist.append(val)
-					weights = 1.0/(1.0 + self.serum_Kc*self.measurements_per_serum[ref])
+					# for each measurment (row in the big matrix), attach weight that accounts for representation of serum
+					weights.append(1.0/(1.0 + self.serum_Kc*self.measurements_per_serum[ref]))
 				except:
 					import pdb; pdb.set_trace()
 					print test, ref, "ERROR"
@@ -257,7 +261,7 @@ class HI_tree(object):
 		# convert to numpy arrays and save product of tree graph with its transpose for future use
 		self.weights = np.sqrt(weights)
 		self.HI_dist =  np.array(HI_dist)*self.weights
-		self.tree_graph = np.array(seq_graph)*self.weights
+		self.tree_graph = (np.array(seq_graph).T*self.weights).T
 		if colin_thres is not None:
 			self.collapse_colinear_mutations(colin_thres)
 		self.TgT = np.dot(self.tree_graph.T, self.tree_graph)
@@ -270,9 +274,11 @@ class HI_tree(object):
 		TT = self.tree_graph[:,:self.genetic_params].T
 		mutation_clusters = []
 		n_measurements = self.tree_graph.shape[0]
+		# a greedy algorithm: if column is similar to existing cluster -> merge with cluster, else -> new cluster
 		for col, mut in izip(TT, self.relevant_muts):
 			col_found = False
 			for cluster in mutation_clusters:
+				# similarity is defined as number of measurements at whcih the cluster and column differ
 				if np.sum(col==cluster[0])>=n_measurements-colin_thres:
 					cluster[1].append(mut)
 					col_found=True
@@ -299,7 +305,9 @@ class HI_tree(object):
 		tree_graph = []
 		HI_dist = []
 		weights = []
+		# mark HI splits have to have been run before, assigning self.HI_split_count
 		n_params = self.HI_split_count + len(self.sera) + len(self.HI_strains)
+		self.genetic_params = self.HI_split_count
 		for (test, ref), val in self.train_HI.iteritems():
 			if not np.isnan(val):
 				try:
@@ -331,7 +339,7 @@ class HI_tree(object):
 						# append model and fit value to lists tree_graph and HI_dist
 						tree_graph.append(tmp)
 						HI_dist.append(val)
-						weights = 1.0/(1.0 + self.serum_Kc*self.measurements_per_serum[ref])
+						weights.append(1.0/(1.0 + self.serum_Kc*self.measurements_per_serum[ref]))
 				except:
 					import pdb; pdb.set_trace()
 					print test, ref, "ERROR"
@@ -339,7 +347,7 @@ class HI_tree(object):
 		# convert to numpy arrays and save product of tree graph with its transpose for future use
 		self.weights = np.sqrt(weights)
 		self.HI_dist =  np.array(HI_dist)*self.weights
-		self.tree_graph = np.array(tree_graph)*self.weights
+		self.tree_graph = (np.array(tree_graph).T*self.weights).T
 		self.TgT = np.dot(self.tree_graph.T, self.tree_graph)
 		print "Found", self.tree_graph.shape, "measurements x parameters"
 
@@ -467,11 +475,12 @@ class HI_tree(object):
 						self.test_HI[key]=val
 					else:
 						self.train_HI[key]=val
-		else:
+		else: # without the need for a test data set, use the entire data set for training
 			self.train_HI = self.HI_normalized
 
-		prev_years = 6 # number of years prior to cut-off to use when fitting date censored data
+		# if data is to censored by date, subset the data set and reassign sera, reference strains, and test viruses
 		if self.cutoff_date is not None:
+			prev_years = 6 # number of years prior to cut-off to use when fitting date censored data
 			self.train_HI = {key:val for key,val in self.train_HI.iteritems()
 							if self.node_lookup[key[0]].num_date<=self.cutoff_date and
 							   self.node_lookup[key[1][0]].num_date<=self.cutoff_date and
@@ -492,6 +501,7 @@ class HI_tree(object):
 			self.ref_strains = list(ref_strains)
 			self.HI_strains = list(HI_strains)
 
+		# construct the design matrix depending on the model
 		if self.map_to_tree:
 			self.make_treegraph()
 		else:

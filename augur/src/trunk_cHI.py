@@ -9,6 +9,7 @@ import seaborn as sns
 import cPickle as pickle
 from scipy.stats import linregress
 from collections import defaultdict
+plt.ion()
 sns.set_style('darkgrid')
 
 fs=14
