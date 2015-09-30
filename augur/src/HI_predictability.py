@@ -24,6 +24,7 @@ params = {
     'lam_avi':2.0,
     'lam_pot':0.3,
     'prefix':'H3N2_',
+    'serum_Kc':0.003,
 }
 
 def add_panel_label(ax,label, x_offset=-0.1):

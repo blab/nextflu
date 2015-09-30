@@ -7,11 +7,11 @@
 	"name": "A/H1N1pdm",
 	"resolutions": ["3y", "7y"]},
 {"virus": "Vic",
-  "default": "/Vic/6y/",
+  "default": "/Vic/12y/",
   "name": "B/Vic",
   "resolutions": ["3y", "6y", "12y", "20y"]},
 { "virus": "Yam",
-  	"default": "/Yam/6y/",
+  	"default": "/Yam/12y/",
   	"name": "B/Yam",
   	"resolutions": ["3y", "6y", "12y", "20y"]}
 ]

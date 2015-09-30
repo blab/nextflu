@@ -345,7 +345,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 			self.export_HI_mutation_effects()
 
 		if 'HIvalidate' in steps:
-			from diagnostic_figures import slope_vs_dHI, tree_additivity_symmetry, fmts, slope_vs_mutation
+			from diagnostic_figures import tree_additivity_symmetry, fmts
 
 			print "--- generating validation figures " + time.strftime("%H:%M:%S") + " ---"
 			print "-- number of non-zero branch parameters: ",np.sum([n.dHI>1e-3 for n in self.tree.postorder_node_iter()])
@@ -357,7 +357,6 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 				except:
 					print("Can't generate symmetry/additivity figures")
 			try:
-				self.slopes_dHI = slope_vs_dHI(self)
 				self.slopes_muts = slope_vs_mutation(self)
 			except:
 				print("Couldn't derive slopes, probably to small time interval")
@@ -388,7 +387,7 @@ if __name__=="__main__":
 
 	# add all arguments to virus_config (possibly overriding)
 	virus_config.update(params.__dict__)
-	virus_config['serum_Kc'] = 0.01
+	virus_config['serum_Kc'] = 0.003
 	# pass all these arguments to the processor: will be passed down as kwargs through all classes
 	myH3N2 = H3N2_process(**virus_config)
 	if params.test:
