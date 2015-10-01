@@ -72,12 +72,6 @@ def to_Biopython(tree):
 
 	try:
 		bT	= Phylo.read(StringIO(tree.as_newick_string()), 'newick')
-		for new_leaf, old_leaf in izip(bT.get_terminals(), tree.leaf_nodes()):
-			for attr,val in old_leaf.__dict__.iteritems():
-				try:
-					new_leaf.__setattr__(attr, float(val))
-				except:
-					new_leaf.__setattr__(attr, val)
 	except:
 		nwk_str = tree.as_string(schema='newick')[5:]
 		print("raw string:", nwk_str)
@@ -87,6 +81,12 @@ def to_Biopython(tree):
 		except:
 				bT = Phylo.read(StringIO(nwk_str+')'), 'newick')
 
+	for new_leaf, old_leaf in izip(bT.get_terminals(), tree.leaf_nodes()):
+		for attr,val in old_leaf.__dict__.iteritems():
+			try:
+				new_leaf.__setattr__(attr, float(val))
+			except:
+				new_leaf.__setattr__(attr, val)
 	for new_leaf, old_leaf in izip(bT.get_nonterminals(order='postorder'), tree.postorder_internal_node_iter()):
 		for attr,val in old_leaf.__dict__.iteritems():
 			try:
