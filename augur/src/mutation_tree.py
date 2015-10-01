@@ -141,7 +141,7 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 	 		self.midpoint_rooting = True
 
  		for ref, hits in by_og:
- 			if np.max([y[-2] for y in hits])>0.95 and ref!=og:
+ 			if np.max([y[-2] for y in hits])>0.98 and ref!=og:
 	 			self.viruses.append(standard_outgroups[ref])
 	 			print("including reference strain ",ref)
 		self.outgroup = standard_outgroups[og]
@@ -150,7 +150,7 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 		print("chosen outgroup",self.outgroup['strain'])
 
 	def refine(self):
-		self.node_lookup = {node.taxon.label:node for node in self.tree.leaf_iter()}
+		self.node_lookup = {node.taxon.label:node for node in self.tree.leaf_node_iter()}
 		self.unique_date()
 		self.remove_outgroup()
 		self.ladderize()
@@ -189,10 +189,10 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 		from Bio.Seq import Seq
 		from Bio.SeqRecord import SeqRecord
 		if self.cds is not None:
-			tmp_aaseqs = [SeqRecord(Seq(node.aa_seq), id=node.strain, annotations = {'num_date':node.num_date, 'region':node.region}) for node in self.tree.leaf_iter()]
+			tmp_aaseqs = [SeqRecord(Seq(node.aa_seq), id=node.strain, annotations = {'num_date':node.num_date, 'region':node.region}) for node in self.tree.leaf_node_iter()]
 			tmp_aaseqs.sort(key = lambda x:x.annotations['num_date'])
 			self.aa_aln = MultipleSeqAlignment(tmp_aaseqs)
-		tmp_nucseqs = [SeqRecord(Seq(node.seq), id=node.strain, annotations = {'num_date':node.num_date, 'region':node.region}) for node in self.tree.leaf_iter()]
+		tmp_nucseqs = [SeqRecord(Seq(node.seq), id=node.strain, annotations = {'num_date':node.num_date, 'region':node.region}) for node in self.tree.leaf_node_iter()]
 		tmp_nucseqs.sort(key = lambda x:x.annotations['num_date'])
 		self.nuc_aln = MultipleSeqAlignment(tmp_nucseqs)
 
@@ -216,7 +216,12 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 				else:
 					muts = n.aa_muts
 			else:
-				muts = n.nuc_muts
+				print(n,"has no amino acid mutations")
+				try:
+					muts = n.nuc_muts
+				except:
+					print(n,"has no nucleotide mutations")
+					muts = []
 			tmp = muts.split(',')
 			if len(tmp)>max_muts:
 				return ', '.join(tmp[:max_muts])+' + '+str(len(tmp)-max_muts)+' others'
@@ -270,7 +275,7 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 			for t in tmp_tree.find_clades(): # revert to original name
 				t.name = t.label
 			plt.close('Tree')
-		for n in self.tree.leaf_iter():
+		for n in self.tree.leaf_node_iter():
 			for field in self.fasta_fields.values():
 				if (not hasattr(n, field)) or n.__dict__[field]=="":
 					n.__dict__[field]="Unknown"
@@ -306,7 +311,7 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 		self.refine()
 		if self.cds:
 			aa_aln = MultipleSeqAlignment([])
-			for node in self.tree.leaf_iter():
+			for node in self.tree.leaf_node_iter():
 				aa_aln.append(SeqRecord(id=node.strain, seq=Seq(node.aa_seq)))
 			AlignIO.write(aa_aln, self.auspice_aa_align_fname, 'fasta')
 
@@ -354,7 +359,7 @@ if __name__=="__main__":
 	with open(muttree.outdir+'/js/fields.js', 'w') as ofile:
 		for field in ['passage', 'host', 'subtype','region']:
 			try:
-				tmp = sorted(set([x.__dict__[field] for x in muttree.tree.leaf_iter()]))
+				tmp = sorted(set([x.__dict__[field] for x in muttree.tree.leaf_node_iter()]))
 			except:
 				tmp = ["Unknown"]
 			if "Unknown" not in tmp: tmp.append("Unknown")
