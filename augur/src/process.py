@@ -310,7 +310,7 @@ class process(virus_frequencies):
 			print "RAxML tree optimization with time limit " + str(raxml_time_limit) + " hours"
 			# using exec to be able to kill process
 			end_time = time.time() + int(raxml_time_limit*3600)
-			process = subprocess.Popen("exec raxml -f d -T 6 -j -s temp.phyx -n topology -c 25 -m GTRCAT -p 344312987 -t initial_tree.newick", shell=True)
+			process = subprocess.Popen("exec raxmlHPC -f d -T 6 -j -s temp.phyx -n topology -c 25 -m GTRCAT -p 344312987 -t initial_tree.newick", shell=True)
 			while (time.time() < end_time):
 				if os.path.isfile('RAxML_result.topology'):
 					break
@@ -329,12 +329,12 @@ class process(virus_frequencies):
 			shutil.copy("initial_tree.newick", 'raxml_tree.newick')
 
 		print "RAxML branch length optimization and rooting"
-		os.system("raxml -f e -T 6 -s temp.phyx -n branches -c 25 -m GTRGAMMA -p 344312987 -t raxml_tree.newick -o " + self.outgroup['strain'])
+		os.system("raxmlHPC -f e -T 6 -s temp.phyx -n branches -c 25 -m GTRGAMMA -p 344312987 -t raxml_tree.newick -o " + self.outgroup['strain'])
 
 		out_fname = "tree_infer.newick"
 		shutil.copy('RAxML_result.branches', out_fname)
 		Phylo.write(Phylo.read(out_fname, 'newick'),'temp.newick','newick')
-		self.tree = dendropy.Tree.get_from_string(delimit_newick(out_fname), 'newick', as_rooted=True)
+		self.tree = dendropy.Tree.get_from_string(delimit_newick(out_fname), 'newick', rooting="force-rooted")
 		os.chdir('..')
 		self.remove_run_dir()
 		if self.midpoint_rooting:

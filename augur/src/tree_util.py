@@ -7,7 +7,7 @@ def delimit_newick(infile_name):
 	from cStringIO import StringIO
 	tmp_tree = Phylo.read(infile_name, 'newick')
 	for t in tmp_tree.get_terminals():
-	    t.name = "'"+t.name+"'"
+		t.name = "'"+t.name+"'"
 	tree_string = StringIO()
 	Phylo.write(tmp_tree, tree_string, format="newick")
 	delimited_tree = tree_string.getvalue().replace("\\'","")
@@ -69,14 +69,23 @@ def to_Biopython(tree):
 	from Bio import Phylo
 	from StringIO import StringIO
 	from itertools import izip
-	bT	= Phylo.read(StringIO(tree.as_newick_string()), 'newick')
 
-	for new_leaf, old_leaf in izip(bT.get_terminals(), tree.leaf_nodes()):
-		for attr,val in old_leaf.__dict__.iteritems():
-			try:
-				new_leaf.__setattr__(attr, float(val))
-			except:
-				new_leaf.__setattr__(attr, val)
+	try:
+		bT	= Phylo.read(StringIO(tree.as_newick_string()), 'newick')
+		for new_leaf, old_leaf in izip(bT.get_terminals(), tree.leaf_nodes()):
+			for attr,val in old_leaf.__dict__.iteritems():
+				try:
+					new_leaf.__setattr__(attr, float(val))
+				except:
+					new_leaf.__setattr__(attr, val)
+	except:
+		nwk_str = tree.as_string(schema='newick')[5:]
+		print("raw string:", nwk_str)
+		print("stringIO output:", StringIO(nwk_str).readlines())
+		try:
+				bT = Phylo.read(StringIO(nwk_str), 'newick')
+		except:
+				bT = Phylo.read(StringIO(nwk_str+')'), 'newick')
 
 	for new_leaf, old_leaf in izip(bT.get_nonterminals(order='postorder'), tree.postorder_internal_node_iter()):
 		for attr,val in old_leaf.__dict__.iteritems():
