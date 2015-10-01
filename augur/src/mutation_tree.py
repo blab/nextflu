@@ -222,7 +222,7 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 					muts = n.nuc_muts
 				except:
 					print(n,"has no nucleotide mutations")
-					muts = []
+					muts = ""
 			tmp = muts.split(',')
 			if len(tmp)>max_muts:
 				return ', '.join(tmp[:max_muts])+' + '+str(len(tmp)-max_muts)+' others'
