@@ -302,6 +302,8 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 
 	def run(self, raxml_time_limit):
 		self.align()
+		for v in self.viruses:
+			v.description=''
 		AlignIO.write(self.viruses, self.auspice_align_fname, 'fasta')
 		self.remove_insertions()
 		print "--- Tree	 infer at " + time.strftime("%H:%M:%S") + " ---"
@@ -313,7 +315,7 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 		if self.cds:
 			aa_aln = MultipleSeqAlignment([])
 			for node in self.tree.leaf_iter():
-				aa_aln.append(SeqRecord(id=node.strain, seq=Seq(node.aa_seq)))
+				aa_aln.append(SeqRecord(id=node.strain, seq=Seq(node.aa_seq), description=''))
 			AlignIO.write(aa_aln, self.auspice_aa_align_fname, 'fasta')
 
 

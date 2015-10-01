@@ -64,7 +64,6 @@ function calcBranchLength(node){
  * for each node, calculate the number of subtending tips (alive or dead)
 **/
 function calcFullTipCounts(node){
-	console.log("Calculating full tip count");
 	node.fullTipCount = 0;
 	if (typeof node.children != "undefined") {
 		for (var i=0; i<node.children.length; i++) {

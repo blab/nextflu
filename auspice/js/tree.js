@@ -217,7 +217,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.enter()
 			.append("text")
 			.attr("class","tipLabel")
-			.style("font-size", function(d) {console.log(tipLabelText(d)); return tipLabelSize(d)+"px"; })
+			.style("font-size", function(d) {return tipLabelSize(d)+"px"; })
 			.text(tipLabelText);
 	}
 
