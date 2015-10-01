@@ -37,7 +37,7 @@ class virus_filter(object):
 			print fasta, "not found"
 		else:
 			for record in SeqIO.parse(handle, "fasta"):
-				words = map(lambda x:x.strip(),record.description.replace(">","").split('|'))
+				words = map(lambda x:x.strip().replace(" ",''),record.description.replace(">","").split('|'))
 				v = {key: words[ii] if ii<len(words) else "" for ii, key in self.fasta_fields.iteritems()}
 				v['seq']= str(record.seq)
 				v['desc'] = record.description
@@ -231,7 +231,7 @@ class flu_filter(virus_filter):
 		for line in reader:
 			label_to_country[line['label'].lower()] = line['country']
 		for v in self.viruses:
-			if "country" not in v:
+			if "country" not in v or v["country"]=="":
 				v['country'] = 'Unknown'
 				try:
 					label = re.match(r'^[AB]/([^/]+)/', v['strain']).group(1).lower()	# check first for whole geo match
@@ -251,11 +251,12 @@ class flu_filter(virus_filter):
 		for line in reader:
 			country_to_region[line['country']] = line['region']
 		for v in self.viruses:
-			v['region'] = 'Unknown'
-			if v['country'] in country_to_region:
-				v['region'] = country_to_region[v['country']]
-			if v['country'] != 'Unknown' and v['region'] == 'Unknown':
-				print "couldn't parse region for", v['strain'], "country:", v["country"]
+			if "region" not in v or v["region"]=="":
+				v['region'] = 'Unknown'
+				if v['country'] in country_to_region:
+					v['region'] = country_to_region[v['country']]
+				if v['country'] != 'Unknown' and v['region'] == 'Unknown':
+					print "couldn't parse region for", v['strain'], "country:", v["country"]
 
 		if prune:
 			self.viruses = filter(lambda v: v['region'] != 'Unknown', self.viruses)

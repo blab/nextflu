@@ -1,4 +1,7 @@
-var regions = ["Africa", "SouthAmerica", "WestAsia", "Oceania", "Europe", "JapanKorea", "NorthAmerica", "SoutheastAsia", "SouthAsia", "China"]
+//var regions = ["Africa", "SouthAmerica", "WestAsia", "Oceania", "Europe", "JapanKorea", "NorthAmerica", "SoutheastAsia", "SouthAsia", "China"]
+//var hosts = ["Unknown", "Human", "Animal", "Environment"]
+//var passages = ["Unknown", "Egg", "Cell", "Direct"]
+//var subtypes = ["H1N1", "H3N2", "H7N9","H5N1"]
 
 var cladeToSeq = {}
 
@@ -45,7 +48,7 @@ d3.json(path + file_prefix + "meta.json", function(error, json) {
     if (error) return console.warn(error);
     d3.select("#updated").text(json['updated']);
     commit_id = json['commit'];
-    short_id = commit_id.substring(0, 6);   
+    short_id = commit_id.substring(0, 6);
     d3.select("#commit")
         .append("a")
         .attr("href", "http://github.com/blab/nextflu/commit/" + commit_id)

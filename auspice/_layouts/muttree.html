@@ -61,6 +61,15 @@
 											{% if page.coloring contains 'date' %}
 											<option value="date">date</option>
 											{% endif %}
+											{% if page.coloring contains 'host' %}
+											<option value="host">host</option>
+											{% endif %}
+											{% if page.coloring contains 'passage' %}
+											<option value="passage">passage</option>
+											{% endif %}
+											{% if page.coloring contains 'subtype' %}
+											<option value="subtype">subtype</option>
+											{% endif %}
 										</select>
 									</div>
 							</div>
@@ -104,9 +113,9 @@
 		<div class="row">
 			<div class="col-md-12">
 			<div class="bigspacer"></div>
-			<h4>FluSurver Link</h4>
+			<!--<h4>FluSurver Link</h4>
 			<div id="FluSurverLink"><div id="FluSurverContent">select column in alignment</div></div>
-			<div class="bigspacer"></div>
+			<div class="bigspacer"></div>!-->
 			<h4>Amino acid alignment in reference coordinates</h4>
 			<div id="aa_aln"></div>
 			<div class="bigspacer"></div>
@@ -141,6 +150,7 @@
 		</div>
 
 
+		<script src="js/fields.js"></script>
 		<script src="js/muttree.js"></script>
 		<script src="js/msa.min.js"></script>
 		<script>

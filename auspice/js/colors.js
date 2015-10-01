@@ -40,11 +40,24 @@ var dfreqColorScale = d3.scale.linear()
 
 var regionColorScale = d3.scale.ordinal()
 	.domain(regions)
-	.range(regionColors);
+	.range(colors[regions.length]);
 
 var dateColorScale = d3.scale.linear().clamp([true])
 	.domain(dateColorDomain)
 	.range(colors[10]);
+
+var hostColorScale = d3.scale.ordinal()
+	.domain(hosts)
+	.range(colors[Math.min(10,hosts.length)]);
+
+var subtypeColorScale = d3.scale.ordinal()
+	.domain(subtypes)
+	.range(colors[Math.min(10,subtypes.length)]);
+
+var passageColorScale = d3.scale.ordinal()
+	.domain(passages)
+	.range(colors[Math.min(10,passages.length)]);
+
 
 // "ep", "ne" and "rb" need no adjustments
 function adjust_coloring_by_date() {
@@ -107,6 +120,18 @@ function colorByTrait() {
 	else if (colorBy == "date") {
 		colorScale = dateColorScale;
 		nodes.map(function(d) { d.coloring = d.num_date; });
+	}
+	else if (colorBy == "host") {
+		colorScale = hostColorScale;
+		nodes.map(function(d) { d.coloring = d.host; });
+	}
+	else if (colorBy == "passage") {
+		colorScale = passageColorScale;
+		nodes.map(function(d) { d.coloring = d.passage; });
+	}
+	else if (colorBy == "subtype") {
+		colorScale = subtypeColorScale;
+		nodes.map(function(d) { d.coloring = d.subtype; });
 	}
 
 	treeplot.selectAll(".link")
@@ -202,11 +227,11 @@ function colorByGenotypePosition (positions) {
 	}
 	tree_legend = makeLegend();
 	//produce flusurver links
-	document.getElementById('FluSurverLink').removeChild(document.getElementById("FluSurverContent"));
-    var div = document.createElement('div');
-    div.id = "FluSurverContent";
-    div.innerHTML = filtered_gts+' <a target="_blank" href="http://flusurver.bii.a-star.edu.sg/tmp/tmp_HA_H1N1_Human_2009_NewYork20_P154S,D239G.html">HA_H1N1_Human_2009_NewYork20_P154S,D239G</a>';
-	document.getElementById('FluSurverLink').appendChild(div);
+	//document.getElementById('FluSurverLink').removeChild(document.getElementById("FluSurverContent"));
+    //var div = document.createElement('div');
+    //div.id = "FluSurverContent";
+    //div.innerHTML = filtered_gts+' <a target="_blank" href="http://flusurver.bii.a-star.edu.sg/tmp/tmp_HA_H1N1_Human_2009_NewYork20_P154S,D239G.html">HA_H1N1_Human_2009_NewYork20_P154S,D239G</a>';
+	//document.getElementById('FluSurverLink').appendChild(div);
 }
 
 d3.select("#coloring")

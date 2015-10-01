@@ -130,6 +130,7 @@ function tipLabelWidth(d) {
 }
 
 function tree_init(){
+	console.log("Initializing tree");
 	calcFullTipCounts(rootNode);
 	calcBranchLength(rootNode);
 	rootNode.branch_length= 0.01;
@@ -169,7 +170,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	if (typeof rootNode['ep'] != "undefined"){ initColorDomain('ep', epitopeColorScale);}
 	if (typeof rootNode['ne'] != "undefined"){ initColorDomain('ne', nonepitopeColorScale);}
 	if (typeof rootNode['rb'] != "undefined"){ initColorDomain('rb', receptorBindingColorScale);}
-	date_init();
+	//date_init();
 	tree_init();
 
 	var xValues = nodes.map(function(d) {
@@ -234,8 +235,8 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			virusTooltip.show(d, this);
 		})
 		.on('click', function(d) {
-			if ((typeof d.db != "undefined") && (d.db == "GISAID") && (typeof d.accession != "undefined")) {
-				var url = "http://gisaid.org/EPI/"+d.accession;
+			if ((typeof d.isolate_id != "undefined")&&(d.isolate_id != "Unknown")) {
+				var url = "http://gisaid.org/EPI_ISL/"+d.isolate_id.substring(8,d.isolate_id.length);
 				console.log("opening url "+url);
 				var win = window.open(url, '_blank');
   				win.focus();
@@ -250,11 +251,11 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.attr("class", "vaccine")
 		.attr('text-anchor', 'middle')
 		.attr('dominant-baseline', 'central')
-		.style("font-size", "28px")
-		.style("font-weight",900)
+		.style("font-size", "22px")
+		.style("font-weight",600)
 		.style('font-family', 'sans-serif')
 		.style("fill", "#555555")
-		.text(function(d) { return 'x';}) //'\uf00d'; })
+		.text(function(d) { return '\uf00d'; }) //'x';}) //
 		.style("cursor", "default")
 		.on('mouseover', function(d) {
 			virusTooltip.show(d, this);
@@ -460,7 +461,6 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.domain([d3.min(xValues), d3.max(xValues)]);
 	var yScale = d3.scale.linear()
 		.domain([d3.min(yValues), d3.max(yValues)]);
-	setMargins();
 
 	resize();
 

@@ -3,17 +3,17 @@ var virusTooltip = d3.tip()
 	.attr('class', 'd3-tip')
 	.offset([0, 12])
 	.html(function(d) {
-	
+
 		string = "";
-				
+
 		// safe to assume the following attributes
 		if (typeof d.strain != "undefined") {
 			string += d.strain;
 		}
 		string += "<div class=\"smallspacer\"></div>";
-		
-		string += "<div class=\"smallnote\">";		
-		
+
+		string += "<div class=\"smallnote\">";
+
 		if (typeof d.country != "undefined") {
 			string += d.country.replace(/([A-Z])/g, ' $1');
 		}
@@ -26,22 +26,25 @@ var virusTooltip = d3.tip()
 		if (typeof d.accession != "undefined") {
 			string += "<br>GISAID ID: EPI" + d.accession;
 		}
-		if (typeof d.orig_lab != "undefined") {
+		if ((typeof d.subtype != "undefined")&&(d.subtype != "Unknown")) {
 			if (d.orig_lab != "") {
-				string += "<br>Source: " + d.orig_lab.substring(0,25);
-				if (d.orig_lab.length>25) string += '...';
+				string += "<br>Subtype: " + d.subtype;
 			}
-		}			
-		if (typeof d.sub_lab != "undefined") {
-			if (d.sub_lab != "") {
-				string += "<br>Subm: " + d.sub_lab.substring(0,25);
-				if (d.sub_lab.length>25) string += '...';
+		}
+		if ((typeof d.host != "undefined")&&(d.host != "Unknown")) {
+			if (d.orig_lab != "") {
+				string += "<br>host group: " + d.host;
 			}
-		}			
+		}
+		if ((typeof d.passage != "undefined")&&(d.passage != "Unknown")) {
+			if (d.orig_lab != "") {
+				string += "<br>passage: " + d.passage;
+			}
+		}
 		string += "</div>";
-		
+
 		string += "<div class=\"smallspacer\"></div>";
-				
+
 		// following may or may not be present
 		string += "<div class=\"smallnote\">";
 		if (typeof d.ep != "undefined") {

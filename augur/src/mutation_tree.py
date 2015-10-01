@@ -16,7 +16,7 @@ std_outgroup_file_blast = 'source-data/outgroups.fasta'
 std_outgroup_file_nuc = 'source-data/vaccrefMix_HAanno_nuc_Sep2015.fa'
 virus_config.update({
 	# data source and sequence parsing/cleaning/processing
-	'fasta_fields':{0:'strain', 1:'date', 2:'isolate_id', 3:'passage', 4:'subtype', 5:'ori_lab', 6:'sub_lab', 7:'submitter'},
+	'fasta_fields':{0:'strain', 1:'isolate_id', 2:'date',  3:'subtype', 4:'country', 5:'region', 7:'host', 6:'passage'},
 	'cds':[0,None], # define the HA start i n 0 numbering
 	'verbose':3
 	})
@@ -95,8 +95,8 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 		self.make_strain_names_unique()
 
 	def load_standard_outgroups(self):
-		return {'|'.join(seq.description.split('|')[:2]).replace(' ',''):{'seq':seq.description.split('|')[0],
-					'seq':str(seq.seq).upper(), 'strain':seq.description.split('|')[1].replace(' ',''), 'desc':seq.description,
+		return {'|'.join(seq.description.split()[1].split('|')[:2]).replace(' ',''):{
+					'seq':str(seq.seq).upper(), 'strain':seq.description.split()[1].split('|')[1].replace(' ',''), 'desc':seq.description,
 						'date':get_date(seq.description)}
 				for seq in SeqIO.parse(std_outgroup_file_nuc, 'fasta')}
 
@@ -108,9 +108,15 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 
 		self.make_run_dir()
 		nvir = 10
-		earliest_date = np.min([numerical_date(v["date"]) for v in self.viruses])
+		tmp_dates = []
+		for v in self.viruses:
+			try:
+				tmp_dates.append(numerical_date(v["date"]))
+			except:
+				print("Can't parse date for",v['strain'], v['date'])
+		earliest_date = np.min(tmp_dates)
 		all_strains = [v["strain"] for v in self.viruses]
-		representatives = [SeqRecord(Seq(v['seq']), id=v['strain']) for v in sample(self.viruses, min(nvir, nvir))]
+		representatives = [SeqRecord(Seq(v['seq']), id=v['strain']) for v in sample(self.viruses, min(nvir, len(self.viruses)))]
 		standard_outgroups = self.load_standard_outgroups()
 		SeqIO.write(representatives, self.run_dir+'representatives.fasta', 'fasta')
 		blast_out = self.run_dir+"outgroup_blast.xml"
@@ -130,11 +136,14 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
  		for og, hits in by_og:
  			if standard_outgroups[og]['date']<earliest_date-5 or np.mean([y[-1] for y in hits])<0.8:
  				break
- 			if self.include_ref_strains and (og not in all_strains):
-	 			self.viruses.append(standard_outgroups[og])
-	 			print("including reference strain ",og)
+
 	 	if np.mean([y[-1] for y in hits])<0.8:
 	 		self.midpoint_rooting = True
+
+ 		for ref, hits in by_og:
+ 			if np.max([y[-2] for y in hits])>0.95 and ref!=og:
+	 			self.viruses.append(standard_outgroups[ref])
+	 			print("including reference strain ",ref)
 		self.outgroup = standard_outgroups[og]
 		self.outgroup['strain']+='OG'
 		self.cds = [0,len(self.outgroup['seq'])]
@@ -261,6 +270,14 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 			for t in tmp_tree.find_clades(): # revert to original name
 				t.name = t.label
 			plt.close('Tree')
+		for n in self.tree.leaf_iter():
+			for field in self.fasta_fields.values():
+				if (not hasattr(n, field)) or n.__dict__[field]=="":
+					n.__dict__[field]="Unknown"
+		for n in self.tree.postorder_internal_node_iter():
+			for field in self.fasta_fields.values():
+				n.__dict__[field]="Unknown"
+
 
 		if self.cds is None:
 			self.export_to_auspice(tree_fields = ['nuc_muts','num_date']+self.fasta_fields.values(), seq='nuc')
@@ -328,10 +345,19 @@ if __name__=="__main__":
 	muttree.run(raxml_time_limit=0.1)
 	muttree.export()
 
+
 	shutil.copy2('../auspice/_site/js/muttree.js', muttree.outdir+'js/muttree.js')
 	shutil.copy2('../auspice/_site/js/msa.min.js', muttree.outdir+'js/msa.min.js')
 	shutil.copy2('../auspice/_site/muttree/index.html', muttree.outdir+'index.html')
 	shutil.copy2('../auspice/_site/css/style.css', muttree.outdir+'css/style.css')
 
+	with open(muttree.outdir+'/js/fields.js', 'w') as ofile:
+		for field in ['passage', 'host', 'subtype','region']:
+			try:
+				tmp = sorted(set([x.__dict__[field] for x in muttree.tree.leaf_iter()]))
+			except:
+				tmp = ["Unknown"]
+			if "Unknown" not in tmp: tmp.append("Unknown")
+			ofile.write(field + 's = [' + ', '.join(map(lambda x:'"'+str(x)+'"',tmp))+']\n')
 
 #	os.system('firefox '+muttree.outdir+'index.html &')

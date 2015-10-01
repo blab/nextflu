@@ -36,16 +36,18 @@ function makeLegend(){
 
 	// construct a dictionary that maps a legend entry to the preceding interval
     var lower_bound = {}, upper_bound = {};
-    lower_bound[colorScale.domain()[0]] = -100000000;
-    upper_bound[colorScale.domain()[0]] = colorScale.domain()[0];
-    for (var i=1; i<colorScale.domain().length; i++){
-        lower_bound[colorScale.domain()[i]]=colorScale.domain()[i-1];
-        upper_bound[colorScale.domain()[i]]=colorScale.domain()[i];
-    }
-    upper_bound[colorScale.domain()[colorScale.domain().length-1]]=10000000;
+    if ((colorBy=='lbi')||(colorBy=='date')||(colorBy=='dfreq')){
+        lower_bound[colorScale.domain()[0]] = -100000000;
+        upper_bound[colorScale.domain()[0]] = colorScale.domain()[0];
+        for (var i=1; i<colorScale.domain().length; i++){
+            lower_bound[colorScale.domain()[i]]=colorScale.domain()[i-1];
+            upper_bound[colorScale.domain()[i]]=colorScale.domain()[i];
+        }
+        upper_bound[colorScale.domain()[colorScale.domain().length-1]]=10000000;
 
-    console.log(lower_bound);
-    console.log(upper_bound);
+        console.log(lower_bound);
+        console.log(upper_bound);
+    }
 
 	// function that equates a tip and a legend element
 	// exact match is required for categorical qunantities such as genotypes, regions
@@ -66,16 +68,18 @@ function makeLegend(){
                 tmp = lower_bound[d]-1.0/12;
             }
             var dstr = Math.floor(tmp).toString();
-            var month = Math.round((tmp-Math.floor(tmp))*12)+1;
+            var month = Math.floor((tmp-Math.floor(tmp))*12)+1;
             if (upper_bound[d]>100000){
                return 'past '+months[month] +' ' + dstr;
             }else{
                return 'to '+months[month] +' ' + dstr;
             }
         }else{
+            console.log(d);
             return d.toString().replace(/([a-z])([A-Z])/g, '$1 $2').replace(/,/g, ', ');
         }
      }
+    console.log("legend domain",colorScale.domain());
 
 	var tmp_leg = legend.selectAll(".legend")
 	.data(colorScale.domain())

@@ -61,9 +61,10 @@ function calcBranchLength(node){
 };
 
 /**
- * for each node, calculate the number of subtending tips (alive or dead) 
+ * for each node, calculate the number of subtending tips (alive or dead)
 **/
 function calcFullTipCounts(node){
+	console.log("Calculating full tip count");
 	node.fullTipCount = 0;
 	if (typeof node.children != "undefined") {
 		for (var i=0; i<node.children.length; i++) {
@@ -71,13 +72,13 @@ function calcFullTipCounts(node){
 			node.fullTipCount += node.children[i].fullTipCount;
 		}
 	}
-	else { 
+	else {
 		node.fullTipCount = 1;
 	}
 };
 
 /**
- * for each node, calculate the number of tips in the currently selected time window. 
+ * for each node, calculate the number of tips in the currently selected time window.
 **/
 function calcTipCounts(node){
 	node.tipCount = 0;
@@ -87,7 +88,7 @@ function calcTipCounts(node){
 			node.tipCount += node.children[i].tipCount;
 		}
 	}
-	else if (node.current){ 
+	else if (node.current){
 		node.tipCount = 1;
 	}
 };
@@ -101,7 +102,7 @@ function setNodeAlive(node){
 		for (var i=0, c=node.children.length; i<c; i++) {
 			setNodeAlive(node.children[i]);
 			aliveChildren = aliveChildren||node.children[i].alive
-		}   
+		}
 		node.alive = aliveChildren;
 	}else{
 		node.alive = node.current;
@@ -140,10 +141,10 @@ function calcDownPolarizers(node){
 			node.children[i1].down_polarizer += node.children[i2].up_polarizer;
 			}
 		}
-		// account for the attenuation over the branch_length 
+		// account for the attenuation over the branch_length
 		bl =  node.children[i1].branch_length/LBItau;
 		node.children[i1].down_polarizer *= Math.exp(-bl);
-		if (node.children[i1].alive) { //the branch contributes only when the node is alive 
+		if (node.children[i1].alive) { //the branch contributes only when the node is alive
 			node.children[i1].down_polarizer += LBItau*(1-Math.exp(-bl));
 		}
 		calcDownPolarizers(node.children[i1]);
