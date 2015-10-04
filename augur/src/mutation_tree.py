@@ -95,9 +95,11 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 		self.make_strain_names_unique()
 
 	def load_standard_outgroups(self):
-		return {'|'.join(seq.description.split()[1].split('|')[:2]).replace(' ',''):{
-					'seq':str(seq.seq).upper(), 'strain':seq.description.split()[1].split('|')[1].replace(' ',''), 'desc':seq.description,
-						'date':get_date(seq.description)}
+		return {'|'.join(seq.description.split()[1].split('|')[:2]).replace(' ',''):
+					{'seq':str(seq.seq).upper(), 
+					 'strain':seq.description.split()[1].split('|')[1].replace(' ',''), 
+					 'desc':seq.description,
+					 'date':get_date(seq.description)}
 				for seq in SeqIO.parse(std_outgroup_file_nuc, 'fasta')}
 
 
