@@ -227,7 +227,7 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine, HI
 				'dHI', 'cHI', 'mean_HI_titers','HI_titers','HI_titers_raw', 'serum', 'HI_info',
 				'avidity_tree','avidity_mut', 'potency_mut', 'potency_tree', 'mean_potency_mut', 'mean_potency_tree', 'autologous_titers'],
                    annotations = ['5','6','6b', '6c','7'])
-			self.generate_indexHTML()
+			#self.generate_indexHTML()
 			self.export_HI_mutation_effects()
 
 		if 'HIvalidate' in steps:
