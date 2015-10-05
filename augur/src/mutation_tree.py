@@ -13,7 +13,7 @@ import numpy as np
 from itertools import izip
 
 std_outgroup_file_blast = 'source-data/outgroups.fasta'
-std_outgroup_file_nuc = 'source-data/vaccrefMix_HAanno_nuc_Sep2015.fa'
+std_outgroup_file_nuc = 'source-data/outgroups_nucleotides.fasta'
 virus_config.update({
 	# data source and sequence parsing/cleaning/processing
 	'fasta_fields':{0:'strain', 1:'isolate_id', 2:'date',  3:'subtype', 4:'country', 5:'region', 7:'host', 6:'passage'},
@@ -96,8 +96,8 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 
 	def load_standard_outgroups(self):
 		return {'|'.join(seq.description.split()[1].split('|')[:2]).replace(' ',''):
-					{'seq':str(seq.seq).upper(), 
-					 'strain':seq.description.split()[1].split('|')[1].replace(' ',''), 
+					{'seq':str(seq.seq).upper(),
+					 'strain':seq.description.split()[1].split('|')[1].replace(' ',''),
 					 'desc':seq.description,
 					 'date':get_date(seq.description)}
 				for seq in SeqIO.parse(std_outgroup_file_nuc, 'fasta')}
@@ -142,6 +142,7 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 
 		if np.mean([y[-1] for y in hits])<0.8:
 			self.midpoint_rooting = True
+			print("will root at midpoint")
 
 		for ref, hits in by_og:
 			if np.max([y[-1] for y in hits])>0.9 and ref!=og:
