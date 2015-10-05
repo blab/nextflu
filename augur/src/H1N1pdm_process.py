@@ -30,7 +30,7 @@ receptor_binding_sites = [x-1 for x in [159,169,170,172,173,203,207]]
 virus_config.update({
 	# data source and sequence parsing/cleaning/processing
 	'virus':'H1N1pdm',
-	'alignment_file':'data/H1N1pdm_gisaid_epiflu_sequence.fasta.gz',
+	'alignment_file':'data/H1N1pdm_gisaid_epiflu_sequence.fasta',
 	'outgroup':'A/Swine/Indiana/P12439/00',
 	'force_include':'data/H1N1pdm_HI_strains.txt',
 	'force_include_all':True,
