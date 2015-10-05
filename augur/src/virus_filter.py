@@ -273,7 +273,7 @@ class flu_filter(virus_filter):
 					if label in label_to_country:
 						v['country'] = label_to_country[label]
 					else:
-						label = re.match(r'^[AB]/([A-Z][a-z]+)[A-Z]', v['strain']).group(1).lower()			# check for partial geo match
+						label = re.match(r'^[AB]/([A-Z][a-z]+)[A-Z0-9]', v['strain']).group(1).lower()			# check for partial geo match
 					if label in label_to_country:
 						v['country'] = label_to_country[label]							
 					if v['country'] == 'Unknown':
