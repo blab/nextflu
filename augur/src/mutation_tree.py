@@ -233,6 +233,8 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 				return ', '.join(tmp)
 
 		from Bio import Phylo
+		import matplotlib
+		matplotlib.use('cairo')
 		import matplotlib.pyplot as plt
 		plt.rcParams.update({'font.size':select_fontsize(len(self.viruses))})
 		plt.ioff()
