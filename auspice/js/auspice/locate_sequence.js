@@ -19,7 +19,9 @@ function findClosestClade(mutations){
                 tmpScore++;
             }
         }
-        tmpScore-=0.00001*Object.keys(cladeToSeq[clade]['nuc']).length
+        if (clade!="root") {
+            tmpScore -= 0.5*Object.keys(cladeToSeq[clade]['nuc']).length;
+        }
         if (tmpScore>bestScore){
             bestScore=tmpScore;
             bestClade=clade;
