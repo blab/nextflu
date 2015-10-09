@@ -1,12 +1,37 @@
-function locateSequence(){
+function parseSequences(){
+    var lines = document.getElementById('seqinput').value.split('\n');
+    var seqs = {};
+    var current_seq_name = "";
+    var current_seq = "";
+    for (var li=0; li<lines.length; li++){
+        if (lines[li][0]=='>'){
+            if (current_seq.length){
+                current_seq_name += " seq "+Object.keys(seqs).length;
+                seqs[current_seq_name]=current_seq;
+             }
+            current_seq_name = lines[li].substring(1,lines[li].length);
+        }else{
+            current_seq += lines[li].toUpperCase().replace(/[^ACGTWRN]/g,"");
+        }
+    }
+    if (current_seq.length){
+        current_seq_name += " seq "+Object.keys(seqs).length;
+        seqs[current_seq_name]=current_seq;
+     }
+    for (current_seq_name in seqs){
+        locateSequence(current_seq_name, seqs[current_seq_name]);
+    }
+}
+
+function locateSequence(name, seq){
     var mutations, olap_start, olap_end;
-    var seq = document.getElementById('seqinput').value.toUpperCase().replace(/[^ACGT]/g,"");
-    console.log('Provided sequence:',seq);
+    console.log('Provided sequence: '+ name +': ' + seq.substring(0,20)+'....');
     tmp = alignToRoot(seq);
     olap_start=tmp[0]; olap_end=tmp[1]; mutations=tmp[2];
     console.log("start, end:", olap_start, olap_end);
     console.log("mutations:", mutations);
     var bestClade = findClosestClade(mutations);
+    markInTree(bestClade);
 }
 
 function findClosestClade(mutations){
@@ -28,6 +53,10 @@ function findClosestClade(mutations){
         }
     }
     console.log("best match:",bestClade);
+    return bestClade;
+}
+
+function markInTree(clade){
 //    treeplot.selectAll('.link').filter(function(d){return d.target.clade==bestClade;})
 //        .append("circle")
 //        .attr("class", "userseq")
@@ -37,7 +66,7 @@ function findClosestClade(mutations){
 //        .attr("cy", function(d) { return d.target.y; })
 //        .style("fill", "#EE4444")
 //        .style("stroke", "#EE4444");
-    treeplot.selectAll('.tip').filter(function(d){return d.clade==bestClade;})
+    treeplot.selectAll('.tip').filter(function(d){return d.clade==clade;})
         .attr("r", function(d){console.log(d.strain); return tipRadius*2.7;})
         .style("visibility", 'visible')
         .style("fill", function (t) {
@@ -102,4 +131,4 @@ function alignToRoot(seq){
 
 
 
-d3.select('#seqinputsubmit').on('click', locateSequence); 
+d3.select('#seqinputsubmit').on('click', parseSequences); 
