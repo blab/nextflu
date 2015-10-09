@@ -1,6 +1,7 @@
 function parseSequences(){
     var lines = document.getElementById('seqinput').value.split('\n');
     var seqs = {};
+    var closest_nodes = {};
     var current_seq_name = "";
     var current_seq = "";
     for (var li=0; li<lines.length; li++){
@@ -10,6 +11,7 @@ function parseSequences(){
                 seqs[current_seq_name]=current_seq;
              }
             current_seq_name = lines[li].substring(1,lines[li].length);
+            current_seq = "";
         }else{
             current_seq += lines[li].toUpperCase().replace(/[^ACGTWRN]/g,"");
         }
@@ -17,9 +19,14 @@ function parseSequences(){
     if (current_seq.length){
         current_seq_name += " seq "+Object.keys(seqs).length;
         seqs[current_seq_name]=current_seq;
-     }
+    }
     for (current_seq_name in seqs){
-        locateSequence(current_seq_name, seqs[current_seq_name]);
+        var tmpclade = locateSequence(current_seq_name, seqs[current_seq_name]);
+        if (typeof closest_nodes[tmpclade]=="undefined"){closest_nodes[tmpclade]=[current_seq_name];}
+        else{closest_nodes[tmpclade].push(current_seq_name);}
+    }
+    for (var tmpclade in closest_nodes){
+        markInTree(tmpclade);
     }
 }
 
@@ -31,7 +38,7 @@ function locateSequence(name, seq){
     console.log("start, end:", olap_start, olap_end);
     console.log("mutations:", mutations);
     var bestClade = findClosestClade(mutations);
-    markInTree(bestClade);
+    return bestClade;
 }
 
 function findClosestClade(mutations){
@@ -57,22 +64,12 @@ function findClosestClade(mutations){
 }
 
 function markInTree(clade){
-//    treeplot.selectAll('.link').filter(function(d){return d.target.clade==bestClade;})
-//        .append("circle")
-//        .attr("class", "userseq")
-//        .attr("id","userseq")
-//        .attr("r", 10)
-//        .attr("cx", function(d) { console.log(d.target.strain, d.target.x); return d.target.x; })
-//        .attr("cy", function(d) { return d.target.y; })
-//        .style("fill", "#EE4444")
-//        .style("stroke", "#EE4444");
     treeplot.selectAll('.tip').filter(function(d){return d.clade==clade;})
         .attr("r", function(d){console.log(d.strain); return tipRadius*2.7;})
         .style("visibility", 'visible')
         .style("fill", function (t) {
           return d3.rgb(tipFillColor(t)).brighter();
         });
-
 }
 
 
