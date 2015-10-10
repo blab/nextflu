@@ -77,14 +77,14 @@ function findClosestClade(mutations){
 }
 
 function markInTree(clades){
-    var nodesToHighlight = nodes.filter(function(d){
+    var userSeqs = nodes.filter(function(d){
         var tmp=0; for (var clade in clades){tmp+= (d.clade==clade);} return tmp>0;});
 
-    for (var mi=0; mi<nodesToHighlight.length; mi++){
-        nodesToHighlight[mi].matches = clades[nodesToHighlight[mi].clade];
+    for (var mi=0; mi<userSeqs.length; mi++){
+        userSeqs[mi].matches = clades[userSeqs[mi].clade];
     }
 
-    treeplot.selectAll('.match').data(nodesToHighlight)
+    treeplot.selectAll('.match').data(userSeqs)
         .enter()
         .append('text')
         .attr("class", "match")

@@ -346,22 +346,27 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			d.y = yScale(d.yvalue);
 		});
 
-		treeplot.selectAll(".tip").data(tips)
+		treeplot.selectAll(".tip")
 			.transition().duration(dt)
 			.attr("cx", function(d) { return d.x; })
 			.attr("cy", function(d) { return d.y; });
 
-		treeplot.selectAll(".vaccine").data(vaccines)
+		treeplot.selectAll(".vaccine")
 			.transition().duration(dt)
 			.attr("x", function(d) { return d.x; })
 			.attr("y", function(d) { return d.y; });
 
-		treeplot.selectAll(".link").data(links)
+		treeplot.selectAll(".match")
+			.transition().duration(dt)
+			.attr("x", function(d) { return d.x; })
+			.attr("y", function(d) { return d.y; });
+
+		treeplot.selectAll(".link")
 			.transition().duration(dt)
 			.attr("points", branchPoints);
 
 		if ((typeof tip_labels != "undefined")&&(tip_labels)){
-			treeplot.selectAll(".tipLabel").data(tips)
+			treeplot.selectAll(".tipLabel")
 				.transition().duration(dt)
 				.style("font-size", function(d) {return tipLabelSize(d)+"px"; })			
 				.attr("x", function(d) { return d.x+10; })
@@ -370,7 +375,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			
 		if ((typeof branch_labels != "undefined")&&(branch_labels)){
 			console.log('shift branch_labels');
-			treeplot.selectAll(".branchLabel").data(nodes)
+			treeplot.selectAll(".branchLabel")
 				.transition().duration(dt)
 				.style("font-size", branchLabelSize)				
 				.attr("x", function(d) {  return d.x - 6;})
@@ -378,7 +383,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		}
 
 		if (typeof clades !="undefined"){
-			treeplot.selectAll(".annotation").data(clades)
+			treeplot.selectAll(".annotation")
 				.transition().duration(dt)
 				.attr("x", function(d) {
 					return xScale(d[1]) - 10;
