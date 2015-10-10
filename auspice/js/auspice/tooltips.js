@@ -97,3 +97,17 @@ var linkTooltip = d3.tip()
 		return string;
 	});
 treeplot.call(linkTooltip);
+
+
+var matchTooltip = d3.tip()
+	.direction('e')
+	.attr('class', 'd3-tip')
+	.offset([0, 12])
+	.html(function(d) {
+		string = "Closest match of:<br>";
+		for (var mi=0; mi<d.matches.length;mi++){
+			string+=d.matches[mi].substring(0,Math.min(30,d.matches[mi].length))+'<br>';
+		}
+		return string;
+	});
+treeplot.call(matchTooltip);
