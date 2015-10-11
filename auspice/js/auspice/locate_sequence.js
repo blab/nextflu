@@ -57,7 +57,10 @@ function locateSequence(name, seq){
 function findClosestClade(mutations){
     var bestClade=-1, bestScore=0;
     var tmpScore=0;
-    for (clade in cladeToSeq){
+    var searchClades = tips.map(function(d){return d.clade;});
+
+    for (ci=0; ci<searchClades.length; ci++){
+        clade = searchClades[ci];
         tmpScore=0;
         for (mut in mutations){
             if (stateAtPosition(clade, 'nuc', mut)==mutations[mut]){

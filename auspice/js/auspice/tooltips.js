@@ -104,10 +104,12 @@ var matchTooltip = d3.tip()
 	.attr('class', 'd3-tip')
 	.offset([0, 12])
 	.html(function(d) {
-		string = "Closest match of:<br>";
+		string = d.strain+ "<i> is closest match of:</i><ul>";
+		string += "<div class=\"smallspacer\"></div>";
 		for (var mi=0; mi<d.matches.length;mi++){
-			string+=d.matches[mi].substring(0,Math.min(30,d.matches[mi].length))+'<br>';
+			string+="<li>" +d.matches[mi].substring(0,Math.min(30,d.matches[mi].length))+'</li>';
 		}
+		string += "</ul>";
 		return string;
 	});
 treeplot.call(matchTooltip);
