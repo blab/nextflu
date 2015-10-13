@@ -1,3 +1,20 @@
+function addSequence(current_seq, current_seq_name, seqs, all_names){
+    if (current_seq_name==""){
+        current_seq_name="input sequence";
+    }
+    var name_count = 0;
+    for (var tmpii=0; tmpii<all_names; tmpii++){
+        if (all_names[ii]==current_seq_name){
+            name_count++;
+        }
+    }
+    if (name_count){
+        suffix=" "+(name_count+1);
+    }else{suffix="";}
+    all_names.push(current_seq_name);
+    seqs[current_seq_name+suffix]=current_seq;    
+}
+
 function parseSequences(){
     var lines = document.getElementById('seqinput').value.split('\n');
     var seqs = {};
@@ -5,12 +22,13 @@ function parseSequences(){
     var closest_nodes = {};
     var current_seq_name = "";
     var current_seq = "";
+    var seq_names = [];
+    var suffix;
     for (var li=0; li<lines.length; li++){
         if (lines[li][0]=='>'){
             if (current_seq.length){
-                current_seq_name += " seq "+Object.keys(seqs).length;
-                seqs[current_seq_name]=current_seq;
-             }
+                addSequence(current_seq, current_seq_name, seqs, seq_names);  
+            }
             current_seq_name = lines[li].substring(1,lines[li].length);
             current_seq = "";
         }else{
@@ -18,8 +36,7 @@ function parseSequences(){
         }
     }
     if (current_seq.length){
-        current_seq_name += " seq "+Object.keys(seqs).length;
-        seqs[current_seq_name]=current_seq;
+        addSequence(current_seq, current_seq_name, seqs, seq_names);  
     }
     for (current_seq_name in seqs){
         var tmpclade = locateSequence(current_seq_name, seqs[current_seq_name]);
@@ -30,7 +47,7 @@ function parseSequences(){
             unmatched.push(current_seq_name);
         }
     }
-    markInTree(closest_nodes);
+    markInTreeSeqSearch(closest_nodes);
     if (unmatched.length){
         console.log(unmatched);
         var tmp_str = "";
@@ -77,33 +94,6 @@ function findClosestClade(mutations){
     }
     console.log("best match:",bestClade);
     return bestClade;
-}
-
-function markInTree(clades){
-    var userSeqs = nodes.filter(function(d){
-        var tmp=0; for (var clade in clades){tmp+= (d.clade==clade);} return tmp>0;});
-
-    for (var mi=0; mi<userSeqs.length; mi++){
-        userSeqs[mi].matches = clades[userSeqs[mi].clade];
-    }
-
-    treeplot.selectAll('.match').data(userSeqs)
-        .enter()
-        .append('text')
-        .attr("class", "match")
-        .attr('text-anchor', 'middle')
-        .attr('dominant-baseline', 'central')
-        .style("font-size", "24px")
-        .style('font-family', 'FontAwesome')
-        .style("fill", "#555555")
-        .text(function(d) { console.log(d.strain); return '\uf069'; })
-        .attr("x", function(d) { return d.x; })
-        .attr("y", function(d) { return d.y; })
-        .style("cursor", "default")
-        .on('mouseover', function(d) {
-            matchTooltip.show(d, this);
-        })
-        .on('mouseout', matchTooltip.hide);
 }
 
 
@@ -165,9 +155,69 @@ function alignToRoot(seq){
     }
 }
 
+// highlight clades in tree
+function markInTreeSeqSearch(clades){
+    var userSeqs = nodes.filter(function(d){
+        var tmp=0; for (var clade in clades){tmp+= (d.clade==clade);} return tmp>0;});
 
+    for (var mi=0; mi<userSeqs.length; mi++){
+        userSeqs[mi].matches = clades[userSeqs[mi].clade];
+    }
 
-d3.select('#seqinputsubmit').on('click', parseSequences); 
+    treeplot.selectAll('.match').data(userSeqs)
+        .enter()
+        .append('text')
+        .attr("class", "match")
+        .text(function(d) { console.log(d.strain); return '\uf069'; })
+        .on('mouseover', function(d) {
+            matchTooltip.show(d, this);
+        })
+        .on('mouseout', matchTooltip.hide);
+    styleHighlight();
+}
+
+function markInTreeStrainSearch(tip){
+    treeplot.selectAll('.match').data([tip])
+        .enter()
+        .append('text')
+        .attr("class", "match")
+        .text(function(d) { console.log(d.strain); return '\uf069'; })
+        .on('mouseover', function(d) {
+            virusTooltip.show(d, this);
+        })
+        .on('mouseout', virusTooltip.hide);
+    styleHighlight();
+}
+
+function styleHighlight(){
+    treeplot.selectAll('.match')
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central')
+        .style("font-size", "24px")
+        .style('font-family', 'FontAwesome')
+        .style("fill", "#555555")
+        .attr("x", function(d) { return d.x; })
+        .attr("y", function(d) { return d.y; })
+        .style("cursor", "default");
+}
+
+// callback to highlight the result of a search by strain name
+var searchEvent;
+function highlightStrainSearch(tip) {
+    var strainName = (tip.strain).replace(/\//g, "");
+    d3.select("#"+strainName)
+        .call(function(d) {
+            markInTreeStrainSearch(tip);
+            virusTooltip.show(tip, d[0][0]);
+        });
+}
+
+var strainSearchEvent;
+d3.select('#seqinput').on('keyup', function(){
+        if (typeof strainSearchEvent != "undefined"){clearTimeout(strainSearchEvent);}
+        strainSearchEvent = setTimeout(parseSequences, 100);
+    }); 
+
 d3.select('#seqinputclear').on('click', function (){
     treeplot.selectAll('.match').data([]).exit().remove();
     document.getElementById('seqinput').value = "";
