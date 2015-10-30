@@ -91,13 +91,27 @@ function dragged(d) {
 	globalDate = d.date;
 
 	calcNodeAges(time_window);
-	treeplot.selectAll(".link")
-		.style("stroke", function(d){return "#ccc";})
+	console.log("recalculating node ages");
+	calcNodeAges(time_window);
+	console.log("adjusting node colors");
+	adjust_coloring_by_date();
+	console.log("updating frequencies");
+	adjust_freq_by_date();
+	if (colorBy!="genotype"){
+		d3.selectAll(".link")
+			.transition().duration(500)
+			.attr("points", branchPoints)
+			.style("stroke-width", branchStrokeWidth)
+			.style("stroke", branchStrokeColor);				
 
-	treeplot.selectAll(".tip")
-		.style("visibility", tipVisibility)
-		.style("fill", "#CCC")
-		.style("stroke", "#AAA");
+		d3.selectAll(".tip")
+			.transition().duration(500)
+			.style("visibility", tipVisibility)
+			.style("fill", tipFillColor)
+			.style("stroke", tipStrokeColor)
+			.attr("r", function(d){return tipRadius+(d.LBI>0.9)*3;});
+				
+	}
 
 	treeplot.selectAll(".vaccine")
 		.style("visibility", function(d) {

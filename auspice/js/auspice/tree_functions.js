@@ -174,6 +174,6 @@ function calcLBI(node, allnodes){
 		}
 	});
 	// normalize the LBI to range [0,1]
-	maxLBI = d3.max(allnodes.map(function (d) {return d.LBI;}));
-	allnodes.forEach(function (d){ d.LBI /= maxLBI;});
+	maxLBI = d3.max(tips.map(function (d) {return d.LBI;}));
+	tips.forEach(function (d){ d.LBI /= maxLBI;});
 };
