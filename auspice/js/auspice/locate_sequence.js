@@ -164,10 +164,10 @@ function markInTreeSeqSearch(clades){
         userSeqs[mi].matches = clades[userSeqs[mi].clade];
     }
 
-    treeplot.selectAll('.match').data(userSeqs)
+    treeplot.selectAll('.seqmatch').data(userSeqs)
         .enter()
         .append('text')
-        .attr("class", "match")
+        .attr("class", "seqmatch")
         .text(function(d) { console.log(d.strain); return '\uf069'; })
         .on('mouseover', function(d) {
             matchTooltip.show(d, this);
@@ -177,10 +177,10 @@ function markInTreeSeqSearch(clades){
 }
 
 function markInTreeStrainSearch(tip){
-    treeplot.selectAll('.match').data([tip])
+    treeplot.selectAll('.strainmatch').data([tip])
         .enter()
         .append('text')
-        .attr("class", "match")
+        .attr("class", "strainmatch")        
         .text(function(d) { console.log(d.strain); return '\uf069'; })
         .on('mouseover', function(d) {
             virusTooltip.show(d, this);
@@ -190,7 +190,7 @@ function markInTreeStrainSearch(tip){
 }
 
 function styleHighlight(){
-    treeplot.selectAll('.match')
+    treeplot.selectAll('.seqmatch')
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'central')
         .style("font-size", "24px")
@@ -198,7 +198,16 @@ function styleHighlight(){
         .style("fill", "#555555")
         .attr("x", function(d) { return d.x; })
         .attr("y", function(d) { return d.y; })
-        .style("cursor", "default");
+        .style("cursor", "default"); 
+    treeplot.selectAll('.strainmatch')
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central')
+        .style("font-size", "24px")
+        .style('font-family', 'FontAwesome')
+        .style("fill", "#555555")
+        .attr("x", function(d) { return d.x; })
+        .attr("y", function(d) { return d.y; })
+        .style("cursor", "default");              
 }
 
 // callback to highlight the result of a search by strain name
@@ -219,6 +228,9 @@ d3.select('#seqinput').on('keyup', function(){
     }); 
 
 d3.select('#seqinputclear').on('click', function (){
-    treeplot.selectAll('.match').data([]).exit().remove();
+    treeplot.selectAll('.seqmatch').data([]).exit().remove();
+    treeplot.selectAll('.strainmatch').data([]).exit().remove();    
     document.getElementById('seqinput').value = "";
-    }); 
+    document.getElementById('bp-input').value = "";
+	virusTooltip.hide();
+    });
