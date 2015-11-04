@@ -2,6 +2,7 @@ import time, argparse,re,os
 from virus_filter import flu_filter
 from virus_clean import virus_clean
 from tree_refine import tree_refine
+from fitness_model import fitness_model
 from process import process, virus_config
 from Bio import SeqIO
 from Bio.Seq import Seq
@@ -233,7 +234,7 @@ class H3N2_refine(tree_refine):
 			node.ne = self.nonepitope_distance(total_aa_seq, root_total_aa_seq)
 			node.rb = self.receptor_binding_distance(total_aa_seq, root_total_aa_seq)
 
-class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
+class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, fitness_model):
 	"""docstring for H3N2_process, H3N2_filter"""
 	def __init__(self,verbose = 0, force_include = None, 
 				force_include_all = False, max_global= True, **kwargs):
@@ -244,6 +245,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine):
 		H3N2_filter.__init__(self,**kwargs)
 		H3N2_clean.__init__(self,**kwargs)
 		H3N2_refine.__init__(self,**kwargs)
+		fitness_model.__init__(self,**kwargs)
 		self.verbose = verbose
 
 	def run(self, steps, viruses_per_month=50, raxml_time_limit = 1.0):

@@ -4,10 +4,16 @@
 #  - viruses that are not egg-passaged
 #  - a single sequence per virus strain, taken as first sequence in list
 
-import os, re, time, datetime, csv, sys
+import os, re, time, datetime, csv, sys, gzip
 from collections import defaultdict
 from Bio import SeqIO
 import numpy as np
+
+def myopen(fname, mode='r'):
+	if fname[-2:] == 'gz':
+		return gzip.open(fname, mode)
+	else:
+		return open(fname, mode)
 
 class virus_filter(object):
 
@@ -32,7 +38,7 @@ class virus_filter(object):
 		"""Parse FASTA file with default header formating"""
 		viruses = []
 		try:
-			handle = open(fasta, 'r')
+			handle = myopen(fasta, 'r')
 		except IOError:
 			print fasta, "not found"
 		else:
