@@ -333,6 +333,9 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		setMargins();
 		xScale.domain([dMin,dMax]);
 		yScale.domain([lMin,lMax]);
+		virusTooltip.hide();
+		linkTooltip.hide();
+		matchTooltip.hide();				
 		transform(1500)
 	}
 
@@ -356,10 +359,15 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.attr("x", function(d) { return d.x; })
 			.attr("y", function(d) { return d.y; });
 
-		treeplot.selectAll(".match")
+		treeplot.selectAll(".seqmatch")
 			.transition().duration(dt)
 			.attr("x", function(d) { return d.x; })
 			.attr("y", function(d) { return d.y; });
+			
+		treeplot.selectAll(".strainmatch")
+			.transition().duration(dt)
+			.attr("x", function(d) { return d.x; })
+			.attr("y", function(d) { return d.y; });			
 
 		treeplot.selectAll(".link")
 			.transition().duration(dt)
