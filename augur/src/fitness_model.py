@@ -20,29 +20,15 @@ def dummy(tree, attr='dummy'):
 
 class fitness_model(object):
 
-	def __init__(self, predictors = ['lb', 'ep', 'freq'], verbose=0,**kwargs):
+	def __init__(self, verbose=0,**kwargs):
 		'''
 		parameters:
 		tree -- tree of sequences for which a fitness model is to be determined
 		'''
 		self.verbose=verbose
 		self.seasons = [ (date(year=y, month = 10, day = 1), date(year = y+1, month = 4, day=1)) 
-						for y in xrange(int(self.time_interval[0]), int(self.time_interval[1]))]
+						for y in xrange(int(self.time_interval[0])+1, int(self.time_interval[1]))]
 
-		self.predictors = []
-		for p in predictors:
-			if p == 'lb':
-				self.predictors.append(('lb',calc_LBI, {'tau':0.0005, 'transform':lambda x:x}))
-			if p == 'ep':
-				self.predictors.append(('ep',calc_epitope_distance,{}))
-			if p == 'ne':
-				self.predictors.append(('ne',calc_nonepitope_distance,{}))
-			if p == 'ne_star':
-				self.predictors.append(('ne_star',calc_nonepitope_star_distance,{"seasons":self.seasons}))		
-			if p == 'tol':
-				self.predictors.append(('tol',calc_tolerance,{}))
-			if p == 'freq':
-				self.predictors.append(('dfreq',dummy,{}))
 
 	def calc_tip_counts(self):
 		'''
@@ -104,22 +90,23 @@ class fitness_model(object):
 	def calc_time_censcored_tree_frequencies(self):
 		print("fitting clade frequencies for seasons")
 		region = "global_fit"
+		freq_cutoff = 5.0
 		from date_util import numerical_date
 		for n in self.tree.preorder_node_iter():
 			n.fit_frequencies = {}
 			n.freq_slope = {}
 		for s in self.seasons:
-			time_interval = [numerical_date(s[0]), numerical_date(s[1])]
-			pivots = np.linspace(time_interval[0], time_interval[1],6)
+			time_interval = [numerical_date(s[0])-1, numerical_date(s[1])]
+			pivots = np.linspace(time_interval[0]-1, time_interval[1],6)
 			self.estimate_tree_frequencies(pivots=pivots, threshold = 20, regions=None,
 								region_name = region, time_interval=time_interval)
 			for n in self.tree.preorder_node_iter():
 				if n.logit_freq[region] is not None:
-					n.fit_frequencies[s] = n.logit_freq[region]
+					n.fit_frequencies[s] = np.minimum(freq_cutoff, np.maximum(-freq_cutoff,n.logit_freq[region]))
 				else:
 					n.fit_frequencies[s] = n.parent_node.fit_frequencies[s]
 				try:
-					slope, intercept, rval, pval, stderr = linregress(pivots, n.fit_frequencies[s])
+					slope, intercept, rval, pval, stderr = linregress(pivots[3:], n.fit_frequencies[s][3:])
 					n.freq_slope[s] = slope
 				except:
 					import ipdb; ipdb.set_trace()
@@ -127,7 +114,8 @@ class fitness_model(object):
 
 
 	def calc_all_predictors(self):
-		if 'dfreq' in [x[0] for x in self.predictors]:
+		if 'dfreq' in [x[0] for x in self.predictors] and \
+				(not hasattr(self.tree.seed_node, 'freq_slope')):
 			self.calc_time_censcored_tree_frequencies()
 		self.predictor_arrays={}
 		for node in self.tree.postorder_node_iter():
@@ -270,7 +258,22 @@ class fitness_model(object):
 			else:
 				node.fitness = 0.0
 
-	def predict(self, niter = 10):
+	def predict(self, predictors = ['ep', 'lb', 'freq'], niter = 10):
+		self.predictors = []
+		for p in predictors:
+			if p == 'lb':
+				self.predictors.append(('lb',calc_LBI, {'tau':0.0005, 'transform':lambda x:x}))
+			if p == 'ep':
+				self.predictors.append(('ep',calc_epitope_distance,{}))
+			if p == 'ne':
+				self.predictors.append(('ne',calc_nonepitope_distance,{}))
+			if p == 'ne_star':
+				self.predictors.append(('ne_star',calc_nonepitope_star_distance,{"seasons":self.seasons}))		
+			if p == 'tol':
+				self.predictors.append(('tol',calc_tolerance,{}))
+			if p == 'freq':
+				self.predictors.append(('dfreq',dummy,{}))
+
 		self.calc_tip_counts()
 		self.calc_all_predictors()
 		self.standardize_predictors()

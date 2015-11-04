@@ -4,7 +4,7 @@ import time
 import numpy as np
 
 debug = False
-log_thres = 15.0
+log_thres = 7.0
 
 cols  = np.array([(166,206,227),(31,120,180),(178,223,138),(51,160,44),(251,154,153),(227,26,28),(253,191,111),(255,127,0),(202,178,214),(106,61,154)], dtype=float)/255
 def running_average(obs, ws):
@@ -112,10 +112,9 @@ class frequency_estimator(object):
 		pivot_freq = tmp_interpolator(pivots)
 		pivot_freq[pivots<=tmp_interpolator.x[0]] = tmp_vals[0]
 		pivot_freq[pivots>=tmp_interpolator.x[-1]] = tmp_vals[-1]
-		pivot_freq = fix_freq(pivot_freq, self.pc)
+		pivot_freq =fix_freq(pivot_freq, 0.95)
 		if self.logit:
-			self.pivot_freq = logit_transform(pivot_freq)
-
+			pivot_freq = logit_transform(pivot_freq)
 		return pivot_freq
 
 
@@ -176,25 +175,33 @@ class frequency_estimator(object):
 			import ipdb; ipdb.set_trace()
 
 		self.pivot_freq = self.initial_guess(tmp_pivots, ws=2*(min(50,len(self.obs))//2))
+		self.pivot_freq[0]=self.pivot_freq[1]
+		self.pivot_freq[-1]=self.pivot_freq[-2]
 		self.frequency_estimate = interp1d(tmp_pivots, self.pivot_freq, kind=self.interpolation_type, bounds_error=False)
 		if self.verbose:
-			print "Initial pivots:", tmp_pivots
+			print "Initial pivots:", tmp_pivots, self.pivot_freq
 		steps= [4,2,1]
-		for step in steps:
-			# subset the pivots, if the last point is not included, attach it
-			self.pivot_tps = tmp_pivots[::step]
-			if self.pivot_tps[-1]!=tmp_pivots[-1]:
-				self.pivot_tps = np.concatenate((self.pivot_tps, tmp_pivots[-1:]))
+		for si in steps:
+			if len(self.final_pivot_tps)>2*si or si==1:
+				# subset the pivots, if the last point is not included, attach it
+				self.pivot_tps = tmp_pivots[::si]
+				if self.pivot_tps[-1]!=tmp_pivots[-1]:
+					self.pivot_tps = np.concatenate((self.pivot_tps, tmp_pivots[-1:]))
 
-			self.pivot_freq = self.frequency_estimate(self.pivot_tps)
-
-			# determine the optimal pivot freqquencies
-			self.pivot_freq = minimizer(self.logLH, self.pivot_freq, ftol = self.tol, xtol = self.tol, disp = self.verbose>0)
-			# instantiate an interpolation object based on the optimal frequency pivots
-			self.frequency_estimate = interp1d(self.pivot_tps, self.pivot_freq, kind=self.interpolation_type, bounds_error=False)
-			if min(np.diff(self.pivot_tps))<0.000001:
-				print pivots
-			if self.verbose: print "neg logLH using",len(self.pivot_tps),"pivots:", self.logLH(self.pivot_freq)
+				self.pivot_freq = self.frequency_estimate(self.pivot_tps)
+				if np.max(np.abs(self.pivot_freq))>20:
+					import ipdb; ipdb.set_trace()
+				# determine the optimal pivot freqquencies
+				self.pivot_freq = minimizer(self.logLH, self.pivot_freq, ftol = self.tol, xtol = self.tol, disp = self.verbose>0)
+				if self.logit:
+					self.pivot_freq = logit_transform(fix_freq(logit_inv(self.pivot_freq), 0.0001))
+				else:
+					self.pivot_freq = fix_freq(self.pivot_freq, 0.0001)
+				# instantiate an interpolation object based on the optimal frequency pivots
+				self.frequency_estimate = interp1d(self.pivot_tps, self.pivot_freq, kind=self.interpolation_type, bounds_error=False)
+				if min(np.diff(self.pivot_tps))<0.000001:
+					print pivots
+				if self.verbose: print "neg logLH using",len(self.pivot_tps),"pivots:", self.logLH(self.pivot_freq)
 
 		self.final_pivot_freq=np.zeros_like(self.final_pivot_tps)
 		self.final_pivot_freq[first_pivot:last_pivot]=self.pivot_freq			
@@ -348,7 +355,7 @@ class virus_frequencies(object):
 					# make n pivots a year, interpolate frequencies
 					# FIXME: adjust stiffness to total number of observations in a more robust manner
 					fe = frequency_estimator(zip(tps, obs), pivots=pivots, stiffness=self.stiffness*len(all_dates)/2000.0, 
-											logit=True, extra_pivots = self.extra_pivots, **self.kwarks)
+											logit=True, extra_pivots = self.extra_pivots, verbose=False, **self.kwarks)
 					fe.learn()
 
 					# assign the frequency vector to the node
