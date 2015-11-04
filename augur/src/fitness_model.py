@@ -15,17 +15,19 @@ pc=1e-2
 regularization = 1e-3
 default_predictors = ['lb', 'ep', 'ne_star']
 
+def dummy(tree, attr='dummy'):
+	return None
+
 class fitness_model(object):
 
-	def __init__(self, tree, predictors = None, verbose=0):
+	def __init__(self, predictors = ['lb', 'ep', 'freq'], verbose=0,**kwargs):
 		'''
 		parameters:
 		tree -- tree of sequences for which a fitness model is to be determined
 		'''
-		self.tree = tree
 		self.verbose=verbose
 		self.seasons = [ (date(year=y, month = 10, day = 1), date(year = y+1, month = 4, day=1)) 
-						for y in xrange(ymin, ymax)]
+						for y in xrange(int(self.time_interval[0]), int(self.time_interval[1]))]
 
 		self.predictors = []
 		for p in predictors:
@@ -39,6 +41,8 @@ class fitness_model(object):
 				self.predictors.append(('ne_star',calc_nonepitope_star_distance,{"seasons":self.seasons}))		
 			if p == 'tol':
 				self.predictors.append(('tol',calc_tolerance,{}))
+			if p == 'freq':
+				self.predictors.append(('freq',dummy,{}))
 
 	def calc_tip_counts(self):
 		'''
@@ -96,7 +100,34 @@ class fitness_model(object):
 			else:
 				node.alive=False
 
+	def calc_time_censcored_tree_frequencies(self):
+		print("fitting clade frequencies for seasons")
+		region = "global_fit"
+		from date_util import numerical_date
+		for n in self.tree.preorder_node_iter():
+			n.fit_frequencies = {}
+			n.dfreq = {}
+		for s in self.seasons:
+			time_interval = [numerical_date(s[0]), numerical_date(s[1])]
+			pivots = np.linspace(time_interval[0], time_interval[1],6)
+			self.estimate_tree_frequencies(pivots=pivots, threshold = 20, regions=None,
+								region_name = region, time_interval=time_interval)
+			for n in self.tree.preorder_node_iter():
+				if n.logit_freq[region] is not None:
+					n.fit_frequencies[s] = n.logit_freq[region]
+				else:
+					n.fit_frequencies[s] = n.parent_node.fit_frequencies[s]
+				try:
+					slope, intercept, rval, pval, stderr = linregress(pivots, n.fit_frequencies[s])
+					n.dfreq[s] = slope
+				except:
+					import ipdb; ipdb.set_trace()
+
+
+
 	def calc_all_predictors(self):
+		if 'freq' in [x[0] for x in self.predictors]:
+			self.calc_time_censcored_tree_frequencies()
 		self.predictor_arrays={}
 		for node in self.tree.postorder_node_iter():
 			node.predictors = {}

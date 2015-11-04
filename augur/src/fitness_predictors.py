@@ -1,6 +1,7 @@
 import dendropy, time
 import numpy as np
 from itertools import izip
+from scipy.stats import linregress
 from seq_util import translate
 from io_util import read_json
 from io_util import write_json
@@ -157,7 +158,6 @@ def calc_LBI(tree, attr = 'lbi', tau=0.0005, transform = lambda x:x):
 		for child in node.child_nodes():
 			tmp_LBI += child.up_polarizer
 		node.__setattr__(attr, transform(tmp_LBI))
-
 
 def main(tree_fname = 'data/tree_refine.json'):
 
