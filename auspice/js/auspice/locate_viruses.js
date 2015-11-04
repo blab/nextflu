@@ -227,7 +227,7 @@ d3.select('#seqinput').on('keyup', function(){
         strainSearchEvent = setTimeout(parseSequences, 100);
     }); 
 
-d3.select('#seqinputclear').on('click', function (){
+d3.select('#searchinputclear').on('click', function (){
     treeplot.selectAll('.seqmatch').data([]).exit().remove();
     treeplot.selectAll('.strainmatch').data([]).exit().remove();    
     document.getElementById('seqinput').value = "";

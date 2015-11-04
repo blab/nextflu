@@ -14,4 +14,4 @@ var date_select = true;
 {% include_relative auspice/tooltips.js %}
 {% include_relative auspice/tree.js %}
 {% include_relative auspice/frequencies.js %}
-{% include_relative auspice/locate_sequence.js %}
+{% include_relative auspice/locate_viruses.js %}

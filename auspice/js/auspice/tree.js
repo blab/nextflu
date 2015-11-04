@@ -434,7 +434,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	}
 
 
-	var mc = autocomplete(document.getElementById('search'))
+	var mc = autocomplete(document.getElementById('straininput'))
 		.keys(tips)
 		.dataField("strain")
 		.placeHolder("search strains...")
