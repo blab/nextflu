@@ -17,12 +17,11 @@ default_predictors = ['lb', 'ep', 'ne_star']
 
 class fitness_model(object):
 
-	def __init__(self, tree, predictors = None, verbose=0):
+	def __init__(self, predictors = ['lb', 'ep', 'freq'], verbose=0,**kwargs):
 		'''
 		parameters:
 		tree -- tree of sequences for which a fitness model is to be determined
 		'''
-		self.tree = tree
 		self.verbose=verbose
 		self.seasons = [ (date(year=y, month = 10, day = 1), date(year = y+1, month = 4, day=1)) 
 						for y in xrange(ymin, ymax)]
