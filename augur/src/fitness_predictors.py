@@ -100,15 +100,15 @@ def calc_nonepitope_star_distance(tree, attr='ne_star', seasons = []):
 	'''
 	if not hasattr(tree, "nonepitope_star_distance_assigned") or tree.nonepitope_star_distance_assigned==False:
 		for node in tree.postorder_node_iter():
-			if len(node.tips) and node!=tree.seed_node:
+			if len(node.season_tips) and node!=tree.seed_node:
 				if not hasattr(node, 'aa'):
 					node.aa = translate(node.seq)
 				tmp_node = node.parent_node
-				cur_season = min(node.tips.keys())
+				cur_season = min(node.season_tips.keys())
 				prev_season = seasons[max(0,seasons.index(cur_season)-1)]
 				while True:
 					if tmp_node!=tree.seed_node:
-						if prev_season in tmp_node.tips and len(tmp_node.tips[prev_season])>0:
+						if prev_season in tmp_node.season_tips and len(tmp_node.season_tips[prev_season])>0:
 							break
 						else:
 							tmp_node=tmp_node.parent_node
