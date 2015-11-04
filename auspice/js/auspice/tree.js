@@ -333,6 +333,9 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		setMargins();
 		xScale.domain([dMin,dMax]);
 		yScale.domain([lMin,lMax]);
+		virusTooltip.hide();
+		linkTooltip.hide();
+		matchTooltip.hide();				
 		transform(1500)
 	}
 
@@ -346,22 +349,32 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			d.y = yScale(d.yvalue);
 		});
 
-		treeplot.selectAll(".tip").data(tips)
+		treeplot.selectAll(".tip")
 			.transition().duration(dt)
 			.attr("cx", function(d) { return d.x; })
 			.attr("cy", function(d) { return d.y; });
 
-		treeplot.selectAll(".vaccine").data(vaccines)
+		treeplot.selectAll(".vaccine")
 			.transition().duration(dt)
 			.attr("x", function(d) { return d.x; })
 			.attr("y", function(d) { return d.y; });
 
-		treeplot.selectAll(".link").data(links)
+		treeplot.selectAll(".seqmatch")
+			.transition().duration(dt)
+			.attr("x", function(d) { return d.x; })
+			.attr("y", function(d) { return d.y; });
+			
+		treeplot.selectAll(".strainmatch")
+			.transition().duration(dt)
+			.attr("x", function(d) { return d.x; })
+			.attr("y", function(d) { return d.y; });			
+
+		treeplot.selectAll(".link")
 			.transition().duration(dt)
 			.attr("points", branchPoints);
 
 		if ((typeof tip_labels != "undefined")&&(tip_labels)){
-			treeplot.selectAll(".tipLabel").data(tips)
+			treeplot.selectAll(".tipLabel")
 				.transition().duration(dt)
 				.style("font-size", function(d) {return tipLabelSize(d)+"px"; })			
 				.attr("x", function(d) { return d.x+10; })
@@ -370,7 +383,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			
 		if ((typeof branch_labels != "undefined")&&(branch_labels)){
 			console.log('shift branch_labels');
-			treeplot.selectAll(".branchLabel").data(nodes)
+			treeplot.selectAll(".branchLabel")
 				.transition().duration(dt)
 				.style("font-size", branchLabelSize)				
 				.attr("x", function(d) {  return d.x - 6;})
@@ -378,7 +391,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		}
 
 		if (typeof clades !="undefined"){
-			treeplot.selectAll(".annotation").data(clades)
+			treeplot.selectAll(".annotation")
 				.transition().duration(dt)
 				.attr("x", function(d) {
 					return xScale(d[1]) - 10;
@@ -421,30 +434,13 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	}
 
 
-	var searchEvent;
-	function onSelect(tip) {
-		var strainName = (tip.strain).replace(/\//g, "");
-		d3.select("#"+strainName)
-			.call(function(d) {
-				virusTooltip.show(tip, d[0][0]);
-			})
-            .attr("r", function(d){return tipRadius*1.7;})
-            .style("fill", function (d) {
-              searchEvent = setTimeout(function (){
-              	d3.select("#"+strainName)
-              	 .attr("r", function(d){return tipRadius;})
-              	 .style("fill", tipFillColor);}, 5000, d);
-              return d3.rgb(tipFillColor(d)).brighter();
-            });
-	}
-
-	var mc = autocomplete(document.getElementById('search'))
+	var mc = autocomplete(document.getElementById('straininput'))
 		.keys(tips)
 		.dataField("strain")
 		.placeHolder("search strains...")
 		.width(800)
 		.height(500)
-		.onSelected(onSelect)
+		.onSelected(highlightStrainSearch)
 		.render();
 
 

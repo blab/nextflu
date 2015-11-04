@@ -57,6 +57,7 @@ function autocomplete(parent) {
                     .attr("class","bp-ac")
                 
             var input = enter.append("input")
+            			.attr("id","bp-input")
             			.attr("type","search")
                         .attr("class", "form-control")
                         .attr("placeholder",_placeHolder)
