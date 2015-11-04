@@ -90,7 +90,7 @@ class fitness_model(object):
 	def calc_time_censcored_tree_frequencies(self):
 		print("fitting clade frequencies for seasons")
 		region = "global_fit"
-		freq_cutoff = 4.0
+		freq_cutoff = 5.0
 		from date_util import numerical_date
 		for n in self.tree.preorder_node_iter():
 			n.fit_frequencies = {}
