@@ -23,7 +23,7 @@ function makeLegend(){
 		}
 		if (colorBy == "date") {
 			return "Date";
-		}		
+		}
 		if (colorBy == "dfreq") {
 			var tmp_nmonth = Math.round(12*dfreq_dn*time_step);
 			var tmp_text = "Freq. change ("+tmp_nmonth+" month";
@@ -32,6 +32,9 @@ function makeLegend(){
 			}
 			return tmp_text+')';
 		}
+		if (colorBy == "fitness") {
+			return "Relative fitness";
+		}		
 	});
 
 	// construct a dictionary that maps a legend entry to the preceding interval

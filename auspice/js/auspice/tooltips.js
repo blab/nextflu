@@ -56,6 +56,9 @@ var virusTooltip = d3.tip()
 		if (typeof d.LBI != "undefined") {
 			string += "Local branching index: " + d.LBI.toFixed(3) + "<br>";
 		}
+		if (typeof d.fitness != "undefined") {
+			string += "Fitness: " + d.fitness.toFixed(3) + "<br>";
+		}		
 		string += "</div>";
 		return string;
 	});

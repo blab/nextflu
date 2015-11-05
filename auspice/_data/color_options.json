@@ -8,4 +8,5 @@
  ["date","sampling date"], 
  ["host","host"],
  ["subtype","subtype"],
+ ["fitness","fitness"], 
 ]
