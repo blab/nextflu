@@ -244,19 +244,28 @@ class H3N2_fitness(fitness_model):
 	def validate_prediction(self):
 		import matplotlib.pyplot as plt
 		from scipy.stats import spearmanr 
-		fig, axs = plt.subplots(1,2)
+		fig, axs = plt.subplots(1,3, figsize=(10,5))
 		for season, pred_vs_true in izip(self.fit_test_season_pairs, self.pred_vs_true):
 			axs[0].scatter(pred_vs_true[:,1], pred_vs_true[:,2])
 			axs[1].scatter(pred_vs_true[:,1]/pred_vs_true[:,0], 
 						   pred_vs_true[:,2]/pred_vs_true[:,0])
-			print("Spearman's rho,raw",spearmanr(pred_vs_true[:,1], pred_vs_true[:,2]))
-			print("Spearman's rho, rel",spearmanr(pred_vs_true[:,1]/pred_vs_true[:,0], 
-											      pred_vs_true[:,2]/pred_vs_true[:,0]))
+			for s, o, p  in pred_vs_true:
+				axs[2].arrow(s,s, o-s,p-s)
+
+
+		tmp = np.vstack(self.pred_vs_true)
+		print("Spearman's rho,raw",spearmanr(tmp[:,1], tmp[:,2]))
+		print("Spearman's rho, rel",spearmanr(tmp[:,1]/tmp[:,0], 
+										      tmp[:,2]/tmp[:,0]))
 
 		axs[0].set_ylabel('predicted')
 		axs[0].set_xlabel('observed')
 		axs[1].set_ylabel('predicted/initial')
 		axs[1].set_xlabel('observed/initial')
+		axs[2].set_ylabel('predicted')
+		axs[2].set_xlabel('observed')
+		axs[2].set_ylim(-0.1, 1.1)
+		axs[2].set_xlim(-0.1, 1.1)
 
 class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, H3N2_fitness):
 	"""docstring for H3N2_process, H3N2_filter"""

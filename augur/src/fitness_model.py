@@ -173,7 +173,9 @@ class fitness_model(object):
 		for s,t in self.fit_test_season_pairs:
 			self.clades_for_season[(s,t)] = []
 			for node in self.tree.postorder_node_iter():
-				if node.season_frequencies[s]>=min_freq and node.season_frequencies[s]<max_freq:
+				if  node.season_frequencies[s]>=min_freq and \
+					node.season_frequencies[s]<max_freq and\
+					any([x!='' for x in node.aa_muts.values()]):
 					self.clades_for_season[(s,t)].append(node)
 
 
