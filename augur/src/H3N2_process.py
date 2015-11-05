@@ -238,8 +238,8 @@ class H3N2_fitness(fitness_model):
 	def __init__(self, **kwargs):
 		fitness_model.__init__(self, **kwargs)
 
-	def annotate_fitness(self):
-		self.predict()
+	def annotate_fitness(self, predictors=['freq']):
+		self.predict(predictors=predictors)
 
 class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, H3N2_fitness):
 	"""docstring for H3N2_process, H3N2_filter"""
@@ -305,7 +305,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, H3N2_fitness):
 			self.export_to_auspice(tree_fields = ['ep', 'ne', 'rb', 'aa_muts','accession',
 			                       				  'isolate_id', 'lab','db', 'country', 'fitness'], 
 			                       annotations = ['3c2.a', '3c3.a', '3c3.b'])
-			self.generate_indexHTML()
+			#self.generate_indexHTML()
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies', 'fitness', 'export']

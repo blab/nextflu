@@ -38,7 +38,7 @@ var nonEpiColorDomain = genericDomain;
 var rbsColorDomain = genericDomain;
 var dateColorDomain = genericDomain;
 var dfreqColorDomain = genericDomain.map(function(d){return Math.round(100*(0.2+d*1.8))/100;});
-var fitnessColorDomain = genericDomain;
+var fitnessColorDomain = genericDomain.map(function(d){return Math.round(100*((d-0.5)*6.0))/100;});
 var time_step;
 
 

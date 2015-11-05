@@ -129,15 +129,10 @@ class fitness_model(object):
 			if self.verbose: print np.round(time.time()-t0,2), 'seconds'
 			for node in self.tree.postorder_node_iter():
 				if 'dfreq' in [x[0] for x in self.predictors]: node.dfreq = node.freq_slope[s]
-				if node.alive:
-					node.predictors[s] = np.array([node.__getattribute__(pred[0]) 
-				                              for pred in self.predictors])
-					if node.is_leaf():
-						tmp_preds.append(node.predictors[s])
-				else:
-					node.predictors[s]=None
-					if node.is_leaf():
-						tmp_preds.append(np.zeros(len(self.predictors)))
+				node.predictors[s] = np.array([node.__getattribute__(pred[0]) 
+			                              for pred in self.predictors])
+				if node.is_leaf():
+					tmp_preds.append(node.predictors[s])
 			self.predictor_arrays[s]=np.array(tmp_preds)
 
 	def standardize_predictors(self):
@@ -176,10 +171,7 @@ class fitness_model(object):
 			self.clades_for_season[(s,t)] = []
 			for node in self.tree.postorder_node_iter():
 				if node.season_frequencies[s]>=min_freq and node.season_frequencies[s]<max_freq:
-				#	if max([c.season_frequencies[s] for c in node.child_nodes()])<node.season_frequencies[s]:
 					self.clades_for_season[(s,t)].append(node)
-				#	else:
-				#		if self.verbose: print "clade fully contained in daughter clade"
 
 
 	def model_fit(self, params):
