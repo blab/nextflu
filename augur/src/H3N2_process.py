@@ -252,11 +252,18 @@ class H3N2_fitness(fitness_model):
 			for s, o, p  in pred_vs_true:
 				axs[2].arrow(s,s, o-s,p-s)
 
-
+		# pred_vs_true is initial, observed, predicted
 		tmp = np.vstack(self.pred_vs_true)
-		print("Spearman's rho,raw",spearmanr(tmp[:,1], tmp[:,2]))
+		print("Spearman's rho, null",spearmanr(tmp[:,0], tmp[:,1]))
+		print("Spearman's rho, raw",spearmanr(tmp[:,1], tmp[:,2]))
 		print("Spearman's rho, rel",spearmanr(tmp[:,1]/tmp[:,0], 
 										      tmp[:,2]/tmp[:,0]))
+		
+		growth_list = [pred > initial for (initial, obs, pred) in tmp if obs > initial]
+		print ("Correct at predicting growth", growth_list.count(True) / float(len(growth_list)))
+
+		decline_list = [pred < initial for (initial, obs, pred) in tmp if obs < initial]
+		print ("Correct at predicting decline", decline_list.count(True) / float(len(decline_list)))
 
 		axs[0].set_ylabel('predicted')
 		axs[0].set_xlabel('observed')
