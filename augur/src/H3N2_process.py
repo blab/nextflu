@@ -241,6 +241,23 @@ class H3N2_fitness(fitness_model):
 	def annotate_fitness(self, predictors=['freq']):
 		self.predict(predictors=predictors)
 
+	def validate_prediction(self):
+		import matplotlib.pyplot as plt
+		from scipy.stats import spearmanr 
+		fig, axs = plt.subplots(1,2)
+		for season, pred_vs_true in izip(self.fit_test_season_pairs, self.pred_vs_true):
+			axs[0].scatter(pred_vs_true[:,1], pred_vs_true[:,2])
+			axs[1].scatter(pred_vs_true[:,1]/pred_vs_true[:,0], 
+						   pred_vs_true[:,2]/pred_vs_true[:,0])
+			print("Spearman's rho,raw",spearmanr(pred_vs_true[:,1], pred_vs_true[:,2]))
+			print("Spearman's rho, rel",spearmanr(pred_vs_true[:,1]/pred_vs_true[:,0], 
+											      pred_vs_true[:,2]/pred_vs_true[:,0]))
+
+		axs[0].set_ylabel('predicted')
+		axs[0].set_xlabel('observed')
+		axs[1].set_ylabel('predicted/initial')
+		axs[1].set_xlabel('observed/initial')
+
 class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, H3N2_fitness):
 	"""docstring for H3N2_process, H3N2_filter"""
 	def __init__(self,verbose = 0, force_include = None, 

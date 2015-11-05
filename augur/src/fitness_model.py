@@ -98,7 +98,8 @@ class fitness_model(object):
 		for s in self.seasons:
 			time_interval = [numerical_date(s[0])-1, numerical_date(s[1])]
 			pivots = np.linspace(time_interval[0]-1, time_interval[1],6)
-			self.estimate_tree_frequencies(pivots=pivots, threshold = 20, regions=None,
+			n_nodes = len(self.tree.seed_node.season_tips[s])
+			self.estimate_tree_frequencies(pivots=pivots, threshold = n_nodes//5, regions=None,
 								region_name = region, time_interval=time_interval)
 			for n in self.tree.preorder_node_iter():
 				if n.logit_freq[region] is not None:
@@ -110,6 +111,8 @@ class fitness_model(object):
 					n.freq_slope[s] = slope
 				except:
 					import ipdb; ipdb.set_trace()
+		# reset pivots in tree to global pivots
+		self.tree.seed_node.pivots = self.pivots
 
 
 
@@ -177,19 +180,23 @@ class fitness_model(object):
 	def model_fit(self, params):
 		# walk through season pairs
 		seasonal_errors = []
+		self.pred_vs_true = []
 		for s,t in self.fit_test_season_pairs:		
 			# normalize strain frequencies
 			total_strain_freq = np.exp(self.fitness(params, self.predictor_arrays[s][self.tree.seed_node.season_tips[s],:])).sum()
 		
 			# project clades forward according to strain makeup
 			clade_errors = []
+			tmp_pred_vs_true = []
 			test_clades = self.clades_for_season[(s,t)]
 			for clade in test_clades:
 				initial_freq = clade.season_frequencies[s]
 				obs_freq = clade.season_frequencies[t]
 				pred_freq = np.sum(np.exp(self.fitness(params, self.predictor_arrays[s][clade.season_tips[s],:])))/total_strain_freq
+				tmp_pred_vs_true.append((initial_freq, obs_freq, pred_freq))
 				clade_errors.append(np.absolute(pred_freq - obs_freq))
 			seasonal_errors.append(np.mean(clade_errors))
+			self.pred_vs_true.append(np.array(tmp_pred_vs_true))
 		mean_error = np.mean(seasonal_errors)
 		if any(np.isnan(seasonal_errors)+np.isinf(seasonal_errors)):
 			mean_error = 1e10
