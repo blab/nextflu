@@ -80,7 +80,7 @@ class frequency_estimator(object):
 	'''
 
 	def __init__(self, observations, pivots = None, extra_pivots = 5, stiffness = 20.0, 
-				inertia = 0.0, logit=False, verbose = 0, dfreq_pc = 1e-2, pc=1e-3, tol=1e-3, **kwarks):
+				inertia = 0.0, logit=False, verbose = 0, dfreq_pc = 1e-2, pc=1e-3, tol=1e-3, **kwargs):
 		self.tps = np.array([x[0] for x in observations])
 		self.obs = np.array([x[1]>0 for x in observations])
 		self.stiffness = stiffness
@@ -214,14 +214,14 @@ class virus_frequencies(object):
 	def __init__(self, time_interval = (2012.0, 2015.1),
 				frequency_stiffness = 10.0, pivots_per_year = 12.0, 
 				clade_designations={}, aggregate_regions = None,
-				extra_pivots = 5, **kwarks):
+				extra_pivots = 5, **kwargs):
 		self.stiffness = frequency_stiffness
 		self.pivots_per_year = pivots_per_year
 		self.clade_designations=clade_designations
 		self.aggregate_regions = aggregate_regions
 		self.extra_pivots = extra_pivots
 		self.pivots = get_pivots(self.time_interval[0], self.time_interval[1], self.pivots_per_year)
-		self.kwarks = kwarks
+		self.freq_kwargs = kwargs
 		if not hasattr(self, "frequencies"):
 			self.frequencies = {}
 		if not hasattr(self, "time_interval"):
@@ -247,7 +247,7 @@ class virus_frequencies(object):
 				print "# of time points",len(tps), "# observations",sum(obs) 
 			fe = frequency_estimator(zip(tps, obs), pivots=self.pivots, extra_pivots = self.extra_pivots,
 			               stiffness=self.stiffness*float(len(observations))/len(self.viruses), 
-		                   logit=True, **self.kwarks)
+		                   logit=True, **self.freq_kwargs)
 			fe.learn()
 			return fe.frequency_estimate, (tps,obs)
 		else:
@@ -355,7 +355,7 @@ class virus_frequencies(object):
 					# make n pivots a year, interpolate frequencies
 					# FIXME: adjust stiffness to total number of observations in a more robust manner
 					fe = frequency_estimator(zip(tps, obs), pivots=pivots, stiffness=self.stiffness*len(all_dates)/2000.0, 
-											logit=True, extra_pivots = self.extra_pivots, verbose=False, **self.kwarks)
+											logit=True, extra_pivots = self.extra_pivots, verbose=False, **self.freq_kwargs)
 					fe.learn()
 
 					# assign the frequency vector to the node
