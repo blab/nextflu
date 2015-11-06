@@ -95,6 +95,9 @@ var linkTooltip = d3.tip()
 			string += "</li>";
 		}
 		string += "</ul>";
+		if (typeof d.fitness != "undefined") {
+			string += "Fitness: " + d.fitness.toFixed(3) + "<br>";
+		}			
 		string += "click to zoom into clade"
 		string += "</div>";
 		return string;
