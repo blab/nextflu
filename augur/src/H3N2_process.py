@@ -238,8 +238,8 @@ class H3N2_fitness(fitness_model):
 	def __init__(self, **kwargs):
 		fitness_model.__init__(self, **kwargs)
 
-	def annotate_fitness(self, predictors=['freq']):
-		self.predict(predictors=predictors)
+	def annotate_fitness(self, predictors=['freq'], estimate_frequencies = True):
+		self.predict(predictors=predictors, estimate_frequencies=estimate_frequencies)
 
 	def validate_prediction(self):
 		import matplotlib.pyplot as plt

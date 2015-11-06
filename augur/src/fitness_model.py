@@ -28,7 +28,7 @@ class fitness_model(object):
 		self.verbose=verbose
 		self.seasons = [ (date(year=y, month = 10, day = 1), date(year = y+1, month = 4, day=1)) 
 						for y in xrange(int(self.time_interval[0])+1, int(self.time_interval[1]))]
-
+		self.seasons.append( (date.fromordinal(date.today().toordinal()-180), date.today()) )
 
 	def calc_tip_counts(self):
 		'''
@@ -90,14 +90,17 @@ class fitness_model(object):
 	def calc_time_censcored_tree_frequencies(self):
 		print("fitting clade frequencies for seasons")
 		region = "global_fit"
-		freq_cutoff = 5.0
+		freq_cutoff = 25.0
+		total_pivots = 6
+		pivots_fit = 2
+		freq_window = 1
 		from date_util import numerical_date
 		for n in self.tree.preorder_node_iter():
 			n.fit_frequencies = {}
 			n.freq_slope = {}
 		for s in self.seasons:
-			time_interval = [numerical_date(s[0])-1, numerical_date(s[1])]
-			pivots = np.linspace(time_interval[0]-1, time_interval[1],6)
+			time_interval = [numerical_date(s[0]) - freq_window, numerical_date(s[1])]
+			pivots = np.linspace(time_interval[0] - freq_window, time_interval[1], total_pivots)
 			n_nodes = len(self.tree.seed_node.season_tips[s])
 			self.estimate_tree_frequencies(pivots=pivots, threshold = n_nodes//5, regions=None,
 								region_name = region, time_interval=time_interval)
@@ -107,7 +110,7 @@ class fitness_model(object):
 				else:
 					n.fit_frequencies[s] = n.parent_node.fit_frequencies[s]
 				try:
-					slope, intercept, rval, pval, stderr = linregress(pivots[3:], n.fit_frequencies[s][3:])
+					slope, intercept, rval, pval, stderr = linregress(pivots[pivots_fit:], n.fit_frequencies[s][pivots_fit:])
 					n.freq_slope[s] = slope
 				except:
 					import ipdb; ipdb.set_trace()
@@ -116,9 +119,8 @@ class fitness_model(object):
 
 
 
-	def calc_all_predictors(self):
-		if 'dfreq' in [x[0] for x in self.predictors] and \
-				(not hasattr(self.tree.seed_node, 'freq_slope')):
+	def calc_all_predictors(self, estimate_frequencies = True):
+		if estimate_frequencies and 'dfreq' in [x[0] for x in self.predictors]:
 			self.calc_time_censcored_tree_frequencies()
 		self.predictor_arrays={}
 		for node in self.tree.postorder_node_iter():
@@ -163,7 +165,7 @@ class fitness_model(object):
 		total_counts = {s:len(strain_list) for s, strain_list in self.tree.seed_node.season_tips.iteritems()}
 		# prune seasons where few observations were made, only consecutive pairs
 		# with sufficient tip count are retained
-		self.fit_test_season_pairs = [(s,t) for s,t in izip(self.seasons[:-1], self.seasons[1:]) 
+		self.fit_test_season_pairs = [(s,t) for s,t in izip(self.seasons[:-2], self.seasons[1:-1]) 
 							if total_counts[s]>min_tips and total_counts[t]>min_tips]
 		
 		# for each pair of seasons with sufficient tip counts, 
@@ -260,7 +262,7 @@ class fitness_model(object):
 			else:
 				node.fitness = 0.0
 
-	def predict(self, predictors = ['ep', 'lb', 'freq'], niter = 10):
+	def predict(self, predictors = ['ep', 'lb', 'freq'], niter = 10, estimate_frequencies = True):
 		self.predictors = []
 		for p in predictors:
 			if p == 'lb':
@@ -277,7 +279,7 @@ class fitness_model(object):
 				self.predictors.append(('dfreq',dummy,{}))
 
 		self.calc_tip_counts()
-		self.calc_all_predictors()
+		self.calc_all_predictors(estimate_frequencies = estimate_frequencies)
 		self.standardize_predictors()
 		self.select_clades_for_fitting()
 		self.learn_parameters(niter = niter)
