@@ -20,12 +20,38 @@ def dummy(tree, attr='dummy'):
 
 class fitness_model(object):
 
-	def __init__(self, verbose=0,**kwargs):
+	def __init__(self, predictor_input = ['ep', 'lb', 'dfreq'], verbose=0, **kwargs):
 		'''
 		parameters:
 		tree -- tree of sequences for which a fitness model is to be determined
 		'''
-		self.verbose=verbose
+		self.verbose = verbose
+		self.estimate_coefficients = True
+
+		if isinstance(predictor_input, dict):
+			predictors = predictor_input.keys()
+			self.estimate_coefficients = False
+		else:
+			predictors = predictor_input
+		self.predictors = []
+		for p in predictors:
+			if p == 'lb':
+				self.predictors.append(('lb',calc_LBI, {'tau':0.0005, 'transform':lambda x:x}))
+			if p == 'ep':
+				self.predictors.append(('ep',calc_epitope_distance,{}))
+			if p == 'ne':
+				self.predictors.append(('ne',calc_nonepitope_distance,{}))
+			if p == 'ne_star':
+				self.predictors.append(('ne_star',calc_nonepitope_star_distance,{"seasons":self.seasons}))
+			if p == 'tol':
+				self.predictors.append(('tol',calc_tolerance,{}))
+			if p == 'dfreq':
+				self.predictors.append(('dfreq',dummy,{}))
+		
+		self.params = 0*np.ones(len(self.predictors))
+		if isinstance(predictor_input, dict):
+			self.params = [predictor_input[k] for k in predictors]
+
 		self.seasons = [ (date(year=y, month = 10, day = 1), date(year = y+1, month = 4, day=1)) 
 						for y in xrange(int(self.time_interval[0])+1, int(self.time_interval[1]))]
 		self.seasons.append( (date.fromordinal(date.today().toordinal()-180), date.today()) )
@@ -119,13 +145,17 @@ class fitness_model(object):
 
 
 
-	def calc_all_predictors(self, estimate_frequencies = True):
+	def calc_all_predictors(self, last_season_only = False, estimate_frequencies = True):
 		if estimate_frequencies and 'dfreq' in [x[0] for x in self.predictors]:
 			self.calc_time_censcored_tree_frequencies()
 		self.predictor_arrays={}
 		for node in self.tree.postorder_node_iter():
 			node.predictors = {}
-		for s in self.seasons:
+		seasons_to_calculate = self.seasons
+		if last_season_only:
+			seasons_to_calculate = [self.seasons[-1]]
+		print seasons_to_calculate
+		for s in seasons_to_calculate:
 			tmp_preds = []
 			t0=time.time()
 			if self.verbose: print "calculating predictors for season ", s[0].strftime("%Y-%m-%d"), '--', s[1].strftime("%Y-%m-%d"),
@@ -262,28 +292,50 @@ class fitness_model(object):
 			else:
 				node.fitness = 0.0
 
-	def predict(self, predictors = ['ep', 'lb', 'freq'], niter = 10, estimate_frequencies = True):
-		self.predictors = []
-		for p in predictors:
-			if p == 'lb':
-				self.predictors.append(('lb',calc_LBI, {'tau':0.0005, 'transform':lambda x:x}))
-			if p == 'ep':
-				self.predictors.append(('ep',calc_epitope_distance,{}))
-			if p == 'ne':
-				self.predictors.append(('ne',calc_nonepitope_distance,{}))
-			if p == 'ne_star':
-				self.predictors.append(('ne_star',calc_nonepitope_star_distance,{"seasons":self.seasons}))		
-			if p == 'tol':
-				self.predictors.append(('tol',calc_tolerance,{}))
-			if p == 'freq':
-				self.predictors.append(('dfreq',dummy,{}))
-
+	def predict(self, niter = 10, estimate_frequencies = True):
 		self.calc_tip_counts()
 		self.calc_all_predictors(estimate_frequencies = estimate_frequencies)
 		self.standardize_predictors()
 		self.select_clades_for_fitting()
-		self.learn_parameters(niter = niter)
+		if self.estimate_coefficients:
+			self.learn_parameters(niter = niter)
 		self.assign_fitness(self.seasons[-1])
+
+def validate_prediction(my_fitness_model):
+	import matplotlib.pyplot as plt
+	from scipy.stats import spearmanr 
+	fig, axs = plt.subplots(1,3, figsize=(10,5))
+	for season, pred_vs_true in izip(my_fitness_model.fit_test_season_pairs, my_fitness_model.pred_vs_true):
+		axs[0].scatter(pred_vs_true[:,1], pred_vs_true[:,2])
+		axs[1].scatter(pred_vs_true[:,1]/pred_vs_true[:,0], 
+					   pred_vs_true[:,2]/pred_vs_true[:,0], c=pred_vs_true[0])
+		for s, o, p  in pred_vs_true:
+			axs[2].arrow(s,s, o-s,p-s)
+
+	# pred_vs_true is initial, observed, predicted
+	tmp = np.vstack(my_fitness_model.pred_vs_true)
+	print("Spearman's rho, null",spearmanr(tmp[:,0], tmp[:,1]))
+	print("Spearman's rho, raw",spearmanr(tmp[:,1], tmp[:,2]))
+	print("Spearman's rho, rel",spearmanr(tmp[:,1]/tmp[:,0], 
+										  tmp[:,2]/tmp[:,0]))
+	
+	growth_list = [pred > initial for (initial, obs, pred) in tmp if obs > initial]
+	print ("Correct at predicting growth", growth_list.count(True) / float(len(growth_list)))
+
+	decline_list = [pred < initial for (initial, obs, pred) in tmp if obs < initial]
+	print ("Correct at predicting decline", decline_list.count(True) / float(len(decline_list)))
+
+	axs[0].set_ylabel('predicted')
+	axs[0].set_xlabel('observed')
+	axs[1].set_ylabel('predicted/initial')
+	axs[1].set_xlabel('observed/initial')
+	axs[1].set_yscale('linear')
+	axs[1].set_xscale('linear')
+	axs[2].set_ylabel('predicted')
+	axs[2].set_xlabel('observed')
+	axs[2].set_ylim(-0.1, 1.1)
+	axs[2].set_xlim(-0.1, 1.1)
+	plt.tight_layout()
 
 def test(params):
 	from io_util import read_json

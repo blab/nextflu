@@ -40,6 +40,7 @@ virus_config.update({
 				   'gtplaceholder': 'HA1 positions...',
 					'freqdefault': '3c2.a, 3c3.a, 3c3.b'},
 	'js_vars': {'LBItau': 0.0005, 'LBItime_window': 0.5, 'dfreq_dn':2},
+	'predictors': { 'dfreq': 2.6 }
 	})
 
 
@@ -236,46 +237,14 @@ class H3N2_refine(tree_refine):
 
 class H3N2_fitness(fitness_model):
 	def __init__(self, **kwargs):
-		fitness_model.__init__(self, **kwargs)
+		if 'predictors' in self.kwargs:
+			predictor_input = self.kwargs['predictors']
+			fitness_model.__init__(self, predictor_input = predictor_input, **kwargs)
+		else:
+			fitness_model.__init__(self, **kwargs)
 
-	def annotate_fitness(self, predictors=['freq'], estimate_frequencies = True):
-		self.predict(predictors=predictors, estimate_frequencies=estimate_frequencies)
-
-	def validate_prediction(self):
-		import matplotlib.pyplot as plt
-		from scipy.stats import spearmanr 
-		fig, axs = plt.subplots(1,3, figsize=(10,5))
-		for season, pred_vs_true in izip(self.fit_test_season_pairs, self.pred_vs_true):
-			axs[0].scatter(pred_vs_true[:,1], pred_vs_true[:,2])
-			axs[1].scatter(pred_vs_true[:,1]/pred_vs_true[:,0], 
-						   pred_vs_true[:,2]/pred_vs_true[:,0], c=pred_vs_true[0])
-			for s, o, p  in pred_vs_true:
-				axs[2].arrow(s,s, o-s,p-s)
-
-		# pred_vs_true is initial, observed, predicted
-		tmp = np.vstack(self.pred_vs_true)
-		print("Spearman's rho, null",spearmanr(tmp[:,0], tmp[:,1]))
-		print("Spearman's rho, raw",spearmanr(tmp[:,1], tmp[:,2]))
-		print("Spearman's rho, rel",spearmanr(tmp[:,1]/tmp[:,0], 
-										      tmp[:,2]/tmp[:,0]))
-		
-		growth_list = [pred > initial for (initial, obs, pred) in tmp if obs > initial]
-		print ("Correct at predicting growth", growth_list.count(True) / float(len(growth_list)))
-
-		decline_list = [pred < initial for (initial, obs, pred) in tmp if obs < initial]
-		print ("Correct at predicting decline", decline_list.count(True) / float(len(decline_list)))
-
-		axs[0].set_ylabel('predicted')
-		axs[0].set_xlabel('observed')
-		axs[1].set_ylabel('predicted/initial')
-		axs[1].set_xlabel('observed/initial')
-		axs[1].set_yscale('linear')
-		axs[1].set_xscale('linear')
-		axs[2].set_ylabel('predicted')
-		axs[2].set_xlabel('observed')
-		axs[2].set_ylim(-0.1, 1.1)
-		axs[2].set_xlim(-0.1, 1.1)
-		plt.tight_layout()
+	def annotate_fitness(self, estimate_frequencies = True):
+		self.predict(estimate_frequencies=estimate_frequencies)
 
 class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, H3N2_fitness):
 	"""docstring for H3N2_process, H3N2_filter"""
