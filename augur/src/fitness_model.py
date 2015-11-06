@@ -54,7 +54,11 @@ class fitness_model(object):
 
 		self.seasons = [ (date(year=y, month = 10, day = 1), date(year = y+1, month = 4, day=1)) 
 						for y in xrange(int(self.time_interval[0])+1, int(self.time_interval[1]))]
-		self.seasons.append( (date.fromordinal(date.today().toordinal()-180), date.today()) )
+		final_interval = (date.fromordinal(date.today().toordinal()-180), date.today())
+		if self.estimate_coefficients:
+			self.seasons.append(final_interval)
+		else:
+			self.seasons = [final_interval]
 
 	def calc_tip_counts(self):
 		'''
@@ -145,17 +149,13 @@ class fitness_model(object):
 
 
 
-	def calc_all_predictors(self, last_season_only = False, estimate_frequencies = True):
+	def calc_all_predictors(self, estimate_frequencies = True):
 		if estimate_frequencies and 'dfreq' in [x[0] for x in self.predictors]:
 			self.calc_time_censcored_tree_frequencies()
 		self.predictor_arrays={}
 		for node in self.tree.postorder_node_iter():
 			node.predictors = {}
-		seasons_to_calculate = self.seasons
-		if last_season_only:
-			seasons_to_calculate = [self.seasons[-1]]
-		print seasons_to_calculate
-		for s in seasons_to_calculate:
+		for s in self.seasons:
 			tmp_preds = []
 			t0=time.time()
 			if self.verbose: print "calculating predictors for season ", s[0].strftime("%Y-%m-%d"), '--', s[1].strftime("%Y-%m-%d"),
