@@ -212,7 +212,7 @@ class fitness_model(object):
 					self.clades_for_season[(s,t)].append(node)
 
 
-	def model_fit(self, params):
+	def clade_fit(self, params):
 		# walk through season pairs
 		seasonal_errors = []
 		self.pred_vs_true = []
@@ -238,23 +238,71 @@ class fitness_model(object):
 		self.last_fit = mean_error
 		if self.verbose>2: print params, self.last_fit
 		return mean_error + regularization*np.sum(params**2)
+
+	def weighted_af(self, seqs, weights):
+		af = np.zeros((4, seqs.shape[1]))
+		for ni, nuc in enumerate('ACGT'):
+			af[ni] += (weights*(seqs==nuc).T).sum(axis=1)/weights.sum()
+		return af
+
+	def af_fit(self, params):
+		# walk through season pairs
+		seasonal_errors = []
+		self.pred_vs_true = []
+		for s,t in self.fit_test_season_pairs:		
+			weights = np.exp(self.fitness(params, self.predictor_arrays[s][self.tree.seed_node.season_tips[s],:]))
+			pred_af = self.weighted_af(self.seqs[s],weights)
+			seasonal_errors.append(np.mean(np.sum((pred_af-self.af[t])**2, axis=0), axis=0)) 
+			self.pred_vs_true.append(np.array(zip(self.af[s].flatten(), self.af[t].flatten(), pred_af.flatten())))
+
+		mean_error = np.mean(seasonal_errors)
+		if any(np.isnan(seasonal_errors)+np.isinf(seasonal_errors)):
+			mean_error = 1e10
+		self.last_fit = mean_error
+		if self.verbose>2: print params, self.last_fit
+		return mean_error + regularization*np.sum(params**2)
 		
 	def fitness(self, params, pred):
 		return np.sum(params*pred, axis=-1)
 
-
-	def minimize_error(self):
+	def minimize_clade_error(self):
 		from scipy.optimize import fmin as minimizer
 		if self.verbose:		
-			print "initial function value:", self.model_fit(self.params)
+			print "initial function value:", self.clade_fit(self.params)
 			print "initial parameters:", self.params
-		self.params = minimizer(self.model_fit, self.params, disp = self.verbose>1)
+		self.params = minimizer(self.clade_fit, self.params, disp = self.verbose>1)
 		if self.verbose:
-			print "final function value:", self.model_fit(self.params)		
+			print "final function value:", self.clade_fit(self.params)		
+			print "final parameters:", self.params, '\n'		
+
+	def minimize_af_error(self):
+		from scipy.optimize import fmin as minimizer
+		if not hasattr('variable_nuc', self):
+			self.determine_variable_positions()
+		self.seqs = {}
+		self.af = {}
+		fit_aln = np.zeros((len(self.viruses), len(self.variable_nuc)), dtype='S1')
+		for leaf in self.tree.leaf_iter():
+			fit_aln[leaf.tip_index] = np.fromstring(leaf.seq, 'S1')[self.variable_nuc]
+		for s in self.seasons:
+			self.seqs[s] = fit_aln[self.tree.seed_node.season_tips[s]]
+			self.af[s] = self.weighted_af(self.seqs[s], np.ones(len(self.seqs[s])))
+		if self.verbose:		
+			print "initial function value:", self.clade_fit(self.params)
+			print "initial parameters:", self.params
+		self.params = minimizer(self.af_fit, self.params, disp = self.verbose>1)
+		if self.verbose:
+			print "final function value:", self.clade_fit(self.params)		
 			print "final parameters:", self.params, '\n'		
 
 
-	def learn_parameters(self, niter = 10):
+	def learn_parameters(self, niter = 10, fit_func = "clade"):
+		if fit_func=='calde':
+			minimize_error=self.minimize_clade_error
+			fit_func=self.clade_fit
+		elif fit_func=="af":
+			minimize_error=self.minimize_af_error
+			fit_func=self.af_fit
 
 		print "fitting parameters of the fitness model\n"
 
@@ -263,18 +311,18 @@ class fitness_model(object):
 		if self.verbose:
 			print "null parameters"
 		self.params = 0*np.ones(len(self.predictors))  # initial values
-		self.minimize_error()
+		minimize_error()
 		params_stack.append((self.last_fit, self.params))
 		
 		for ii in xrange(niter):
 			if self.verbose:
 				print "iteration:", ii+1
 			self.params = 0.5*np.random.randn(len(self.predictors)) #0*np.ones(len(self.predictors))  # initial values
-			self.minimize_error()
+			minimize_error()
 			params_stack.append((self.last_fit, self.params))
 
 		self.params = params_stack[np.argmin([x[0] for x in params_stack])][1]
-		self.model_fit(self.params)
+		fit_func(self.params)
 		if self.verbose:
 			print "best after",niter,"iterations\nfunction value:", self.last_fit
 			print "fit parameters:"
