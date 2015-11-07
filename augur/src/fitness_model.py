@@ -252,8 +252,11 @@ class fitness_model(object):
 		for s,t in self.fit_test_season_pairs:		
 			weights = np.exp(self.fitness(params, self.predictor_arrays[s][self.tree.seed_node.season_tips[s],:]))
 			pred_af = self.weighted_af(self.seqs[s],weights)
-			seasonal_errors.append(np.mean(np.sum((pred_af-self.af[t])**2, axis=0), axis=0)) 
-			self.pred_vs_true.append(np.array(zip(self.af[s].flatten(), self.af[t].flatten(), pred_af.flatten())))
+			#seasonal_errors.append(np.mean(np.sum((pred_af-self.af[t])**2, axis=0), axis=0))
+			future_diameter = 0.5*np.sum(np.sum(self.af[t]*(1-self.af[t]), axis=0), axis=0)
+			seasonal_errors.append(np.sum(np.sum(pred_af*(1-self.af[t]), axis=0), axis=0)-future_diameter)
+			good_ind = self.af[s]*(1-self.af[s])>0.05
+			self.pred_vs_true.append(np.array(zip(self.af[s][good_ind], self.af[t][good_ind], pred_af[good_ind])))
 
 		mean_error = np.mean(seasonal_errors)
 		if any(np.isnan(seasonal_errors)+np.isinf(seasonal_errors)):
@@ -277,7 +280,7 @@ class fitness_model(object):
 
 	def minimize_af_error(self):
 		from scipy.optimize import fmin as minimizer
-		if not hasattr('variable_nuc', self):
+		if not hasattr(self,'variable_nuc'):
 			self.determine_variable_positions()
 		self.seqs = {}
 		self.af = {}
@@ -288,15 +291,15 @@ class fitness_model(object):
 			self.seqs[s] = fit_aln[self.tree.seed_node.season_tips[s]]
 			self.af[s] = self.weighted_af(self.seqs[s], np.ones(len(self.seqs[s])))
 		if self.verbose:		
-			print "initial function value:", self.clade_fit(self.params)
+			print "initial function value:", self.af_fit(self.params)
 			print "initial parameters:", self.params
 		self.params = minimizer(self.af_fit, self.params, disp = self.verbose>1)
 		if self.verbose:
-			print "final function value:", self.clade_fit(self.params)		
+			print "final function value:", self.af_fit(self.params)		
 			print "final parameters:", self.params, '\n'		
 
 
-	def learn_parameters(self, niter = 10, fit_func = "clade"):
+	def learn_parameters(self, niter = 10, fit_func = "af"):
 		if fit_func=='clade':
 			minimize_error=self.minimize_clade_error
 			fit_func=self.clade_fit
