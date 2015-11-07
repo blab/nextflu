@@ -297,12 +297,15 @@ class fitness_model(object):
 
 
 	def learn_parameters(self, niter = 10, fit_func = "clade"):
-		if fit_func=='calde':
+		if fit_func=='clade':
 			minimize_error=self.minimize_clade_error
 			fit_func=self.clade_fit
 		elif fit_func=="af":
 			minimize_error=self.minimize_af_error
 			fit_func=self.af_fit
+		else:
+			print("fit function", fit_func,"does not exist")
+			raise NotImplementedError
 
 		print "fitting parameters of the fitness model\n"
 
