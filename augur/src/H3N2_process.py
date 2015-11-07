@@ -40,7 +40,7 @@ virus_config.update({
 				   'gtplaceholder': 'HA1 positions...',
 					'freqdefault': '3c2.a, 3c3.a, 3c3.b'},
 	'js_vars': {'LBItau': 0.0005, 'LBItime_window': 0.5, 'dfreq_dn':2},
-	'predictors':['dfreq'] #: 2.6 }
+	'predictors':{'dfreq': 2.6 }
 	})
 
 
