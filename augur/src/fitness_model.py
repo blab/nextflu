@@ -3,6 +3,7 @@ import numpy as np
 import dendropy
 from collections import defaultdict
 from datetime import date
+from date_util import calendar_date
 from itertools import izip
 from fitness_predictors import *
 
@@ -54,7 +55,10 @@ class fitness_model(object):
 
 		self.seasons = [ (date(year=y, month = 10, day = 1), date(year = y+1, month = 4, day=1)) 
 						for y in xrange(int(self.time_interval[0])+1, int(self.time_interval[1]))]
-		final_interval = (date.fromordinal(date.today().toordinal()-180), date.today())
+		
+		final_date = calendar_date(self.time_interval[1])
+		final_interval = (date.fromordinal(final_date.toordinal()-180), final_date)
+		
 		if self.estimate_coefficients:
 			self.seasons.append(final_interval)
 		else:
