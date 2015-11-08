@@ -25,6 +25,7 @@ class fitness_model(object):
 		'''
 		parameters:
 		tree -- tree of sequences for which a fitness model is to be determined
+		predictor_input -- list of predictors to fit or dict of predictors to coefficients / std deviations
 		'''
 		self.verbose = verbose
 		self.estimate_coefficients = True
@@ -34,6 +35,9 @@ class fitness_model(object):
 			self.estimate_coefficients = False
 		else:
 			predictors = predictor_input
+		if "estimate_fitness_model" in self.kwargs:
+			if self.kwargs["estimate_fitness_model"]:
+				self.estimate_coefficients = True
 		self.predictors = []
 		for p in predictors:
 			if p == 'lb':
@@ -51,7 +55,11 @@ class fitness_model(object):
 		
 		self.params = 0*np.ones(len(self.predictors))
 		if isinstance(predictor_input, dict):
-			self.params = [predictor_input[k] for k in predictors]
+			self.params = np.array([predictor_input[k][0] for k in predictors])
+			
+		self.global_std = 0*np.ones(len(self.predictors))
+		if isinstance(predictor_input, dict):
+			self.global_std = np.array([predictor_input[k][1] for k in predictors])
 
 		self.seasons = [ (date(year=y, month = 10, day = 1), date(year = y+1, month = 4, day=1)) 
 						for y in xrange(int(self.time_interval[0])+1, int(self.time_interval[1]))]
@@ -182,7 +190,8 @@ class fitness_model(object):
 			self.season_means.append(self.predictor_arrays[s][self.tree.seed_node.season_tips[s],:].mean(axis=0))
 			self.season_std.append(self.predictor_arrays[s][self.tree.seed_node.season_tips[s],:].std(axis=0))
 
-		self.global_std = np.mean(self.season_std, axis=0)
+		if self.estimate_coefficients:
+			self.global_std = np.mean(self.season_std, axis=0)
 
 		for s, m in izip(self.seasons, self.season_means):
 			# keep this for internal nodes

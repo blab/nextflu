@@ -22,7 +22,8 @@ parser.add_argument('--start', default = 'filter', type = str,  help ="start pip
 parser.add_argument('--stop', default = 'export', type=str,  help ="run to end")
 parser.add_argument('--skip', nargs='+', type = str,  help ="analysis steps to skip")	
 parser.add_argument('--ATG', action="store_true", default=False, help ="include full HA sequence starting at ATG")	
-parser.add_argument('--resolution', type = str,  help ="label for the resolution")	
+parser.add_argument('--resolution', type = str,  help ="label for the resolution")
+parser.add_argument('--estimate_fitness_model', default = False, action="store_true", help ="estimate parameters of fitness model")
 
 
 virus_config = {
