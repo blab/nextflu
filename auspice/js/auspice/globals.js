@@ -2,7 +2,9 @@ var regions = ["Africa", "SouthAmerica", "WestAsia", "Oceania", "Europe", "Japan
 
 var cladeToSeq = {}
 
-var globalDate = new Date();
+if (typeof globalDate == 'undefined') {
+    var globalDate = new Date();
+}
 
 var nodes, tips, rootNode, links, vaccines;
 

@@ -1,4 +1,5 @@
 [
+ ["fitness","fitness"], 
  ["ep", "epitope mutations"],
  ["ne","non epitope mutations"],
  ["rb","receptor binding mutations"],
@@ -8,5 +9,4 @@
  ["date","sampling date"], 
  ["host","host"],
  ["subtype","subtype"],
- ["fitness","fitness"], 
 ]

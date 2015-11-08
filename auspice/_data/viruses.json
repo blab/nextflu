@@ -1,7 +1,8 @@
 [{	"virus": "H3N2",
  	"default": "/H3N2/3y/",
 	"name": "A/H3N2",
-  	"resolutions": ["1y","3y", "6y", "12y"]},
+  	"resolutions": ["1y","3y", "6y", "12y", "Feb-2015"]
+ },
  {	"virus": "H1N1pdm",
 	"default": "/H1N1pdm/3y/",
 	"name": "A/H1N1pdm",

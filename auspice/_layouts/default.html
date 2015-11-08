@@ -86,7 +86,7 @@
 						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
 								{% if page.categories.first == 'app' %}
-								{{ page.resolution }}
+								{{ page.resolution | replace:'-',' ' }}
 								{% else %}
 								Time 
 								{% endif %}
@@ -99,10 +99,10 @@
 										{% for res in entry.resolutions %}
 											{% if page.resolution == res %}
 											<li class="disabled">
-												<a>{{ res }}</a>
+												<a>{{ res | replace:'-',' ' }}</a>
 											{% else %}
 											<li>
-												<a href="/{{ entry.virus }}/{{ res }}">{{ res }}</a>
+												<a href="/{{ entry.virus }}/{{ res }}">{{ res | replace:'-',' ' }}</a>
 											{% endif %}
 											</li>
 										{% endfor %}
