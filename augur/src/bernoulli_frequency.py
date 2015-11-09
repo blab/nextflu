@@ -4,6 +4,7 @@ import time
 import numpy as np
 
 debug = False
+log_thres = 7.0
 
 cols  = np.array([(166,206,227),(31,120,180),(178,223,138),(51,160,44),(251,154,153),(227,26,28),(253,191,111),(255,127,0),(202,178,214),(106,61,154)], dtype=float)/255
 def running_average(obs, ws):
@@ -23,7 +24,7 @@ def running_average(obs, ws):
 			tmp_vals[:ws//2]*=float(ws)/np.arange(ws//2+1,ws)
 			tmp_vals[-ws//2:]*=float(ws)/np.arange(ws,ws//2,-1.0)
 	except:
-		import pdb; pdb.set_trace()
+		import ipdb; ipdb.set_trace()
 	return tmp_vals
 
 def fix_freq(freq, pc):
@@ -44,8 +45,8 @@ def logit_transform(freq):
 	return np.log(np.maximum(freq, 1e-10)/np.maximum(1e-10,(1-freq)))
 
 def logit_inv(logit_freq):
-	logit_freq[logit_freq<-20]=-20
-	logit_freq[logit_freq>20]=20
+	logit_freq[logit_freq<-log_thres]=-log_thres
+	logit_freq[logit_freq>log_thres]=log_thres
 	tmp_freq = np.exp(logit_freq)
 	return tmp_freq/(1.0+tmp_freq)
 
@@ -79,7 +80,7 @@ class frequency_estimator(object):
 	'''
 
 	def __init__(self, observations, pivots = None, extra_pivots = 5, stiffness = 20.0,
-				inertia = 0.0, logit=False, verbose = 0, dfreq_pc = 1e-2, pc=1e-3, tol=1e-3, **kwarks):
+				inertia = 0.0, logit=False, verbose = 0, dfreq_pc = 1e-2, pc=1e-3, tol=1e-3, **kwargs):
 		self.tps = np.array([x[0] for x in observations])
 		self.obs = np.array([x[1]>0 for x in observations])
 		self.stiffness = stiffness
@@ -111,10 +112,9 @@ class frequency_estimator(object):
 		pivot_freq = tmp_interpolator(pivots)
 		pivot_freq[pivots<=tmp_interpolator.x[0]] = tmp_vals[0]
 		pivot_freq[pivots>=tmp_interpolator.x[-1]] = tmp_vals[-1]
-		pivot_freq = fix_freq(pivot_freq, self.pc)
+		pivot_freq =fix_freq(pivot_freq, 0.95)
 		if self.logit:
-			self.pivot_freq = logit_transform(pivot_freq)
-
+			pivot_freq = logit_transform(pivot_freq)
 		return pivot_freq
 
 
@@ -172,28 +172,36 @@ class frequency_estimator(object):
 			self.tps = self.full_tps[(self.full_tps>=tmp_pivots[0])*(self.full_tps<tmp_pivots[-1])]
 			self.obs = self.full_obs[(self.full_tps>=tmp_pivots[0])*(self.full_tps<tmp_pivots[-1])]
 		except:
-			import pdb; pdb.set_trace()
+			import ipdb; ipdb.set_trace()
 
 		self.pivot_freq = self.initial_guess(tmp_pivots, ws=2*(min(50,len(self.obs))//2))
+		self.pivot_freq[0]=self.pivot_freq[1]
+		self.pivot_freq[-1]=self.pivot_freq[-2]
 		self.frequency_estimate = interp1d(tmp_pivots, self.pivot_freq, kind=self.interpolation_type, bounds_error=False)
 		if self.verbose:
-			print "Initial pivots:", tmp_pivots
+			print "Initial pivots:", tmp_pivots, self.pivot_freq
 		steps= [4,2,1]
-		for step in steps:
-			# subset the pivots, if the last point is not included, attach it
-			self.pivot_tps = tmp_pivots[::step]
-			if self.pivot_tps[-1]!=tmp_pivots[-1]:
-				self.pivot_tps = np.concatenate((self.pivot_tps, tmp_pivots[-1:]))
+		for si in steps:
+			if len(self.final_pivot_tps)>2*si or si==1:
+				# subset the pivots, if the last point is not included, attach it
+				self.pivot_tps = tmp_pivots[::si]
+				if self.pivot_tps[-1]!=tmp_pivots[-1]:
+					self.pivot_tps = np.concatenate((self.pivot_tps, tmp_pivots[-1:]))
 
-			self.pivot_freq = self.frequency_estimate(self.pivot_tps)
-
-			# determine the optimal pivot freqquencies
-			self.pivot_freq = minimizer(self.logLH, self.pivot_freq, ftol = self.tol, xtol = self.tol, disp = self.verbose>0)
-			# instantiate an interpolation object based on the optimal frequency pivots
-			self.frequency_estimate = interp1d(self.pivot_tps, self.pivot_freq, kind=self.interpolation_type, bounds_error=False)
-			if min(np.diff(self.pivot_tps))<0.000001:
-				print pivots
-			if self.verbose: print "neg logLH using",len(self.pivot_tps),"pivots:", self.logLH(self.pivot_freq)
+				self.pivot_freq = self.frequency_estimate(self.pivot_tps)
+				if np.max(np.abs(self.pivot_freq))>20:
+					import ipdb; ipdb.set_trace()
+				# determine the optimal pivot freqquencies
+				self.pivot_freq = minimizer(self.logLH, self.pivot_freq, ftol = self.tol, xtol = self.tol, disp = self.verbose>0)
+				if self.logit:
+					self.pivot_freq = logit_transform(fix_freq(logit_inv(self.pivot_freq), 0.0001))
+				else:
+					self.pivot_freq = fix_freq(self.pivot_freq, 0.0001)
+				# instantiate an interpolation object based on the optimal frequency pivots
+				self.frequency_estimate = interp1d(self.pivot_tps, self.pivot_freq, kind=self.interpolation_type, bounds_error=False)
+				if min(np.diff(self.pivot_tps))<0.000001:
+					print pivots
+				if self.verbose: print "neg logLH using",len(self.pivot_tps),"pivots:", self.logLH(self.pivot_freq)
 
 		self.final_pivot_freq=np.zeros_like(self.final_pivot_tps)
 		self.final_pivot_freq[first_pivot:last_pivot]=self.pivot_freq
@@ -206,14 +214,14 @@ class virus_frequencies(object):
 	def __init__(self, time_interval = (2012.0, 2015.1),
 				frequency_stiffness = 10.0, pivots_per_year = 12.0,
 				clade_designations={}, aggregate_regions = None,
-				extra_pivots = 5, **kwarks):
+				extra_pivots = 5, **kwargs):
 		self.stiffness = frequency_stiffness
 		self.pivots_per_year = pivots_per_year
 		self.clade_designations=clade_designations
 		self.aggregate_regions = aggregate_regions
 		self.extra_pivots = extra_pivots
 		self.pivots = get_pivots(self.time_interval[0], self.time_interval[1], self.pivots_per_year)
-		self.kwarks = kwarks
+		self.freq_kwargs = kwargs
 		if not hasattr(self, "frequencies"):
 			self.frequencies = {}
 		if not hasattr(self, "time_interval"):
@@ -239,7 +247,7 @@ class virus_frequencies(object):
 				print "# of time points",len(tps), "# observations",sum(obs)
 			fe = frequency_estimator(zip(tps, obs), pivots=self.pivots, extra_pivots = self.extra_pivots,
 			               stiffness=self.stiffness*float(len(observations))/len(self.viruses),
-		                   logit=True, **self.kwarks)
+		                   logit=True, **self.freq_kwargs)
 			fe.learn()
 			return fe.frequency_estimate, (tps,obs)
 		else:
@@ -342,12 +350,17 @@ class virus_frequencies(object):
 				clade_frequencies[clade_name.lower()] = list(np.round(logit_inv(freq.y),3))
 		return clade_frequencies
 
-	def estimate_sub_frequencies(self, node, all_dates, tip_to_date_index, threshold=50, region_name="global"):
+	def estimate_sub_frequencies(self, node, all_dates, tip_to_date_index, pivots = None,
+						threshold=50, region_name="global", time_interval=None):
 		# extract time points and the subset of observations that fall in the clade.
+		if time_interval is None: time_interval=self.time_interval
+		if pivots is None: pivots=self.pivots
 		tps = all_dates[tip_to_date_index[node.tips]]
-		start_index = max(0,np.searchsorted(tps, self.time_interval[0]))
-		stop_index = min(np.searchsorted(tps, self.time_interval[1]), all_dates.shape[0]-1)
+		start_index = max(0,np.searchsorted(tps, time_interval[0]))
+		stop_index = min(np.searchsorted(tps, time_interval[1]), all_dates.shape[0]-1)
 		tps = tps[start_index:stop_index]
+
+
 		# we estimate frequencies of subclades, they will be multiplied by the
 		# frequency of the parent node and corrected for the frequency of sister clades
 		# already fit
@@ -363,30 +376,27 @@ class virus_frequencies(object):
 			if len(child.tips)<threshold: # skip tiny clades
 				break
 			else:
+				# note that dates are unique, hence we can filter by date match
 				obs = np.in1d(tps, all_dates[tip_to_date_index[child.tips]])
-
-				# make n pivots a year, interpolate frequencies
-				# FIXME: adjust stiffness to total number of observations in a more robust manner
-				if np.sum(obs)>0 and np.sum(obs)<len(tps):
-					fe = frequency_estimator(zip(tps, obs), pivots=self.pivots, stiffness=self.stiffness*len(all_dates)/2000.0,
-											logit=True, extra_pivots = self.extra_pivots, **self.kwarks)
+				if len(obs)>threshold:
+					# make n pivots a year, interpolate frequencies
+					# FIXME: adjust stiffness to total number of observations in a more robust manner
+					fe = frequency_estimator(zip(tps, obs), pivots=pivots, stiffness=self.stiffness*len(all_dates)/2000.0, 
+											logit=True, extra_pivots = self.extra_pivots, verbose=False, **self.freq_kwargs)
 					fe.learn()
 
 					# assign the frequency vector to the node
 					child.freq[region_name] = frequency_left * logit_inv(fe.final_pivot_freq)
+					child.logit_freq[region_name] = logit_transform(child.freq[region_name])
 					if debug: print len(child.tips), child.freq[region_name][-5:]
-				elif np.sum(obs)==0:
-					child.freq[region_name] = np.zeros_like(self.pivots)
+
+					# update the frequency remaining to be explained and prune explained observations
+					frequency_left *= (1.0-logit_inv(fe.final_pivot_freq))
+					tps_left = np.ones_like(tps,dtype=bool)
+					tps_left[obs]=False # prune observations from clade
+					tps = tps[tps_left]
 				else:
-					child.freq[region_name] = frequency_left * np.ones_like(self.pivots)
-
-				child.logit_freq[region_name] = logit_transform(child.freq[region_name])
-
-				# update the frequency remaining to be explained and prune explained observations
-				frequency_left *= (1.0-child.freq[region_name]/(frequency_left+1e-10))
-				tps_left = np.ones_like(tps,dtype=bool)
-				tps_left[obs]=False # prune observations from clade
-				tps = tps[tps_left]
+					break
 			ci+=1
 
 		# if the above loop finished assign the frequency of the remaining clade to the frequency_left
@@ -394,22 +404,26 @@ class virus_frequencies(object):
 			last_child = children_by_size[-1]
 			last_child.freq[region_name] = np.array(frequency_left)
 			last_child.logit_freq[region_name] = logit_transform(last_child.freq[region_name])
-		else:  # broke out of loop because clades too small.
+		else:  # broke out of loop because clades too small. 
 			for child in children_by_size[ci:]: # assign freqs of all remaining clades to None.
-				child.freq[region_name] = None
-				child.logit_freq[region_name] = None
+				child.freq[region_name] = frequency_left/(len(children_by_size)-ci)
+				child.logit_freq[region_name] = logit_transform(child.freq[region_name])
 		# recursively repeat for subclades
 		for child in node.child_nodes():
-			self.estimate_sub_frequencies(child, all_dates, tip_to_date_index, threshold, region_name)
+			self.estimate_sub_frequencies(child, all_dates, tip_to_date_index, pivots=pivots,
+					threshold=threshold, region_name=region_name, time_interval=time_interval)
 
-	def estimate_tree_frequencies(self, threshold = 20, regions=None, region_name = None):
+	def estimate_tree_frequencies(self, threshold = 20, regions=None, pivots=None,
+								region_name = None, time_interval=None):
 		'''
 		loop over nodes of the tree and estimate frequencies of all clade above a certain size
 		'''
+		if pivots is None: pivots=self.pivots
 		all_dates = []
 		rootnode = self.tree.seed_node
 		# loop over all nodes, make time ordered lists of tips, restrict to the specified regions
 		tip_index_region_specific = 0
+		if time_interval is None: time_interval = self.time_interval
 		if not hasattr(self.tree.seed_node, "virus_count"): self.tree.seed_node.virus_count = {}
 		for node in self.tree.postorder_node_iter():
 			tmp_tips = []
@@ -437,18 +451,20 @@ class virus_frequencies(object):
 		reverse_order = np.argsort(leaf_order)
 		all_dates = all_dates[leaf_order]
 
-		if regions is None:
+		if regions is None and region_name is None: 
 			region_name="global"
 		elif region_name is None:
 			region_name = ",".join(regions)
 		# set the frequency of the root node to 1, the logit frequency to a large value
-		rootnode.pivots = self.pivots
-		rootnode.virus_count[region_name] = np.histogram(all_dates, bins = self.pivots)[0]
-		rootnode.freq[region_name] = np.ones_like(self.pivots)
-		rootnode.logit_freq[region_name] = 10*np.ones_like(self.pivots)
+		rootnode.pivots = pivots
+		rootnode.virus_count[region_name] = np.histogram(all_dates, bins = pivots)[0]
+		rootnode.freq[region_name] = np.ones_like(pivots)
+		rootnode.logit_freq[region_name] = 10*np.ones_like(pivots)
 
 		# start estimating frequencies of subclades recursively
-		self.estimate_sub_frequencies(rootnode, all_dates, reverse_order, threshold = threshold, region_name = region_name)
+		self.estimate_sub_frequencies(rootnode, all_dates, reverse_order, pivots=pivots,
+				threshold = threshold, region_name = region_name,
+				time_interval=time_interval)
 
 	def all_mutation_frequencies(self, threshold = 0.01, gene='nuc'):
 		if not hasattr(self, 'nuc_frequencies'):

@@ -2,7 +2,9 @@ var regions = ["Africa", "SouthAmerica", "WestAsia", "Oceania", "Europe", "Japan
 
 var cladeToSeq = {}
 
-var globalDate = new Date();
+if (typeof globalDate == 'undefined') {
+    var globalDate = new Date();
+}
 
 var nodes, tips, rootNode, links, vaccines, sera;
 
@@ -40,6 +42,7 @@ var rbsColorDomain = genericDomain;
 var dateColorDomain = genericDomain;
 var HIColorDomain = genericDomain.map(function(d){return Math.round(100*(d*3.6))/100;});
 var dfreqColorDomain = genericDomain.map(function(d){return Math.round(100*(0.2+d*1.8))/100;});
+var fitnessColorDomain = genericDomain.map(function(d){return Math.round(100*((d-0.5)*6.0))/100;});
 var time_step;
 
 

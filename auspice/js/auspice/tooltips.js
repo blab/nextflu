@@ -82,6 +82,9 @@ var virusTooltip = d3.tip()
 		if (typeof d.LBI != "undefined") {
 			string += "Local branching index: " + d.LBI.toFixed(3) + "<br>";
 		}
+		if (typeof d.fitness != "undefined") {
+			string += "Fitness: " + d.fitness.toFixed(3) + "<br>";
+		}		
 		string += "</div>";
 		return string;
 	});
@@ -121,8 +124,27 @@ var linkTooltip = d3.tip()
 			string += "</li>";
 		}
 		string += "</ul>";
+		if (typeof d.fitness != "undefined") {
+			string += "Fitness: " + d.fitness.toFixed(3) + "<br>";
+		}			
 		string += "click to zoom into clade"
 		string += "</div>";
 		return string;
 	});
 treeplot.call(linkTooltip);
+
+
+var matchTooltip = d3.tip()
+	.direction('e')
+	.attr('class', 'd3-tip')
+	.offset([0, 12])
+	.html(function(d) {
+		string = d.strain+ "<i> is closest match of:</i><ul>";
+		string += "<div class=\"smallspacer\"></div>";
+		for (var mi=0; mi<d.matches.length;mi++){
+			string+="<li>" +d.matches[mi].substring(0,Math.min(30,d.matches[mi].length))+'</li>';
+		}
+		string += "</ul>";
+		return string;
+	});
+treeplot.call(matchTooltip);

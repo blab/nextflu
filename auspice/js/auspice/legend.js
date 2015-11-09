@@ -38,6 +38,9 @@ function makeLegend(){
 			}
 			return tmp_text+')';
 		}
+		if (colorBy == "fitness") {
+			return "Relative fitness";
+		}		
 	});
 
 	// construct a dictionary that maps a legend entry to the preceding interval

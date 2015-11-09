@@ -49,7 +49,9 @@ virus_config.update({
 					'freqdefault': '3c2.a, 3c3.a, 3c3.b'},
 	'js_vars': {'LBItau': 0.0005, 'LBItime_window': 0.5, 'dfreq_dn':2},
 	'excluded_tables': ['NIMR_Sep2012_08.csv'], #, 'nimr-sep-2010-table8', 'nimr-sep-2010-table8','NIMR_Sep2012_11.csv'],
-	'layout':'auspice_HI'
+	'layout':'auspice_HI',
+#	'predictors': ['dfreq']						# estimate
+	'predictors': { 'dfreq': [2.60, 1.50] }		# fix predictor: [value, std deviation]
 	})
 
 
@@ -261,10 +263,19 @@ class H3N2_refine(tree_refine):
 			node.ep = self.epitope_distance(total_aa_seq, root_total_aa_seq)
 			node.ne = self.nonepitope_distance(total_aa_seq, root_total_aa_seq)
 			node.rb = self.receptor_binding_distance(total_aa_seq, root_total_aa_seq)
+class H3N2_fitness(fitness_model):
+	def __init__(self, **kwargs):
+		if 'predictors' in self.kwargs:
+			predictor_input = self.kwargs['predictors']
+			fitness_model.__init__(self, predictor_input = predictor_input, **kwargs)
+		else:
+			fitness_model.__init__(self, **kwargs)
+
+	def annotate_fitness(self, estimate_frequencies = True):
+		self.predict(estimate_frequencies=estimate_frequencies)
 
 
-
-class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitness_model):
+class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, H3N2_fitness):
 	"""docstring for H3N2_process, H3N2_filter"""
 	def __init__(self,verbose = 0, force_include = None,
 				force_include_all = False, max_global= True, **kwargs):
@@ -276,7 +287,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 		H3N2_clean.__init__(self,**kwargs)
 		H3N2_refine.__init__(self,**kwargs)
 		HI_tree.__init__(self,**kwargs)
-		fitness_model.__init__(self,**kwargs)
+		H3N2_fitness.__init__(self,**kwargs)
 		self.verbose = verbose
 
 	def run(self, steps, viruses_per_month=50, raxml_time_limit = 1.0, lam_HI=.5, lam_avi=1, lam_pot=.1):
@@ -332,16 +343,21 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 			#self.frequencies["mutations"]["global"].update(freqs)
 			self.dump()
 
+		if 'fitness' in steps:
+			print "--- Estimating fitnesses at " + time.strftime("%H:%M:%S") + " ---"
+			self.annotate_fitness()
+			self.dump()			
+
 		if 'export' in steps:
 			self.add_titers()
 			self.temporal_regional_statistics()
 			# exporting to json, including the H3N2 specific fields
 			self.export_to_auspice(tree_fields = [
-				'ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country',
+				'ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country','fitness',
 				'dHI', 'cHI', 'mean_HI_titers','HI_titers','HI_titers_raw', 'serum', 'HI_info',
 				'avidity_tree','avidity_mut', 'potency_mut', 'potency_tree', 'mean_potency_mut', 'mean_potency_tree', 'autologous_titers'],
 				   annotations = ['3c2.a', '3c3.a', '3c3.b'])
-			self.generate_indexHTML()
+			#self.generate_indexHTML()
 			self.export_HI_mutation_effects()
 
 		if 'HIvalidate' in steps:
@@ -365,7 +381,8 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, fitne
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine',
-				 'frequencies','HI', 'export']+ ['HIvalidate']
+				 'frequencies','HI', 'fitness', 'export']+ ['HIvalidate']
+
 	from process import parser
 	import matplotlib.pyplot as plt
 	plt.ion()
