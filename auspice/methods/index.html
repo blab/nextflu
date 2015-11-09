@@ -1,7 +1,7 @@
 ---
 layout: default
 title: nextflu / methods
-categories: 
+categories:
  - methods
 ---
 
@@ -32,7 +32,7 @@ categories:
 
 <div class="row">
 	<div class="col-md-12">
-		<div class="bigspacer"></div>	
+		<div class="bigspacer"></div>
 	</div>
 </div>
 
@@ -61,7 +61,7 @@ categories:
 
 <div class="row">
 	<div class="col-md-12">
-		<div class="bigspacer"></div>	
+		<div class="bigspacer"></div>
 	</div>
 </div>
 
@@ -79,7 +79,7 @@ categories:
 	From the filtered and cleaned alignment, <span class="highlight">augur</span> builds a phylogenetic tree using <a href="http://www.microbesonline.org/fasttree/">FastTree<a/>, which is then further refined using <a href="http://sco.h-its.org/exelixis/web/software/raxml/index.html">RAxML</a>.
 	Next, the state of every internal node of the tree is inferred using a marginal maximum likelihood method and missing sequence data at phylogeny tips is filled with the nearest ancestral sequence at these sites.
 	Internal branches without mutations are collapsed into polytomies.
-	The final tree is decorated with the attributes to be displayed in the browser. 
+	The final tree is decorated with the attributes to be displayed in the browser.
 	</div>
 
 </div>
@@ -101,9 +101,9 @@ categories:
 	</div>
 
 	<div class="col-md-9">
-	<span class="highlight">augur</span> estimates the frequency trajectories of mutations, genotypes and clades in the tree. 
-	Frequency trajectories are represented as a linear interpolation $x(t)$ of pivot frequencies $x_i$ at time points $t_i$ spaced one month apart. 
-	The frequencies $x_i$ corresponding to a feature $\phi$ (e.g. mutation) are estimated by simultaneously maximizing the Bernoulli observation model 
+	<span class="highlight">augur</span> estimates the frequency trajectories of mutations, genotypes and clades in the tree.
+	Frequency trajectories are represented as a linear interpolation $x(t)$ of pivot frequencies $x_i$ at time points $t_i$ spaced one month apart.
+	The frequencies $x_i$ corresponding to a feature $\phi$ (e.g. mutation) are estimated by simultaneously maximizing the Bernoulli observation model
 	$$
 	f(\mathbf{x}) = \prod_{v\in V_\phi} x(t_v) \prod_{v\notin V_{\phi}} (1-x(t_v))
 	$$
@@ -122,7 +122,77 @@ To speed up convergence, optimization is first done using a coarse grid of pivot
 	</div>
 
 </div>
+<div class="bigspacer"></div>
 
+<div class="row">
+	<div class="col-md-3">
+		<div class="io-container">
+			<div class="title">
+			HI model fit
+			</div>
+		</div>
+		<div class="spacer"></div>
+	</div>
+
+	<div class="col-md-9">
+For each combination of virus $i$ and antiserum $\alpha$, we define antigenic distance as $H_{i,\alpha} = \log_2(T_{a\alpha}) - \log_2(T_{i\alpha})$, where $T_{i\alpha}$ is the antiserum titer required to inhibit virus $i$ and $T_{a\alpha}$ is the homologous titer.
+In case multiple measurements are available, we average the base 2 logarithm of the titers. When no homologous titer was available, the maximal titer was used as a proxy for the homologous titer. $H_{i,\alpha}$ is then modeled as a sum of virus avidity $c_i$, serum potency $p_\alpha$ and antigenic contribution of branches $b \in (i \ldots \alpha)$ connecting the virus and antiserum in the phylogenetic tree.
+$$
+ \Delta_{i\alpha} = p_\alpha + c_i + \sum_{b\in (i\ldots\alpha)} d_{b}
+$$
+The parameters $d_b$, $p_\alpha$, $c_i$ are then estimated by minimizing the cost function
+\begin{equation}
+\label{eq:cost}
+C = \sum_{i,\alpha} (H_{i,\alpha} - \Delta_{i,\alpha})^2 + \lambda \sum_b d_b + \gamma \sum_i c_i^2 + \delta \sum_\alpha p_\alpha^2
+\end{equation}
+subject to the constraints $d_b\geq0$. To avoid overfitting, the different parameters of the model are regularized by the last three terms in the above equation. Large titer drops are penalized with their absolute value multiplied by $\lambda$ ($\ell_1$ regularization), which results in a sparse model in which most branches have no titer drop (<a href="http://dx.doi.org/10.1109/TIT.2005.858979">Candes and Tao, 2005</a>). The antiserum potencies and virus avidities are $\ell_2$-regularized by $\gamma$ and $\delta$, penalizing very large values without enforcing sparsity. This constrained minimization can be cast into a canonical convex optimization problem and solved efficiently. In the substitution model, the sum over the path in the tree is replaced by a sum over amino acid differences in HA1. Sets of substitutions that always occur together are merged and treated as one compound substitution. The inference of the substitution model parameters is done in the same way as for the tree model (<a href="http://arxiv.org/abs/1404.4197">see Harvey et al, 2014</a>, <a href="http://mbio.asm.org/content/4/4/e00230-13.short">Sun et al, 2013</a>} for a similar approach).
+
+This optimization problem can be cast into a canonical quadratic programming problem which we solve using <a href="http://cvxopt.org/"><bf>cvxopt</bf></a> by M. Andersen and L. Vandenberghe.
+	</div>
+</div>
+
+<div class="bigspacer"></div>
+
+<div class="row">
+	<div class="col-md-3">
+		<div class="io-container">
+			<div class="title">
+			HI model validation
+			</div>
+		</div>
+		<div class="spacer"></div>
+	</div>
+
+	<div class="col-md-9">
+		<div class="row">
+			<div class="col-md-6">
+	 			<figure>
+					<img src="/methods/figures/HI_prediction_tree.png" width="500" align="middle">
+				 </figure>
+	 		</div>
+			<div class="col-md-6">
+	 			<figure>
+					<img src="/methods/figures/HI_prediction_virus_tree.png" width="500" align="middle">
+	 			</figure>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-6">
+	 			<figure>
+					<img src="/methods/figures/HI_prediction_mutation.png" width="500" align="middle">
+				 </figure>
+	 		</div>
+			<div class="col-md-6">
+	 			<figure>
+					<img src="/methods/figures/HI_prediction_virus_mutation.png" width="500" align="middle">
+	 			</figure>
+			</div>
+		</div>
+		<div align="justify">
+			Predicted log<sub>2</sub> HI titer distance vs measured HI titer distance for the tree model (top) and mutation model (bottom) fit to A(H3N2) data from the past 12 years. Validation is done either (left) by excluding 10% of all measurements, or (right) 10% of all viruses from the training data. The model is then used to predict the excluded data. The prediction errors are indicted in the figure. When predicting titers for viruses that were completely absent from the training data (right), prediction errors are larger since no virus avidities could be trained.
+		</div>
+	</div>
+</div>
 <div class="row">
 	<div class="col-md-12">
 		<div class="bigspacer"></div>
@@ -133,4 +203,4 @@ To speed up convergence, optimization is first done using a coarse grid of pivot
 <script type="text/javascript"
  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 <!-- MathJax config -->
-<script src="/js/mathjax.config.js"></script>	
+<script src="/js/mathjax.config.js"></script>

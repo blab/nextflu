@@ -30,7 +30,7 @@ receptor_binding_sites = [x-1 for x in [159,169,170,172,173,203,207]]
 virus_config.update({
 	# data source and sequence parsing/cleaning/processing
 	'virus':'H1N1pdm',
-	'alignment_file':'data/H1N1pdm_gisaid_epiflu_sequence.fasta.gz',
+	'alignment_file':'data/H1N1pdm_gisaid_epiflu_sequence.fasta',
 	'outgroup':'A/Swine/Indiana/P12439/00',
 	'force_include':'data/H1N1pdm_HI_strains.txt',
 	'force_include_all':True,
@@ -227,7 +227,7 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine, HI
 				'dHI', 'cHI', 'mean_HI_titers','HI_titers','HI_titers_raw', 'serum', 'HI_info',
 				'avidity_tree','avidity_mut', 'potency_mut', 'potency_tree', 'mean_potency_mut', 'mean_potency_tree', 'autologous_titers'],
                    annotations = ['5','6','6b', '6c','7'])
-			self.generate_indexHTML()
+			#self.generate_indexHTML()
 			self.export_HI_mutation_effects()
 
 		if 'HIvalidate' in steps:

@@ -165,8 +165,7 @@ if __name__=="__main__":
 		params.lineages = ['H3N2', 'H1N1pdm', 'Vic', 'Yam']
 
 	if params.resolutions is None:
-#		params.resolutions = ['1y', '3y', '6y', '12y']
-		params.resolutions = ['3y', '6y', '20y']
+		params.resolutions = ['3y', '6y', '12y', '20y']
 
 	for lineage in params.lineages:
 		if params.s3:
@@ -194,19 +193,19 @@ if __name__=="__main__":
 					n_viruses = 50
 					n_years = 2
 				if resolution == '3y':
-					n_viruses = 50
+					n_viruses = 30
 					n_years = 3
 				if resolution == '5y':
 					n_viruses = 20
 					n_years = 5
 				if resolution == '6y':
-					n_viruses = 30
+					n_viruses = 10
 					n_years = 6
 				if resolution == '7y':
 					n_viruses = 30
 					n_years = 6
 				if resolution == '20y':
-					n_viruses = 10
+					n_viruses = 1
 					n_years = 20
 				if resolution == '10y':
 					n_viruses = 10
@@ -215,7 +214,7 @@ if __name__=="__main__":
 					n_viruses = 10
 					n_years = 12
 				prefix = lineage + '_'
-				call = map(str, [params.bin, process, '-v', n_viruses, '-y', n_years, '--start','HI',
+				call = map(str, [params.bin, process, '-v', n_viruses, '-y', n_years,
 				           		 '--prefix', prefix, '--resolution', resolution] + common_args)
 				print call
 				if not params.annotate:

@@ -28,7 +28,7 @@ receptor_binding_sites = [159,169,170,172,173,203,207]
 virus_config.update({
 	# data source and sequence parsing/cleaning/processing
 	'virus':'Vic',
-	'alignment_file':'data/Vic_gisaid_epiflu_sequence.fasta.gz',
+	'alignment_file':'data/Vic_gisaid_epiflu_sequence.fasta',
 	'outgroup':'B/HongKong/02/1993',
 	'force_include':'data/Vic_HI_strains.txt',
 	'force_include_all':True,
@@ -215,7 +215,7 @@ class BVic_process(process, BVic_filter, BVic_clean, BVic_refine, HI_tree):
 				'dHI', 'cHI', 'mean_HI_titers','HI_titers','HI_titers_raw', 'serum', 'HI_info',
 				'avidity_tree','avidity_mut', 'potency_mut', 'potency_tree', 'mean_potency_mut', 'mean_potency_tree', 'autologous_titers'],
 				annotations = ['1A', '1B'])
-			self.generate_indexHTML()
+			#self.generate_indexHTML()
 			self.export_HI_mutation_effects()
 
 
