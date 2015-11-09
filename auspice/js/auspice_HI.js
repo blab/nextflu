@@ -13,6 +13,7 @@ var date_select = true;
 {% include_relative auspice/date.js %}
 {% include_relative auspice/legend.js %}
 {% include_relative auspice/colors.js %}
+{% include_relative auspice/locate_viruses.js %}
 {% include_relative auspice/tree_functions.js %}
 {% include_relative auspice/tooltips.js %}
 {% include_relative auspice/tree.js %}
