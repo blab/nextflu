@@ -10,7 +10,7 @@ from fitness_predictors import *
 ymin = 2005
 ymax = 2015
 min_freq = 0.1
-max_freq = 0.9
+max_freq = 0.99
 min_tips = 10
 pc=1e-2
 regularization = 1e-3
@@ -314,41 +314,47 @@ class fitness_model(object):
 			self.learn_parameters(niter = niter)
 		self.assign_fitness(self.seasons[-1])
 
-def validate_prediction(my_fitness_model):
-	import matplotlib.pyplot as plt
-	from scipy.stats import spearmanr 
-	fig, axs = plt.subplots(1,3, figsize=(10,5))
-	for season, pred_vs_true in izip(my_fitness_model.fit_test_season_pairs, my_fitness_model.pred_vs_true):
-		axs[0].scatter(pred_vs_true[:,1], pred_vs_true[:,2])
-		axs[1].scatter(pred_vs_true[:,1]/pred_vs_true[:,0], 
-					   pred_vs_true[:,2]/pred_vs_true[:,0], c=pred_vs_true[0])
-		for s, o, p  in pred_vs_true:
-			axs[2].arrow(s,s, o-s,p-s)
+	def validate_prediction(self):
+		import matplotlib.pyplot as plt
+		from scipy.stats import spearmanr 
+		fig, axs = plt.subplots(1,4, figsize=(10,5))
+		for season, pred_vs_true in izip(self.fit_test_season_pairs, self.pred_vs_true):
+			# 0: initial, 1: observed, 2: predicted
+			axs[0].scatter(pred_vs_true[:,1], pred_vs_true[:,2])
+			axs[1].scatter(pred_vs_true[:,1]/pred_vs_true[:,0], 
+						   pred_vs_true[:,2]/pred_vs_true[:,0], c=pred_vs_true[0])
+			for s, o, p  in pred_vs_true:
+				axs[2].arrow(s,s, o-s,p-s)
+			axs[3].scatter(pred_vs_true[:,0], 
+						   (pred_vs_true[:,2]+0.01)/(pred_vs_true[:,1]+0.01))				
 
-	# pred_vs_true is initial, observed, predicted
-	tmp = np.vstack(my_fitness_model.pred_vs_true)
-	print("Spearman's rho, null",spearmanr(tmp[:,0], tmp[:,1]))
-	print("Spearman's rho, raw",spearmanr(tmp[:,1], tmp[:,2]))
-	print("Spearman's rho, rel",spearmanr(tmp[:,1]/tmp[:,0], 
-										  tmp[:,2]/tmp[:,0]))
+		# pred_vs_true is initial, observed, predicted
+		tmp = np.vstack(self.pred_vs_true)
+		print("Spearman's rho, null",spearmanr(tmp[:,0], tmp[:,1]))
+		print("Spearman's rho, raw",spearmanr(tmp[:,1], tmp[:,2]))
+		print("Spearman's rho, rel",spearmanr(tmp[:,1]/tmp[:,0], 
+											  tmp[:,2]/tmp[:,0]))
 	
-	growth_list = [pred > initial for (initial, obs, pred) in tmp if obs > initial]
-	print ("Correct at predicting growth", growth_list.count(True) / float(len(growth_list)))
+		growth_list = [pred > initial for (initial, obs, pred) in tmp if obs > initial]
+		print ("Correct at predicting growth", growth_list.count(True) / float(len(growth_list)))
 
-	decline_list = [pred < initial for (initial, obs, pred) in tmp if obs < initial]
-	print ("Correct at predicting decline", decline_list.count(True) / float(len(decline_list)))
+		decline_list = [pred < initial for (initial, obs, pred) in tmp if obs < initial]
+		print ("Correct at predicting decline", decline_list.count(True) / float(len(decline_list)))
 
-	axs[0].set_ylabel('predicted')
-	axs[0].set_xlabel('observed')
-	axs[1].set_ylabel('predicted/initial')
-	axs[1].set_xlabel('observed/initial')
-	axs[1].set_yscale('linear')
-	axs[1].set_xscale('linear')
-	axs[2].set_ylabel('predicted')
-	axs[2].set_xlabel('observed')
-	axs[2].set_ylim(-0.1, 1.1)
-	axs[2].set_xlim(-0.1, 1.1)
-	plt.tight_layout()
+		axs[0].set_ylabel('predicted')
+		axs[0].set_xlabel('observed')
+		axs[1].set_ylabel('predicted/initial')
+		axs[1].set_xlabel('observed/initial')
+		axs[1].set_yscale('linear')
+		axs[1].set_xscale('linear')
+		axs[2].set_ylabel('predicted')
+		axs[2].set_xlabel('observed')
+		axs[2].set_ylim(-0.1, 1.1)
+		axs[2].set_xlim(-0.1, 1.1)
+		axs[3].set_ylabel('predicted / observed')
+		axs[3].set_xlabel('initial')
+		axs[3].set_yscale('log')		
+		plt.tight_layout()
 
 def test(params):
 	from io_util import read_json
