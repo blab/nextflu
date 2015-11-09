@@ -49,8 +49,8 @@ virus_config.update({
 	'js_vars': {'LBItau': 0.0005, 'LBItime_window': 0.5, 'dfreq_dn':2},
 	'excluded_tables': ['NIMR_Sep2012_08.csv'], #, 'nimr-sep-2010-table8', 'nimr-sep-2010-table8','NIMR_Sep2012_11.csv'],
 	'layout':'auspice_HI',
-#	'predictors': ['dfreq']						# estimate
-	'predictors': { 'dfreq': [2.60, 1.50] }		# fix predictor: [value, std deviation]
+	'predictors': ['dfreq', 'cHI']						# estimate
+#	'predictors': { 'dfreq': [2.60, 1.50] }		# fix predictor: [value, std deviation]
 	})
 
 
@@ -251,6 +251,8 @@ class H3N2_refine(tree_refine):
 			node.ep = self.epitope_distance(total_aa_seq, root_total_aa_seq)
 			node.ne = self.nonepitope_distance(total_aa_seq, root_total_aa_seq)
 			node.rb = self.receptor_binding_distance(total_aa_seq, root_total_aa_seq)
+
+
 class H3N2_fitness(fitness_model):
 	def __init__(self, **kwargs):
 		if 'predictors' in self.kwargs:

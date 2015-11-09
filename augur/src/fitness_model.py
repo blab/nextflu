@@ -52,10 +52,12 @@ class fitness_model(object):
 				self.predictors.append(('tol',calc_tolerance,{}))
 			if p == 'dfreq':
 				self.predictors.append(('dfreq',dummy,{}))
+			if p == 'cHI':
+				self.predictors.append(('cHI',dummy,{}))
 		
-		self.params = 0*np.ones(len(self.predictors))
+		self.model_params = 0*np.ones(len(self.predictors))
 		if isinstance(predictor_input, dict):
-			self.params = np.array([predictor_input[k][0] for k in predictors])
+			self.model_params = np.array([predictor_input[k][0] for k in predictors])
 			
 		self.global_std = 0*np.ones(len(self.predictors))
 		if isinstance(predictor_input, dict):
@@ -284,12 +286,12 @@ class fitness_model(object):
 	def minimize_clade_error(self):
 		from scipy.optimize import fmin as minimizer
 		if self.verbose:		
-			print "initial function value:", self.clade_fit(self.params)
-			print "initial parameters:", self.params
-		self.params = minimizer(self.clade_fit, self.params, disp = self.verbose>1)
+			print "initial function value:", self.clade_fit(self.model_params)
+			print "initial parameters:", self.model_params
+		self.model_params = minimizer(self.clade_fit, self.model_params, disp = self.verbose>1)
 		if self.verbose:
-			print "final function value:", self.clade_fit(self.params)		
-			print "final parameters:", self.params, '\n'		
+			print "final function value:", self.clade_fit(self.model_params)		
+			print "final parameters:", self.model_params, '\n'		
 
 	def minimize_af_error(self):
 		from scipy.optimize import fmin as minimizer
@@ -304,12 +306,12 @@ class fitness_model(object):
 			self.seqs[s] = fit_aln[self.tree.seed_node.season_tips[s]]
 			self.af[s] = self.weighted_af(self.seqs[s], np.ones(len(self.seqs[s])))
 		if self.verbose:		
-			print "initial function value:", self.af_fit(self.params)
-			print "initial parameters:", self.params
-		self.params = minimizer(self.af_fit, self.params, disp = self.verbose>1)
+			print "initial function value:", self.af_fit(self.model_params)
+			print "initial parameters:", self.model_params
+		self.model_params = minimizer(self.af_fit, self.model_params, disp = self.verbose>1)
 		if self.verbose:
-			print "final function value:", self.af_fit(self.params)		
-			print "final parameters:", self.params, '\n'		
+			print "final function value:", self.af_fit(self.model_params)		
+			print "final parameters:", self.model_params, '\n'		
 
 
 	def learn_parameters(self, niter = 10, fit_func = "af"):
@@ -329,23 +331,23 @@ class fitness_model(object):
 
 		if self.verbose:
 			print "null parameters"
-		self.params = 0*np.ones(len(self.predictors))  # initial values
+		self.model_params = 0*np.ones(len(self.predictors))  # initial values
 		minimize_error()
-		params_stack.append((self.last_fit, self.params))
+		params_stack.append((self.last_fit, self.model_params))
 		
 		for ii in xrange(niter):
 			if self.verbose:
 				print "iteration:", ii+1
-			self.params = 0.5*np.random.randn(len(self.predictors)) #0*np.ones(len(self.predictors))  # initial values
+			self.model_params = 0.5*np.random.randn(len(self.predictors)) #0*np.ones(len(self.predictors))  # initial values
 			minimize_error()
-			params_stack.append((self.last_fit, self.params))
+			params_stack.append((self.last_fit, self.model_params))
 
-		self.params = params_stack[np.argmin([x[0] for x in params_stack])][1]
-		fit_func(self.params)
+		self.model_params = params_stack[np.argmin([x[0] for x in params_stack])][1]
+		fit_func(self.model_params)
 		if self.verbose:
 			print "best after",niter,"iterations\nfunction value:", self.last_fit
 			print "fit parameters:"
-			for pred, val in izip(self.predictors, self.params):
+			for pred, val in izip(self.predictors, self.model_params):
 				print pred[0],':', val
 
 
@@ -355,7 +357,7 @@ class fitness_model(object):
 		#FIXME: standardize predictors
 		for node in self.tree.postorder_node_iter():
 			if node.predictors[season] is not None:
-				node.fitness = self.fitness(self.params, node.predictors[season])
+				node.fitness = self.fitness(self.model_params, node.predictors[season])
 			else:
 				node.fitness = 0.0
 

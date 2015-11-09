@@ -25,6 +25,7 @@ def running_average(obs, ws):
 			tmp_vals[-ws//2:]*=float(ws)/np.arange(ws,ws//2,-1.0)
 	except:
 		import ipdb; ipdb.set_trace()
+		tmp_vals = 0.5*np.ones_like(obs, dtype=float)
 	return tmp_vals
 
 def fix_freq(freq, pc):
