@@ -49,8 +49,8 @@ virus_config.update({
 	'js_vars': {'LBItau': 0.0005, 'LBItime_window': 0.5, 'dfreq_dn':2},
 	'excluded_tables': ['NIMR_Sep2012_08.csv'], #, 'nimr-sep-2010-table8', 'nimr-sep-2010-table8','NIMR_Sep2012_11.csv'],
 	'layout':'auspice_HI',
-	'predictors': ['dfreq', 'cHI']						# estimate
-#	'predictors': { 'dfreq': [2.60, 1.50] }		# fix predictor: [value, std deviation]
+#	'predictors': ['dfreq', 'cHI']										# estimate
+	'predictors': { 'dfreq': [2.60, 1.50], 'cHI': [0.14, 0.51] }		# fix predictor: [value, std deviation]
 	})
 
 
@@ -170,11 +170,8 @@ class H3N2_clean(virus_clean):
 	def clean_outliers(self):
 		"""Remove single outlying viruses"""
 		remove_viruses = []
-		outlier_strains = ["A/Helsinki/942/2013", "A/India/6352/2012", "A/Pennsylvania/14/2010", "A/HuNan/01/2014",
-						   "A/OSAKA/31/2005", "A/Sari/388/2006", "A/Busan/15453/2009", "A/SaoPaulo/36178/2015",
-						   "A/Chile/8266/2003", "A/Kenya/170/2011", "A/Kenya/168/2011", "A/Pennsylvania/40/2010",
-						   "A/Pennsylvania/09/2011","A/Indiana/21/2013","A/Indiana/06/2013", "A/Indiana/11/2013",
-						   "A/Indiana/13/2012", "A/Indiana/08/2012", "A/Ohio/34/2012"]					   
+		outlier_strains = ["A/Sari/388/2006", "A/SaoPaulo/36178/2015", "A/Pennsylvania/40/2010", "A/Pennsylvania/14/2010", "A/Pennsylvania/09/2011", "A/OSAKA/31/2005", "A/Ohio/34/2012", "A/Kenya/170/2011", "A/Kenya/168/2011", "A/Indiana/21/2013", "A/Indiana/13/2012", "A/Indiana/11/2013", "A/Indiana/08/2012", "A/Indiana/06/2013", "A/India/6352/2012", "A/HuNan/01/2014", "A/Helsinki/942/2013", "A/Guam/AF2771/2011", "A/Chile/8266/2003", "A/Busan/15453/2009"]					
+
 		for outlier_strain in outlier_strains:
 			for v in self.viruses:
 				if (v.strain == outlier_strain):
@@ -348,7 +345,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, H3N2_
 				'avidity_tree','avidity_mut', 'potency_mut', 'potency_tree', 'mean_potency_mut', 'mean_potency_tree', 'autologous_titers'],
 				   annotations = ['3c2.a', '3c3.a', '3c3.b'])
 			#self.generate_indexHTML()
-			self.export_HI_mutation_effects()
+			#self.export_HI_mutation_effects()
 
 		if 'HIvalidate' in steps:
 			from diagnostic_figures import tree_additivity_symmetry, fmts

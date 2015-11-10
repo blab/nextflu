@@ -119,8 +119,7 @@ class process(virus_frequencies):
 				cPickle.dump(self.nuc_aln, outfile)				
 		if hasattr(self, 'mutation_effects'):
 			with open(self.HI_model_fname, 'w') as outfile:
-				cPickle.dump((self.mutation_effects, self.virus_effect,
-							  self.serum_potency), outfile)
+				cPickle.dump((self.sera, self.ref_strains, self.HI_strains, self.mutation_effects, self.virus_effect, self.serum_potency), outfile)
 
 	def load(self):
 		import cPickle
@@ -146,9 +145,7 @@ class process(virus_frequencies):
 		if os.path.isfile(self.HI_model_fname):
 			try:
 				with open(self.HI_model_fname, 'r') as infile:
-					(self.mutation_effects,
-					 self.virus_effect,
-				  	 self.serum_potency) = cPickle.load(infile)
+					(self.sera, self.ref_strains, self.HI_strains, self.mutation_effects, self.virus_effect, self.serum_potency) = cPickle.load(infile)
 			except:
 				pass
 		try:

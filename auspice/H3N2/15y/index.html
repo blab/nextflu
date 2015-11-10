@@ -1,20 +1,19 @@
 ---
-title: nextflu / H3N2 / Feb 2015
+title: nextflu / H3N2 / 15y
 layout: auspice_HI
 virus: H3N2
-resolution: Feb-2015
+resolution: 15y
 coloring: ep, ne, rb, lbi, dfreq, region, date, cHI, HI_dist, fitness
 gtplaceholder: HA1 positions...
 freqdefault: 3c2.a, 3c3.a, 3c3.b
 ---
 
 <script>
-var file_prefix = "H3N2_Feb2015_";
-var time_window = 1;
-var time_ticks=[2013.0, 2013.5, 2014.0, 2014.5, 2015.0, 2015.5];
+var file_prefix = "H3N2_15y_";
+var time_window = 4.0;
+var time_ticks=[2002.0, 2004.0, 2006.0, 2008.0, 2010.0, 2012.0, 2014.0];
 var LBItau = 0.0005;
 var dfreq_dn = 2;
 var LBItime_window = 0.5;
-var globalDate = new Date("2015-02-26");
 {%include H3N2_meta.js %}
 </script>

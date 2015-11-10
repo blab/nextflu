@@ -18,7 +18,13 @@ def epitope_sites(aa):
 def nonepitope_sites(aa):
 	aaa = np.fromstring(aa, 'S1')
 	return ''.join(aaa[epitope_mask[:len(aa)]=='0'])
-	
+
+def receptor_binding_sites(aa):
+	sp = 16
+	aaa = np.fromstring(aa, 'S1')
+	receptor_binding_list = map(lambda x:x+sp-1, [145, 155, 156, 158, 159, 189, 193])
+	return ''.join(aaa[receptor_binding_list])	
+
 def epitope_distance(aaA, aaB):
 	"""Return distance of sequences aaA and aaB by comparing epitope sites"""
 	epA = epitope_sites(aaA)
@@ -31,6 +37,13 @@ def nonepitope_distance(aaA, aaB):
 	neA = nonepitope_sites(aaA)
 	neB = nonepitope_sites(aaB)
 	distance = sum(a != b for a, b in izip(neA, neB))
+	return distance
+
+def rbs_distance(aaA, aaB):
+	"""Return distance of sequences aaA and aaB by comparing receptor binding sites (Koel sites)"""
+	rbsA = receptor_binding_sites(aaA)
+	rbsB = receptor_binding_sites(aaB)
+	distance = sum(a != b for a, b in izip(rbsA, rbsB))
 	return distance
 
 def calc_epitope_distance(tree, attr='ep', ref = None):
@@ -47,6 +60,21 @@ def calc_epitope_distance(tree, attr='ep', ref = None):
 				node.aa = translate(node.seq)
 			node.__setattr__(attr, epitope_distance(node.aa, ref))
 		tree.epitope_distance_assigned=True
+
+def calc_rbs_distance(tree, attr='rb', ref = None):
+	'''
+	calculates the distance at receptor binding sites of any tree node to ref
+	tree   --   dendropy tree
+	attr   --   the attribute name used to save the result
+	'''
+	if not hasattr(tree, "rbs_distance_assigned") or tree.rbs_distance_assigned==False:
+		if ref == None:
+			ref = translate(tree.seed_node.seq)
+		for node in tree.postorder_node_iter():
+			if not hasattr(node, 'aa'):
+				node.aa = translate(node.seq)
+			node.__setattr__(attr, rbs_distance(node.aa, ref))
+		tree.rbs_distance_assigned=True
 
 def  calc_tolerance(tree, attr='tol'):
 	'''

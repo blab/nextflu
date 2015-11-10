@@ -38,6 +38,18 @@ class fitness_model(object):
 		if "estimate_fitness_model" in self.kwargs:
 			if self.kwargs["estimate_fitness_model"]:
 				self.estimate_coefficients = True
+
+		self.seasons = [ (date(year=y, month = 10, day = 1), date(year = y+1, month = 4, day=1)) 
+						for y in xrange(int(self.time_interval[0])+1, int(self.time_interval[1]))]
+		
+		final_date = calendar_date(self.time_interval[1])
+		final_interval = (date.fromordinal(final_date.toordinal()-180), final_date)
+		
+		if self.estimate_coefficients:
+			self.seasons.append(final_interval)
+		else:
+			self.seasons = [final_interval]
+
 		self.predictors = []
 		for p in predictors:
 			if p == 'lb':
@@ -62,17 +74,6 @@ class fitness_model(object):
 		self.global_std = 0*np.ones(len(self.predictors))
 		if isinstance(predictor_input, dict):
 			self.global_std = np.array([predictor_input[k][1] for k in predictors])
-
-		self.seasons = [ (date(year=y, month = 10, day = 1), date(year = y+1, month = 4, day=1)) 
-						for y in xrange(int(self.time_interval[0])+1, int(self.time_interval[1]))]
-		
-		final_date = calendar_date(self.time_interval[1])
-		final_interval = (date.fromordinal(final_date.toordinal()-180), final_date)
-		
-		if self.estimate_coefficients:
-			self.seasons.append(final_interval)
-		else:
-			self.seasons = [final_interval]
 
 	def calc_tip_counts(self):
 		'''
@@ -135,18 +136,18 @@ class fitness_model(object):
 		print("fitting clade frequencies for seasons")
 		region = "global_fit"
 		freq_cutoff = 25.0
-		total_pivots = 6
+		total_pivots = 12
 		pivots_fit = 2
-		freq_window = 1
+		freq_window = 0.5
 		from date_util import numerical_date
 		for n in self.tree.preorder_node_iter():
 			n.fit_frequencies = {}
 			n.freq_slope = {}
 		for s in self.seasons:
 			time_interval = [numerical_date(s[0]) - freq_window, numerical_date(s[1])]
-			pivots = np.linspace(time_interval[0] - freq_window, time_interval[1], total_pivots)
+			pivots = np.linspace(time_interval[0], time_interval[1], total_pivots)
 			n_nodes = len(self.tree.seed_node.season_tips[s])
-			self.estimate_tree_frequencies(pivots=pivots, threshold = n_nodes//20, regions=None,
+			self.estimate_tree_frequencies(pivots=pivots, threshold = 20, regions=None,
 								region_name = region, time_interval=time_interval)
 			for n in self.tree.preorder_node_iter():
 				if n.logit_freq[region] is not None:
@@ -223,7 +224,7 @@ class fitness_model(object):
 				if  node.season_frequencies[s]>=min_freq and \
 					node.season_frequencies[s]<max_freq and\
 					node.season_frequencies[s]<node.parent_node.season_frequencies[s]:
-					#any([x!='' for x in node.aa_muts.values()]) and\
+					#node.aa_muts['HA1']!='':
 					self.clades_for_season[(s,t)].append(node)
 
 
@@ -367,7 +368,7 @@ class fitness_model(object):
 		self.standardize_predictors()
 		self.select_clades_for_fitting()
 		if self.estimate_coefficients:
-			self.learn_parameters(niter = niter)
+			self.learn_parameters(niter = niter, fit_func = "clade")
 		self.assign_fitness(self.seasons[-1])
 
 	def validate_prediction(self):
