@@ -7,8 +7,6 @@ from date_util import calendar_date
 from itertools import izip
 from fitness_predictors import *
 
-ymin = 2005
-ymax = 2015
 min_freq = 0.1
 max_freq = 0.99
 min_tips = 10
@@ -136,9 +134,9 @@ class fitness_model(object):
 		print("fitting clade frequencies for seasons")
 		region = "global_fit"
 		freq_cutoff = 25.0
-		total_pivots = 12
+		total_pivots = 6
 		pivots_fit = 2
-		freq_window = 0.5
+		freq_window = 0.0
 		from date_util import numerical_date
 		for n in self.tree.preorder_node_iter():
 			n.fit_frequencies = {}
@@ -147,7 +145,7 @@ class fitness_model(object):
 			time_interval = [numerical_date(s[0]) - freq_window, numerical_date(s[1])]
 			pivots = np.linspace(time_interval[0], time_interval[1], total_pivots)
 			n_nodes = len(self.tree.seed_node.season_tips[s])
-			self.estimate_tree_frequencies(pivots=pivots, threshold = 20, regions=None,
+			self.estimate_tree_frequencies(pivots=pivots, threshold = 50, regions=None,
 								region_name = region, time_interval=time_interval)
 			for n in self.tree.preorder_node_iter():
 				if n.logit_freq[region] is not None:
@@ -294,8 +292,7 @@ class fitness_model(object):
 			print "final function value:", self.clade_fit(self.model_params)		
 			print "final parameters:", self.model_params, '\n'		
 
-	def minimize_af_error(self):
-		from scipy.optimize import fmin as minimizer
+	def prep_af(self):
 		if not hasattr(self,'variable_nuc'):
 			self.determine_variable_positions()
 		self.seqs = {}
@@ -306,6 +303,9 @@ class fitness_model(object):
 		for s in self.seasons:
 			self.seqs[s] = fit_aln[self.tree.seed_node.season_tips[s]]
 			self.af[s] = self.weighted_af(self.seqs[s], np.ones(len(self.seqs[s])))
+
+	def minimize_af_error(self):
+		from scipy.optimize import fmin as minimizer
 		if self.verbose:		
 			print "initial function value:", self.af_fit(self.model_params)
 			print "initial parameters:", self.model_params
@@ -361,12 +361,24 @@ class fitness_model(object):
 				node.fitness = self.fitness(self.model_params, node.predictors[season])
 			else:
 				node.fitness = 0.0
+				
+		weights = np.exp(self.fitness(self.model_params, self.predictor_arrays[season][self.tree.seed_node.season_tips[season],:]))
+		pred_af = self.weighted_af(self.seqs[season], weights)
+
+		for node in self.tree.postorder_node_iter():
+			if node.predictors[season] is not None:
+				seq = np.fromstring(node.seq, 'S1')[self.variable_nuc]
+				seq_indicators = self.weighted_af(np.array([seq]), np.ones(1))		
+				node.pred_distance = np.sum(np.sum(pred_af*(1-seq_indicators), axis=0), axis=0)
+			else:
+				node.pred_distance = 0.0
 
 	def predict(self, niter = 10, estimate_frequencies = True):
 		self.calc_tip_counts()
 		self.calc_all_predictors(estimate_frequencies = estimate_frequencies)
 		self.standardize_predictors()
 		self.select_clades_for_fitting()
+		self.prep_af()
 		if self.estimate_coefficients:
 			self.learn_parameters(niter = niter, fit_func = "clade")
 		self.assign_fitness(self.seasons[-1])

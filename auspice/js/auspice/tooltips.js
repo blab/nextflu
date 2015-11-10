@@ -84,7 +84,10 @@ var virusTooltip = d3.tip()
 		}
 		if (typeof d.fitness != "undefined") {
 			string += "Fitness: " + d.fitness.toFixed(3) + "<br>";
-		}		
+		}
+		if (typeof d.pred_distance != "undefined") {
+			string += "Predicted distance: " + d.pred_distance.toFixed(3) + "<br>";
+		}				
 		string += "</div>";
 		return string;
 	});

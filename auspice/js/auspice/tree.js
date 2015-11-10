@@ -9,7 +9,20 @@ var freqScale = d3.scale.sqrt()
 	.domain([0, 1])
 	.range([1, 10]);
 
-var tipRadius = 4.0;
+var distanceScale = d3.scale.sqrt()
+	.domain([5, 25])
+	.range([10, 2])
+	.clamp([true]);
+
+function tipRadius(d) {
+	if (typeof d.pred_distance != "undefined") {
+		return distanceScale(d.pred_distance);
+	}
+	else {
+		return 4.0;
+	}
+}
+
 var left_margin = 10;
 var right_margin = 10;
 var bottom_margin = 10;
@@ -509,11 +522,11 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.call(function(d) {
 				virusTooltip.show(tip, d[0][0]);
 			})
-            .attr("r", function(d){return tipRadius*1.7;})
+            .attr("r", function(d){return tipRadius(d)*1.7;})
             .style("fill", function (d) {
               searchEvent = setTimeout(function (){
               	d3.select("#"+strainName)
-              	 .attr("r", function(d){return tipRadius;})
+              	 .attr("r", function(d){return tipRadius(d);})
               	 .style("fill", tipFillColor);}, 5000, d);
               return d3.rgb(tipFillColor(d)).brighter();
             });
