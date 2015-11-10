@@ -163,6 +163,7 @@ function colorByTrait() {
 		.style("stroke", branchStrokeColor);
 
 	d3.selectAll(".tip")
+		.attr("r", tipRadius)	
 		.style("visibility", tipVisibility)
 		.style("fill", tipFillColor)
 		.style("stroke", tipStrokeColor);

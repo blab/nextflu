@@ -49,8 +49,9 @@ virus_config.update({
 	'js_vars': {'LBItau': 0.0005, 'LBItime_window': 0.5, 'dfreq_dn':2},
 	'excluded_tables': ['NIMR_Sep2012_08.csv'], #, 'nimr-sep-2010-table8', 'nimr-sep-2010-table8','NIMR_Sep2012_11.csv'],
 	'layout':'auspice_HI',
-	'predictors': ['dfreq', 'cHI']												# estimate
-#	'predictors': { 'dfreq': [2.44, 2.95], 'cHI': [2.08, 0.52] }				# fix predictor: [value, std deviation]
+	'min_aamuts': 1, 
+#	'predictors': ['dfreq', 'cHI']												# estimate
+	'predictors': { 'dfreq': [2.44, 2.95], 'cHI': [2.08, 0.52] }				# fix predictor: [value, std deviation]
 	})
 
 
@@ -252,6 +253,10 @@ class H3N2_refine(tree_refine):
 			node.rb = self.receptor_binding_distance(total_aa_seq, root_total_aa_seq)
 
 
+class H3N2_HI(HI_tree):
+	def __init__(self, **kwargs):
+		HI_tree.__init__(self, **kwargs)
+
 class H3N2_fitness(fitness_model):
 	def __init__(self, **kwargs):
 		if 'predictors' in self.kwargs:
@@ -264,7 +269,7 @@ class H3N2_fitness(fitness_model):
 		self.predict(estimate_frequencies=estimate_frequencies)
 
 
-class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, H3N2_fitness):
+class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, H3N2_HI, H3N2_fitness):
 	"""docstring for H3N2_process, H3N2_filter"""
 	def __init__(self,verbose = 0, force_include = None,
 				force_include_all = False, max_global= True, **kwargs):
@@ -275,7 +280,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, H3N2_
 		H3N2_filter.__init__(self,**kwargs)
 		H3N2_clean.__init__(self,**kwargs)
 		H3N2_refine.__init__(self,**kwargs)
-		HI_tree.__init__(self,**kwargs)
+		H3N2_HI.__init__(self,**kwargs)
 		H3N2_fitness.__init__(self,**kwargs)
 		self.verbose = verbose
 

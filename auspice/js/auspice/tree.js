@@ -15,7 +15,7 @@ var distanceScale = d3.scale.sqrt()
 	.clamp([true]);
 
 function tipRadius(d) {
-	if (typeof d.pred_distance != "undefined") {
+	if (typeof d.pred_distance != "undefined" && colorBy == "fitness") {
 		return distanceScale(d.pred_distance);
 	}
 	else {
