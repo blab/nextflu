@@ -110,9 +110,9 @@ function calcHImutations(node){
 		}
 		for (var mi=0; mi<=mutations.length; mi++){
 			var mut = mutations[mi];
-		//	if ((typeof mut != "undefined")&&(typeof HI_model[mut]!="undefined")){
-		//		d.HI_dist_mut += HI_model[mut];
-		//	}
+			if ((typeof mut != "undefined")&&(typeof HI_model[mut]!="undefined")){
+				d.HI_dist_mut += HI_model[mut];
+			}
 		}
 		if ((correctVirus==false)&&(typeof d.avidity != "undefined")){
 			d.HI_dist_mut += d.avidity_mut;

@@ -345,7 +345,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, HI_tree, H3N2_
 				'avidity_tree','avidity_mut', 'potency_mut', 'potency_tree', 'mean_potency_mut', 'mean_potency_tree', 'autologous_titers'],
 				   annotations = ['3c2.a', '3c3.a', '3c3.b'])
 			#self.generate_indexHTML()
-			#self.export_HI_mutation_effects()
+			self.export_HI_mutation_effects()
 
 		if 'HIvalidate' in steps:
 			from diagnostic_figures import tree_additivity_symmetry, fmts
