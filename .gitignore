@@ -5,6 +5,10 @@ data
 _site/
 figures
 validation
+HI_mutation_effects.tsv
+parameters_mutation.txt
+parameters_tree.txt
+
 
 # Tex # 
 ###################
