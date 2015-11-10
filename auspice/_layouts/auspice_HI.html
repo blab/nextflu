@@ -33,7 +33,7 @@ categories:
 								<select id="coloring" class="form-control">
 								{% for color_option in site.data.color_options %}
 									{% if page.coloring contains color_option[0] %}
-									{% if color_option[0] == "HI_dist" %}
+									{% if color_option[0] == "fitness" %}
 									<option value={{color_option[0] }} selected="selected">{{ color_option[1] }}</option>
 									{% else %}
 									<option value={{color_option[0] }}>{{ color_option[1] }}</option>
@@ -48,7 +48,7 @@ categories:
 						<label class="col-xs-4 control-label">Or</label>
 						<div class="col-xs-8 controls">
 							<input id="gt-color" type="search" placeholder= "{{ page.gtplaceholder }}"  class="form-control">
-							<input type="checkbox" id="branchlabels" checked="unchecked"> branch labels
+							<input type="checkbox" id="branchlabels"> branch labels
 						</div>
 					</div>
 					{% if page.coloring contains 'HI' %}
@@ -100,22 +100,18 @@ categories:
 				<div class="spacer"></div>
 				<button id="searchinputclear" class="btn btn-default">clear</button>
 				<div class="bigspacer"></div>
+				<div>
+					<button id="reset" class="btn btn-default">reset layout</button>
+				</div>				
 			</div>
 		</div>
 	</div>
 	<div class="col-md-9">
-		<div class="bigspacer"></div>
 		<div class="treeplot-container" id="treeplot-container">
 			<svg id="treeplot"></svg>
 		</div>
-		<div align="right">
-			click (repeatedly) on a branch to zoom <button id="reset" class="btn btn-default">reset layout</button>
-			<button id="svgexport" class="btn btn-default">export tree (svg)</button>
-		</div>
-		<div class="entropy-container">
-			<div id="entropy"></div>
-		</div>
 	</div>
+	
 </div>
 
 <div class="row">
@@ -161,8 +157,11 @@ categories:
 		<div class="spacer"></div>
 	</div>
 	<div class="col-md-9">
-		<div class="freqplot-container">
+		<div class="freqplot-container">		
 			<div id="gtchart"></div>
+		</div>
+		<div class="entropy-container">		
+			<div id="entropy"></div>
 		</div>
 	</div>
 </div>

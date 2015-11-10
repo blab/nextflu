@@ -15,7 +15,7 @@ var right_margin = 10;
 var bottom_margin = 10;
 
 var branchLabelVisFraction = 0.05;
-var top_margin = 20;
+var top_margin = 35;
 if ((typeof branch_labels != "undefined")&&(branch_labels)) {top_margin +=5;}
 
 function initDateColorDomain(intAttributes){
@@ -188,7 +188,8 @@ function addBranchLabels(){
 		.attr("class", "branchLabel")
 		.style("font-size", branchLabelSize)
 		.style("text-anchor", "end")
-		.text(branchLabelText);
+		.text(branchLabelText)
+		.style("visibility", "hidden");
 }
 
 
@@ -498,7 +499,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	}
 
 
-	branch_labels = document.getElementById("branchlabels").checked;
+	branch_labels = document.getElementById("branchlabels");
 	addBranchLabels();
 
 	var searchEvent;
@@ -531,7 +532,8 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			branch_labels = document.getElementById("branchlabels").checked;
 			console.log("changing branch labels: "+branch_labels);
 			treeplot.selectAll(".branchLabel").data(nodes)
-				.text(branchLabelText);
+				.text(branchLabelText)
+				.style("visibility", (branch_labels)?"visible":"hidden");
 			treeplot.selectAll(".annotation").data(clades)
 				.style("visibility",(branch_labels)?"hidden":"visible");
 		});
@@ -557,7 +559,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.append("text")
 			.attr("class", "annotation")
 			.style("text-anchor", "end")
-			.style("visibility",(branch_labels)?"hidden":"visible")
+			.style("visibility", "visible")
 			.text(function (d) {
 				return d[0];
 			});

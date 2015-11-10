@@ -1,6 +1,6 @@
-[["cHI","antigenic advance"],
+[["fitness","fitness"], 
+ ["cHI","antigenic advance"],
  ["HI_dist","HI distance from focus"],
- ["fitness","fitness"], 
  ["ep", "epitope mutations"],
  ["ne","non epitope mutations"],
  ["rb","receptor binding mutations"],
