@@ -134,9 +134,9 @@ class fitness_model(object):
 		print("fitting clade frequencies for seasons")
 		region = "global_fit"
 		freq_cutoff = 25.0
-		total_pivots = 6
+		total_pivots = 12
 		pivots_fit = 2
-		freq_window = 0.0
+		freq_window = 0.5
 		from date_util import numerical_date
 		for n in self.tree.preorder_node_iter():
 			n.fit_frequencies = {}

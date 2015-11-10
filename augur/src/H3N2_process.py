@@ -51,7 +51,7 @@ virus_config.update({
 	'layout':'auspice_HI',
 	'min_aamuts': 1, 
 #	'predictors': ['dfreq', 'cHI']												# estimate
-	'predictors': { 'dfreq': [2.44, 2.95], 'cHI': [2.08, 0.52] }				# fix predictor: [value, std deviation]
+	'predictors': { 'dfreq': [1.32, 2.94], 'cHI': [1.55, 0.45] }				# fix predictor: [value, std deviation]
 	})
 
 
