@@ -90,28 +90,33 @@ function dragged(d) {
 
 	globalDate = d.date;
 
+	treeplot.selectAll(".link")
+		.style("stroke", function(d){return "#ccc";})
+	treeplot.selectAll(".tip")
+		.style("visibility", tipVisibility)
+		.style("fill", "#CCC")
+		.style("stroke", "#AAA");
+//	console.log("recalculating node ages");
 	calcNodeAges(time_window);
-	console.log("recalculating node ages");
-	calcNodeAges(time_window);
-	console.log("adjusting node colors");
-	adjust_coloring_by_date();
-	console.log("updating frequencies");
-	adjust_freq_by_date();
-	if (colorBy!="genotype"){
-		d3.selectAll(".link")
-			.transition().duration(500)
-			.attr("points", branchPoints)
-			.style("stroke-width", branchStrokeWidth)
-			.style("stroke", branchStrokeColor);				
-
-		d3.selectAll(".tip")
-			.transition().duration(500)
-			.style("visibility", tipVisibility)
-			.style("fill", tipFillColor)
-			.style("stroke", tipStrokeColor)
-			.attr("r", function(d){return tipRadius+(d.LBI>0.9)*3;});
-				
-	}
+//	console.log("adjusting node colors");
+//	adjust_coloring_by_date();
+//	console.log("updating frequencies");
+//	adjust_freq_by_date();
+//	if (colorBy!="genotype"){
+//		d3.selectAll(".link")
+//			.transition().duration(500)
+//			.attr("points", branchPoints)
+//			.style("stroke-width", branchStrokeWidth)
+//			.style("stroke", branchStrokeColor);				
+//
+//		d3.selectAll(".tip")
+//			.transition().duration(500)
+//			.style("visibility", tipVisibility)
+//			.style("fill", tipFillColor)
+//			.style("stroke", tipStrokeColor)
+//			.attr("r", function(d){return tipRadius+(d.LBI>0.9)*3;});
+//				
+//	}
 
 	treeplot.selectAll(".vaccine")
 		.style("visibility", function(d) {
@@ -160,7 +165,9 @@ function draggedMin(d) {
 
 function dragend() {
 	var num_date = globalDate/1000/3600/24/365.25+1970;	
-
+	setDate(num_date);
+}
+function setDate(num_date){
 	updateColorDomains(num_date);
 	for (var ii=0; ii<rootNode.pivots.length-1; ii++){
 		if (rootNode.pivots[ii]<num_date && rootNode.pivots[ii+1]>=num_date){
@@ -185,16 +192,17 @@ function dragend() {
 
 	if (colorBy!="genotype"){
 		d3.selectAll(".link")
-			.transition().duration(500)
+			.transition().duration(0)
 			.attr("points", branchPoints)
 			.style("stroke-width", branchStrokeWidth)
 			.style("stroke", branchStrokeColor);				
 
 		d3.selectAll(".tip")
-			.transition().duration(500)
+			.transition().duration(0)
 			.style("visibility", tipVisibility)
 			.style("fill", tipFillColor)
-			.style("stroke", tipStrokeColor);
+			.style("stroke", tipStrokeColor)
+			.attr("r", function(d){return tipRadius+(d.LBI>0.9)*3;});
 				
 	}
 	
@@ -205,6 +213,14 @@ function dragend() {
 			.style("font-size", tipLabelSize);
 	}	
 	
+	treeplot.selectAll(".vaccine")
+		.style("visibility", function(d) {
+			var date = new Date(d.choice);
+			var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
+			var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
+			if (diffYears > 0) { return "visible"; }
+				else { return "hidden"; }
+			});
 }
 
 
@@ -321,4 +337,43 @@ function date_init(){
 		.style("cursor", "pointer")
 		.call(drag);
 
+}
+
+d3.select('#play').on('click',play);
+
+function play(){
+	var begin_date = earliestDate/1000/3600/24/365.25+1970+0.5;
+	var end_date = 2015.8;
+	step(begin_date, end_date);
+}
+
+function step(begin_date, end_date){
+	globalDate = new Date((begin_date-1970)*1000*3600*24*365.25);
+
+	var x = dateScale(globalDate);
+	var sliderstart = new Date(globalDate);
+	sliderstart.setDate(sliderstart.getDate() - (time_window * 365.25));
+	x2 = dateScale(sliderstart);	
+	
+	d3.selectAll(".date-input-text")
+		.attr("dx", function(d) {return 0.5*d.x})
+		.text(function(d) {
+			var format = d3.time.format("%Y %b %-d");
+			return format(globalDate)
+		});
+	d3.selectAll(".date-input-marker")
+		.attr("cx", function(d) {return x});
+	d3.selectAll(".date-input-window")
+		.attr("x1", function(d) {return x})
+		.attr("x2", function(d) {return x2});
+	d3.selectAll(".date-input-edge")
+		.attr("x1", function(d) {return x2;})
+		.attr("x2", function(d) {return x2});		
+
+
+	console.log('global date',begin_date, globalDate);
+	setDate(begin_date);
+	if (begin_date+6./12<end_date){
+		setTimeout(function (){return step(begin_date+6./12, end_date);}, 1000);
+	}
 }
