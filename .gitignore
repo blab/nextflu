@@ -8,7 +8,7 @@ validation
 HI_mutation_effects.tsv
 parameters_mutation.txt
 parameters_tree.txt
-
+temp_*
 
 # Tex # 
 ###################

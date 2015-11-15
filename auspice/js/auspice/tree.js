@@ -10,8 +10,8 @@ var freqScale = d3.scale.sqrt()
 	.range([1, 10]);
 
 var distanceScale = d3.scale.sqrt()
-	.domain([5, 25])
-	.range([10, 2])
+	.domain([5, 20])
+	.range([9, 3])
 	.clamp([true]);
 
 function tipRadius(d) {
