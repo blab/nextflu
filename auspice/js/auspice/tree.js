@@ -10,7 +10,7 @@ var freqScale = d3.scale.sqrt()
 	.range([1, 10]);
 
 var distanceScale = d3.scale.sqrt()
-	.domain([5, 20])
+	.domain([3, 20])
 	.range([9, 3])
 	.clamp([true]);
 
