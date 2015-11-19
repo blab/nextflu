@@ -109,9 +109,9 @@ function makeLegend(){
 	.attr('y', legendRectSize - legendSpacing)
 	.text(function(d) {
 		var label = d.toString().replace(/([a-z])([A-Z])/g, '$1 $2').replace(/,/g, ', ');
-		if (colorBy == "dfreq") {
-			label += "\u00D7";
-		}
+//		if (colorBy == "dfreq") {
+//			label += "\u00D7";
+//		}
 		return label;
 	})
    .on('mouseover', function(leg){

@@ -136,7 +136,7 @@ class fitness_model(object):
 		freq_cutoff = 25.0
 		total_pivots = 12
 		pivots_fit = 2
-		freq_window = 0.5
+		freq_window = 0.0
 		from date_util import numerical_date
 		for n in self.tree.preorder_node_iter():
 			n.fit_frequencies = {}
@@ -145,7 +145,7 @@ class fitness_model(object):
 			time_interval = [numerical_date(s[0]) - freq_window, numerical_date(s[1])]
 			pivots = np.linspace(time_interval[0], time_interval[1], total_pivots)
 			n_nodes = len(self.tree.seed_node.season_tips[s])
-			self.estimate_tree_frequencies(pivots=pivots, threshold = 50, regions=None,
+			self.estimate_tree_frequencies(pivots=pivots, threshold = 40, regions=None,
 								region_name = region, time_interval=time_interval)
 			for n in self.tree.preorder_node_iter():
 				if n.logit_freq[region] is not None:

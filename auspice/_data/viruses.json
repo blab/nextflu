@@ -1,18 +1,6 @@
 [{	"virus": "H3N2",
- 	"default": "/H3N2/6y/",
+ 	"default": "/H3N2/2y/",
 	"name": "A/H3N2",
-  	"resolutions": ["3y", "6y", "12y", "20y", "Sep-2015", "Feb-2015", "Sep-2014", "Feb-2014", "Sep-2013", "Feb-2013"]
- },
- {	"virus": "H1N1pdm",
-	"default": "/H1N1pdm/6y/",
-	"name": "A/H1N1pdm",
-	"resolutions": ["3y", "6y", "12y", "20y"]},
-{"virus": "Vic",
-  "default": "/Vic/6y/",
-  "name": "B/Vic",
-  "resolutions": ["3y", "6y", "12y", "20y"]},
-{ "virus": "Yam",
-  	"default": "/Yam/6y/",
-  	"name": "B/Yam",
-  	"resolutions": ["3y", "6y", "12y", "20y"]}
+  	"resolutions": ["2y", "Sep-2015", "Feb-2015", "Sep-2014", "May-2014", "Feb-2014", "Sep-2013"]
+ }
 ]

@@ -158,14 +158,18 @@ if __name__=="__main__":
 	parser.add_argument('-r', type = float, default = 1.0)
 	params = parser.parse_args()
 
-	common_args = ['--skip', 'genotype_frequencies', '-r', params.r, '--lam_HI', 1, '--lam_pot', 0.3, '--lam_avi', 2]
+	common_args = ['--skip', 'genotype_frequencies HIvalidate', '-r', params.r, '--lam_HI', 1, '--lam_pot', 0.3, '--lam_avi', 2]
 	if params.ATG: common_args.append('--ATG')
 
 	if params.lineages is None:
 		params.lineages = ['H3N2', 'H1N1pdm', 'Vic', 'Yam']
 
 	if params.resolutions is None:
-		params.resolutions = ['3y', '6y', '12y', '20y']
+		params.resolutions = ['3y', '6y', '12y']
+		
+	if "historical_predictions" in params.resolutions:
+		params.resolutions.remove("historical_predictions")
+		params.resolutions.extend(['Sep-2013', 'Feb-2014', 'May-2014', 'Sep-2014', 'Feb-2015', 'Sep-2015'])
 
 	for lineage in params.lineages:
 		if params.s3:
@@ -186,14 +190,15 @@ if __name__=="__main__":
 				print '\n------------------------------\n'
 				print 'Processing lineage',lineage,'with resolution',resolution
 				process = 'src/' + lineage + '_process.py'
+				is_interval = False
 				if resolution == '1y':
 					n_viruses = 100
 					n_years = 1
 				if resolution == '2y':
-					n_viruses = 50
+					n_viruses = 60
 					n_years = 2
 				if resolution == '3y':
-					n_viruses = 30
+					n_viruses = 60
 					n_years = 3
 				if resolution == '5y':
 					n_viruses = 20
@@ -213,9 +218,50 @@ if __name__=="__main__":
 				if resolution == '12y':
 					n_viruses = 10
 					n_years = 12
+				if resolution == 'Sep-2015':
+					n_viruses = 60
+					interval_start = 2012.73
+					interval_stop = 2015.73
+					is_interval = True
+				if resolution == 'Feb-2015':
+					n_viruses = 60
+					interval_start = 2012.15
+					interval_stop = 2015.15
+					is_interval = True
+				if resolution == 'Sep-2014':
+					n_viruses = 60
+					interval_start = 2011.73
+					interval_stop = 2014.73
+					is_interval = True
+				if resolution == 'May-2014':
+					n_viruses = 60
+					interval_start = 2011.40
+					interval_stop = 2014.40
+					is_interval = True
+				if resolution == 'Feb-2014':
+					n_viruses = 60
+					interval_start = 2011.15
+					interval_stop = 2014.15
+					is_interval = True
+				if resolution == 'Sep-2013':
+					n_viruses = 60
+					interval_start = 2010.73
+					interval_stop = 2013.73
+					is_interval = True
+				if resolution == 'Feb-2013':
+					n_viruses = 60
+					interval_start = 2010.15
+					interval_stop = 2013.15
+					is_interval = True												
 				prefix = lineage + '_'
-				call = map(str, [params.bin, process, '-v', n_viruses, '-y', n_years,
-				           		 '--prefix', prefix, '--resolution', resolution] + common_args)
+
+				if is_interval:
+					call = map(str, [params.bin, process, '-v', n_viruses, '--interval', interval_start, interval_stop,
+				           			 '--prefix', prefix, '--resolution', resolution] + common_args)				
+				else:
+					call = map(str, [params.bin, process, '-v', n_viruses, '-y', n_years,
+				           			 '--prefix', prefix, '--resolution', resolution] + common_args)				
+				
 				print call
 				if not params.annotate:
 					subprocess.call(call)

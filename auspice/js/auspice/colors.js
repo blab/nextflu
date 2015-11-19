@@ -84,12 +84,6 @@ function adjust_coloring_by_date() {
 			d.coloring = d.LBI;
 		});
 	}
-	else if (colorBy == "dfreq") {
-		calcDfreq(rootNode, freq_ii);
-		nodes.forEach(function (d) {
-			d.coloring = d.dfreq;
-		});
-	}
 	else if (colorBy == "date") {
 		nodes.forEach(function (d) {
 			d.coloring = d.num_date;
@@ -136,7 +130,7 @@ function colorByTrait() {
 	}
 	else if (colorBy == "dfreq") {
 		colorScale = dfreqColorScale;
-		adjust_coloring_by_date();
+		nodes.map(function(d) { d.coloring = d.dfreq; });
 	}
 	else if (colorBy == "region") {
 		colorScale = regionColorScale;
