@@ -170,20 +170,18 @@ function dragend() {
 		makeLegend();
 	}
 
-	if (colorBy!="genotype"){
-		treeplot.selectAll(".link")
-			.transition().duration(500)
-			.attr("points", branchPoints)
-			.style("stroke-width", branchStrokeWidth)
-			.style("stroke", branchStrokeColor);
+	treeplot.selectAll(".link")
+		.transition().duration(500)
+		.attr("points", branchPoints)
+		.style("stroke-width", branchStrokeWidth)
+		.style("stroke", branchStrokeColor);
 
-		treeplot.selectAll(".tip")
-			.transition().duration(500)
-			.style("visibility", tipVisibility)
-			.style("fill", tipFillColor)
-			.style("stroke", tipStrokeColor);
+	treeplot.selectAll(".tip")
+		.transition().duration(500)
+		.style("visibility", tipVisibility)
+		.style("fill", tipFillColor)
+		.style("stroke", tipStrokeColor);
 
-	}
 
 	if ((typeof tip_labels != "undefined")&&(tip_labels)) {
 		nDisplayTips = displayRoot.fullTipCount;
