@@ -90,7 +90,7 @@ function makeLegend(){
    .on('mouseover', function(leg){
     	treeplot.selectAll(".tip") //highlight all tips corresponding to legend
             .filter(function (d){return legend_match(leg, d);})
-            .attr("r", function(d){return tipRadius*1.7;})
+            .attr("r", function(d){return tipRadius(d)*1.7;})
             .style("fill", function (t) {
               return d3.rgb(tipFillColor(t)).brighter();
             });
@@ -98,7 +98,7 @@ function makeLegend(){
   	.on('mouseout', function(leg){
     	treeplot.selectAll(".tip") //undo highlight
             .filter(function (d){return legend_match(leg, d);})
-            .attr("r", function(d){return tipRadius;})
+            .attr("r", function(d){return tipRadius(d);})
             .style("fill", function (t) {
               return d3.rgb(tipFillColor(t));
             });
@@ -117,7 +117,7 @@ function makeLegend(){
    .on('mouseover', function(leg){
     	treeplot.selectAll(".tip")
             .filter(function (d){return legend_match(leg, d);})
-            .attr("r", function(d){return tipRadius*1.7;})
+            .attr("r", function(d){return tipRadius(d)*1.7;})
             .style("fill", function (t) {
               return d3.rgb(tipFillColor(t)).brighter();
             });
@@ -125,7 +125,7 @@ function makeLegend(){
   	.on('mouseout', function(leg){
     	treeplot.selectAll(".tip")
             .filter(function (d){return legend_match(leg, d);})
-            .attr("r", function(d){return tipRadius;})
+            .attr("r", function(d){return tipRadius(d);})
             .style("fill", function (t) {
               return d3.rgb(tipFillColor(t));
             });
