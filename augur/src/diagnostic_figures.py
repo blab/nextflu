@@ -9,6 +9,8 @@ sns.set_style('darkgrid')
 colors = sns.color_palette(['#a6cee3','#1f78b4','#b2df8a','#33a02c','#fb9a99',
                          '#e31a1c','#fdbf6f','#ff7f00','#cab2d6'])
 
+koel_pos = [145, 155, 156, 158, 159, 189, 193]
+
 fs = 12
 plt.locator_params(nbins=4)
 fmts = ['.pdf','.svg','.png']
@@ -43,8 +45,14 @@ def make_combined_accession_number_lists():
 #### make list of mutation effects across different periods
 ######################################
 def mutation_list(flu = 'H3N2', format='tsv', nconstraints=False):
+    '''
+    make a table of all inferred effects from overlapping 10y intervals (exists only for H3N2)
+    table can be output either as tsv or as Latex table. the argument nconstraints
+    allows to print or omit the number of measurements that constrain the effect of the
+    substitutions
+    '''
     import pandas as pd
-    flist = glob('../auspice/'+flu+'/*to*/HI_mutation_effects.tsv')
+    flist = glob('../auspice/'+flu+'/*to*/HI_mutation_effects.tsv') # pick out 10y intervals such as 1995to2005
     mutation_effects = {}
     mutation_counts = {}
     for fname in flist:
@@ -77,9 +85,13 @@ def mutation_list(flu = 'H3N2', format='tsv', nconstraints=False):
         sep = '\t'
         le = '\n'
     ndigits = 2
+    # write inferred displacements to file, ordered by the maximal inferred effect
     with open('HI_mutation_effects_all.tsv', 'w') as ofile:
         ofile.write("mutation\t"+sep.join(N.columns)+le)
         for r,c in izip(N.iterrows(), D.iterrows()):
+            mut_name = r[0]
+            if flu=='H3N2' and any([str(x) in mut_name for x in koel_pos]):
+                mut_name+="*"
             if nconstraints:
                 tmp = sep.join([r[0]]+map(str,[(round(x,ndigits),y) for x,y in izip(r[1], c[1])])).replace('nan','---')
             else:
@@ -89,11 +101,16 @@ def mutation_list(flu = 'H3N2', format='tsv', nconstraints=False):
     return N, D
 
 def mutation_list_by_position(flu = 'H3N2', format='tsv', nconstraints=False):
+    '''
+    make a list of all estimated antigenic displacements for each individual position
+    for each of the 10 year intervals 1985-1995, 1990-2000 etc
+    '''
     from glob import glob
     import pandas as pd
     from collections import defaultdict
     flist = glob('../auspice/'+flu+'/*to*/HI_mutation_effects.tsv')
 
+    # a dict that contains a list of all estimates for a particular position
     mutation_effects = defaultdict(list)
     intervals = []
     for fname in flist:
@@ -107,6 +124,7 @@ def mutation_list_by_position(flu = 'H3N2', format='tsv', nconstraints=False):
                 mut, val, count = line.strip().split('\t')
                 positions = map(lambda x:int(x[1:-1]), mut.split('/'))
                 for pos in positions:
+                    # append time interval (eg 1995to2005), specific substitution (eg F159S), effect size, and number of measurements
                     mutation_effects[pos].append((interval, mut, float(val), int(count)))
 
     positions_by_length = sorted(mutation_effects.items(), key=lambda x:len(x[1]), reverse=True)
@@ -118,6 +136,7 @@ def mutation_list_by_position(flu = 'H3N2', format='tsv', nconstraints=False):
         le = '\n'
     ndigits = 2
     intervals.sort()
+    # write all effects to file, ordered by position with decreasing number of substitutions
     with open("effects_by_position.tsv", 'w') as ofile:
         for pos, muts in positions_by_length:
             avg_all = np.mean([x[2] for x in muts])
@@ -126,7 +145,10 @@ def mutation_list_by_position(flu = 'H3N2', format='tsv', nconstraints=False):
             tmp = {(x[1],x[0]):x for x in muts}
             unique_muts = set([x[1] for x in muts])
             for mut in unique_muts:
-                ofile.write(mut+sep)
+                if flu=='H3N2' and any([str(x) in mut for x in koel_pos]):
+                    ofile.write(mut+'*'+sep)
+                else:
+                    ofile.write(mut+sep)
                 for interval in intervals:
                     if (mut, interval) in tmp:
                         ofile.write(str((tmp[(mut,interval)][2],tmp[(mut,interval)][3]))+sep)
@@ -251,11 +273,13 @@ def tree_additivity_symmetry(myflu, mtype='tree'):
         for v in tmp_recip:
             val_fwd = myflu.HI_normalized[(testvir,serum)]
             val_bwd = myflu.HI_normalized[v]
+            date_fwd = myflu.sequence_lookup(testvir).num_date
+            date_bwd = myflu.sequence_lookup(serum[0]).num_date
             diff_uncorrected = val_fwd - val_bwd
             diff_corrected = (val_fwd - myflu.serum_potency[mtype][serum] - myflu.virus_effect[mtype][testvir])\
                             -(val_bwd - myflu.serum_potency[mtype][v[1]] - myflu.virus_effect[mtype][serum[0]])
             val_bwd = myflu.HI_normalized[v]
-            reciprocal_measurements.append([testvir, serum, diff_uncorrected, diff_corrected])
+            reciprocal_measurements.append([testvir, serum, diff_uncorrected, diff_corrected, np.sign(date_fwd-date_bwd)])
             reciprocal_measurements_titers.append([testvir, serum, val_fwd, val_bwd,
                                                   (val_fwd - myflu.serum_potency[mtype][serum] - myflu.virus_effect[mtype][testvir]),
                                                   (val_bwd - myflu.serum_potency[mtype][v[1]] - myflu.virus_effect[mtype][serum[0]]),
@@ -264,9 +288,10 @@ def tree_additivity_symmetry(myflu, mtype='tree'):
     ax = plt.subplot(121)
     plt.text(0.05, 0.93,  ('tree model' if mtype=='tree' else 'mutation model'),
              weight='bold', fontsize=fs, transform=plt.gca().transAxes)
-    plt.hist([x[2] for x in reciprocal_measurements],alpha=0.7, label="raw", normed=True)
-    plt.hist([x[3] for x in reciprocal_measurements],alpha=0.7, label="tree", normed=True)
-    plt.xlabel('distance asymmetry', fontsize=fs)
+    # multiple the difference by the +/- one to polarize all comparisons by date
+    plt.hist([x[2]*x[-1] for x in reciprocal_measurements],alpha=0.7, label="raw", normed=True)
+    plt.hist([x[3]*x[-1] for x in reciprocal_measurements],alpha=0.7, label="tree", normed=True)
+    plt.xlabel('titer asymmetry', fontsize=fs)
     ax.tick_params(axis='both', labelsize=fs)
     plt.legend(fontsize=fs)
     plt.tight_layout()

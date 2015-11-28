@@ -1,3 +1,8 @@
+'''
+script that makes validation figures outside of the usual pipeline. These functions
+are largely obsolete as much of this was migrated to "diagnostic figures"
+'''
+
 import matplotlib.pyplot as plt
 import seaborn as sns
 from tree_titer import plot_tree, plot_dHI_distribution

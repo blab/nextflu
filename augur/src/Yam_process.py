@@ -192,7 +192,7 @@ class BYam_process(process, BYam_filter, BYam_clean, BYam_refine, HI_tree):
 			self.filter()
 			if self.force_include is not None and os.path.isfile(self.force_include):
 				with open(self.force_include) as infile:
-					forced_strains = [fix_name(line.strip()).upper() for line in infile]
+					forced_strains = [fix_name(line.strip().split('\t')[0]).upper() for line in infile]
 			else:
 				forced_strains = []
 			self.subsample(viruses_per_month,
