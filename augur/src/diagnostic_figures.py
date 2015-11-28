@@ -273,8 +273,8 @@ def tree_additivity_symmetry(myflu, mtype='tree'):
         for v in tmp_recip:
             val_fwd = myflu.HI_normalized[(testvir,serum)]
             val_bwd = myflu.HI_normalized[v]
-            date_fwd = myflu.sequence_lookup(testvir).num_date
-            date_bwd = myflu.sequence_lookup(serum[0]).num_date
+            date_fwd = myflu.node_lookup[testvir].num_date
+            date_bwd = myflu.node_lookup[serum[0]].num_date
             diff_uncorrected = val_fwd - val_bwd
             diff_corrected = (val_fwd - myflu.serum_potency[mtype][serum] - myflu.virus_effect[mtype][testvir])\
                             -(val_bwd - myflu.serum_potency[mtype][v[1]] - myflu.virus_effect[mtype][serum[0]])
@@ -289,8 +289,12 @@ def tree_additivity_symmetry(myflu, mtype='tree'):
     plt.text(0.05, 0.93,  ('tree model' if mtype=='tree' else 'mutation model'),
              weight='bold', fontsize=fs, transform=plt.gca().transAxes)
     # multiple the difference by the +/- one to polarize all comparisons by date
-    plt.hist([x[2]*x[-1] for x in reciprocal_measurements],alpha=0.7, label="raw", normed=True)
-    plt.hist([x[3]*x[-1] for x in reciprocal_measurements],alpha=0.7, label="tree", normed=True)
+    vals= [x[2]*x[-1] for x in reciprocal_measurements]
+    plt.hist(vals, alpha=0.7, label=r"raw", normed=True)
+    print("raw reciprocal titers: ", str(np.round(np.mean(vals),3))+'+/-'+str(np.round(np.std(vals),3)))
+    vals= [x[3]*x[-1] for x in reciprocal_measurements]
+    plt.hist(vals, alpha=0.7, label=r"$D_{ab}$", normed=True)
+    print("symmetric component: ", str(np.round(np.mean(vals),3))+'+/-'+str(np.round(np.std(vals),3)))
     plt.xlabel('titer asymmetry', fontsize=fs)
     ax.tick_params(axis='both', labelsize=fs)
     plt.legend(fontsize=fs)
