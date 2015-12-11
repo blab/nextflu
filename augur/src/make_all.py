@@ -146,6 +146,7 @@ if __name__=="__main__":
 	parser.add_argument('--annotate', action = "store_true", default = False, help = "annotate, but don't process")
 	parser.add_argument('--infile', type = str, default = "gisaid_epiflu_sequence.fasta")
 	parser.add_argument('--bin', type = str, default = "python")
+	parser.add_argument('--html', action="store_true", default=False, help ="regenerate HTML")
 	parser.add_argument('--ATG', action = "store_true", default = False, help = "include full HA sequence starting at ATG")
 	parser.add_argument('--all', action = "store_true", default = False)
 	parser.add_argument('--s3', action = "store_true", default = False, help = "push/pull FASTA and JSON files to/from S3")
@@ -160,13 +161,14 @@ if __name__=="__main__":
 
 	common_args = ['--skip', 'genotype_frequencies HIvalidate', '-r', params.r, '--lam_HI', 1, '--lam_pot', 0.3, '--lam_avi', 2]
 	if params.ATG: common_args.append('--ATG')
+	if params.html: common_args.append('--html')
 
 	if params.lineages is None:
 		params.lineages = ['H3N2', 'H1N1pdm', 'Vic', 'Yam']
 
 	if params.resolutions is None:
 		params.resolutions = ['3y', '6y', '12y']
-		
+
 	if "historical_predictions" in params.resolutions:
 		params.resolutions.remove("historical_predictions")
 		params.resolutions.extend(['Sep-2013', 'Feb-2014', 'May-2014', 'Sep-2014', 'Feb-2015', 'Sep-2015'])
@@ -184,7 +186,8 @@ if __name__=="__main__":
 		print 'Parsing new sequences for lineage',lineage
 		if params.all:
 			params.threshold = 0
-		#run = ammend_fasta(params.infile, lineage, existing_strains, threshold = params.threshold, directory = 'data/')
+		if params.annotate:
+			run = ammend_fasta(params.infile, lineage, existing_strains, threshold = params.threshold, directory = 'data/')
 		if True:
 			for resolution in params.resolutions:
 				print '\n------------------------------\n'
@@ -252,16 +255,16 @@ if __name__=="__main__":
 					n_viruses = 60
 					interval_start = 2010.15
 					interval_stop = 2013.15
-					is_interval = True												
+					is_interval = True
 				prefix = lineage + '_'
 
 				if is_interval:
 					call = map(str, [params.bin, process, '-v', n_viruses, '--interval', interval_start, interval_stop,
-				           			 '--prefix', prefix, '--resolution', resolution] + common_args)				
+				           			 '--prefix', prefix, '--resolution', resolution] + common_args)
 				else:
 					call = map(str, [params.bin, process, '-v', n_viruses, '-y', n_years,
-				           			 '--prefix', prefix, '--resolution', resolution] + common_args)				
-				
+				           			 '--prefix', prefix, '--resolution', resolution] + common_args)
+
 				print call
 				if not params.annotate:
 					subprocess.call(call)

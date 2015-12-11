@@ -22,9 +22,10 @@ parser.add_argument('--path', type = str, default = 'data/', help='path of file 
 parser.add_argument('--prefix', type = str, default = '', help='prefix of file dumps including auspice')
 parser.add_argument('--test', default = False, action="store_true",  help ="don't run the pipeline")
 parser.add_argument('--start', default = 'filter', type = str,  help ="start pipeline at specified step")
-parser.add_argument('--stop', default = 'HIvalidate', type=str,  help ="run to end")
+parser.add_argument('--stop', default = 'export', type=str,  help ="run to end")
 parser.add_argument('--skip', nargs='+', type = str,  help ="analysis steps to skip")
 parser.add_argument('--ATG', action="store_true", default=False, help ="include full HA sequence starting at ATG")
+parser.add_argument('--html', action="store_true", default=False, help ="regenerate HTML")
 parser.add_argument('--resolution', type = str,  help ="label for the resolution")
 parser.add_argument('--estimate_fitness_model', default = False, action="store_true", help ="estimate parameters of fitness model")
 
@@ -70,7 +71,7 @@ class process(virus_frequencies):
 		self.frequency_fname = 	self.path + self.prefix + self.resolution_prefix + 'frequencies.pkl'
 		self.aa_seq_fname = 	self.path + self.prefix + self.resolution_prefix + 'aa_seq.pkl'
 		self.HI_model_fname = 	self.path + self.prefix + self.resolution_prefix + 'HI_model.pkl'
-		self.nuc_seq_fname = 	self.path + self.prefix + self.resolution_prefix + 'nuc_seq.pkl'		
+		self.nuc_seq_fname = 	self.path + self.prefix + self.resolution_prefix + 'nuc_seq.pkl'
 		if run_dir is None:
 			import random
 			self.run_dir = '_'.join(['temp', time.strftime('%Y%m%d-%H%M%S',time.gmtime()), str(random.randint(0,1000000))])
@@ -116,7 +117,7 @@ class process(virus_frequencies):
 				cPickle.dump(self.aa_aln, outfile)
 		if hasattr(self, 'nuc_aln'):
 			with open(self.nuc_seq_fname, 'w') as outfile:
-				cPickle.dump(self.nuc_aln, outfile)				
+				cPickle.dump(self.nuc_aln, outfile)
 		if hasattr(self, 'mutation_effects'):
 			with open(self.HI_model_fname, 'w') as outfile:
 				cPickle.dump((self.sera, self.ref_strains, self.HI_strains, self.mutation_effects, self.virus_effect, self.serum_potency), outfile)
@@ -141,7 +142,7 @@ class process(virus_frequencies):
 				self.aa_aln = cPickle.load(infile)
 		if os.path.isfile(self.nuc_seq_fname):
 			with open(self.nuc_seq_fname, 'r') as infile:
-				self.nuc_aln = cPickle.load(infile)				
+				self.nuc_aln = cPickle.load(infile)
 		if os.path.isfile(self.HI_model_fname):
 			try:
 				with open(self.HI_model_fname, 'r') as infile:
@@ -283,7 +284,7 @@ class process(virus_frequencies):
 		else:
 			tmp_layout="auspice"
 		with open(self.htmlpath()+'index.html','w') as out:
-			out.write("---\ntitle: HI.nextflu / "+self.virus_type+" / "+self.resolution_prefix.rstrip('_')
+			out.write("---\ntitle: nextflu / "+self.virus_type+" / "+self.resolution_prefix.rstrip('_')
 					  +"\nlayout: "+tmp_layout
 					  +"\nvirus: "+self.virus_type+"\nresolution: "+self.resolution_prefix.rstrip('_')+"\n")
 			if "html_vars"  in self.kwargs:

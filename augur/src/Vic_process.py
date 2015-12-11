@@ -46,7 +46,7 @@ virus_config.update({
 				  'gtplaceholder': 'HA1 positions...',
 				  'freqdefault': '1A, 1B'},
 	'js_vars': {'LBItau': 0.0005, 'LBItime_window': 0.5, 'dfreq_dn':2},
-	'layout':'auspice_HI',
+	'layout':'auspice',
 	})
 
 
@@ -215,7 +215,8 @@ class BVic_process(process, BVic_filter, BVic_clean, BVic_refine, HI_tree):
 				'dHI', 'cHI', 'mean_HI_titers','HI_titers','HI_titers_raw', 'serum', 'HI_info',
 				'avidity_tree','avidity_mut', 'potency_mut', 'potency_tree', 'mean_potency_mut', 'mean_potency_tree', 'autologous_titers'],
 				annotations = ['1A', '1B'])
-			#self.generate_indexHTML()
+			if params.html:
+				self.generate_indexHTML()
 			self.export_HI_mutation_effects()
 
 
@@ -225,7 +226,7 @@ class BVic_process(process, BVic_filter, BVic_clean, BVic_refine, HI_tree):
 
 
 if __name__=="__main__":
-	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','HI', 'export']+ ['HIvalidate']
+	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','HI', 'export'] + ['HIvalidate']
 	from process import parser
 	params = parser.parse_args()
 
@@ -236,7 +237,7 @@ if __name__=="__main__":
 		params.time_interval = (params.interval[0], params.interval[1])
 	dt= params.time_interval[1]-params.time_interval[0]
 	params.pivots_per_year = 12.0 if dt<5 else 6.0
-	steps = all_steps[all_steps.index(params.start):(all_steps.index(params.stop)+1)] + ["HIvalidate"]
+	steps = all_steps[all_steps.index(params.start):(all_steps.index(params.stop)+1)]
 	if params.skip is not None:
 		for tmp_step in params.skip:
 			if tmp_step in steps:
