@@ -143,7 +143,7 @@ if mut_models:
     plt.figure()
     plt.plot(sorted(fixed), np.linspace(0,1,len(fixed)), label = '>'+str(freq_thres)+' n='+str(len(fixed)))
     plt.plot(sorted(failed), np.linspace(0,1,len(failed)), label = '<'+str(freq_thres)+' n='+str(len(failed)))
-    plt.xlabel(r'antigenic displacement $d_i$')
+    plt.xlabel(r'Contribution to HI titer $d_i$')
     plt.ylabel('cumulative distribution')
     plt.legend(loc=4)
     if save_figs:
@@ -174,7 +174,7 @@ if mut_models:
             frac_success.append((HI_max[ind,1]>freq_thres).mean())
         ax3.errorbar(np.arange(len(frac_success))+0.5+0.03*fi, frac_success,stddev_success, label = "max freq >"+str(freq_thres), lw=2)
 
-    ax3.set_xlabel(r'antigenic displacement $d_i$', fontsize=fs)
+    ax3.set_xlabel(r'Contribution to HI titer $d_i$', fontsize=fs)
     ax3.set_ylabel('fraction reaching frequency threshold', fontsize=fs)
     ax3.tick_params(labelsize=fs)
     ax3.set_xticks(np.arange(len(HI_binc))+0.5)
@@ -194,7 +194,7 @@ if mut_models:
     cumHI =  HI_backbone.cumsum()
     plt.plot(HI_backbone, cumHI/cumHI[-1])
     plt.ylabel('fraction of cHI due to effects < cutoff', fontsize = fs)
-    plt.xlabel(r'antigenic displacement', fontsize = fs)
+    plt.xlabel(r'Contribution to HI titer', fontsize = fs)
     plt.tick_params(labelsize=fs)
     plt.tight_layout()
     if save_figs:
@@ -270,7 +270,7 @@ print("KS stat:", D, "p-val:",p)
 plt.figure()
 plt.plot(sorted(fixed), np.linspace(0,1,len(fixed)), label = '>'+str(freq_thres)+' n='+str(len(fixed)))
 plt.plot(sorted(failed), np.linspace(0,1,len(failed)), label = '<'+str(freq_thres)+' n='+str(len(failed)))
-plt.xlabel(r'antigenic displacement $d_i$')
+plt.xlabel(r'Contribution to HI titer $d_i$')
 plt.ylabel('cumulative distribution')
 plt.legend(loc=4)
 if save_figs:

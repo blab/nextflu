@@ -41,6 +41,45 @@ def make_combined_accession_number_lists():
             for strain, acc in all_accessions:
                 ofile.write(strain+'\t'+acc+'\n')
 
+def make_table_with_virus_parameter_count():
+    numbers = {}
+    fields = {
+            'total number of viruses':  '# viruses',
+            'number of test viruses': '# test virus',
+            'number of reference viruses': '# ref viruses',
+            'number of antisera': '# antisera',
+            'number of HI measurements':  '# HI titers',
+            'number of genetic parameters': '# genetic parameters'   ,
+            'number of positive genetic parameters': '# non-zero genetic parameters' ,
+            }
+    for mtype in ['tree', 'mutation']:
+        for flu in ['H3N2', 'H1N1pdm', 'Vic', 'Yam']:
+            flist = glob.glob('../auspice/'+flu+'/*y')
+            for dirname in flist:
+                res = dirname.split('/')[-1]
+                try:
+                    with open(dirname+'/parameters_'+mtype+'.txt') as infile:
+                        numbers[(flu, res, mtype)] = {}
+                        for line in infile:
+                            field = fields[line.split('\t')[0][:-1]]
+                            numbers[(flu, res, mtype)][field] = line.strip().split('\t')[1]
+                except:
+                    print("cant open", (flu, res, mtype))
+
+        sep='& '
+        le = '\\\\ \n'
+#        sep='\t'
+#        le = '\n'
+        table_fields = ['# viruses', '# test virus','# ref viruses','# antisera','# HI titers','# genetic parameters', '# non-zero genetic parameters']
+        with open('supplementary_table.tsv', 'w') as ofile:
+            ofile.write(sep.join(table_fields)+le)
+            for flu in ['H3N2', 'H1N1pdm', 'Vic', 'Yam']:
+                for res in ['3y', '6y', '12y', '20y']:
+                    for mtype in ['tree', 'mutation']:
+                        if (flu, res, mtype) in numbers:
+                            vals = [numbers[(flu, res, mtype)][x] for x in table_fields]
+                            ofile.write(sep.join([flu, res, mtype]+vals)+le)
+
 ######################################
 #### make list of mutation effects across different periods
 ######################################
@@ -431,7 +470,53 @@ def titer_vs_distances(myflu, mtype='tree'):
         ax.set_xlabel(col_name, fontsize=fs)
         ax.set_title(u'$r='+str(np.round(C[0],2))+'$', fontsize=fs)
         #ax.legend(loc=4, fontsize=fs)
-    axs[0].set_ylabel('HI genetic component', fontsize=fs)
+    axs[0].set_ylabel(r'inferred $D_{ab}$', fontsize=fs)
+    plt.tight_layout(pad=0.3, w_pad=0.5)
+    return dists
+
+######################################
+#### analyze correlations between avidities and sequence/model distances
+######################################
+def avidities_vs_distances(myflu, mtype='tree'):
+    from scipy.stats import pearsonr
+    from matplotlib import cm
+    dists = []
+    for (test, serum), val in myflu.HI_normalized.iteritems():
+        muts = myflu.get_mutations(serum[0], test)
+        ref_node = myflu.node_lookup[serum[0]]
+        test_node = myflu.node_lookup[test]
+        ref_aaseq = myflu.get_total_peptide(ref_node)
+        test_aaseq = myflu.get_total_peptide(test_node)
+
+        hamming_dist = np.sum(np.fromstring(ref_node.seq, 'S1')!=np.fromstring(test_node.seq, 'S1'))
+        epidist = myflu.epitope_distance(ref_aaseq, test_aaseq)
+        nonepidist = myflu.nonepitope_distance(ref_aaseq, test_aaseq)
+        rbsdist = myflu.receptor_binding_distance(ref_aaseq, test_aaseq)
+        correction = myflu.virus_effect[mtype][test] + myflu.serum_potency[mtype][serum]
+        if mtype=='tree':
+            dHI = myflu.predict_HI_tree(test, serum)
+        else:
+            dHI = myflu.predict_HI_mutations(test, serum)
+        val_corrected = dHI - correction
+        d_avi = myflu.virus_effect[mtype][test] - myflu.virus_effect[mtype][serum[0]]
+
+        dists.append([hamming_dist, len(muts), epidist, rbsdist, val_corrected, d_avi, np.abs(d_avi)])
+
+    dists = np.array(dists)
+    fig, axs = plt.subplots(1,3,figsize=(3*figheight, figheight))
+
+    for ai, (ax, ci, col_name, gridsize) in enumerate(izip(axs, [2, 3, 4],
+                                            ['epitope distance',
+                                            'RBS distance', mtype+r' model $D_{ab}$'], [20,6,20])):
+
+        C = pearsonr(dists[:,ci], dists[:,-1])
+        print(col_name, C)
+        ax.hexbin(dists[:,ci], dists[:,-1], gridsize=gridsize, cmap = cm.YlOrRd_r, bins='log') #,s=1, label = u'$r='+str(np.round(C[0],2))+'$')
+        ax.tick_params(axis='both', labelsize=fs)
+        ax.set_xlabel(col_name, fontsize=fs)
+        ax.set_title(u'$r='+str(np.round(C[0],2))+'$', fontsize=fs)
+        #ax.legend(loc=4, fontsize=fs)
+    axs[0].set_ylabel(r'inferred $|v_{a}-v_{b}|$', fontsize=fs)
     plt.tight_layout(pad=0.3, w_pad=0.5)
     return dists
 

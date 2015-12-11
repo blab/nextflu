@@ -63,7 +63,7 @@ for fname in flist:
     for p in cHI_path:
         all_path[flu].extend([p[-1,:]])
         ax.plot(p[-1,0], p[-1,1], 'o', ls='none', c=cols[flu])
-        ax.plot(p[:,0], p[:,1], ls='-', c=cols[flu], alpha=0.2)
+        ax.plot(p[:,0], p[:,1], ls='-', c=cols[flu], alpha=0.6, lw=2)
 
 # add linear regression for each flu type and add labels
 for flu in all_path:
@@ -73,7 +73,7 @@ for flu in all_path:
         ax = plt.subplot(122)
     R = linregress(np.array(all_path[flu]))
     t = np.array([2007 if flu=='H1N1pdm' else 1993,2015])
-    ax.plot(t,R[1]+R[0]*t, c = cols[flu], lw=2, ls='--',
+    ax.plot(t,R[1]+R[0]*t, c = cols[flu], lw=3, ls='--',
              label= flu+r', $\mu='+str(np.round(R[0],2))+'$')
 #plt.ylim([-0.5, 19])
 for ai,ax in enumerate([plt.subplot(121), plt.subplot(122)]):
