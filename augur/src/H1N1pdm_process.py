@@ -176,12 +176,13 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine, HI
 			self.filter()
 			if self.force_include is not None and os.path.isfile(self.force_include):
 				with open(self.force_include) as infile:
-					forced_strains = [fix_name(line.strip()).upper() for line in infile]
+					forced_strains = [fix_name(line.strip().split('\t')[0]).upper() for line in infile]
 			else:
 				forced_strains = []
 			self.subsample(viruses_per_month,
 				prioritize=forced_strains, all_priority=self.force_include_all,
 				region_specific = self.max_global)
+			self.add_older_vaccine_viruses(dt = 3)
 			self.dump()
 		else:
 			self.load()

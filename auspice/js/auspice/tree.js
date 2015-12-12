@@ -187,6 +187,7 @@ function tree_init(){
 	calcNodeAges(LBItime_window);
 	colorByTrait();
 	adjust_freq_by_date();
+	calcDfreq(rootNode, freq_ii);
 	tree_legend = makeLegend();
 	nDisplayTips = displayRoot.fullTipCount;
 }
@@ -400,7 +401,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		yScale.domain([lMin,lMax]);
 		virusTooltip.hide();
 		linkTooltip.hide();
-		matchTooltip.hide();				
+		matchTooltip.hide();
 		transform(1500)
 	}
 
@@ -433,11 +434,11 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.transition().duration(dt)
 			.attr("x", function(d) { return d.x; })
 			.attr("y", function(d) { return d.y; });
-			
+
 		treeplot.selectAll(".strainmatch")
 			.transition().duration(dt)
 			.attr("x", function(d) { return d.x; })
-			.attr("y", function(d) { return d.y; });			
+			.attr("y", function(d) { return d.y; });
 
 		treeplot.selectAll(".link")
 			.transition().duration(dt)

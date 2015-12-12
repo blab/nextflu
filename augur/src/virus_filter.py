@@ -49,7 +49,7 @@ class virus_filter(object):
 		self.strain_lookup = {}
 		self.outgroup = None
 		self.date_spec = date_spec
-		
+
 	def parse_fasta(self, fasta):
 		"""Parse FASTA file with default header formating"""
 		viruses = []
@@ -64,10 +64,10 @@ class virus_filter(object):
 				v['seq']= str(record.seq)
 				viruses.append(v)
 			handle.close()
-		return viruses		
-		
+		return viruses
+
 	def filter(self):
-		self.filter_generic()			
+		self.filter_generic()
 
 	def filter_generic(self, prepend_strains = None):
 		'''
@@ -91,20 +91,20 @@ class virus_filter(object):
 		print len(self.viruses), "after filtering for unique strains"
 
 	def sort_length(self):
-		'''	
+		'''
 		Sort by length, but randomize viruses of a given length
-		'''	
+		'''
 		from random import shuffle
 		shuffle(self.viruses)
 		self.viruses.sort(key = lambda v: len(v['seq']), reverse = True)
 
 	def filter_unique(self):
-		'''		
+		'''
 		Keep only the first isolate of a strain
-		'''	
+		'''
 		filtered_viruses = []
 		for v in self.viruses:
-			label = v['strain'].upper() 
+			label = v['strain'].upper()
 			if not label in self.strain_lookup:
 				filtered_viruses.append(v)
 				self.strain_lookup[label]=v
@@ -123,7 +123,7 @@ class virus_filter(object):
 			self.viruses = filter(lambda v: re.match(r'\d\d\d\d', v['date']) is not None, self.viruses)
 			for v in self.viruses:
 				if re.match(r'\d\d\d\d-\d\d-\d\d', v['date']) is None:
-					v['date'] = v['date'][:4]+'-'+format(np.random.randint(12)+1, '02d')+'-01' 
+					v['date'] = v['date'][:4]+'-'+format(np.random.randint(12)+1, '02d')+'-01'
 
 	def subsample(self, viruses_per_month, prioritize = None, all_priority=False, region_specific = True):
 		'''
@@ -141,8 +141,8 @@ class virus_filter(object):
 		else:
 			select_func = self.select_viruses_global
 
-		priority_viruses = self.viruses_by_date_region([v for v in self.viruses if v['strain'].upper() in prioritize]) 
-		other_viruses = self.viruses_by_date_region([v for v in self.viruses if v['strain'].upper() not in prioritize]) 
+		priority_viruses = self.viruses_by_date_region([v for v in self.viruses if v['strain'].upper() in prioritize])
+		other_viruses = self.viruses_by_date_region([v for v in self.viruses if v['strain'].upper() not in prioritize])
 
 		filtered_viruses = []
 		first_year = int(np.floor(self.time_interval[0]))
@@ -153,11 +153,11 @@ class virus_filter(object):
 		print "Selecting " + str(viruses_per_month), "viruses per month"
 		y = first_year
 		for m in range(first_month,13):
-			filtered_viruses.extend(select_func(priority_viruses,other_viruses, 
+			filtered_viruses.extend(select_func(priority_viruses,other_viruses,
 												y, m, viruses_per_month, regions, all_priority=all_priority))
 		for y in range(first_year+1,int(np.floor(self.time_interval[1]))+1):
 			for m in range(1,13):
-				filtered_viruses.extend(select_func(priority_viruses,other_viruses, 
+				filtered_viruses.extend(select_func(priority_viruses,other_viruses,
 												y, m, viruses_per_month, regions, all_priority=all_priority))
 				if y+float(m)/12.0>self.time_interval[1]:
 					break
@@ -177,7 +177,7 @@ class virus_filter(object):
 				vdate = datetime.datetime.strptime(v['date'], self.date_format['fields']).date()
 			except:
 				print "incomplete date!", v['strain'], v['date'], "adjusting to July 1st"
-				v['date']+='-07-01'	
+				v['date']+='-07-01'
 				vdate = datetime.datetime.strptime(v['date'], '%Y-%m-%d').date()
 			virus_tuples[(vdate.year, vdate.month, v['region'])].append(v)
 
@@ -224,7 +224,7 @@ class virus_filter(object):
 
 class flu_filter(virus_filter):
 
-	def __init__(self, alignment_file='', fasta_fields=None, **kwargs):	
+	def __init__(self, alignment_file='', fasta_fields=None, **kwargs):
 		virus_filter.__init__(self, alignment_file = alignment_file, fasta_fields = fasta_fields, **kwargs)
 		self.add_gisaid_metadata()
 		self.fix_strain_names()
@@ -235,10 +235,24 @@ class flu_filter(virus_filter):
 		print len(self.viruses), "with proper strain names"
 		self.filter_passage()
 		print len(self.viruses), "without egg passage"
-		self.filter_generic(prepend_strains = self.vaccine_strains)	
+		self.filter_generic(prepend_strains = self.vaccine_strains)
 		self.filter_geo(prune=False)
 		print len(self.viruses), "with geographic information"
-		
+
+	def add_older_vaccine_viruses(self, dt = 3):
+		'''
+		addes additional vaccine viruses prior to the time interval to provide phylogenetic context
+		'''
+		from date_util import numerical_date
+		for v in self.vaccine_strains:
+			tmp_date = numerical_date(v['date'])
+			if tmp_date<self.time_interval[0] and tmp_date>=self.time_interval[0]-dt:
+				self.viruses.append(v)
+				print("adding ",v['strain'], v['date'], tmp_date, self.time_interval)
+			else:
+				print("skipping ",v['strain'], v['date'], tmp_date, self.time_interval)
+
+
 	def add_gisaid_metadata(self):
 		for v in self.viruses:
 			v['db']="GISAID"
@@ -275,7 +289,7 @@ class flu_filter(virus_filter):
 					else:
 						label = re.match(r'^[AB]/([A-Z][a-z]+)[A-Z0-9]', v['strain']).group(1).lower()			# check for partial geo match
 					if label in label_to_country:
-						v['country'] = label_to_country[label]							
+						v['country'] = label_to_country[label]
 					if v['country'] == 'Unknown':
 						print "couldn't parse location for", v['strain']
 				except:
@@ -290,7 +304,7 @@ class flu_filter(virus_filter):
 			if v['country'] in country_to_region:
 				v['region'] = country_to_region[v['country']]
 			if v['country'] != 'Unknown' and v['region'] == 'Unknown':
-				print "couldn't parse region for", v['strain'], "country:", v["country"]		
-		
+				print "couldn't parse region for", v['strain'], "country:", v["country"]
+
 		if prune:
 			self.viruses = filter(lambda v: v['region'] != 'Unknown', self.viruses)

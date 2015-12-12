@@ -71,10 +71,10 @@ var dateColorScale = d3.scale.linear().clamp([true])
 var regionColorScale = d3.scale.ordinal()
 	.domain(regions.map(function(d){return d[0];}))
 	.range(regions.map(function(d){return d[1];}));
-	
+
 var fitnessColorScale = d3.scale.linear().clamp([true])
 	.domain(fitnessColorDomain)
-	.range(colors[10]);	
+	.range(colors[10]);
 
 // "ep", "ne" and "rb" need no adjustments
 function adjust_coloring_by_date() {
@@ -130,7 +130,7 @@ function colorByTrait() {
 	}
 	else if (colorBy == "dfreq") {
 		colorScale = dfreqColorScale;
-		nodes.map(function(d) { d.coloring = d.dfreq; });
+		nodes.map(function(d) { d.coloring = d.dfreq;});
 	}
 	else if (colorBy == "region") {
 		colorScale = regionColorScale;
@@ -151,13 +151,13 @@ function colorByTrait() {
 	else if (colorBy == "fitness") {
 		colorScale = fitnessColorScale;
 		nodes.map(function(d) { d.coloring = d.fitness; });
-	}	
+	}
 
 	treeplot.selectAll(".link")
 		.style("stroke", branchStrokeColor);
 
 	d3.selectAll(".tip")
-		.attr("r", tipRadius)	
+		.attr("r", tipRadius)
 		.style("visibility", tipVisibility)
 		.style("fill", tipFillColor)
 		.style("stroke", tipStrokeColor);

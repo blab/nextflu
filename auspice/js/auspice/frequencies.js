@@ -11,7 +11,7 @@ function calcDfreq(node, freq_ii){
 				if (node.children[i1].freq["global"] != "undefined"){
 					var tmp_freq = node.children[i1].freq["global"]
 					//node.children[i1].dfreq = 0.5*(tmp_freq[freq_ii] - tmp_freq[freq_ii-dfreq_dn])/(tmp_freq[freq_ii] + tmp_freq[freq_ii-dfreq_dn] + 0.2);
-					node.children[i1].dfreq = (tmp_freq[freq_ii] + 0.01)/(tmp_freq[freq_ii-dfreq_dn] + 0.03);
+					node.children[i1].dfreq = (tmp_freq[freq_ii] + 0.01)/(tmp_freq[freq_ii-dfreq_dn] + 0.01);
 				} else {
 					node.children[i1].dfreq = node.dfreq;
 				}
@@ -111,7 +111,7 @@ function make_gt_chart(gt){
        	unload: true
 	});
 	gt_chart.data.colors(tmp_colors);
-	// construct a tab separated string the frequency data 
+	// construct a tab separated string the frequency data
 	freqDataString="";
 	for (var ii=0; ii<tmp_data[0].length; ii+=1){
 		for (var jj=0; jj<tmp_data.length; jj+=1){
@@ -354,10 +354,10 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 		});
 	d3.select("#downloadfreq")
 		.on("click", function (){
-			gt = parse_gt_string(document.getElementById("gtspec").value);			
+			gt = parse_gt_string(document.getElementById("gtspec").value);
 			make_gt_chart(gt);
 			var blob = new Blob([freqDataString], {type: "text/plain;charset=utf-8"});
-			saveAs(blob,'frequencies.tsv');			
+			saveAs(blob,'frequencies.tsv');
 		});
 	make_gt_chart(parse_gt_string(document.getElementById("gtspec").value));
 });

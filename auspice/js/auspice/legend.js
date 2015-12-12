@@ -40,7 +40,7 @@ function makeLegend(){
 		}
 		if (colorBy == "fitness") {
 			return "Relative fitness";
-		}		
+		}
 	});
 
 	// construct a dictionary that maps a legend entry to the preceding interval
@@ -104,16 +104,16 @@ function makeLegend(){
             });
 	    });
 
-	tmp_leg.append('text')
-	.attr('x', legendRectSize + legendSpacing + 5)
-	.attr('y', legendRectSize - legendSpacing)
-	.text(function(d) {
-		var label = d.toString().replace(/([a-z])([A-Z])/g, '$1 $2').replace(/,/g, ', ');
-//		if (colorBy == "dfreq") {
-//			label += "\u00D7";
-//		}
-		return label;
-	})
+    tmp_leg.append('text')
+    .attr('x', legendRectSize + legendSpacing + 5)
+    .attr('y', legendRectSize - legendSpacing)
+    .text(function(d) {
+        var label = d.toString().replace(/([a-z])([A-Z])/g, '$1 $2').replace(/,/g, ', ');
+        if (colorBy == "dfreq") {
+            label += "\u00D7";
+        }
+        return label;
+    })
    .on('mouseover', function(leg){
     	treeplot.selectAll(".tip")
             .filter(function (d){return legend_match(leg, d);})

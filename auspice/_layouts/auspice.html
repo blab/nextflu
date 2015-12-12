@@ -33,7 +33,7 @@ categories:
 								<select id="coloring" class="form-control">
 								{% for color_option in site.data.color_options %}
 									{% if page.coloring contains color_option[0] %}
-									{% if color_option[0] == "fitness" %}
+									{% if color_option[0] == "cHI" %}
 									<option value={{color_option[0] }} selected="selected">{{ color_option[1] }}</option>
 									{% else %}
 									<option value={{color_option[0] }}>{{ color_option[1] }}</option>

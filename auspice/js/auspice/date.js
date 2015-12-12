@@ -161,6 +161,7 @@ function dragend() {
 	adjust_coloring_by_date();
 	console.log("updating frequencies");
 	adjust_freq_by_date();
+	calcDfreq(rootNode, freq_ii);
 
 	if (colorBy == "genotype") {
 		colorByGenotype();
@@ -196,7 +197,7 @@ function dragend() {
 function date_init(){
 	nodes.forEach(function (d) {d.dateval = new Date(d.date)});
 	var dateValues = nodes.filter(function(d) {
-		return typeof d.date === 'string';
+		return (typeof d.date === 'string')&(typeof vaccineChoice[d.strain]=="undefined");
 		}).map(function(d) {
 		return new Date(d.date);
 	});
