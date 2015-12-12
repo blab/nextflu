@@ -34,7 +34,7 @@ for fname in flist:
              label= flu+r', $\mu='+str(np.round(R[0],2))+'\pm'+str(np.round(R[-1],2))+'$')
 
 ax.tick_params(axis='both', labelsize=fs)
-plt.ylabel(r'cumulative antigenic change $[\log_2]$', fontsize=fs)
+plt.ylabel(r'cumulative antigenic change $\mathrm{cHI}$', fontsize=fs)
 plt.xlabel(r'year', fontsize=fs)
 plt.legend(loc=2, fontsize = fs-2)
 plt.tight_layout()
@@ -81,12 +81,12 @@ for ai,ax in enumerate([plt.subplot(121), plt.subplot(122)]):
     ax.set_xlim([1995 if ai else 1985,2017])
     ax.set_ylim([-0.5, 4 if ai else 25])
     ax.set_yticks(range(4) if ai else [0,5,10,15, 20])
-    if ai==0: ax.set_ylabel(r'cumulative antigenic change $[\log_2]$', fontsize=fs)
+    if ai==0: ax.set_ylabel(r'cumulative antigenic change $\mathrm{cHI}$', fontsize=fs)
     ax.set_xlabel(r'year', fontsize=fs)
     ax.legend(loc=2, fontsize = fs-2)
 plt.tight_layout()
-add_panel_label(plt.subplot(121), "A", x_offset=-0.12)
-add_panel_label(plt.subplot(122), "B", x_offset=-0.12)
+add_panel_label(plt.subplot(121), "A", x_offset=-0.08)
+add_panel_label(plt.subplot(122), "B", x_offset=-0.08)
 
 for fmt in fmts: plt.savefig('cHI_path'+fmt)
 

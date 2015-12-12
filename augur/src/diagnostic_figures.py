@@ -329,14 +329,14 @@ def tree_additivity_symmetry(myflu, mtype='tree'):
              weight='bold', fontsize=fs, transform=plt.gca().transAxes)
     # multiple the difference by the +/- one to polarize all comparisons by date
     vals= [x[2]*x[-1] for x in reciprocal_measurements]
-    plt.hist(vals, alpha=0.7, label=r"raw", normed=True)
+    plt.hist(vals, alpha=0.7, label=r"$H_{a\beta}-H_{b\alpha}$", normed=True)
     print("raw reciprocal titers: ", str(np.round(np.mean(vals),3))+'+/-'+str(np.round(np.std(vals),3)))
     vals= [x[3]*x[-1] for x in reciprocal_measurements]
-    plt.hist(vals, alpha=0.7, label=r"$D_{ab}$", normed=True)
+    plt.hist(vals, alpha=0.7, label=r"sym. part", normed=True)
     print("symmetric component: ", str(np.round(np.mean(vals),3))+'+/-'+str(np.round(np.std(vals),3)))
     plt.xlabel('titer asymmetry', fontsize=fs)
     ax.tick_params(axis='both', labelsize=fs)
-    plt.legend(fontsize=fs)
+    plt.legend(fontsize=fs, handlelength=0.8)
     plt.tight_layout()
 
     ####  Analyze all cliques #######################################################
@@ -384,7 +384,7 @@ def tree_additivity_symmetry(myflu, mtype='tree'):
              label = 'quartet, mean='+str(np.round(np.mean(additivity_test['test']),2)))
     ax.tick_params(axis='both', labelsize=fs)
     plt.xlabel(r'$\Delta$ top two distance sums', fontsize = fs)
-    plt.legend(fontsize=fs)
+    plt.legend(fontsize=fs, handlelength=0.8)
     plt.tight_layout()
 
 ######################################
