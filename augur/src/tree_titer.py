@@ -992,6 +992,16 @@ def write_flat_HI_titers(flutype = 'H3N2', fname = None):
 	print "written",written,"records"
 	print "skipped",skipped,"records"
 
+def export_ref_strains(myflu):
+	strains = []
+	for r in myflu.ref_strains:
+		tmp = myflu.sequence_lookup[myflu.node_lookup[r].strain]
+		strains.append({'seq': str(tmp.seq), 'date': tmp.date, 'strain': tmp.strain, 'region': tmp.region, 'country':tmp.country})
+	from json import dump as jdump
+	with open('source-data/'+ myflu.virus_type+'_ref_strains.json', 'w') as ofile:
+		jdump(strains, ofile, indent=2)
+
+
 def main(tree, HI_fname='data/HI_titers.txt', training_fraction = 1.0, reg=5):
 	print "--- Fitting HI titers at " + time.strftime("%H:%M:%S") + " ---"
 	measurements, strains, sources = read_HI_titers(HI_fname)

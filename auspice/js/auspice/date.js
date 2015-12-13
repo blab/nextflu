@@ -197,7 +197,7 @@ function dragend() {
 function date_init(){
 	nodes.forEach(function (d) {d.dateval = new Date(d.date)});
 	var dateValues = nodes.filter(function(d) {
-		return (typeof d.date === 'string')&(typeof vaccineChoice[d.strain]=="undefined");
+		return (typeof d.date === 'string')&(typeof vaccineChoice[d.strain]=="undefined")&(typeof reference_viruses[d.strain]=="undefined");
 		}).map(function(d) {
 		return new Date(d.date);
 	});
