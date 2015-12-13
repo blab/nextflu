@@ -198,7 +198,7 @@ class BYam_process(process, BYam_filter, BYam_clean, BYam_refine, HI_tree):
 			self.subsample(viruses_per_month,
 				prioritize=forced_strains, all_priority=self.force_include_all,
 				region_specific = self.max_global)
-			self.add_older_vaccine_viruses(dt = 3)
+			self.add_older_vaccine_viruses(dt = 6)
 			self.dump()
 		else:
 			self.load()
@@ -229,12 +229,15 @@ class BYam_process(process, BYam_filter, BYam_clean, BYam_refine, HI_tree):
 			self.dump()
 		if 'HI' in steps:
 			print "--- Adding HI titers to the tree " + time.strftime("%H:%M:%S") + " ---"
-			self.determine_variable_positions()
-			self.map_HI(training_fraction=1.0, method = 'nnl1reg',
+			try:
+				self.determine_variable_positions()
+				self.map_HI(training_fraction=1.0, method = 'nnl1reg',
 					lam_HI=lam_HI, lam_avi=lam_avi, lam_pot=lam_pot, map_to_tree=True)
-			self.map_HI(training_fraction=1.0, method = 'nnl1reg', force_redo=True,
+				self.map_HI(training_fraction=1.0, method = 'nnl1reg', force_redo=True,
 					lam_HI=lam_HI, lam_avi=lam_avi, lam_pot=lam_pot, map_to_tree=False)
-			self.dump()
+				self.dump()
+			except:
+				print("HI modeling failed!")
 		if 'export' in steps:
 			self.add_titers()
 			self.temporal_regional_statistics()
