@@ -239,7 +239,7 @@ class flu_filter(virus_filter):
 		self.filter_geo(prune=False)
 		print len(self.viruses), "with geographic information"
 
-	def add_older_vaccine_viruses(self, dt = 3):
+	def add_older_vaccine_viruses(self, dt = 3, dtref = None):
 		'''
 		addes additional vaccine viruses prior to the time interval to provide phylogenetic context
 		'''
@@ -253,6 +253,8 @@ class flu_filter(virus_filter):
 				print("skipping ",v['strain'], v['date'], tmp_date, self.time_interval)
 		vaccine_strain_names = [v['strain'] for v in self.vaccine_strains]
 		try:
+			if dtref==None:
+				dtref=dt*0.5
 			from json import load as jload
 			with open('source-data/'+self.virus_type+'_ref_strains.json', 'r') as infile:
 				self.reference_viruses = jload(infile)
@@ -262,7 +264,7 @@ class flu_filter(virus_filter):
 				tmp_strain = v['strain']
 				print(tmp_strain)
 				if tmp_strain not in vaccine_strain_names:
-					if tmp_date<self.time_interval[0] and tmp_date>=self.time_interval[0]-dt:
+					if tmp_date<self.time_interval[0] and tmp_date>=self.time_interval[0]-dtref:
 						self.viruses.append(v)
 						print("adding ",v['strain'], v['date'], tmp_date, self.time_interval)
 					else:

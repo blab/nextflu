@@ -296,7 +296,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, H3N2_HI, H3N2_
 			self.subsample(viruses_per_month,
 				prioritize=forced_strains, all_priority=self.force_include_all,
 				region_specific = self.max_global)
-			self.add_older_vaccine_viruses(dt = 3)
+			self.add_older_vaccine_viruses(dt = 4)
 			self.dump()
 		else:
 			self.load()
