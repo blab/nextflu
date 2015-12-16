@@ -221,12 +221,21 @@ class BVic_process(process, BVic_filter, BVic_clean, BVic_refine, HI_tree):
 
 		if 'HIvalidate' in steps:
 			print "--- generating validation figures " + time.strftime("%H:%M:%S") + " ---"
+			from diagnostic_figures import tree_additivity_symmetry, fmts
+			for model in ['tree', 'mutation']:
+				try:
+					tree_additivity_symmetry(self, model)
+					for fmt in fmts: plt.savefig(self.htmlpath()+'HI_symmetry_'+model+fmt)
+				except:
+					print("Can't generate symmetry/additivity figures")
 			self.generate_validation_figures()
 
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine', 'frequencies','HI', 'export']+ ['HIvalidate']
 	from process import parser
+	import matplotlib.pyplot as plt
+	plt.ion()
 	params = parser.parse_args()
 
 	lt = time.localtime()

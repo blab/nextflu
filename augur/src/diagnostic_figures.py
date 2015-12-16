@@ -31,7 +31,7 @@ def get_slope(freq, pivots, threshold):
 ####################################
 def make_combined_accession_number_lists():
     for flu in ['H3N2', 'H1N1pdm', 'Vic', 'Yam']:
-        flist = glob.glob('../auspice/data/'+flu+'*accession_numbers.tsv')
+        flist = glob('../auspice/data/'+flu+'*accession_numbers.tsv')
         all_accessions=set()
         for fname in flist:
             with open(fname) as infile:
@@ -41,7 +41,7 @@ def make_combined_accession_number_lists():
             for strain, acc in all_accessions:
                 ofile.write(strain+'\t'+acc+'\n')
 
-def make_table_with_virus_parameter_count():
+def make_table_with_virus_parameter_count(fmt='tex'):
     numbers = {}
     fields = {
             'total number of viruses':  '# viruses',
@@ -55,6 +55,7 @@ def make_table_with_virus_parameter_count():
     for mtype in ['tree', 'mutation']:
         for flu in ['H3N2', 'H1N1pdm', 'Vic', 'Yam']:
             flist = glob.glob('../auspice/'+flu+'/*y')
+            print(flist)
             for dirname in flist:
                 res = dirname.split('/')[-1]
                 try:
@@ -66,15 +67,17 @@ def make_table_with_virus_parameter_count():
                 except:
                     print("cant open", (flu, res, mtype))
 
-        sep='& '
-        le = '\\\\ \n'
-#        sep='\t'
-#        le = '\n'
+        if fmt=='tex':
+            sep='& '
+            le = '\\\\ \n'
+        else:
+            sep='\t'
+            le = '\n'
         table_fields = ['# viruses', '# test virus','# ref viruses','# antisera','# HI titers','# genetic parameters', '# non-zero genetic parameters']
-        with open('supplementary_table.tsv', 'w') as ofile:
+        with open('supp_data/supplementary_table_parameter_count.'+fmt, 'w') as ofile:
             ofile.write(sep.join(table_fields)+le)
             for flu in ['H3N2', 'H1N1pdm', 'Vic', 'Yam']:
-                for res in ['3y', '6y', '12y', '20y']:
+                for res in ['3y', '7y', '6y', '12y', '20y']:
                     for mtype in ['tree', 'mutation']:
                         if (flu, res, mtype) in numbers:
                             vals = [numbers[(flu, res, mtype)][x] for x in table_fields]
@@ -83,7 +86,7 @@ def make_table_with_virus_parameter_count():
 ######################################
 #### make list of mutation effects across different periods
 ######################################
-def mutation_list(flu = 'H3N2', format='tsv', nconstraints=False):
+def mutation_list(flu = 'H3N2', fmt='tsv', nconstraints=False):
     '''
     make a table of all inferred effects from overlapping 10y intervals (exists only for H3N2)
     table can be output either as tsv or as Latex table. the argument nconstraints
@@ -117,7 +120,7 @@ def mutation_list(flu = 'H3N2', format='tsv', nconstraints=False):
     N = pd.DataFrame.from_items([(x[0][0],x[0][1]) for x in mutation_statistics]).transpose()
     D = pd.DataFrame.from_items([(x[1][0],x[1][1]) for x in mutation_statistics]).transpose()
 
-    if format=='tex':
+    if fmt=='tex':
         sep = ' & '
         le = '\\\\ \n'
     else:
@@ -125,21 +128,21 @@ def mutation_list(flu = 'H3N2', format='tsv', nconstraints=False):
         le = '\n'
     ndigits = 2
     # write inferred displacements to file, ordered by the maximal inferred effect
-    with open('HI_mutation_effects_all.tsv', 'w') as ofile:
+    with open('supp_data/HI_mutation_effects_all.'+fmt, 'w') as ofile:
         ofile.write("mutation\t"+sep.join(N.columns)+le)
         for r,c in izip(N.iterrows(), D.iterrows()):
             mut_name = r[0]
             if flu=='H3N2' and any([str(x) in mut_name for x in koel_pos]):
                 mut_name+="*"
             if nconstraints:
-                tmp = sep.join([r[0]]+map(str,[(round(x,ndigits),y) for x,y in izip(r[1], c[1])])).replace('nan','---')
+                tmp = sep.join([mut_name]+map(str,[(round(x,ndigits),y) for x,y in izip(r[1], c[1])])).replace('nan','---')
             else:
-                tmp = sep.join([r[0]]+map(str,[round(x,ndigits) for x,y in izip(r[1], c[1])])).replace('nan','---')
+                tmp = sep.join([mut_name]+map(str,[round(x,ndigits) for x,y in izip(r[1], c[1])])).replace('nan','---')
             print tmp
             ofile.write(tmp+le)
     return N, D
 
-def mutation_list_by_position(flu = 'H3N2', format='tsv', nconstraints=False):
+def mutation_list_by_position(flu = 'H3N2', fmt='tsv', nconstraints=False):
     '''
     make a list of all estimated antigenic displacements for each individual position
     for each of the 10 year intervals 1985-1995, 1990-2000 etc
@@ -167,7 +170,7 @@ def mutation_list_by_position(flu = 'H3N2', format='tsv', nconstraints=False):
                     mutation_effects[pos].append((interval, mut, float(val), int(count)))
 
     positions_by_length = sorted(mutation_effects.items(), key=lambda x:len(x[1]), reverse=True)
-    if format=='tex':
+    if fmt=='tex':
         sep = ' & '
         le = '\\\\ \n'
     else:
@@ -176,7 +179,7 @@ def mutation_list_by_position(flu = 'H3N2', format='tsv', nconstraints=False):
     ndigits = 2
     intervals.sort()
     # write all effects to file, ordered by position with decreasing number of substitutions
-    with open("effects_by_position.tsv", 'w') as ofile:
+    with open("supp_data/HI_effects_by_position."+fmt, 'w') as ofile:
         for pos, muts in positions_by_length:
             avg_all = np.mean([x[2] for x in muts])
             avg_alone = np.mean([x[2] for x in muts if len(x[1].split('/'))==1])
@@ -190,7 +193,10 @@ def mutation_list_by_position(flu = 'H3N2', format='tsv', nconstraints=False):
                     ofile.write(mut+sep)
                 for interval in intervals:
                     if (mut, interval) in tmp:
-                        ofile.write(str((tmp[(mut,interval)][2],tmp[(mut,interval)][3]))+sep)
+                        if nconstraints:
+                            ofile.write(str((tmp[(mut,interval)][2],tmp[(mut,interval)][3]))+sep)
+                        else:
+                            ofile.write(str(tmp[(mut,interval)][2])+sep)
                     else:
                         ofile.write('---'+sep)
                 ofile.write('\n')
