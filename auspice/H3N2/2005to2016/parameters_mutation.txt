@@ -1,0 +1,7 @@
+total number of viruses:	2786
+number of test viruses:	1644
+number of reference viruses:	55
+number of antisera:	155
+number of HI measurements:	14253
+number of genetic parameters:	127
+number of positive genetic parameters:	60

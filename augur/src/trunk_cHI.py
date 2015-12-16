@@ -38,7 +38,8 @@ plt.ylabel(r'cumulative antigenic change $\mathrm{cHI}$', fontsize=fs)
 plt.xlabel(r'year', fontsize=fs)
 plt.legend(loc=2, fontsize = fs-2)
 plt.tight_layout()
-plt.savefig('cHI_trunk.png')
+for fmt in fmts:
+    plt.savefig('cHI_trunk'+fmt)
 
 
 ############################################
