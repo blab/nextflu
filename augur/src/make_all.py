@@ -167,7 +167,7 @@ if __name__=="__main__":
 		params.lineages = ['H3N2', 'H1N1pdm', 'Vic', 'Yam']
 
 	if params.resolutions is None:
-		params.resolutions = ['3y', '6y', '12y']
+		params.resolutions = ['3y', '6y', '12y', '20y']
 
 	if "historical_predictions" in params.resolutions:
 		params.resolutions.remove("historical_predictions")
@@ -213,7 +213,7 @@ if __name__=="__main__":
 					n_viruses = 30
 					n_years = 6
 				if resolution == '20y':
-					n_viruses = 1
+					n_viruses = 4
 					n_years = 20
 				if resolution == '10y':
 					n_viruses = 10
