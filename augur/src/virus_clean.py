@@ -61,7 +61,7 @@ class virus_clean(object):
 
 	def times_from_outgroup(self):
 		outgroup_date = self.sequence_lookup[self.outgroup['strain']].num_date
-		return np.array([x.num_date-outgroup_date for x in self.viruses  if x.strain])
+		return np.array([x.num_date-outgroup_date for x in self.viruses if x.strain])
 
 	def distance_from_outgroup(self, start=0, stop=0):
 		from seq_util import hamming_distance

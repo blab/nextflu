@@ -245,12 +245,13 @@ class flu_filter(virus_filter):
 		'''
 		from date_util import numerical_date
 		for v in self.vaccine_strains:
-			tmp_date = numerical_date(v['date'])
-			if tmp_date<self.time_interval[0] and tmp_date>=self.time_interval[0]-dt:
-				self.viruses.append(v)
-				print("adding ",v['strain'], v['date'], tmp_date, self.time_interval)
-			else:
-				print("skipping ",v['strain'], v['date'], tmp_date, self.time_interval)
+			if v['strain'] not in [x['strain'] for x in self.viruses]:
+				tmp_date = numerical_date(v['date'])
+				if tmp_date<self.time_interval[0] and tmp_date>=self.time_interval[0]-dt:
+					self.viruses.append(v)
+					print("adding ",v['strain'], v['date'], tmp_date, self.time_interval)
+				else:
+					print("skipping ",v['strain'], v['date'], tmp_date, self.time_interval)
 		vaccine_strain_names = [v['strain'] for v in self.vaccine_strains]
 		try:
 			if dtref==None:
@@ -260,15 +261,16 @@ class flu_filter(virus_filter):
 				self.reference_viruses = jload(infile)
 			print(self.reference_viruses)
 			for v in self.reference_viruses:
-				tmp_date = numerical_date(v['date'])
-				tmp_strain = v['strain']
-				print(tmp_strain)
-				if tmp_strain not in vaccine_strain_names:
-					if tmp_date<self.time_interval[0] and tmp_date>=self.time_interval[0]-dtref:
-						self.viruses.append(v)
-						print("adding ",v['strain'], v['date'], tmp_date, self.time_interval)
-					else:
-						print("skipping ",v['strain'], v['date'], tmp_date, self.time_interval)
+				if v['strain'] not in [x['strain'] for x in self.viruses]:
+					tmp_date = numerical_date(v['date'])
+					tmp_strain = v['strain']
+					print(tmp_strain)
+					if tmp_strain not in vaccine_strain_names:
+						if tmp_date<self.time_interval[0] and tmp_date>=self.time_interval[0]-dtref:
+							self.viruses.append(v)
+							print("adding ",v['strain'], v['date'], tmp_date, self.time_interval)
+						else:
+							print("skipping ",v['strain'], v['date'], tmp_date, self.time_interval)
 		except:
 			print("can't find reference_viruses")
 
