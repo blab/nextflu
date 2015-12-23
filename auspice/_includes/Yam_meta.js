@@ -12,7 +12,9 @@ var restrictTo = {"region":"all"};
 
 var genome_annotation = {'SP':[[1.2,1.2,1.2], [12,20,57]],
                          'HA1':[[1,1,1], [57,460,57+1038]],
-                         'HA2':[[1.2,1.2,1.2], [57+1038,1200,1769]]}
+                         'HA2':[[1.2,1.2,1.2], [57+1038,1200,1769]]};
+var default_gene = 'HA1';
+
 var structure = "4M40.pdb";
 var reference_viruses = {
 "B/Florida/7/2004":'2004-04-01',
