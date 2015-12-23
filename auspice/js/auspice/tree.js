@@ -33,43 +33,41 @@ if ((typeof branch_labels != "undefined")&&(branch_labels)) {top_margin +=5;}
 
 function initDateColorDomain(intAttributes){
 	var numDateValues = tips.map(function(d) {return d.num_date;})
-	var minDate = d3.min(numDateValues.filter(function (d){return d!="undefined";}));
 	var maxDate = d3.max(numDateValues.filter(function (d){return d!="undefined";}));
-	if (typeof time_window == "undefined"){
-		time_window = maxDate-minDate;
-		console.log("defining time window as " + time_window);
+	var time_back = 1.0;
+	if (typeof time_window != "undefined"){
+		time_back = time_window;
 	}
-	if (time_window>1){
-		dateColorDomain = genericDomain.map(function (d){return Math.round(10*(maxDate - (1.0-d)*time_window))/10;});
+	if (typeof full_data_time_window != "undefined"){
+		time_back = full_data_time_window;
+	}
+	console.log("setting time_back to: " + time_back)
+	if (time_back>1){
+		dateColorDomain = genericDomain.map(function (d){return Math.round(10*(maxDate - (1.0-d)*time_back))/10;});
 	}else{
-		dateColorDomain = genericDomain.map(function (d){return Math.round(100*(maxDate - (1.0-d)*time_window))/100;});
+		dateColorDomain = genericDomain.map(function (d){return Math.round(100*(maxDate - (1.0-d)*time_back))/100;});
 	}
-	console.log('setting date domain '+dateColorDomain);
 	dateColorScale.domain(dateColorDomain);
-}
-
-function initHIColorDomain(){
-	var numHIValues = tips.filter(function(d) {return tipVisibility(d)=='visible';}).map(function(d) {return d.cHI;})
-	var minHI = d3.min(numHIValues.filter(function (d){return d!="undefined";}));
-	var maxHI = d3.max(numHIValues.filter(function (d){return d!="undefined";}));
-	var cHIColorDomain = genericDomain.map(function (d){return Math.round(10*(maxHI - (1.0-d)*(maxHI-minHI)))/10;});
-	console.log('setting cHI domain '+cHIColorDomain);
-	cHIColorScale.domain(cHIColorDomain);
 }
 
 function initColorDomain(attr, tmpCS){
 	//var vals = tips.filter(function(d) {return tipVisibility(d)=='visible';}).map(function(d) {return d[attr];});
 	var vals = tips.map(function(d) {return d[attr];});
-	var minval = d3.min(vals);
-	var maxval = d3.max(vals);
-	var rangeIndex = Math.min(10, maxval - minval + 1);
+	var minval = Math.floor(d3.min(vals));
+	var maxval = Math.ceil(d3.max(vals));
+	var minval = Math.floor(2*d3.min(vals))/2;
+	var maxval = Math.ceil(2*d3.max(vals))/2;
 	var domain = [];
-	if (maxval-minval<20)
-	{
-		for (var i=maxval - rangeIndex + 1; i<=maxval; i+=1){domain.push(i);}
-	}else{
-		for (var i=1.0*minval; i<=maxval; i+=(maxval-minval)/9.0){domain.push(Math.round(10*i)/10);}
+	if (maxval-minval < 5) {
+		for (var i=minval; i<=maxval; i+=0.5){ domain.push(i); }
+	} else if (maxval-minval < 10) {
+		for (var i=minval; i<=maxval; i+=1){ domain.push(i); }
+	} else if (maxval-minval < 20) {
+		for (var i=minval; i<=maxval; i+=2){ domain.push(i); }
+	} else {
+		for (var i=minval; i<=maxval; i+=3){ domain.push(i); }
 	}
+	var rangeIndex = domain.length
 	tmpCS.range(colors[rangeIndex]);
 	tmpCS.domain(domain);
 }
@@ -184,7 +182,7 @@ function tree_init(){
 			freq_ii = rootNode.pivots.length - 1;
 		}
 	}
-	calcNodeAges(LBItime_window);
+	calcNodeAges(time_window);
 	colorByTrait();
 	adjust_freq_by_date();
 	calcDfreq(rootNode, freq_ii);
@@ -221,7 +219,8 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	sera = getSera(tips);
 
 	initDateColorDomain();
-	initHIColorDomain();
+//	initHIColorDomain();
+	if (typeof rootNode['cHI'] != "undefined"){ initColorDomain('cHI', cHIColorScale);}
 	if (typeof rootNode['ep'] != "undefined"){ initColorDomain('ep', epitopeColorScale);}
 	if (typeof rootNode['ne'] != "undefined"){ initColorDomain('ne', nonepitopeColorScale);}
 	if (typeof rootNode['rb'] != "undefined"){ initColorDomain('rb', receptorBindingColorScale);}

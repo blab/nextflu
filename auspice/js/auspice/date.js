@@ -91,13 +91,13 @@ function dragged(d) {
 	globalDate = d.date;
 
 	calcNodeAges(time_window);
-	treeplot.selectAll(".link")
-		.style("stroke", function(d){return "#ccc";})
+//	treeplot.selectAll(".link")
+//		.style("stroke", function(d){return "#ccc";})
 
 	treeplot.selectAll(".tip")
-		.style("visibility", tipVisibility)
-		.style("fill", "#CCC")
-		.style("stroke", "#AAA");
+		.style("visibility", tipVisibility);
+//		.style("fill", "#CCC")
+//		.style("stroke", "#AAA");
 
 	treeplot.selectAll(".vaccine")
 		.style("visibility", function(d) {
@@ -146,9 +146,8 @@ function draggedMin(d) {
 
 function dragend() {
 	var num_date = globalDate/1000/3600/24/365.25+1970;
-
-	updateColorDomains(num_date);
-	initHIColorDomain();
+//	updateColorDomains(num_date);
+//	initHIColorDomain();
 	for (var ii=0; ii<rootNode.pivots.length-1; ii++){
 		if (rootNode.pivots[ii]<num_date && rootNode.pivots[ii+1]>=num_date){
 			freq_ii=Math.max(dfreq_dn,ii+1);

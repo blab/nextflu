@@ -3,17 +3,17 @@
 var colors = [
 	[],
 	["#8EBC66"],
-	["#5EA9A1", "#E0A23A"],
-	["#5CA7A4", "#A4BE56", "#E39B39"],
-	["#5AA5A7", "#8ABB6A", "#C3BA46", "#E69237"],
-	["#59A3AA", "#7CB879", "#AABD52", "#D4B13F", "#E68634"],
-	["#57A1AD", "#73B583", "#98BD5E", "#C0BA47", "#DEA73C", "#E67B32"],
-	["#559EB1", "#6DB28B", "#8CBB68", "#AFBD4F", "#CFB541", "#E39B39", "#E56E30"],
-	["#539CB4", "#68AF92", "#83BA71", "#A2BE57", "#C1BA47", "#DAAC3D", "#E68E36", "#E35F2D"],
-	["#519AB7", "#64AC99", "#7BB879", "#97BD5F", "#B5BD4C", "#CFB541", "#E0A13A", "#E67F33", "#E1512A"],
-	["#5097BA", "#60AA9E", "#75B681", "#8EBC66", "#AABD52", "#C4B945", "#D9AD3D", "#E59637", "#E67030", "#DF4327"],
-	["#4E95BD", "#5DA8A3", "#70B487", "#87BB6D", "#A0BE58", "#BABC4A", "#D0B440", "#E0A23A", "#E68634", "#E35F2D", "#DD3425"],
-	["#4D92BF", "#5AA5A8", "#6BB18D", "#80B974", "#98BD5E", "#B1BD4E", "#C8B944", "#DAAC3D", "#E59738", "#E67732", "#E14F2A", "#DB2522"]
+	["#529BB5", "#E4662E"],
+	["#519AB7", "#B0BD4E", "#E3612D"],
+	["#5199B8", "#8BBB6A", "#D3B240", "#E25B2C"],
+	["#5097BA", "#79B77D", "#B2BD4D", "#DFA43B", "#E2562B"],
+	["#4F96BB", "#6EB389", "#9ABE5C", "#C9B843", "#E59738", "#E1512A"],
+	["#4E95BD", "#68AF93", "#8BBB6A", "#B3BD4D", "#D6B03F", "#E68A35", "#E04C29"],
+	["#4D94BE", "#63AC9A", "#7FB975", "#A2BE57", "#C5B945", "#DEA73B", "#E67F33", "#DF4628"],
+	["#4D92BF", "#5FA9A0", "#77B67E", "#95BD61", "#B5BD4C", "#D1B340", "#E29D39", "#E67631", "#DF4127"],
+	["#4C90C0", "#5CA7A5", "#71B486", "#8BBB6A", "#A7BE54", "#C3BA46", "#D9AD3D", "#E69437", "#E56C2F", "#DE3C26"],
+	["#4B8FC1", "#59A4A9", "#6CB28D", "#82BA71", "#9CBE5B", "#B6BD4B", "#CEB541", "#DFA53B", "#E68A35", "#E4632E", "#DD3725"],
+	["#4B8DC2", "#57A1AD", "#68AF93", "#7CB879", "#93BC63", "#ABBD52", "#C2BA46", "#D6B03F", "#E29D39", "#E68033", "#E25A2C", "#DD3124"]
 ];
 var genotypeColors = ["#60AA9E", "#D9AD3D", "#5097BA", "#E67030", "#8EBC66", "#E59637", "#AABD52", "#DF4327", "#C4B945", "#75B681"];
 
@@ -37,7 +37,7 @@ var dfreqColorScale = d3.scale.linear()
 	.domain(dfreqColorDomain)
 	.range(colors[10]);
 
-var HIColorScale_valid = d3.scale.linear()
+var HIColorScale = d3.scale.linear()
 	.domain(HIColorDomain)
 	.range(colors[10]);
 
@@ -48,17 +48,6 @@ var cHIColorScale = d3.scale.linear()
 var dHIColorScale = d3.scale.linear().clamp([true])
 	.domain(genericDomain.map(function (d){return 1.5*d;}))
 	.range(colors[10]);
-//	.range(['blue', 'green', 'yellow' ,'orange', 'red','red']);
-
-var HIColorScale = function(c){
-	if (c!='NaN'){
-		return HIColorScale_valid(c);
-	}else{
-		return '#EEEEEE';
-	}
-}
-HIColorScale.domain = HIColorScale_valid.domain;
-HIColorScale.range = HIColorScale_valid.range;
 
 var regionColorScale = d3.scale.ordinal()
 	.domain(regions.map(function(d){return d[0];}))
