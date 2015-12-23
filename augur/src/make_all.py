@@ -167,7 +167,7 @@ if __name__=="__main__":
 		params.lineages = ['H3N2', 'H1N1pdm', 'Vic', 'Yam']
 
 	if params.resolutions is None:
-		params.resolutions = ['3y', '6y', '12y', '20y']
+		params.resolutions = ['3y', '6y', '12y']
 
 	if "historical_predictions" in params.resolutions:
 		params.resolutions.remove("historical_predictions")
