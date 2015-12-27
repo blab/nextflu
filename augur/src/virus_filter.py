@@ -120,10 +120,24 @@ class virus_filter(object):
 		if self.date_spec=='full':
 			self.viruses = filter(lambda v: re.match(self.date_format['reg'], v['date']) is not None, self.viruses)
 		elif self.date_spec=='year':
-			self.viruses = filter(lambda v: re.match(r'\d\d\d\d', v['date']) is not None, self.viruses)
+			good_viruses = []
 			for v in self.viruses:
-				if re.match(r'\d\d\d\d-\d\d-\d\d', v['date']) is None:
-					v['date'] = v['date'][:4]+'-'+format(np.random.randint(12)+1, '02d')+'-01'
+				try:
+					if re.match(self.date_format['reg'], v['date']) is not None:
+						good_viruses.append(v)
+				except:
+					if re.match(r'\d\d\d\d', v['date']) is not None:
+						good_viruses.append(v)
+					else:
+						print v["date"]
+#			print(len(self.viruses))
+#			print([v['date'] for v in self.viruses])
+#			self.viruses = filter(lambda v: re.match(r'\d\d\d\d', v['date']) is not None, self.viruses)
+#			print(len(self.viruses))
+#			for v in self.viruses:
+#				if re.match(r'\d\d\d\d-\d\d-\d\d', v['date']) is None:
+#					v['date'] = v['date'][:4]+'-'+format(np.random.randint(12)+1, '02d')+'-01'
+			self.viruses=good_viruses
 
 	def subsample(self, viruses_per_month, prioritize = None, all_priority=False, region_specific = True):
 		'''
@@ -176,9 +190,12 @@ class virus_filter(object):
 			try:
 				vdate = datetime.datetime.strptime(v['date'], self.date_format['fields']).date()
 			except:
-				print "incomplete date!", v['strain'], v['date'], "adjusting to July 1st"
-				v['date']+='-07-01'
-				vdate = datetime.datetime.strptime(v['date'], '%Y-%m-%d').date()
+				try:
+					vdate = datetime.datetime.strptime(v['date'], '%Y-%m-%d').date()
+				except:
+					print "incomplete date!", v['strain'], v['date'], "adjusting to July 1st"
+					v['date']+='-07-01'
+					vdate = datetime.datetime.strptime(v['date'], '%Y-%m-%d').date()
 			virus_tuples[(vdate.year, vdate.month, v['region'])].append(v)
 
 		return virus_tuples
@@ -300,15 +317,15 @@ class flu_filter(virus_filter):
 			if "country" not in v:
 				v['country'] = 'Unknown'
 				try:
-					label = re.match(r'^[AB]/([^/]+)/', v['strain']).group(1).lower()						# check first for whole geo match
+					label = re.match(r'^[AB]/([^/]+)/', v['strain']).group(2).lower()						# check first for whole geo match
 					if label in label_to_country:
 						v['country'] = label_to_country[label]
 					else:
-						label = re.match(r'^[AB]/([^\-^\/]+)[\-\/]', v['strain']).group(1).lower()			# check for partial geo match
+						label = re.match(r'^[AB]/([^\-^\/]+)[\-\/]', v['strain']).group(2).lower()			# check for partial geo match
 					if label in label_to_country:
 						v['country'] = label_to_country[label]
 					else:
-						label = re.match(r'^[AB]/([A-Z][a-z]+)[A-Z0-9]', v['strain']).group(1).lower()			# check for partial geo match
+						label = re.match(r'^[AB]/([A-Z][a-z]+)[A-Z0-9]', v['strain']).group(2).lower()			# check for partial geo match
 					if label in label_to_country:
 						v['country'] = label_to_country[label]
 					if v['country'] == 'Unknown':

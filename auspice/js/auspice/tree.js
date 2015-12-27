@@ -65,7 +65,7 @@ function initColorDomain(attr, tmpCS){
 	} else if (maxval-minval < 20) {
 		for (var i=minval; i<=maxval; i+=2){ domain.push(i); }
 	} else {
-		for (var i=minval; i<=maxval; i+=3){ domain.push(i); }
+		for (var i=minval; i<=maxval; i+=Math.ceil((maxval-minval)/10)){ domain.push(i); }
 	}
 	var rangeIndex = domain.length
 	tmpCS.range(colors[rangeIndex]);

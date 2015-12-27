@@ -427,14 +427,18 @@ class process(virus_frequencies):
 		self.region_totals
 		'''
 		from collections import defaultdict, Counter
+		from datetime import datetime
 		self.date_region_count = defaultdict(lambda:defaultdict(int))
 		regions = set()
 		# count viruses in every month and every region
 		for v in self.viruses:
 			if v.strain != self.outgroup['strain']:
-				year, month, day = map(int, v.date.split('-'))
-				self.date_region_count[(year, month)][v.region]+=1
-				regions.add(v.region)
+				try:
+					vdate = datetime.strptime(v.date, self.date_format['fields']).date()
+					self.date_region_count[(vdate.year, vdate.month)][v.region]+=1
+					regions.add(v.region)
+				except:
+					print("failed to parse",v.strain, v.date)
 		# add a sorted list of all regions to self and calculate region totals
 		self.regions = sorted(regions)
 		self.region_totals = {reg:sum(val[reg] for val in self.date_region_count.values()) for reg in self.regions}

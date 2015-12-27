@@ -1,0 +1,110 @@
+LOCUS       CY112249                1735 bp    DNA              VRL 03-APR-2012
+DEFINITION  Influenza A virus (A/Hong Kong/1/1968(H3N2)) hemagglutinin (HA)
+            gene, complete cds.
+ACCESSION   CY112249
+VERSION     CY112249.1  GI:383213134
+KEYWORDS    STANDARD_DRAFT; VIRUS_AMBIGUITY.
+SOURCE      Influenza A virus (A/Hong Kong/1/1968(H3N2))
+  ORGANISM  Influenza A virus (A/Hong Kong/1/1968(H3N2))
+            Viruses; ssRNA viruses; ssRNA negative-strand viruses;
+            Orthomyxoviridae; Influenzavirus A.
+REFERENCE   1  (bases 1 to 1735)
+  AUTHORS   Wentworth,D.E., Dugan,V., Halpin,R., Lin,X., Bera,J., Ghedin,E.,
+            Fedorova,N., Overton,L., Tsitrin,T., Stockwell,T., Amedeo,P.,
+            Bishop,B., Chen,H., Edworthy,P., Gupta,N., Katzel,D., Li,K.,
+            Schobel,S., Shrivastava,S., Thovarai,V., Wang,S., Westgeest,K.B.,
+            van Beek,R., Bestebroer,T.M., de Jong,J.C., Rimmelzwaan,G.F.,
+            Osterhaus,A.D.M.E., Fouchier,R.A.M., Bao,Y., Sanders,R.,
+            Dernovoy,D., Kiryutin,B., Lipman,D.J. and Tatusova,T.
+  TITLE     The NIAID Influenza Genome Sequencing Project
+  JOURNAL   Unpublished
+REFERENCE   2  (bases 1 to 1735)
+  CONSRTM   The NIAID Influenza Genome Sequencing Consortium
+  TITLE     Direct Submission
+  JOURNAL   Submitted (03-APR-2012) on behalf of JCVI/Erasmus Medical
+            College/NCBI, National Center for Biotechnology Information, NIH,
+            Bethesda, MD 20894, USA
+COMMENT     This influenza isolate was sequenced as part of the NIAID Genome
+            Sequencing Center Influenza Genome Sequencing Project at the J.
+            Craig Venter Institute.  This sample is being submitted as a draft
+            sequence because after two rounds of targeted finishing some or all
+            segments do not meet either NCBI or J. Craig Venter Institute
+            standards of completeness due to low coverage, low quality,
+            ambiguities, frameshifts, gaps, or other problems.
+            This work was supported by the National Institute of Allergy and
+            Infectious Diseases (NIAID), Genome Sequencing Centers for
+            Infectious Diseases (GSCID) program.
+FEATURES             Location/Qualifiers
+     source          1..1735
+                     /mol_type="viral cRNA"
+                     /lab_host="xtMK3 MDCK1 passage(s)"
+                     /db_xref="taxon:506350"
+                     /collection_date="1968"
+                     /segment="4"
+                     /serotype="H3N2"
+                     /strain="A/Hong Kong/1/1968"
+                     /host="human"
+                     /country="Hong Kong"
+                     /bio_material="CEIRS#CIP047HK168#"
+                     /organism="Influenza A virus (A/Hong Kong/1/1968(H3N2))"
+     misc_feature    1..1735
+                     /db_xref="IRD:NIGSP_CEIRS_CIP047_RFH3_00003.HA"
+     gene            15..1715
+                     /gene="HA"
+     CDS             15..1715
+                     /function="receptor binding and fusion protein"
+                     /product="hemagglutinin"
+                     /codon_start=1
+                     /db_xref="GI:383213135"
+                     /translation="MKTIIALSYIFCLALGQDLPGNDNSTATLCLGHHAVPNGTLVKTI
+                     TDDQIEVTNATELVQSSSTGKICNNPHRILDGIDCTLIDALLGDPHCDVFQNETWDLFV
+                     ERSKAFSNCYPYDVPDYASLRSLVASSGTLEFITEGFTWTGVTQNGGSNACKRGPGXGF
+                     FSRLNWLTKSGSTYPVLNVTMPNNDNFDKLYIWGVHHPSTNQEQTSLYVQASGRVTVST
+                     RRSQQTIIPNIGSRPWVRGMSSRISIYWTIVKPGDVLVINSNGNLIAPRGYFKMRTGKS
+                     SIMRSDAPIDTCISECITPNGSIPNDKPFQNVNKITYGACPKYVKQNTLKLATGMRNVP
+                     EKQTRGLFGAIAGFIENGWEGMIDGWYGFRHQNSEGTGQAADLKSTQAAIDQINGKLNR
+                     VIEKTNEKFHQIEKEFSEVEGRIQDLEKYVEDTKIDLWSYNAELLVALENQHTIDLTDS
+                     EMNKLFEKTRRQLRENAEDMGNGCFKIYHKCDNACIESIRNGTYDHDVYRDEALNNRFQ
+                     IKGVELKSGYKDWILWISFAISCFLLCVVLLGFIMWACQRGNIRCNICI"
+                     /gene="HA"
+                     /protein_id="AFG71887.1"
+     CDS             15..62
+                     /product="Signal peptide"
+                     /gene="SigPep"
+     CDS             63..1049
+                     /product="HA1 protein"
+                     /gene="HA1"
+     CDS             1050..1712
+                     /product="HA2 protein"
+                     /gene="HA2"
+ORIGIN
+        1 taattctatt aatcatgaag accatcattg ctttgagcta cattttctgt ctggctctcg
+       61 gccaagacct tccaggaaat gacaacagca cagcaacgct gtgcctggga catcatgcgg
+      121 tgccaaacgg aacactagtg aaaacaatca cagatgatca gattgaagtg actaatgcta
+      181 ctgagctagt tcagagctcc tcaacgggga aaatatgcaa caatcctcat cgaatccttg
+      241 atggaataga ctgcacactg atagatgctc tattggggga ccctcattgt gatgtttttc
+      301 aaaatgagac atgggacctt ttcgttgaac gcagcaaagc tttcagcaac tgttaccctt
+      361 atgatgtgcc agattatgcc tcccttaggt cactagttgc ctcgtcaggc actctggagt
+      421 ttatcactga gggtttcact tggactgggg tcactcagaa tgggggaagc aatgcttgca
+      481 aaaggggacc tggtakcggt tttttcagta gactgaactg gttgaccaaa tcaggaagca
+      541 catatccagt gctgaacgtg actatgccaa acaatgacaa ttttgacaaa ctatacattt
+      601 ggggggttca ccacccgagc acgaaccaag aacaaaccag cctgtatgtt caagcatcag
+      661 ggagagtcac agtctctacc aggagaagcc agcaaactat aatcccgaat atcgggtcca
+      721 gaccctgggt aaggggtatg tctagtagaa taagcatcta ttggacaata gttaagccgg
+      781 gagacgtact ggtaattaat agtaatggga acctaatcgc tcctcggggt tatttcaaaa
+      841 tgcgcactgg gaaaagctca ataatgaggt cagatgcacc tattgatacc tgtatttctg
+      901 aatgcatcac tccaaatgga agcattccca atgacaagcc ctttcaaaac gtaaacaaga
+      961 tcacatatgg agcatgcccc aagtatgtta agcaaaacac cctgaagttg gcaacaggga
+     1021 tgcggaatgt accagagaaa caaactagag gcctattcgg cgcaatagca ggtttcatag
+     1081 aaaatggttg ggagggaatg atagacggtt ggtacggttt caggcatcaa aattctgagg
+     1141 gcacaggaca agcagcagat cttaaaagca ctcaagcagc catcgaccaa atcaatggga
+     1201 aattgaacag ggtaatcgag aagacgaacg agaaattcca tcaaatcgaa aaggaattct
+     1261 cagaagtaga agggagaatt caggacctcg agaaatacgt tgaagacact aaaatagatc
+     1321 tctggtctta caatgcggag cttcttgtcg ctctggagaa tcaacataca attgacctga
+     1381 ctgactcgga aatgaacaag ctgtttgaaa aaacaaggag gcaactgagg gaaaatgctg
+     1441 aagacatggg caatggttgc ttcaaaatat accacaaatg tgacaacgct tgcatagagt
+     1501 caatcagaaa tgggacttat gaccatgatg tatacagaga cgaagcatta aacaaccggt
+     1561 ttcagatcaa aggtgttgaa ctgaagtctg gatacaaaga ctggatcctg tggatttcct
+     1621 ttgccatatc atgctttttg ctttgtgttg ttttgctggg gttcatcatg tgggcctgcc
+     1681 agagaggcaa cattaggtgc aacatttgca tttgagtgta ttagtaatta aaaac
+//
