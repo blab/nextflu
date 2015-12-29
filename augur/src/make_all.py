@@ -143,7 +143,7 @@ def ammend_fasta(fname, lineage, existing_strains, threshold = 10, directory = '
 
 if __name__=="__main__":
 	parser = argparse.ArgumentParser(description = "ammend existing files with downloaded viruses, rerun")
-	parser.add_argument('--annotate', action = "store_true", default = False, help = "annotate, but don't process")
+	parser.add_argument('--annotate', action = "store_true", default = False, help = "add new sequences to lineage-specific FASTAs")
 	parser.add_argument('--infile', type = str, default = "gisaid_epiflu_sequence.fasta")
 	parser.add_argument('--bin', type = str, default = "python")
 	parser.add_argument('--html', action="store_true", default=False, help ="regenerate HTML")
@@ -186,8 +186,7 @@ if __name__=="__main__":
 		print 'Parsing new sequences for lineage',lineage
 		if params.all:
 			params.threshold = 0
-		if params.annotate:
-			run = ammend_fasta(params.infile, lineage, existing_strains, threshold = params.threshold, directory = 'data/')
+		run = ammend_fasta(params.infile, lineage, existing_strains, threshold = params.threshold, directory = 'data/')
 		if True:
 			for resolution in params.resolutions:
 				print '\n------------------------------\n'

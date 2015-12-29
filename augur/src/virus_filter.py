@@ -259,7 +259,6 @@ class flu_filter(virus_filter):
 			from json import load as jload
 			with open('source-data/'+self.virus_type+'_ref_strains.json', 'r') as infile:
 				self.reference_viruses = jload(infile)
-			print(self.reference_viruses)
 			for v in self.reference_viruses:
 				if v['strain'] not in [x['strain'] for x in self.viruses]:
 					tmp_date = numerical_date(v['date'])
