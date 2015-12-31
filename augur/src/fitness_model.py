@@ -73,9 +73,9 @@ class fitness_model(object):
 		if isinstance(predictor_input, dict):
 			self.model_params = np.array([predictor_input[k][0] for k in predictors])
 			
-		self.global_std = 0*np.ones(len(self.predictors))
+		self.global_sds = 0*np.ones(len(self.predictors))
 		if isinstance(predictor_input, dict):
-			self.global_std = np.array([predictor_input[k][1] for k in predictors])
+			self.global_sds = np.array([predictor_input[k][1] for k in predictors])
 
 	def prep_nodes(self):
 		self.nodes = [node for node in self.tree.postorder_node_iter()]
@@ -154,7 +154,7 @@ class fitness_model(object):
 
 	def select_nodes_in_season(self, timepoint):
 		# used by fitness_predictors:calc_LBI
-		# TODO: fix me
+		# TODO: fix me for continous time model
 		cutoff = 0.01
 		for node in self.nodes:
 			#if season in node.season_tips and len(node.season_tips[season])>0:		
@@ -164,7 +164,7 @@ class fitness_model(object):
 				node.alive=False
 
 	def calc_time_censored_tree_frequencies(self):
-		print("fitting clade frequencies for seasons")
+		print("fitting clade frequencies for timepoints")
 		region = "global_fit"
 		freq_cutoff = 25.0
 		total_pivots = 12
@@ -202,7 +202,7 @@ class fitness_model(object):
 		for node in self.nodes:
 			node.predictors = {}
 		for time in self.initial_times:
-			if self.verbose: print "calculating predictors for time ", time
+			if self.verbose: print "calculating predictors for time", time
 			self.select_nodes_in_season(time)
 			self.calc_predictors()
 			for node in self.nodes:
@@ -215,46 +215,40 @@ class fitness_model(object):
 			self.predictor_arrays[time]=np.array(tmp_preds)
 
 	def standardize_predictors(self):
-		self.initial_means = []
-		self.initial_sds = []
-		if self.verbose: print "standardize predictors for season"
+		self.predictor_means = {}
+		self.predictor_sds = {}
+		if self.verbose: print "standardizing predictors"
 		for time in self.initial_times:
-			self.season_means.append(self.predictor_arrays[time][self.tree.seed_node.season_tips[time],:].mean(axis=0))
-			self.season_std.append(self.predictor_arrays[time][self.tree.seed_node.season_tips[time],:].std(axis=0))
+			values = self.predictor_arrays[time]
+			weights = self.initial_freq_arrays[time]
+			means = np.average(values, weights=weights, axis=0)
+			variances = np.average((values-means)**2, weights=weights, axis=0)
+			sds = np.sqrt(variances)
+			self.predictor_means[time] = means
+			self.predictor_sds[time] = sds
 
 		if self.estimate_coefficients:
-			self.global_std = np.mean(self.season_std, axis=0)
+			self.global_sds = np.mean(self.predictor_sds.values(), axis=0)
 
-		for s, m in izip(self.seasons, self.season_means):
-			# keep this for internal nodes
-			for node in self.tree.postorder_node_iter():
-				if node.predictors[s] is not None:
-					node.predictors[s] = (node.predictors[s]-m)/self.global_std
-
-			self.predictor_arrays[s]-=m
-			self.predictor_arrays[s]/=self.global_std
+		for time in self.initial_times:
+			for node in self.nodes:
+				if node.predictors[time] is not None:
+					node.predictors[time] = (node.predictors[time]-self.predictor_means[time]) / self.global_sds
+			self.predictor_arrays[time] -= self.predictor_means[time]
+			self.predictor_arrays[time] /= self.global_sds		
 
 
 	def select_clades_for_fitting(self):
-		# short cut to total number of tips per seaons
-		total_counts = {s:len(strain_list) for s, strain_list in self.tree.seed_node.season_tips.iteritems()}
-		# prune seasons where few observations were made, only consecutive pairs
-		# with sufficient tip count are retained
-		self.fit_test_season_pairs = [(s,t) for s,t in izip(self.seasons[:-2], self.seasons[1:-1]) 
-							if total_counts[s]>min_tips and total_counts[t]>min_tips]
-		
-		# for each pair of seasons with sufficient tip counts, 
-		# select clades in a certain frequency window
-		# keep track of these season / clade combinations in the dict clades_for_season
-		self.clades_for_season = {}
-		for s,t in self.fit_test_season_pairs:
-			self.clades_for_season[(s,t)] = []
-			for node in self.tree.postorder_node_iter():
-				if  node.season_frequencies[s]>=min_freq and \
-					node.season_frequencies[s]<max_freq and\
-					node.season_frequencies[s]<node.parent_node.season_frequencies[s]:
-					#node.aa_muts['HA1']!='':
-					self.clades_for_season[(s,t)].append(node)
+		# for each initial time point, select clades that are within the specified frequency window
+		# keep track in the dict initial_clades that maps timepoint to clade list
+		self.initial_clades = {}
+		for time in self.initial_times:
+			self.initial_clades[time] = []
+			for node in self.nodes:
+				if  node.initial_freqs[time] >= min_freq and \
+					node.initial_freqs[time] <= max_freq and \
+					node.initial_freqs[time] < node.parent_node.initial_freqs[time]:
+					self.initial_clades[time].append(node)
 
 
 	def clade_fit(self, params):
@@ -324,6 +318,7 @@ class fitness_model(object):
 			print "final parameters:", self.model_params, '\n'		
 
 	def prep_af(self):
+		# TODO: fix me for continous time model
 		if not hasattr(self,'variable_nuc'):
 			self.determine_variable_positions()
 		self.seqs = {}
@@ -346,7 +341,7 @@ class fitness_model(object):
 			print "final parameters:", self.model_params, '\n'		
 
 
-	def learn_parameters(self, niter = 10, fit_func = "af"):
+	def learn_parameters(self, niter = 10, fit_func = "clade"):
 		if fit_func=='clade':
 			minimize_error=self.minimize_clade_error
 			fit_func=self.clade_fit
@@ -409,10 +404,10 @@ class fitness_model(object):
 		self.calc_tip_counts()
 		self.calc_node_frequencies()
 		self.calc_all_predictors(estimate_frequencies = estimate_frequencies)
-		raise ValueError('End of redo')
 		self.standardize_predictors()
 		self.select_clades_for_fitting()
-		self.prep_af()
+#		self.prep_af()
+		raise ValueError('End of redo')		
 		if self.estimate_coefficients:
 			self.learn_parameters(niter = niter, fit_func = "clade")
 		self.assign_fitness(self.seasons[-1])
