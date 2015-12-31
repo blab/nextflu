@@ -380,7 +380,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, H3N2_HI, H3N2_
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine',
-				 'frequencies','HI', 'export'] + ['HIvalidate']
+				 'frequencies','HI', 'fitness', 'export'] + ['HIvalidate']
 
 	from process import parser
 	import matplotlib.pyplot as plt
