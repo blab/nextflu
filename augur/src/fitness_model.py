@@ -45,8 +45,6 @@ class fitness_model(object):
 		self.timepoint_step_size = 0.5		# amount of time between timepoints chosen for fitting
 		self.delta_time = 1.0 				# amount of time projected forward to do fitting		
 		self.timepoints = np.append(np.arange(self.time_interval[0], self.time_interval[1]-self.delta_time+0.0001, self.timepoint_step_size), self.time_interval[1])
-		if not self.estimate_coefficients:
-			self.timepoints = [self.time_interval[1]]
 			
 		self.predictors = []
 		for p in predictors:
@@ -89,9 +87,9 @@ class fitness_model(object):
 			node.timepoint_freqs = defaultdict(float)
 			node.delta_freqs = defaultdict(float)			
 			for time in self.timepoints:
-				node.timepoint_freqs[time] = interpolation(time)
+				node.timepoint_freqs[time] = np.asscalar(interpolation(time))
 			for time in self.timepoints[:-1]:
-				node.delta_freqs[time] = interpolation(time + self.delta_time)				
+				node.delta_freqs[time] = np.asscalar(interpolation(time + self.delta_time))
 		# freq_arrays list *all* tips for each initial timepoint
 		self.freq_arrays={}
 		for time in self.timepoints:
@@ -213,7 +211,7 @@ class fitness_model(object):
 		for time in self.timepoints[:-1]:
 
 			# normalization factor for predicted tip frequencies
-			total_tip_freq = np.sum(self.projection(params, self.predictor_arrays[time], self.freq_arrays[time], self.delta_time))
+			total_pred_freq = np.sum(self.projection(params, self.predictor_arrays[time], self.freq_arrays[time], self.delta_time))
 
 			# project clades forward according to strain makeup
 			clade_errors = []
@@ -223,7 +221,7 @@ class fitness_model(object):
 				obs_final_freq = clade.delta_freqs[time]
 				pred = self.predictor_arrays[time][clade.tips]
 				freqs = self.freq_arrays[time][clade.tips]
-				pred_final_freq = np.sum(self.projection(params, pred, freqs, self.delta_time)) / total_tip_freq
+				pred_final_freq = np.sum(self.projection(params, pred, freqs, self.delta_time)) / total_pred_freq
 				tmp_pred_vs_true.append((initial_freq, obs_final_freq, pred_final_freq))
 				clade_errors.append(np.absolute(pred_final_freq - obs_final_freq))
 			timepoint_errors.append(np.mean(clade_errors))
@@ -411,6 +409,39 @@ class fitness_model(object):
 		axs[3].set_ylabel('predicted / observed')
 		axs[3].set_xlabel('initial')
 		axs[3].set_yscale('log')
+
+	def validate_trajectories(self):
+		'''
+		Project clade trajectories based on fitted fitness model and compare to observed trajectories
+		'''
+		self.trajectory_data = []
+		series = 0
+		for time in self.timepoints[:-1]:
+			all_pred = self.predictor_arrays[time]
+			all_freqs = self.freq_arrays[time]
+			for clade in self.fit_clades[time]:
+				initial_freq = clade.timepoint_freqs[time]
+				pred = all_pred[clade.tips]
+				freqs = all_freqs[clade.tips]
+				interpolation = interp1d(self.rootnode.pivots, clade.freq['global'], kind='linear', bounds_error=False)
+				for delta in np.arange(0, 1.1, 0.1):
+					total_pred_freq = np.sum(self.projection(self.model_params, all_pred, all_freqs, delta))
+					pred_freq = np.sum(self.projection(self.model_params, pred, freqs, delta)) / total_pred_freq
+					obs_freq = np.asscalar(interpolation(time+delta))
+					self.trajectory_data.append([series, str(clade), time, time+delta, obs_freq, pred_freq])
+				series += 1
+
+		import pandas as pd
+		df = pd.DataFrame(self.trajectory_data, columns=['series', 'clade', 'initial_time', 'time', 'obs', 'pred'])
+
+		import bokeh.charts as bk
+		bk.defaults.height = 250
+		bk.output_file("lines.html", title="line plot example")
+		lines = []
+		for time in self.timepoints[:-1]:
+			line = bk.Line(df[df.initial_time == time], x='time', y=['obs', 'pred'], dash=['obs', 'pred'], color='clade', xlabel='Date', ylabel='Frequency', tools=False)
+			lines.append(line)
+		bk.show(bk.vplot(*lines))
 
 def test(params):
 	from io_util import read_json
