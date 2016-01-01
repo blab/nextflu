@@ -40,18 +40,14 @@ class fitness_model(object):
 
 		self.seasons = [ (date(year=y, month = 10, day = 1), date(year = y+1, month = 4, day=1)) 
 						for y in xrange(int(self.time_interval[0])+1, int(self.time_interval[1]))]
-						
-		self.initial_times = [2013.0, 2014.0]
-		self.final_times = [2014.0, 2015.0]
-		
-		final_date = calendar_date(self.time_interval[1])
-		final_interval = (date.fromordinal(final_date.toordinal()-180), final_date)
-		
-		if self.estimate_coefficients:
-			self.seasons.append(final_interval)
-		else:
-			self.seasons = [final_interval]
 
+		# final timepoint is end of interval and is only projected forward, not tested
+		self.timepoint_step_size = 0.5		# amount of time between timepoints chosen for fitting
+		self.delta_time = 1.0 				# amount of time projected forward to do fitting		
+		self.timepoints = np.append(np.arange(self.time_interval[0], self.time_interval[1]-self.delta_time+0.0001, self.timepoint_step_size), self.time_interval[1])
+		if not self.estimate_coefficients:
+			self.timepoints = [self.time_interval[1]]
+			
 		self.predictors = []
 		for p in predictors:
 			if p == 'lb':
@@ -81,49 +77,8 @@ class fitness_model(object):
 		self.nodes = [node for node in self.tree.postorder_node_iter()]
 		self.tips = [node for node in self.nodes if node.is_leaf()]
 		self.rootnode = self.tree.seed_node
+		# each node has list of tip indices under node.tips that map to self.tips list
 
-	def calc_tip_counts(self):
-		'''
-		goes over all nodes and assigns tips to seasons (or any interval, really)
-		then counts tips in every season for all internal nodes and calculates the
-		fraction of viruses the clade defined by the internal node accounts for in 	
-		a given season, i.e. the frequency 
-		'''
-		# count tips
-		leaf_count = 0
-		for node in self.tree.postorder_node_iter():
-			tmp_list = defaultdict(list)
-			for child in node.child_nodes():
-				for season, count in child.season_tips.iteritems():
-					tmp_list[season].extend(count)
-
-			node.season_tips = {}
-			for season, strain_list in tmp_list.iteritems():
-				node.season_tips[season] = np.array(strain_list, dtype=int)
-
-			if node.is_leaf():
-				node_date = date(*map(int, node.date.split('-')))
-				tmp_season_list = [s for s in self.seasons if node_date>=s[0] and node_date<s[1]]
-				if len(tmp_season_list)==1:
-					node.season_tips[tmp_season_list[0]]=[leaf_count]
-				leaf_count+=1
-				node.tip_index = leaf_count
-
-		# short cut to total number of tips per seaons
-		total_counts = {s:len(strain_list) for s, strain_list in self.tree.seed_node.season_tips.iteritems()} 
-		if self.verbose>1:
-			for d,c in sorted(total_counts.items()): 
-				print "number of tips in", d[0].strftime('%Y-%m-%d'), '--', \
-											d[1].strftime('%Y-%m-%d'),':',c
-
-		# calculate frequencies
-		for node in self.tree.postorder_node_iter():
-			node.season_frequencies = defaultdict(float)
-			for season, strain_list in node.season_tips.iteritems():
-				if season in total_counts:
-					node.season_frequencies[season]=float(len(strain_list))/(total_counts[season]+1e-10)
-				else:
-					node.season_frequencies[season]=0
 
 	def calc_node_frequencies(self):
 		'''
@@ -131,20 +86,20 @@ class fitness_model(object):
 		'''
 		for node in self.nodes:		
 			interpolation = interp1d(self.rootnode.pivots, node.freq['global'], kind='linear', bounds_error=False)
-			node.initial_freqs = defaultdict(float)
-			for time in self.initial_times:
-				node.initial_freqs[time] = interpolation(time)
-			node.final_freqs = defaultdict(float)				
-			for time in self.final_times:
-				node.final_freqs[time] = interpolation(time)
+			node.timepoint_freqs = defaultdict(float)
+			node.delta_freqs = defaultdict(float)			
+			for time in self.timepoints:
+				node.timepoint_freqs[time] = interpolation(time)
+			for time in self.timepoints[:-1]:
+				node.delta_freqs[time] = interpolation(time + self.delta_time)				
 		# freq_arrays list *all* tips for each initial timepoint
-		self.initial_freq_arrays={}
-		for time in self.initial_times:		
-			tmp_freqs = []			                              
+		self.freq_arrays={}
+		for time in self.timepoints:
+			tmp_freqs = []
 			for tip in self.tips:
-				tmp_freqs.append(tip.initial_freqs[time])
-			self.initial_freq_arrays[time] = np.array(tmp_freqs)		
-				
+				tmp_freqs.append(tip.timepoint_freqs[time])
+			self.freq_arrays[time] = np.array(tmp_freqs)
+
 
 	def calc_predictors(self):
 		for pred, func, kwargs in self.predictors:
@@ -158,7 +113,7 @@ class fitness_model(object):
 		cutoff = 0.01
 		for node in self.nodes:
 			#if season in node.season_tips and len(node.season_tips[season])>0:		
-			if node.initial_freqs[timepoint] > cutoff:
+			if node.timepoint_freqs[timepoint] > cutoff:
 				node.alive=True
 			else:
 				node.alive=False
@@ -174,7 +129,7 @@ class fitness_model(object):
 		for node in self.nodes:
 			node.fit_frequencies = {}
 			node.freq_slope = {}
-		for time in self.initial_times:
+		for time in self.timepoints:
 			time_interval = [time - freq_window, time]
 			pivots = np.linspace(time_interval[0], time_interval[1], total_pivots)
 			self.estimate_tree_frequencies(pivots=pivots, threshold = 40, regions=None,
@@ -193,7 +148,6 @@ class fitness_model(object):
 		self.rootnode.pivots = self.pivots
 
 
-
 	def calc_all_predictors(self, estimate_frequencies = True):
 		if estimate_frequencies and 'dfreq' in [x[0] for x in self.predictors]:
 			self.calc_time_censored_tree_frequencies()
@@ -201,7 +155,7 @@ class fitness_model(object):
 		self.predictor_arrays={}
 		for node in self.nodes:
 			node.predictors = {}
-		for time in self.initial_times:
+		for time in self.timepoints:
 			if self.verbose: print "calculating predictors for time", time
 			self.select_nodes_in_season(time)
 			self.calc_predictors()
@@ -218,9 +172,9 @@ class fitness_model(object):
 		self.predictor_means = {}
 		self.predictor_sds = {}
 		if self.verbose: print "standardizing predictors"
-		for time in self.initial_times:
+		for time in self.timepoints:
 			values = self.predictor_arrays[time]
-			weights = self.initial_freq_arrays[time]
+			weights = self.freq_arrays[time]
 			means = np.average(values, weights=weights, axis=0)
 			variances = np.average((values-means)**2, weights=weights, axis=0)
 			sds = np.sqrt(variances)
@@ -230,7 +184,7 @@ class fitness_model(object):
 		if self.estimate_coefficients:
 			self.global_sds = np.mean(self.predictor_sds.values(), axis=0)
 
-		for time in self.initial_times:
+		for time in self.timepoints:
 			for node in self.nodes:
 				if node.predictors[time] is not None:
 					node.predictors[time] = (node.predictors[time]-self.predictor_means[time]) / self.global_sds
@@ -239,40 +193,44 @@ class fitness_model(object):
 
 
 	def select_clades_for_fitting(self):
-		# for each initial time point, select clades that are within the specified frequency window
-		# keep track in the dict initial_clades that maps timepoint to clade list
-		self.initial_clades = {}
-		for time in self.initial_times:
-			self.initial_clades[time] = []
+		# for each time point, select clades that are within the specified frequency window
+		# keep track in the dict fit_clades that maps timepoint to clade list
+		self.fit_clades = {}
+		for time in self.timepoints[:-1]:
+			self.fit_clades[time] = []
 			for node in self.nodes:
-				if  node.initial_freqs[time] >= min_freq and \
-					node.initial_freqs[time] <= max_freq and \
-					node.initial_freqs[time] < node.parent_node.initial_freqs[time]:
-					self.initial_clades[time].append(node)
+				if  node.timepoint_freqs[time] >= min_freq and \
+					node.timepoint_freqs[time] <= max_freq and \
+					node.timepoint_freqs[time] < node.parent_node.timepoint_freqs[time]:
+					self.fit_clades[time].append(node)
 
 
 	def clade_fit(self, params):
-		# walk through season pairs
-		seasonal_errors = []
+		# walk through initial/final timepoint pairs
+		# tested that the sum of frequencies of tips within a clade is equal to the direct clade frequency
+		timepoint_errors = []
 		self.pred_vs_true = []
-		for s,t in self.fit_test_season_pairs:		
-			# normalize strain frequencies
-			total_strain_freq = np.exp(self.fitness(params, self.predictor_arrays[s][self.tree.seed_node.season_tips[s],:])).sum()
-		
+		for time in self.timepoints[:-1]:
+
+			# normalization factor for predicted tip frequencies
+			total_tip_freq = np.sum(self.projection(params, self.predictor_arrays[time], self.freq_arrays[time], self.delta_time))
+
 			# project clades forward according to strain makeup
 			clade_errors = []
 			tmp_pred_vs_true = []
-			test_clades = self.clades_for_season[(s,t)]
-			for clade in test_clades:
-				initial_freq = clade.season_frequencies[s]
-				obs_freq = clade.season_frequencies[t]
-				pred_freq = np.sum(np.exp(self.fitness(params, self.predictor_arrays[s][clade.season_tips[s],:])))/total_strain_freq
-				tmp_pred_vs_true.append((initial_freq, obs_freq, pred_freq))
-				clade_errors.append(np.absolute(pred_freq - obs_freq))
-			seasonal_errors.append(np.mean(clade_errors))
+			for clade in self.fit_clades[time]:
+				initial_freq = clade.timepoint_freqs[time]
+				obs_final_freq = clade.delta_freqs[time]
+				pred = self.predictor_arrays[time][clade.tips]
+				freqs = self.freq_arrays[time][clade.tips]
+				pred_final_freq = np.sum(self.projection(params, pred, freqs, self.delta_time)) / total_tip_freq
+				tmp_pred_vs_true.append((initial_freq, obs_final_freq, pred_final_freq))
+				clade_errors.append(np.absolute(pred_final_freq - obs_final_freq))
+			timepoint_errors.append(np.mean(clade_errors))
 			self.pred_vs_true.append(np.array(tmp_pred_vs_true))
-		mean_error = np.mean(seasonal_errors)
-		if any(np.isnan(seasonal_errors)+np.isinf(seasonal_errors)):
+
+		mean_error = np.mean(timepoint_errors)
+		if any(np.isnan(timepoint_errors)+np.isinf(timepoint_errors)):
 			mean_error = 1e10
 		self.last_fit = mean_error
 		if self.verbose>2: print params, self.last_fit
@@ -307,6 +265,9 @@ class fitness_model(object):
 	def fitness(self, params, pred):
 		return np.sum(params*pred, axis=-1)
 
+	def projection(self, params, pred, freqs, delta):
+		return freqs * np.exp(self.fitness(params, pred) * delta);
+
 	def minimize_clade_error(self):
 		from scipy.optimize import fmin as minimizer
 		if self.verbose:		
@@ -315,7 +276,7 @@ class fitness_model(object):
 		self.model_params = minimizer(self.clade_fit, self.model_params, disp = self.verbose>1)
 		if self.verbose:
 			print "final function value:", self.clade_fit(self.model_params)		
-			print "final parameters:", self.model_params, '\n'		
+			print "final parameters:", self.model_params, '\n'
 
 	def prep_af(self):
 		# TODO: fix me for continous time model
@@ -378,53 +339,51 @@ class fitness_model(object):
 				print pred[0],':', val
 
 
-	def assign_fitness(self, season):
-		if self.verbose: print "calculating predictors for the last season"
+	def assign_fitness(self):
+		if self.verbose: print "calculating predictors for the final timepoint"
+		final_timepoint = self.timepoints[-1]
 
-		#FIXME: standardize predictors
-		for node in self.tree.postorder_node_iter():
-			if node.predictors[season] is not None:
-				node.fitness = self.fitness(self.model_params, node.predictors[season])
+		for node in self.nodes:
+			if node.predictors[final_timepoint] is not None:
+				node.fitness = self.fitness(self.model_params, node.predictors[final_timepoint])
 			else:
 				node.fitness = 0.0
-				
-		weights = np.exp(self.fitness(self.model_params, self.predictor_arrays[season][self.tree.seed_node.season_tips[season],:]))
-		pred_af = self.weighted_af(self.seqs[season], weights)
 
-		for node in self.tree.postorder_node_iter():
-			if node.predictors[season] is not None:
-				seq = np.fromstring(node.seq, 'S1')[self.variable_nuc]
-				seq_indicators = self.weighted_af(np.array([seq]), np.ones(1))		
-				node.pred_distance = np.sum(np.sum(pred_af*(1-seq_indicators), axis=0), axis=0)
-			else:
-				node.pred_distance = 0.0
+#		weights = np.exp(self.fitness(self.model_params, self.predictor_arrays[season][self.tree.seed_node.season_tips[season],:]))
+#		pred_af = self.weighted_af(self.seqs[season], weights)
+
+#		for node in self.nodes:
+#			if node.predictors[final_timepoint] is not None:
+#				seq = np.fromstring(node.seq, 'S1')[self.variable_nuc]
+#				seq_indicators = self.weighted_af(np.array([seq]), np.ones(1))		
+#				node.pred_distance = np.sum(np.sum(pred_af*(1-seq_indicators), axis=0), axis=0)
+#			else:
+#				node.pred_distance = 0.0
 
 	def predict(self, niter = 10, estimate_frequencies = True):
 		self.prep_nodes()
-		self.calc_tip_counts()
 		self.calc_node_frequencies()
 		self.calc_all_predictors(estimate_frequencies = estimate_frequencies)
 		self.standardize_predictors()
 		self.select_clades_for_fitting()
-#		self.prep_af()
-		raise ValueError('End of redo')		
+#		self.prep_af()	
 		if self.estimate_coefficients:
-			self.learn_parameters(niter = niter, fit_func = "clade")
-		self.assign_fitness(self.seasons[-1])
+			self.learn_parameters(niter = niter, fit_func = "clade")			
+		self.assign_fitness()
 
 	def validate_prediction(self):
 		import matplotlib.pyplot as plt
 		from scipy.stats import spearmanr 
 		fig, axs = plt.subplots(1,4, figsize=(10,5))
-		for season, pred_vs_true in izip(self.fit_test_season_pairs, self.pred_vs_true):
+		for time, pred_vs_true in izip(self.timepoints[:-1], self.pred_vs_true):
 			# 0: initial, 1: observed, 2: predicted
 			axs[0].scatter(pred_vs_true[:,1], pred_vs_true[:,2])
-			axs[1].scatter(pred_vs_true[:,1]/pred_vs_true[:,0], 
+			axs[1].scatter(pred_vs_true[:,1]/pred_vs_true[:,0],
 						   pred_vs_true[:,2]/pred_vs_true[:,0], c=pred_vs_true[0])
 			for s, o, p  in pred_vs_true:
-				axs[2].arrow(s,s, o-s,p-s)
-			axs[3].scatter(pred_vs_true[:,0], 
-						   (pred_vs_true[:,2]+0.01)/(pred_vs_true[:,1]+0.01))				
+				axs[2].arrow(s, s, o-s, p-s)
+			axs[3].scatter(pred_vs_true[:,0],
+						   (pred_vs_true[:,2]+0.01)/(pred_vs_true[:,1]+0.01))			
 
 		# pred_vs_true is initial, observed, predicted
 		tmp = np.vstack(self.pred_vs_true)
@@ -451,8 +410,7 @@ class fitness_model(object):
 		axs[2].set_xlim(-0.1, 1.1)
 		axs[3].set_ylabel('predicted / observed')
 		axs[3].set_xlabel('initial')
-		axs[3].set_yscale('log')		
-		plt.tight_layout()
+		axs[3].set_yscale('log')
 
 def test(params):
 	from io_util import read_json
