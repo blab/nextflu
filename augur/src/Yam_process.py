@@ -41,6 +41,7 @@ virus_config.update({
 		'2':  [('HA1', 48,'K'), ('HA1', 108, 'A'), ('HA1', 150, 'S')],
 		'3':  [('HA1', 48,'R'), ('HA1', 108, 'P'), ('HA1', 150, 'I')],
 		'3a': [('HA1', 37,'A'), ('HA1', 298, 'E'), ('HA1', 48,'R'), ('HA1', 105, 'P'), ('HA1', 150, 'I')],
+		'172Q': [('HA1', 48,'R'), ('HA1', 108, 'P'), ('HA1', 150, 'I'), ('HA1', 116, 'K'), ('HA1', 172, 'Q')]
 	},
 	'auspice_prefix':'Yam_',
 	'HI_fname':'data/Yam_HI_titers.txt',
@@ -246,7 +247,7 @@ class BYam_process(process, BYam_filter, BYam_clean, BYam_refine, HI_tree):
 				'ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country',
 				'dHI', 'cHI', 'mean_HI_titers','HI_titers','HI_titers_raw', 'serum', 'HI_info',
 				'avidity_tree','avidity_mut', 'potency_mut', 'potency_tree', 'mean_potency_mut', 'mean_potency_tree', 'autologous_titers'],
-				annotations = ['2', '3', '3a'])
+				annotations = ['2', '3', '3a', '172Q'])
 			if params.html:
 				self.generate_indexHTML()
 			self.export_HI_mutation_effects()
