@@ -156,10 +156,14 @@ if __name__=="__main__":
 	parser.add_argument('--lineages', nargs='+', type = str,  help ="lineages to include")
 	parser.add_argument('--resolutions', nargs='+', type = str,  help ="resolutions to include")
 	parser.add_argument('--aligner', type = str, default = "mafft", help = "aligner to use, either mafft or seqan")
+	parser.add_argument('--fitness', action = "store_true", default = False, help = "calculate fitnesses")	
 	parser.add_argument('-r', type = float, default = 1.0)
 	params = parser.parse_args()
 
-	common_args = ['--skip', 'genotype_frequencies HIvalidate', '-r', params.r, '--lam_HI', 1, '--lam_pot', 0.3, '--lam_avi', 2]
+	skip = 'genotype_frequencies fitness HIvalidate'
+	if params.fitness:
+		skip = 'genotype_frequencies HIvalidate'
+	common_args = ['--skip', skip, '-r', params.r, '--lam_HI', 1, '--lam_pot', 0.3, '--lam_avi', 2]
 	if params.ATG: common_args.append('--ATG')
 	if params.html: common_args.append('--html')
 
@@ -186,8 +190,8 @@ if __name__=="__main__":
 		print 'Parsing new sequences for lineage',lineage
 		if params.all:
 			params.threshold = 0
-		run = ammend_fasta(params.infile, lineage, existing_strains, threshold = params.threshold, directory = 'data/')
-		if True:
+		updated = ammend_fasta(params.infile, lineage, existing_strains, threshold = params.threshold, directory = 'data/')
+		if updated:
 			for resolution in params.resolutions:
 				print '\n------------------------------\n'
 				print 'Processing lineage',lineage,'with resolution',resolution
