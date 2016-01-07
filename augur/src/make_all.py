@@ -175,7 +175,7 @@ if __name__=="__main__":
 
 	if "historical_predictions" in params.resolutions:
 		params.resolutions.remove("historical_predictions")
-		params.resolutions.extend(['Sep-2013', 'Feb-2014', 'May-2014', 'Sep-2014', 'Feb-2015', 'Sep-2015'])
+		params.resolutions.extend(['Feb-2014', 'Sep-2014', 'Feb-2015', 'Sep-2015'])
 
 	for lineage in params.lineages:
 		if params.s3:
