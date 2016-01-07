@@ -60,6 +60,7 @@ def calc_epitope_distance(tree, attr='ep', ref = None):
 	attr   --   the attribute name used to save the result
 	'''
 	if not hasattr(tree, "epitope_distance_assigned") or tree.epitope_distance_assigned==False:
+		setup_epitope_mask()	
 		if ref == None:
 			ref = translate(tree.seed_node.seq)
 		for node in tree.postorder_node_iter():
@@ -119,6 +120,7 @@ def calc_nonepitope_distance(tree, attr='ne', ref = None):
 	attr   --   the attribute name used to save the result
 	'''
 	if not hasattr(tree, "nonepitope_distance_assigned") or tree.nonepitope_distance_assigned==False:
+		setup_epitope_mask()	
 		if ref == None:
 			ref = translate(tree.seed_node.seq)
 		for node in tree.postorder_node_iter():
@@ -134,6 +136,7 @@ def calc_nonepitope_star_distance(tree, attr='ne_star', seasons = []):
 	attr   --   the attribute name used to save the result
 	'''
 	if not hasattr(tree, "nonepitope_star_distance_assigned") or tree.nonepitope_star_distance_assigned==False:
+		setup_epitope_mask()	
 		for node in tree.postorder_node_iter():
 			if len(node.season_tips) and node!=tree.seed_node:
 				if not hasattr(node, 'aa'):
