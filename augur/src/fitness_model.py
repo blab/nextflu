@@ -50,6 +50,7 @@ class fitness_model(object):
 
 		self.predictors = []
 		for p in predictors:
+			self.setup_epitope_mask()
 			if p == 'lb':
 				self.predictors.append(('lb',calc_LBI, {'tau':0.0005, 'transform':lambda x:x}))
 			if p == 'ep':

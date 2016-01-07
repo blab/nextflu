@@ -9,15 +9,22 @@ from tree_util import json_to_dendropy
 from tree_util import dendropy_to_json
 from fitness_tolerance import load_mutational_tolerance, calc_fitness_tolerance
 
-epitope_mask = np.fromstring("00000000000000000000000000000000000000000000000000000000000011111011011001010011000100000001001011110011100110101000001100000100000001000110101011111101011010111110001010011111000101011011111111010010001111101110111001010001110011111111000000111110000000101010101110000000000011100100000001011011100000000000001001011000110111111000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", dtype='S1')
+def setup_epitope_mask():
+	self.epitope_mask = ""
+	if "epitope_masks_fname" in self.kwargs and "epitope_mask" in self.kwargs:
+		with open(self.kwargs["epitope_masks_fname"]) as f:
+			for line in f:
+				(key, value) = line.split()
+				if key == self.kwargs["epitope_mask"]:
+					self.epitope_mask = value
 
 def epitope_sites(aa):
 	aaa = np.fromstring(aa, 'S1')
-	return ''.join(aaa[epitope_mask[:len(aa)]=='1'])
+	return ''.join(aaa[self.epitope_mask[:len(aa)]=='1'])
 
 def nonepitope_sites(aa):
 	aaa = np.fromstring(aa, 'S1')
-	return ''.join(aaa[epitope_mask[:len(aa)]=='0'])
+	return ''.join(aaa[self.epitope_mask[:len(aa)]=='0'])
 
 def receptor_binding_sites(aa):
 	sp = 16
