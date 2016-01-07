@@ -14,13 +14,6 @@ from Bio.Align import MultipleSeqAlignment
 import numpy as np
 from itertools import izip
 
-
-# numbering starting at HA1 start, adding sp to obtain numbering from methionine
-sp = 16
-epitope_mask = np.fromstring(sp*"0"+"000000000000000000000000000000000000000000011111011011001010011000100000001001011110011100110101000001100000100000001000110101011111101011010111110001010011111000101011011111111010010001111101110111001010001110011111111000000111110000000101010101110000000000011100100000001011011100000000000001001011000110111111000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", dtype='S1')
-receptor_binding_sites = map(lambda x:x+sp-1, [145, 155, 156, 158, 159, 189, 193])
-
-
 virus_config.update({
 	# data source and sequence parsing/cleaning/processing
 	'virus':'H3N2',
@@ -41,6 +34,8 @@ virus_config.update({
 						   "3c2":   [('HA1', 144,'N'), ('HA1',159,'F'), ('HA1',225,'N'), ('HA2', 160,'N'), ('HA1', 142, 'R')],
 						   "3c3.b": [('HA1',  83,'R'), ('HA1',261,'Q'), ('HA1',62,'K'),  ('HA1', 122,'D')]
 							},
+	'epitope_masks_fname':'source-data/H3N2_epitope_masks.tsv',
+	'epitope_mask':'wolf',
 	'HI_fname':'data/H3N2_HI_titers.txt',
 	'auspice_prefix':'H3N2_',
 	'html_vars': {'coloring': 'ep, ne, rb, lbi, dfreq, region, date, cHI, HI_dist',
@@ -195,6 +190,13 @@ class H3N2_clean(virus_clean):
 class H3N2_refine(tree_refine):
 	def __init__(self, **kwargs):
 		tree_refine.__init__(self, **kwargs)
+		self.epitope_mask = ""
+		if "epitope_masks_fname" in self.kwargs and "epitope_mask" in self.kwargs:
+			with open(self.kwargs["epitope_masks_fname"]) as f:
+				for line in f:
+					(key, value) = line.split()
+            		if key == self.kwargs["epitope_mask"]:
+            			self.epitope_mask = value
 
 	def refine(self):
 		self.refine_generic()  # -> all nodes now have aa_seq, xvalue, yvalue, trunk, and basic virus properties
@@ -202,11 +204,11 @@ class H3N2_refine(tree_refine):
 
 	def epitope_sites(self, aa):
 		aaa = np.fromstring(aa, 'S1')
-		return ''.join(aaa[epitope_mask[:len(aa)]=='1'])
+		return ''.join(aaa[self.epitope_mask[:len(aa)]=='1'])
 
 	def nonepitope_sites(self, aa):
 		aaa = np.fromstring(aa, 'S1')
-		return ''.join(aaa[epitope_mask[:len(aa)]=='0'])
+		return ''.join(aaa[self.epitope_mask[:len(aa)]=='0'])
 
 	def receptor_binding_sites(self, aa):
 		'''
@@ -214,7 +216,9 @@ class H3N2_refine(tree_refine):
 		These are (145, 155, 156, 158, 159, 189, 193) in canonical HA numbering
 		need to subtract one since python arrays start at 0
 		'''
-		return ''.join([aa[pos] for pos in receptor_binding_sites])
+		sp = 16
+		rbs = map(lambda x:x+sp-1, [145, 155, 156, 158, 159, 189, 193])					
+		return ''.join([aa[pos] for pos in rbs])
 
 	def get_total_peptide(self, node):
 		'''

@@ -38,7 +38,8 @@ virus_config.update({
 	# numbering starting at methionine including the signal peptide
 	'clade_designations': {
 		'1A': [('HA1', 75,'K'), ('HA1', 58, 'L'), ('HA1', 165, 'K')],
-		'1B': [('HA1', 75,'K'), ('HA1', 58, 'P'), ('HA1', 165, 'K')]
+		'1B': [('HA1', 75,'K'), ('HA1', 58, 'P'), ('HA1', 165, 'K')],
+		'117V': [('HA1', 75,'K'), ('HA1', 58, 'L'), ('HA1', 165, 'K'), ('HA1', 129, 'D'), ('HA1', 117, 'V')]
 	},
 	'auspice_prefix':'Vic_',
 	'HI_fname':'data/Vic_HI_titers.txt',
@@ -218,7 +219,7 @@ class BVic_process(process, BVic_filter, BVic_clean, BVic_refine, HI_tree):
 				'ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country',
 				'dHI', 'cHI', 'mean_HI_titers','HI_titers','HI_titers_raw', 'serum', 'HI_info',
 				'avidity_tree','avidity_mut', 'potency_mut', 'potency_tree', 'mean_potency_mut', 'mean_potency_tree', 'autologous_titers'],
-				annotations = ['1A', '1B'])
+				annotations = ['1A', '1B', '117V'])
 			if params.html:
 				self.generate_indexHTML()
 			self.export_HI_mutation_effects()
