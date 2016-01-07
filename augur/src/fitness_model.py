@@ -75,8 +75,8 @@ class fitness_model(object):
 		self.nodes = [node for node in self.tree.postorder_node_iter()]
 		self.tips = [node for node in self.nodes if node.is_leaf()]
 		self.rootnode = self.tree.seed_node
+		self.rootnode.pivots = self.pivots		
 		# each node has list of tip indices under node.tips that map to self.tips list
-
 
 	def calc_node_frequencies(self):
 		'''
@@ -274,15 +274,16 @@ class fitness_model(object):
 			print "initial parameters:", self.model_params
 		self.model_params = minimizer(self.clade_fit, self.model_params, disp = self.verbose>1)
 		if self.verbose:
-			print "final function value:", self.clade_fit(self.model_params)		
+			print "final function value:", self.clade_fit(self.model_params)	
 			print "final parameters:", self.model_params, '\n'
 
 	def prep_af(self):
 		if not hasattr(self,'variable_nuc'):
 			self.determine_variable_positions()
 		fit_aln = np.zeros((len(self.tips), len(self.variable_nuc)), dtype='S1')
-		for tip in self.tips:
-			fit_aln[tip.tip_index-1] = np.fromstring(tip.seq, 'S1')[self.variable_nuc]		# tip_index starts at 1
+		for i in range(len(self.tips)):
+			tip = self.tips[i]
+			fit_aln[i] = np.fromstring(tip.seq, 'S1')[self.variable_nuc]
 		self.seqs = fit_aln
 		self.af = {}		
 		for time in self.timepoints:
@@ -386,16 +387,17 @@ class fitness_model(object):
 
 		# pred_vs_true is initial, observed, predicted
 		tmp = np.vstack(self.pred_vs_true)
-		print("Spearman's rho, null",spearmanr(tmp[:,0], tmp[:,1]))
-		print("Spearman's rho, raw",spearmanr(tmp[:,1], tmp[:,2]))
-		print("Spearman's rho, rel",spearmanr(tmp[:,1]/tmp[:,0], 
+		print("Abs clade error:"), self.clade_fit(self.model_params)
+		print("Spearman's rho, null:", spearmanr(tmp[:,0], tmp[:,1]))
+		print("Spearman's rho, raw:", spearmanr(tmp[:,1], tmp[:,2]))
+		print("Spearman's rho, rel:", spearmanr(tmp[:,1]/tmp[:,0], 
 											  tmp[:,2]/tmp[:,0]))
 	
 		growth_list = [pred > initial for (initial, obs, pred) in tmp if obs > initial]
-		print ("Correct at predicting growth", growth_list.count(True) / float(len(growth_list)))
+		print ("Correct at predicting growth:", growth_list.count(True) / float(len(growth_list)))
 
 		decline_list = [pred < initial for (initial, obs, pred) in tmp if obs < initial]
-		print ("Correct at predicting decline", decline_list.count(True) / float(len(decline_list)))
+		print ("Correct at predicting decline:", decline_list.count(True) / float(len(decline_list)))
 
 		axs[0].set_ylabel('predicted')
 		axs[0].set_xlabel('observed')
@@ -410,6 +412,14 @@ class fitness_model(object):
 		axs[3].set_ylabel('predicted / observed')
 		axs[3].set_xlabel('initial')
 		axs[3].set_yscale('log')
+		
+		import pandas as pd
+		pred_data = []
+		for time, pred_vs_true in izip(self.timepoints[:-1], self.pred_vs_true):
+			for entry in pred_vs_true:
+				pred_data.append(np.append(entry, time))
+		self.pred_vs_true_df = pd.DataFrame(pred_data, columns=['initial', 'obs', 'pred', 'time'])
+		self.pred_vs_true_df.to_csv("data/prediction_pairs.tsv", sep="\t", index=False)
 
 	def validate_trajectories(self):
 		'''
@@ -425,22 +435,26 @@ class fitness_model(object):
 				pred = all_pred[clade.tips]
 				freqs = all_freqs[clade.tips]
 				interpolation = interp1d(self.rootnode.pivots, clade.freq['global'], kind='linear', bounds_error=False)
-				for delta in np.arange(0, 1.1, 0.1):
-					total_pred_freq = np.sum(self.projection(self.model_params, all_pred, all_freqs, delta))
-					pred_freq = np.sum(self.projection(self.model_params, pred, freqs, delta)) / total_pred_freq
-					obs_freq = np.asscalar(interpolation(time+delta))
-					self.trajectory_data.append([series, str(clade), time, time+delta, obs_freq, pred_freq])
+				for delta in np.arange(-0.2, 1.1, 0.1):
+					if time + delta >= self.rootnode.pivots[0] and time + delta <= self.rootnode.pivots[-1]:
+						obs_freq = np.asscalar(interpolation(time+delta))
+						pred_freq = obs_freq
+						if delta >= 0:
+							total_pred_freq = np.sum(self.projection(self.model_params, all_pred, all_freqs, delta))
+							pred_freq = np.sum(self.projection(self.model_params, pred, freqs, delta)) / total_pred_freq					
+						self.trajectory_data.append([series, str(clade), time, time+delta, obs_freq, pred_freq])
 				series += 1
 
 		import pandas as pd
-		df = pd.DataFrame(self.trajectory_data, columns=['series', 'clade', 'initial_time', 'time', 'obs', 'pred'])
+		self.trajectory_data_df = pd.DataFrame(self.trajectory_data, columns=['series', 'clade', 'initial_time', 'time', 'obs', 'pred'])
+		self.trajectory_data_df.to_csv("data/prediction_trajectories.tsv", sep="\t", index=False)
 
 		import bokeh.charts as bk
 		bk.defaults.height = 250
 		bk.output_file("lines.html", title="line plot example")
 		lines = []
 		for time in self.timepoints[:-1]:
-			line = bk.Line(df[df.initial_time == time], x='time', y=['obs', 'pred'], dash=['obs', 'pred'], color='clade', xlabel='Date', ylabel='Frequency', tools=False)
+			line = bk.Line(self.trajectory_data_df[self.trajectory_data_df.initial_time == time], x='time', y=['obs', 'pred'], dash=['obs', 'pred'], color='clade', xlabel='Date', ylabel='Frequency', tools=False)
 			lines.append(line)
 		bk.show(bk.vplot(*lines))
 
