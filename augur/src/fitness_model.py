@@ -6,7 +6,7 @@ from collections import defaultdict
 from datetime import date
 from date_util import calendar_date
 from itertools import izip
-from fitness_predictors import *
+from fitness_predictors import fitness_predictors
 
 min_freq = 0.1
 max_freq = 0.99
@@ -14,9 +14,6 @@ min_tips = 10
 pc=1e-2
 regularization = 1e-3
 default_predictors = ['lb', 'ep', 'ne_star']
-
-def dummy(tree, attr='dummy'):
-	return None
 
 class fitness_model(object):
 
@@ -30,10 +27,10 @@ class fitness_model(object):
 		self.estimate_coefficients = True
 
 		if isinstance(predictor_input, dict):
-			predictors = predictor_input.keys()
+			predictor_names = predictor_input.keys()
 			self.estimate_coefficients = False
 		else:
-			predictors = predictor_input
+			predictor_names = predictor_input
 		if "estimate_fitness_model" in self.kwargs:
 			if self.kwargs["estimate_fitness_model"]:
 				self.estimate_coefficients = True
@@ -45,24 +42,9 @@ class fitness_model(object):
 		self.timepoint_step_size = 0.5		# amount of time between timepoints chosen for fitting
 		self.delta_time = 1.0 				# amount of time projected forward to do fitting		
 		self.timepoints = np.append(np.arange(self.time_interval[0], self.time_interval[1]-self.delta_time+0.0001, self.timepoint_step_size), self.time_interval[1])
-			
-		self.predictors = []
-		for p in predictors:
-			if p == 'lb':
-				self.predictors.append(('lb',calc_LBI, {'tau':0.0005, 'transform':lambda x:x}))
-			if p == 'ep':
-				self.predictors.append(('ep',calc_epitope_distance,{}))
-			if p == 'ne':
-				self.predictors.append(('ne',calc_nonepitope_distance,{}))
-			if p == 'ne_star':
-				self.predictors.append(('ne_star',calc_nonepitope_star_distance,{"seasons":self.seasons}))
-			if p == 'tol':
-				self.predictors.append(('tol',calc_tolerance,{}))
-			if p == 'dfreq':
-				self.predictors.append(('dfreq',dummy,{}))
-			if p == 'cHI':
-				self.predictors.append(('cHI',dummy,{}))
-		
+
+		self.predictors = predictor_names
+
 		self.model_params = 0*np.ones(len(self.predictors))
 		if isinstance(predictor_input, dict):
 			self.model_params = np.array([predictor_input[k][0] for k in predictors])
@@ -70,6 +52,8 @@ class fitness_model(object):
 		self.global_sds = 0*np.ones(len(self.predictors))
 		if isinstance(predictor_input, dict):
 			self.global_sds = np.array([predictor_input[k][1] for k in predictors])
+			
+		self.fp = fitness_predictors(predictor_names = predictor_names, **kwargs)
 
 	def prep_nodes(self):
 		self.nodes = [node for node in self.tree.postorder_node_iter()]
@@ -101,10 +85,10 @@ class fitness_model(object):
 
 
 	def calc_predictors(self):
-		for pred, func, kwargs in self.predictors:
+		for pred in self.predictors:
 			# calculate the predictors for all nodes of the tree and save as node.attr
-			if pred!='dfreq':
-				func(self.tree, attr = pred, **kwargs)
+			if pred != 'dfreq':	
+				self.fp.setup_predictor(self.tree, pred)
 
 	def select_nodes_in_season(self, timepoint):
 		# used by fitness_predictors:calc_LBI
@@ -160,8 +144,7 @@ class fitness_model(object):
 			self.calc_predictors()
 			for node in self.nodes:
 				if 'dfreq' in [x[0] for x in self.predictors]: node.dfreq = node.freq_slope[time]
-				node.predictors[time] = np.array([node.__getattribute__(pred[0]) 
-			                              for pred in self.predictors])
+				node.predictors[time] = np.array([node.__getattribute__(pred) for pred in self.predictors])
 			tmp_preds = []			                              
 			for tip in self.tips:
 				tmp_preds.append(tip.predictors[time])
@@ -334,7 +317,7 @@ class fitness_model(object):
 			print "best after",niter,"iterations\nfunction value:", self.last_fit
 			print "fit parameters:"
 			for pred, val in izip(self.predictors, self.model_params):
-				print pred[0],':', val
+				print pred,':', val
 
 
 	def assign_fitness(self):
