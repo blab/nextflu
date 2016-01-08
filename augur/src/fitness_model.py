@@ -1,6 +1,7 @@
 import argparse
 import numpy as np
 from scipy.interpolate import interp1d
+from scipy.stats import linregress
 import dendropy
 from collections import defaultdict
 from datetime import date
@@ -47,11 +48,11 @@ class fitness_model(object):
 
 		self.model_params = 0*np.ones(len(self.predictors))
 		if isinstance(predictor_input, dict):
-			self.model_params = np.array([predictor_input[k][0] for k in predictors])
+			self.model_params = np.array([predictor_input[k][0] for k in predictor_names])
 			
 		self.global_sds = 0*np.ones(len(self.predictors))
 		if isinstance(predictor_input, dict):
-			self.global_sds = np.array([predictor_input[k][1] for k in predictors])
+			self.global_sds = np.array([predictor_input[k][1] for k in predictor_names])
 			
 		self.fp = fitness_predictors(predictor_names = predictor_names, **kwargs)
 
@@ -115,8 +116,7 @@ class fitness_model(object):
 		for time in self.timepoints:
 			time_interval = [time - freq_window, time]
 			pivots = np.linspace(time_interval[0], time_interval[1], total_pivots)
-			self.estimate_tree_frequencies(pivots=pivots, threshold = 40, regions=None,
-								region_name = region, time_interval=time_interval)
+			self.estimate_tree_frequencies(pivots=pivots, threshold=40, regions=None, region_name=region, time_interval=time_interval)
 			for node in self.nodes:
 				if node.logit_freq[region] is not None:
 					node.fit_frequencies[time] = np.minimum(freq_cutoff, np.maximum(-freq_cutoff,node.logit_freq[region]))
@@ -132,7 +132,7 @@ class fitness_model(object):
 
 
 	def calc_all_predictors(self, estimate_frequencies = True):
-		if estimate_frequencies and 'dfreq' in [x[0] for x in self.predictors]:
+		if estimate_frequencies and 'dfreq' in [x for x in self.predictors]:
 			self.calc_time_censored_tree_frequencies()
 		# predictor_arrays list *all* tips for each timepoint
 		self.predictor_arrays={}
@@ -143,7 +143,7 @@ class fitness_model(object):
 			self.select_nodes_in_season(time)
 			self.calc_predictors()
 			for node in self.nodes:
-				if 'dfreq' in [x[0] for x in self.predictors]: node.dfreq = node.freq_slope[time]
+				if 'dfreq' in [x for x in self.predictors]: node.dfreq = node.freq_slope[time]
 				node.predictors[time] = np.array([node.__getattribute__(pred) for pred in self.predictors])
 			tmp_preds = []			                              
 			for tip in self.tips:
