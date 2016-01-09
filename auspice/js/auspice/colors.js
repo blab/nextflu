@@ -33,7 +33,7 @@ var lbiColorScale = d3.scale.linear()
 	.domain([0.0, 0.02, 0.04, 0.07, 0.1, 0.2, 0.4, 0.7, 0.9, 1.0])
 	.range(colors[10]);
 
-var dfreqColorScale = d3.scale.linear()
+var dfreqColorScale = d3.scale.linear().clamp([true])
 	.domain(dfreqColorDomain)
 	.range(colors[10]);
 

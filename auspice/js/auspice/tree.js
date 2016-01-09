@@ -169,7 +169,7 @@ function tree_init(){
 	calcFullTipCounts(rootNode);
 	calcBranchLength(rootNode);
 	rootNode.branch_length= 0.01;
-	rootNode.dfreq = 0.0;
+//	rootNode.dfreq = 0.0;
 	if (typeof rootNode.pivots != "undefined"){
 		time_step = rootNode.pivots[1]-rootNode.pivots[0];
 	}else{
@@ -185,7 +185,7 @@ function tree_init(){
 	calcNodeAges(time_window);
 	colorByTrait();
 	adjust_freq_by_date();
-	calcDfreq(rootNode, freq_ii);
+//	calcDfreq(rootNode, freq_ii);
 	tree_legend = makeLegend();
 	nDisplayTips = displayRoot.fullTipCount;
 }
@@ -224,6 +224,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	if (typeof rootNode['ep'] != "undefined"){ initColorDomain('ep', epitopeColorScale);}
 	if (typeof rootNode['ne'] != "undefined"){ initColorDomain('ne', nonepitopeColorScale);}
 	if (typeof rootNode['rb'] != "undefined"){ initColorDomain('rb', receptorBindingColorScale);}
+	if (typeof rootNode['dfreq'] != "undefined"){ initColorDomain('dfreq', dfreqColorScale);}	
 	date_init();
 	tree_init();
 
