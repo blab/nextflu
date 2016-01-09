@@ -178,7 +178,7 @@ class fitness_predictors(object):
 				node.__setattr__(attr, np.nan)				
 
 
-	def calc_LBI(self, tree, attr = 'lbi', tau=0.0005, transform = lambda x:x):
+	def calc_LBI(self, tree, attr = 'lb', tau=0.0005, transform = lambda x:x):
 		'''
 		traverses the tree in postorder and preorder to calculate the
 		up and downstream tree length exponentially weighted by distance.
