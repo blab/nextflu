@@ -64,14 +64,14 @@ function tipVisibility(d) {
 }
 
 function branchPoints(d) {
-	var mod = 0.5 * freqScale(d.target.frequency) - freqScale(0);
+	var mod = 0.5 * freqScale(0.2) - freqScale(0);
 	return (d.source.x-mod).toString() + "," + d.source.y.toString() + " "
 		+ (d.source.x-mod).toString() + "," + d.target.y.toString() + " "
 		+ (d.target.x).toString() + "," + d.target.y.toString();
 }
 
 function branchStrokeWidth(d) {
-	return freqScale(d.target.frequency);
+	return freqScale(0.2);
 }
 
 function branchLabelText(d) {
