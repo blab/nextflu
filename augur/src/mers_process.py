@@ -109,6 +109,17 @@ class mers_refine(tree_refine):
 		tmp_nucseqs.sort(key = lambda x:x.annotations['num_date'])
 		self.nuc_aln = MultipleSeqAlignment(tmp_nucseqs)
 
+		try:
+			with open('source-data/camel_exposure.tsv', 'r') as infile:
+				camel_exposure = [line.strip() for line in infile]
+		except:
+			print "no exposure file found"
+		else:
+			for l in self.tree.leaf_iter():
+				if l.strain in camel_exposure:
+					print 'Documented camel contact of strain ', l.strain
+					l.host +=', camel contact'
+
 def hamming_matrix(aln):
 	dm = np.zeros((aln.shape[0], aln.shape[0]), dtype = float)
 	for si, seq in enumerate(aln):
