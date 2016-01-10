@@ -28,7 +28,7 @@ class fitness_predictors(object):
 		if pred == 'ne_star':
 			self.calc_nonepitope_star_distance(tree)
 		if pred == 'tol':
-			self.calc_tolerance()
+			self.calc_tolerance(tree)
 		#if pred == 'dfreq':
 			# do nothing
 		#if pred == 'cHI':

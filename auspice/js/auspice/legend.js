@@ -31,9 +31,8 @@ function makeLegend(){
             return "log<sub>2</sub> titer distance from "+focusNode.strain;
         }
 		if (colorBy == "dfreq") {
-			var tmp_nmonth = Math.round(12*dfreq_dn*time_step);
-			var tmp_text = "Freq. change ("+tmp_nmonth+" month";
-			if (tmp_nmonth>1){
+			var tmp_text = "Log freq. change ("+dfreq_dn+" month";
+			if (dfreq_dn>1){
 				tmp_text+='s';
 			}
 			return tmp_text+')';
@@ -109,9 +108,9 @@ function makeLegend(){
     .attr('y', legendRectSize - legendSpacing)
     .text(function(d) {
         var label = d.toString().replace(/([a-z])([A-Z])/g, '$1 $2').replace(/,/g, ', ');
-        if (colorBy == "dfreq") {
-            label += "\u00D7";
-        }
+//        if (colorBy == "dfreq") {
+//            label += "\u00D7";
+//        }
         return label;
     })
    .on('mouseover', function(leg){
