@@ -35,7 +35,7 @@ virus_config.update({
 						   "3c3.b": [('HA1',  83,'R'), ('HA1',261,'Q'), ('HA1',62,'K'),  ('HA1', 122,'D')]
 							},
 	'epitope_masks_fname':'source-data/H3N2_epitope_masks.tsv',
-	'epitope_mask':'wolf',
+	'epitope_mask_version':'wolf',
 	'HI_fname':'data/H3N2_HI_titers.txt',
 	'auspice_prefix':'H3N2_',
 	'html_vars': {'coloring': 'ep, ne, rb, lbi, dfreq, region, date, cHI, HI_dist',
@@ -191,12 +191,14 @@ class H3N2_refine(tree_refine):
 	def __init__(self, **kwargs):
 		tree_refine.__init__(self, **kwargs)
 		self.epitope_mask = ""
-		if "epitope_masks_fname" in self.kwargs and "epitope_mask" in self.kwargs:
+		if "epitope_masks_fname" in self.kwargs and "epitope_mask_version" in self.kwargs:
+			epitope_map = {}
 			with open(self.kwargs["epitope_masks_fname"]) as f:
 				for line in f:
 					(key, value) = line.split()
-            		if key == self.kwargs["epitope_mask"]:
-            			self.epitope_mask = value
+					epitope_map[key] = value
+			if self.kwargs["epitope_mask_version"] in epitope_map:
+				self.epitope_mask = epitope_map[self.kwargs["epitope_mask_version"]]
 
 	def refine(self):
 		self.refine_generic()  # -> all nodes now have aa_seq, xvalue, yvalue, trunk, and basic virus properties

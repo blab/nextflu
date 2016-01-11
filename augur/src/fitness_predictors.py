@@ -11,12 +11,14 @@ from fitness_tolerance import load_mutational_tolerance, calc_fitness_tolerance
 
 def setup_epitope_mask():
 	self.epitope_mask = ""
-	if "epitope_masks_fname" in self.kwargs and "epitope_mask" in self.kwargs:
+	if "epitope_masks_fname" in self.kwargs and "epitope_mask_version" in self.kwargs:
+		epitope_map = {}
 		with open(self.kwargs["epitope_masks_fname"]) as f:
 			for line in f:
 				(key, value) = line.split()
-				if key == self.kwargs["epitope_mask"]:
-					self.epitope_mask = value
+				epitope_map[key] = value
+		if self.kwargs["epitope_mask_version"] in epitope_map:
+			self.epitope_mask = epitope_map[self.kwargs["epitope_mask_version"]]
 
 def epitope_sites(aa):
 	aaa = np.fromstring(aa, 'S1')
