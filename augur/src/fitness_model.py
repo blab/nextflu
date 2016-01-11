@@ -67,9 +67,13 @@ class fitness_model(object):
 		'''
 		goes over all nodes and calculates frequencies at timepoints based on previously calculated frequency trajectories
 		'''
-		print("calculating global node frequencies")		
+		print("calculating global node frequencies")
+		region = "global"
+		# estimate_tree_frequencies needs to run once and it's result will be decorated on the tree with subsequent loads
+		# maybe move to frequency step
+		self.estimate_tree_frequencies(pivots=self.rootnode.pivots, threshold=40, regions=None, region_name=region, time_interval=self.time_interval)
 		for node in self.nodes:		
-			interpolation = interp1d(self.rootnode.pivots, node.freq['global'], kind='linear', bounds_error=False)
+			interpolation = interp1d(self.rootnode.pivots, node.freq[region], kind='linear', bounds_error=False)
 			node.timepoint_freqs = defaultdict(float)
 			node.delta_freqs = defaultdict(float)			
 			for time in self.timepoints:
@@ -85,11 +89,11 @@ class fitness_model(object):
 			self.freq_arrays[time] = np.array(tmp_freqs)
 
 
-	def calc_predictors(self):
+	def calc_predictors(self, timepoint):
 		for pred in self.predictors:
 			# calculate the predictors for all nodes of the tree and save as node.attr
 			if pred != 'dfreq':	
-				self.fp.setup_predictor(self.tree, pred)
+				self.fp.setup_predictor(self.tree, pred, timepoint)
 
 	def select_nodes_in_season(self, timepoint):
 		# used by fitness_predictors:calc_LBI
@@ -104,12 +108,12 @@ class fitness_model(object):
 
 	def calc_time_censored_tree_frequencies(self):
 		print("fitting time censored tree frequencies")
-		region = "global_fit"
+		# this doesn't interfere with the previous freq estimates via difference in region: global_censored vs global
+		region = "global_censored"
 		freq_cutoff = 25.0
 		total_pivots = 12
 		pivots_fit = 2
 		freq_window = 1.0
-		from date_util import numerical_date
 		for node in self.nodes:
 			node.fit_frequencies = {}
 			node.freq_slope = {}
@@ -141,7 +145,7 @@ class fitness_model(object):
 		for time in self.timepoints:
 			if self.verbose: print "calculating predictors for time", time
 			self.select_nodes_in_season(time)
-			self.calc_predictors()
+			self.calc_predictors(time)
 			for node in self.nodes:
 				if 'dfreq' in [x for x in self.predictors]: node.dfreq = node.freq_slope[time]
 				node.predictors[time] = np.array([node.__getattribute__(pred) for pred in self.predictors])

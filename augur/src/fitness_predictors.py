@@ -18,11 +18,13 @@ class fitness_predictors(object):
 			self.setup_epitope_mask()
 		self.predictor_names = predictor_names
 	
-	def setup_predictor(self, tree, pred):
+	def setup_predictor(self, tree, pred, timepoint):
 		if pred == 'lb':
 			self.calc_LBI(tree, tau = 0.0005, transform = lambda x:x)
 		if pred == 'ep':
 			self.calc_epitope_distance(tree)
+		if pred == 'epH':
+			self.calc_epitope_history(tree, timepoint)			
 		if pred == 'ne':
 			self.calc_nonepitope_distance(tree)
 		if pred == 'ne_star':
@@ -95,6 +97,31 @@ class fitness_predictors(object):
 			if not hasattr(node, 'aa'):
 				node.aa = translate(node.seq)
 			node.__setattr__(attr, self.epitope_distance(node.aa, ref))
+			
+	def calc_epitope_history(self, tree, timepoint, attr='epH'):
+		'''
+		calculates the distance at epitope sites of any tree node to all nodes before timepoint
+		these comparison nodes are a proxy for the host immune landscape at that time
+		tree   --   dendropy tree
+		attr   --   the attribute name used to save the result
+		'''
+		comparison_nodes = [] 
+		for node in tree.postorder_node_iter():
+			if not hasattr(node, 'aa'):
+				node.aa = translate(node.seq)
+			node.__setattr__(attr, 0)
+			if node.is_leaf():
+				if node.num_date <= timepoint:
+					comparison_nodes.append(node)
+		for node in tree.postorder_node_iter():
+			if node.is_leaf():
+				mean_distance = 0
+				count = 0
+				for comp_node in comparison_nodes:
+					mean_distance += self.epitope_distance(node.aa, comp_node.aa)
+					count += 1
+				epitope_history = mean_distance / float(count)
+				node.__setattr__(attr, epitope_history)			
 
 	def calc_rbs_distance(self, tree, attr='rb', ref = None):
 		'''

@@ -45,8 +45,8 @@ virus_config.update({
 	'excluded_tables': ['NIMR_Sep2012_08.csv'], #, 'nimr-sep-2010-table8', 'nimr-sep-2010-table8','NIMR_Sep2012_11.csv'],
 	'layout':'auspice',
 	'min_aamuts': 1,
-#	'predictors': ['dfreq', 'cHI']												# estimate
-	'predictors': { 'dfreq': [2.50, 2.84], 'cHI': [1.68, 0.45] }				# fix predictor: [value, std deviation]
+#	'predictors': ['dfreq', 'cHI']														# estimate
+	'predictors': { 'dfreq': [0.30, 1.87], 'cHI': [2.11, 0.78] }						# fix predictor: [value, std deviation]
 	})
 
 
