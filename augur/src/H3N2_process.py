@@ -192,23 +192,31 @@ class H3N2_refine(tree_refine):
 		tree_refine.__init__(self, **kwargs)
 		self.epitope_mask = ""
 		if "epitope_masks_fname" in self.kwargs and "epitope_mask_version" in self.kwargs:
+			epitope_map = {}
 			with open(self.kwargs["epitope_masks_fname"]) as f:
 				for line in f:
 					(key, value) = line.split()
-            		if key == self.kwargs["epitope_mask_version"]:
-            			self.epitope_mask = value
+					epitope_map[key] = value
+			if self.kwargs["epitope_mask_version"] in epitope_map:
+				self.epitope_mask = epitope_map[self.kwargs["epitope_mask_version"]]
 
 	def refine(self):
 		self.refine_generic()  # -> all nodes now have aa_seq, xvalue, yvalue, trunk, and basic virus properties
 		self.add_H3N2_attributes()
 
 	def epitope_sites(self, aa):
-		aaa = np.fromstring(aa, 'S1')
-		return ''.join(aaa[self.epitope_mask[:len(aa)]=='1'])
+		sites = []
+		for a, m in izip(aa, self.epitope_mask):
+			if m == '1':
+				sites.append(a)
+		return ''.join(sites)
 
 	def nonepitope_sites(self, aa):
-		aaa = np.fromstring(aa, 'S1')
-		return ''.join(aaa[self.epitope_mask[:len(aa)]=='0'])
+		sites = []
+		for a, m in izip(aa, self.epitope_mask):
+			if m == '0':
+				sites.append(a)
+		return ''.join(sites)
 
 	def receptor_binding_sites(self, aa):
 		'''

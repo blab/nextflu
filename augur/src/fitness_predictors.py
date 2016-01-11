@@ -38,11 +38,13 @@ class fitness_predictors(object):
 
 	def setup_epitope_mask(self, epitope_masks_fname = 'source-data/H3N2_epitope_masks.tsv', epitope_mask_version = 'wolf'):
 		self.epitope_mask = ""
+		epitope_map = {}
 		with open(epitope_masks_fname) as f:
 			for line in f:
 				(key, value) = line.split()
-				if key == epitope_mask_version:
-					self.epitope_mask = value
+				epitope_map[key] = value
+		if epitope_mask_version in epitope_map:
+			self.epitope_mask = epitope_map[epitope_mask_version]
 
 	def epitope_sites(self, aa):
 		sites = []
