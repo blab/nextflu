@@ -199,6 +199,7 @@ class H3N2_refine(tree_refine):
 					epitope_map[key] = value
 			if self.kwargs["epitope_mask_version"] in epitope_map:
 				self.epitope_mask = epitope_map[self.kwargs["epitope_mask_version"]]
+		self.epitope_mask = np.fromstring(self.epitope_mask, dtype='S1')				# epitope_mask is numpy array
 
 	def refine(self):
 		self.refine_generic()  # -> all nodes now have aa_seq, xvalue, yvalue, trunk, and basic virus properties
