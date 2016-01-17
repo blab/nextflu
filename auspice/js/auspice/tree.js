@@ -51,8 +51,27 @@ function initDateColorDomain(intAttributes){
 }
 
 function initColorDomain(attr, tmpCS){
-	//var vals = tips.filter(function(d) {return tipVisibility(d)=='visible';}).map(function(d) {return d[attr];});
-	var vals = tips.map(function(d) {return d[attr];});
+	// only measure recent tips
+	var numDateValues = tips.map(function(d) {return d.num_date;})
+	var maxDate = d3.max(numDateValues.filter(function (d){return d!="undefined";}));
+	var time_back = 1.0;
+	if (typeof time_window != "undefined"){
+		time_back = time_window;
+	}
+	if (typeof full_data_time_window != "undefined"){
+		time_back = full_data_time_window;
+	}		
+	var minimum_date = maxDate - time_back;
+
+	// find attribute values
+	var vals = [];
+	for (var i = 0; i < tips.length; i++) {
+		var tip = tips[i];
+		if (tip.num_date > minimum_date && tip[attr] != "undefined") {
+			vals.push(tip[attr]);
+		}
+	}	
+//	var vals = tips.map(function(d) {return d[attr];});
 	var minval = Math.floor(d3.min(vals));
 	var maxval = Math.ceil(d3.max(vals));
 	var minval = Math.floor(2*d3.min(vals))/2;
