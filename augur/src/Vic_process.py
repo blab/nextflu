@@ -159,7 +159,7 @@ class BVic_process(process, BVic_filter, BVic_clean, BVic_refine, HI_tree):
 		HI_tree.__init__(self,**kwargs)
 		self.verbose = verbose
 
-	def run(self, steps, viruses_per_month=50, raxml_time_limit = 1.0, lam_HI=.5, lam_avi=1, lam_pot=.1):
+	def run(self, steps, viruses_per_month=50, raxml_time_limit = 1.0, lam_HI=2.0, lam_pot=0.3, lam_avi=2.0):
 		if 'filter' in steps:
 			print "--- Virus filtering at " + time.strftime("%H:%M:%S") + " ---"
 			self.filter()
@@ -171,7 +171,7 @@ class BVic_process(process, BVic_filter, BVic_clean, BVic_refine, HI_tree):
 			self.subsample(viruses_per_month,
 				prioritize=forced_strains, all_priority=self.force_include_all,
 				region_specific = self.max_global)
-			self.add_older_vaccine_viruses(dt = 6)
+			self.add_older_vaccine_viruses(dt = 5)
 			self.dump()
 		else:
 			self.load()
