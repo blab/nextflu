@@ -163,7 +163,7 @@ if __name__=="__main__":
 	skip = 'genotype_frequencies fitness HIvalidate'
 	if params.fitness:
 		skip = 'genotype_frequencies HIvalidate'
-	common_args = ['--skip', skip, '-r', params.r, '--lam_HI', 1, '--lam_pot', 0.3, '--lam_avi', 2]
+	common_args = ['--skip', skip, '-r', params.r, '--lam_HI', 2.0, '--lam_pot', 0.3, '--lam_avi', 2]
 	if params.ATG: common_args.append('--ATG')
 	if params.html: common_args.append('--html')
 

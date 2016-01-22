@@ -16,7 +16,12 @@ def myopen(fname, mode='r'):
 		return open(fname, mode)
 
 def HI_fix_name(name):
-	tmp_name = fix_name(name)
+	if name.split() == ["NIB-85", "(A/Almaty/2958/2013)"]:
+		tmp_name = fix_name("A/Almaty/2958/2013")
+	elif name.split() == ["A/Texas/50/2012","(6&7)"]:
+		tmp_name = fix_name("A/Texas/50/2012")
+	else:
+		tmp_name = fix_name(name)
 	return tmp_name.upper().lstrip('*')
 
 
@@ -140,7 +145,7 @@ class HI_tree(object):
 		self.HI_split_to_branch = defaultdict(list)
 		for node in self.tree.preorder_node_iter():
 			if self.map_to_tree:
-				node.dHI, node.cHI, node.constraints = 0, 0, 0
+				node.dHI, node.cHI, node.mHI, node.constraints = 0, 0, 0, 0
 			if node.HI_info>1:
 				node.HI_branch_index = self.HI_split_count
 				self.HI_split_to_branch[node.HI_branch_index].append(node)
@@ -540,7 +545,7 @@ class HI_tree(object):
 				likely_branch.dHI = self.params[HI_split]
 				likely_branch.constraints = self.tree_graph[:,HI_split].sum()
 
-			# integrate the HI change dHI into a cumulative antigentic evolution score cHI
+			# integrate the tree model HI change dHI into a cumulative antigentic evolution score cHI
 			for node in self.tree.preorder_node_iter():
 				if node.parent_node is not None:
 					node.cHI = node.parent_node.cHI + node.dHI
@@ -550,6 +555,14 @@ class HI_tree(object):
 			self.mutation_effects={}
 			for mi, mut in enumerate(self.relevant_muts):
 				self.mutation_effects[mut] = self.params[mi]
+			# integrate the mutation model change into a cumulative antigentic evolution score mHI
+			for node in self.tree.preorder_node_iter():
+				if node.parent_node is not None:
+					node.mHI = node.parent_node.mHI \
+					+ sum([0]+[self.mutation_effects[('HA1',str(mut))] for mut in node.aa_muts['HA1'].split(',')
+					       if ('HA1',str(mut)) in self.mutation_effects])
+				else:
+					node.mHI=0
 
 		self.serum_potency['tree' if self.map_to_tree else 'mutation'] =\
 					{serum:self.params[self.genetic_params+ii]
@@ -834,7 +847,7 @@ def parse_HI_matrix(fname):
 					'NTHCAROL':"NORTHCAROLINA",'ALA':"ALABAMA", 'NY':"NEWYORK", "GLAS":"GLASGOW", "AL":"ALABAMA",
 					"NETH":"NETHERLANDS", "FIN":"FINLAND", "BRIS":"BRISBANE", "MARY":"MARYLAND",
 					"ST.P'BURG":"ST.PETERSBURG", 'CAL':'CALIFORNIA', 'AUCK':'AUCKLAND', "C'CHURCH":'CHRISTCHURCH',
-					'CHCH':'CHRISTCHURCH', 'ASTR':'ASTRAKHAN', 'ASTRAK':'ASTRAKHAN', 'ST.P':"ST.PETERSBURG",
+					'CHCH':'CHRISTCHURCH', 'ASTR':'ASTRAKHAN', 'ASTRAK':'ASTRAKHAN', 'ST.P':"ST.PETERSBURG",'ST P':"ST.PETERSBURG",'STP':"ST.PETERSBURG",
 					'JHB':'JOHANNESBURG', 'FOR':'FORMOSA','MAL':'MALAYSIA', 'STHAUS':'SOUTHAUSTRALIA',
 					'FL':'FLORIDA', 'MASS':'MASSACHUSETTS','NOVO':'NOVOSIBIRSK','WIS':'WISCONSIN','BANG':'BANGLADESH','EG':'EGYPT' 	}
 	src_id = fname.split('/')[-1]
@@ -959,24 +972,31 @@ def write_strains_with_HI_and_sequence(flutype='H3N2'):
 	from Bio import SeqIO
 	good_strains = set()
 	with myopen("data/"+flutype+"_strains_with_HI.fasta", 'w') as outfile, \
-		 myopen("data/"+flutype+"_HI_strains.txt", 'w') as HI_strain_outfile, \
-		 myopen("data/"+flutype+"_gisaid_epiflu_sequence.fasta.gz", 'r') as infile:
+		 myopen("data/"+flutype+"_gisaid_epiflu_sequence.fasta", 'r') as infile:
 		for seq_rec in SeqIO.parse(infile, 'fasta'):
 			tmp_name = seq_rec.description.split('|')[0].strip()
 			reduced_name = HI_fix_name(tmp_name)
 			if reduced_name in HI_strains and (reduced_name not in good_strains):
 				SeqIO.write(seq_rec, outfile,'fasta')
 				good_strains.add(reduced_name)
-				HI_strain_outfile.write(tmp_name+'\n')
-				if fix_name(tmp_name)!=tmp_name:
-					HI_strain_outfile.write(fix_name(tmp_name)+'\n')
-				#print seq_rec.name
+
+	titer_count = defaultdict(int)
+	measurements = get_all_titers_flat(flutype)
+	for ii, rec in measurements.iterrows():
+		test, ref, src_id, val = rec
+		titer_count[test]+=1
+
+	with myopen("data/"+flutype+"_HI_strains.txt", 'w') as HI_strain_outfile:
+		for strain, count in sorted(titer_count.items(), key=lambda x:x[1], reverse=True):
+			HI_strain_outfile.write(strain + '\t'+str(count)+'\n')
+			if fix_name(strain)!=strain:
+				HI_strain_outfile.write(fix_name(strain) + '\t'+str(count)+'\n')
 
 
 def write_flat_HI_titers(flutype = 'H3N2', fname = None):
 	measurements = get_all_titers_flat(flutype)
 	with myopen('data/'+flutype+'_HI_strains.txt') as infile:
-		strains = [HI_fix_name(line.strip()).upper() for line in infile]
+		strains = [HI_fix_name(line.strip().split('\t')[0]).upper() for line in infile]
 	if fname is None:
 		fname = 'data/'+flutype+'_HI_titers.txt'
 	written = 0
