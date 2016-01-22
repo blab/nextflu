@@ -9,15 +9,24 @@ from tree_util import json_to_dendropy
 from tree_util import dendropy_to_json
 from fitness_tolerance import load_mutational_tolerance, calc_fitness_tolerance
 
-epitope_mask = np.fromstring("00000000000000000000000000000000000000000000000000000000000011111011011001010011000100000001001011110011100110101000001100000100000001000110101011111101011010111110001010011111000101011011111111010010001111101110111001010001110011111111000000111110000000101010101110000000000011100100000001011011100000000000001001011000110111111000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", dtype='S1')
+def setup_epitope_mask():
+	self.epitope_mask = ""
+	if "epitope_masks_fname" in self.kwargs and "epitope_mask_version" in self.kwargs:
+		epitope_map = {}
+		with open(self.kwargs["epitope_masks_fname"]) as f:
+			for line in f:
+				(key, value) = line.split()
+				epitope_map[key] = value
+		if self.kwargs["epitope_mask_version"] in epitope_map:
+			self.epitope_mask = epitope_map[self.kwargs["epitope_mask_version"]]
 
 def epitope_sites(aa):
 	aaa = np.fromstring(aa, 'S1')
-	return ''.join(aaa[epitope_mask[:len(aa)]=='1'])
+	return ''.join(aaa[self.epitope_mask[:len(aa)]=='1'])
 
 def nonepitope_sites(aa):
 	aaa = np.fromstring(aa, 'S1')
-	return ''.join(aaa[epitope_mask[:len(aa)]=='0'])
+	return ''.join(aaa[self.epitope_mask[:len(aa)]=='0'])
 
 def receptor_binding_sites(aa):
 	sp = 16
@@ -53,6 +62,7 @@ def calc_epitope_distance(tree, attr='ep', ref = None):
 	attr   --   the attribute name used to save the result
 	'''
 	if not hasattr(tree, "epitope_distance_assigned") or tree.epitope_distance_assigned==False:
+		setup_epitope_mask()	
 		if ref == None:
 			ref = translate(tree.seed_node.seq)
 		for node in tree.postorder_node_iter():
@@ -112,6 +122,7 @@ def calc_nonepitope_distance(tree, attr='ne', ref = None):
 	attr   --   the attribute name used to save the result
 	'''
 	if not hasattr(tree, "nonepitope_distance_assigned") or tree.nonepitope_distance_assigned==False:
+		setup_epitope_mask()	
 		if ref == None:
 			ref = translate(tree.seed_node.seq)
 		for node in tree.postorder_node_iter():
@@ -127,6 +138,7 @@ def calc_nonepitope_star_distance(tree, attr='ne_star', seasons = []):
 	attr   --   the attribute name used to save the result
 	'''
 	if not hasattr(tree, "nonepitope_star_distance_assigned") or tree.nonepitope_star_distance_assigned==False:
+		setup_epitope_mask()	
 		for node in tree.postorder_node_iter():
 			if len(node.season_tips) and node!=tree.seed_node:
 				if not hasattr(node, 'aa'):

@@ -51,6 +51,7 @@ virus_config.update({
 		'6b':[('HA1', 163,'Q'),  ('HA1', 256, 'T'), ('HA1', 197, 'A'), ('HA1', 283,'E')],
 		'7': [('HA1', 143,'G'),  ('HA1', 97, 'D'), ('HA1', 197, 'T')],
 		'8': [('HA1', 186,'T'),  ('HA1', 272,'A')],
+		'84N':[('HA1', 163,'Q'),  ('HA1', 256, 'T'), ('HA1', 197, 'A'), ('HA1', 283,'E'), ('SigPep', 13, 'T'), ('HA1', 84, 'N')]
 		},
 	'HI_fname':'data/H1N1pdm_HI_titers.txt',
 	'auspice_prefix':'H1N1pdm_',
@@ -230,7 +231,7 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine, HI
 				'ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country',
 				'dHI', 'cHI', 'mean_HI_titers','HI_titers','HI_titers_raw', 'serum', 'HI_info',
 				'avidity_tree','avidity_mut', 'potency_mut', 'potency_tree', 'mean_potency_mut', 'mean_potency_tree', 'autologous_titers'],
-                   annotations = ['5','6','6b', '6c','7'])
+                   annotations = ['5', '6', '6b', '6c', '7', '84N'])
 			if params.html:
 				self.generate_indexHTML()
 			self.export_HI_mutation_effects()
