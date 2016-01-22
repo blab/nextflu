@@ -183,7 +183,7 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine, HI
 			self.subsample(viruses_per_month,
 				prioritize=forced_strains, all_priority=self.force_include_all,
 				region_specific = self.max_global)
-			self.add_older_vaccine_viruses(dt = 5)
+			self.add_older_vaccine_viruses(dt = 6)
 			self.dump()
 		else:
 			self.load()
