@@ -145,7 +145,7 @@ class HI_tree(object):
 		self.HI_split_to_branch = defaultdict(list)
 		for node in self.tree.preorder_node_iter():
 			if self.map_to_tree:
-				node.dHI, node.cHI, node.constraints = 0, 0, 0
+				node.dHI, node.cHI, node.mHI, node.constraints = 0, 0, 0, 0
 			if node.HI_info>1:
 				node.HI_branch_index = self.HI_split_count
 				self.HI_split_to_branch[node.HI_branch_index].append(node)
@@ -545,24 +545,24 @@ class HI_tree(object):
 				likely_branch.dHI = self.params[HI_split]
 				likely_branch.constraints = self.tree_graph[:,HI_split].sum()
 
-			# integrate the HI change dHI into a cumulative antigentic evolution score cHI
-			#for node in self.tree.preorder_node_iter():
-			#	if node.parent_node is not None:
-			#		node.cHI = node.parent_node.cHI + node.dHI
-			#	else:
-			#		node.cHI=0
+			# integrate the tree model HI change dHI into a cumulative antigentic evolution score cHI
+			for node in self.tree.preorder_node_iter():
+				if node.parent_node is not None:
+					node.cHI = node.parent_node.cHI + node.dHI
+				else:
+					node.cHI=0
 		else:
 			self.mutation_effects={}
 			for mi, mut in enumerate(self.relevant_muts):
 				self.mutation_effects[mut] = self.params[mi]
-			# integrate the HI change dHI into a cumulative antigentic evolution score cHI
+			# integrate the mutation model change into a cumulative antigentic evolution score mHI
 			for node in self.tree.preorder_node_iter():
 				if node.parent_node is not None:
-					node.cHI = node.parent_node.cHI \
+					node.mHI = node.parent_node.mHI \
 					+ sum([0]+[self.mutation_effects[('HA1',str(mut))] for mut in node.aa_muts['HA1'].split(',')
 					       if ('HA1',str(mut)) in self.mutation_effects])
 				else:
-					node.cHI=0
+					node.mHI=0
 
 		self.serum_potency['tree' if self.map_to_tree else 'mutation'] =\
 					{serum:self.params[self.genetic_params+ii]
