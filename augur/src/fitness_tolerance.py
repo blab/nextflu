@@ -23,12 +23,12 @@ def calc_fitness_tolerance(aa_seq, aa_prob, aa, indices, beta = 1.0):
 	H3_aa_indices = np.array([aa.index(aa_seq[p]) if aa_seq[p] in aa else -1 for p in indices])
 	return np.sum((H3_aa_indices!=-1)*np.log(aa_prob[(np.arange(len(indices)), H3_aa_indices)])*beta)
 
-def assign_fitness(nodes):
+def assign_fitness(nodes, epitope_mask=None):
 	'''
 	loops over all viruses, translates their sequences and calculates the virus fitness
 	'''
 	aa, sites, wt_aa, aa_prob = load_mutational_tolerance()
-	aln = AlignIO.read('source-data/H1_H3_77.fasta', 'fasta')
+	aln = AlignIO.read('source-data/H1_H3.fasta', 'fasta')
 	# returns true whenever neither of the sequences have a gap
 	aligned = (np.array(aln)!='-').min(axis=0)
 	# map alignment positions to sequence positions, subset to aligned amino acids
@@ -41,6 +41,12 @@ def assign_fitness(nodes):
 	# attach another column for non-canonical amino acids
 	aa_prob = np.hstack((aa_prob, 1e-5*np.ones((aa_prob.shape[0],1))))
 	print("AA preference matrix:",aa_prob.shape)
+	if epitope_mask is not None: # strip epitope positions
+		nonepi_pos = np.where(epitope_mask=='0')[0]
+		nonepi_indices = np.in1d(indices['H3'], nonepi_pos)
+		aa_prob=aa_prob[nonepi_indices,:]
+		indices['H3'] = indices['H3'][nonepi_indices]
+		assert all(epitope_mask[indices['H3']]=='0')
 	if isinstance(nodes, list):
 		for node in nodes:
 			node['tol'] = calc_fitness_tolerance(Seq.translate(node['seq']),
