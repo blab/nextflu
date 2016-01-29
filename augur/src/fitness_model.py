@@ -18,13 +18,14 @@ default_predictors = ['lb', 'ep', 'ne_star']
 
 class fitness_model(object):
 
-	def __init__(self, predictor_input = ['ep', 'lb', 'dfreq'], verbose=0, **kwargs):
+	def __init__(self, predictor_input = ['ep', 'lb', 'dfreq'], verbose = 0, enforce_positive_predictors = True, **kwargs):
 		'''
 		parameters:
 		tree -- tree of sequences for which a fitness model is to be determined
 		predictor_input -- list of predictors to fit or dict of predictors to coefficients / std deviations
 		'''
 		self.verbose = verbose
+		self.enforce_positive_predictors = enforce_positive_predictors
 		self.estimate_coefficients = True
 
 		if isinstance(predictor_input, dict):
@@ -220,7 +221,12 @@ class fitness_model(object):
 			mean_error = 1e10
 		self.last_fit = mean_error
 		if self.verbose>2: print params, self.last_fit
-		return mean_error + regularization*np.sum(params**2)
+		penalty = regularization*np.sum(params**2)
+		if self.enforce_positive_predictors:
+			for param in params:
+				if param < 0:
+					penalty += 1
+		return mean_error + penalty
 
 	def weighted_af(self, seqs, weights):
 		af = np.zeros((4, seqs.shape[1]))
@@ -311,7 +317,7 @@ class fitness_model(object):
 		for ii in xrange(niter):
 			if self.verbose:
 				print "iteration:", ii+1
-			self.model_params = 0.5*np.random.randn(len(self.predictors)) #0*np.ones(len(self.predictors))  # initial values
+			self.model_params = np.random.rand(len(self.predictors)) #0*np.ones(len(self.predictors))  # initial values
 			minimize_error()
 			params_stack.append((self.last_fit, self.model_params))
 

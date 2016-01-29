@@ -9,6 +9,10 @@ from tree_util import json_to_dendropy
 from tree_util import dendropy_to_json
 from fitness_tolerance import load_mutational_tolerance, calc_fitness_tolerance
 
+# all fitness predictors should be designed to give a positive sign, ie.
+# number of epitope mutations
+# -1 * number of non-epitope mutations
+
 class fitness_predictors(object):
 
 	def __init__(self, predictor_names = ['ep', 'lb', 'dfreq'], **kwargs):
@@ -168,7 +172,7 @@ class fitness_predictors(object):
 
 	def calc_nonepitope_distance(self, tree, attr='ne', ref = None):
 		'''
-		calculates the distance at nonepitope sites of any tree node to ref
+		calculates -1 * distance at nonepitope sites of each node in tree to ref
 		tree   --   dendropy tree
 		attr   --   the attribute name used to save the result
 		'''
@@ -177,7 +181,8 @@ class fitness_predictors(object):
 		for node in tree.postorder_node_iter():
 			if not hasattr(node, 'aa'):
 				node.aa = translate(node.seq)
-			node.__setattr__(attr, self.nonepitope_distance(node.aa, ref))
+			distance = self.nonepitope_distance(node.aa, ref)
+			node.__setattr__(attr, -1 * distance)
 
 	def calc_nonepitope_star_distance(self, tree, attr='ne_star', seasons = []):
 		'''
