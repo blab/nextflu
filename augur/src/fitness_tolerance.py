@@ -37,15 +37,21 @@ def assign_fitness(nodes, epitope_mask=None):
 		indices[seq.name] = (np.cumsum(np.fromstring(str(seq.seq), dtype='S1')!='-')-1)[aligned]
 
 	# make a reduced set of amino-acid probabilities that only contains aligned positions
+	# column ii in aa_prob[ii,:] now corresponds to position indices['H3'][ii] in the H3 HA
 	aa_prob=aa_prob[indices['H1'],:]
 	# attach another column for non-canonical amino acids
 	aa_prob = np.hstack((aa_prob, 1e-5*np.ones((aa_prob.shape[0],1))))
 	print("AA preference matrix:",aa_prob.shape)
 	if epitope_mask is not None: # strip epitope positions
 		nonepi_pos = np.where(epitope_mask=='0')[0]
+		# determine those position in the H3 index set that correspond to nonepitope positions
+		# nonepi_indices[ii]==True iff indices['H3'][ii] is a non epitope position
 		nonepi_indices = np.in1d(indices['H3'], nonepi_pos)
+		# remove epitope positions from the aa matrix and the indices
 		aa_prob=aa_prob[nonepi_indices,:]
 		indices['H3'] = indices['H3'][nonepi_indices]
+		# column ii in aa_prob[ii,:] again corresponds to position indices['H3'][ii] in the H3 HA
+		# but only nonepitope indices are in indices['H3']
 		assert all(epitope_mask[indices['H3']]=='0')
 	if isinstance(nodes, list):
 		for node in nodes:
