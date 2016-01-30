@@ -35,7 +35,7 @@ virus_config.update({
 						   "3c3.b": [('HA1',  83,'R'), ('HA1',261,'Q'), ('HA1',62,'K'),  ('HA1', 122,'D')]
 							},
 	'epitope_masks_fname':'source-data/H3N2_epitope_masks.tsv',
-	'epitope_mask_version':'wolf',
+	'epitope_mask_version':'ha1',
 	'HI_fname':'data/H3N2_HI_titers.txt',
 	'auspice_prefix':'H3N2_',
 	'html_vars': {'coloring': 'ep, ne, rb, lbi, dfreq, region, date, cHI, HI_dist',

@@ -71,8 +71,8 @@ class fitness_model(object):
 		print("calculating global node frequencies")
 		region = "global"
 		# estimate_tree_frequencies needs to run once and it's result will be decorated on the tree with subsequent loads
-		# maybe move to frequency step
-		self.estimate_tree_frequencies(pivots=self.rootnode.pivots, threshold=40, regions=None, region_name=region, time_interval=self.time_interval)
+		if not hasattr(self.rootnode, 'freq'):
+			self.estimate_tree_frequencies(pivots=self.rootnode.pivots, threshold=40, regions=None, region_name=region, time_interval=self.time_interval)
 		for node in self.nodes:		
 			interpolation = interp1d(self.rootnode.pivots, node.freq[region], kind='linear', bounds_error=False)
 			node.timepoint_freqs = defaultdict(float)
@@ -387,10 +387,15 @@ class fitness_model(object):
 											  tmp[:,2]/tmp[:,0]))
 	
 		growth_list = [pred > initial for (initial, obs, pred) in tmp if obs > initial]
-		print ("Correct at predicting growth:", growth_list.count(True) / float(len(growth_list)))
-
+		correct_growth = growth_list.count(True)
+		total_growth = float(len(growth_list))
 		decline_list = [pred < initial for (initial, obs, pred) in tmp if obs < initial]
-		print ("Correct at predicting decline:", decline_list.count(True) / float(len(decline_list)))
+		correct_decline = decline_list.count(True)
+		total_decline = float(len(decline_list))
+		
+		print ("Correct at predicting growth:", correct_growth / total_growth)
+		print ("Correct at predicting decline:",  correct_decline / total_decline)
+		print ("Correct classification:",  (correct_growth+correct_decline) / (total_growth+total_decline))
 
 		axs[0].set_ylabel('predicted')
 		axs[0].set_xlabel('observed')

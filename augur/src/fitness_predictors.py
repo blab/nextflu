@@ -7,7 +7,7 @@ from io_util import read_json
 from io_util import write_json
 from tree_util import json_to_dendropy
 from tree_util import dendropy_to_json
-from fitness_tolerance import load_mutational_tolerance, calc_fitness_tolerance
+from fitness_tolerance import assign_fitness_tolerance
 
 # all fitness predictors should be designed to give a positive sign, ie.
 # number of epitope mutations
@@ -34,7 +34,9 @@ class fitness_predictors(object):
 		if pred == 'ne_star':
 			self.calc_nonepitope_star_distance(tree)
 		if pred == 'tol':
-			self.calc_tolerance(tree)
+			self.calc_tolerance(tree, attr = 'tol')
+		if pred == 'tol_ne':
+			self.calc_tolerance(tree, epitope_mask = self.epitope_mask, attr = 'tol_ne')			
 		#if pred == 'dfreq':
 			# do nothing
 		#if pred == 'cHI':
@@ -142,33 +144,13 @@ class fitness_predictors(object):
 				node.aa = translate(node.seq)
 			node.__setattr__(attr, self.rbs_distance(node.aa, ref))
 
-	def calc_tolerance(self, tree, attr='tol'):
+	def calc_tolerance(self, tree, epitope_mask=None, attr='tol'):
 		'''
-		calculates the distance at epitope sites of any tree node  to ref
+		calculates log odds of a node's AA sequence relative to a set of site-specific AA preferences
 		tree   --   dendropy tree
 		attr   --   the attribute name used to save the result
 		'''
-		from Bio import AlignIO
-		aa, sites, wt_aa, aa_prob = load_mutational_tolerance()
-		aln = AlignIO.read('source-data/H1_H3.fasta', 'fasta')
-		# returns true whenever either of the sequences have a gap
-		aligned = (np.array(aln)!='-').min(axis=0)
-		# map alignment positions to sequence positions, subset to aligned amino acids
-		indices = {}
-		for seq in aln:
-			indices[seq.name] = (np.cumsum(np.fromstring(str(seq.seq), dtype='S1')!='-')-1)[aligned]
-
-		# make a reduced set of amino-acid probabilities that only contains aligned positions
-		aa_prob=aa_prob[indices['H1'],:]
-		# attach another column for non-canonical amino acids
-
-		aa_prob = np.hstack((aa_prob, 1e-5*np.ones((aa_prob.shape[0],1))))	
-		
-		for node in tree.postorder_node_iter():
-			if not hasattr(node, 'aa'):
-				node.aa = translate(node.seq)
-			node.__setattr__(attr, calc_fitness_tolerance(node.aa, aa_prob, aa, indices['H3']))
-
+		assign_fitness_tolerance(tree, epitope_mask=epitope_mask, attr=attr)
 
 	def calc_nonepitope_distance(self, tree, attr='ne', ref = None):
 		'''
