@@ -35,7 +35,8 @@ virus_config.update({
 						   "3c3.b": [('HA1',  83,'R'), ('HA1',261,'Q'), ('HA1',62,'K'),  ('HA1', 122,'D')]
 							},
 	'epitope_masks_fname':'source-data/H3N2_epitope_masks.tsv',
-	'epitope_mask_version':'ha1',
+	'epitope_mask_version':'wolf',
+	'tolerance_mask_version':'ha1',	
 	'HI_fname':'data/H3N2_HI_titers.txt',
 	'auspice_prefix':'H3N2_',
 	'html_vars': {'coloring': 'ep, ne, rb, lbi, dfreq, region, date, cHI, HI_dist',
@@ -45,8 +46,10 @@ virus_config.update({
 	'excluded_tables': ['NIMR_Sep2012_08.csv'], #, 'nimr-sep-2010-table8', 'nimr-sep-2010-table8','NIMR_Sep2012_11.csv'],
 	'layout':'auspice',
 	'min_aamuts': 1,
-#	'predictors': ['dfreq', 'cHI']														# estimate
-	'predictors': { 'dfreq': [0.30, 1.87], 'cHI': [2.11, 0.78] }						# fix predictor: [value, std deviation]
+#	'predictors': ['ep', 'tol_ne']														# estimate
+#	'predictors': { 'cHI': [2.11, 0.78], 'dfreq': [0.30, 1.87] }						# fix predictor: [value, std deviation]
+#	'predictors': { 'cHI': [2.66, 0.78], 'tol_ne': [1.10, 2.30] }						# fix predictor: [value, std deviation]
+	'predictors': { 'ep': [1.83, 2.21], 'tol_ne': [2.53, 2.30] }						# fix predictor: [value, std deviation]
 	})
 
 

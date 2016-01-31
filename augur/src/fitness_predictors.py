@@ -16,7 +16,9 @@ from fitness_tolerance import assign_fitness_tolerance
 class fitness_predictors(object):
 
 	def __init__(self, predictor_names = ['ep', 'lb', 'dfreq'], **kwargs):
-		if "epitope_masks_fname" in kwargs and "epitope_mask_version" in kwargs:
+		if "epitope_masks_fname" in kwargs and "epitope_mask_version" in kwargs and "tolerance_mask_version" in kwargs:
+			self.setup_epitope_mask(epitope_masks_fname = kwargs["epitope_masks_fname"], epitope_mask_version = kwargs["epitope_mask_version"], tolerance_mask_version = kwargs["tolerance_mask_version"])
+		elif "epitope_masks_fname" in kwargs and "epitope_mask_version" in kwargs:
 			self.setup_epitope_mask(epitope_masks_fname = kwargs["epitope_masks_fname"], epitope_mask_version = kwargs["epitope_mask_version"])
 		else:
 			self.setup_epitope_mask()
@@ -36,14 +38,15 @@ class fitness_predictors(object):
 		if pred == 'tol':
 			self.calc_tolerance(tree, attr = 'tol')
 		if pred == 'tol_ne':
-			self.calc_tolerance(tree, epitope_mask = self.epitope_mask, attr = 'tol_ne')			
+			self.calc_tolerance(tree, epitope_mask = self.tolerance_mask, attr = 'tol_ne')			
 		#if pred == 'dfreq':
 			# do nothing
 		#if pred == 'cHI':
 			# do nothing
 
-	def setup_epitope_mask(self, epitope_masks_fname = 'source-data/H3N2_epitope_masks.tsv', epitope_mask_version = 'wolf'):
+	def setup_epitope_mask(self, epitope_masks_fname = 'source-data/H3N2_epitope_masks.tsv', epitope_mask_version = 'wolf', tolerance_mask_version = 'ha1'):
 		self.epitope_mask = ""
+		self.tolerance_mask = ""
 		epitope_map = {}
 		with open(epitope_masks_fname) as f:
 			for line in f:
@@ -51,6 +54,10 @@ class fitness_predictors(object):
 				epitope_map[key] = value
 		if epitope_mask_version in epitope_map:
 			self.epitope_mask = epitope_map[epitope_mask_version]
+		if tolerance_mask_version in epitope_map:
+			self.tolerance_mask = epitope_map[tolerance_mask_version]
+		else:
+			self.tolerance_mask = self.epitope_mask
 
 	def epitope_sites(self, aa):
 		sites = []
