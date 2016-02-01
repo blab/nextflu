@@ -97,9 +97,9 @@ class fitness_model(object):
 				self.fp.setup_predictor(self.tree, pred, timepoint)
 
 	def select_nodes_in_season(self, timepoint):
-		# used by fitness_predictors:calc_LBI
+		# used by fitness_predictors:calc_LBI and fitness_predictors:calc_epitope_cross_immunity
 		# TODO: fix me for continous time model
-		cutoff = 0.01
+		cutoff = 0.001
 		for node in self.nodes:
 			#if season in node.season_tips and len(node.season_tips[season])>0:		
 			if node.timepoint_freqs[timepoint] > cutoff:

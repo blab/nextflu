@@ -29,8 +29,8 @@ class fitness_predictors(object):
 			self.calc_LBI(tree, tau = 0.0005, transform = lambda x:x)
 		if pred == 'ep':
 			self.calc_epitope_distance(tree)
-		if pred == 'epH':
-			self.calc_epitope_history(tree, timepoint)			
+		if pred == 'ep_x':
+			self.calc_epitope_cross_immunity(tree)			
 		if pred == 'ne':
 			self.calc_nonepitope_distance(tree)
 		if pred == 'ne_star':
@@ -86,6 +86,10 @@ class fitness_predictors(object):
 		distance = sum(a != b for a, b in izip(epA, epB))
 		return distance
 
+	def fast_epitope_distance(self, epA, epB):
+		"""Return distance of sequences aaA and aaB by comparing epitope sites"""
+		return np.count_nonzero(epA!=epB)
+
 	def nonepitope_distance(self, aaA, aaB):
 		"""Return distance of sequences aaA and aaB by comparing non-epitope sites"""
 		neA = self.nonepitope_sites(aaA)
@@ -102,41 +106,47 @@ class fitness_predictors(object):
 
 	def calc_epitope_distance(self, tree, attr='ep', ref = None):
 		'''
-		calculates the distance at epitope sites of any tree node  to ref
+		calculates the distance at epitope sites of any tree node to ref
 		tree   --   dendropy tree
 		attr   --   the attribute name used to save the result
 		'''
+		for node in tree.postorder_node_iter():
+			if not hasattr(node, 'np_ep'):
+				if not hasattr(node, 'aa'):
+					node.aa = translate(node.seq)
+				node.np_ep = np.array(list(self.epitope_sites(node.aa)))	
 		if ref == None:
-			ref = translate(tree.seed_node.seq)
+			ref = tree.seed_node
 		for node in tree.postorder_node_iter():
-			if not hasattr(node, 'aa'):
-				node.aa = translate(node.seq)
-			node.__setattr__(attr, self.epitope_distance(node.aa, ref))
+			node.__setattr__(attr, self.fast_epitope_distance(node.np_ep, ref.np_ep))
 			
-	def calc_epitope_history(self, tree, timepoint, attr='epH'):
+	def calc_epitope_cross_immunity(self, tree, attr='ep_x'):
 		'''
-		calculates the distance at epitope sites of any tree node to all nodes before timepoint
-		these comparison nodes are a proxy for the host immune landscape at that time
+		calculates the distance at epitope sites to contemporaneous viruses
+		this should capture cross-immunity of circulating viruses
+		meant to be used in conjunction with epitope_distance that focuses
+		on escape from previous human immunity
 		tree   --   dendropy tree
 		attr   --   the attribute name used to save the result
 		'''
-		comparison_nodes = [] 
+		comparison_nodes = []
 		for node in tree.postorder_node_iter():
-			if not hasattr(node, 'aa'):
-				node.aa = translate(node.seq)
-			node.__setattr__(attr, 0)
-			if node.is_leaf():
-				if node.num_date <= timepoint:
+			if hasattr(node, 'alive'):
+				if node.alive:
 					comparison_nodes.append(node)
+			if not hasattr(node, 'np_ep'):
+				if not hasattr(node, 'aa'):
+					node.aa = translate(node.seq)
+				node.np_ep = np.array(list(self.epitope_sites(node.aa)))
 		for node in tree.postorder_node_iter():
-			if node.is_leaf():
-				mean_distance = 0
-				count = 0
-				for comp_node in comparison_nodes:
-					mean_distance += self.epitope_distance(node.aa, comp_node.aa)
-					count += 1
-				epitope_history = mean_distance / float(count)
-				node.__setattr__(attr, epitope_history)			
+			mean_distance = 0
+			count = 0
+			for comp_node in comparison_nodes:
+				mean_distance += self.fast_epitope_distance(node.np_ep, comp_node.np_ep)
+				count += 1
+			if count > 0:
+				mean_distance /= float(count)
+			node.__setattr__(attr, mean_distance)	
 
 	def calc_rbs_distance(self, tree, attr='rb', ref = None):
 		'''
