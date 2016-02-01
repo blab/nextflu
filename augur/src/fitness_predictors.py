@@ -30,7 +30,7 @@ class fitness_predictors(object):
 		if pred == 'ep':
 			self.calc_epitope_distance(tree)
 		if pred == 'ep_x':
-			self.calc_epitope_cross_immunity(tree)			
+			self.calc_epitope_cross_immunity(tree, timepoint)			
 		if pred == 'ne':
 			self.calc_nonepitope_distance(tree)
 		if pred == 'ne_star':
@@ -120,7 +120,7 @@ class fitness_predictors(object):
 		for node in tree.postorder_node_iter():
 			node.__setattr__(attr, self.fast_epitope_distance(node.np_ep, ref.np_ep))
 			
-	def calc_epitope_cross_immunity(self, tree, attr='ep_x'):
+	def calc_epitope_cross_immunity(self, tree, timepoint, window = 2.0, attr='ep_x'):
 		'''
 		calculates the distance at epitope sites to contemporaneous viruses
 		this should capture cross-immunity of circulating viruses
@@ -131,13 +131,14 @@ class fitness_predictors(object):
 		'''
 		comparison_nodes = []
 		for node in tree.postorder_node_iter():
-			if hasattr(node, 'alive'):
-				if node.alive:
+			if node.is_leaf():
+				if node.num_date < timepoint and node.num_date > timepoint - window:
 					comparison_nodes.append(node)
 			if not hasattr(node, 'np_ep'):
 				if not hasattr(node, 'aa'):
 					node.aa = translate(node.seq)
 				node.np_ep = np.array(list(self.epitope_sites(node.aa)))
+		print "calculating cross-immunity to " + str(len(comparison_nodes)) + " comparison nodes"
 		for node in tree.postorder_node_iter():
 			mean_distance = 0
 			count = 0
