@@ -45,6 +45,7 @@ class fitness_predictors(object):
 			# do nothing
 
 	def setup_epitope_mask(self, epitope_masks_fname = 'source-data/H3N2_epitope_masks.tsv', epitope_mask_version = 'wolf', tolerance_mask_version = 'ha1'):
+		print "setup " + epitope_mask_version + " epitope mask and " + tolerance_mask_version + " tolerance mask"
 		self.epitope_mask = ""
 		self.tolerance_mask = ""
 		epitope_map = {}
@@ -68,7 +69,7 @@ class fitness_predictors(object):
 
 	def nonepitope_sites(self, aa):
 		sites = []
-		for a, m in izip(aa, self.epitope_mask):
+		for a, m in izip(aa, self.tolerance_mask):
 			if m == '0':
 				sites.append(a)
 		return ''.join(sites)
