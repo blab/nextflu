@@ -125,13 +125,13 @@ function draggedMin(d) {
 		.attr("x2", function(d) {return d.x2});
 
 	calcNodeAges(time_window);
-	treeplot.selectAll(".link")
-		.style("stroke", function(d){return "#ccc";})
+//	treeplot.selectAll(".link")
+//		.style("stroke", function(d){return "#ccc";})
 
 	treeplot.selectAll(".tip")
-		.style("visibility", tipVisibility)
-		.style("fill", "#CCC")
-		.style("stroke", "#AAA");
+		.style("visibility", tipVisibility);
+//		.style("fill", "#CCC")
+//		.style("stroke", "#AAA");
 
 	treeplot.selectAll(".vaccine")
 		.style("visibility", function(d) {
