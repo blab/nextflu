@@ -202,7 +202,7 @@ function date_init(){
 	});
 	earliestDate = new Date(d3.min(dateValues));
 	earliestDate.setDate(earliestDate.getDate() + 1);
-	globalDate = new Date(d3.max(dateValues));
+//	globalDate = new Date(d3.max(dateValues));
 
 	dateScale = d3.time.scale()
 		.domain([earliestDate, globalDate])
