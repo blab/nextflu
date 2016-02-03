@@ -243,6 +243,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	if (typeof rootNode['ep'] != "undefined"){ initColorDomain('ep', epitopeColorScale);}
 	if (typeof rootNode['ne'] != "undefined"){ initColorDomain('ne', nonepitopeColorScale);}
 	if (typeof rootNode['rb'] != "undefined"){ initColorDomain('rb', receptorBindingColorScale);}
+	if (typeof rootNode['tol_ne'] != "undefined"){ initColorDomain('tol_ne', toleranceColorScale);}
 	if (typeof rootNode['dfreq'] != "undefined"){ initColorDomain('dfreq', dfreqColorScale);}	
 	date_init();
 	tree_init();

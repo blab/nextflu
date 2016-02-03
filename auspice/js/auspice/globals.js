@@ -43,6 +43,7 @@ var serumSymbol = '\uf0fe';
 var epiColorDomain = genericDomain;
 var nonEpiColorDomain = genericDomain;
 var rbsColorDomain = genericDomain;
+var tolColorDomain = genericDomain;
 var dateColorDomain = genericDomain;
 var HIColorDomain = genericDomain.map(function(d){return Math.round(100*(d*3.6))/100;});
 var dfreqColorDomain = genericDomain.map(function(d){return Math.round(100*(0.2+d*1.8))/100;});

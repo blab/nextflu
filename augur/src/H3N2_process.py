@@ -367,7 +367,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, H3N2_HI, H3N2_
 			self.temporal_regional_statistics()
 			# exporting to json, including the H3N2 specific fields
 			self.export_to_auspice(tree_fields = [
-				'ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country', 'dfreq', 'fitness', 'pred_distance',
+				'ep', 'ne', 'rb', 'tol_ne', 'aa_muts','accession','isolate_id', 'lab','db', 'country', 'dfreq', 'fitness', 'pred_distance',
 				'dHI', 'cHI', 'mHI', 'mean_HI_titers', 'HI_titers', 'HI_titers_raw', 'serum', 'HI_info',
 				'avidity_tree', 'avidity_mut', 'potency_mut', 'potency_tree', 'mean_potency_mut', 'mean_potency_tree', 'autologous_titers'],
 				   annotations = ['3c2.a', '3c3.a', '3c3.b'])
