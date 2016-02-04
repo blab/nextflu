@@ -12,6 +12,9 @@ function makeLegend(){
 		if (colorBy == "rb") {
 			return "Receptor binding mutations";
 		}
+		if (colorBy == "tol_ne") {
+			return "HA2 DMS tolerance";
+		}		
 		if (colorBy == "lbi") {
 			return "Local branching index";
 		}

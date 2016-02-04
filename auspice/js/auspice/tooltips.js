@@ -79,6 +79,9 @@ var virusTooltip = d3.tip()
 		if (typeof d.rb != "undefined") {
 			string += "Receptor binding distance: " + d.rb + "<br>";
 		}
+		if (typeof d.tol_ne != "undefined") {
+			string += "HA2 DMS tolerance: " + d.tol_ne.toFixed(1) + "<br>";
+		}		
 		if (typeof d.LBI != "undefined") {
 			string += "Local branching index: " + d.LBI.toFixed(3) + "<br>";
 		}

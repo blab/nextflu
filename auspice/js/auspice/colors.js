@@ -117,6 +117,10 @@ function colorByTrait() {
 		colorScale = receptorBindingColorScale;
 		nodes.map(function(d) { d.coloring = d.rb; });
 	}
+	else if (colorBy == "tol_ne") {
+		colorScale = toleranceColorScale;
+		nodes.map(function(d) { d.coloring = d.tol_ne; });
+	}	
 	else if (colorBy == "lbi") {
 		colorScale = lbiColorScale;
 		adjust_coloring_by_date();

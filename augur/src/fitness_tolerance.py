@@ -53,6 +53,8 @@ def assign_fitness_tolerance(nodes, epitope_mask=None, attr='tol'):
 		for pos in indices['H3']:
 			if epitope_mask[pos][0] == '0':
 				nonepi_indices.append(True)
+			if epitope_mask[pos][0] == '1':
+				nonepi_indices.append(False)								
 		# remove epitope positions from the aa matrix and the indices				
 		aa_prob=aa_prob[nonepi_indices,:]
 	#	indices['H3'] = indices['H3'][nonepi_indices]
