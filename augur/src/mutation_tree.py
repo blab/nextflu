@@ -1,4 +1,4 @@
-import time, re, os, argparse,shutil
+import time, re, os, argparse,shutil, sys
 from tree_refine import tree_refine
 from virus_clean import virus_clean
 from virus_filter import flu_filter
@@ -12,8 +12,10 @@ from Bio.Align import MultipleSeqAlignment
 import numpy as np
 from itertools import izip
 
-std_outgroup_file_blast = 'source-data/outgroups.fasta'
-std_outgroup_file_nuc = 'source-data/outgroups_nucleotides.fasta'
+path_to_augur = './' + ('/'.join(sys.argv[0].split('/')[:-2]))
+std_outgroup_file_blast = path_to_augur+'/source-data/outgroups.fasta'
+std_outgroup_file_nuc = path_to_augur+'/source-data/outgroups_nucleotides.fasta'
+
 virus_config.update({
 	# data source and sequence parsing/cleaning/processing
 	'fasta_fields':{0:'strain', 1:'isolate_id', 2:'date',  3:'subtype', 4:'country', 5:'region', 7:'host', 6:'passage'},
