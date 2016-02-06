@@ -36,6 +36,7 @@ virus_config.update({
 							},
 	'epitope_masks_fname':'source-data/H3N2_epitope_masks.tsv',
 	'epitope_mask_version':'wolf',
+	'tolerance_mask_version':'ha1',	
 	'HI_fname':'data/H3N2_HI_titers.txt',
 	'auspice_prefix':'H3N2_',
 	'html_vars': {'coloring': 'ep, ne, rb, lbi, dfreq, region, date, cHI, HI_dist',
@@ -45,8 +46,10 @@ virus_config.update({
 	'excluded_tables': ['NIMR_Sep2012_08.csv'], #, 'nimr-sep-2010-table8', 'nimr-sep-2010-table8','NIMR_Sep2012_11.csv'],
 	'layout':'auspice',
 	'min_aamuts': 1,
-#	'predictors': ['dfreq', 'cHI']												# estimate
-	'predictors': { 'dfreq': [2.50, 2.84], 'cHI': [1.68, 0.45] }				# fix predictor: [value, std deviation]
+#	'predictors': ['ep', 'tol_ne']														# estimate
+#	'predictors': { 'cHI': [2.11, 0.78], 'dfreq': [0.30, 1.87] }						# fix predictor: [value, std deviation]
+#	'predictors': { 'cHI': [2.66, 0.78], 'tol_ne': [1.10, 2.30] }						# fix predictor: [value, std deviation]
+	'predictors': { 'ep': [1.83, 2.21], 'tol_ne': [2.53, 2.30] }						# fix predictor: [value, std deviation]
 	})
 
 
@@ -206,12 +209,18 @@ class H3N2_refine(tree_refine):
 		self.add_H3N2_attributes()
 
 	def epitope_sites(self, aa):
-		aaa = np.fromstring(aa, 'S1')
-		return ''.join(aaa[self.epitope_mask[:len(aa)]=='1'])
+		sites = []
+		for a, m in izip(aa, self.epitope_mask):
+			if m == '1':
+				sites.append(a)
+		return ''.join(sites)
 
 	def nonepitope_sites(self, aa):
-		aaa = np.fromstring(aa, 'S1')
-		return ''.join(aaa[self.epitope_mask[:len(aa)]=='0'])
+		sites = []
+		for a, m in izip(aa, self.epitope_mask):
+			if m == '0':
+				sites.append(a)
+		return ''.join(sites)
 
 	def receptor_binding_sites(self, aa):
 		'''
@@ -291,7 +300,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, H3N2_HI, H3N2_
 		H3N2_fitness.__init__(self,**kwargs)
 		self.verbose = verbose
 
-	def run(self, steps, viruses_per_month=50, raxml_time_limit = 1.0, lam_HI=.5, lam_avi=1, lam_pot=.1):
+	def run(self, steps, viruses_per_month=50, raxml_time_limit = 1.0, lam_HI=2.0, lam_pot=0.3, lam_avi=2):
 		if 'filter' in steps:
 			print "--- Virus filtering at " + time.strftime("%H:%M:%S") + " ---"
 			self.filter()
@@ -303,7 +312,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, H3N2_HI, H3N2_
 			self.subsample(viruses_per_month,
 				prioritize=forced_strains, all_priority=self.force_include_all,
 				region_specific = self.max_global)
-			self.add_older_vaccine_viruses(dt = 4)
+			self.add_older_vaccine_viruses(dt = 3)
 			self.dump()
 		else:
 			self.load()
@@ -358,9 +367,9 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, H3N2_HI, H3N2_
 			self.temporal_regional_statistics()
 			# exporting to json, including the H3N2 specific fields
 			self.export_to_auspice(tree_fields = [
-				'ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country', 'dfreq', 'fitness', 'pred_distance',
-				'dHI', 'cHI', 'mean_HI_titers','HI_titers','HI_titers_raw', 'serum', 'HI_info',
-				'avidity_tree','avidity_mut', 'potency_mut', 'potency_tree', 'mean_potency_mut', 'mean_potency_tree', 'autologous_titers'],
+				'ep', 'ne', 'rb', 'tol_ne', 'aa_muts','accession','isolate_id', 'lab','db', 'country', 'dfreq', 'fitness', 'pred_distance',
+				'dHI', 'cHI', 'mHI', 'mean_HI_titers', 'HI_titers', 'HI_titers_raw', 'serum', 'HI_info',
+				'avidity_tree', 'avidity_mut', 'potency_mut', 'potency_tree', 'mean_potency_mut', 'mean_potency_tree', 'autologous_titers'],
 				   annotations = ['3c2.a', '3c3.a', '3c3.b'])
 			if params.html:
 				self.generate_indexHTML()

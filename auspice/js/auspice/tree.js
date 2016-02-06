@@ -51,8 +51,27 @@ function initDateColorDomain(intAttributes){
 }
 
 function initColorDomain(attr, tmpCS){
-	//var vals = tips.filter(function(d) {return tipVisibility(d)=='visible';}).map(function(d) {return d[attr];});
-	var vals = tips.map(function(d) {return d[attr];});
+	// only measure recent tips
+	var numDateValues = tips.map(function(d) {return d.num_date;})
+	var maxDate = d3.max(numDateValues.filter(function (d){return d!="undefined";}));
+	var time_back = 1.0;
+	if (typeof time_window != "undefined"){
+		time_back = time_window;
+	}
+	if (typeof full_data_time_window != "undefined"){
+		time_back = full_data_time_window;
+	}		
+	var minimum_date = maxDate - time_back;
+
+	// find attribute values
+	var vals = [];
+	for (var i = 0; i < tips.length; i++) {
+		var tip = tips[i];
+		if (tip.num_date > minimum_date && tip[attr] != "undefined") {
+			vals.push(tip[attr]);
+		}
+	}	
+//	var vals = tips.map(function(d) {return d[attr];});
 	var minval = Math.floor(d3.min(vals));
 	var maxval = Math.ceil(d3.max(vals));
 	var minval = Math.floor(2*d3.min(vals))/2;
@@ -169,7 +188,7 @@ function tree_init(){
 	calcFullTipCounts(rootNode);
 	calcBranchLength(rootNode);
 	rootNode.branch_length= 0.01;
-	rootNode.dfreq = 0.0;
+//	rootNode.dfreq = 0.0;
 	if (typeof rootNode.pivots != "undefined"){
 		time_step = rootNode.pivots[1]-rootNode.pivots[0];
 	}else{
@@ -185,7 +204,7 @@ function tree_init(){
 	calcNodeAges(time_window);
 	colorByTrait();
 	adjust_freq_by_date();
-	calcDfreq(rootNode, freq_ii);
+//	calcDfreq(rootNode, freq_ii);
 	tree_legend = makeLegend();
 	nDisplayTips = displayRoot.fullTipCount;
 }
@@ -224,6 +243,8 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	if (typeof rootNode['ep'] != "undefined"){ initColorDomain('ep', epitopeColorScale);}
 	if (typeof rootNode['ne'] != "undefined"){ initColorDomain('ne', nonepitopeColorScale);}
 	if (typeof rootNode['rb'] != "undefined"){ initColorDomain('rb', receptorBindingColorScale);}
+	if (typeof rootNode['tol_ne'] != "undefined"){ initColorDomain('tol_ne', toleranceColorScale);}
+	if (typeof rootNode['dfreq'] != "undefined"){ initColorDomain('dfreq', dfreqColorScale);}	
 	date_init();
 	tree_init();
 

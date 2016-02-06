@@ -28,12 +28,16 @@ var nonepitopeColorScale = d3.scale.linear().clamp([true])
 var receptorBindingColorScale = d3.scale.linear().clamp([true])
 	.domain(rbsColorDomain)
 	.range(colors[4]);
+	
+var toleranceColorScale = d3.scale.linear().clamp([true])
+	.domain(tolColorDomain)
+	.range(colors[10]);
 
 var lbiColorScale = d3.scale.linear()
 	.domain([0.0, 0.02, 0.04, 0.07, 0.1, 0.2, 0.4, 0.7, 0.9, 1.0])
 	.range(colors[10]);
 
-var dfreqColorScale = d3.scale.linear()
+var dfreqColorScale = d3.scale.linear().clamp([true])
 	.domain(dfreqColorDomain)
 	.range(colors[10]);
 
@@ -113,6 +117,10 @@ function colorByTrait() {
 		colorScale = receptorBindingColorScale;
 		nodes.map(function(d) { d.coloring = d.rb; });
 	}
+	else if (colorBy == "tol_ne") {
+		colorScale = toleranceColorScale;
+		nodes.map(function(d) { d.coloring = d.tol_ne; });
+	}	
 	else if (colorBy == "lbi") {
 		colorScale = lbiColorScale;
 		adjust_coloring_by_date();

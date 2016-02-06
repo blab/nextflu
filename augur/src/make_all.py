@@ -163,7 +163,7 @@ if __name__=="__main__":
 	skip = 'genotype_frequencies fitness HIvalidate'
 	if params.fitness:
 		skip = 'genotype_frequencies HIvalidate'
-	common_args = ['--skip', skip, '-r', params.r, '--lam_HI', 1, '--lam_pot', 0.3, '--lam_avi', 2]
+	common_args = ['--skip', skip, '-r', params.r, '--lam_HI', 2.0, '--lam_pot', 0.3, '--lam_avi', 2]
 	if params.ATG: common_args.append('--ATG')
 	if params.html: common_args.append('--html')
 
@@ -175,7 +175,7 @@ if __name__=="__main__":
 
 	if "historical_predictions" in params.resolutions:
 		params.resolutions.remove("historical_predictions")
-		params.resolutions.extend(['Sep-2013', 'Feb-2014', 'May-2014', 'Sep-2014', 'Feb-2015', 'Sep-2015'])
+		params.resolutions.extend(['Feb-2014', 'Sep-2014', 'Feb-2015', 'Sep-2015'])
 
 	for lineage in params.lineages:
 		if params.s3:
