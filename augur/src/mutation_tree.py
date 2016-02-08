@@ -24,17 +24,14 @@ virus_config.update({
 	})
 
 def get_date(strain):
+	from datetime import datetime
+	date_str = strain.split('|')[2]
 	try:
-		year = int(strain.split('|')[2][:4])
+		collection_date = datetime.strptime(date_str, '%Y-%m-%d')
+		return collection_date.strftime('%Y-%m-%d')
 	except:
-		print("cannot parse year of ", strain)
-		return 1900
-
-	if year<18:
-		year +=2000
-	elif year<100:
-		year+=1900
-	return year
+		collection_date = datetime.strptime(date_str[:4], '%Y')
+		return collection_date.strftime('%Y-%m-%d')
 
 class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 	"""docstring for mutation_tree"""
@@ -112,6 +109,7 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 
 		self.make_run_dir()
 		nvir = 10
+		max_ref_seqs = 5
 		tmp_dates = []
 		for v in self.viruses:
 			try:
@@ -146,10 +144,12 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 			self.midpoint_rooting = True
 			print("will root at midpoint")
 
-		for ref, hits in by_og:
+		for oi, (ref, hits) in enumerate(by_og):
 			if np.max([y[-1] for y in hits])>0.9 and ref!=og:
 				self.viruses.append(standard_outgroups[ref])
 				print("including reference strain ",ref, [y[-1] for y in hits])
+				if oi>max_ref_seqs:
+					break
 		self.outgroup = standard_outgroups[og]
 		self.outgroup['strain']+='OG'
 		self.cds = [0,len(self.outgroup['seq'])]
