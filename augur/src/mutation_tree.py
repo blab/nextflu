@@ -363,6 +363,11 @@ if __name__=="__main__":
 	shutil.copy2('../auspice/_site/js/msa.min.js', muttree.outdir+'js/msa.min.js')
 	shutil.copy2('../auspice/_site/muttree/index.html', muttree.outdir+'index.html')
 	shutil.copy2('../auspice/_site/css/style.css', muttree.outdir+'css/style.css')
+	try:
+		shutil.copytree('../auspice/_site/css/font', muttree.outdir+'css/font')
+		shutil.copytree('../auspice/_site/css/font-awesome', muttree.outdir+'css/font-awesome')
+	except:
+		print "Cannot create font directories"
 
 	with open(muttree.outdir+'/js/fields.js', 'w') as ofile:
 		for field in ['passage', 'host', 'subtype','region']:
