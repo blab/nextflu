@@ -47,14 +47,15 @@ class fitness_model(object):
 
 		self.predictors = predictor_names
 
-		self.model_params = 0*np.ones(len(self.predictors))
+		self.model_params = np.zeros(len(self.predictors))
 		if isinstance(predictor_input, dict):
 			self.model_params = np.array([predictor_input[k][0] for k in predictor_names])
 
-		self.global_sds = 0*np.ones(len(self.predictors))
 		self.to_standardize = np.array([p!='dfreq' for p in self.predictors])
 		if isinstance(predictor_input, dict):
 			self.global_sds = np.array([predictor_input[k][1] for k in predictor_names])
+		else:
+			self.global_sds = np.zeros(len(self.predictors))
 
 		self.fp = fitness_predictors(predictor_names = predictor_names, **kwargs)
 
@@ -101,12 +102,21 @@ class fitness_model(object):
 		# used by fitness_predictors:calc_LBI and fitness_predictors:calc_epitope_cross_immunity
 		# TODO: fix me for continous time model
 		cutoff = 0.001
-		for node in self.nodes:
+#		for node in self.nodes:
+#			#if season in node.season_tips and len(node.season_tips[season])>0:
+#			if node.timepoint_freqs[timepoint] > cutoff:
+#				node.alive=True
+#			else:
+#				node.alive=False
+		for node in self.tree.postorder_node_iter():
 			#if season in node.season_tips and len(node.season_tips[season])>0:
-			if node.timepoint_freqs[timepoint] > cutoff:
-				node.alive=True
+			if node.is_internal():
+				node.alive = any(ch.alive for ch in node.child_nodes())
 			else:
-				node.alive=False
+				if node.num_date <= timepoint and node.num_date > timepoint - 6.0/12.0:
+					node.alive=True
+				else:
+					node.alive=False
 
 	def calc_time_censored_tree_frequencies(self):
 		print("fitting time censored tree frequencies")
@@ -114,7 +124,7 @@ class fitness_model(object):
 		region = "global_censored"
 		freq_cutoff = 25.0
 		total_pivots = 12
-		pivots_fit = 2
+		pivots_fit = 6
 		freq_window = 1.0
 		for node in self.nodes:
 			node.fit_frequencies = {}
@@ -122,14 +132,15 @@ class fitness_model(object):
 		for time in self.timepoints:
 			time_interval = [time - freq_window, time]
 			pivots = np.linspace(time_interval[0], time_interval[1], total_pivots)
-			self.estimate_tree_frequencies(pivots=pivots, threshold=40, regions=None, region_name=region, time_interval=time_interval)
+			self.estimate_tree_frequencies(pivots=pivots, threshold=20, regions=None,
+						region_name=region, time_interval=time_interval)
 			for node in self.nodes:
 				if node.logit_freq[region] is not None:
 					node.fit_frequencies[time] = np.minimum(freq_cutoff, np.maximum(-freq_cutoff,node.logit_freq[region]))
 				else:
 					node.fit_frequencies[time] = node.parent_node.fit_frequencies[time]
 				try:
-					slope, intercept, rval, pval, stderr = linregress(pivots[pivots_fit:], node.fit_frequencies[time][pivots_fit:])
+					slope, intercept, rval, pval, stderr = linregress(pivots[pivots_fit:-1], node.fit_frequencies[time][pivots_fit:-1])
 					node.freq_slope[time] = slope
 				except:
 					import ipdb; ipdb.set_trace()
@@ -154,7 +165,7 @@ class fitness_model(object):
 			tmp_preds = []
 			for tip in self.tips:
 				tmp_preds.append(tip.predictors[time])
-			self.predictor_arrays[time]=np.array(tmp_preds)
+			self.predictor_arrays[time]=np.array(tmp_preds, dtype=float)
 
 	def standardize_predictors(self):
 		self.predictor_means = {}
@@ -176,8 +187,8 @@ class fitness_model(object):
 			for node in self.nodes:
 				if node.predictors[time] is not None:
 					node.predictors[time] = (node.predictors[time]-self.predictor_means[time]) / self.global_sds
-			self.predictor_arrays[time][:,self.to_standardize] -= self.predictor_means[time][:,self.to_standardize]
-			self.predictor_arrays[time][:,self.to_standardize] /= self.global_sds
+			self.predictor_arrays[time][:,self.to_standardize] -= self.predictor_means[time][self.to_standardize]
+			self.predictor_arrays[time][:,self.to_standardize] /= self.global_sds[self.to_standardize]
 
 
 	def select_clades_for_fitting(self):
@@ -434,7 +445,7 @@ class fitness_model(object):
 				pred = all_pred[clade.tips]
 				freqs = all_freqs[clade.tips]
 				interpolation = interp1d(self.rootnode.pivots, clade.freq['global'], kind='linear', bounds_error=False)
-				for delta in np.arange(-0.2, 1.1, 0.1):
+				for delta in np.arange(-0.5, 1.1, 0.1):
 					if time + delta >= self.rootnode.pivots[0] and time + delta <= self.rootnode.pivots[-1]:
 						obs_freq = np.asscalar(interpolation(time+delta))
 						pred_freq = obs_freq
@@ -447,7 +458,6 @@ class fitness_model(object):
 		import pandas as pd
 		self.trajectory_data_df = pd.DataFrame(self.trajectory_data, columns=['series', 'clade', 'initial_time', 'time', 'obs', 'pred'])
 		self.trajectory_data_df.to_csv("data/prediction_trajectories.tsv", sep="\t", index=False)
-
 		import bokeh.charts as bk
 		bk.defaults.height = 250
 		bk.output_file("lines.html", title="line plot example")
@@ -458,6 +468,17 @@ class fitness_model(object):
 					xlabel='Date', ylabel='Frequency', tools=False)
 			lines.append(line)
 		bk.show(bk.vplot(*lines))
+#		import seaborn as sns
+#		import matplotlib.pyplot as plt
+#		cols = sns.color_palette(n_colors=6)
+#		fig, axs = plt.subplots(6,4, sharey=True)
+#		for tp, ax in zip(self.timepoints[:-1], axs.flatten()):
+#			traj = self.trajectory_data_df[self.trajectory_data_df.initial_time == tp]
+#			clades = np.unique(traj['series'])
+#			for ci in clades:
+#				tmp = traj[traj['series']==ci]
+#				ax.plot(tmp['time'], tmp['obs'], ls='-', c=cols[ci%6])
+#				ax.plot(tmp['time'], tmp['pred'], ls='--', c=cols[ci%6])
 
 def test(params):
 	from io_util import read_json

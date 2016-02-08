@@ -36,13 +36,13 @@ virus_config = {
 	# frequency estimation parameters
 	'aggregate_regions': [  ("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]),
 							("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ],
-	'frequency_stiffness':10.0,
 	'verbose':2,
 	'tol':2e-4, #tolerance for frequency optimization
 	'pc':1e-3, #pseudocount for frequencies
 
 	'extra_pivots': 12,  # number of pivot point for or after the last observations of a mutations
-	'inertia':0.5,		# fraction of frequency change carry over in the stiffness term
+	'inertia':0.7,		 # fraction of frequency change carry over in the stiffness term
+	'frequency_stiffness':10.0,
 	'n_iqd':3,     # standard deviations from clock
 	'min_mutation_frequency':0.02,
 	'min_genotype_frequency':0.1,
