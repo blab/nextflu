@@ -1,0 +1,34 @@
+---
+title: nextstrain / zika
+layout: auspice_zika
+virus: Zika
+resolution: 
+coloring: region, date
+gtplaceholder: Genomic positions...
+freqdefault: 
+---
+
+<script>
+var file_prefix = "Zika_";
+var	vaccineChoice = {};
+var vaccineStrains = Object.keys(vaccineChoice);
+var reference_viruses= {};
+var branch_labels=false;
+var restrictTo = {"region": "all"};
+var time_window = 4.0;
+var full_data_time_window = 4.0;
+var time_ticks=[2013.0, 2013.5, 2014.0, 2014.5, 2015.0, 2015.5, 2016.0];
+var dfreq_dn = 2;
+var LBItime_window = 0.5;
+var LBItau = 0.0005;
+var regions = [
+["FrenchPolynesia",	"#5097BA"],
+["Brazil",  		"#60AA9E"],
+["Suriname",  		"#75B681"],
+["Guatemala",  		"#8EBC66"],
+["Haiti",  			"#AABD52"],
+["Martinique",  	"#C4B945"],
+["PuertoRico",  	"#D9AD3D"]
+];
+var mutType = 'nuc';
+</script>
