@@ -605,7 +605,8 @@ class HI_tree(object):
 			for node in self.tree.postorder_node_iter():
 				node.dHI=0
 			for HI_split, branches in self.HI_split_to_branch.iteritems():
-				likely_branch = branches[np.argmax([len(b.mutations) for b in branches])]
+				likely_branch = branches[np.argmax([len(b.aa_muts['HA1']) if 'HA1' in b.aa_muts else 0
+													for b in branches])]
 				likely_branch.dHI = self.params[HI_split]
 				likely_branch.constraints = self.tree_graph[:,HI_split].sum()
 
