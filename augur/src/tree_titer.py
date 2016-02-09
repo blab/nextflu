@@ -27,7 +27,7 @@ def HI_fix_name(name):
 
 class HI_tree(object):
 
-	def __init__(self, HI_fname = 'data/HI_titers.txt',serum_Kc = 0.0,  min_aamuts = 0,**kwargs):
+	def __init__(self, HI_fname = 'data/HI_titers.txt',serum_Kc = 0.0,  min_aamuts = 0, method = 'nnl1reg', **kwargs):
 		self.HI_fname = HI_fname
 		if "excluded_tables" in kwargs:
 			self.excluded_tables = kwargs["excluded_tables"]
@@ -36,6 +36,7 @@ class HI_tree(object):
 		self.HI, tmp, sources = self.read_HI_titers(HI_fname)
 		self.sources = list(sources)
 		self.serum_Kc = serum_Kc
+		self.method = method
 		self.tree_graph = None
 		self.min_aamuts = min_aamuts
 		self.serum_potency = {}
@@ -130,6 +131,7 @@ class HI_tree(object):
 	def mark_HI_splits(self):
 		# flag all branches on the tree with HI_strain = True if they lead to strain with titer data
 		for leaf in self.tree.leaf_iter():
+			leaf.dep=0
 			if leaf.strain.upper() in self.HI_strains:
 				leaf.serum = leaf.strain.upper() in self.ref_strains
 				leaf.HI_info = 1
@@ -137,7 +139,13 @@ class HI_tree(object):
 				leaf.serum, leaf.HI_info=False, 0
 
 		for node in self.tree.postorder_internal_node_iter():
+			if node.parent_node is not None:
+				node.dep = node.ep - node.parent_node.ep
+			else:
+				node.dep = 0
 			node.HI_info = sum([c.HI_info for c in node.child_nodes()])
+			#print(node.HI_info, 2*((node.dep!=0) and self.method=='nnl1reg_epi'))
+			node.HI_info +=  2*((node.dep!=0) and self.method=='nnl1reg_epi')
 			node.serum= False
 
 		# combine sets of branches that span identical sets of HI measurements
@@ -152,11 +160,15 @@ class HI_tree(object):
 				# at a bi- or multifurcation, increase the split count and HI index
 				# either individual child branches have enough HI info be counted,
 				# or the pre-order node iteraction will move towards the root
-				if sum([c.HI_info>0 for c in node.child_nodes()])>1:
+				#import ipdb; ipdb.set_trace()
+				if sum([(c.HI_info>0) or ((c.dep!=0) and self.method=='nnl1reg_epi' and (not c.is_leaf()))
+						for c in node.child_nodes()])>1:
 					self.HI_split_count+=1
 				elif node.is_leaf():
 					self.HI_split_count+=1
 
+		self.epi_prior = 0.3*np.array([np.abs(np.sum([x.dep for x in self.HI_split_to_branch[ii]]))>0
+									   for ii in xrange(self.HI_split_count)])
 		self.genetic_params = self.HI_split_count
 		print "# of reference strains:",len(self.sera), "# of branches with HI constraint", self.HI_split_count
 
@@ -226,7 +238,7 @@ class HI_tree(object):
 			gene = mut[0]
 			pos = int(mut[1][1:-1])-1
 			aa1, aa2 = mut[1][0],mut[1][-1]
-			if gene=='HA1' and count>min_count and \
+			if gene=='HA1' and (count>min_count or (self.method=='nnl1reg_epi' and self.epitope_mask[pos]=='1')) and \
 				self.aa_frequencies[gene][self.aa_alphabet.index(aa1),pos]>min_freq and\
 				self.aa_frequencies[gene][self.aa_alphabet.index(aa2),pos]>min_freq:
 				relevant_muts.append(mut)
@@ -299,6 +311,10 @@ class HI_tree(object):
 		# make a dictionary that maps this effect to the cluster
 		self.mutation_clusters = {c[1][0]:c[1] for c in mutation_clusters}
 		self.relevant_muts = [c[1][0] for c in mutation_clusters]
+		if self.method=='nnl1reg_epi':
+			self.epi_prior = 0.3*np.array([np.sum([self.epitope_mask[int(x[1][1:-1])-1]=='1' for x in cluster[1]])>0
+													for cluster in mutation_clusters])
+
 		print("dimensions of new design matrix",self.tree_graph.shape)
 
 	def make_treegraph(self):
@@ -451,6 +467,52 @@ class HI_tree(object):
 		#print "rms deviation after relax=",np.sqrt(self.fit_func())
 		return self.params
 
+	def fit_l1_nn_epi(self):
+		from cvxopt import matrix, solvers
+		n_params = self.tree_graph.shape[1]
+		HI_sc = self.genetic_params
+		n_sera = len(self.sera)
+		n_v = len(self.HI_strains)
+
+		# set up the quadratic matrix containing the deviation term (linear xterm below)
+		# and the l2-regulatization of the avidities and potencies
+		P1 = np.zeros((n_params+HI_sc,n_params+HI_sc))
+		P1[:n_params, :n_params] = self.TgT
+		for ii in xrange(HI_sc, HI_sc+n_sera):
+			P1[ii,ii]+=self.lam_pot
+		for ii in xrange(HI_sc+n_sera, n_params):
+			P1[ii,ii]+=self.lam_avi
+		P = matrix(P1)
+
+		# set up cost for auxillary parameter and the linear cross-term
+		q1 = np.zeros(n_params+HI_sc)
+		q1[:n_params] = -np.dot( self.HI_dist, self.tree_graph)
+		q1[n_params:] = self.lam_HI
+		q = matrix(q1)
+
+		# set up linear constraint matrix to regularize the HI parameters
+		# there are three separate inequalities: x-epi <  v -> x-v  < epi
+		#										 x-epi > -v -> -x-v < -epi
+		#											 x > 0  -> -x < 0
+		h_tmp = np.zeros(3*HI_sc)
+		h_tmp[:HI_sc] = self.epi_prior
+		h_tmp[HI_sc:2*HI_sc] = -self.epi_prior
+		h = matrix(h_tmp)	# Gw <=h
+		G1 = np.zeros((3*HI_sc,n_params+HI_sc))
+		G1[:HI_sc, :HI_sc]    = np.eye(HI_sc)  # x
+		G1[:HI_sc, n_params:] = -np.eye(HI_sc) # -v
+		G1[HI_sc:2*HI_sc, :HI_sc] = -np.eye(HI_sc) # -x
+		G1[HI_sc:2*HI_sc, n_params:] = -np.eye(HI_sc) # -v
+		G1[2*HI_sc:, :HI_sc] = -np.eye(HI_sc) #-x
+		G = matrix(G1)
+		W = solvers.qp(P,q,G,h)
+		# pull out the real variables -- skip the auxillary ones
+		self.params = np.array([x for x in W['x']])[:n_params]
+		print "rms deviation prior to relax=",np.sqrt(self.fit_func())
+		return self.params
+
+
+
 	def prepare_HI_map(self):
 		'''
 		normalize the HI measurements, split the data into training and test sets
@@ -512,7 +574,7 @@ class HI_tree(object):
 		else:
 			self.make_seqgraph()
 
-	def map_HI(self, training_fraction = 1.0, method = 'nnls', lam_HI=1.0, map_to_tree = True,
+	def map_HI(self, training_fraction = 1.0, lam_HI=1.0, map_to_tree = True,
 			lam_pot = 0.5, lam_avi = 3.0, cutoff_date = None, subset_strains = False, force_redo = False):
 		self.map_to_tree = map_to_tree
 		self.training_fraction = training_fraction
@@ -524,17 +586,19 @@ class HI_tree(object):
 		if self.tree_graph is None or force_redo:
 			self.prepare_HI_map()
 
-		if method=='l1reg':  # l1 regularized fit, no constraint on sign of effect
+		if self.method=='l1reg':  # l1 regularized fit, no constraint on sign of effect
 			self.params = self.fit_l1reg()
-		elif method=='nnls':  # non-negative least square, not regularized
+		elif self.method=='nnls':  # non-negative least square, not regularized
 			self.params = self.fit_nnls()
-		elif method=='nnl2reg':	# non-negative L2 norm regularized fit
+		elif self.method=='nnl2reg':	# non-negative L2 norm regularized fit
 			self.params = self.fit_nnl2reg()
-		elif method=='nnl1reg':  # non-negative fit, branch terms L1 regularized, avidity terms L2 regularized
+		elif self.method=='nnl1reg':  # non-negative fit, branch terms L1 regularized, avidity terms L2 regularized
 			self.params = self.fit_nnl1reg()
+		elif self.method=='nnl1reg_epi':  # non-negative fit, branch terms L1 regularized, avidity terms L2 regularized, non-negative prior on branches with epitope contributions
+			self.params = self.fit_l1_nn_epi()
 
 		self.fit_error = np.sqrt(self.fit_func())
-		print("method",method, "regularized by", self.lam_HI, "rms deviation=", self.fit_error)
+		print("method",self.method, "regularized by", self.lam_HI, "rms deviation=", self.fit_error)
 		# for each set of branches with HI constraints, pick the branch with most aa mutations
 		# and assign the dHI to that one, record the number of constraints
 		if self.map_to_tree:
@@ -571,7 +635,7 @@ class HI_tree(object):
 					{strain:self.params[self.genetic_params+len(self.sera)+ii]
 				  for ii, strain in enumerate(self.HI_strains)}
 
-	def generate_validation_figures(self, method = 'nnl1reg'):
+	def generate_validation_figures(self):
 		import matplotlib.pyplot as plt
 
 		lam_pot = self.lam_pot
@@ -614,13 +678,13 @@ class HI_tree(object):
 
 
 		for map_to_tree, model in [(True, 'tree'), (False,'mutation')]:
-			self.map_HI(training_fraction=0.9, method=method,lam_HI=lam_HI, lam_avi=lam_avi,
+			self.map_HI(training_fraction=0.9, lam_HI=lam_HI, lam_avi=lam_avi,
 						lam_pot = lam_pot, force_redo=True, map_to_tree=map_to_tree, subset_strains=True)
 
 			self.validate(plot=True)
 			for fmt in fmts: plt.savefig(self.htmlpath()+'HI_prediction_virus_'+model+fmt)
 
-			self.map_HI(training_fraction=0.9, method=method,lam_HI=lam_HI, lam_avi=lam_avi,
+			self.map_HI(training_fraction=0.9, lam_HI=lam_HI, lam_avi=lam_avi,
 						lam_pot = lam_pot, force_redo=True, map_to_tree=map_to_tree)
 			self.validate(plot=True)
 			for fmt in fmts: plt.savefig(self.htmlpath()+'HI_prediction_'+model+fmt)
@@ -1026,7 +1090,7 @@ def main(tree, HI_fname='data/HI_titers.txt', training_fraction = 1.0, reg=5):
 	print "--- Fitting HI titers at " + time.strftime("%H:%M:%S") + " ---"
 	measurements, strains, sources = read_HI_titers(HI_fname)
 	HI_map = HI_tree(tree, measurements)
-	HI_map.map_HI_to_tree(training_fraction=training_fraction, method = 'nnl1reg', lam=reg)
+	HI_map.map_HI_to_tree(training_fraction=training_fraction, lam=reg)
 	return HI_map
 
 

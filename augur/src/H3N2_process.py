@@ -35,8 +35,8 @@ virus_config.update({
 						   "3c3.b": [('HA1',  83,'R'), ('HA1',261,'Q'), ('HA1',62,'K'),  ('HA1', 122,'D')]
 							},
 	'epitope_masks_fname':'source-data/H3N2_epitope_masks.tsv',
-	'epitope_mask_version':'wolf',
-	'tolerance_mask_version':'ha1',	
+	'epitope_mask_version':'ha1',
+	'tolerance_mask_version':'ha1',
 	'HI_fname':'data/H3N2_HI_titers.txt',
 	'auspice_prefix':'H3N2_',
 	'html_vars': {'coloring': 'ep, ne, rb, lbi, dfreq, region, date, cHI, HI_dist',
@@ -49,7 +49,9 @@ virus_config.update({
 #	'predictors': ['ep', 'tol_ne']														# estimate
 #	'predictors': { 'cHI': [2.11, 0.78], 'dfreq': [0.30, 1.87] }						# fix predictor: [value, std deviation]
 #	'predictors': { 'cHI': [2.66, 0.78], 'tol_ne': [1.10, 2.30] }						# fix predictor: [value, std deviation]
-	'predictors': { 'ep': [1.83, 2.21], 'tol_ne': [2.53, 2.30] }						# fix predictor: [value, std deviation]
+	'predictors': { 'ep': [1.83, 2.21], 'tol_ne': [2.53, 2.30] },						# fix predictor: [value, std deviation]
+	#'method':'nnl1reg'
+	'method':'nnl1reg_epi'
 	})
 
 
@@ -229,7 +231,7 @@ class H3N2_refine(tree_refine):
 		need to subtract one since python arrays start at 0
 		'''
 		sp = 16
-		rbs = map(lambda x:x+sp-1, [145, 155, 156, 158, 159, 189, 193])					
+		rbs = map(lambda x:x+sp-1, [145, 155, 156, 158, 159, 189, 193])
 		return ''.join([aa[pos] for pos in rbs])
 
 	def get_total_peptide(self, node):
@@ -342,20 +344,20 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, H3N2_HI, H3N2_
 					self.estimate_frequencies(tasks = ["genotypes"])
 			self.dump()
 
-		method = 'nnl1reg'
 		if 'HI' in steps:
 			print "--- Adding HI titers to the tree " + time.strftime("%H:%M:%S") + " ---"
-			try:
+			if True:#			try:
+				self.refine()
 				self.determine_variable_positions()
-				self.map_HI(training_fraction=1.0, method = 'nnl1reg',
+				self.map_HI(training_fraction=1.0,
 					lam_HI=lam_HI, lam_avi=lam_avi, lam_pot=lam_pot, map_to_tree=True)
-				self.map_HI(training_fraction=1.0, method = 'nnl1reg', force_redo=True,
+				self.map_HI(training_fraction=1.0, force_redo=True,
 					lam_HI=lam_HI, lam_avi=lam_avi, lam_pot=lam_pot, map_to_tree=False)
-			except:
-				print("HI modeling failed!")
+				self.dump()
+#			except:
+#				print("HI modeling failed!")
 			#freqs = self.determine_HI_mutation_frequencies(threshold = 0.1)
 			#self.frequencies["mutations"]["global"].update(freqs)
-			self.dump()
 
 		if 'fitness' in steps:
 			print "--- Estimating fitnesses at " + time.strftime("%H:%M:%S") + " ---"
