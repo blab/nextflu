@@ -7,7 +7,7 @@ import json
 sns.set_style('darkgrid')
 plt.ion()
 
-virus = 'Yam'
+virus = 'H3N2'
 #virus = 'H1N1pdm'
 
 
@@ -37,6 +37,7 @@ offset = datetime(2000,1,1).toordinal()
 pivots = [offset+(x-2000)*365.25 for x in  freqs['clades']['global']['pivots']]
 regions = ['global', 'NA', 'AS', 'EU', 'OC']
 cols = sns.color_palette(n_colors=len(regions))
+fs=12
 
 if len(clades):
     fig, axs = plt.subplots(len(clades), 1, sharex=True, figsize=(8, len(clades)*2))
@@ -51,6 +52,8 @@ if len(clades):
         ax.set_xlim([pivots[-1]-700,pivots[-1]+30])
         ax.set_ylim(0,1)
         ax.text(pivots[-1]-700, 0.9, clade)
+        ax.tick_params(labelsize=fs)
+        ax.set_yticks([0,0.3, 0.6, 0.9])
     axs[1].legend(loc=1, ncol=2)
     plt.tight_layout(h_pad=0.01)
     plt.savefig('figures/feb-2016/'+virus+'_clades.png')
@@ -68,7 +71,8 @@ for mutation, ax in zip(mutations, axs):
     ax.set_xlim([pivots[-1]-700,pivots[-1]+30])
     ax.set_ylim(0,1)
     ax.text(pivots[-1]-700, 0.9, mutation)
+    ax.set_yticks([0,0.3, 0.6, 0.9])
+    ax.tick_params(labelsize=fs)
 axs[mut_legend['panel']].legend(loc=mut_legend['loc'], ncol=2)
-ax.set_xlabel('time')
 plt.tight_layout(h_pad=0.01)
 plt.savefig('figures/feb-2016/'+virus+'_mutations.png')
