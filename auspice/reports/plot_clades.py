@@ -3,14 +3,15 @@ import numpy as np
 import seaborn as sns
 from datetime import datetime
 import json
+from matplotlib.dates import YearLocator, MonthLocator, DateFormatter
 
 sns.set_style('darkgrid')
 plt.ion()
 
-#virus = 'H3N2'
+virus = 'H3N2'
 #virus = 'H1N1pdm'
 #virus = 'Vic'
-virus = 'Yam'
+#virus = 'Yam'
 
 
 if virus=='H3N2': ########## H3N2
@@ -59,9 +60,12 @@ if len(clades):
         ax.set_ylim(0,1)
         ax.text(pivots[-1]-700, 0.9, clade)
         ax.tick_params(labelsize=fs)
-        ax.set_yticks([0,0.3, 0.6, 0.9])
-    axs[clade_legend['panel']].legend(loc=clade_legend['loc'], ncol=2)
-    plt.tight_layout(h_pad=0.01)
+        ax.set_yticks([0,0.25, 0.5, 0.75, 1.0])
+        ax.fmt_xdata = DateFormatter('%Y-%m-%d')
+        fig.autofmt_xdate()
+    axs[clade_legend['panel']].legend(loc=clade_legend['loc'], ncol=1, bbox_to_anchor=(1.0, 0.2))
+    #plt.tight_layout(h_pad=0.01)
+    plt.subplots_adjust(left=0.08, right=0.86, top=0.96, bottom=0.11)
     plt.savefig('figures/feb-2016/'+virus+'_clades.png')
 
 
@@ -80,5 +84,5 @@ for mutation, ax in zip(mutations, axs):
     ax.set_yticks([0,0.3, 0.6, 0.9])
     ax.tick_params(labelsize=fs)
 axs[mut_legend['panel']].legend(loc=mut_legend['loc'], ncol=2)
-plt.tight_layout(h_pad=0.01)
+#plt.tight_layout(h_pad=0.01)
 plt.savefig('figures/feb-2016/'+virus+'_mutations.png')
