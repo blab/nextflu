@@ -68,7 +68,8 @@ if len(clades):
     fig.autofmt_xdate()
     axs[clade_legend['panel']].legend(loc=clade_legend['loc'], ncol=1, bbox_to_anchor=(1.0, 0.2))
     #plt.tight_layout(h_pad=0.01)
-    plt.subplots_adjust(left=0.08, right=0.86, top=0.96, bottom=0.11)
+    bottom_margin = 0.2 - 0.03*len(clades)
+    plt.subplots_adjust(left=0.08, right=0.86, top=0.96, bottom=bottom_margin)
     plt.savefig('figures/feb-2016/'+virus+'_clades.png')
 
 
@@ -91,5 +92,6 @@ for mutation, ax in zip(mutations, axs):
 fig.autofmt_xdate()    
 axs[mut_legend['panel']].legend(loc=mut_legend['loc'], ncol=1, bbox_to_anchor=(1.0, 0.2))
 #plt.tight_layout(h_pad=0.01)
-plt.subplots_adjust(left=0.08, right=0.86, top=0.96, bottom=0.11)
+bottom_margin = 0.2 - 0.03*len(mutations)
+plt.subplots_adjust(left=0.08, right=0.86, top=0.96, bottom=bottom_margin)
 plt.savefig('figures/feb-2016/'+virus+'_mutations.png')
