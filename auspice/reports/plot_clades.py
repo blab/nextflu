@@ -7,10 +7,10 @@ import json
 sns.set_style('darkgrid')
 plt.ion()
 
-virus = 'H3N2'
+#virus = 'H3N2'
 #virus = 'H1N1pdm'
 #virus = 'Vic'
-#virus = 'Yam'
+virus = 'Yam'
 
 
 if virus=='H3N2': ########## H3N2
