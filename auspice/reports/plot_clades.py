@@ -8,8 +8,8 @@ from matplotlib.dates import YearLocator, MonthLocator, DateFormatter
 sns.set_style('darkgrid')
 plt.ion()
 
-#virus = 'H3N2'
-virus = 'H1N1pdm'
+virus = 'H3N2'
+#virus = 'H1N1pdm'
 #virus = 'Vic'
 #virus = 'Yam'
 
@@ -63,7 +63,7 @@ if len(clades):
         ax.set_ylim(0,1)
         ax.text(pivots[-1]-700, 0.9, clade)
         ax.tick_params(labelsize=fs)
-        ax.set_yticks([0, 0.25, 0.5, 0.75, 1.0])
+        ax.set_yticklabels(['{:3.0f}%'.format(x*100) for x in [0, 0.2, 0.4, 0.6, 0.8, 1.0]])        
         ax.xaxis.set_major_locator(months)
         ax.xaxis.set_major_formatter(monthsFmt)
     fig.autofmt_xdate()
@@ -86,7 +86,7 @@ for mutation, ax in zip(mutations, axs):
     ax.set_xlim([pivots[-1]-700,pivots[-1]+30])
     ax.set_ylim(0,1)
     ax.text(pivots[-1]-700, 0.9, mutation)
-    ax.set_yticks([0, 0.25, 0.5, 0.75, 1.0])
+    ax.set_yticklabels(['{:3.0f}%'.format(x*100) for x in [0, 0.2, 0.4, 0.6, 0.8, 1.0]]) 
     ax.tick_params(labelsize=fs)
     ax.xaxis.set_major_locator(months)
     ax.xaxis.set_major_formatter(monthsFmt)
