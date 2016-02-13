@@ -35,8 +35,8 @@ elif virus=='Vic':
     mut_legend = {'panel':0, 'loc':3}
 elif virus=='Yam':
     freqs = json.load(open('../data/Yam_2y_frequencies.json'))
-    clades = ['3', '2']
-    mutations = ['HA1:251V', 'HA1:172Q']
+    clades = ['2', '3']
+    mutations = ['HA1:172Q', 'HA1:251V']
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
 
