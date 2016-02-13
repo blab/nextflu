@@ -44,6 +44,7 @@ elif virus=='Yam':
 offset = datetime(2000,1,1).toordinal()
 pivots = [offset+(x-2000)*365.25 for x in  freqs['clades']['global']['pivots']]
 regions = ['global', 'NA', 'AS', 'EU', 'OC']
+region_label = {'global': 'Global', 'NA': 'N America', 'AS': 'Asia', 'EU': 'Europe', 'OC': 'Oceania'}
 cols = sns.color_palette(n_colors=len(regions))
 fs=12
 months = MonthLocator(range(1, 13), bymonthday=1, interval=3)
@@ -56,7 +57,7 @@ if len(clades):
             try:
                 tmp_freq = freqs['clades'][region][clade]
                 if tmp_freq is not None:
-                    ax.plot_date(pivots, tmp_freq,'-o', label = region, c=c, lw=3 if region=='global' else 1)
+                    ax.plot_date(pivots, tmp_freq,'-o', label = region_label[region], c=c, lw=3 if region=='global' else 1)
             except:
                 print "skipping", clade, region
         ax.set_xlim([pivots[-1]-700,pivots[-1]+30])
@@ -75,7 +76,7 @@ if len(clades):
     axs[clade_legend['panel']].legend(loc=clade_legend['loc'], ncol=1, bbox_to_anchor=(1.0, 0.2))
     #plt.tight_layout(h_pad=0.01)
     bottom_margin = 0.2 - 0.03*len(clades)
-    plt.subplots_adjust(left=0.12, right=0.86, top=0.96, bottom=bottom_margin)
+    plt.subplots_adjust(left=0.12, right=0.84, top=0.96, bottom=bottom_margin)
     plt.savefig('figures/feb-2016/'+virus+'_clades.png')
 
 
@@ -85,7 +86,7 @@ for mutation, ax in zip(mutations, axs):
         try:
             tmp_freq = freqs['mutations'][region][mutation]
             if tmp_freq is not None:
-                ax.plot_date(pivots, tmp_freq, '-o',label = region, c=c, lw=3 if region=='global' else 1)
+                ax.plot_date(pivots, tmp_freq, '-o', label = region_label[region], c=c, lw=3 if region=='global' else 1)
         except:
             print "skipping", mutation, region
     ax.set_xlim([pivots[-1]-700,pivots[-1]+30])
@@ -104,5 +105,5 @@ fax.text(0.02, 0.54, "Frequency", rotation='vertical', horizontalalignment='cent
 axs[mut_legend['panel']].legend(loc=mut_legend['loc'], ncol=1, bbox_to_anchor=(1.0, 0.2))
 #plt.tight_layout(h_pad=0.01)
 bottom_margin = 0.2 - 0.03*len(mutations)
-plt.subplots_adjust(left=0.12, right=0.86, top=0.96, bottom=bottom_margin)
+plt.subplots_adjust(left=0.12, right=0.84, top=0.96, bottom=bottom_margin)
 plt.savefig('figures/feb-2016/'+virus+'_mutations.png')
