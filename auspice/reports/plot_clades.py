@@ -8,8 +8,8 @@ from matplotlib.dates import YearLocator, MonthLocator, DateFormatter
 sns.set_style('darkgrid')
 plt.ion()
 
-virus = 'H3N2'
-#virus = 'H1N1pdm'
+#virus = 'H3N2'
+virus = 'H1N1pdm'
 #virus = 'Vic'
 #virus = 'Yam'
 
@@ -24,7 +24,7 @@ if virus=='H3N2': ########## H3N2
 elif virus=='H1N1pdm': ########## H1N1pdm
     freqs = json.load(open('../data/H1N1pdm_2y_frequencies.json'))
     clades = ['6b.1', '6b.2']
-    mutations = ['HA1:84N','HA1:162N','HA1:152T', 'HA2:164G'] #these don't add up to one in Asia, probably due to sketchy sampling.
+    mutations = ['HA1:84N','HA1:162N','HA1:152T'] #these don't add up to one in Asia, probably due to sketchy sampling.
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
 elif virus=='Vic':
