@@ -43,12 +43,16 @@ elif virus=='Yam':
 
 offset = datetime(2000,1,1).toordinal()
 pivots = [offset+(x-2000)*365.25 for x in  freqs['clades']['global']['pivots']]
+pivots.pop()
 regions = ['global', 'NA', 'AS', 'EU', 'OC']
 region_label = {'global': 'Global', 'NA': 'N America', 'AS': 'Asia', 'EU': 'Europe', 'OC': 'Oceania'}
 cols = sns.color_palette(n_colors=len(regions))
 fs=12
-months = MonthLocator(range(1, 13), bymonthday=1, interval=3)
-monthsFmt = DateFormatter("%b %y")
+
+years    = YearLocator()
+months = MonthLocator(range(1, 13), bymonthday=1, interval=2)
+yearsFmt = DateFormatter('%Y')
+monthsFmt = DateFormatter("%b")
 
 if len(clades):
     fig, axs = plt.subplots(len(clades), 1, sharex=True, figsize=(8, len(clades)*2))
@@ -57,26 +61,28 @@ if len(clades):
             try:
                 tmp_freq = freqs['clades'][region][clade]
                 if tmp_freq is not None:
+                    tmp_freq.pop()
                     ax.plot_date(pivots, tmp_freq,'-o', label = region_label[region], c=c, lw=3 if region=='global' else 1)
             except:
                 print "skipping", clade, region
-        ax.set_xlim([pivots[-1]-700,pivots[-1]+30])
+        ax.set_xlim([pivots[0], pivots[-1]])
         ax.set_ylim(0,1)
-        ax.text(pivots[-1]-700, 0.9, clade)
-        ax.tick_params(labelsize=fs)
+        ax.text(pivots[0]+5, 0.88, clade)
         ax.set_yticklabels(['{:3.0f}%'.format(x*100) for x in [0, 0.2, 0.4, 0.6, 0.8, 1.0]])
-        ax.xaxis.set_major_locator(months)
-        ax.xaxis.set_major_formatter(monthsFmt)
-    fig.autofmt_xdate()
+        ax.tick_params(labelsize=fs, pad=18)
+        ax.xaxis.set_major_locator(years)
+        ax.xaxis.set_major_formatter(yearsFmt)
+        ax.xaxis.set_minor_locator(months)
+        ax.xaxis.set_minor_formatter(monthsFmt)
+    fig.autofmt_xdate(bottom=0.25, rotation=0, ha='center')
     fax = fig.add_axes( [0., 0., 1, 1] )
     fax.set_axis_off()
     fax.set_xlim(0, 1)
     fax.set_ylim(0, 1)
     fax.text(0.02, 0.54, "Frequency", rotation='vertical', horizontalalignment='center', verticalalignment='center')
     axs[clade_legend['panel']].legend(loc=clade_legend['loc'], ncol=1, bbox_to_anchor=(1.0, 0.2))
-    #plt.tight_layout(h_pad=0.01)
-    bottom_margin = 0.2 - 0.03*len(clades)
-    plt.subplots_adjust(left=0.12, right=0.84, top=0.96, bottom=bottom_margin)
+    bottom_margin = 0.18 - 0.03*len(clades)
+    plt.subplots_adjust(left=0.12, right=0.84, top=0.97, bottom=bottom_margin)
     plt.savefig('figures/feb-2016/'+virus+'_clades.png')
 
 
@@ -86,24 +92,26 @@ for mutation, ax in zip(mutations, axs):
         try:
             tmp_freq = freqs['mutations'][region][mutation]
             if tmp_freq is not None:
+                tmp_freq.pop()            
                 ax.plot_date(pivots, tmp_freq, '-o', label = region_label[region], c=c, lw=3 if region=='global' else 1)
         except:
             print "skipping", mutation, region
-    ax.set_xlim([pivots[-1]-700,pivots[-1]+30])
+    ax.set_xlim([pivots[0], pivots[-1]+15])
     ax.set_ylim(0,1)
-    ax.text(pivots[-1]-700, 0.9, mutation)
+    ax.text(pivots[0]+5, 0.88, mutation)
     ax.set_yticklabels(['{:3.0f}%'.format(x*100) for x in [0, 0.2, 0.4, 0.6, 0.8, 1.0]]) 
-    ax.tick_params(labelsize=fs)
-    ax.xaxis.set_major_locator(months)
-    ax.xaxis.set_major_formatter(monthsFmt)
-fig.autofmt_xdate()
+    ax.tick_params(labelsize=fs, pad=18)
+    ax.xaxis.set_major_locator(years)
+    ax.xaxis.set_major_formatter(yearsFmt)
+    ax.xaxis.set_minor_locator(months)
+    ax.xaxis.set_minor_formatter(monthsFmt)
+fig.autofmt_xdate(bottom=0.25, rotation=0, ha='center')
 fax = fig.add_axes( [0., 0., 1, 1] )
 fax.set_axis_off()
 fax.set_xlim(0, 1)
 fax.set_ylim(0, 1)
 fax.text(0.02, 0.54, "Frequency", rotation='vertical', horizontalalignment='center', verticalalignment='center')
 axs[mut_legend['panel']].legend(loc=mut_legend['loc'], ncol=1, bbox_to_anchor=(1.0, 0.2))
-#plt.tight_layout(h_pad=0.01)
-bottom_margin = 0.2 - 0.03*len(mutations)
-plt.subplots_adjust(left=0.12, right=0.84, top=0.96, bottom=bottom_margin)
+bottom_margin = 0.18 - 0.03*len(mutations)
+plt.subplots_adjust(left=0.12, right=0.84, top=0.97, bottom=bottom_margin)
 plt.savefig('figures/feb-2016/'+virus+'_mutations.png')
