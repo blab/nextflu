@@ -17,7 +17,7 @@ virus = 'H3N2'
 if virus=='H3N2': ########## H3N2
     freqs = json.load(open('../data/H3N2_2y_frequencies.json'))
     clades = ['3c2.a', '3c3.a', '3c3.b']
-    mutations = ['HA1:114T', 'HA1:142K', 'HA1:171K']
+    mutations = ['HA1:114T', 'HA1:142K', 'HA1:168V', 'HA1:171K']
     #mutations = ['HA1:94H', 'HA1:114T', 'HA1:142K', 'HA1:171K']
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
