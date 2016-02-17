@@ -14,6 +14,9 @@ from Bio.Align import MultipleSeqAlignment
 import numpy as np
 from itertools import izip
 
+# HA2 AA sites are shifted by +327 relative to HA1
+# So HA2:174E is 501E in HA1 numbering 
+
 # numbering starting at methionine including the signal peptide
 sp = 17
 epitope_mask = np.array(['1' if pos in [141,142,145,146,172,176,178,179,180,181,183,184,185, #Sa

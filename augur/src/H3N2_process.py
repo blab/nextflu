@@ -14,6 +14,9 @@ from Bio.Align import MultipleSeqAlignment
 import numpy as np
 from itertools import izip
 
+# HA2 AA sites are shifted by +329 relative to HA1
+# So HA2:77V is 406V in HA1 numbering 
+
 virus_config.update({
 	# data source and sequence parsing/cleaning/processing
 	'virus':'H3N2',
@@ -180,7 +183,7 @@ class H3N2_clean(virus_clean):
 
 	def clean(self):
 		self.clean_generic()
-		#self.clean_outbreaks()
+		self.clean_outbreaks()
 		#print "Number of viruses after outbreak filtering:",len(self.viruses)
 		self.clean_reassortants()
 		print "Number of viruses after reassortant filtering:",len(self.viruses)
