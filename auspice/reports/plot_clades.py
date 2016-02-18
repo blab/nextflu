@@ -62,14 +62,15 @@ if len(clades):
                 tmp_freq = freqs['clades'][region][clade]
                 if tmp_freq is not None:
                     tmp_freq.pop()
-                    ax.plot_date(pivots, tmp_freq,'-o', label = region_label[region], c=c, lw=3 if region=='global' else 1)
+                    ax.plot_date(pivots, tmp_freq,'-o', label = region_label[region], c=c, lw=3 if region=='global' else 1, clip_on=False)
             except:
                 print "skipping", clade, region
         ax.set_xlim([pivots[0], pivots[-1]])
         ax.set_ylim(0,1)
         ax.text(pivots[0]+5, 0.88, clade)
         ax.set_yticklabels(['{:3.0f}%'.format(x*100) for x in [0, 0.2, 0.4, 0.6, 0.8, 1.0]])
-        ax.tick_params(labelsize=fs, pad=18)
+        ax.tick_params(which = 'major', labelsize=fs, pad=20)
+        ax.tick_params(which = 'minor', pad=7)
         ax.xaxis.set_major_locator(years)
         ax.xaxis.set_major_formatter(yearsFmt)
         ax.xaxis.set_minor_locator(months)
@@ -80,9 +81,9 @@ if len(clades):
     fax.set_xlim(0, 1)
     fax.set_ylim(0, 1)
     fax.text(0.02, 0.54, "Frequency", rotation='vertical', horizontalalignment='center', verticalalignment='center')
-    axs[clade_legend['panel']].legend(loc=clade_legend['loc'], ncol=1, bbox_to_anchor=(1.0, 0.2))
+    axs[clade_legend['panel']].legend(loc=clade_legend['loc'], ncol=1, bbox_to_anchor=(1.02, 0.2))
     bottom_margin = 0.18 - 0.03*len(clades)
-    plt.subplots_adjust(left=0.12, right=0.84, top=0.97, bottom=bottom_margin)
+    plt.subplots_adjust(left=0.12, right=0.82, top=0.97, bottom=bottom_margin)
     plt.savefig('figures/feb-2016/'+virus+'_clades.png')
 
 
@@ -93,10 +94,10 @@ for mutation, ax in zip(mutations, axs):
             tmp_freq = freqs['mutations'][region][mutation]
             if tmp_freq is not None:
                 tmp_freq.pop()            
-                ax.plot_date(pivots, tmp_freq, '-o', label = region_label[region], c=c, lw=3 if region=='global' else 1)
+                ax.plot_date(pivots, tmp_freq, '-o', label = region_label[region], c=c, lw=3 if region=='global' else 1, clip_on=False)
         except:
             print "skipping", mutation, region
-    ax.set_xlim([pivots[0], pivots[-1]+15])
+    ax.set_xlim([pivots[0], pivots[-1]])
     ax.set_ylim(0,1)
     ax.text(pivots[0]+5, 0.88, mutation)
     ax.set_yticklabels(['{:3.0f}%'.format(x*100) for x in [0, 0.2, 0.4, 0.6, 0.8, 1.0]]) 
@@ -111,7 +112,7 @@ fax.set_axis_off()
 fax.set_xlim(0, 1)
 fax.set_ylim(0, 1)
 fax.text(0.02, 0.54, "Frequency", rotation='vertical', horizontalalignment='center', verticalalignment='center')
-axs[mut_legend['panel']].legend(loc=mut_legend['loc'], ncol=1, bbox_to_anchor=(1.0, 0.2))
+axs[mut_legend['panel']].legend(loc=mut_legend['loc'], ncol=1, bbox_to_anchor=(1.02, 0.2))
 bottom_margin = 0.18 - 0.03*len(mutations)
-plt.subplots_adjust(left=0.12, right=0.84, top=0.97, bottom=bottom_margin)
+plt.subplots_adjust(left=0.12, right=0.82, top=0.97, bottom=bottom_margin)
 plt.savefig('figures/feb-2016/'+virus+'_mutations.png')
