@@ -8,6 +8,8 @@ from matplotlib.dates import YearLocator, MonthLocator, DateFormatter
 sns.set_style('darkgrid')
 plt.ion()
 
+show_errorbars = True
+
 virus = 'H3N2'
 #virus = 'H1N1pdm'
 #virus = 'Vic'
@@ -79,8 +81,9 @@ if len(clades):
                     tmp_freq = np.array(tmp_freq[:-1])
                     std_dev = np.sqrt(tmp_freq*(1-tmp_freq)/(smoothed_count_by_region[region][:-1]+1))
                     ax.plot_date(pivots, tmp_freq,'-o', label = region_label[region], c=c, lw=3 if region=='global' else 1, clip_on=False)
-                    ax.plot_date(pivots, tmp_freq+n_std_dev*std_dev,':', c=c, lw=1)
-                    ax.plot_date(pivots, tmp_freq-n_std_dev*std_dev,':', c=c, lw=1)
+                    if show_errorbars:
+                        ax.plot_date(pivots, tmp_freq+n_std_dev*std_dev,':', c=c, lw=1)
+                        ax.plot_date(pivots, tmp_freq-n_std_dev*std_dev,':', c=c, lw=1)
             except:
                 print "skipping", clade, region
         ax.set_xlim([pivots[0], pivots[-1]])
@@ -114,8 +117,9 @@ for mutation, ax in zip(mutations, axs):
                 tmp_freq = np.array(tmp_freq[:-1])
                 std_dev = np.sqrt(tmp_freq*(1-tmp_freq)/(smoothed_count_by_region[region][:-1]+1))
                 ax.plot_date(pivots, tmp_freq, '-o', label = region_label[region], c=c, lw=3 if region=='global' else 1, clip_on=False)
-                ax.plot_date(pivots, tmp_freq+n_std_dev*std_dev,':', c=c, lw=1)
-                ax.plot_date(pivots, tmp_freq-n_std_dev*std_dev,':', c=c, lw=1)
+                if show_errorbars:
+                    ax.plot_date(pivots, tmp_freq+n_std_dev*std_dev,':', c=c, lw=1)
+                    ax.plot_date(pivots, tmp_freq-n_std_dev*std_dev,':', c=c, lw=1)
         except:
             print "skipping", mutation, region
     ax.set_xlim([pivots[0], pivots[-1]])
