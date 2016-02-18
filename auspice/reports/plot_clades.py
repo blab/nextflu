@@ -53,23 +53,41 @@ region_label = {'global': 'Global', 'NA': 'N America', 'AS': 'Asia', 'EU': 'Euro
 cols = sns.color_palette(n_colors=len(regions))
 fs=12
 
+years    = YearLocator()
+months = MonthLocator(range(1, 13), bymonthday=1, interval=2)
+yearsFmt = DateFormatter('%Y')
+monthsFmt = DateFormatter("%b")
+
 n=2
 n_std_dev=1.5
 l = len(freqs['clades']['global']['pivots'])
+bins = np.array([c[0] for c in counts])[-l:]
+date_bins = []
+for b in bins:
+	date_bins.append(datetime.strptime(b, "%Y-%m"))
 count_array = np.array([c[1:] for c in counts])[-l:,:].T
+count_by_region = {region: np.sum([count_array[region_names.index(r)] for r in region_codes[region]], axis=0)
+                            for region in regions if region!='global'}
+count_by_region['global'] = count_array.sum(axis=0)                            
 smoothed_count_array = np.array([np.convolve(np.ones(n, dtype=float)/n, c, mode='same')
                         for c in count_array])
 smoothed_count_by_region = {region: np.sum([smoothed_count_array[region_names.index(r)] for r in region_codes[region]], axis=0)
                             for region in regions if region!='global'}
 smoothed_count_by_region['global'] = smoothed_count_array.sum(axis=0)
 
-
-
-
-years    = YearLocator()
-months = MonthLocator(range(1, 13), bymonthday=1, interval=2)
-yearsFmt = DateFormatter('%Y')
-monthsFmt = DateFormatter("%b")
+fig, ax = plt.subplots(figsize=(8, 3))
+for c,region in zip(cols, regions):
+	plt.plot_date(date_bins[2:], count_by_region[region][2:], '-o', label = region_label[region], c=c, lw=3 if region=='global' else 1, clip_on=False)
+ax.tick_params(which = 'major', labelsize=fs, pad=20)
+ax.tick_params(which = 'minor', pad=7)
+ax.xaxis.set_major_locator(years)
+ax.xaxis.set_major_formatter(yearsFmt)
+ax.xaxis.set_minor_locator(months)
+ax.xaxis.set_minor_formatter(monthsFmt)
+ax.set_ylabel('Sample count')
+ax.legend(loc=3, ncol=1, bbox_to_anchor=(1.02, 0.53))
+plt.subplots_adjust(left=0.12, right=0.82, top=0.94, bottom=0.16)
+plt.savefig('figures/feb-2016/'+virus+'_counts.png')
 
 if len(clades):
     fig, axs = plt.subplots(len(clades), 1, sharex=True, figsize=(8, len(clades)*2))
