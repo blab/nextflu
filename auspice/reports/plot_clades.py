@@ -1,11 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 from matplotlib.dates import YearLocator, MonthLocator, DateFormatter
 
-sns.set_style('darkgrid')
+sns.set_style('ticks')
 plt.ion()
 
 show_errorbars = True
@@ -64,11 +64,11 @@ l = len(freqs['clades']['global']['pivots'])
 bins = np.array([c[0] for c in counts])[-l:]
 date_bins = []
 for b in bins:
-	date_bins.append(datetime.strptime(b, "%Y-%m"))
+	date_bins.append(datetime.strptime(b, "%Y-%m") - timedelta(days=8))
 count_array = np.array([c[1:] for c in counts])[-l:,:].T
 count_by_region = {region: np.sum([count_array[region_names.index(r)] for r in region_codes[region]], axis=0)
                             for region in regions if region!='global'}
-count_by_region['global'] = count_array.sum(axis=0)                            
+count_by_region['global'] = count_array.sum(axis=0)
 smoothed_count_array = np.array([np.convolve(np.ones(n, dtype=float)/n, c, mode='same')
                         for c in count_array])
 smoothed_count_by_region = {region: np.sum([smoothed_count_array[region_names.index(r)] for r in region_codes[region]], axis=0)
@@ -76,17 +76,22 @@ smoothed_count_by_region = {region: np.sum([smoothed_count_array[region_names.in
 smoothed_count_by_region['global'] = smoothed_count_array.sum(axis=0)
 
 fig, ax = plt.subplots(figsize=(8, 3))
+tmpcounts = np.zeros(len(date_bins[2:]))
+plt.bar(date_bins[2:], count_by_region['global'][2:], width=18, linewidth=0, label="Other", color="#bbbbbb", clip_on=False)
 for c,region in zip(cols, regions):
-	plt.plot_date(date_bins[2:], count_by_region[region][2:], '-o', label = region_label[region], c=c, lw=3 if region=='global' else 1, clip_on=False)
-ax.tick_params(which = 'major', labelsize=fs, pad=20)
-ax.tick_params(which = 'minor', pad=7)
+    if region!='global':
+        plt.bar(date_bins[2:], count_by_region[region][2:], bottom=tmpcounts, width=18, linewidth=0, label=region_label[region], color=c, clip_on=False)
+        tmpcounts += count_by_region[region][2:]
+ax.tick_params(axis='x', which='major', labelsize=fs, pad=20)
+ax.tick_params(axis='x', which='minor', pad=7)
 ax.xaxis.set_major_locator(years)
 ax.xaxis.set_major_formatter(yearsFmt)
 ax.xaxis.set_minor_locator(months)
 ax.xaxis.set_minor_formatter(monthsFmt)
 ax.set_ylabel('Sample count')
 ax.legend(loc=3, ncol=1, bbox_to_anchor=(1.02, 0.53))
-plt.subplots_adjust(left=0.12, right=0.82, top=0.94, bottom=0.16)
+plt.subplots_adjust(left=0.1, right=0.82, top=0.94, bottom=0.22)
+sns.despine()
 plt.savefig('figures/feb-2016/'+virus+'_counts.png')
 
 if len(clades):
@@ -98,7 +103,7 @@ if len(clades):
                 if tmp_freq is not None:
                     tmp_freq = np.array(tmp_freq[:-1])
                     std_dev = np.sqrt(tmp_freq*(1-tmp_freq)/(smoothed_count_by_region[region][:-1]+1))
-                    ax.plot_date(pivots, tmp_freq,'-o', label = region_label[region], c=c, lw=3 if region=='global' else 1, clip_on=False)
+                    ax.plot_date(pivots, tmp_freq,'-o', label = region_label[region], c=c, lw=3 if region=='global' else 1)
                     if show_errorbars:
                         ax.fill_between(pivots, tmp_freq-n_std_dev*std_dev, tmp_freq+n_std_dev*std_dev, facecolor=c, linewidth=0, alpha=0.1)
             except:
@@ -107,8 +112,8 @@ if len(clades):
         ax.set_ylim(0,1)
         ax.text(pivots[0]+5, 0.88, clade)
         ax.set_yticklabels(['{:3.0f}%'.format(x*100) for x in [0, 0.2, 0.4, 0.6, 0.8, 1.0]])
-        ax.tick_params(which = 'major', labelsize=fs, pad=20)
-        ax.tick_params(which = 'minor', pad=7)
+        ax.tick_params(axis='x', which='major', labelsize=fs, pad=20)
+        ax.tick_params(axis='x', which='minor', pad=7)
         ax.xaxis.set_major_locator(years)
         ax.xaxis.set_major_formatter(yearsFmt)
         ax.xaxis.set_minor_locator(months)
@@ -120,8 +125,9 @@ if len(clades):
     fax.set_ylim(0, 1)
     fax.text(0.02, 0.54, "Frequency", rotation='vertical', horizontalalignment='center', verticalalignment='center')
     axs[clade_legend['panel']].legend(loc=clade_legend['loc'], ncol=1, bbox_to_anchor=(1.02, 0.2))
-    bottom_margin = 0.18 - 0.03*len(clades)
+    bottom_margin = 0.22 - 0.03*len(clades)
     plt.subplots_adjust(left=0.12, right=0.82, top=0.97, bottom=bottom_margin)
+    sns.despine()
     plt.savefig('figures/feb-2016/'+virus+'_clades.png')
 
 
@@ -133,7 +139,7 @@ for mutation, ax in zip(mutations, axs):
             if tmp_freq is not None:
                 tmp_freq = np.array(tmp_freq[:-1])
                 std_dev = np.sqrt(tmp_freq*(1-tmp_freq)/(smoothed_count_by_region[region][:-1]+1))
-                ax.plot_date(pivots, tmp_freq, '-o', label = region_label[region], c=c, lw=3 if region=='global' else 1, clip_on=False)
+                ax.plot_date(pivots, tmp_freq, '-o', label = region_label[region], c=c, lw=3 if region=='global' else 1)
                 if show_errorbars:
                     ax.fill_between(pivots, tmp_freq-n_std_dev*std_dev, tmp_freq+n_std_dev*std_dev, facecolor=c, linewidth=0, alpha=0.1)
         except:
@@ -142,7 +148,8 @@ for mutation, ax in zip(mutations, axs):
     ax.set_ylim(0,1)
     ax.text(pivots[0]+5, 0.88, mutation)
     ax.set_yticklabels(['{:3.0f}%'.format(x*100) for x in [0, 0.2, 0.4, 0.6, 0.8, 1.0]])
-    ax.tick_params(labelsize=fs, pad=18)
+    ax.tick_params(axis='x', which='major', labelsize=fs, pad=20)
+    ax.tick_params(axis='x', which='minor', pad=7)
     ax.xaxis.set_major_locator(years)
     ax.xaxis.set_major_formatter(yearsFmt)
     ax.xaxis.set_minor_locator(months)
@@ -154,6 +161,7 @@ fax.set_xlim(0, 1)
 fax.set_ylim(0, 1)
 fax.text(0.02, 0.54, "Frequency", rotation='vertical', horizontalalignment='center', verticalalignment='center')
 axs[mut_legend['panel']].legend(loc=mut_legend['loc'], ncol=1, bbox_to_anchor=(1.02, 0.2))
-bottom_margin = 0.18 - 0.03*len(mutations)
+bottom_margin = 0.22 - 0.03*len(mutations)
 plt.subplots_adjust(left=0.12, right=0.82, top=0.97, bottom=bottom_margin)
+sns.despine()
 plt.savefig('figures/feb-2016/'+virus+'_mutations.png')
