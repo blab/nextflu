@@ -82,8 +82,7 @@ if len(clades):
                     std_dev = np.sqrt(tmp_freq*(1-tmp_freq)/(smoothed_count_by_region[region][:-1]+1))
                     ax.plot_date(pivots, tmp_freq,'-o', label = region_label[region], c=c, lw=3 if region=='global' else 1, clip_on=False)
                     if show_errorbars:
-                        ax.plot_date(pivots, tmp_freq+n_std_dev*std_dev,':', c=c, lw=1)
-                        ax.plot_date(pivots, tmp_freq-n_std_dev*std_dev,':', c=c, lw=1)
+                        ax.fill_between(pivots, tmp_freq-n_std_dev*std_dev, tmp_freq+n_std_dev*std_dev, facecolor=c, linewidth=0, alpha=0.1)
             except:
                 print "skipping", clade, region
         ax.set_xlim([pivots[0], pivots[-1]])
@@ -118,8 +117,7 @@ for mutation, ax in zip(mutations, axs):
                 std_dev = np.sqrt(tmp_freq*(1-tmp_freq)/(smoothed_count_by_region[region][:-1]+1))
                 ax.plot_date(pivots, tmp_freq, '-o', label = region_label[region], c=c, lw=3 if region=='global' else 1, clip_on=False)
                 if show_errorbars:
-                    ax.plot_date(pivots, tmp_freq+n_std_dev*std_dev,':', c=c, lw=1)
-                    ax.plot_date(pivots, tmp_freq-n_std_dev*std_dev,':', c=c, lw=1)
+                    ax.fill_between(pivots, tmp_freq-n_std_dev*std_dev, tmp_freq+n_std_dev*std_dev, facecolor=c, linewidth=0, alpha=0.1)
         except:
             print "skipping", mutation, region
     ax.set_xlim([pivots[0], pivots[-1]])
