@@ -51,7 +51,8 @@ region_label = {'global': 'Global', 'NA': 'N America', 'AS': 'Asia', 'EU': 'Euro
 cols = sns.color_palette(n_colors=len(regions))
 fs=12
 
-n=4
+n=2
+n_std_dev=1.5
 l = len(freqs['clades']['global']['pivots'])
 count_array = np.array([c[1:] for c in counts])[-l:,:].T
 smoothed_count_array = np.array([np.convolve(np.ones(n, dtype=float)/n, c, mode='same')
@@ -76,10 +77,10 @@ if len(clades):
                 tmp_freq = freqs['clades'][region][clade]
                 if tmp_freq is not None:
                     tmp_freq = np.array(tmp_freq[:-1])
-                    std_dev = np.sqrt(tmp_freq*(1-tmp_freq)/(smoothed_count_by_region[region][:-1]+2))
+                    std_dev = np.sqrt(tmp_freq*(1-tmp_freq)/(smoothed_count_by_region[region][:-1]+1))
                     ax.plot_date(pivots, tmp_freq,'-o', label = region_label[region], c=c, lw=3 if region=='global' else 1, clip_on=False)
-                    ax.plot_date(pivots, tmp_freq+std_dev,':', c=c, lw=1)
-                    ax.plot_date(pivots, tmp_freq-std_dev,':', c=c, lw=1)
+                    ax.plot_date(pivots, tmp_freq+n_std_dev*std_dev,':', c=c, lw=1)
+                    ax.plot_date(pivots, tmp_freq-n_std_dev*std_dev,':', c=c, lw=1)
             except:
                 print "skipping", clade, region
         ax.set_xlim([pivots[0], pivots[-1]])
@@ -111,10 +112,10 @@ for mutation, ax in zip(mutations, axs):
             tmp_freq = freqs['mutations'][region][mutation]
             if tmp_freq is not None:
                 tmp_freq = np.array(tmp_freq[:-1])
-                std_dev = np.sqrt(tmp_freq*(1-tmp_freq)/(smoothed_count_by_region[region][:-1]+2))
+                std_dev = np.sqrt(tmp_freq*(1-tmp_freq)/(smoothed_count_by_region[region][:-1]+1))
                 ax.plot_date(pivots, tmp_freq, '-o', label = region_label[region], c=c, lw=3 if region=='global' else 1, clip_on=False)
-                ax.plot_date(pivots, tmp_freq+std_dev,':', c=c, lw=1)
-                ax.plot_date(pivots, tmp_freq-std_dev,':', c=c, lw=1)
+                ax.plot_date(pivots, tmp_freq+n_std_dev*std_dev,':', c=c, lw=1)
+                ax.plot_date(pivots, tmp_freq-n_std_dev*std_dev,':', c=c, lw=1)
         except:
             print "skipping", mutation, region
     ax.set_xlim([pivots[0], pivots[-1]])
