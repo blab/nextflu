@@ -18,7 +18,7 @@ virus = 'H3N2'
 freqs = json.load(open('../data/'+virus+'_2y_frequencies.json'))
 counts = json.load(open('../data/'+virus+'_2y_meta.json'))['virus_stats']
 region_names = json.load(open('../data/'+virus+'_2y_meta.json'))['regions']
-region_codes = {'EU':['Europe'], 'AS':['China', 'JapanKorea', 'SouthAsia', 'SoutheastAsia', 'WestAsia'],
+region_codes = {'EU':['Europe'], 'AS':['China', 'JapanKorea','SoutheastAsia'],
                 'NA':["NorthAmerica"], 'OC':["Oceania"]}
 
 
