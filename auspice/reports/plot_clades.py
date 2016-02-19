@@ -76,12 +76,13 @@ smoothed_count_by_region = {region: np.sum([smoothed_count_array[region_names.in
 smoothed_count_by_region['global'] = smoothed_count_array.sum(axis=0)
 
 fig, ax = plt.subplots(figsize=(8, 3))
-tmpcounts = np.zeros(len(date_bins[2:]))
-plt.bar(date_bins[2:], count_by_region['global'][2:], width=18, linewidth=0, label="Other", color="#bbbbbb", clip_on=False)
+drop = 3
+tmpcounts = np.zeros(len(date_bins[drop:]))
+plt.bar(date_bins[drop:], count_by_region['global'][drop:], width=18, linewidth=0, label="Other", color="#bbbbbb", clip_on=False)
 for c,region in zip(cols, regions):
     if region!='global':
-        plt.bar(date_bins[2:], count_by_region[region][2:], bottom=tmpcounts, width=18, linewidth=0, label=region_label[region], color=c, clip_on=False)
-        tmpcounts += count_by_region[region][2:]
+        plt.bar(date_bins[drop:], count_by_region[region][drop:], bottom=tmpcounts, width=18, linewidth=0, label=region_label[region], color=c, clip_on=False)
+        tmpcounts += count_by_region[region][drop:]
 ax.tick_params(axis='x', which='major', labelsize=fs, pad=20)
 ax.tick_params(axis='x', which='minor', pad=7)
 ax.xaxis.set_major_locator(years)
