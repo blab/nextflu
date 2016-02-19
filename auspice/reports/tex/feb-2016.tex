@@ -8,10 +8,12 @@
 \usepackage{color} 
 \usepackage{parskip}
 \usepackage{float}
+\usepackage{microtype}
+\usepackage{url}
 
 % text layout
 \usepackage{geometry}
-\geometry{textwidth=16.25cm} % 15.25cm for single-space, 16.25cm for double-space
+\geometry{textwidth=16.5cm} % 15.25cm for single-space, 16.25cm for double-space
 \geometry{textheight=22.5cm} % 22cm for single-space, 22.5cm for double-space
 
 % helps to keep figures from being orphaned on a page by themselves
@@ -65,7 +67,7 @@ Seasonal influenza circulation patterns and future projections
 \affil[1]{Vaccine and Infectious Disease Division, Fred Hutchinson Cancer Research Center, Seattle, WA, USA.}
 \affil[2]{Max Planck Institute for Developmental Biology, T\"ubingen, Germany.}
 
-\date{February 16, 2016}
+\date{February 18, 2016}
 
 \begin{document}
 
@@ -81,37 +83,47 @@ Seasonal influenza circulation patterns and future projections
 
 \textbf{We expect clade 3c2.a viruses to continue to predominate over 3c3.a and 3c3.b viruses. Diversity within 3c2.a is beginning to accrue with the emergence of several clades of appreciable frequency, the most notable of which is the new 171K clade that has very recently risen to high frequency.}
 
-Throughout 2015, clade 3c2.a viruses predominated over 3c3.a and 3c3.b viruses (Fig.\ \ref{H3N2_clades}). The only exception to this trend has been the recent reemergence of 3c3.a viruses in Europe. However, this clade of European 3c3.a viruses lacks recent amino acid substitutions relative to the 3c3.a parent. Thus it appears that the reemergence of 3c3.a viruses in Europe is due to epidemiological factors, rather than genetic factors. In addition, we estimate that 3c2.a viruses still predominate in Europe over 3c3.a viruses despite their recent uptick and 3c3.a isolates have been declining in recent weeks.
+We base our primary analysis on a set of viruses collected between Feb 2014 and Jan 2016, comprising approximately 100 viruses per month where available and seeking to equilibriate sample counts geographically where possible (Fig.\ \ref{H3N2_counts}). This equilibration attempts to collect equal samples from Africa, China, Europe, Japan/South Korea, North America, Oceania, South America, South Asia, Southeast Asia and West Asia. In the following analysis we collapse samples from China, South Asia, Southeast Asia and West Asia into a single region, resulting in Asia possessing greater sample counts than North America or Europe. The only month that significantly departs from equitable sampling is Jan 2016 with 61 viruses, primarily from Europe and North America. Oct 2015 to Jan 2016 are lacking Southern Hemisphere viruses.
 
 \begin{figure}[h!]
 	\centering		
-	\includegraphics[width=0.9\textwidth]{../figures/feb-2016/H3N2_clades.png}
+	\includegraphics[width=0.95\textwidth]{../figures/feb-2016/H3N2_counts.png}
+	\caption{\textbf{Sample counts through time and across regions.} 
+	}
+	\label{H3N2_counts}
+\end{figure}
+
+For each virus, we know its date of collection and we know its genetic make up, allowing us count the number of viruses belonging to a particular genetic lineage through time. We use these timeseries of presence/absence to estimate clade frequencies through time. This estimation smooths month-to-month sampling variation.
+
+Throughout 2015, clade 3c2.a viruses predominated over 3c3.a and 3c3.b viruses (Fig.\ \ref{H3N2_clades}). The only exception to this trend has been the recent reemergence of 3c3.a viruses in Europe. However, this clade of European 3c3.a viruses lacks recent amino acid substitutions relative to the 3c3.a parent. Thus it appears that the reemergence of 3c3.a viruses in Europe is due to epidemiological factors, rather than genetic factors. In addition, we find that 3c2.a viruses still predominate in Europe over 3c3.a viruses despite their recent uptick and 3c3.a isolates have been declining in recent weeks.
+
+\begin{figure}[h!]
+	\centering		
+	\includegraphics[width=0.95\textwidth]{../figures/feb-2016/H3N2_clades.png}
 	\caption{\textbf{Frequency trajectories of H3N2 clades.} 
 	}
 	\label{H3N2_clades}
 \end{figure}
 
-Within clade 3c2.a, there have emerged multiple circulating amino acid variants including HA1:114T, HA1:142K/197R and (HA1:171K, HA2:77V/155E) (Fig.\ \ref{H3N2_3c2a_tree}). This last clade corresponds to HA1:171K/406V/484E. The substitution 171K has emerged twice within 3c3.a. The earlier substitution did not spread far, however, the recent substitution has occurred alongside HA2:77V/155E and is present in more recent viral isolates. Within clade 142K/197R there is a subclade of significant size bearing 168V.
+Within clade 3c2.a, there have emerged multiple circulating amino acid variants including HA1:114T, HA1:142K/197R and (HA1:171K, HA2:77V/155E) (Fig.\ \ref{H3N2_3c2a_tree}). This last clade corresponds to HA1:171K/406V/484E. The substitution 171K has emerged twice within 3c3.a. The earlier substitution did not spread far. However, the recent 171K substitution has occurred alongside HA2:77V/155E and is present in more recent viral isolates. Within clade 142K/197R there is a subclade of significant size bearing 168V.
 
 \begin{figure}[h!]
 	\centering		
-	\includegraphics[width=0.8\textwidth]{../figures/feb-2016/H3N2_3c2a_tree.png}
+	\includegraphics[width=0.9\textwidth]{../figures/feb-2016/H3N2_3c2a_tree.png}
 	\caption{\textbf{H3N2 / 3c2.a phylogeny colored by genotype.} 
 	}
 	\label{H3N2_3c2a_tree}
 \end{figure}
 
-These variants show varying dynamics (Fig.\ \ref{H3N2_mutations}). The 114T variant peaked in frequency around July 2015 and similarly the 142K variant has been around for more than a year with a low but even geographic distribution. Consequently, we expect neither of these variants to be under strong positive selection. The T160K substitution is observed scattered within clade 3c2.a and overrepresented in sequences obtained from cultured virus.
+These variants show varying dynamics (Fig.\ \ref{H3N2_mutations}). The 114T variant peaked in frequency around July 2015 and similarly the 142K variant has been around for more than a year with a low but even geographic distribution, although has seen a recent uptick in frequency since October due to 168V. We expect neither of these variants to be under strong positive selection. The T160K substitution is observed scattered within clade 3c2.a and overrepresented in sequences obtained from cultured virus.
 
-\pagebreak
-
-We observe a recent rapid increase in frequency of (HA1:171K, HA2:77V/155E) especially in Asia and North America. This has been the fastest growing variant within 3c2.a that we have observed. This clade also shows rapid phylogenetic branching \cite{neher2014predicting}, corroborating its rapid rise. Additionally, the subclade bearing HA1:142K/197R/168V has recently risen in frequency, although not as rapidly as the (HA1:171K, HA2:77V/155E) clade. We estimate clade HA1:142K/197R/168V has gone from 1\% global frequency in March 2015 to 19\% global frequency today, while clade (HA1:171K, HA2:77V/155E) has gone from 1\% global frequency in June 2015 to 29\% global frequency today.
+We observe a recent rapid increase in frequency of (HA1:171K, HA2:77V/155E) especially in Asia and North America. This has been the fastest growing variant within 3c2.a that we have observed. This clade also shows rapid phylogenetic branching \cite{neher2014predicting}, corroborating its rapid rise. Additionally, the subclade bearing HA1:142K/197R/168V has recently risen in frequency, although not as rapidly as the (HA1:171K, HA2:77V/155E) clade. We estimate clade HA1:142K/197R/168V has gone from 1\% global frequency in March 2015 to 19\% global frequency today, while clade (HA1:171K, HA2:77V/155E) has gone from 1\% global frequency in June 2015 to 29\% global frequency today. For comparison, 3c3.a viruses increased in frequency from 1\% to 31\% in a similar span of 8 months time.
 
 Barring substantial changes in other clades, we predict the (HA1:171K, HA2:77V/155E) variant to dominate.
 
 \begin{figure}[h!]
 	\centering		
-	\includegraphics[width=0.9\textwidth]{../figures/feb-2016/H3N2_mutations.png}
+	\includegraphics[width=0.95\textwidth]{../figures/feb-2016/H3N2_mutations.png}
 	\caption{\textbf{Frequency trajectories of 3c2.a subclades.} 
 	}
 	\label{H3N2_mutations}
@@ -119,7 +131,7 @@ Barring substantial changes in other clades, we predict the (HA1:171K, HA2:77V/1
 
 \pagebreak
 
-Due to poorly performing HI assays on 3c2.a samples and the lack of recent data, antigenic diversity within 3c2.a is hard to assess. The data available to us do not suggest significant antigenic evolution. Here we show recent antigenic data using sera against A/HongKong/5738/2014 from the Crick Worldwide Influenza Centre alongside model fits \cite{neher2015prediction} (Fig.\ \ref{H3N2_HI}). Cooler color indicate greater antigenic similarity. Note that we lack HI data for (HA1:171K, HA2:77V/155E) viruses. Epitope mutation count would predict that HA1:142K/197R/168V is more drifted than (HA1:171K, HA2:77V/155E) with 2 epitope mutations vs 1 epitope mutation, although this requires confirmation through HI or other antigenic characterization.
+Due to poorly performing HI assays on 3c2.a samples and the lack of recent data, antigenic diversity within 3c2.a is hard to assess. The data available to us do not suggest significant antigenic evolution. Here we show recent antigenic data (through September 2015) using sera against A/HongKong/5738/2014 from the Crick Worldwide Influenza Centre alongside model fits \cite{neher2015prediction} (Fig.\ \ref{H3N2_HI}). Cooler color indicate greater antigenic similarity. Note that we lack HI data for (HA1:171K, HA2:77V/155E) viruses. Epitope mutation count would predict that HA1:142K/197R/168V is more drifted than (HA1:171K, HA2:77V/155E) with 2 epitope mutations vs 1 epitope mutation, although this requires confirmation through HI or other antigenic characterization.
 
 \begin{figure}[h!]
 	\centering		
@@ -127,6 +139,16 @@ Due to poorly performing HI assays on 3c2.a samples and the lack of recent data,
 	\caption{\textbf{H3N2 phylogeny colored by antigenicity.} 
 	}
 	\label{H3N2_HI}
+\end{figure}
+
+We would prioritize further characterization of viruses basal to the (HA1:171K, HA2:77V/155E) and HA1:142K/197R/168V clades. These include A/Washington/51/2015 and A/Laos/928/2015 for 171K and A/Bangladesh/3400/2015 and A/Roma/29/2015 for 168V (Fig.\ \ref{H3N2_basal_viruses}).
+
+\begin{figure}[h!]
+	\centering		
+	\includegraphics[width=1.0\textwidth]{../figures/feb-2016/H3N2_basal_viruses.png}
+	\caption{\textbf{Viruses basal to the (HA1:171K, HA2:77V/155E) clade (left panel) and to the HA1:142K/197R/168V clade (right panel).} 
+	}
+	\label{H3N2_basal_viruses}
 \end{figure}
 
 \clearpage
@@ -138,11 +160,21 @@ Due to poorly performing HI assays on 3c2.a samples and the lack of recent data,
 
 \textbf{Within clade 6b, the clade 6b.1, comprising 84N/162N/216T, has rapidly risen to predominate the H1N1pdm population in the latter half of 2015. Although there is no obvious serological evidence for antigenic novelty of 6b.1, its extremely rapid rise in frequency suggests a selective mechanism promoting its spread.}
 
+We base our primary analysis on a set viruses collected between Feb 2014 and Feb 2016, comprising approximately 100 viruses per month where available and seeking to equilibriate sample counts geographically where possible. As discussed above, this equilibration attempts to collect equal samples from Africa, China, Europe, Japan/South Korea, North America, Oceania, South America, South Asia, Southeast Asia and West Asia. Recent months through Jan 2016 have largely sufficient sample counts and sample distributions, although are lacking Southern Hemisphere viruses.
+
+\begin{figure}[h!]
+	\centering		
+	\includegraphics[width=0.95\textwidth]{../figures/feb-2016/H1N1pdm_counts.png}
+	\caption{\textbf{Sample counts through time and across regions.} 
+	}
+	\label{H1N1pdm_counts}
+\end{figure}
+
 Within clade 6b, genetic variants have begun to emerge, most notably HA1:84N/162N/216T, referred to here as clade 6b.1, and (HA1:152T, HA2:174E), referred to here as clade 6b.2 (Fig.\ \ref{H1N1pdm_tree}). The 6b.2 clade corresponds to HA1:152T/501E.
 
 \begin{figure}[h!]
 	\centering		
-	\includegraphics[width=0.8\textwidth]{../figures/feb-2016/H1N1pdm_tree.png}
+	\includegraphics[width=0.9\textwidth]{../figures/feb-2016/H1N1pdm_tree.png}
 	\caption{\textbf{H1N1pdm phylogeny colored by genotype.} 
 	}
 	\label{H1N1pdm_tree}
@@ -150,17 +182,27 @@ Within clade 6b, genetic variants have begun to emerge, most notably HA1:84N/162
 
 \pagebreak
 
-Both 6b.1 and 6b.2 viruses have recently increased in frequency (Fig.\ \ref{H1N1pdm_mutations}). With the exception of China, all regions of the world are now dominated by 6b.1 (with the caveat that most recent data comes from Europe and data on almost all other regions is sparse). The 84N substitution rose in frequency around April 2015 and 162N followed around October 2015. Additionally, China and Oceania have seen a recent rise in 6b.2 viruses. Recent samples from China have been dominated by 6b.2 viruses.
+Both 6b.1 and 6b.2 viruses have recently increased in frequency (Fig.\ \ref{H1N1pdm_mutations}). With the exception of China, all regions of the world are now dominated by 6b.1. The 84N substitution rose in frequency around April 2015 and 162N followed around October 2015. Additionally, China and Oceania have seen a recent rise in 6b.2 viruses. Recent samples from China have been mixed between 6b.1 and 6b.2 viruses. We note that that are very few Oceania viruses on which to base estimates resulting in wide confidence intervals.
 
 \begin{figure}[h!]
 	\centering		
-	\includegraphics[width=0.9\textwidth]{../figures/feb-2016/H1N1pdm_mutations.png}
+	\includegraphics[width=0.95\textwidth]{../figures/feb-2016/H1N1pdm_mutations.png}
 	\caption{\textbf{Frequency trajectories of H1N1pdm variants.} 
 	}
 	\label{H1N1pdm_mutations}
 \end{figure}
 
-The 6b.1 clade comprising 84N/162N/216T rose from very low counts in early summer 2015 to almost 100\% by early 2016 in Europe and North America. The global rise of 6b.1 is extremely rapid relative to average H1N1pdm dynamics. This clade is also singled out by the local branching index \cite{neher2014predicting} as the clade most likely to persist. The rapid rise of 6b.1 viruses is likely selective in origin. Along these lines, we observe a very slight drop in titer associated with the 84N substitution of approximately 0.5 log2 HI dilutions. We lack antigenic data to catalog an effect from the 162N, 216T or 152T substitutions. Here we show recent antigenic data from the Crick Worldwide Influenza Centre alongside model fits \cite{neher2015prediction} (Fig.\ \ref{H1N1pdm_HI}).
+Although recent samples from China have contained a large fraction of 6b.2 viruses, samples have been limited in geographic scope with the majority of Chinese 6b.2 isolates originating in Shanghai (Fig.\ \ref{H1N1pdm_6b2_tree}). Further sampling of a more diverse geographic area may revise our estimates of the frequency of 6b.2 in Asia downwards.
+
+\begin{figure}[h!]
+	\centering		
+	\includegraphics[width=1.0\textwidth]{../figures/feb-2016/H1N1pdm_6b2_tree.png}
+	\caption{\textbf{H1N1pdm phylogeny showing clade 6b.2 viruses colored by sampling location.} 
+	}
+	\label{H1N1pdm_6b2_tree}
+\end{figure}
+
+The 6b.1 clade comprising 84N/162N/216T rose from very low counts in early summer 2015 to almost 100\% by early 2016 in Europe and North America. The global rise of 6b.1 is extremely rapid relative to average H1N1pdm dynamics. This clade is also singled out by the local branching index \cite{neher2014predicting} as the clade most likely to persist. The rapid rise of 6b.1 viruses is likely selective in origin. Along these lines, we observe a very slight drop in titer associated with the 84N substitution of approximately 0.5 log2 HI dilutions. We lack antigenic data to catalog an effect from the 162N, 216T or 152T substitutions. Here we show recent antigenic data (through September 2015) from the Crick Worldwide Influenza Centre alongside model fits \cite{neher2015prediction} (Fig.\ \ref{H1N1pdm_HI}).
 
 \begin{figure}[h!]
 	\centering		
@@ -187,7 +229,7 @@ North American and European isolates almost all contain 129D. While the majority
 
 \begin{figure}[h!]
 	\centering		
-	\includegraphics[width=0.9\textwidth]{../figures/feb-2016/Vic_mutations.png}
+	\includegraphics[width=0.95\textwidth]{../figures/feb-2016/Vic_mutations.png}
 	\caption{\textbf{Frequency trajectories of B/Vic variants.} 
 	}
 	\label{Vic_mutations}
@@ -208,7 +250,7 @@ In 2015, the vast majority of B/Yamagata isolates were of clade 3 viruses (Fig.\
 
 \begin{figure}[h!]
 	\centering		
-	\includegraphics[width=0.9\textwidth]{../figures/feb-2016/Yam_clades.png}
+	\includegraphics[width=0.95\textwidth]{../figures/feb-2016/Yam_clades.png}
 	\caption{\textbf{Frequency trajectories of B/Yam clades.} 
 	}
 	\label{Yam_clades}
@@ -220,7 +262,7 @@ Within clade 3, HA1:172Q has predominated during the whole of 2015, while the su
 
 \begin{figure}[h!]
 	\centering		
-	\includegraphics[width=0.9\textwidth]{../figures/feb-2016/Yam_mutations.png}
+	\includegraphics[width=0.95\textwidth]{../figures/feb-2016/Yam_mutations.png}
 	\caption{\textbf{Frequency trajectories of B/Yam variants.} 
 	}
 	\label{Yam_mutations}
