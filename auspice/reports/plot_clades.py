@@ -59,7 +59,7 @@ yearsFmt = DateFormatter('%Y')
 monthsFmt = DateFormatter("%b")
 
 n=2
-n_std_dev=1.5
+n_std_dev=2
 l = len(freqs['clades']['global']['pivots'])
 bins = np.array([c[0] for c in counts])[-l:]
 date_bins = []
