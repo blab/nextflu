@@ -49,7 +49,7 @@ offset = datetime(2000,1,1).toordinal()
 pivots = [offset+(x-2000)*365.25 for x in  freqs['clades']['global']['pivots']]
 pivots.pop()
 regions = ['global', 'NA', 'AS', 'EU', 'OC']
-region_label = {'global': 'Global', 'NA': 'N America', 'AS': 'Asia', 'EU': 'Europe', 'OC': 'Oceania'}
+region_label = {'global': 'Global', 'NA': 'N America', 'AS': 'E Asia', 'EU': 'Europe', 'OC': 'Oceania'}
 cols = sns.color_palette(n_colors=len(regions))
 fs=12
 
