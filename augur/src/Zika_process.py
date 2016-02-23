@@ -12,7 +12,7 @@ from itertools import izip
 virus_config.update({
 	# data source and sequence parsing/cleaning/processing
 	'virus':'zika',
-	'fasta_fields':{0:'accession', 1:'strain', 4:'date', 6:'country', 6:'region'},
+	'fasta_fields':{0:'accession', 1:'strain', 2:'date', 4:'country', 4:'region'},
 	#>KU365779|BeH819966|Zika_virus|NA|2015|Human|Brazil
 	'alignment_file':'data/zika.fasta',
 	'outgroup':'H/PF/2013',
@@ -22,7 +22,6 @@ virus_config.update({
 	'cds':[0,None], # define the HA start i n 0 numbering
 	# define relevant clades in canonical HA1 numbering (+1)
 	# numbering starting at methionine including the signal peptide
-	'clade_designations': {},
 	'min_mutation_frequency':0.499,
 	'min_genotype_frequency':0.499,
 	'auspice_prefix':'Zika_',
@@ -55,9 +54,13 @@ class zika_filter(virus_filter):
 		}
 
 	def filter(self):
+		print "Number of viruses before filtering:",len(self.viruses)	
 		self.filter_length(self.min_length)
-		self.filter_noncanoncial_nucleotides()
+		print "Number of viruses after length filtering:",len(self.viruses)
+#		self.filter_noncanoncial_nucleotides()
+#		print "Number of viruses after filtering for noncanonical nucleotides:",len(self.viruses)		
 		self.filter_unique()
+		print "Number of viruses after filtering unique:",len(self.viruses)			
 		self.sort_length()
 		regexp = re.compile(r'[A-Za-z]')
 		for virus in self.viruses:
@@ -139,10 +142,10 @@ class zika_process(process, zika_filter, zika_clean, zika_refine):
 		if 'frequencies' in steps:
 			print "--- Estimating frequencies at " + time.strftime("%H:%M:%S") + " ---"
 			self.determine_variable_positions()
-			self.estimate_frequencies(tasks = ["mutations", "tree"])
+			#self.estimate_frequencies(tasks = ["mutations", "tree"])
 			self.dump()
 		if 'export' in steps:
-			self.temporal_regional_statistics()
+			#self.temporal_regional_statistics()
 			# exporting to json, including the H1N1pdm specific fields
 			self.export_to_auspice(tree_fields = ['nuc_muts', 'accession', 'country'], annotations = [])
 			#self.generate_indexHTML()
