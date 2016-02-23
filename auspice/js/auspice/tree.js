@@ -204,7 +204,9 @@ function tree_init(){
 	calcNodeAges(time_window);
 	colorByTrait();
 	adjust_freq_by_date();
-	calcDfreq(rootNode, freq_ii);
+	if (typeof calcDfreq == 'function') {
+		calcDfreq(rootNode, freq_ii);
+	}
 	tree_legend = makeLegend();
 	nDisplayTips = displayRoot.fullTipCount;
 }
@@ -235,7 +237,12 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	displayRoot = rootNode;
 	tips = gatherTips(rootNode, []);
 	vaccines = getVaccines(tips);
-	sera = getSera(tips);
+	if (typeof getSera == 'function') {
+		sera = getSera(tips);
+	}
+	else {
+		sera = []
+	}
 
 	initDateColorDomain();
 //	initHIColorDomain();
@@ -283,7 +290,6 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.style("font-size", function(d) {return tipLabelSize(d)+"px"; })
 			.text(tipLabelText);
 	}
-
 
 	var tipCircles = treeplot.selectAll(".tip")
 		.data(tips)
@@ -349,7 +355,6 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			document.getElementById("coloring").value = "HI_dist";
 			newFocus();
 		});
-
 
 	/*
 	 * zoom into the tree upon click onto a branch

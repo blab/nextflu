@@ -160,7 +160,9 @@ function dragend() {
 	adjust_coloring_by_date();
 	console.log("updating frequencies");
 	adjust_freq_by_date();
-	calcDfreq(rootNode, freq_ii);
+	if (typeof calcDfreq == 'function') {	
+		calcDfreq(rootNode, freq_ii);
+	}
 
 	if (colorBy == "genotype") {
 		colorByGenotype();

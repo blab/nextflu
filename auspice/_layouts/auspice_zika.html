@@ -1,0 +1,132 @@
+---
+layout: default_zika
+categories:
+ - app
+---
+
+<div class="row">
+	<div class="col-md-3">
+		<div class="subtitle-container note">
+			Real-time tracking of Zika virus evolution
+		</div>
+		<div class="bigspacer"></div>
+		<div class="io-container title">
+			Phylogeny
+		</div>
+		<div class="spacer"></div>
+		<div class="row">
+			<div class="col-xs-6 io-container">
+				<div>
+					<svg id="date-input"></svg>
+				</div>
+				<div>
+					<h5 id="legend-title">Legend</h5>
+					<svg id="legend"></svg>
+				</div>
+				<div class="spacer"></div>
+			</div>
+			<div class="col-xs-6 io-container">
+				<form class="form-horizontal form-small">
+					<div class="form-group">
+							<label class="col-xs-4 control-label">Color by</label>
+							<div class="col-xs-8 controls">
+								<select id="coloring" class="form-control">
+								{% for color_option in site.data.color_options %}
+									{% if page.coloring contains color_option[0] %}
+									<option value={{color_option[0] }}>{{ color_option[1] }}</option>
+									{% endif %}
+								{% endfor %}
+								</select>
+							</div>
+					</div>
+					<div class="form-group">
+						<label class="col-xs-4 control-label">Or</label>
+						<div class="col-xs-8 controls">
+							<input id="gt-color" type="search" placeholder= "{{ page.gtplaceholder }}"  class="form-control">
+							<input type="checkbox" id="branchlabels"> branch labels
+						</div>
+					</div>
+				</form>
+				<div class="spacer"></div>
+
+				{% for res in site.data.restrictions %}
+				<form class="form-horizontal form-small">
+					<div class="form-group">
+						<label class="col-xs-4 control-label">{{res.label}}</label>
+						<div class="col-xs-8 controls">
+							<select id="{{res.id}}" class="form-control">
+								{% for reg in res.fields %}
+								<option value="{{ reg[0] }}">{{reg[1] }}</option>
+								{% endfor %}
+							</select>
+						</div>
+					</div>
+				</form>
+				{% endfor %}
+				<div id="search"></div>
+				<div class="spacer"></div>
+
+				<div id="straininput"></div>
+				<div class="spacer"></div>
+				<button id="searchinputclear" class="btn btn-default">clear</button>
+				<div class="bigspacer"></div>
+				<div>
+					<button id="reset" class="btn btn-default">reset layout</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-9">
+		<div class="treeplot-container" id="treeplot-container">
+			<svg id="treeplot"></svg>
+		</div>
+	</div>
+
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<div class="bigspacer"></div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-3"></div>
+	<div class="col-md-9">
+		<hr>
+		<p>
+		Built by <a href="https://neherlab.wordpress.com/">Richard Neher</a> and
+		<a href="http://bedford.io">Trevor Bedford</a>. This work is made possible by the open sharing of genetic data by
+		research groups from all over the world. We gratefully acknowledge their
+		contributions.
+		</p>
+		<p>
+		Give us a shout at <a href="https://twitter.com/richardneher" target="_blank">@richardneher</a> or
+		<a href="https://twitter.com/trvrb" target="_blank">@trvrb</a> with questions or comments. All
+		<a href="http://github.com/blab/nextflu" target="_blank">source code</a> is freely available under the terms of the
+		<a href="http://github.com/blab/nextflu/blob/master/LICENSE.txt" target="_blank">GNU Affero General Public License</a>.
+		A <a href="/methods/">detailed description of methods</a> is also available. Data  updated <span id="updated"></span> and processed
+		with commit <span id="commit"></span>.
+		</p>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-3"></div>
+	<div class="col-md-9">
+		<hr>
+		<div class="center text-gray smallnote">
+			&copy; 2015 Trevor Bedford and Richard Neher
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<div class="bigspacer"></div>
+	</div>
+</div>
+
+{{ content }}
+
+<script src="/js/auspice_zika.js"></script>

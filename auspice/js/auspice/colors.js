@@ -99,7 +99,9 @@ function colorByTrait() {
 	d3.selectAll('.serum')
 		.style("visibility", serumVisibility);
 	var vis = (colorBy=='HI_dist')?'block':'none';
-	document.getElementById("HIcontrols").style.display = vis;
+	if (document.getElementById('HIcontrols') !== null) {
+		document.getElementById("HIcontrols").style.display = vis;
+	}
 
 	if (colorBy == "ep") {
 		colorScale = epitopeColorScale;

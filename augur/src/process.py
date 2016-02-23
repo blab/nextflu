@@ -194,8 +194,9 @@ class process(virus_frequencies):
 			clade_present = {}
 			clade_xval = {}
 			clade_yval = {}
-			self.frequencies['clades'] = {reg:{"pivots":list(self.tree.seed_node.pivots)}
-											for reg in self.tree.seed_node.freq}
+			if hasattr(self.tree.seed_node, "freq"):
+				self.frequencies['clades'] = {reg:{"pivots":list(self.tree.seed_node.pivots)}
+												for reg in self.tree.seed_node.freq}
 
 			for clade, gt in self.clade_designations.iteritems():
 				if clade in annotations:
