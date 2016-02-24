@@ -206,7 +206,7 @@ if __name__=="__main__":
 					n_viruses = 20
 					n_years = 5
 				if resolution == '6y':
-					n_viruses = 10
+					n_viruses = 24
 					n_years = 6
 				if resolution == '7y':
 					n_viruses = 30
@@ -218,7 +218,7 @@ if __name__=="__main__":
 					n_viruses = 10
 					n_years = 10
 				if resolution == '12y':
-					n_viruses = 10
+					n_viruses = 12
 					n_years = 12
 				if resolution == 'Sep-2015':
 					n_viruses = 60
