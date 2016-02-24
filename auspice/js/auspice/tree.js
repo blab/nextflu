@@ -311,6 +311,12 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 				var win = window.open(url, '_blank');
   				win.focus();
   			}
+			if ((typeof d.db != "undefined") && (d.db == "Genbank") && (typeof d.accession != "undefined")) {
+				var url = "http://www.ncbi.nlm.nih.gov/nuccore/"+d.accession;
+				console.log("opening url "+url);
+				var win = window.open(url, '_blank');
+  				win.focus();
+  			}  			
   		})
 		.on('mouseout', virusTooltip.hide);
 
