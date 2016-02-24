@@ -12,8 +12,8 @@ from itertools import izip
 virus_config.update({
 	# data source and sequence parsing/cleaning/processing
 	'virus':'zika',
-	'fasta_fields':{0:'accession', 1:'strain', 2:'date', 4:'country', 4:'region'},
-	#>KU365779|BeH819966|Zika_virus|NA|2015|Human|Brazil
+	'fasta_fields':{0:'strain', 2:'accession', 3:'date', 5:'country', 5:'region'},	
+	#>BeH818995|Zika|KU365777|2015-07-21|SouthAmerica|Brazil|Para|Belem|Genbank|Genome|
 	'alignment_file':'data/zika.fasta',
 	'outgroup':'H/PF/2013',
 	'aggregate_regions':[('global', None)],
