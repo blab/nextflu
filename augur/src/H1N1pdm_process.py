@@ -58,7 +58,6 @@ virus_config.update({
 		'6b.2':[('HA1', 163,'Q'),  ('HA1', 256, 'T'), ('HA1', 197, 'A'), ('HA1', 283, 'E'), ('HA2', 164, 'G'), ('HA1', 152, 'T'), ('HA2', 174, 'E')]
 		},
 	'HI_fname':'data/H1N1pdm_HI_titers.txt',
-	'auspice_prefix':'H1N1pdm_',
 	'html_vars': {'coloring': 'ep, ne, rb, lbi, dfreq, region, date, cHI, HI_dist',
 				  'gtplaceholder': 'HA1 positions...',
 				  'freqdefault': '6b, 6c'},

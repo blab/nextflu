@@ -40,7 +40,6 @@ virus_config.update({
 	'epitope_masks_fname':'source-data/H3N2_epitope_masks.tsv',
 	'epitope_mask_version':'wolf',
 	'HI_fname':'data/H3N2_HI_titers.txt',
-	'auspice_prefix':'H3N2_',
 	'html_vars': {'coloring': 'ep, ne, rb, lbi, dfreq, region, date, cHI, HI_dist',
 				   'gtplaceholder': 'HA1 positions...',
 					'freqdefault': '3c2.a, 3c3.a, 3c3.b'},

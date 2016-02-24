@@ -41,7 +41,6 @@ virus_config.update({
 		'1B': [('HA1', 75,'K'), ('HA1', 58, 'P'), ('HA1', 165, 'K')],
 		'117V': [('HA1', 75,'K'), ('HA1', 58, 'L'), ('HA1', 165, 'K'), ('HA1', 129, 'D'), ('HA1', 117, 'V')]
 	},
-	'auspice_prefix':'Vic_',
 	'HI_fname':'data/Vic_HI_titers.txt',
 	'html_vars': {'coloring': 'lbi, dfreq, region, date, cHI, HI_dist',
 				  'gtplaceholder': 'HA1 positions...',

@@ -52,14 +52,15 @@ virus_config = {
 
 class process(virus_frequencies):
 	"""generic template class for processing virus sequences into trees"""
-	def __init__(self, path = 'data/', output_path = 'output_', prefix = 'virus', time_interval = (2012.0, 2015.0),
+	def __init__(self, path = 'data/', output_path = 'output_', time_interval = (2012.0, 2015.0),
 	             run_dir = None, virus = None, resolution = None, date_format={'fields':'%Y-%m-%d', 'reg':r'\d\d\d\d-\d\d-\d\d'},
 				 min_mutation_frequency = 0.01, min_genotype_frequency = 0.1, **kwargs):
 		self.path = path
 		self.output_path = output_path		
-		self.virus_type=virus
+		self.virus_type = virus
 		self.resolution = resolution
-		self.prefix = prefix
+		if self.virus_type:
+			self.prefix = self.virus_type+'_'
 		if resolution is not None:
 			self.resolution_prefix = resolution+'_'
 		else:

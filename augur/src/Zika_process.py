@@ -24,7 +24,6 @@ virus_config.update({
 	# numbering starting at methionine including the signal peptide
 	'min_mutation_frequency':0.499,
 	'min_genotype_frequency':0.499,
-	'auspice_prefix':'Zika_',
 	'html_vars': {'coloring': 'lbi, dfreq, region, date',
 				   'gtplaceholder': 'Genomic positions...',
 					'freqdefault': ''},

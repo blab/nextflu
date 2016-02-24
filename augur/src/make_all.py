@@ -255,14 +255,13 @@ if __name__=="__main__":
 					interval_start = 2010.15
 					interval_stop = 2013.15
 					is_interval = True
-				prefix = lineage + '_'
 
 				if is_interval:
 					call = map(str, [params.bin, process, '-v', n_viruses, '--interval', interval_start, interval_stop,
-				           			 '--prefix', prefix, '--resolution', resolution] + common_args)
+				           			'--resolution', resolution] + common_args)
 				else:
 					call = map(str, [params.bin, process, '-v', n_viruses, '-y', n_years,
-				           			 '--prefix', prefix, '--resolution', resolution] + common_args)
+				           			'--resolution', resolution] + common_args)
 
 				print call
 				if not params.annotate:
