@@ -16,6 +16,8 @@ def year_delta(start_date, years):
 
 def numerical_date(date, format = '%Y-%m-%d'):
 	"""Takes a calendar date and a numerical dates in terms of years"""
+	"""If date is missing precision, still return numerical date"""
+	date = date.replace("XX", "01")
 	if isinstance(date, basestring):
 		try:
 			date = datetime.datetime.strptime(date, format).date()
