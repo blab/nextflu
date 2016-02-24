@@ -595,10 +595,10 @@ class HI_tree(object):
 				plt.tight_layout()
 				ax.set_xticks([-4,-2,0,2,4])
 				ax.tick_params(axis='both', labelsize=fs)
-				for fmt in fmts: plt.savefig(self.htmlpath()+'HI_effects_'+model+fmt)
+				for fmt in fmts: plt.savefig(self.output_path+self.prefix+self.resolution_prefix+'HI_effects_'+model+fmt)
 
 				# write model statistics
-				with open(self.htmlpath()+'parameters_'+model+'.txt', 'w') as ofile:
+				with open(self.output_path+self.prefix+self.resolution_prefix+'parameters_'+model+'.txt', 'w') as ofile:
 					ofile.write('total number of viruses:\t'+str(len(self.viruses))+'\n')
 					ofile.write('number of test viruses:\t'+str(len(self.virus_effect[model]))+'\n')
 					ofile.write('number of reference viruses:\t'+str(len(self.ref_strains))+'\n')
@@ -618,12 +618,12 @@ class HI_tree(object):
 						lam_pot = lam_pot, force_redo=True, map_to_tree=map_to_tree, subset_strains=True)
 
 			self.validate(plot=True)
-			for fmt in fmts: plt.savefig(self.htmlpath()+'HI_prediction_virus_'+model+fmt)
+			for fmt in fmts: plt.savefig(self.output_path+self.prefix+self.resolution_prefix+'HI_prediction_virus_'+model+fmt)
 
 			self.map_HI(training_fraction=0.9, method=method,lam_HI=lam_HI, lam_avi=lam_avi,
 						lam_pot = lam_pot, force_redo=True, map_to_tree=map_to_tree)
 			self.validate(plot=True)
-			for fmt in fmts: plt.savefig(self.htmlpath()+'HI_prediction_'+model+fmt)
+			for fmt in fmts: plt.savefig(self.output_path+self.prefix+self.resolution_prefix+'HI_prediction_'+model+fmt)
 
 		self.save_trunk_cHI()
 
