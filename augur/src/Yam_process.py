@@ -31,7 +31,7 @@ virus_config.update({
 	'alignment_file':'data/Yam_gisaid_epiflu_sequence.fasta',
 	'outgroup':'B/Singapore/11/94',
 	'force_include':'data/Yam_HI_strains.txt',
-	'force_include_all':True,
+	'force_include_all':False,
 	'date_spec':'year',
 	'max_global':True,   # sample as evenly as possible from different geographic regions
 	'cds':[11,None], # define the translation start i n 0 numbering

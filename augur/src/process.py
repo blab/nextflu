@@ -17,8 +17,10 @@ parser.add_argument('-r', '--raxml_time_limit', type = float, default = 1.0, hel
 parser.add_argument('--lam_HI', type = float, default = 1.0, help='regularization for HI')
 parser.add_argument('--lam_avi', type = float, default = 1.0, help='regularization for avidity')
 parser.add_argument('--lam_pot', type = float, default = 0.2, help='regularization for potency')
+parser.add_argument('--min_mutation_frequency', type = float, default = 0.01, help='minimum mutation frequency to calculate trajectory')
 parser.add_argument('--interval', nargs = '+', type = float, default = None, help='interval from which to pull sequences')
 parser.add_argument('--path', type = str, default = 'data/', help='path of file dumps')
+parser.add_argument('--output_path', type = str, default = 'output/', help='path of results dumps')
 parser.add_argument('--prefix', type = str, default = '', help='prefix of file dumps including auspice')
 parser.add_argument('--test', default = False, action="store_true",  help ="don't run the pipeline")
 parser.add_argument('--start', default = 'filter', type = str,  help ="start pipeline at specified step")
@@ -50,10 +52,11 @@ virus_config = {
 
 class process(virus_frequencies):
 	"""generic template class for processing virus sequences into trees"""
-	def __init__(self, path = 'data/', prefix = 'virus', time_interval = (2012.0, 2015.0),
+	def __init__(self, path = 'data/', output_path = 'output_', prefix = 'virus', time_interval = (2012.0, 2015.0),
 	             run_dir = None, virus = None, resolution = None, date_format={'fields':'%Y-%m-%d', 'reg':r'\d\d\d\d-\d\d-\d\d'},
 				 min_mutation_frequency = 0.01, min_genotype_frequency = 0.1, **kwargs):
 		self.path = path
+		self.output_path = output_path		
 		self.virus_type=virus
 		self.resolution = resolution
 		self.prefix = prefix
@@ -84,7 +87,7 @@ class process(virus_frequencies):
 		self.auspice_meta_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'meta.json'
 		self.auspice_HI_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'HI.json'
 		self.accession_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'accession_numbers.tsv'
-		self.auspice_HI_display_mutations =	 '../auspice/_data/HI_mutation_effects.json'
+		self.auspice_HI_display_mutations =	 '../auspice/data/HI_mutation_effects.json'
 		self.nuc_alphabet = 'ACGT-N'
 		self.aa_alphabet = 'ACDEFGHIKLMNPQRSTVWY*X'
 		virus_frequencies.__init__(self, **kwargs)
@@ -311,7 +314,8 @@ class process(virus_frequencies):
 		from io_util import write_json, read_json
 		# make a tab delimited file with the mutaton effects
 		table_effects = []
-		with open(self.htmlpath()+'HI_mutation_effects.tsv','w') as ofile:
+		HI_mutation_effects_fname = self.output_path+self.prefix+self.resolution_prefix+'HI_mutation_effects.tsv'
+		with open(HI_mutation_effects_fname, 'w') as ofile:
 			for mut, val in self.mutation_effects.iteritems():
 				mut_str = '/'.join([x[1] for x in self.mutation_clusters[mut]])
 				ofile.write(mut_str+'\t'+str(np.round(val,4))+'\t'+str(self.mutation_counter[mut])+'\n')

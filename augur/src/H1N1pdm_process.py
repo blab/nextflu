@@ -36,7 +36,7 @@ virus_config.update({
 	'alignment_file':'data/H1N1pdm_gisaid_epiflu_sequence.fasta',
 	'outgroup':'A/Swine/Indiana/P12439/00',
 	'force_include':'data/H1N1pdm_HI_strains.txt',
-	'force_include_all':True,
+	'force_include_all':False,
 	'date_spec':'year',
 	'max_global':True,   # sample as evenly as possible from different geographic regions
 

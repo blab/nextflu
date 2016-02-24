@@ -31,7 +31,7 @@ virus_config.update({
 	'alignment_file':'data/Vic_gisaid_epiflu_sequence.fasta',
 	'outgroup':'B/HongKong/02/1993',
 	'force_include':'data/Vic_HI_strains.txt',
-	'force_include_all':True,
+	'force_include_all':False,
 	'date_spec':'year',
 	'max_global':True,   # sample as evenly as possible from different geographic regions
 	# define relevant clades in canonical HA1 numbering (+1)

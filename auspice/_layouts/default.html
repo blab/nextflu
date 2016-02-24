@@ -74,7 +74,7 @@
 										<a>{{ entry.virus }}</a>
 									{% else %}
 									<li>
-										<a href="/{{ entry.virus }}/{{ page.resolution }}">{{ entry.virus }}</a>
+										<a href="/{{ entry.virus | downcase }}/{{ page.resolution | downcase }}">{{ entry.virus }}</a>
 									{% endif %}
 									</li>
 								{% endfor %}
@@ -85,7 +85,7 @@
 						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
 								{% if page.categories.first == 'app' %}
-								{{ page.resolution | replace:'-',' ' }}
+								{{ page.resolution | replace:'-',' ' |  }}
 								{% else %}
 								Time
 								{% endif %}
@@ -101,7 +101,7 @@
 												<a>{{ res | replace:'-',' ' }}</a>
 											{% else %}
 											<li>
-												<a href="/{{ entry.virus }}/{{ res }}">{{ res | replace:'-',' ' }}</a>
+												<a href="/{{ entry.virus | downcase }}/{{ res | downcase }}">{{ res | replace:'-',' ' }}</a>
 											{% endif %}
 											</li>
 										{% endfor %}

@@ -1,23 +1,23 @@
 # For augur repo #
 environment*
 ec2-startup.sh
-data
+augur/data/
+augur/output/
+auspice/data/
 _site/
 figures
 validation
-HI_mutation_effects.tsv
-parameters_mutation.txt
-parameters_tree.txt
 temp_*
+tmp
+*.pdf
 
 # Tex # 
 ###################
-*aux
-*pdf
-*bbl
-*blg
-*log
-*toc
+*.aux
+*.bbl
+*.blg
+*.log
+*.toc
 
 # Compiled source #
 ###################
@@ -65,11 +65,6 @@ Thumbs.db
 # IDE #
 #######
 *sublime*
-
-# graphics output #
-###################
-*png
-*svg
 
 # cluster log #
 *.sh.*
