@@ -46,7 +46,7 @@ var dragMin = d3.behavior.drag()
 
 function calcNodeAges(tw){
 	tips.forEach(function (d) {
-		var date = new Date(d.date);
+		var date = new Date(d.date.replace(/XX/g, "01"));
 		var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
 		var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
 		d.diff = diffYears;
@@ -202,9 +202,17 @@ function date_init(){
 		}).map(function(d) {
 		return new Date(d.date);
 	});
-	earliestDate = new Date(d3.min(dateValues));
-	earliestDate.setDate(earliestDate.getDate() + 1);
-//	globalDate = new Date(d3.max(dateValues));
+
+	var time_back = 1.0;
+	if (typeof time_window != "undefined"){
+		time_back = time_window;
+	}
+	if (typeof full_data_time_window != "undefined"){
+		time_back = full_data_time_window;
+	}
+
+	var earliestDate = new Date(globalDate);
+	earliestDate.setDate(earliestDate.getDate() - (time_back * 365.25));
 
 	dateScale = d3.time.scale()
 		.domain([earliestDate, globalDate])
