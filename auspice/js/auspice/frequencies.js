@@ -1,6 +1,8 @@
 var frequencies, pivots;
 var gene = 'nuc';
 var mutType = 'aa';
+var plot_frequencies = true;
+
 /**
  * for each node, calculate the derivative of the frequency tranjectory. if none exists, copy parent
 **/
@@ -19,30 +21,6 @@ function calcDfreq(node, freq_ii){
 			calcDfreq(node.children[i1], freq_ii);
 		}
 	}
-};
-function parse_gt_string(gt){
-	mutations = [];
-	gt.split(',').map( function (d) {
-		var tmp = d.split(/[\s//]/); //FIXME: make more inclusive
-		var region;
-		var positions = [];
-		for (var i=0; i<tmp.length; i++){
-			if (contains(["EU","NA","AS","OC"], tmp[i])){
-				region = tmp[i];
-			}else{
-				if (tmp[i].length>0) positions.push(tmp[i]);
-			}
-		}
-		if (typeof region == "undefined") region="global";
-		// sort if this is a multi mutation genotype
-		if (positions.length>1){
-			positions.sort(function (a,b){
-				return parseInt(a.substring(0,a.length-1)) - parseInt(b.substring(0,b.length-1));
-			});
-		}
-		mutations.push([region, positions.join('/')]);
-	});
-	return mutations;
 };
 
 /**
@@ -199,12 +177,6 @@ var gt_chart = c3.generate({
 		columns: [],
 	}
 });
-
-function contains(arr, obj) {
-    for(var i=0; i<arr.length; i++) {
-        if (arr[i] == obj) return true;
-    }
-}
 
 d3.json(path + file_prefix + "frequencies.json", function(error, json){
 	console.log(error);

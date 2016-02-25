@@ -185,6 +185,37 @@ function branchStrokeColor(d) {
 	return d3.rgb(modCol).toString();
 }
 
+function contains(arr, obj) {
+    for(var i=0; i<arr.length; i++) {
+        if (arr[i] == obj) return true;
+    }
+}
+
+function parse_gt_string(gt){
+	mutations = [];
+	gt.split(',').map( function (d) {
+		var tmp = d.split(/[\s//]/); //FIXME: make more inclusive
+		var region;
+		var positions = [];
+		for (var i=0; i<tmp.length; i++){
+			if (contains(["EU","NA","AS","OC"], tmp[i])){
+				region = tmp[i];
+			}else{
+				if (tmp[i].length>0) positions.push(tmp[i]);
+			}
+		}
+		if (typeof region == "undefined") region="global";
+		// sort if this is a multi mutation genotype
+		if (positions.length>1){
+			positions.sort(function (a,b){
+				return parseInt(a.substring(0,a.length-1)) - parseInt(b.substring(0,b.length-1));
+			});
+		}
+		mutations.push([region, positions.join('/')]);
+	});
+	return mutations;
+};
+
 function colorByGenotype() {
 	var positions_string = document.getElementById("gt-color").value.split(',');
 	var positions_list = []
@@ -215,8 +246,10 @@ function colorByGenotype() {
 	else {
 		d3.select("#coloring").each(colorByTrait);
 		gt = parse_gt_string(freqdefault);
-		make_gt_chart(gt);
-		document.getElementById("gtspec").value = freqdefault;
+		if (plot_frequencies) {
+			make_gt_chart(gt);
+			document.getElementById("gtspec").value = freqdefault;
+		}
 	}
 }
 

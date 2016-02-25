@@ -128,7 +128,7 @@ function branchStrokeWidth(d) {
 
 function branchLabelText(d) {
 	var tmp_str='';
-	if (branch_labels){
+	if (branch_labels && mutType == 'aa'){
 		for (tmp_gene in d.aa_muts){
 			if (d.aa_muts[tmp_gene].length){
 				if (tmp_str!=''){
@@ -141,6 +141,17 @@ function branchLabelText(d) {
 			tmp_str = tmp_str.substring(0,45)+'...';
 		}
 	}
+	if (branch_labels && mutType == 'nuc'){
+		if (d.nuc_muts.length){
+			if (tmp_str!=''){
+				tmp_str+=', ';
+			}
+			tmp_str+=d.nuc_muts.replace(/,/g, ', ');
+		}
+		if (tmp_str.length>50){
+			tmp_str = tmp_str.substring(0,45)+'...';
+		}
+	}	
 	return tmp_str;
 }
 
