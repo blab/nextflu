@@ -44,6 +44,12 @@ var virusTooltip = d3.tip()
 				if (d.lab.length>25) string += '...';
 			}
 		}
+		if (typeof d.authors != "undefined") {
+			if (d.authors != "") {
+				string += "<br>Authors: " + d.authors.substring(0,25);
+				if (d.authors.length>25) string += '...';
+			}
+		}		
 		string += "</div>";
 		// following may or may not be present
 		if ((typeof focusNode != "undefined")){
