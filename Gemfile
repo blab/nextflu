@@ -9,4 +9,4 @@ gem 'therubyracer'
 gem 'less'
 
 # deploying
-gem 's3_website', '1.4.5'
+gem 's3_website'
