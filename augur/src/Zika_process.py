@@ -73,10 +73,23 @@ class zika_clean(virus_clean):
 	def __init__(self,**kwargs):
 		virus_clean.__init__(self, **kwargs)
 
+	def clean_outlier_strains(self):
+		"""Remove single outlying viruses"""
+		remove_viruses = []
+		outlier_strains = ["VE_Ganxian_Asian"]
+		for outlier_strain in outlier_strains:
+			for v in self.viruses:
+				if (v.strain == outlier_strain):
+					remove_viruses.append(v)
+					if self.verbose > 1:
+						print "\tremoving", v.strain
+		self.viruses = MultipleSeqAlignment([v for v in self.viruses if v not in remove_viruses])
+
 	def clean(self):
 		self.unique_date()	
-		self.remove_insertions()	
-		self.clean_ambiguous()			
+		self.remove_insertions()
+		self.clean_ambiguous()
+		self.clean_outlier_strains()
 		print "Number of viruses after cleaning:",len(self.viruses)
 
 class zika_refine(tree_refine):

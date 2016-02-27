@@ -419,7 +419,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			var labels = treeplot.selectAll(".tipLabel")
 				.data(tips)
 				.each(function(d) {
-					var textWidth = tipLabelWidth(d);
+					var textWidth = 0.5*tipLabelWidth(d);
 					if (textWidth>maxTextWidth) {
 						maxTextWidth = textWidth;
 					}
