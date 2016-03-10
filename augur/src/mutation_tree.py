@@ -15,6 +15,7 @@ from itertools import izip
 path_to_augur = './' + ('/'.join(sys.argv[0].split('/')[:-2]))
 std_outgroup_file_blast = path_to_augur+'/source-data/outgroups.fasta'
 std_outgroup_file_nuc = path_to_augur+'/source-data/outgroups_nucleotides.fasta'
+no_raxml_threshold = 150
 
 virus_config.update({
 	# data source and sequence parsing/cleaning/processing
@@ -136,21 +137,22 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 		print by_og[1]
 		# sort by number of hits, then mean score
 		by_og.sort(key = lambda x:(len(x[1]), np.mean([y[-2] for y in x[1]])), reverse=True)
-		for og, hits in by_og:
-			if standard_outgroups[og]['date']<earliest_date-5 or np.mean([y[-1] for y in hits])<0.8:
+		for oi, (og, hits) in enumerate(by_og):
+			if standard_outgroups[og]['date']<earliest_date-5 or np.mean([y[-1] for y in hits])<0.8+0.03*oi:
 				break
+		outgroup_index = oi
 
 		if np.mean([y[-1] for y in hits])<0.8:
 			self.midpoint_rooting = True
 			print("will root at midpoint")
 
 		for oi, (ref, hits) in enumerate(by_og):
-			if np.max([y[-1] for y in hits])>0.9 and ref!=og:
+			if (np.max([y[-1] for y in hits])>0.9+oi*0.02) and ref!=og:
 				self.viruses.append(standard_outgroups[ref])
 				print("including reference strain ",ref, [y[-1] for y in hits])
 				if oi>max_ref_seqs:
 					break
-		self.outgroup = standard_outgroups[og]
+		self.outgroup = standard_outgroups[by_og[outgroup_index][0]]
 		self.outgroup['strain']+='OG'
 		self.cds = [0,len(self.outgroup['seq'])]
 		print("chosen outgroup",self.outgroup['strain'])
@@ -308,13 +310,16 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 
 
 	def run(self, raxml_time_limit):
+		rax_tlimit = raxml_time_limit
 		self.align()
 		for v in self.viruses:
 			v.description=''
 		AlignIO.write(self.viruses, self.auspice_align_fname, 'fasta')
 		self.remove_insertions()
+		if len(self.viruses)>no_raxml_threshold:
+			rax_tlimit = 0
 		print "--- Tree	 infer at " + time.strftime("%H:%M:%S") + " ---"
-		self.infer_tree(raxml_time_limit)
+		self.infer_tree(rax_tlimit)
 		print "--- Infer ancestral sequences " + time.strftime("%H:%M:%S") + " ---"
 		self.infer_ancestral()  # -> every node has a sequence
 		print "--- Tree refine at " + time.strftime("%H:%M:%S") + " ---"
