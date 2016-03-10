@@ -342,12 +342,11 @@ class process(virus_frequencies):
 		if not raxml_rooted:
 			with open(out_fname) as ofile:
 				tstr = "".join([x.strip() for x in ofile])
+			out_fname = out_fname+'_fixed'
 			if tstr.startswith('[&R]'):
-				with open(out_fname+'_fixed','w') as ofile:
+				with open(out_fname,'w') as ofile:
 					ofile.write(tstr[4:]+'\n')
-				T = Phylo.read(out_fname+'_fixed', 'newick')
-			else:
-				T = Phylo.read(out_fname, 'newick')
+			T = Phylo.read(out_fname, 'newick')
 
 			try:
 				outgroup_clade = [c for x in T.get_terminals() if c.strain == self.outgroup['strain']][0]
