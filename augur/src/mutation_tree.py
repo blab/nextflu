@@ -354,6 +354,16 @@ if __name__=="__main__":
 			os.makedirs(params.out+'/css')
 		except OSError as e:
 			print "Cannot create output directory",e
+	if not os.path.isdir(params.out+'/js'):
+		try:
+			os.makedirs(params.out+'/js')
+		except OSError as e:
+			print "Cannot create output directory",e
+	if not os.path.isdir(params.out+'/css'):
+		try:
+			os.makedirs(params.out+'/css')
+		except OSError as e:
+			print "Cannot create output directory",e
 	virus_config["outdir"]=params.out
 
 	muttree = mutation_tree(params.aln, params.outgroup, **virus_config)
