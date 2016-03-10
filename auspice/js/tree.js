@@ -5,6 +5,7 @@ var freqScale = d3.scale.linear()
 	.range([1.5, 4.5]);
 
 var tipRadius = 4.0;
+var refRadius = 4.0;
 var left_margin = 10;
 var bottom_margin = 10;
 var top_margin = 10;
@@ -248,9 +249,9 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.data(vaccines)
 		.enter()
 		.append("circle")
-		.attr("class", "tip")
+		.attr("class", "vaccine")
 		.style("fill", "#555555")
-		.attr("r", tipRadius)
+		.attr("r", refRadius)
 		.style("cursor", "default")
 		.on('mouseover', function(d) {
 			virusTooltip.show(d, this);
@@ -355,8 +356,8 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 
 		treeplot.selectAll(".vaccine").data(vaccines)
 			.transition().duration(dt)
-			.attr("x", function(d) { return d.x; })
-			.attr("y", function(d) { return d.y; });
+			.attr("cx", function(d) { return d.x; })
+			.attr("cy", function(d) { return d.y; });
 
 		treeplot.selectAll(".link").data(links)
 			.transition().duration(dt)
