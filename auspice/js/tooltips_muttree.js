@@ -5,6 +5,9 @@ var virusTooltip = d3.tip()
 	.html(function(d) {
 
 		string = "";
+		if (typeof vaccineChoice[d.strain] != "undefined"){
+			string+="REFERENCE STRAIN<br>";
+		}
 
 		// safe to assume the following attributes
 		if (typeof d.strain != "undefined") {
