@@ -330,11 +330,24 @@ class process(virus_frequencies):
 			shutil.copy("initial_tree.newick", 'raxml_tree.newick')
 
 		print "RAxML branch length optimization and rooting"
-		os.system("raxmlHPC -f e -T "+str(self.nthreads) +  " -s temp.phyx -n branches -c 25 -m GTRGAMMA -p 344312987 -t raxml_tree.newick -o " + self.outgroup['strain'])
+		if raxml_time_limit>0:
+			os.system("raxmlHPC -f e -T "+str(self.nthreads) +  " -s temp.phyx -n branches -c 25 -m GTRGAMMA -p 344312987 -t raxml_tree.newick -o " + self.outgroup['strain'])
+			raxml_rooted=True
+		else:
+			shutil.copy('raxml_tree.newick', 'RAxML_result.branches')
+			raxml_rooted=False
 
 		out_fname = "tree_infer.newick"
 		shutil.copy('RAxML_result.branches', out_fname)
-		Phylo.write(Phylo.read(out_fname, 'newick'),'temp.newick','newick')
+		T = Phylo.read(out_fname, 'newick')
+		if not raxml_rooted:
+			try:
+				outgroup_clade = [c for x in T.get_terminals() if c.strain = self.outgroup['strain'][0]
+			except:
+				print("Can't find outgroup in tree -- midpoint_rooting")
+				self.midpoint_rooting = True
+
+		Phylo.write(T,'temp.newick','newick')
 		self.tree = dendropy.Tree.get_from_string(delimit_newick(out_fname), 'newick', rooting="force-rooted")
 		os.chdir('..')
 		self.remove_run_dir()
