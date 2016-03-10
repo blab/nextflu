@@ -6,7 +6,7 @@ var freqScale = d3.scale.linear()
 
 var tipRadius = 4.0;
 var refRadius = 4.0;
-var left_margin = 10;
+var left_margin = 30;
 var bottom_margin = 10;
 var top_margin = 10;
 if ((typeof branch_labels != "undefined")&&(branch_labels)) {top_margin +=15;}
@@ -219,6 +219,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.append("text")
 			.attr("class","tipLabel")
 			.style("font-size", function(d) {return tipLabelSize(d)+"px"; })
+			.style("fill", function(d) {if (typeof vaccineChoice[d.strain]=="undefined") {return '#000000';} else {return "#AAAAAA";}})
 			.text(tipLabelText);
 	}
 
