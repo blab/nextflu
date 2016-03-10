@@ -332,6 +332,7 @@ if __name__=="__main__":
 	parser.add_argument('--outgroup', required = True, type = str,  help ="outgroup to root the tree, strain label or fasta file")
 	parser.add_argument('--cds', nargs = '+', type = int, default = None, help='part of the outgroup sequence that is to be translated')
 	parser.add_argument('--out', type = str, default = 'output/', help='output directory')
+	parser.add_argument('--nthreads', type = int, default=1,   help ="number of threads to use (mafft and raxml)")
 	params = parser.parse_args()
 
 	# check and parse cds
@@ -345,6 +346,7 @@ if __name__=="__main__":
 		else:
 			raise ValueError("Expecting a cds of length 1 (start only) or 2, got "+str(params.cds))
 			exit()
+
 
 	# check and create output directory
 	if not os.path.isdir(params.out):
@@ -365,6 +367,7 @@ if __name__=="__main__":
 		except OSError as e:
 			print "Cannot create output directory",e
 	virus_config["outdir"]=params.out
+	virus_config["nthreads"]=params.nthreads
 
 	muttree = mutation_tree(params.aln, params.outgroup, **virus_config)
 	muttree.run(raxml_time_limit=0.1)

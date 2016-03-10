@@ -51,11 +51,12 @@ class process(virus_frequencies):
 	"""generic template class for processing virus sequences into trees"""
 	def __init__(self, path = 'data/', prefix = 'virus', time_interval = (2012.0, 2015.0),
 	             run_dir = None, virus = None, resolution = None, date_format={'fields':'%Y-%m-%d', 'reg':r'\d\d\d\d-\d\d-\d\d'},
-				 min_mutation_frequency = 0.01, min_genotype_frequency = 0.1, **kwargs):
+				 min_mutation_frequency = 0.01, min_genotype_frequency = 0.1, nthreads=1, **kwargs):
 		self.path = path
 		self.virus_type=virus
 		self.resolution = resolution
 		self.prefix = prefix
+		self.nthreads=nthreads
 		if resolution is not None:
 			self.resolution_prefix = resolution+'_'
 		else:
@@ -278,9 +279,9 @@ class process(virus_frequencies):
 		os.chdir(self.run_dir)
 		SeqIO.write([SeqRecord(Seq(v['seq']), id=v['strain']) for v in self.viruses], "temp_in.fasta", "fasta")
 		if fast:
-			os.system("mafft --anysymbol temp_in.fasta > temp_out.fasta")
+			os.system("mafft --anysymbol --thread " + str(self.nthreads) + " temp_in.fasta > temp_out.fasta")
 		else:
-			os.system("mafft --anysymbol temp_in.fasta > temp_out.fasta")
+			os.system("mafft --anysymbol --thread " + str(self.nthreads) + " temp_in.fasta > temp_out.fasta")
 		aln = AlignIO.read('temp_out.fasta', 'fasta')
 		self.sequence_lookup = {seq.id:seq for seq in aln}
 		# add attributes to alignment
@@ -295,7 +296,6 @@ class process(virus_frequencies):
 		builds a tree from the alignment using fasttree and RAxML. raxml runs for
 		raxml_time_limit and is terminated thereafter. raxml_time_limit can be 0.
 		'''
-		nthreads = 1
 		self.make_run_dir()
 		os.chdir(self.run_dir)
 		AlignIO.write(self.viruses, 'temp.fasta', 'fasta')
@@ -311,7 +311,7 @@ class process(virus_frequencies):
 			print "RAxML tree optimization with time limit " + str(raxml_time_limit) + " hours"
 			# using exec to be able to kill process
 			end_time = time.time() + int(raxml_time_limit*3600)
-			process = subprocess.Popen("exec raxmlHPC -f d -T "+str(nthreads) +  " -j -s temp.phyx -n topology -c 25 -m GTRCAT -p 344312987 -t initial_tree.newick", shell=True)
+			process = subprocess.Popen("exec raxmlHPC -f d -T "+str(self.nthreads) +  " -j -s temp.phyx -n topology -c 25 -m GTRCAT -p 344312987 -t initial_tree.newick", shell=True)
 			while (time.time() < end_time):
 				if os.path.isfile('RAxML_result.topology'):
 					break
@@ -330,7 +330,7 @@ class process(virus_frequencies):
 			shutil.copy("initial_tree.newick", 'raxml_tree.newick')
 
 		print "RAxML branch length optimization and rooting"
-		os.system("raxmlHPC -f e -T "+str(nthreads) +  " -s temp.phyx -n branches -c 25 -m GTRGAMMA -p 344312987 -t raxml_tree.newick -o " + self.outgroup['strain'])
+		os.system("raxmlHPC -f e -T "+str(self.nthreads) +  " -s temp.phyx -n branches -c 25 -m GTRGAMMA -p 344312987 -t raxml_tree.newick -o " + self.outgroup['strain'])
 
 		out_fname = "tree_infer.newick"
 		shutil.copy('RAxML_result.branches', out_fname)
