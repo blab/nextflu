@@ -280,7 +280,7 @@ class process(virus_frequencies):
 		if fast:
 			os.system("mafft --anysymbol temp_in.fasta > temp_out.fasta")
 		else:
-			os.system("mafft --anysymbol --nofft temp_in.fasta > temp_out.fasta")
+			os.system("mafft --anysymbol temp_in.fasta > temp_out.fasta")
 		aln = AlignIO.read('temp_out.fasta', 'fasta')
 		self.sequence_lookup = {seq.id:seq for seq in aln}
 		# add attributes to alignment
@@ -295,12 +295,13 @@ class process(virus_frequencies):
 		builds a tree from the alignment using fasttree and RAxML. raxml runs for
 		raxml_time_limit and is terminated thereafter. raxml_time_limit can be 0.
 		'''
+		nthreads = 1
 		self.make_run_dir()
 		os.chdir(self.run_dir)
 		AlignIO.write(self.viruses, 'temp.fasta', 'fasta')
 
 		print "Building initial tree with FastTree"
-		os.system("fasttree -gtr -nt -gamma -nosupport -mlacc 2 -slownni temp.fasta > initial_tree.newick")
+		os.system("fasttree -gtr -nt -gamma -nosupport temp.fasta > initial_tree.newick")
 		self.tree = dendropy.Tree.get_from_string(delimit_newick('initial_tree.newick'),'newick', as_rooted=True)
 		self.tree.resolve_polytomies()
 		self.tree.write_to_path("initial_tree.newick", "newick")
@@ -310,7 +311,7 @@ class process(virus_frequencies):
 			print "RAxML tree optimization with time limit " + str(raxml_time_limit) + " hours"
 			# using exec to be able to kill process
 			end_time = time.time() + int(raxml_time_limit*3600)
-			process = subprocess.Popen("exec raxmlHPC -f d -T 6 -j -s temp.phyx -n topology -c 25 -m GTRCAT -p 344312987 -t initial_tree.newick", shell=True)
+			process = subprocess.Popen("exec raxmlHPC -f d -T "+str(nthreads) +  " -j -s temp.phyx -n topology -c 25 -m GTRCAT -p 344312987 -t initial_tree.newick", shell=True)
 			while (time.time() < end_time):
 				if os.path.isfile('RAxML_result.topology'):
 					break
@@ -329,7 +330,7 @@ class process(virus_frequencies):
 			shutil.copy("initial_tree.newick", 'raxml_tree.newick')
 
 		print "RAxML branch length optimization and rooting"
-		os.system("raxmlHPC -f e -T 6 -s temp.phyx -n branches -c 25 -m GTRGAMMA -p 344312987 -t raxml_tree.newick -o " + self.outgroup['strain'])
+		os.system("raxmlHPC -f e -T "+str(nthreads) +  " -s temp.phyx -n branches -c 25 -m GTRGAMMA -p 344312987 -t raxml_tree.newick -o " + self.outgroup['strain'])
 
 		out_fname = "tree_infer.newick"
 		shutil.copy('RAxML_result.branches', out_fname)
