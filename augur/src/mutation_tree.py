@@ -316,8 +316,8 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 			v.description=''
 		AlignIO.write(self.viruses, self.auspice_align_fname, 'fasta')
 		self.remove_insertions()
-		if len(self.viruses)>no_raxml_threshold:
-			rax_tlimit = 0
+#		if len(self.viruses)>no_raxml_threshold:
+#			rax_tlimit = 0
 		print "--- Tree	 infer at " + time.strftime("%H:%M:%S") + " ---"
 		self.infer_tree(rax_tlimit)
 		print "--- Infer ancestral sequences " + time.strftime("%H:%M:%S") + " ---"
