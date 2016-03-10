@@ -342,7 +342,7 @@ class process(virus_frequencies):
 		T = Phylo.read(out_fname, 'newick')
 		if not raxml_rooted:
 			try:
-				outgroup_clade = [c for x in T.get_terminals() if c.strain = self.outgroup['strain'][0]
+				outgroup_clade = [c for x in T.get_terminals() if c.strain == self.outgroup['strain']][0]
 			except:
 				print("Can't find outgroup in tree -- midpoint_rooting")
 				self.midpoint_rooting = True
