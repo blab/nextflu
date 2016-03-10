@@ -138,7 +138,7 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 		# sort by number of hits, then mean score
 		by_og.sort(key = lambda x:(len(x[1]), np.mean([y[-2] for y in x[1]])), reverse=True)
 		for oi, (og, hits) in enumerate(by_og):
-			if standard_outgroups[og]['date']<earliest_date-5 or np.mean([y[-1] for y in hits])<0.8+0.03*oi:
+			if standard_outgroups[og]['date']<earliest_date-5 or np.mean([y[-1] for y in hits])<0.8:
 				break
 		outgroup_index = oi
 
