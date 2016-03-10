@@ -247,15 +247,10 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	var vaccineCircles = treeplot.selectAll(".vaccine")
 		.data(vaccines)
 		.enter()
-		.append("text")
-		.attr("class", "vaccine")
-		.attr('text-anchor', 'middle')
-		.attr('dominant-baseline', 'central')
-		.style("font-size", "22px")
-		.style("font-weight",600)
-		.style('font-family', 'sans-serif')
+		.append("circle")
+		.attr("class", "tip")
 		.style("fill", "#555555")
-		.text(function(d) { return '\uf00d'; }) //'x';}) //
+		.attr("r", tipRadius)
 		.style("cursor", "default")
 		.on('mouseover', function(d) {
 			virusTooltip.show(d, this);
