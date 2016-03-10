@@ -284,7 +284,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		}
 		var dy = yScale.domain()[1]-yScale.domain()[0];
 		displayRoot = d.target;
-		var dMin = 0.5 * (minimumAttribute(d.target, "xvalue", d.target.xvalue) + minimumAttribute(d.source, "xvalue", d.source.xvalue)),
+		var dMin = minimumAttribute(d.target, "xvalue", d.target.xvalue) - 0.1 * (minimumAttribute(d.target, "xvalue", d.target.xvalue) - minimumAttribute(d.source, "xvalue", d.source.xvalue)),
 			dMax = maximumAttribute(d.target, "xvalue", d.target.xvalue),
 			lMin = minimumAttribute(d.target, "yvalue", d.target.yvalue),
 			lMax = maximumAttribute(d.target, "yvalue", d.target.yvalue);
@@ -295,7 +295,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			lMin = minimumAttribute(d.source, "yvalue", d.source.yvalue),
 			lMax = maximumAttribute(d.source, "yvalue", d.source.yvalue);
 		}
-		if ((lMax-lMin)>0.8*dy){
+		if ((lMax-lMin)>0.9*dy){
 			lMin = lMax - dy*0.7
 		}
 		var visibleXvals = tips.filter(function (d){return (d.yvalue>=lMin)&&(d.yvalue<lMax)}).map(function(d){return +d.xvalue;});
