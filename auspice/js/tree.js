@@ -12,7 +12,7 @@ if ((typeof branch_labels != "undefined")&&(branch_labels)) {top_margin +=15;}
 var right_margin = 10;
 
 function initDateColorDomain(intAttributes){
-	var numDateValues = tips.map(function(d) {return d.num_date;})
+	var numDateValues = tips.filter(function (d){return typeof vaccines[d.strain]=="undefined";}).map(function(d) {return d.num_date;})
 	var minDate = d3.min(numDateValues.filter(function (d){return d!="undefined";}));
 	var maxDate = d3.max(numDateValues.filter(function (d){return d!="undefined";}));
 	if (typeof time_window == "undefined"){
