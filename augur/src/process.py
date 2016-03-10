@@ -339,13 +339,22 @@ class process(virus_frequencies):
 
 		out_fname = "tree_infer.newick"
 		shutil.copy('RAxML_result.branches', out_fname)
-		T = Phylo.read(out_fname, 'newick')
 		if not raxml_rooted:
+			with open(out_fname) as ofile:
+				tstr = "".join([x.strip() for x in ofile])
+			tstr_parts = tstr.split()
+			if len(tstr_parts)>1:
+				with open(out_fname, 'w') as ofile:
+					ofile.write("".join(tstr_parts[1:]))
+
+			T = Phylo.read(out_fname, 'newick')
 			try:
 				outgroup_clade = [c for x in T.get_terminals() if c.strain == self.outgroup['strain']][0]
 			except:
 				print("Can't find outgroup in tree -- midpoint_rooting")
 				self.midpoint_rooting = True
+		else:
+			T = Phylo.read(out_fname, 'newick')
 
 		Phylo.write(T,'temp.newick','newick')
 		self.tree = dendropy.Tree.get_from_string(delimit_newick(out_fname), 'newick', rooting="force-rooted")
