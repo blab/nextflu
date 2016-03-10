@@ -342,10 +342,9 @@ class process(virus_frequencies):
 		if not raxml_rooted:
 			with open(out_fname) as ofile:
 				tstr = "".join([x.strip() for x in ofile])
-			tstr_parts = tstr.split()
-			if len(tstr_parts)>1:
-				with open(out_fname, 'w') as ofile:
-					ofile.write("".join(tstr_parts[1:]))
+			if tstr.startswith('[&R]'):
+				with open(out_fname,'w') as ofile:
+					ofile.write(tstr[4:]+'\n')
 
 			T = Phylo.read(out_fname, 'newick')
 			try:
