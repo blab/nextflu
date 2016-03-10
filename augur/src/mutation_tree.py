@@ -1,4 +1,4 @@
-import time, re, os, argparse,shutil
+import time, re, os, argparse,shutil, sys
 from tree_refine import tree_refine
 from virus_clean import virus_clean
 from virus_filter import flu_filter
@@ -12,8 +12,10 @@ from Bio.Align import MultipleSeqAlignment
 import numpy as np
 from itertools import izip
 
-std_outgroup_file_blast = 'source-data/outgroups.fasta'
-std_outgroup_file_nuc = 'source-data/outgroups_nucleotides.fasta'
+path_to_augur = './' + ('/'.join(sys.argv[0].split('/')[:-2]))
+std_outgroup_file_blast = path_to_augur+'/source-data/outgroups.fasta'
+std_outgroup_file_nuc = path_to_augur+'/source-data/outgroups_nucleotides.fasta'
+
 virus_config.update({
 	# data source and sequence parsing/cleaning/processing
 	'fasta_fields':{0:'strain', 1:'isolate_id', 2:'date',  3:'subtype', 4:'country', 5:'region', 7:'host', 6:'passage'},
@@ -22,17 +24,14 @@ virus_config.update({
 	})
 
 def get_date(strain):
+	from datetime import datetime
+	date_str = strain.split('|')[2]
 	try:
-		year = int(strain.split('|')[2][:4])
+		collection_date = datetime.strptime(date_str, '%Y-%m-%d')
+		return collection_date.strftime('%Y-%m-%d')
 	except:
-		print("cannot parse year of ", strain)
-		return 1900
-
-	if year<18:
-		year +=2000
-	elif year<100:
-		year+=1900
-	return year
+		collection_date = datetime.strptime(date_str[:4], '%Y')
+		return collection_date.strftime('%Y-%m-%d')
 
 class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 	"""docstring for mutation_tree"""
@@ -110,6 +109,7 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 
 		self.make_run_dir()
 		nvir = 10
+		max_ref_seqs = 5
 		tmp_dates = []
 		for v in self.viruses:
 			try:
@@ -144,10 +144,12 @@ class mutation_tree(process, flu_filter, tree_refine, virus_clean):
 			self.midpoint_rooting = True
 			print("will root at midpoint")
 
-		for ref, hits in by_og:
+		for oi, (ref, hits) in enumerate(by_og):
 			if np.max([y[-1] for y in hits])>0.9 and ref!=og:
 				self.viruses.append(standard_outgroups[ref])
 				print("including reference strain ",ref, [y[-1] for y in hits])
+				if oi>max_ref_seqs:
+					break
 		self.outgroup = standard_outgroups[og]
 		self.outgroup['strain']+='OG'
 		self.cds = [0,len(self.outgroup['seq'])]
