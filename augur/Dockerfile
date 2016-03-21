@@ -1,3 +1,5 @@
+# augur dockerfile
+
 FROM ubuntu:14.04
 MAINTAINER Trevor Bedford <trevor@bedford.io>
 RUN apt-get -y update
