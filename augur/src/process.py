@@ -213,12 +213,13 @@ class process(virus_frequencies):
 						base_node = tmp_nodes[0]
 						clade_xval[clade] = base_node.xvalue
 						clade_yval[clade] = base_node.yvalue
-						for region in base_node.freq:
-							try:
-								self.frequencies["clades"][region][clade.lower()] = [round(x,3) for x in base_node.freq[region]]
-								print "added frequencies",region, clade
-							except:
-								print base_node.freq[region]
+						if hasattr(base_node, 'freq'):
+							for region in base_node.freq:
+								try:
+									self.frequencies["clades"][region][clade.lower()] = [round(x,3) for x in base_node.freq[region]]
+									print "added frequencies",region, clade
+								except:
+									print base_node.freq[region]
 					else:
 						clade_present[clade] = False
 						print "clade",clade, gt, "not in tree"
