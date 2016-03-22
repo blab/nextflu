@@ -41,7 +41,7 @@ RUN git clone https://github.com/blab/nextflu.git /nextflu
 WORKDIR /nextflu/augur
 
 # update
-ENV cache bust
+ADD http://www.timeapi.org/utc/now /tmp/bustcache
 RUN git pull
 
 # default process

@@ -22,7 +22,7 @@ RUN git clone https://github.com/blab/nextflu.git /nextflu
 WORKDIR /nextflu/auspice
 
 # update
-ENV cache bust
+ADD http://www.timeapi.org/utc/now /tmp/bustcache
 RUN git pull
 
 # ports
