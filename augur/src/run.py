@@ -5,9 +5,13 @@ from vdb_download import vdb_download
 from Bio import SeqIO, AlignIO
 
 def local_count(params):
-	handle = open(params.path + params.fstem + "." + params.ftype, "rU")
-	records = list(SeqIO.parse(handle, "fasta"))
-	return len(records)
+	count = 0
+	fname = params.path + params.fstem + "." + params.ftype
+	if os.path.isfile(fname):
+		handle = open(fname, "rU")
+		records = list(SeqIO.parse(handle, "fasta"))
+		count = len(records)
+	return count
 
 def build(params):
 	'''
