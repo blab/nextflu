@@ -1,0 +1,21 @@
+version: '2'
+volumes:
+  augur-data:
+    driver: local
+  auspice-data:
+    driver: local    
+services:    
+  augur:
+    image: trvrb/augur
+    volumes:
+      - augur-data:/nextflu/augur/data
+      - auspice-data:/nextflu/auspice/data
+    environment:
+      RETHINK_HOST: ${RETHINK_HOST}
+      RETHINK_AUTH_KEY: ${RETHINK_AUTH_KEY}      
+  auspice:
+    image: trvrb/auspice
+    volumes:
+      - auspice-data:/nextflu/auspice/data         
+    ports:
+      - "4000:4000" 
