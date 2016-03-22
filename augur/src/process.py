@@ -272,7 +272,7 @@ class process(virus_frequencies):
 			meta["regions"] = self.regions
 			meta["virus_stats"] = [ [str(y)+'-'+str(m)] + [self.date_region_count[(y,m)][reg] for reg in self.regions]
 									for y,m in sorted(self.date_region_count.keys()) ]
-		write_json(meta, self.auspice_meta_fname, indent=0)
+		write_json(meta, self.auspice_meta_fname, indent=None)
 		self.export_accession_numbers()
 
 	def htmlpath(self):

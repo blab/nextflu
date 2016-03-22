@@ -1,6 +1,6 @@
 # auspice dockerfile
 
-FROM ruby:2.2.2
+FROM ruby:2.2.4
 MAINTAINER Trevor Bedford <trevor@bedford.io>
 RUN apt-get -y update
 

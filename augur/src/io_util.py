@@ -20,6 +20,7 @@ def write_json(data, file_name, indent=1):
 		pass
 	else:
 		json.dump(data, handle, indent=indent)
+		handle.write("\n")
 		handle.close()
 
 def read_fasta(file_name):
