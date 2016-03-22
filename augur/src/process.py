@@ -61,7 +61,7 @@ class process(virus_frequencies):
 		self.resolution = resolution
 		if self.virus_type:
 			self.prefix = self.virus_type+'_'
-		if resolution is not None:
+		if resolution is not None and resolution is not '':
 			self.resolution_prefix = resolution+'_'
 		else:
 			self.resolution_prefix = ''

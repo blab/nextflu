@@ -28,7 +28,7 @@ if __name__=="__main__":
 	parser = argparse.ArgumentParser(description = "download and process")
 	parser.add_argument('--bin', type = str, default = "python")	
 	parser.add_argument('-v', '--virus', default='Zika', help="virus table to interact with")
-	parser.add_argument('-r', '--resolution', default='', help="build params")	
+	parser.add_argument('-r', '--resolution', default='', help="build params / annotation")	
 	parser.add_argument('--host', default=None, help="rethink host url")
 	parser.add_argument('--auth_key', default=None, help="auth_key for rethink database")
 	parser.add_argument('--build', action="store_true", default=False, help ="single rebuild")
@@ -37,9 +37,6 @@ if __name__=="__main__":
 
 	if params.virus is None:
 		params.virus = 'Zika'
-
-	if params.resolution is None:
-		params.resolution = ''
 
 	params.database = 'vdb'
 	params.path = 'data/'

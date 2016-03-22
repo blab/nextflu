@@ -34,10 +34,15 @@ RUN pip install boto==2.38.0
 RUN pip install matplotlib==1.5.1
 RUN pip install pandas==0.16.2
 RUN pip install seaborn==0.6.0
+RUN pip install rethinkdb==1.13.0-2
 
 # augur
 RUN git clone https://github.com/blab/nextflu.git /nextflu
 WORKDIR /nextflu/augur
 
+# update
+ENV cache bust
+RUN git pull
+
 # default process
-CMD python -u src/Zika_process.py
+CMD python -u src/run.py --build
