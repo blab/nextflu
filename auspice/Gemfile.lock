@@ -18,7 +18,7 @@ GEM
     erubis (2.7.0)
     ffi (1.9.10)
     filey-diff (2.0.0)
-    jekyll (3.0.3)
+    jekyll (3.1.2)
       colorator (~> 0.1)
       jekyll-sass-converter (~> 1.0)
       jekyll-watch (~> 1.1)
@@ -74,7 +74,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  jekyll (= 3.0.3)
+  jekyll (= 3.1.2)
   less (= 2.6.0)
   s3_website (= 1.8.2)
   therubyracer (= 0.12.2)

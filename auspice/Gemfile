@@ -1,8 +1,7 @@
 source "https://rubygems.org"
-ruby "2.2.2"
 
 # jekyll
-gem 'jekyll', '3.0.3'
+gem 'jekyll', '3.1.2'
 
 # compiling less
 gem 'therubyracer', '0.12.2'
