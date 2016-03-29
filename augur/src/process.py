@@ -76,6 +76,7 @@ class process(virus_frequencies):
 		self.aa_seq_fname = 	self.path + self.prefix + self.resolution_prefix + 'aa_seq.pkl'
 		self.HI_model_fname = 	self.path + self.prefix + self.resolution_prefix + 'HI_model.pkl'
 		self.nuc_seq_fname = 	self.path + self.prefix + self.resolution_prefix + 'nuc_seq.pkl'
+		self.alignment_fname = 	self.path + self.prefix + self.resolution_prefix + 'alignment.fasta'		
 		if run_dir is None:
 			import random
 			self.run_dir = '_'.join(['temp', time.strftime('%Y%m%d-%H%M%S',time.gmtime()), str(random.randint(0,1000000))])
@@ -359,6 +360,7 @@ class process(virus_frequencies):
 			os.system("mafft --anysymbol temp_in.fasta > temp_out.fasta")
 		else:
 			os.system("mafft --anysymbol --nofft temp_in.fasta > temp_out.fasta")
+		shutil.copy('temp_out.fasta', '../' + self.alignment_fname)
 		aln = AlignIO.read('temp_out.fasta', 'fasta')
 		self.sequence_lookup = {seq.id:seq for seq in aln}
 		# add attributes to alignment
