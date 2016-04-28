@@ -17,7 +17,7 @@ def build(params):
 	'''
 	run build for single virus / resolution combination
 	'''
-	vdb.download_all_documents()
+	vdb.download()
 	vdb.output()
 
 	process = 'src/' + params.virus + '_process.py'
@@ -46,6 +46,8 @@ if __name__=="__main__":
 	params.path = 'data/'
 	params.ftype = 'fasta'	
 	params.fstem = params.virus
+	params.public_only = True
+	params.countries = None
 	
 	vdb = vdb_download(**params.__dict__)
 
