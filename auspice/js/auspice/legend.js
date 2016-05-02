@@ -63,17 +63,20 @@ function makeLegend(){
 		}
 	}
 
+	var count = colorScale.domain().length;
+	var stack = Math.ceil(count / 2);	
+	d3.select("#legend")
+		.attr("height", stack * (legendRectSize + legendSpacing) + legendSpacing);
+
 	var tmp_leg = legend.selectAll(".legend")
 	.data(colorScale.domain())
 	.enter().append('g')
 	.attr('class', 'legend')
 	.attr('transform', function(d, i) {
-		var stack = 5;
-		var height = legendRectSize + legendSpacing;
 		var fromRight = Math.floor(i / stack);
 		var fromTop = i % stack;
 		var horz = fromRight * 145 + 5;
-		var vert = fromTop * height + 5;
+		var vert = fromTop * (legendRectSize + legendSpacing) + 5;
 		return 'translate(' + horz + ',' + vert + ')';
 	 });
 	tmp_leg.append('rect')
