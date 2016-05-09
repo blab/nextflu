@@ -56,7 +56,7 @@ class zika_filter(virus_filter):
 	def filter_outlier_strains(self):
 		"""Remove single outlying viruses"""
 		remove_viruses = []
-		outlier_strains = ["VE_Ganxian", "Zika_virus/H.sapiens_tc/THA/2014/SV0127__14", "Zika_virus/SZ01/2016", "Dominican_Republic/2016/PD2", "MEX/InDRE/Lm/2016", "PLCal_ZV"]
+		outlier_strains = ["VE_Ganxian", "Zika_virus/H.sapiens_tc/THA/2014/SV0127__14", "Zika_virus/SZ01/2016", "Dominican_Republic/2016/PD2", "MEX/InDRE/Lm/2016", "PLCal_ZV", "ZIKV/Homo_sapiens/PAN/CDC_259364_V1_Vx/2015", "ZIKV/Homo_sapiens/PAN/CDC_259249_V1_Vx/2015", "ZIKV/Homo_sapiens/PAN/CDC_259359_V1_Vx/2015"]
 		for outlier_strain in outlier_strains:
 			for v in self.viruses:
 				if (v['strain'] == outlier_strain):
