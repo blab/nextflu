@@ -47,7 +47,6 @@ var dfreqColorDomain = genericDomain.map(function(d){return Math.round(100*(0.2+
 var fitnessColorDomain = genericDomain.map(function(d){return Math.round(100*((d-0.5)*16.0))/100;});
 var time_step;
 
-
 d3.json(path + file_prefix + "meta.json", function(error, json) {
     if (error) return console.warn(error);
     d3.select("#updated").text(json['updated']);
@@ -59,3 +58,7 @@ d3.json(path + file_prefix + "meta.json", function(error, json) {
         .text(short_id);
 
 });
+
+String.prototype.toTitleCase = function() {
+	return this.replace(/\w+/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+}
