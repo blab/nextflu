@@ -63,6 +63,10 @@ From within the nextflu/augur/ directory, run a shell from within the container
 Run augur
 
     docker run --volumes-from augur-data --volumes-from auspice-data trvrb/augur
+    
+Run shell
+
+    docker run -t -i --volumes-from augur-data --volumes-from auspice-data trvrb/augur /bin/bash
 
 ## Auspice
 
