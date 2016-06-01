@@ -162,6 +162,7 @@ class zika_process(process, zika_filter, zika_clean, zika_refine):
 			#self.temporal_regional_statistics()
 			# exporting to json, including the H1N1pdm specific fields
 			self.export_to_auspice(tree_fields = ['nuc_muts', 'accession', 'country', 'db', 'authors'], annotations = [])
+			self.export_fasta_alignment()
 			#self.generate_indexHTML()
 
 if __name__=="__main__":

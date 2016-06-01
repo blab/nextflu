@@ -88,7 +88,8 @@ class process(virus_frequencies):
 		self.auspice_frequency_fname = 	'../auspice/data/' + self.prefix + self.resolution_prefix + 'frequencies.json'
 		self.auspice_meta_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'meta.json'
 		self.auspice_HI_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'HI.json'
-		self.accession_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'accession_numbers.tsv'
+		self.accession_fname = 			'../auspice/data/' + self.prefix + self.resolution_prefix + 'accession_numbers.tsv'
+		self.auspice_align_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'align.fasta'		
 		self.auspice_HI_display_mutations =	 '../auspice/data/HI_mutation_effects.json'
 		self.nuc_alphabet = 'ACGT-N'
 		self.aa_alphabet = 'ACDEFGHIKLMNPQRSTVWY*X'
@@ -236,7 +237,7 @@ class process(virus_frequencies):
 			print "Read failed, rewriting with indents"
 			write_json(self.tree_json, self.auspice_tree_fname, indent=1)
 
-		# Include genotype frequencies
+		# Write out frequencies
 		if hasattr(self, 'frequencies'):
 			if not hasattr(self, 'aa_entropy') and not hasattr(self, 'nuc_entropy'):
 				self.determine_variable_positions()
@@ -275,6 +276,21 @@ class process(virus_frequencies):
 									for y,m in sorted(self.date_region_count.keys()) ]
 		write_json(meta, self.auspice_meta_fname, indent=None)
 		self.export_accession_numbers()
+
+	def export_fasta_alignment(self):
+		print "Writing alignment"	
+		try:
+			handle = open(self.auspice_align_fname, 'w')
+		except IOError:
+			pass
+		else:
+			for node in self.tree:
+				if node.is_leaf():
+					if hasattr(node, 'strain') and hasattr(node, 'accession') and hasattr(node, 'date'):
+						handle.write(">" + node.strain + "|" + node.accession + "|" + node.date + "|" + node.region + "\n")
+						handle.write(node.seq + "\n")
+					else:
+						print node.strain + " is missing metadata"
 
 	def htmlpath(self):
 		htmlpath = '../auspice/'
@@ -344,7 +360,7 @@ class process(virus_frequencies):
 		with open(self.accession_fname,'w') as ofile:
 			for n in self.tree.leaf_nodes():
 				try:
-					ofile.write('\t'.join(map(str, [n.strain, n.accession, n.lab]))+'\n')
+					ofile.write('\t'.join(map(str, [n.strain, n.accession]))+'\n')
 				except:
 					print(n.strain,"has no accession number")
 
