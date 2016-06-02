@@ -89,7 +89,8 @@ class process(virus_frequencies):
 		self.auspice_meta_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'meta.json'
 		self.auspice_HI_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'HI.json'
 		self.accession_fname = 			'../auspice/data/' + self.prefix + self.resolution_prefix + 'accession_numbers.tsv'
-		self.auspice_align_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'align.fasta'		
+		self.auspice_align_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'align.fasta'
+		self.auspice_newick_fname = 	'../auspice/data/' + self.prefix + self.resolution_prefix + 'tree.newick'		
 		self.auspice_HI_display_mutations =	 '../auspice/data/HI_mutation_effects.json'
 		self.nuc_alphabet = 'ACGT-N'
 		self.aa_alphabet = 'ACDEFGHIKLMNPQRSTVWY*X'
@@ -291,6 +292,29 @@ class process(virus_frequencies):
 						handle.write(node.seq + "\n")
 					else:
 						print node.strain + " is missing metadata"
+			handle.close()
+
+	def export_newick_tree(self):
+		print "Writing newick tree"
+		try:
+			handle = open(self.auspice_newick_fname, 'w')
+		except IOError:
+			pass
+		else:
+			tmp_tree = self.tree
+			for node in tmp_tree:
+				if node.is_leaf():
+					if hasattr(node, 'strain') and hasattr(node, 'accession') and hasattr(node, 'date'):
+						node.taxon.label = node.strain + "|" + node.accession + "|" + node.date + "|" + node.region
+					else:
+						print node.strain + " is missing metadata"
+			newick_string = tmp_tree.as_string('newick')
+			handle.write(newick_string)
+			handle.close()
+			for node in tmp_tree:
+				if node.is_leaf():
+					if hasattr(node, 'strain'):
+						node.taxon.label = node.strain
 
 	def htmlpath(self):
 		htmlpath = '../auspice/'
