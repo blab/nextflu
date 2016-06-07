@@ -46,8 +46,7 @@ categories:
 				</form>
 				<div class="spacer"></div>
 
-				<!--
-				{% for res in site.data.restrictions %}
+				{% for res in site.data.restrictions_zika %}
 				<form class="form-horizontal form-small">
 					<div class="form-group">
 						<label class="col-xs-4 control-label">{{res.label}}</label>
@@ -61,7 +60,6 @@ categories:
 					</div>
 				</form>
 				{% endfor %}
-				-->
 
 				<div id="search"></div>
 				<div class="spacer"></div>
@@ -96,13 +94,20 @@ categories:
 		<hr>
 		<p>
 		Built by <a href="https://neherlab.wordpress.com/">Richard Neher</a> and
-		<a href="http://bedford.io">Trevor Bedford</a>. Give us a shout at 
+		<a href="http://bedford.io">Trevor Bedford</a>. Give us a shout at
 		<a href="https://twitter.com/richardneher" target="_blank">@richardneher</a> or
-		<a href="https://twitter.com/trvrb" target="_blank">@trvrb</a> with questions or comments. All
-		<a href="http://github.com/blab/nextflu" target="_blank">source code</a> is freely available under the terms of the
-		<a href="http://github.com/blab/nextflu/blob/master/LICENSE.txt" target="_blank">GNU Affero General Public License</a>.
-		Data  updated <span id="updated"></span> and processed with commit <span id="commit"></span>.
-		</p>
+		<a href="https://twitter.com/trvrb" target="_blank">@trvrb</a> with questions or comments.
+		All <a href="http://github.com/blab/nextflu" target="_blank">source code</a> is freely available under the terms
+		of the <a href="http://github.com/blab/nextflu/blob/master/LICENSE.txt" target="_blank">GNU Affero General
+		Public License</a>. Data updated <span id="updated"></span> and processed with commit
+		<span id="commit"></span>.
+		{% for entry in site.data.viruses_zika %}
+			{% if page.virus == entry.virus %}
+			The raw sequence alignment is <a href="/data/{{ entry.alignment }}">available in FASTA format</a> and
+			the raw tree is <a href="/data/{{ entry.newick }}">available in NEWICK format</a>.
+			{% endif %}
+		{% endfor %}
+		</p>		
 
 		<p>
 		This work is made possible by the open sharing of genetic data by research groups from all over the world. We 
