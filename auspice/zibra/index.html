@@ -1,0 +1,50 @@
+---
+title: nextstrain / zibra
+layout: auspice_zika
+virus: Zika
+resolution:
+coloring: region, date
+gtplaceholder: Genomic positions...
+freqdefault:
+---
+
+<script>
+var file_prefix = "Zika_";
+var	vaccineChoice = {};
+var vaccineStrains = Object.keys(vaccineChoice);
+var reference_viruses= {};
+var branch_labels=false;
+var restrictTo = {"authors": "ZiBRA", "region": "all"};
+var time_window = 3.0;
+var full_data_time_window = 1.5;
+var time_ticks=[2013.0, 2013.5, 2014.0, 2014.5, 2015.0, 2015.5, 2016.0];
+var dfreq_dn = 2;
+var LBItime_window = 0.5;
+var LBItau = 0.0005;
+var regions = [
+["french_polynesia",   "#403CC5"],
+["american_samoa",	   "#3F50CC"],
+["china",			   "#3F63CF"],
+["brazil",  		   "#5CA7A5"],
+["colombia",  		   "#66AE96"],
+["suriname",  		   "#70B487"],
+["venezuela",          "#7CB879"],
+["panama",             "#B2BD4D"],
+["honduras",           "#BFBB48"],
+["guatemala",  		   "#CBB742"],
+["mexico",             "#D5B03F"],
+["martinique",  	   "#DEA73C"],
+["puerto_rico",  	   "#E39B39"],
+["dominican_republic", "#E68B35"],
+["haiti",  			   "#E67932"]
+];
+// Asia: "#403CC5", "#3F50CC", "#3F63CF", "#4374CD", "#4784C8", "#4D92BF", "#549DB2"
+// South America: "#5CA7A5", "#66AE96", "#70B487", "#7CB879", "#89BB6B", "#96BD60", "#A4BE56",
+// Central America: "#B2BD4D", "#BFBB48", "#CBB742", "#D5B03F", "#DEA73C", "#E39B39", "#E68B35", "#E67932", "#E4632E", "#E04C29"
+
+
+// Americas: "#72B485", "#81BA72", "#92BC63", "#A4BE56", "#B6BD4C", "#C6B944", "#D4B13F", "#DEA63B", "#E59637", "#E67E33", "#E4632E"
+var mutType = 'nuc';
+var default_gene = 'nuc';
+var plot_frequencies = false;
+</script>
