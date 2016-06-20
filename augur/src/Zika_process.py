@@ -15,7 +15,7 @@ virus_config.update({
 	'fasta_fields':{0:'strain', 2:'accession', 3:'date', 5:'country', 5:'region', 8:'db', 10:'authors'},
 	# 0         1    2        3          4            5      6    7     8       9      10
 	#>BeH818995|Zika|KU365777|2015-07-21|SouthAmerica|Brazil|Para|Belem|Genbank|Genome|Azevedo et al|?|
-	'alignment_file':'data/Zika.fasta',
+	'alignment_file':'data/zika.fasta',
 	'outgroup':'H/PF/2013',
 	'aggregate_regions':[('global', None)],
 	'force_include_all':False,
@@ -56,7 +56,7 @@ class zika_filter(virus_filter):
 	def filter_outlier_strains(self):
 		"""Remove single outlying viruses"""
 		remove_viruses = []
-		outlier_strains = ["VE_Ganxian", "Zika_virus/H.sapiens_tc/THA/2014/SV0127__14", "Zika_virus/SZ01/2016", "Dominican_Republic/2016/PD2", "MEX/InDRE/Lm/2016", "PLCal_ZV", "ZIKV/Homo_sapiens/PAN/CDC_259364_V1_Vx/2015", "ZIKV/Homo_sapiens/PAN/CDC_259249_V1_Vx/2015", "ZIKV/Homo_sapiens/PAN/CDC_259359_V1_Vx/2015"]
+		outlier_strains = ["VE_Ganxian", "THA/2014/SV0127_14", "SZ01/2016", "Dominican_Republic/2016/PD2", "MEX/InDRE/Lm/2016", "PLCal_ZV", "PAN/CDC_259364_V1_Vx/2015", "PAN/CDC_259249_V1_Vx/2015", "PAN/CDC_259359_V1_Vx/2015"]
 		for outlier_strain in outlier_strains:
 			for v in self.viruses:
 				if (v['strain'] == outlier_strain):
@@ -162,6 +162,8 @@ class zika_process(process, zika_filter, zika_clean, zika_refine):
 			#self.temporal_regional_statistics()
 			# exporting to json, including the H1N1pdm specific fields
 			self.export_to_auspice(tree_fields = ['nuc_muts', 'accession', 'country', 'db', 'authors'], annotations = [])
+			self.export_fasta_alignment()
+			self.export_newick_tree()			
 			#self.generate_indexHTML()
 
 if __name__=="__main__":

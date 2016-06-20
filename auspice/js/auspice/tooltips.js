@@ -24,10 +24,10 @@ var virusTooltip = d3.tip()
 		}
 
 		if (typeof d.country != "undefined") {
-			string += d.country.replace(/([A-Z])/g, ' $1');
+			string += d.country.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').toTitleCase();
 		}
 		else if (typeof d.region != "undefined") {
-			string += d.region.replace(/([A-Z])/g, ' $1');
+			string += d.region.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').toTitleCase();
 		}
 		if (typeof d.date != "undefined") {
 			string += ", " + d.date;
@@ -45,7 +45,7 @@ var virusTooltip = d3.tip()
 			}
 		}
 		if (typeof d.authors != "undefined") {
-			if (d.authors != "") {
+			if ((d.authors != "") && (d.authors != "?")) {
 				string += "<br>Authors: " + d.authors.substring(0,25);
 				if (d.authors.length>25) string += '...';
 			}

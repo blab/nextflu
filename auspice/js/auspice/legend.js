@@ -111,7 +111,7 @@ function makeLegend(){
     .attr('x', legendRectSize + legendSpacing + 5)
     .attr('y', legendRectSize - legendSpacing)
     .text(function(d) {
-        var label = d.toString().replace(/([a-z])([A-Z])/g, '$1 $2').replace(/,/g, ', ');
+        var label = d.toString().replace(/([a-z])([A-Z])/g, '$1 $2').replace(/,/g, ', ').replace(/_/g, ' ').toTitleCase();
         if (colorBy == "dfreq") {
             label += "\u00D7";
         }

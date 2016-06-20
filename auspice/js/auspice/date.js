@@ -148,9 +148,11 @@ function dragend() {
 	var num_date = globalDate/1000/3600/24/365.25+1970;
 //	updateColorDomains(num_date);
 //	initHIColorDomain();
-	for (var ii=0; ii<rootNode.pivots.length-1; ii++){
-		if (rootNode.pivots[ii]<num_date && rootNode.pivots[ii+1]>=num_date){
-			freq_ii=Math.max(dfreq_dn,ii+1);
+	if (typeof rootNode.pivots != "undefined"){
+		for (var ii=0; ii<rootNode.pivots.length-1; ii++){
+			if (rootNode.pivots[ii]<num_date && rootNode.pivots[ii+1]>=num_date){
+				freq_ii=Math.max(dfreq_dn,ii+1);
+			}
 		}
 	}
 	console.log("changed frequency index to "+freq_ii+" date cut off is "+num_date);
