@@ -31,16 +31,27 @@ def tick():
 if __name__=="__main__":
 	parser = argparse.ArgumentParser(description = "download and process")
 	parser.add_argument('--bin', type = str, default = "python")	
-	parser.add_argument('-v', '--virus', default='Zika', help="virus table to interact with")
-	parser.add_argument('-r', '--resolution', default='', help="build params / annotation")	
+	parser.add_argument('--zika_lineages', nargs='+', type = str,  help ="zika lineages to include")
+	parser.add_argument('--zika_resolutions', nargs='+', type = str,  help ="zika resolutions to include")
+	parser.add_argument('--flu_lineages', nargs='+', type = str,  help ="flu lineages to include")
+	parser.add_argument('--flu_resolutions', nargs='+', type = str,  help ="flu resolutions to include")	
 	parser.add_argument('--host', default=None, help="rethink host url")
 	parser.add_argument('--auth_key', default=None, help="auth_key for rethink database")
 	parser.add_argument('--build', action="store_true", default=False, help ="single rebuild")
 	parser.add_argument('--watch', action="store_true", default=False, help ="watch database and rebuild when updated")	
 	params = parser.parse_args()
 
-	if params.virus is None:
-		params.virus = 'Zika'
+	if params.zika_lineages is None:
+		params.zika_lineages = ['Zika']
+
+	if params.zika_resolutions is None:
+		params.zika_resolutions = ['']	
+
+	if params.flu_lineages is None:
+		params.flu_lineages = ['H3N2', 'H1N1pdm', 'Vic', 'Yam']
+
+	if params.flu_resolutions is None:
+		params.flu_resolutions = ['3y', '6y', '12y']
 
 	params.database = 'vdb'
 	params.path = 'data/'
