@@ -388,7 +388,7 @@ class process(virus_frequencies):
 				except:
 					print(n.strain,"has no accession number")
 
-	def align(self, fast=False):
+	def align(self, fast=True):
 		'''
 		aligns viruses using mafft. produces temporary files and deletes those at the end
 		after this step, self.viruses is a BioPhython multiple alignment object
@@ -397,9 +397,9 @@ class process(virus_frequencies):
 		os.chdir(self.run_dir)
 		SeqIO.write([SeqRecord(Seq(v['seq']), id=v['strain']) for v in self.viruses], "temp_in.fasta", "fasta")
 		if fast:
-			os.system("mafft --anysymbol temp_in.fasta > temp_out.fasta")
+			os.system("mafft --anysymbol --op 10.0 temp_in.fasta > temp_out.fasta")
 		else:
-			os.system("mafft --anysymbol --nofft temp_in.fasta > temp_out.fasta")
+			os.system("mafft --nofft --anysymbol --op 10.0 temp_in.fasta > temp_out.fasta")
 		shutil.copy('temp_out.fasta', '../' + self.alignment_fname)
 		aln = AlignIO.read('temp_out.fasta', 'fasta')
 		self.sequence_lookup = {seq.id:seq for seq in aln}
