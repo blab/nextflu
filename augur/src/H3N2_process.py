@@ -367,6 +367,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, H3N2_HI, H3N2_
 			if params.html:
 				self.generate_indexHTML()
 			self.export_HI_mutation_effects()
+			#self.export_clade_frequencies()
 
 		if 'HIvalidate' in steps:
 			from diagnostic_figures import tree_additivity_symmetry, fmts

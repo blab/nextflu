@@ -90,7 +90,8 @@ class process(virus_frequencies):
 		self.auspice_HI_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'HI.json'
 		self.accession_fname = 			'../auspice/data/' + self.prefix + self.resolution_prefix + 'accession_numbers.tsv'
 		self.auspice_align_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'align.fasta'
-		self.auspice_newick_fname = 	'../auspice/data/' + self.prefix + self.resolution_prefix + 'tree.newick'		
+		self.auspice_newick_fname = 	'../auspice/data/' + self.prefix + self.resolution_prefix + 'tree.newick'
+		self.auspice_clade_frequencies_fname = '../auspice/data/' + self.prefix + self.resolution_prefix + 'clade_frequencies.tsv'
 		self.auspice_HI_display_mutations =	 '../auspice/data/HI_mutation_effects.json'
 		self.nuc_alphabet = 'ACGT-N'
 		self.aa_alphabet = 'ACDEFGHIKLMNPQRSTVWY*X'
@@ -315,6 +316,22 @@ class process(virus_frequencies):
 				if node.is_leaf():
 					if hasattr(node, 'strain'):
 						node.taxon.label = node.strain
+
+	def export_clade_frequencies(self):
+		print "Writing clade frequencies"
+		with open(self.auspice_clade_frequencies_fname, 'w') as ofile:
+			nodes = [node for node in self.tree]
+			if hasattr(nodes[0], 'pivots'):
+				pivots = nodes[0].pivots
+				string = "\t".join(map(str, pivots))
+				ofile.write(string + "\n")
+			for node in nodes:
+				if hasattr(node, 'freq'):
+					freqs = node.freq['global']
+					string = "\t".join(map(str, freqs))
+					ofile.write(string + "\n")
+		ofile.close()
+
 
 	def htmlpath(self):
 		htmlpath = '../auspice/'
