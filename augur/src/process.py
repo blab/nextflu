@@ -92,6 +92,7 @@ class process(virus_frequencies):
 		self.auspice_align_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'align.fasta'
 		self.auspice_newick_fname = 	'../auspice/data/' + self.prefix + self.resolution_prefix + 'tree.newick'
 		self.auspice_clade_frequencies_fname = '../auspice/data/' + self.prefix + self.resolution_prefix + 'clade_frequencies.tsv'
+		self.auspice_viruses_fname = '../auspice/data/' + self.prefix + self.resolution_prefix + 'viruses.tsv'		
 		self.auspice_HI_display_mutations =	 '../auspice/data/HI_mutation_effects.json'
 		self.nuc_alphabet = 'ACGT-N'
 		self.aa_alphabet = 'ACDEFGHIKLMNPQRSTVWY*X'
@@ -332,6 +333,14 @@ class process(virus_frequencies):
 					ofile.write(string + "\n")
 		ofile.close()
 
+	def export_viruses(self):
+		print "Writing virus list"
+		with open(self.auspice_viruses_fname, 'w') as ofile:	
+			ofile.write("strain\tdate\tcountry\tregion\tep\tcHI\n")
+			for node in self.tree.postorder_node_iter():
+				if node.is_leaf():
+					ofile.write( str(node.strain) + "\t" + str(node.date) + "\t" + str(node.country) + "\t" + str(node.region) + "\t" + str(node.ep) + "\t" + str(node.cHI) + "\n" )
+		ofile.close()
 
 	def htmlpath(self):
 		htmlpath = '../auspice/'
