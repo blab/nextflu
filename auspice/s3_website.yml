@@ -9,5 +9,4 @@ gzip:
   - .tsv
   - .json
   - .js
-  - .png
-  - .jpg
+
