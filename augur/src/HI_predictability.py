@@ -552,7 +552,7 @@ plt.figure(figsize = (1.2*figheight, figheight))
 ax=plt.subplot(111)
 for col, cutoff in zip(['b', 'g'], [0.01, 0.05]):
     plt.scatter(best_HI_vs_HI_of_best[cutoff][:,1],
-        best_HI_vs_HI_of_best[cutoff][:,2], label = '>'+str(cutoff), s=50, c=col) #, s=50*best_HI[:,-3])
+        best_HI_vs_HI_of_best[cutoff][:,2], label = r'$\mathrm{freq.}>'+str(cutoff)+'$', s=50, c=col) #, s=50*best_HI[:,-3])
 plt.plot([0,3],[0,3])
 plt.tick_params(labelsize=fs)
 plt.xlabel(r'maximal $\mathrm{cHI}-\langle \mathrm{cHI}\rangle_{year}$', fontsize=fs)

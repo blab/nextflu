@@ -16,6 +16,10 @@ plt.locator_params(nbins=4)
 fmts = ['.pdf','.svg','.png']
 figheight = 4
 
+def add_panel_label(ax,label, x_offset=-0.1):
+    '''add one letter labels to the upper left corner of a figure A, B, C etc '''
+    ax.text(x_offset, 0.95, label, transform=ax.transAxes, fontsize=fs*1.5)
+
 #####
 ## utility function that returns the slope and x-value of an interpolation object at a y-cutoff
 #####
@@ -342,6 +346,7 @@ def tree_additivity_symmetry(myflu, mtype='tree'):
     print("symmetric component: ", str(np.round(np.mean(vals),3))+'+/-'+str(np.round(np.std(vals),3)))
     plt.xlabel('titer asymmetry', fontsize=fs)
     ax.tick_params(axis='both', labelsize=fs)
+    add_panel_label(ax, 'A', x_offset=-0.2)
     plt.legend(fontsize=fs, handlelength=0.8)
     plt.tight_layout()
 
@@ -391,6 +396,7 @@ def tree_additivity_symmetry(myflu, mtype='tree'):
     ax.tick_params(axis='both', labelsize=fs)
     plt.xlabel(r'$\Delta$ top two distance sums', fontsize = fs)
     plt.legend(fontsize=fs, handlelength=0.8)
+    add_panel_label(ax, 'B', x_offset=-0.2)
     plt.tight_layout()
 
 ######################################

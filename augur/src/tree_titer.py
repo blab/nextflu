@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 from itertools import izip
 from virus_filter import fix_name
 import pandas as pd
-from diagnostic_figures import fs, fmts, figheight
+from diagnostic_figures import fs, fmts, figheight, add_panel_label
 
 def myopen(fname, mode='r'):
 	if fname[-2:]=='gz':
@@ -23,6 +23,7 @@ def HI_fix_name(name):
 	else:
 		tmp_name = fix_name(name)
 	return tmp_name.upper().lstrip('*')
+
 
 
 class HI_tree(object):
@@ -609,17 +610,17 @@ class HI_tree(object):
 			self.map_HI(training_fraction=0.9, method=method,lam_HI=lam_HI, lam_avi=lam_avi,
 						lam_pot = lam_pot, force_redo=True, map_to_tree=map_to_tree, subset_strains=True)
 
-			self.validate(plot=True)
+			self.validate(plot=True, plabel='B')
 			for fmt in fmts: plt.savefig(self.htmlpath()+'HI_prediction_virus_'+model+fmt)
 
 			self.map_HI(training_fraction=0.9, method=method,lam_HI=lam_HI, lam_avi=lam_avi,
 						lam_pot = lam_pot, force_redo=True, map_to_tree=map_to_tree)
-			self.validate(plot=True)
+			self.validate(plot=True, plabel='A')
 			for fmt in fmts: plt.savefig(self.htmlpath()+'HI_prediction_'+model+fmt)
 
 		self.save_trunk_cHI()
 
-	def validate(self, plot=False, cutoff=0.0, validation_set = None, incl_ref_strains='yes'):
+	def validate(self, plot=False, cutoff=0.0, validation_set = None, incl_ref_strains='yes', plabel=""):
 		if validation_set is None:
 			validation_set=self.test_HI
 		from scipy.stats import linregress, pearsonr
@@ -663,6 +664,7 @@ class HI_tree(object):
 			plt.text(1.2,6, str(self.lam_HI)+'/'+str(self.lam_pot)+'/'+str(self.lam_avi)+' (HI/pot/avi)'
 			         +'\n'+str(round(self.abs_error, 2))\
 					 +'/'+str(round(self.rms_error, 2))+' (abs/rms)', fontsize = fs-2)
+			add_panel_label(ax, plabel, x_offset=-0.15)
 			plt.tight_layout()
 		return a.shape[0]
 
