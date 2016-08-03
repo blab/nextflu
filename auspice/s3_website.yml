@@ -3,4 +3,10 @@ s3_secret: <%= ENV['S3_SECRET'] %>
 s3_bucket: <%= ENV['S3_BUCKET'] %>
 cloudfront_distribution_id: <%= ENV['CLOUDFRONT_ID'] %>
 cloudfront_invalidate_root: true
-gzip: true
+gzip:
+  - .html
+  - .css
+  - .tsv
+  - .json
+  - .js
+

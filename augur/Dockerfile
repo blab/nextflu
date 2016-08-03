@@ -35,6 +35,7 @@ RUN pip install matplotlib==1.5.1
 RUN pip install pandas==0.16.2
 RUN pip install seaborn==0.6.0
 RUN pip install rethinkdb==1.13.0-2
+RUN pip install cvxopt==1.1.8
 
 # augur
 RUN git clone https://github.com/blab/nextflu.git /nextflu

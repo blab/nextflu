@@ -214,6 +214,9 @@ if __name__=="__main__":
 				if resolution == '20y':
 					n_viruses = 4
 					n_years = 20
+				if resolution == '24y':
+					n_viruses = 10
+					n_years = 24
 				if resolution == '10y':
 					n_viruses = 10
 					n_years = 10

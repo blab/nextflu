@@ -90,7 +90,9 @@ class process(virus_frequencies):
 		self.auspice_HI_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'HI.json'
 		self.accession_fname = 			'../auspice/data/' + self.prefix + self.resolution_prefix + 'accession_numbers.tsv'
 		self.auspice_align_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'align.fasta'
-		self.auspice_newick_fname = 	'../auspice/data/' + self.prefix + self.resolution_prefix + 'tree.newick'		
+		self.auspice_newick_fname = 	'../auspice/data/' + self.prefix + self.resolution_prefix + 'tree.newick'
+		self.auspice_clade_frequencies_fname = '../auspice/data/' + self.prefix + self.resolution_prefix + 'clade_frequencies.tsv'
+		self.auspice_viruses_fname = '../auspice/data/' + self.prefix + self.resolution_prefix + 'viruses.tsv'		
 		self.auspice_HI_display_mutations =	 '../auspice/data/HI_mutation_effects.json'
 		self.nuc_alphabet = 'ACGT-N'
 		self.aa_alphabet = 'ACDEFGHIKLMNPQRSTVWY*X'
@@ -127,7 +129,7 @@ class process(virus_frequencies):
 				cPickle.dump(self.nuc_aln, outfile)
 		if hasattr(self, 'mutation_effects'):
 			with open(self.HI_model_fname, 'w') as outfile:
-				cPickle.dump((self.sera, self.ref_strains, self.HI_strains, self.mutation_effects, self.virus_effect, self.serum_potency), outfile)
+				cPickle.dump((self.sera, self.ref_strains, self.HI_strains, self.mutation_effects, self.virus_effect, self.serum_potency, self.node_lookup, self.autologous_titers, self.HI_normalized, self.HI_raw, self.mutation_clusters, self.mutation_counter), outfile)
 
 	def load(self):
 		import cPickle
@@ -153,7 +155,7 @@ class process(virus_frequencies):
 		if os.path.isfile(self.HI_model_fname):
 			try:
 				with open(self.HI_model_fname, 'r') as infile:
-					(self.sera, self.ref_strains, self.HI_strains, self.mutation_effects, self.virus_effect, self.serum_potency) = cPickle.load(infile)
+					(self.sera, self.ref_strains, self.HI_strains, self.mutation_effects, self.virus_effect, self.serum_potency, self.node_lookup, self.autologous_titers, self.HI_normalized, self.HI_raw, self.mutation_clusters, self.mutation_counter) = cPickle.load(infile)
 			except:
 				pass
 		try:
@@ -316,6 +318,30 @@ class process(virus_frequencies):
 					if hasattr(node, 'strain'):
 						node.taxon.label = node.strain
 
+	def export_clade_frequencies(self):
+		print "Writing clade frequencies"
+		with open(self.auspice_clade_frequencies_fname, 'w') as ofile:
+			nodes = [node for node in self.tree]
+			if hasattr(nodes[0], 'pivots'):
+				pivots = nodes[0].pivots
+				string = "\t".join(map(str, pivots))
+				ofile.write(string + "\n")
+			for node in nodes:
+				if hasattr(node, 'freq'):
+					freqs = node.freq['global']
+					string = "\t".join(map(str, freqs))
+					ofile.write(string + "\n")
+		ofile.close()
+
+	def export_viruses(self):
+		print "Writing virus list"
+		with open(self.auspice_viruses_fname, 'w') as ofile:	
+			ofile.write("strain\tdate\tcountry\tregion\tep\tcHI\n")
+			for node in self.tree.postorder_node_iter():
+				if node.is_leaf():
+					ofile.write( str(node.strain) + "\t" + str(node.date) + "\t" + str(node.country) + "\t" + str(node.region) + "\t" + str(node.ep) + "\t" + str(node.cHI) + "\n" )
+		ofile.close()
+
 	def htmlpath(self):
 		htmlpath = '../auspice/'
 		if self.virus_type is not None:
@@ -388,7 +414,7 @@ class process(virus_frequencies):
 				except:
 					print(n.strain,"has no accession number")
 
-	def align(self, fast=False):
+	def align(self, fast=True):
 		'''
 		aligns viruses using mafft. produces temporary files and deletes those at the end
 		after this step, self.viruses is a BioPhython multiple alignment object
@@ -397,9 +423,9 @@ class process(virus_frequencies):
 		os.chdir(self.run_dir)
 		SeqIO.write([SeqRecord(Seq(v['seq']), id=v['strain']) for v in self.viruses], "temp_in.fasta", "fasta")
 		if fast:
-			os.system("mafft --anysymbol temp_in.fasta > temp_out.fasta")
+			os.system("mafft --anysymbol --op 10.0 temp_in.fasta > temp_out.fasta")
 		else:
-			os.system("mafft --anysymbol --nofft temp_in.fasta > temp_out.fasta")
+			os.system("mafft --nofft --anysymbol --op 10.0 temp_in.fasta > temp_out.fasta")
 		shutil.copy('temp_out.fasta', '../' + self.alignment_fname)
 		aln = AlignIO.read('temp_out.fasta', 'fasta')
 		self.sequence_lookup = {seq.id:seq for seq in aln}
