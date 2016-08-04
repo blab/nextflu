@@ -13,8 +13,8 @@ virus_config.update({
 	# data source and sequence parsing/cleaning/processing
 	'virus':'Zika',
 	'fasta_fields':{0:'strain', 2:'accession', 3:'date', 5:'country', 5:'region', 8:'db', 10:'authors'},
-	# 0         1    2        3          4            5      6    7     8       9      10
-	#>BeH818995|Zika|KU365777|2015-07-21|SouthAmerica|Brazil|Para|Belem|Genbank|Genome|Azevedo et al|?|
+	# 0         1    2        3          4             5      6 7 8       9      10
+	#>BeH818995|zika|KU365777|2015-XX-XX|south_america|brazil|?|?|genbank|genome|Azevedo et al
 	'alignment_file':'data/zika.fasta',
 	'outgroup':'H/PF/2013',
 	'aggregate_regions':[('global', None)],
