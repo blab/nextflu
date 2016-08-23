@@ -132,7 +132,7 @@ class BVic_clean(virus_clean):
 	def clean_outlier_strains(self):
 		"""Remove single outlying viruses"""
 		remove_viruses = []
-		outlier_strains = ["B/Bangkok/SI17/2012", "B/Bangkok/SI58/2012", "B/Kol/2024/2008"]
+		outlier_strains = ["B/Bangkok/SI17/2012", "B/Bangkok/SI58/2012", "B/Kol/2024/2008", "B/Kolkata/2024/2008"]
 		for outlier_strain in outlier_strains:
 			for v in self.viruses:
 				if (v.strain == outlier_strain):

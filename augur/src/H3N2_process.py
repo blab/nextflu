@@ -184,7 +184,7 @@ class H3N2_clean(virus_clean):
 	def clean_outliers(self):
 		"""Remove single outlying viruses"""
 		remove_viruses = []
-		outlier_strains = ["A/Sari/388/2006", "A/SaoPaulo/36178/2015", "A/Pennsylvania/40/2010", "A/Pennsylvania/14/2010", "A/Pennsylvania/09/2011", "A/OSAKA/31/2005", "A/Ohio/34/2012", "A/Kenya/170/2011", "A/Kenya/168/2011", "A/Indiana/21/2013", "A/Indiana/13/2012", "A/Indiana/11/2013", "A/Indiana/08/2012", "A/Indiana/06/2013", "A/India/6352/2012", "A/HuNan/01/2014", "A/Helsinki/942/2013", "A/Guam/AF2771/2011", "A/Chile/8266/2003", "A/Busan/15453/2009", "A/Nepal/142/2011", "A/Kenya/155/2011", "A/Guam/AF2771/2011"]
+		outlier_strains = ["A/Sari/388/2006", "A/SaoPaulo/36178/2015", "A/Pennsylvania/40/2010", "A/Pennsylvania/14/2010", "A/Pennsylvania/09/2011", "A/OSAKA/31/2005", "A/Ohio/34/2012", "A/Kenya/170/2011", "A/Kenya/168/2011", "A/Indiana/21/2013", "A/Indiana/13/2012", "A/Indiana/11/2013", "A/Indiana/08/2012", "A/Indiana/06/2013", "A/India/6352/2012", "A/HuNan/01/2014", "A/Helsinki/942/2013", "A/Guam/AF2771/2011", "A/Chile/8266/2003", "A/Busan/15453/2009", "A/Nepal/142/2011", "A/Kenya/155/2011", "A/Guam/AF2771/2011", "A/Michigan/82/2016", "A/Ohio/27/2016", "A/Ohio/28/2016", "A/Michigan/83/2016", "A/Michigan/84/2016"]
 
 		for outlier_strain in outlier_strains:
 			for v in self.viruses:
@@ -374,7 +374,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, H3N2_HI, H3N2_
 			self.temporal_regional_statistics()
 			# exporting to json, including the H3N2 specific fields
 			self.export_to_auspice(tree_fields = [
-				'ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country', 'dfreq', 'fitness', 'pred_distance',
+				'ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab', 'db', 'country', 'dfreq', 'fitness', 'pred_distance',
 				'dHI', 'cHI', 'mHI', 'mean_HI_titers', 'HI_titers', 'HI_titers_raw', 'serum', 'HI_info',
 				'avidity_tree', 'avidity_mut', 'potency_mut', 'potency_tree', 'mean_potency_mut', 'mean_potency_tree', 'autologous_titers'],
 				   annotations = ['3c2.a', '3c3.a', '3c3.b'])
