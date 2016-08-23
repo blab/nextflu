@@ -14,9 +14,9 @@ parser = argparse.ArgumentParser(description='Process virus sequences, build tre
 parser.add_argument('-y', '--years_back', type = float, default=3, help='number of past years to sample sequences from')
 parser.add_argument('-v', '--viruses_per_month', type = int, default = 50, help='number of viruses sampled per month')
 parser.add_argument('-r', '--raxml_time_limit', type = float, default = 1.0, help='number of hours raxml is run')
-parser.add_argument('--lam_HI', type = float, default = 1.0, help='regularization for HI')
-parser.add_argument('--lam_avi', type = float, default = 1.0, help='regularization for avidity')
-parser.add_argument('--lam_pot', type = float, default = 0.2, help='regularization for potency')
+parser.add_argument('--lam_HI', type = float, default = 2.0, help='regularization for HI')
+parser.add_argument('--lam_avi', type = float, default = 2.0, help='regularization for avidity')
+parser.add_argument('--lam_pot', type = float, default = 0.3, help='regularization for potency')
 parser.add_argument('--min_mutation_frequency', type = float, default = 0.01, help='minimum mutation frequency to calculate trajectory')
 parser.add_argument('--interval', nargs = '+', type = float, default = None, help='interval from which to pull sequences')
 parser.add_argument('--path', type = str, default = 'data/', help='path of file dumps')
@@ -34,10 +34,13 @@ parser.add_argument('--estimate_fitness_model', default = False, action="store_t
 
 virus_config = {
 	'date_format':{'fields':'%Y-%m-%d', 'reg':r'\d\d\d\d-\d\d-\d\d'},
-	'fasta_fields':{0:'strain', 1:'isolate_id', 3:'passage', 5:'date', 7:'lab', 8:"accession"},
+	# 0                  1     2         3               4      5       6        7        8                9 
+	# strain             virus accession collection_date region country division location passage_category submitting_lab
+	#>A/Norway/3105/2013|flu|  EPI505249|2013-11-11|     europe|norway| norway|  norway|  cell|            national_institute_for_medical_research
+	'fasta_fields':{0:'strain', 2:'isolate_id', 3:'date', 4:'region', 5:'country', 8:'passage', 9:'lab'},
 	# frequency estimation parameters
-	'aggregate_regions': [  ("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]),
-							("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ],
+	'aggregate_regions': [  ("global", None), ("NA", ["north_america"]), ("EU", ["europe"]),
+							("AS", ["china", "southeast_asia", "japan_korea"]), ("OC", ["oceania"]) ],
 	'frequency_stiffness':30.0,
 	'verbose':2,
 	'tol':2e-4, #tolerance for frequency optimization
