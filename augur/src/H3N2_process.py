@@ -31,11 +31,12 @@ virus_config.update({
 	'min_mutation_frequency':0.01,
 	# define relevant clades in canonical HA1 numbering (+1)
 	# numbering starting at HA1 start, adding sp to obtain numbering from methionine
-	'clade_designations': { "3c3.a":[('HA1', 128,'A'), ('HA1',142,'G'), ('HA1',159,'S')],
-						   "3c3":   [('HA1', 128,'A'), ('HA1',142,'G'), ('HA1',159,'F')],
-						   "3c2.a": [('HA1', 144,'S'), ('HA1',159,'Y'), ('HA1',225,'D'), ('HA1', 311,'H'), ('HA2', 160,'N')],
-						   "3c2":   [('HA1', 144,'N'), ('HA1',159,'F'), ('HA1',225,'N'), ('HA2', 160,'N'), ('HA1', 142, 'R')],
-						   "3c3.b": [('HA1',  83,'R'), ('HA1',261,'Q'), ('HA1',62,'K'),  ('HA1', 122,'D')]
+	'clade_designations': { "3c3.a":[('HA1',128,'A'), ('HA1',142,'G'), ('HA1',159,'S')],
+						   "3c3":   [('HA1',128,'A'), ('HA1',142,'G'), ('HA1',159,'F')],
+						   "3c2.a": [('HA1',144,'S'), ('HA1',159,'Y'), ('HA1',225,'D'), ('HA1',311,'H'), ('HA2',160,'N')],
+						   "171K": [('HA1',144,'S'), ('HA1',159,'Y'), ('HA1',171,'K'), ('HA1',225,'D'), ('HA1',311,'H'), ('HA2',77,'V'), ('HA2',155,'E'), ('HA2',160,'N')],
+						   "3c2":   [('HA1',144,'N'), ('HA1',159,'F'), ('HA1',225,'N'), ('HA2',160,'N'), ('HA1',142,'R')],
+						   "3c3.b": [('HA1',83,'R'), ('HA1',261,'Q'), ('HA1',62,'K'),  ('HA1',122,'D')]
 							},
 	'epitope_masks_fname':'source-data/H3N2_epitope_masks.tsv',
 	'epitope_mask_version':'wolf',
@@ -377,7 +378,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, H3N2_HI, H3N2_
 				'ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab', 'db', 'country', 'dfreq', 'fitness', 'pred_distance',
 				'dHI', 'cHI', 'mHI', 'mean_HI_titers', 'HI_titers', 'HI_titers_raw', 'serum', 'HI_info',
 				'avidity_tree', 'avidity_mut', 'potency_mut', 'potency_tree', 'mean_potency_mut', 'mean_potency_tree', 'autologous_titers'],
-				   annotations = ['3c2.a', '3c3.a', '3c3.b'])
+				   annotations = ['3c2.a', '3c3.a', '3c3.b', '171K'])
 			if params.html:
 				self.generate_indexHTML()
 			self.export_HI_mutation_effects()
