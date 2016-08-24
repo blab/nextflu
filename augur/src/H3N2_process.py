@@ -22,7 +22,7 @@ virus_config.update({
 	'virus':'H3N2',
 	'alignment_file':'data/h3n2.fasta',
 	'outgroup':'A/Beijing/32/1992',
-	'force_include':'data/h3n2_hi_strains.txt',
+	'force_include':'data/h3n2_hi_strains.tsv',
 	'force_include_all':False,
 	'date_spec':'year',
 	'max_global':True,   # sample as evenly as possible from different geographic regions
@@ -39,7 +39,7 @@ virus_config.update({
 							},
 	'epitope_masks_fname':'source-data/H3N2_epitope_masks.tsv',
 	'epitope_mask_version':'wolf',
-	'HI_fname':'data/h3n2_hi_titers.txt',
+	'HI_fname':'data/h3n2_hi_titers.tsv',
 	'html_vars': {'coloring': 'ep, ne, rb, lbi, dfreq, region, date, cHI, HI_dist',
 				   'gtplaceholder': 'HA1 positions...',
 					'freqdefault': '3c2.a, 3c3.a, 3c3.b'},

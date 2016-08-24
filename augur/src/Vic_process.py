@@ -30,7 +30,7 @@ virus_config.update({
 	'virus':'Vic',
 	'alignment_file':'data/vic.fasta',
 	'outgroup':'B/HongKong/02/1993',
-	'force_include':'data/vic_hi_strains.txt',
+	'force_include':'data/vic_hi_strains.tsv',
 	'force_include_all':False,
 	'date_spec':'year',
 	'max_global':True,   # sample as evenly as possible from different geographic regions
@@ -41,7 +41,7 @@ virus_config.update({
 		'1B': [('HA1', 75,'K'), ('HA1', 58, 'P'), ('HA1', 165, 'K')],
 		'117V': [('HA1', 75,'K'), ('HA1', 58, 'L'), ('HA1', 165, 'K'), ('HA1', 129, 'D'), ('HA1', 117, 'V')]
 	},
-	'HI_fname':'data/vic_hi_titers.txt',
+	'HI_fname':'data/vic_hi_titers.tsv',
 	'html_vars': {'coloring': 'lbi, dfreq, region, date, cHI, HI_dist',
 				  'gtplaceholder': 'HA1 positions...',
 				  'freqdefault': '1A, 1B'},

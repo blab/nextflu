@@ -30,7 +30,7 @@ virus_config.update({
 	'virus':'Yam',
 	'alignment_file':'data/yam.fasta',
 	'outgroup':'B/Singapore/11/94',
-	'force_include':'data/yam_hi_strains.txt',
+	'force_include':'data/yam_hi_strains.tsv',
 	'force_include_all':False,
 	'date_spec':'year',
 	'max_global':True,   # sample as evenly as possible from different geographic regions
@@ -43,7 +43,7 @@ virus_config.update({
 		'3a': [('HA1', 37,'A'), ('HA1', 298, 'E'), ('HA1', 48,'R'), ('HA1', 105, 'P'), ('HA1', 150, 'I')],
 		'172Q': [('HA1', 48,'R'), ('HA1', 108, 'P'), ('HA1', 150, 'I'), ('HA1', 116, 'K'), ('HA1', 172, 'Q')]
 	},
-	'HI_fname':'data/yam_hi_titers.txt',
+	'HI_fname':'data/yam_hi_titers.tsv',
 	'html_vars': {'coloring': 'lbi, dfreq, region, date, cHI, HI_dist',
 				  'gtplaceholder': 'HA1 positions...',
 				  'freqdefault': '2, 3, 3a'},

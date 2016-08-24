@@ -35,7 +35,7 @@ virus_config.update({
 	'virus':'H1N1pdm',
 	'alignment_file':'data/h1n1pdm.fasta',
 	'outgroup':'A/Swine/Indiana/P12439/00',
-	'force_include':'data/h1n1pdm_hi_strains.txt',
+	'force_include':'data/h1n1pdm_hi_strains.tsv',
 	'force_include_all':False,
 	'date_spec':'year',
 	'max_global':True,   # sample as evenly as possible from different geographic regions
@@ -57,7 +57,7 @@ virus_config.update({
 		'6b.1':[('HA1', 163,'Q'),  ('HA1', 256, 'T'), ('HA1', 197, 'A'), ('HA1', 283, 'E'), ('SigPep', 13, 'T'), ('HA1', 84, 'N'), ('HA1', 162, 'N')],
 		'6b.2':[('HA1', 163,'Q'),  ('HA1', 256, 'T'), ('HA1', 197, 'A'), ('HA1', 283, 'E'), ('HA2', 164, 'G'), ('HA1', 152, 'T'), ('HA2', 174, 'E')]
 		},
-	'HI_fname':'data/h1n1pdm_hi_titers.txt',
+	'HI_fname':'data/h1n1pdm_hi_titers.tsv',
 	'html_vars': {'coloring': 'ep, ne, rb, lbi, dfreq, region, date, cHI, HI_dist',
 				  'gtplaceholder': 'HA1 positions...',
 				  'freqdefault': '6b, 6c'},
