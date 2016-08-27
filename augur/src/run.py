@@ -7,6 +7,9 @@ def flu_build(lineage, resolution):
 	'''
 	print '\n------------------------------\n'
 	print 'Processing lineage',lineage,'with resolution',resolution
+	if resolution == '2y':
+		n_viruses = 100
+		n_years = 2
 	if resolution == '3y':
 		n_viruses = 60
 		n_years = 3
