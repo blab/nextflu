@@ -105,15 +105,15 @@ function colorByTrait() {
 
 	if (colorBy == "ep") {
 		colorScale = epitopeColorScale;
-		nodes.map(function(d) { d.coloring = d.ep; });
+		nodes.map(function(d) { d.coloring = d.attr.ep; });
 	}
 	else if (colorBy == "ne") {
 		colorScale = nonepitopeColorScale;
-		nodes.map(function(d) { d.coloring = d.ne; });
+		nodes.map(function(d) { d.coloring = d.attr.ne; });
 	}
 	else if (colorBy == "rb") {
 		colorScale = receptorBindingColorScale;
-		nodes.map(function(d) { d.coloring = d.rb; });
+		nodes.map(function(d) { d.coloring = d.attr.rb; });
 	}
 	else if (colorBy == "lbi") {
 		colorScale = lbiColorScale;
@@ -125,11 +125,11 @@ function colorByTrait() {
 	}
 	else if (colorBy == "region") {
 		colorScale = regionColorScale;
-		nodes.map(function(d) { d.coloring = d.region; });
+		nodes.map(function(d) { d.coloring = d.attr.region; });
 	}
 	else if (colorBy == "cHI") {
 		colorScale = cHIColorScale;
-		nodes.map(function(d) { d.coloring = d.cHI; });
+		nodes.map(function(d) { d.coloring = d.attr.dTiter; });
 	}
 	else if (colorBy == "HI_dist") {
 		newFocus();
@@ -137,11 +137,11 @@ function colorByTrait() {
 	}
 	else if (colorBy == "date") {
 		colorScale = dateColorScale;
-		nodes.map(function(d) { d.coloring = d.num_date; });
+		nodes.map(function(d) { d.coloring = d.attr.num_date; });
 	}
 	else if (colorBy == "fitness") {
 		colorScale = fitnessColorScale;
-		nodes.map(function(d) { d.coloring = d.fitness; });
+		nodes.map(function(d) { d.coloring = d.attr.fitness; });
 	}
 
 	treeplot.selectAll(".link")

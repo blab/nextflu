@@ -60,7 +60,7 @@ function initColorDomain(attr, tmpCS){
 	}
 	if (typeof full_data_time_window != "undefined"){
 		time_back = full_data_time_window;
-	}		
+	}
 	var minimum_date = maxDate - time_back;
 
 	// find attribute values
@@ -70,7 +70,7 @@ function initColorDomain(attr, tmpCS){
 		if (tip.num_date > minimum_date && tip[attr] != "undefined") {
 			vals.push(tip[attr]);
 		}
-	}	
+	}
 //	var vals = tips.map(function(d) {return d[attr];});
 	var minval = Math.floor(d3.min(vals));
 	var maxval = Math.ceil(d3.max(vals));
@@ -151,7 +151,7 @@ function branchLabelText(d) {
 		if (tmp_str.length>50){
 			tmp_str = tmp_str.substring(0,45)+'...';
 		}
-	}	
+	}
 	return tmp_str;
 }
 
@@ -207,9 +207,9 @@ function tree_init(){
 	}
 	//setting index of frequency trajectory to use for calculating frequency change
 	freq_ii = 1;
-	if (typeof rootNode.pivots != "undefined") {
-		if (typeof rootNode.pivots.length != "undefined") {
-			freq_ii = rootNode.pivots.length - 1;
+	if (typeof pivots != "undefined") {
+		if (typeof pivots.length != "undefined") {
+			freq_ii = pivots.length - 1;
 		}
 	}
 	calcNodeAges(time_window);
@@ -327,7 +327,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 				console.log("opening url "+url);
 				var win = window.open(url, '_blank');
   				win.focus();
-  			}  			
+  			}
   		})
 		.on('mouseout', virusTooltip.hide);
 

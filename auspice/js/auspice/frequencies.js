@@ -9,14 +9,12 @@ var plot_frequencies = true;
 function calcDfreq(node, freq_ii){
 	if (typeof node.children != "undefined") {
 		for (var i1=0; i1<node.children.length; i1++) {
-			if (typeof node.children[i1].freq != "undefined") {
-				if (node.children[i1].freq["global"] != "undefined"){
-					var tmp_freq = node.children[i1].freq["global"]
-					//node.children[i1].dfreq = 0.5*(tmp_freq[freq_ii] - tmp_freq[freq_ii-dfreq_dn])/(tmp_freq[freq_ii] + tmp_freq[freq_ii-dfreq_dn] + 0.2);
-					node.children[i1].dfreq = (tmp_freq[freq_ii] + 0.01)/(tmp_freq[freq_ii-dfreq_dn] + 0.01);
-				} else {
-					node.children[i1].dfreq = node.dfreq;
-				}
+			var label_str = "global_clade:"+node.children[ii].clade)
+			if (frequencies[label_str] != "undefined"){
+				var tmp_freq = get_frequencies("global", "clade:"+node.children[ii].clade)
+				node.children[i1].dfreq = (tmp_freq[freq_ii] + 0.01)/(tmp_freq[freq_ii-dfreq_dn] + 0.01);
+			} else {
+				node.children[i1].dfreq = node.dfreq;
 			}
 			calcDfreq(node.children[i1], freq_ii);
 		}
@@ -31,31 +29,11 @@ function get_frequencies(region, gt){
 	var freq = [];
 	for (var pi=0; pi<pivots.length; pi++){freq[freq.length]=0;}
 	console.log("searching for "+region+' ' + gt);
-	if (frequencies["clades"][region][gt.toLowerCase()]!=undefined) {
+	var label_str = region+'_'+gt
+	if (frequencies[label_str]!=undefined) {
 		console.log(gt+" found as clade");
 		for (var pi=0; pi<freq.length; pi++){
-			freq[pi]+=frequencies["clades"][region][gt.toLowerCase()][pi];
-		}
-	}else if ((typeof frequencies["genotypes"] !="undefined") && (frequencies["genotypes"][region][gt]!=undefined)) {
-		console.log(gt+" found as genotype");
-		for (var pi=0; pi<freq.length; pi++){
-			freq[pi]+=frequencies["genotypes"][region][gt][pi];
-		}
-	}else if (frequencies["mutations"] !== undefined){
-		var tmp_mut = gt.split(':');
-		var mut ="";
-		if (tmp_mut.length==1){
-			mut = default_gene+":"+gt;
-		}else{
-			mut = gt;
-		}
-		if (frequencies["mutations"][region][mut]!==undefined) {
-			console.log(gt+" found as mutation");
-			for (var pi=0; pi<freq.length; pi++){
-				freq[pi]+=frequencies["mutations"][region][mut][pi];
-			}
-		}else{
-			console.log("not found "+gt);
+			freq[pi]+=frequencies[label_str][pi];
 		}
 	}else{
 		console.log("not found "+gt);
@@ -100,13 +78,13 @@ function make_gt_chart(gt){
 
 function addClade(d) {
 	if (typeof gt_chart != "undefined"){
-		var plot_data = [['x'].concat(rootNode["pivots"])];
+		var plot_data = [['x'].concat(pivots)];
 		var reg = "global";
 		if ((typeof d.target.freq !="undefined" )&&(d.target.freq[reg] != "undefined")){
-			plot_data[plot_data.length] = [reg].concat(d.target.freq[reg]);
+			plot_data[plot_data.length] = [reg].concat(get_frequencies(reg,'clade:'+d.target.clade);
 		}
 		if (plot_data.length > 1) {
-			if (plot_data[1][0] == "global") {
+			if (plot_data[1][0] == reg) {
 				plot_data[1][0] = "clade";
 			}
 		}
@@ -181,7 +159,7 @@ var gt_chart = c3.generate({
 d3.json(path + file_prefix + "frequencies.json", function(error, json){
 	console.log(error);
 	frequencies = json;
-	pivots= frequencies["mutations"]["global"]["pivots"].map(function (d) {return Math.round(parseFloat(d)*100)/100;});
+	pivots= frequencies["pivots"].map(function (d) {return Math.round(parseFloat(d)*100)/100;});
 	var ticks = [Math.round(pivots[0])];
 	var tick_step = Math.round((pivots[pivots.length-1]-pivots[0])/6*10)/10;
 	while (ticks[ticks.length-1]<pivots[pivots.length-1]){
