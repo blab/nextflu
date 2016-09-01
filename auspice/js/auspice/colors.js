@@ -301,7 +301,7 @@ function newFocus(){
 		var ntiters = 0, ntmp;
 		focusNode=sera[0];
 		for (var i=0; i<sera.length; i++){
-			ntmp = Object.keys(sera[i].mean_HI_titers).length;
+			ntmp = Object.keys(HI_titers[sera[i].clade]).length;
 			if (ntmp>ntiters){
 				ntiters = ntmp;
 				focusNode = sera[i];
@@ -313,10 +313,12 @@ function newFocus(){
 	var htmlStr = "";
 	activeSera = {};
 	console.log(focusNode);
-	for (var serum in focusNode.potency_mut){
-		var serumID = serum.split("/").join("");
-		htmlStr+='<input type="checkbox" id="' + serumID + '" name="' + serum + '" checked="checked"> ' + serum +"<br>";
-		activeSera[serum]=true;
+	for (var serum in titer_subs_model["potency"][focusNode.clade]){
+		if (serum!="mean_potency"){
+			var serumID = serum.split("/").join("");
+			htmlStr+='<input type="checkbox" id="' + serumID + '" name="' + serum + '" checked="checked"> ' + serum +"<br>";
+			activeSera[serum]=true;
+		}
 	}
 	seraDiv.innerHTML = htmlStr;
 	console.log(seraDiv);
