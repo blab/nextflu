@@ -200,18 +200,21 @@ d3.json(path + file_prefix + "entropy.json", function(error, json){
 
 	entropy = json;
 	for (gene in entropy){
-		chart_data[gene]=[];
-		chart_data['x'+gene]=[];
-		chart_types[gene]='bar';
-		chart_xaxis[gene]='x'+gene;
-		for (var ii=0;ii<entropy[gene]["pos"].length;ii+=1){
-			if (Math.round(10000*entropy[gene]["val"][ii])/10000>0.05){
-				chart_data[gene].push(Math.round(10000*entropy[gene]["val"][ii])/10000);
-				chart_data['x'+gene].push(entropy[gene]["pos"][ii]);
+		if (gene!='nuc'){
+			chart_data[gene]=[];
+			chart_data['x'+gene]=[];
+			chart_types[gene]='bar';
+			chart_xaxis[gene]='x'+gene;
+			for (var ii=0;ii<entropy[gene]["pos"].length;ii+=1){
+				if (Math.round(10000*entropy[gene]["val"][ii])/10000>0.05){
+					chart_data[gene].push(Math.round(10000*entropy[gene]["val"][ii])/10000);
+					chart_data['x'+gene].push(entropy[gene]["pos"][ii]);
+					posToAA[entropy[gene]["pos"][ii]] = [gene, entropy[gene]["codon"][ii]]
+				}
 			}
+			var tmp_xmax = d3.max(chart_data['x'+gene]);
+			if (tmp_xmax>xmax) {xmax=tmp_xmax;}
 		}
-		var tmp_xmax = d3.max(chart_data['x'+gene]);
-		if (tmp_xmax>xmax) {xmax=tmp_xmax;}
 	}
 	var entropy_chart = c3.generate({
 		bindto: '#entropy',
@@ -257,11 +260,7 @@ d3.json(path + file_prefix + "entropy.json", function(error, json){
 			onclick: function (d,i) {
             	gene = posToAA[d.x][0];
             	var pos = posToAA[d.x][1];
-				if (frequencies["entropy"][gene][pos][2].length>1){
-					var tmp = [];
-					for (var ii=0;ii<frequencies["entropy"][gene][pos][2].length;ii+=1){
-						tmp.push(["global",d.x+frequencies["entropy"][gene][pos][2][ii]]);
-					}
+				if (entropy[gene]["val"][pos]>0.0){
 					colorBy = "genotype";
 					console.log("color by genotype: "+gene + ' ' + pos)
 					colorByGenotypePosition([[gene, pos]]);
@@ -297,7 +296,7 @@ d3.json(path + file_prefix + "entropy.json", function(error, json){
 	            	if (typeof posToAA[d] != "undefined"){
 		            	var gene = posToAA[d][0];
 		            	var pos = posToAA[d][1];
-		            	return gene + ' codon ' + (pos+1) + frequencies["entropy"][gene][pos][2].join(",");
+		            	return gene + ' codon ' + (pos+1) +": " + entropy[gene]["val"][pos];
 		            }else{ return d;}},
 	            value: function (value, ratio, id) {
 	                return id.substring(id.length-4)=='anno'?"start/stop":"Variability: "+value;
