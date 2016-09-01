@@ -129,7 +129,7 @@ function colorByTrait() {
 	}
 	else if (colorBy == "cHI") {
 		colorScale = cHIColorScale;
-		nodes.map(function(d) { d.coloring = d.attr.dTiter; });
+		nodes.map(function(d) { d.coloring = d.attr.cTiter; });
 	}
 	else if (colorBy == "HI_dist") {
 		newFocus();

@@ -88,7 +88,7 @@ function dragged(d) {
 		.attr("x1", function(d) {return d.x2;})
 		.attr("x2", function(d) {return d.x2});
 
-	globalDate = d.attr.date;
+	globalDate = d.date;
 
 	calcNodeAges(time_window);
 //	treeplot.selectAll(".link")

@@ -200,8 +200,8 @@ function tree_init(){
 	calcBranchLength(rootNode);
 	rootNode.branch_length= 0.01;
 	rootNode.dfreq = 0.0;
-	if (typeof rootNode.pivots != "undefined"){
-		time_step = rootNode.pivots[1]-rootNode.pivots[0];
+	if (typeof pivots != "undefined"){
+		time_step = pivots[1]-pivots[0];
 	}else{
 		time_step = 1.0/12;
 	}
@@ -257,7 +257,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	console.log('tree.root.attr:'+rootNode.attr);
 	initDateColorDomain();
 //	initHIColorDomain();
-	if (typeof rootNode.attr['cHI'] != "undefined"){ initColorDomain('cTiter', cHIColorScale);}
+	if (typeof rootNode.attr['cTiter'] != "undefined"){ initColorDomain('cTiter', cHIColorScale);}
 	if (typeof rootNode.attr['ep'] != "undefined"){ initColorDomain('ep', epitopeColorScale);}
 	if (typeof rootNode.attr['ne'] != "undefined"){ initColorDomain('ne', nonepitopeColorScale);}
 	if (typeof rootNode.attr['rb'] != "undefined"){ initColorDomain('rb', receptorBindingColorScale);}
