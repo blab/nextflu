@@ -1,12 +1,4 @@
-[{	
-"label":"Study", 
-"id":"authors", 
-"fields": 
 [
-  ["all", "all"],
-  ["ZiBRA", "ZiBRA"]
-]
-},
 {	
 "label":"Region", 
 "id":"region", 
@@ -16,8 +8,10 @@
 ["brazil",  		   "Brazil"],
 ["china",			   "China"],
 ["colombia",  		   "Colombia"],
+["cuba",               "Cuba"],
 ["dominican_republic", "Dominican Republic"],
 ["french_polynesia",   "French Polynesia"],
+["guadeloupe",         "Guadeloupe"],
 ["guatemala",  		   "Guatemala"],
 ["haiti",  			   "Haiti"],
 ["honduras",           "Honduras"],
@@ -26,6 +20,7 @@
 ["panama",             "Panama"],
 ["puerto_rico",  	   "Puerto Rico"],
 ["suriname",  		   "Suriname"],
+["thailand",           "Thailand"],
 ["venezuela",          "Venezuela"],
 ]
 }

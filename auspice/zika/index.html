@@ -16,16 +16,17 @@ var reference_viruses= {};
 var branch_labels=false;
 var restrictTo = {"authors": "all", "region": "all"};
 var time_window = 3.0;
-var full_data_time_window = 1.5;
-var time_ticks=[2013.0, 2013.5, 2014.0, 2014.5, 2015.0, 2015.5, 2016.0];
+var full_data_time_window = 3.0;
+var time_ticks=[2013.0, 2013.5, 2014.0, 2014.5, 2015.0, 2015.5, 2016.0, 2016.5];
 var dfreq_dn = 2;
 var LBItime_window = 0.5;
 var LBItau = 0.0005;
 var regions = [
 // Asia: "#403CC5", "#3F50CC", "#3F63CF", "#4374CD", "#4784C8", "#4D92BF", "#549DB2"
-["french_polynesia",   "#403CC5"],
-["american_samoa",	   "#3F50CC"],
-["china",			   "#3F63CF"],
+["thailand",           "#403CC5"],
+["french_polynesia",   "#3F50CC"],
+["american_samoa",	   "#3F63CF"],
+["china",			   "#4374CD"],
 // South America: "#5CA7A5", "#66AE96", "#70B487", "#7CB879", "#89BB6B", "#96BD60", "#A4BE56",
 ["brazil",  		   "#5CA7A5"],
 ["colombia",  		   "#66AE96"],
@@ -38,9 +39,11 @@ var regions = [
 ["guatemala",  		   "#CBB742"],
 ["mexico",             "#D5B03F"],
 ["martinique",  	   "#DEA73C"],
-["puerto_rico",  	   "#E39B39"],
-["dominican_republic", "#E68B35"],
-["haiti",  			   "#E67932"]
+["guadeloupe",         "#E39B39"],
+["puerto_rico",  	   "#E68B35"],
+["dominican_republic", "#E67932"],
+["haiti",  			   "#E4632E"],
+["cuba",  			   "#E04C29"]
 ];
 var mutType = 'nuc';
 var default_gene = 'nuc';
