@@ -1,4 +1,4 @@
-var frequencies, pivots;
+var frequencies, pivots, entropy;
 var gene = 'nuc';
 var mutType = 'aa';
 var plot_frequencies = true;
@@ -31,7 +31,7 @@ function get_frequencies(region, gt){
 	console.log("searching for "+region+' ' + gt);
 	var label_str = region+'_'+gt
 	if (frequencies[label_str]!=undefined) {
-		console.log(gt+" found as clade");
+		console.log(gt+" found");
 		for (var pi=0; pi<freq.length; pi++){
 			freq[pi]+=frequencies[label_str][pi];
 		}
@@ -169,6 +169,11 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 	while (ticks[ticks.length-1]<pivots[pivots.length-1]){
 		ticks.push(Math.round((ticks[ticks.length-1]+tick_step)*10)/10);
 	}
+});
+
+d3.json(path + file_prefix + "entropy.json", function(error, json){
+	console.log(error, path+file_prefix+"entropy.json");
+
 	//gt_chart.axis.x.values = ticks;
 	/**
 		parses a genotype string into region and positions
@@ -193,20 +198,20 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 		ymin-=0.08;
 	}
 
-	for (gene in frequencies["entropy"]){
+	entropy = json;
+	for (gene in entropy){
 		chart_data[gene]=[];
 		chart_data['x'+gene]=[];
 		chart_types[gene]='bar';
 		chart_xaxis[gene]='x'+gene;
-		var offset = frequencies['location'][gene][0];
-		for (var ii=0;ii<frequencies["entropy"][gene].length;ii+=1){
-			if (Math.round(10000*frequencies["entropy"][gene][ii][1])/10000>0.05){
-				chart_data[gene].push(Math.round(10000*frequencies["entropy"][gene][ii][1])/10000);
-				chart_data['x'+gene].push(ii*3+offset);
-				posToAA[ii*3+offset] = [gene, ii];
-				if ((ii*3+offset)>xmax) {xmax = (ii*3+offset);}
+		for (var ii=0;ii<entropy[gene]["pos"].length;ii+=1){
+			if (Math.round(10000*entropy[gene]["val"][ii])/10000>0.05){
+				chart_data[gene].push(Math.round(10000*entropy[gene]["val"][ii])/10000);
+				chart_data['x'+gene].push(entropy[gene]["pos"][ii]);
 			}
 		}
+		var tmp_xmax = d3.max(chart_data['x'+gene]);
+		if (tmp_xmax>xmax) {xmax=tmp_xmax;}
 	}
 	var entropy_chart = c3.generate({
 		bindto: '#entropy',
