@@ -236,8 +236,8 @@ class flu_filter(virus_filter):
 		self.filter_passage()
 		print len(self.viruses), "without egg passage"
 		self.filter_generic(prepend_strains = self.vaccine_strains)
-		self.filter_geo(prune=False)
-		print len(self.viruses), "with geographic information"
+#		self.filter_geo(prune=False)
+#		print len(self.viruses), "with geographic information"
 
 	def add_older_vaccine_viruses(self, dt = 3, dtref = None):
 		'''
@@ -285,8 +285,7 @@ class flu_filter(virus_filter):
 			v['strain'] = fix_name(v['strain'])
 
 	def filter_passage(self):
-		self.viruses = filter(lambda v: re.match(r'^E\d+', v.get('passage',''), re.I) == None, self.viruses)
-		self.viruses = filter(lambda v: re.match(r'^Egg', v.get('passage',''), re.I) == None, self.viruses)
+		self.viruses = filter(lambda v: re.match(r'^egg', v.get('passage_category',''), re.I) == None, self.viruses)
 
 	def filter_geo(self, prune = True):
 		"""Label viruses with geographic location based on strain name"""

@@ -22,7 +22,7 @@ def HI_fix_name(name):
 		tmp_name = fix_name("A/Texas/50/2012")
 	else:
 		tmp_name = fix_name(name)
-	return tmp_name.upper().lstrip('*')
+	return tmp_name.lstrip('*')
 
 
 class HI_tree(object):
@@ -80,9 +80,9 @@ class HI_tree(object):
 		all_per_serum = defaultdict(list)
 		autologous = defaultdict(list)
 		for (test, ref), val in self.HI.iteritems():
-			if test.upper() in self.node_lookup and ref[0].upper() in self.node_lookup:
-				HI_strains.add(test.upper())
-				HI_strains.add(ref[0].upper())
+			if test in self.node_lookup and ref[0] in self.node_lookup:
+				HI_strains.add(test)
+				HI_strains.add(ref[0])
 				all_per_serum[ref].append(val)
 				if ref[0]==test:
 					autologous[ref].append(val)
@@ -100,7 +100,7 @@ class HI_tree(object):
 					print("discarding",serum,"since there are only ",len(all_per_serum[serum]),'measurements')
 
 		for (test, ref), val in self.HI.iteritems():
-			if test.upper() in self.node_lookup and ref[0].upper() in self.node_lookup:
+			if test in self.node_lookup and ref[0] in self.node_lookup:
 				if ref in self.autologous_titers:
 					sera.add(ref)
 					ref_strains.add(ref[0])
@@ -130,8 +130,8 @@ class HI_tree(object):
 	def mark_HI_splits(self):
 		# flag all branches on the tree with HI_strain = True if they lead to strain with titer data
 		for leaf in self.tree.leaf_iter():
-			if leaf.strain.upper() in self.HI_strains:
-				leaf.serum = leaf.strain.upper() in self.ref_strains
+			if leaf.strain in self.HI_strains:
+				leaf.serum = leaf.strain in self.ref_strains
 				leaf.HI_info = 1
 			else:
 				leaf.serum, leaf.HI_info=False, 0
@@ -496,7 +496,7 @@ class HI_tree(object):
 			HI_strains = set()
 
 			for test,ref in self.train_HI:
-				if test.upper() in self.node_lookup and ref[0].upper() in self.node_lookup:
+				if test in self.node_lookup and ref[0] in self.node_lookup:
 					HI_strains.add(test)
 					HI_strains.add(ref[0])
 					sera.add(ref)
@@ -640,8 +640,8 @@ class HI_tree(object):
 
 			if pred_HI is not None:
 				if any([incl_ref_strains=='yes',
-						incl_ref_strains=='no' and (key[0].upper() not in self.ref_strains),
-						incl_ref_strains=='only' and (key[0].upper() in self.ref_strains)]):
+						incl_ref_strains=='no' and (key[0] not in self.ref_strains),
+						incl_ref_strains=='only' and (key[0] in self.ref_strains)]):
 					self.validation[key] = (val, pred_HI)
 
 		a = np.array(self.validation.values())
@@ -996,7 +996,7 @@ def write_strains_with_HI_and_sequence(flutype='H3N2'):
 def write_flat_HI_titers(flutype = 'H3N2', fname = None):
 	measurements = get_all_titers_flat(flutype)
 	with myopen('data/'+flutype+'_HI_strains.txt') as infile:
-		strains = [HI_fix_name(line.strip().split('\t')[0]).upper() for line in infile]
+		strains = [HI_fix_name(line.strip().split('\t')[0]) for line in infile]
 	if fname is None:
 		fname = 'data/'+flutype+'_HI_titers.txt'
 	written = 0
@@ -1004,7 +1004,7 @@ def write_flat_HI_titers(flutype = 'H3N2', fname = None):
 	with myopen(fname, 'w') as outfile:
 		for ii, rec in measurements.iterrows():
 			test, ref, src_id, val = rec
-			if HI_fix_name(test).upper() in strains and HI_fix_name(rec[1][0]).upper() in strains:
+			if HI_fix_name(test) in strains and HI_fix_name(rec[1][0]) in strains:
 				outfile.write('\t'.join(map(str, [test, ref[0], ref[1], src_id, val]))+'\n')
 				written+=1
 			else:
