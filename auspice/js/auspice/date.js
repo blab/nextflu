@@ -46,7 +46,7 @@ var dragMin = d3.behavior.drag()
 
 function calcNodeAges(tw){
 	tips.forEach(function (d) {
-		var date = new Date(d.date.replace(/XX/g, "01"));
+		var date = new Date(d.attr.date.replace(/XX/g, "01"));
 		var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
 		var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
 		d.diff = diffYears;
@@ -88,7 +88,7 @@ function dragged(d) {
 		.attr("x1", function(d) {return d.x2;})
 		.attr("x2", function(d) {return d.x2});
 
-	globalDate = d.date;
+	globalDate = d.attr.date;
 
 	calcNodeAges(time_window);
 //	treeplot.selectAll(".link")
@@ -148,9 +148,9 @@ function dragend() {
 	var num_date = globalDate/1000/3600/24/365.25+1970;
 //	updateColorDomains(num_date);
 //	initHIColorDomain();
-	if (typeof rootNode.pivots != "undefined"){
-		for (var ii=0; ii<rootNode.pivots.length-1; ii++){
-			if (rootNode.pivots[ii]<num_date && rootNode.pivots[ii+1]>=num_date){
+	if (typeof pivots != "undefined"){
+		for (var ii=0; ii<pivots.length-1; ii++){
+			if (pivots[ii]<num_date && pivots[ii+1]>=num_date){
 				freq_ii=Math.max(dfreq_dn,ii+1);
 			}
 		}
@@ -162,7 +162,7 @@ function dragend() {
 	adjust_coloring_by_date();
 	console.log("updating frequencies");
 	adjust_freq_by_date();
-	if (typeof calcDfreq == 'function') {	
+	if (typeof calcDfreq == 'function') {
 		calcDfreq(rootNode, freq_ii);
 	}
 

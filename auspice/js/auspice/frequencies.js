@@ -9,9 +9,9 @@ var plot_frequencies = true;
 function calcDfreq(node, freq_ii){
 	if (typeof node.children != "undefined") {
 		for (var i1=0; i1<node.children.length; i1++) {
-			var label_str = "global_clade:"+node.children[ii].clade)
+			var label_str = "global_clade:"+node.children[i1].clade;
 			if (frequencies[label_str] != "undefined"){
-				var tmp_freq = get_frequencies("global", "clade:"+node.children[ii].clade)
+				var tmp_freq = get_frequencies("global", "clade:"+node.children[i1].clade)
 				node.children[i1].dfreq = (tmp_freq[freq_ii] + 0.01)/(tmp_freq[freq_ii-dfreq_dn] + 0.01);
 			} else {
 				node.children[i1].dfreq = node.dfreq;
@@ -78,10 +78,13 @@ function make_gt_chart(gt){
 
 function addClade(d) {
 	if (typeof gt_chart != "undefined"){
+		console.log(d);
 		var plot_data = [['x'].concat(pivots)];
 		var reg = "global";
-		if ((typeof d.target.freq !="undefined" )&&(d.target.freq[reg] != "undefined")){
-			plot_data[plot_data.length] = [reg].concat(get_frequencies(reg,'clade:'+d.target.clade);
+		var label_str = 'clade:'+d.target.clade;
+		if (typeof frequencies[reg+"_"+label_str] !="undefined" ){
+
+			plot_data[plot_data.length] = [reg].concat(get_frequencies(reg,label_str));
 		}
 		if (plot_data.length > 1) {
 			if (plot_data[1][0] == reg) {
@@ -157,8 +160,9 @@ var gt_chart = c3.generate({
 });
 
 d3.json(path + file_prefix + "frequencies.json", function(error, json){
-	console.log(error);
+	console.log(error, path+file_prefix+"frequencies.json");
 	frequencies = json;
+	console.log(frequencies);
 	pivots= frequencies["pivots"].map(function (d) {return Math.round(parseFloat(d)*100)/100;});
 	var ticks = [Math.round(pivots[0])];
 	var tick_step = Math.round((pivots[pivots.length-1]-pivots[0])/6*10)/10;

@@ -32,7 +32,7 @@ var top_margin = 35;
 if ((typeof branch_labels != "undefined")&&(branch_labels)) {top_margin +=5;}
 
 function initDateColorDomain(intAttributes){
-	var numDateValues = tips.map(function(d) {return d.num_date;})
+	var numDateValues = tips.map(function(d) {return d.attr.num_date;})
 	var maxDate = d3.max(numDateValues.filter(function (d){return d!="undefined";}));
 	var time_back = 1.0;
 	if (typeof time_window != "undefined"){
@@ -52,7 +52,7 @@ function initDateColorDomain(intAttributes){
 
 function initColorDomain(attr, tmpCS){
 	// only measure recent tips
-	var numDateValues = tips.map(function(d) {return d.num_date;})
+	var numDateValues = tips.map(function(d) {return d.attr.num_date;})
 	var maxDate = d3.max(numDateValues.filter(function (d){return d!="undefined";}));
 	var time_back = 1.0;
 	if (typeof time_window != "undefined"){
@@ -67,8 +67,8 @@ function initColorDomain(attr, tmpCS){
 	var vals = [];
 	for (var i = 0; i < tips.length; i++) {
 		var tip = tips[i];
-		if (tip.num_date > minimum_date && tip[attr] != "undefined") {
-			vals.push(tip[attr]);
+		if (tip.attr.num_date > minimum_date && tip.attr[attr] != "undefined") {
+			vals.push(tip.attr[attr]);
 		}
 	}
 //	var vals = tips.map(function(d) {return d[attr];});
@@ -134,7 +134,7 @@ function branchLabelText(d) {
 				if (tmp_str!=''){
 					tmp_str+=', ';
 				}
-				tmp_str+=tmp_gene+":"+d.aa_muts[tmp_gene].replace(/,/g, ', ');
+				tmp_str+=tmp_gene+":"+d.aa_muts[tmp_gene].join(', ');
 			}
 		}
 		if (tmp_str.length>50){
@@ -146,7 +146,7 @@ function branchLabelText(d) {
 			if (tmp_str!=''){
 				tmp_str+=', ';
 			}
-			tmp_str+=d.nuc_muts.replace(/,/g, ', ');
+			tmp_str+=d.muts.join(', ');
 		}
 		if (tmp_str.length>50){
 			tmp_str = tmp_str.substring(0,45)+'...';
@@ -254,13 +254,13 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	else {
 		sera = []
 	}
-
+	console.log('tree.root.attr:'+rootNode.attr);
 	initDateColorDomain();
 //	initHIColorDomain();
-	if (typeof rootNode['cHI'] != "undefined"){ initColorDomain('cHI', cHIColorScale);}
-	if (typeof rootNode['ep'] != "undefined"){ initColorDomain('ep', epitopeColorScale);}
-	if (typeof rootNode['ne'] != "undefined"){ initColorDomain('ne', nonepitopeColorScale);}
-	if (typeof rootNode['rb'] != "undefined"){ initColorDomain('rb', receptorBindingColorScale);}
+	if (typeof rootNode.attr['cHI'] != "undefined"){ initColorDomain('cTiter', cHIColorScale);}
+	if (typeof rootNode.attr['ep'] != "undefined"){ initColorDomain('ep', epitopeColorScale);}
+	if (typeof rootNode.attr['ne'] != "undefined"){ initColorDomain('ne', nonepitopeColorScale);}
+	if (typeof rootNode.attr['rb'] != "undefined"){ initColorDomain('rb', receptorBindingColorScale);}
 	date_init();
 	tree_init();
 
@@ -316,14 +316,14 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			virusTooltip.show(d, this);
 		})
 		.on('dblclick', function(d) {
-			if ((typeof d.db != "undefined") && (d.db == "GISAID") && (typeof d.accession != "undefined")) {
-				var url = "http://gisaid.org/EPI/"+d.accession;
+			if ((typeof d.attr.db != "undefined") && (d.attr.db == "GISAID") && (typeof d.attr.accession != "undefined")) {
+				var url = "http://gisaid.org/EPI/"+d.attr.accession;
 				console.log("opening url "+url);
 				var win = window.open(url, '_blank');
   				win.focus();
   			}
-			if ((typeof d.db != "undefined") && (d.db == "Genbank") && (typeof d.accession != "undefined")) {
-				var url = "http://www.ncbi.nlm.nih.gov/nuccore/"+d.accession;
+			if ((typeof d.attr.db != "undefined") && (d.attr.db == "Genbank") && (typeof d.attr.accession != "undefined")) {
+				var url = "http://www.ncbi.nlm.nih.gov/nuccore/"+d.attr.accession;
 				console.log("opening url "+url);
 				var win = window.open(url, '_blank');
   				win.focus();
