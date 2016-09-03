@@ -152,7 +152,7 @@ class BYam_clean(virus_clean):
 		self.viruses = MultipleSeqAlignment(new_viruses)
 		return new_viruses
 
-	def clean_outliers(self):
+	def clean_outliers_by_sequence(self):
 		from seq_util import hamming_distance as distance
 		"""Remove outlier viruses"""
 		remove_viruses = []
@@ -166,17 +166,17 @@ class BYam_clean(virus_clean):
 			for v in self.viruses:
 				dist = distance(Seq(outlier_seq), v)
 				if (dist < 0.02):
-					remove_viruses.append(v)
+					remove_viruses.append(v.strain)
 					if self.verbose>1:
 						print "\tremoving", v.strain
 
-		self.viruses = MultipleSeqAlignment([v for v in self.viruses if v not in remove_viruses])
+		self.viruses = MultipleSeqAlignment([v for v in self.viruses if v.strain not in remove_viruses])
 
 	def clean(self):
 		self.clean_generic()
 		self.clean_outbreaks()
 		print "Number of viruses after outbreak filtering:",len(self.viruses)
-		self.clean_outliers()
+		self.clean_outliers_by_sequence()
 		print "Number of viruses after outlier filtering:",len(self.viruses)
 
 class BYam_process(process, BYam_filter, BYam_clean, BYam_refine, HI_tree):
