@@ -14,4 +14,5 @@ var date_select = true;
 {% include_relative auspice/locate_viruses.js %}
 {% include_relative auspice/tree_functions.js %}
 {% include_relative auspice/tooltips.js %}
+{% include_relative auspice/entropy.js %}
 {% include_relative auspice/tree.js %}
