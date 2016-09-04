@@ -638,6 +638,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 });
 
 d3.json(path + file_prefix + "sequences.json", function(error, json) {
+	console.log('loading sequences');
 	if (error) return console.warn(error);
 	cladeToSeq=json;
 });

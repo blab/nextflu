@@ -127,6 +127,15 @@ function colorByTrait() {
 		colorScale = regionColorScale;
 		nodes.map(function(d) { d.coloring = d.attr.region; });
 	}
+	else if (colorBy == "country") {
+		if (typeof countries!=='undefined'){
+			var countryColorScale = d3.scale.ordinal()
+				.domain(countries.map(function(d){return d[0];}))
+				.range(countries.map(function(d){return d[1];}));
+		}
+		colorScale = countryColorScale;
+		nodes.map(function(d) { d.coloring = d.attr.country; });
+	}
 	else if (colorBy == "cHI") {
 		colorScale = cHIColorScale;
 		nodes.map(function(d) { d.coloring = d.attr.cTiter; });
@@ -171,7 +180,7 @@ function tipFillColor(d) {
 
 function branchStrokeColor(d) {
 	var col;
-	if (colorBy == "region" || colorBy == "date") {
+	if (colorBy == "date") {
 		col = "#AAA";
 	}
 	else {

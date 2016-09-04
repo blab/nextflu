@@ -16,36 +16,18 @@ var reference_viruses= {};
 var branch_labels=false;
 var restrictTo = {"authors": "all", "region": "all"};
 var time_window = 3.0;
-var full_data_time_window = 1.5;
+var full_data_time_window = 3.5;
 var time_ticks=[2013.0, 2013.5, 2014.0, 2014.5, 2015.0, 2015.5, 2016.0];
 var dfreq_dn = 2;
 var LBItime_window = 0.5;
 var LBItau = 0.0005;
-var genome_annotation = {'SP': [[1.2,1.2,1.2], [1,20,49]],
-                         'HA1': [[1,1,1], [49,460,49+987]],
-						 'HA2': [[1.2,1.2,1.2], [49+987,1200,1701]]};
-
 
 var regions = [
-// Asia: "#403CC5", "#3F50CC", "#3F63CF", "#4374CD", "#4784C8", "#4D92BF", "#549DB2"
-["french_polynesia",   "#403CC5"],
-["american_samoa",	   "#3F50CC"],
-["china",			   "#3F63CF"],
-// South America: "#5CA7A5", "#66AE96", "#70B487", "#7CB879", "#89BB6B", "#96BD60", "#A4BE56",
-["brazil",  		   "#5CA7A5"],
-["colombia",  		   "#66AE96"],
-["french_guiana",  	   "#70B487"],
-["suriname",  		   "#7CB879"],
-["venezuela",          "#89BB6B"],
-// Central America: "#B2BD4D", "#BFBB48", "#CBB742", "#D5B03F", "#DEA73C", "#E39B39", "#E68B35", "#E67932", "#E4632E", "#E04C29"
-["panama",             "#B2BD4D"],
-["honduras",           "#BFBB48"],
-["guatemala",  		   "#CBB742"],
-["mexico",             "#D5B03F"],
-["martinique",  	   "#DEA73C"],
-["puerto_rico",  	   "#E39B39"],
-["dominican_republic", "#E68B35"],
-["haiti",  			   "#E67932"]
+['asia', "#403CC5"],
+['south_america', "#5CA7A5"],
+['north_america', "#B2BD4D"],
+['china', "#3F63CF"],
+['oceania', "#403CC5"]
 ];
 var countries = [
 // Asia: "#403CC5", "#3F50CC", "#3F63CF", "#4374CD", "#4784C8", "#4D92BF", "#549DB2"
