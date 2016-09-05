@@ -1,5 +1,14 @@
 [
 {	
+"label":"Source", 
+"id":"db", 
+"fields": 
+[
+  ["all", "all"],
+  ["zibra", "ZiBRA"]
+]
+},
+{	
 "label":"Region", 
 "id":"region", 
 "fields": 
