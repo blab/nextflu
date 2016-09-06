@@ -29,7 +29,10 @@ var virusTooltip = d3.tip()
 		else if (typeof d.attr.region != "undefined") {
 			string += d.attr.region.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').toTitleCase();
 		}
-		if (typeof d.attr.date != "undefined") {
+		if (typeof d.attr.raw_date != "undefined") {
+			string += ", " + d.attr.raw_date;
+		}
+		else if (typeof d.attr.date != "undefined") {
 			string += ", " + d.attr.date;
 		}
 		if ((typeof d.attr.db != "undefined") && (typeof d.attr.accession != "undefined") && (d.attr.db == "GISAID")) {
@@ -127,7 +130,7 @@ var linkTooltip = d3.tip()
 		}
 		string += "<div class=\"smallspacer\"></div>";
 		string += "<div class=\"smallnote\">";
-		if ((typeof d.aa_muts !="undefined")&&(mutType=='aa')){
+		if ((typeof d.aa_muts !="undefined")&&(mutType=='aa'||mutType=='both')){
 			var ncount = 0;
 			for (tmp_gene in d.aa_muts) {ncount+=d.aa_muts[tmp_gene].length;}
 			if (ncount) {string += "<b>Mutations:</b><ul>";}
@@ -137,7 +140,7 @@ var linkTooltip = d3.tip()
 				}
 			}
 		}
-		else if ((typeof d.muts !="undefined")&&(mutType=='nuc')&&(d.muts.length)){
+		if ((typeof d.muts !="undefined")&&(mutType=='nuc'||mutType=='both')&&(d.muts.length)){
 			var nmuts = d.muts.length;
 			var tmp_muts = d.muts.slice(0,Math.min(10, nmuts))
 			string += "<li>"+tmp_muts.join(', ');

@@ -1,5 +1,5 @@
 console.log('Enter tree.js');
-
+var timetree=false;
 
 var dHIScale = d3.scale.linear()
 	.domain([0, 1])
@@ -263,13 +263,14 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	if (typeof rootNode.attr['rb'] != "undefined"){ initColorDomain('rb', receptorBindingColorScale);}
 	date_init();
 	tree_init();
+	nodes.forEach(function(d){d.xval=d.xvalue; d.yval=d.yvalue;});
 
 	var xValues = nodes.map(function(d) {
-		return +d.xvalue;
+		return +d.xval;
 	});
 
 	var yValues = nodes.map(function(d) {
-		return +d.yvalue;
+		return +d.yval;
 	});
 
 	var clade_freq_event;
@@ -382,22 +383,22 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		}
 		var dy = yScale.domain()[1]-yScale.domain()[0];
 		displayRoot = d.target;
-		var dMin = 0.5 * (minimumAttribute(d.target, "xvalue", d.target.xvalue) + minimumAttribute(d.source, "xvalue", d.source.xvalue)),
-			dMax = maximumAttribute(d.target, "xvalue", d.target.xvalue),
-			lMin = minimumAttribute(d.target, "yvalue", d.target.yvalue),
-			lMax = maximumAttribute(d.target, "yvalue", d.target.yvalue);
+		var dMin = 0.5 * (minimumAttribute(d.target, "xval", d.target.xval) + minimumAttribute(d.source, "xval", d.source.xval)),
+			dMax = maximumAttribute(d.target, "xval", d.target.xval),
+			lMin = minimumAttribute(d.target, "yval", d.target.yval),
+			lMax = maximumAttribute(d.target, "yval", d.target.yval);
 		if (dMax == dMin || lMax == lMin) {
 			displayRoot = d.source;
-			dMin = minimumAttribute(d.source, "xvalue", d.source.xvalue),
-			dMax = maximumAttribute(d.source, "xvalue", d.source.xvalue),
-			lMin = minimumAttribute(d.source, "yvalue", d.source.yvalue),
-			lMax = maximumAttribute(d.source, "yvalue", d.source.yvalue);
+			dMin = minimumAttribute(d.source, "xval", d.source.xval),
+			dMax = maximumAttribute(d.source, "xval", d.source.xval),
+			lMin = minimumAttribute(d.source, "yval", d.source.yval),
+			lMax = maximumAttribute(d.source, "yval", d.source.yval);
 		}
 
 		if ((lMax-lMin)>0.999*dy){
 			lMin = lMax - dy*0.7
 		}
-		var visibleXvals = tips.filter(function (d){return (d.yvalue>=lMin)&&(d.yvalue<lMax)}).map(function(d){return +d.xvalue;});
+		var visibleXvals = tips.filter(function (d){return (d.yval>=lMin)&&(d.yval<lMax)}).map(function(d){return +d.xval;});
 		nDisplayTips = visibleXvals.length;
 		dMax = Math.max.apply(Math, visibleXvals);
 		console.log("nodes in view: "+nDisplayTips+' max Xval: '+dMax);
@@ -451,9 +452,28 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	 */
 	function transform(dt){
 		nodes.forEach(function (d) {
-			d.x = xScale(d.xvalue);
-			d.y = yScale(d.yvalue);
+			d.x = xScale(d.xval);
+			d.y = yScale(d.yval);
 		});
+
+        yearTicks.forEach(function (d){
+            d.x1 = xScale(d.T1); d.x2 = xScale(d.T2);
+            d.y1 = yScale(d.c1); d.y2 = yScale(d.c2);
+        });
+        monthTicks.forEach(function (d){
+            d.x1 = xScale(d.T1); d.x2 = xScale(d.T2);
+            d.y1 = yScale(d.c1); d.y2 = yScale(d.c2);
+        });
+        treeplot.selectAll(".year")
+            .transition().duration(dt)
+            .attr("points", gridLine);
+        treeplot.selectAll(".yearLabel")
+            .transition().duration(dt)
+            .attr("x", function(d){return d.x1;})
+            .attr("y", function(d){return treeHeight;});
+        treeplot.selectAll(".month")
+            .transition().duration(dt)
+            .attr("points", gridLine);
 
 		treeplot.selectAll(".tip")
 			.transition().duration(dt)
@@ -573,6 +593,25 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
             });
 	}
 
+	function toggleTimeTree(){
+		if (timetree){
+			nodes.forEach(function(d){d.xval=d.attr['num_date']; d.yval=d.yvalue;});
+		}else{
+			nodes.forEach(function(d){d.xval=d.xvalue; d.yval=d.yvalue;});
+		}
+
+		xValues = nodes.map(function(d) {return +d.xval;});
+		yValues = nodes.map(function(d) {return +d.yval;});
+		resetLayout();
+	}
+
+	d3.select("#timetree")
+		.on("change", function (d){
+			timetree = document.getElementById("timetree").checked;
+			console.log("changing timtree: "+timetree);
+			toggleTimeTree();
+		});
+
 	d3.select(window).on('resize', resize);
 
 	d3.select("#reset")
@@ -602,6 +641,53 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.onSelected(highlightStrainSearch)
 		.render();
 
+    var yearTicks = [], monthTicks=[];
+    function gridLine(d) {
+    	console.log('gridline',d);
+        return  d.x1.toString()+","+top_margin.toString()+" "+d.x2.toString()
+                +","+(treeHeight-bottom_margin).toString();
+    }
+    function drawGrid(){
+        var maxy = treeHeight+100, miny=-100;
+        var tValues=nodes.map(function(d){return d.attr['num_date'];});
+        var maxt = d3.max(tValues);
+        var mint = d3.min(tValues);
+        var tRoot = rootNode.attr['num_date'];
+        console.log("Setting up date grid starting: ",tRoot);
+        for (var yi=Math.floor(mint); yi<Math.ceil(maxt+0.1); yi+=1+Math.floor((maxt-mint)/10)){
+            yearTicks.push({'year':yi, "T1":yi, "c1":miny, "T2":yi,"c2":maxy});
+            if (maxt-mint<8){
+                for (var mi=1; mi<12; mi++){
+                    monthTicks.push({'year':yi,"month":mi, "T1":yi+mi/12.0, "c1":miny,
+                                    "T2":yi+mi/12.0,"c2":maxy});
+                }
+            }
+        }
+        console.log(yearTicks);
+        var yearGrid = treeplot.selectAll(".year")
+            .data(yearTicks)
+            .enter().append('polyline')
+            .attr("class","year")
+            //.style('visibility', function(){return timetree?"visible":"hidden";})
+            .style("stroke-width", 3)
+            .style("stroke", "#DDDDDD");
+
+        var yearLabel = treeplot.selectAll(".yearLabel")
+            .data(yearTicks)
+            .enter().append('text')
+            .attr("class","yearLabel")
+            .text(function(d){return d.year.toString()})
+            //.style('visibility', function(){return timetree?"visible":"hidden";})
+            .style('font-size',14);
+
+        var monthGrid = treeplot.selectAll(".month")
+            .data(monthTicks)
+            .enter().append('polyline')
+            .attr("class","month")
+            .style("stroke-width", 1)
+            //.style('visibility', function(){return timetree?"visible":"hidden";})
+            .style("stroke", "#EEEEEE");
+    }
 
 	// add clade labels
 	clades = rootNode["clade_annotations"];
@@ -622,6 +708,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.domain([d3.min(xValues), d3.max(xValues)]);
 	var yScale = d3.scale.linear()
 		.domain([d3.min(yValues), d3.max(yValues)]);
+    drawGrid();
 	resize();
 
 	function exportTreeSVG(){
