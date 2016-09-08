@@ -300,8 +300,10 @@ function colorByGenotypePosition (positions) {
 		for (var ii=0; ii<filtered_gts.length; ii+=1){
 			tmp_gts.push(["global", filtered_gts[ii]])
 		}
+		if (plot_frequencies) {
 		make_gt_chart(tmp_gts);
-		document.getElementById("gtspec").value = tmp_gts.map( function (d) {return d[1];}).join(', ');
+		  document.getElementById("gtspec").value = tmp_gts.map( function (d) {return d[1];}).join(', ');
+	  }
 	}
 }
 
@@ -406,6 +408,3 @@ d3.select("#gt-color")
 		if (typeof genotypeColoringEvent != "undefined"){clearTimeout(genotypeColoringEvent);}
 		genotypeColoringEvent = setTimeout(colorByGenotype, 200);
 	});
-
-
-

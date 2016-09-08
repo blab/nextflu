@@ -279,9 +279,8 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	});
 
 	function gridLine(d) {
-		console.log('gridline',d);
-			return  d.x1.toString()+","+top_margin.toString()+" "+d.x2.toString()
-							+","+(treeHeight-1.5*bottom_margin).toString();
+		return  d.x1.toString()+","+top_margin.toString()+" "+d.x2.toString()
+						+","+(treeHeight-1.5*bottom_margin).toString();
 	}
 	function drawGrid(){
 			var maxy = treeHeight+100, miny=-100;
@@ -299,7 +298,6 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 							}
 					}
 			}
-			console.log(yearTicks);
 			var yearGrid = treeplot.selectAll(".year")
 					.data(yearTicks)
 					.enter().append('polyline')
@@ -599,7 +597,9 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			lMin = d3.min(yValues),
 			lMax = d3.max(yValues);
 		rescale(dMin, dMax, lMin, lMax);
-		removeClade();
+		if (plot_frequencies) {
+		  removeClade();
+	  }
 	}
 
 	function restrictToFunc(rt) {
@@ -680,8 +680,10 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			treeplot.selectAll(".branchLabel").data(nodes)
 				.text(branchLabelText)
 				.style("visibility", (branch_labels)?"visible":"hidden");
-			treeplot.selectAll(".annotation").data(clades)
-				.style("visibility",(branch_labels)?"hidden":"visible");
+			if (clades) {
+			  treeplot.selectAll(".annotation").data(clades)
+				  .style("visibility",(branch_labels)?"hidden":"visible");
+			}
 		});
 
 
