@@ -1,5 +1,5 @@
 console.log('Enter tree.js');
-var timetree=false;
+var timetree=true;
 
 var dHIScale = d3.scale.linear()
 	.domain([0, 1])
@@ -263,7 +263,12 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	if (typeof rootNode.attr['rb'] != "undefined"){ initColorDomain('rb', receptorBindingColorScale);}
 	date_init();
 	tree_init();
-	nodes.forEach(function(d){d.xval=d.xvalue; d.yval=d.yvalue;});
+
+	if (timetree){
+		nodes.forEach(function(d){d.xval=d.attr['num_date']; d.yval=d.yvalue;});
+	}else{
+		nodes.forEach(function(d){d.xval=d.xvalue; d.yval=d.yvalue;});
+	}
 
 	var xValues = nodes.map(function(d) {
 		return +d.xval;
@@ -272,6 +277,57 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	var yValues = nodes.map(function(d) {
 		return +d.yval;
 	});
+
+	function gridLine(d) {
+		console.log('gridline',d);
+			return  d.x1.toString()+","+top_margin.toString()+" "+d.x2.toString()
+							+","+(treeHeight-1.5*bottom_margin).toString();
+	}
+	function drawGrid(){
+			var maxy = treeHeight+100, miny=-100;
+			var tValues=nodes.map(function(d){return d.attr['num_date'];});
+			var maxt = d3.max(tValues);
+			var mint = d3.min(tValues);
+			var tRoot = rootNode.attr['num_date'];
+			console.log("Setting up date grid starting: ",tRoot);
+			for (var yi=Math.floor(mint); yi<Math.ceil(maxt+0.1); yi+=1+Math.floor((maxt-mint)/10)){
+					yearTicks.push({'year':yi, "T1":yi, "c1":miny, "T2":yi,"c2":maxy});
+					if (maxt-mint<8){
+							for (var mi=1; mi<12; mi++){
+									monthTicks.push({'year':yi,"month":mi, "T1":yi+mi/12.0, "c1":miny,
+																	"T2":yi+mi/12.0,"c2":maxy});
+							}
+					}
+			}
+			console.log(yearTicks);
+			var yearGrid = treeplot.selectAll(".year")
+					.data(yearTicks)
+					.enter().append('polyline')
+					.attr("class","year")
+					//.style('visibility', function(){return timetree?"visible":"hidden";})
+					.style("stroke-width", 3)
+					.style("stroke", "#DDDDDD");
+
+			var yearLabel = treeplot.selectAll(".yearLabel")
+					.data(yearTicks)
+					.enter().append('text')
+					.attr("class","yearLabel")
+					.text(function(d){return d.year.toString()})
+					//.style('visibility', function(){return timetree?"visible":"hidden";})
+					.style('font-size',14)
+					.style('text-anchor',"middle");
+
+			var monthGrid = treeplot.selectAll(".month")
+					.data(monthTicks)
+					.enter().append('polyline')
+					.attr("class","month")
+					.style("stroke-width", 1)
+					//.style('visibility', function(){return timetree?"visible":"hidden";})
+					.style("stroke", "#EEEEEE");
+  }
+
+  var yearTicks = [], monthTicks=[];
+	drawGrid();
 
 	var clade_freq_event;
 	var link = treeplot.selectAll(".link")
@@ -428,7 +484,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			right_margin = maxTextWidth + 10;
 		}
 		xScale.range([left_margin, treeWidth - right_margin]);
-		yScale.range([top_margin, treeHeight - bottom_margin]);
+		yScale.range([top_margin, treeHeight - 2*bottom_margin]);
 	}
 
 	/*
@@ -465,14 +521,11 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
             d.y1 = yScale(d.c1); d.y2 = yScale(d.c2);
         });
         treeplot.selectAll(".year")
-            .transition().duration(dt)
             .attr("points", gridLine);
         treeplot.selectAll(".yearLabel")
-            .transition().duration(dt)
             .attr("x", function(d){return d.x1;})
-            .attr("y", function(d){return treeHeight;});
+            .attr("y", function(d){return treeHeight+0*bottom_margin;});
         treeplot.selectAll(".month")
-            .transition().duration(dt)
             .attr("points", gridLine);
 
 		treeplot.selectAll(".tip")
@@ -641,54 +694,6 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.onSelected(highlightStrainSearch)
 		.render();
 
-    var yearTicks = [], monthTicks=[];
-    function gridLine(d) {
-    	console.log('gridline',d);
-        return  d.x1.toString()+","+top_margin.toString()+" "+d.x2.toString()
-                +","+(treeHeight-bottom_margin).toString();
-    }
-    function drawGrid(){
-        var maxy = treeHeight+100, miny=-100;
-        var tValues=nodes.map(function(d){return d.attr['num_date'];});
-        var maxt = d3.max(tValues);
-        var mint = d3.min(tValues);
-        var tRoot = rootNode.attr['num_date'];
-        console.log("Setting up date grid starting: ",tRoot);
-        for (var yi=Math.floor(mint); yi<Math.ceil(maxt+0.1); yi+=1+Math.floor((maxt-mint)/10)){
-            yearTicks.push({'year':yi, "T1":yi, "c1":miny, "T2":yi,"c2":maxy});
-            if (maxt-mint<8){
-                for (var mi=1; mi<12; mi++){
-                    monthTicks.push({'year':yi,"month":mi, "T1":yi+mi/12.0, "c1":miny,
-                                    "T2":yi+mi/12.0,"c2":maxy});
-                }
-            }
-        }
-        console.log(yearTicks);
-        var yearGrid = treeplot.selectAll(".year")
-            .data(yearTicks)
-            .enter().append('polyline')
-            .attr("class","year")
-            //.style('visibility', function(){return timetree?"visible":"hidden";})
-            .style("stroke-width", 3)
-            .style("stroke", "#DDDDDD");
-
-        var yearLabel = treeplot.selectAll(".yearLabel")
-            .data(yearTicks)
-            .enter().append('text')
-            .attr("class","yearLabel")
-            .text(function(d){return d.year.toString()})
-            //.style('visibility', function(){return timetree?"visible":"hidden";})
-            .style('font-size',14);
-
-        var monthGrid = treeplot.selectAll(".month")
-            .data(monthTicks)
-            .enter().append('polyline')
-            .attr("class","month")
-            .style("stroke-width", 1)
-            //.style('visibility', function(){return timetree?"visible":"hidden";})
-            .style("stroke", "#EEEEEE");
-    }
-
 	// add clade labels
 	clades = rootNode["clade_annotations"];
 	if (typeof clades != "undefined"){
@@ -708,7 +713,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.domain([d3.min(xValues), d3.max(xValues)]);
 	var yScale = d3.scale.linear()
 		.domain([d3.min(yValues), d3.max(yValues)]);
-    drawGrid();
+  //drawGrid();
 	resize();
 
 	function exportTreeSVG(){
@@ -729,4 +734,3 @@ d3.json(path + file_prefix + "sequences.json", function(error, json) {
 	if (error) return console.warn(error);
 	cladeToSeq=json;
 });
-

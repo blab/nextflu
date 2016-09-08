@@ -16,6 +16,7 @@ d3.json(path + file_prefix + "entropy.json", function(error, json){
 	var chart_xaxis = {}
 	var posToAA = {};
 	var ymin = 0;
+	var ymax = 0;
 	var xmax = 0;
 	var anno_count=0;
 	entropy = json;
@@ -49,6 +50,8 @@ d3.json(path + file_prefix + "entropy.json", function(error, json){
 			}
 			var tmp_xmax = d3.max(chart_data['x'+gene]);
 			if (tmp_xmax>xmax) {xmax=tmp_xmax;}
+			var tmp_ymax = d3.max(entropy[gene]["val"]);
+			if (tmp_ymax>ymax) {ymax=tmp_ymax;}
 		}
 	}
 	var entropy_chart = c3.generate({
@@ -68,10 +71,11 @@ d3.json(path + file_prefix + "entropy.json", function(error, json){
 					position: 'outer-middle'
 				},
 				tick: {
-					values: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6],
+					values: [0.0, 0.25, 0.50, 0.75, 1.25, 1.5],
 					outer: false
 				},
 				min:ymin,
+				max:1.05*ymax
 			},
 			x: {
 				label: {
@@ -80,7 +84,7 @@ d3.json(path + file_prefix + "entropy.json", function(error, json){
 				},
 				tick: {
 					outer: false,
-					values: ([1,2,3,4,5]).map(function (d){
+					values: ([1,2,3,4,5,6,7,8,9]).map(function (d){
 						var dec = Math.pow(10,Math.floor(Math.log10(xmax/5)))
 						var step = dec*Math.floor(xmax/5/dec);
 						return d*step;
