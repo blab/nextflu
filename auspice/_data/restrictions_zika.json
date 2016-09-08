@@ -1,32 +1,75 @@
-[{	
-"label":"Study", 
-"id":"authors", 
-"fields": 
 [
-  ["all", "all"],
-  ["ZiBRA", "ZiBRA"]
-]
-},
 {	
 "label":"Region", 
 "id":"region", 
 "fields": 
 [["all", "all"],
-["american_samoa",	   "American Samoa"],
-["brazil",  		   "Brazil"],
-["china",			   "China"],
-["colombia",  		   "Colombia"],
-["dominican_republic", "Dominican Republic"],
-["french_polynesia",   "French Polynesia"],
-["guatemala",  		   "Guatemala"],
-["haiti",  			   "Haiti"],
-["honduras",           "Honduras"],
-["martinique",  	   "Martinique"],
-["mexico",             "Mexico"],
-["panama",             "Panama"],
-["puerto_rico",  	   "Puerto Rico"],
-["suriname",  		   "Suriname"],
-["venezuela",          "Venezuela"],
+  ["american_samoa", "American Samoa"],
+  ["brazil", "Brazil"],
+  ["china", "China"],
+  ["colombia", "Colombia"],
+  ["cuba", "Cuba"],
+  ["dominican_republic", "Dominican Republic"],
+  ["ecuador", "Ecuador"],
+  ["french_guiana", "French Guiana"],
+  ["french_polynesia", "French Polynesia"],
+  ["guadeloupe", "Guadeloupe"],
+  ["guatemala", "Guatemala"],
+  ["haiti", "Haiti"],
+  ["honduras", "Honduras"],
+  ["martinique", "Martinique"],
+  ["mexico", "Mexico"],
+  ["panama", "Panama"],
+  ["puerto_rico", "Puerto Rico"],
+  ["suriname", "Suriname"],
+  ["usa", "USA"]
+]
+},
+{	
+"label":"Consortium", 
+"id":"db", 
+"fields": 
+[
+  ["all", "all"],
+  ["zibra", "ZiBRA"]
+]
+},
+{	
+"label":"Authors", 
+"id":"authors", 
+"fields": 
+[
+  ["all", "all"],
+  ["Alcantara et al", "Alcantara et al"],
+  ["Andersen et al", "Andersen et al"],
+  ["Barzon et al", "Barzon et al"],
+  ["Bonaldo et al", "Bonaldo et al"],
+  ["Calvet et al", "Calvet et al"],
+  ["Carletti et al", "Carletti et al"],
+  ["Cunha et al", "Cunha et al"],
+  ["Deng et al", "Deng et al"],
+  ["Diaz-Quinonez et al", "Diaz-Quinonez et al"],
+  ["Donald et al", "Donald et al"],
+  ["Driggers et al", "Driggers et al"],
+  ["Enfissi et al", "Enfissi et al"],
+  ["Esposito et al", "Esposito et al"],
+  ["Faria et al", "Faria et al"],
+  ["Kneubehl et al", "Kneubehl et al"],
+  ["Lanciotti et al", "Lanciotti et al"],
+  ["Lednicky et al", "Lednicky et al"],
+  ["Li et al", "Li et al"],
+  ["Marquez et al", "Marquez et al"],
+  ["Mlakar et al", "Mlakar et al"],
+  ["Naccache et al", "Naccache et al"],
+  ["Nougairede et al", "Nougairede et al"],
+  ["Piorkowski et al", "Piorkowski et al"],
+  ["Sardi et al", "Sardi et al"],
+  ["Shabman et al", "Shabman et al"],
+  ["Stalin Raj et al", "Stalin Raj et al"],
+  ["Tong et al", "Tong et al"],
+  ["Wu et al", "Wu et al"],
+  ["Zhang et al", "Zhang et al"],
+  ["Zhao et al", "Zhao et al"]
 ]
 }
 ]
