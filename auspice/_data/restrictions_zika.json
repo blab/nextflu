@@ -1,8 +1,8 @@
 [
-{	
-"label":"Region", 
-"id":"region", 
-"fields": 
+{
+"label":"Country",
+"id":"country",
+"fields":
 [["all", "all"],
   ["american_samoa", "American Samoa"],
   ["brazil", "Brazil"],
@@ -25,19 +25,30 @@
   ["usa", "USA"]
 ]
 },
-{	
-"label":"Consortium", 
-"id":"db", 
-"fields": 
+{
+"label":"Region",
+"id":"region",
+"fields":
+[["all", "all"],
+  ["china", "China"],
+  ["north_america", "North America"],
+  ["oceania", "Oceania"],
+  ["south_america", "South America"]
+]
+},
+{
+"label":"Consortium",
+"id":"db",
+"fields":
 [
   ["all", "all"],
   ["zibra", "ZiBRA"]
 ]
 },
-{	
-"label":"Authors", 
-"id":"authors", 
-"fields": 
+{
+"label":"Authors",
+"id":"authors",
+"fields":
 [
   ["all", "all"],
   ["Alcantara et al", "Alcantara et al"],

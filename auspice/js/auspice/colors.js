@@ -53,13 +53,13 @@ var regionColorScale = d3.scale.ordinal()
 	.domain(regions.map(function(d){return d[0];}))
 	.range(regions.map(function(d){return d[1];}));
 
+var countryColorScale = d3.scale.ordinal()
+	.domain(countries.map(function(d){return d[0];}))
+	.range(countries.map(function(d){return d[1];}));
+
 var dateColorScale = d3.scale.linear().clamp([true])
 	.domain(dateColorDomain)
 	.range(colors[10]);
-
-var regionColorScale = d3.scale.ordinal()
-	.domain(regions.map(function(d){return d[0];}))
-	.range(regions.map(function(d){return d[1];}));
 
 var fitnessColorScale = d3.scale.linear().clamp([true])
 	.domain(fitnessColorDomain)
@@ -128,11 +128,6 @@ function colorByTrait() {
 		nodes.map(function(d) { d.coloring = d.attr.region; });
 	}
 	else if (colorBy == "country") {
-		if (typeof countries!=='undefined'){
-			var countryColorScale = d3.scale.ordinal()
-				.domain(countries.map(function(d){return d[0];}))
-				.range(countries.map(function(d){return d[1];}));
-		}
 		colorScale = countryColorScale;
 		nodes.map(function(d) { d.coloring = d.attr.country; });
 	}

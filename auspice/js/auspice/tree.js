@@ -105,7 +105,7 @@ function tipVisibility(d) {
 		return "hidden";
 	}
 	for (var k in restrictTo){
-		if (d[k]!=restrictTo[k] && restrictTo[k]!="all"){
+		if (d.attr[k]!=restrictTo[k] && restrictTo[k]!="all"){
 			return "hidden";
 		}
 	}
@@ -302,7 +302,6 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 					.data(yearTicks)
 					.enter().append('polyline')
 					.attr("class","year")
-					//.style('visibility', function(){return timetree?"visible":"hidden";})
 					.style("stroke-width", 3)
 					.style("stroke", "#DDDDDD");
 
@@ -311,7 +310,6 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 					.enter().append('text')
 					.attr("class","yearLabel")
 					.text(function(d){return d.year.toString()})
-					//.style('visibility', function(){return timetree?"visible":"hidden";})
 					.style('font-size',14)
 					.style('text-anchor',"middle");
 
@@ -320,7 +318,6 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 					.enter().append('polyline')
 					.attr("class","month")
 					.style("stroke-width", 1)
-					//.style('visibility', function(){return timetree?"visible":"hidden";})
 					.style("stroke", "#EEEEEE");
   }
 
@@ -501,6 +498,19 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	}
 
 	/*
+	 * rescale the tree to a horizontal window defined by the arguments
+	 * dMin, dMax  -- minimal and maximal horizontal dimensions
+	 */
+	function horizontal_rescale(dMin, dMax) {
+		setMargins();
+		xScale.domain([dMin,dMax]);
+		virusTooltip.hide();
+		linkTooltip.hide();
+		matchTooltip.hide();
+		transform(1500)
+	}
+
+	/*
 	 *move all svg items to their new location
 	 *dt -- the duration of the transition
 	 */
@@ -519,12 +529,15 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
             d.y1 = yScale(d.c1); d.y2 = yScale(d.c2);
         });
         treeplot.selectAll(".year")
-            .attr("points", gridLine);
+					.transition().duration(dt)
+          .attr("points", gridLine);
         treeplot.selectAll(".yearLabel")
-            .attr("x", function(d){return d.x1;})
-            .attr("y", function(d){return treeHeight+0*bottom_margin;});
+					.transition().duration(dt)
+          .attr("x", function(d){return d.x1;})
+          .attr("y", function(d){return treeHeight+0*bottom_margin;});
         treeplot.selectAll(".month")
-            .attr("points", gridLine);
+					.transition().duration(dt)
+          .attr("points", gridLine);
 
 		treeplot.selectAll(".tip")
 			.transition().duration(dt)
@@ -648,14 +661,14 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 
 	function toggleTimeTree(){
 		if (timetree){
-			nodes.forEach(function(d){d.xval=d.attr['num_date']; d.yval=d.yvalue;});
-		}else{
-			nodes.forEach(function(d){d.xval=d.xvalue; d.yval=d.yvalue;});
+			nodes.forEach(function(d){d.xval=d.attr['num_date'];});
+		} else{
+			nodes.forEach(function(d){d.xval=d.xvalue;});
 		}
-
 		xValues = nodes.map(function(d) {return +d.xval;});
-		yValues = nodes.map(function(d) {return +d.yval;});
-		resetLayout();
+		var dMin = d3.min(xValues),
+			dMax = d3.max(xValues);
+		horizontal_rescale(dMin, dMax);
 	}
 
 	d3.select("#timetree")

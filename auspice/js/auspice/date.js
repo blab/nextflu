@@ -6,6 +6,9 @@ function adjust_freq_by_date() {
 	var tipCount = rootNode.tipCount;
 	nDisplayTips = displayRoot.tipCount;
 	console.log("Total tipcount: " + tipCount);
+	if (tipCount < 1) {
+		tipCount = 1;
+	}
 	nodes.forEach(function (d) {
 		d.frequency = (d.tipCount)/tipCount;
 	});
@@ -56,7 +59,7 @@ function calcNodeAges(tw){
 			d.current = false;
 		}
 		for (var k in restrictTo){
-			if (d[k]!=restrictTo[k] && restrictTo[k]!="all"){
+			if (d.attr[k]!=restrictTo[k] && restrictTo[k]!="all"){
 				d.current = false;
 			}
 		}
