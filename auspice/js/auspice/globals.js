@@ -49,13 +49,20 @@ var time_step;
 
 d3.json(path + file_prefix + "meta.json", function(error, json) {
     if (error) return console.warn(error);
-    d3.select("#updated").text(json['updated']);
+    update_date = json['updated'];
+    d3.select("#updated")
+      .append("span")
+      .html("updated " + update_date);
     commit_id = json['commit'];
     short_id = commit_id.substring(0, 6);
-    d3.select("#commit")
+    if (commit_id !== "unknown") {
+      d3.select("#commit")
+        .append("span")
+        .html("and processed with commit ")
         .append("a")
         .attr("href", "http://github.com/blab/nextflu/commit/" + commit_id)
         .text(short_id);
+    }
 
 });
 

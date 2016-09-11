@@ -103,12 +103,13 @@ categories:
 		<a href="https://twitter.com/trvrb" target="_blank">@trvrb</a> with questions or comments.
 		All <a href="http://github.com/blab/nextflu" target="_blank">source code</a> is freely available under the terms
 		of the <a href="http://github.com/blab/nextflu/blob/master/LICENSE.txt" target="_blank">GNU Affero General
-		Public License</a>. Data updated <span id="updated"></span> and processed with commit
-		<span id="commit"></span>.
+		Public License</a>. Data <span id="updated"></span><span id="commit"></span>.
 		{% for entry in site.data.viruses_zika %}
 			{% if page.virus == entry.virus %}
+      <!--
 			The raw sequence alignment is <a href="/data/{{ entry.alignment }}">available in FASTA format</a> and
 			the raw tree is <a href="/data/{{ entry.newick }}">available in NEWICK format</a>.
+    -->
 			{% endif %}
 		{% endfor %}
 		</p>
