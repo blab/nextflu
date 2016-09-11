@@ -2,26 +2,33 @@
 title: nextstrain / zika
 layout: auspice_zika
 virus: Zika
-resolution: 
-coloring: region, date
+resolution:
+coloring: country, region, date
 gtplaceholder: Genomic positions...
-freqdefault: 
+freqdefault:
 ---
 
 <script>
-var file_prefix = "Zika_";
+var file_prefix = "zika_";
 var	vaccineChoice = {};
 var vaccineStrains = Object.keys(vaccineChoice);
 var reference_viruses= {};
 var branch_labels=false;
-var restrictTo = {"region": "all", "db": "all", "authors": "all"};
+var restrictTo = {"country": "all", "region": "all", "db": "all", "authors": "all"};
 var time_window = 3.0;
 var full_data_time_window = 3.0;
 var time_ticks=[2013.0, 2013.5, 2014.0, 2014.5, 2015.0, 2015.5, 2016.0, 2016.5];
 var dfreq_dn = 2;
 var LBItime_window = 0.5;
 var LBItau = 0.0005;
+
 var regions = [
+['oceania', '#3F4FCC'],
+['china', '#4580CA'],
+['south_america', '#69B091'],
+['north_america', '#E0A33B']
+];
+var countries = [
 // Asia: "#462EB9", "#403DC5", "#3F4FCC", "#3F60D0", "#4271CE", "#4580CA", "#4B8DC2", "#5199B8", "#58A2AC"
 ["french_polynesia",   "#403DC5"],
 ["american_samoa",	   "#3F4FCC"],
@@ -45,7 +52,7 @@ var regions = [
 ["cuba",  			   "#E04E2A"],
 ["usa",                "#DE3926"]
 ];
-var mutType = 'nuc';
+var mutType = 'aa';
 var default_gene = 'nuc';
 var plot_frequencies = false;
 </script>

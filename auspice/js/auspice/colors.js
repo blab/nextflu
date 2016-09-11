@@ -53,13 +53,13 @@ var regionColorScale = d3.scale.ordinal()
 	.domain(regions.map(function(d){return d[0];}))
 	.range(regions.map(function(d){return d[1];}));
 
+var countryColorScale = d3.scale.ordinal()
+	.domain(countries.map(function(d){return d[0];}))
+	.range(countries.map(function(d){return d[1];}));
+
 var dateColorScale = d3.scale.linear().clamp([true])
 	.domain(dateColorDomain)
 	.range(colors[10]);
-
-var regionColorScale = d3.scale.ordinal()
-	.domain(regions.map(function(d){return d[0];}))
-	.range(regions.map(function(d){return d[1];}));
 
 var fitnessColorScale = d3.scale.linear().clamp([true])
 	.domain(fitnessColorDomain)
@@ -105,15 +105,15 @@ function colorByTrait() {
 
 	if (colorBy == "ep") {
 		colorScale = epitopeColorScale;
-		nodes.map(function(d) { d.coloring = d.ep; });
+		nodes.map(function(d) { d.coloring = d.attr.ep; });
 	}
 	else if (colorBy == "ne") {
 		colorScale = nonepitopeColorScale;
-		nodes.map(function(d) { d.coloring = d.ne; });
+		nodes.map(function(d) { d.coloring = d.attr.ne; });
 	}
 	else if (colorBy == "rb") {
 		colorScale = receptorBindingColorScale;
-		nodes.map(function(d) { d.coloring = d.rb; });
+		nodes.map(function(d) { d.coloring = d.attr.rb; });
 	}
 	else if (colorBy == "lbi") {
 		colorScale = lbiColorScale;
@@ -125,11 +125,15 @@ function colorByTrait() {
 	}
 	else if (colorBy == "region") {
 		colorScale = regionColorScale;
-		nodes.map(function(d) { d.coloring = d.region; });
+		nodes.map(function(d) { d.coloring = d.attr.region; });
+	}
+	else if (colorBy == "country") {
+		colorScale = countryColorScale;
+		nodes.map(function(d) { d.coloring = d.attr.country; });
 	}
 	else if (colorBy == "cHI") {
 		colorScale = cHIColorScale;
-		nodes.map(function(d) { d.coloring = d.cHI; });
+		nodes.map(function(d) { d.coloring = d.attr.cTiter; });
 	}
 	else if (colorBy == "HI_dist") {
 		newFocus();
@@ -137,11 +141,11 @@ function colorByTrait() {
 	}
 	else if (colorBy == "date") {
 		colorScale = dateColorScale;
-		nodes.map(function(d) { d.coloring = d.num_date; });
+		nodes.map(function(d) { d.coloring = d.attr.num_date; });
 	}
 	else if (colorBy == "fitness") {
 		colorScale = fitnessColorScale;
-		nodes.map(function(d) { d.coloring = d.fitness; });
+		nodes.map(function(d) { d.coloring = d.attr.fitness; });
 	}
 
 	treeplot.selectAll(".link")
@@ -171,7 +175,7 @@ function tipFillColor(d) {
 
 function branchStrokeColor(d) {
 	var col;
-	if (colorBy == "region" || colorBy == "date") {
+	if (colorBy == "date") {
 		col = "#AAA";
 	}
 	else {
@@ -291,8 +295,10 @@ function colorByGenotypePosition (positions) {
 		for (var ii=0; ii<filtered_gts.length; ii+=1){
 			tmp_gts.push(["global", filtered_gts[ii]])
 		}
+		if (plot_frequencies) {
 		make_gt_chart(tmp_gts);
-		document.getElementById("gtspec").value = tmp_gts.map( function (d) {return d[1];}).join(', ');
+		  document.getElementById("gtspec").value = tmp_gts.map( function (d) {return d[1];}).join(', ');
+	  }
 	}
 }
 
@@ -301,7 +307,7 @@ function newFocus(){
 		var ntiters = 0, ntmp;
 		focusNode=sera[0];
 		for (var i=0; i<sera.length; i++){
-			ntmp = Object.keys(sera[i].mean_HI_titers).length;
+			ntmp = Object.keys(HI_titers[sera[i].clade]).length;
 			if (ntmp>ntiters){
 				ntiters = ntmp;
 				focusNode = sera[i];
@@ -313,10 +319,12 @@ function newFocus(){
 	var htmlStr = "";
 	activeSera = {};
 	console.log(focusNode);
-	for (var serum in focusNode.potency_mut){
-		var serumID = serum.split("/").join("");
-		htmlStr+='<input type="checkbox" id="' + serumID + '" name="' + serum + '" checked="checked"> ' + serum +"<br>";
-		activeSera[serum]=true;
+	for (var serum in titer_subs_model["potency"][focusNode.clade]){
+		if (serum!="mean_potency"){
+			var serumID = serum.split("/").join("");
+			htmlStr+='<input type="checkbox" id="' + serumID + '" name="' + serum + '" checked="checked"> ' + serum +"<br>";
+			activeSera[serum]=true;
+		}
 	}
 	seraDiv.innerHTML = htmlStr;
 	console.log(seraDiv);
@@ -395,6 +403,3 @@ d3.select("#gt-color")
 		if (typeof genotypeColoringEvent != "undefined"){clearTimeout(genotypeColoringEvent);}
 		genotypeColoringEvent = setTimeout(colorByGenotype, 200);
 	});
-
-
-
