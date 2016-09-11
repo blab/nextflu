@@ -568,33 +568,27 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.transition().duration(dt)
 			.attr("points", branchPoints);
 
-		if ((typeof tip_labels != "undefined")&&(tip_labels)){
-			treeplot.selectAll(".tipLabel")
-				.transition().duration(dt)
-				.style("font-size", function(d) {return tipLabelSize(d)+"px"; })
-				.attr("x", function(d) { return d.x+10; })
-				.attr("y", function(d) { return d.y+4; });
-		}
+		treeplot.selectAll(".tipLabel")
+			.transition().duration(dt)
+			.style("font-size", function(d) {return tipLabelSize(d)+"px"; })
+			.attr("x", function(d) { return d.x+10; })
+			.attr("y", function(d) { return d.y+4; });
 
-		if ((typeof branch_labels != "undefined")&&(branch_labels)){
-			console.log('shift branch_labels');
-			treeplot.selectAll(".branchLabel")
-				.transition().duration(dt)
-				.style("font-size", branchLabelSize)
-				.attr("x", function(d) {  return d.x - 9;})
-				.attr("y", function(d) {  return d.y - 6;});
-		}
+		treeplot.selectAll(".branchLabel")
+			.transition().duration(dt)
+			.style("font-size", branchLabelSize)
+			.attr("x", function(d) {  return d.x - 9;})
+			.attr("y", function(d) {  return d.y - 6;});
+	
+		treeplot.selectAll(".annotation")
+			.transition().duration(dt)
+			.attr("x", function(d) {
+				return xScale(d[1]) - 10;
+			})
+			.attr("y", function(d) {
+				return yScale(d[2]) - 6;
+			});
 
-		if (typeof clades !="undefined"){
-			treeplot.selectAll(".annotation")
-				.transition().duration(dt)
-				.attr("x", function(d) {
-					return xScale(d[1]) - 10;
-				})
-				.attr("y", function(d) {
-					return yScale(d[2]) - 6;
-				});
-		}
 	}
 
 	function resize() {
