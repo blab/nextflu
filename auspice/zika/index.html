@@ -14,7 +14,7 @@ var	vaccineChoice = {};
 var vaccineStrains = Object.keys(vaccineChoice);
 var reference_viruses= {};
 var branch_labels=false;
-var restrictTo = {"authors": "all", "region": "all"};
+var restrictTo = {"region": "all", "db": "all", "authors": "all"};
 var time_window = 3.0;
 var full_data_time_window = 3.0;
 var time_ticks=[2013.0, 2013.5, 2014.0, 2014.5, 2015.0, 2015.5, 2016.0, 2016.5];
@@ -22,29 +22,28 @@ var dfreq_dn = 2;
 var LBItime_window = 0.5;
 var LBItau = 0.0005;
 var regions = [
-// Asia: "#403CC5", "#3F50CC", "#3F63CF", "#4374CD", "#4784C8", "#4D92BF", "#549DB2"
-["thailand",           "#403CC5"],
-["french_polynesia",   "#3F50CC"],
-["american_samoa",	   "#3F63CF"],
-["china",			   "#4374CD"],
-// South America: "#5CA7A5", "#66AE96", "#70B487", "#7CB879", "#89BB6B", "#96BD60", "#A4BE56",
-["brazil",  		   "#5CA7A5"],
-["ecuador",  		   "#66AE96"],
-["colombia",  		   "#70B487"],
-["french_guiana",  	   "#7CB879"],
+// Asia: "#462EB9", "#403DC5", "#3F4FCC", "#3F60D0", "#4271CE", "#4580CA", "#4B8DC2", "#5199B8", "#58A2AC"
+["french_polynesia",   "#403DC5"],
+["american_samoa",	   "#3F4FCC"],
+["china",			   "#3F60D0"],
+// South America: "#60AA9F", "#69B091", "#73B584", "#7DB877", "#89BB6B", "#95BD60", "#A2BE57", "#AFBD4F"
+["brazil",  		   "#60AA9F"],
+["ecuador",  		   "#69B091"],
+["colombia",  		   "#73B584"],
+["french_guiana",  	   "#7DB877"],
 ["suriname",  		   "#89BB6B"],
-["venezuela",          "#96BD60"],
-// Central America: "#B2BD4D", "#BFBB48", "#CBB742", "#D5B03F", "#DEA73C", "#E39B39", "#E68B35", "#E67932", "#E4632E", "#E04C29"
-["panama",             "#B2BD4D"],
-["honduras",           "#BFBB48"],
-["guatemala",  		   "#CBB742"],
-["mexico",             "#D5B03F"],
-["martinique",  	   "#DEA73C"],
-["guadeloupe",         "#E39B39"],
-["puerto_rico",  	   "#E68B35"],
-["dominican_republic", "#E67932"],
+// Central America: "#BBBC49", "#C6B944", "#D0B440", "#D9AD3D", "#E0A33B", "#E49838", "#E68835", "#E67732", "#E4632E", "#E04E2A", "#DE3926"
+["panama",             "#BBBC49"],
+["honduras",           "#C6B944"],
+["guatemala",  		   "#D0B440"],
+["mexico",             "#D9AD3D"],
+["martinique",  	   "#E0A33B"],
+["guadeloupe",         "#E49838"],
+["puerto_rico",  	   "#E68835"],
+["dominican_republic", "#E67732"],
 ["haiti",  			   "#E4632E"],
-["cuba",  			   "#E04C29"]
+["cuba",  			   "#E04E2A"],
+["usa",                "#DE3926"]
 ];
 var mutType = 'nuc';
 var default_gene = 'nuc';

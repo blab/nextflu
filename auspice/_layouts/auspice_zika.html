@@ -25,8 +25,8 @@ categories:
 			<div class="col-xs-6 io-container">
 				<form class="form-horizontal form-small">
 					<div class="form-group">
-							<label class="col-xs-4 control-label">Color by</label>
-							<div class="col-xs-8 controls">
+							<label class="col-xs-5 control-label">Color by</label>
+							<div class="col-xs-7 controls">
 								<select id="coloring" class="form-control">
 								{% for color_option in site.data.color_options %}
 									{% if page.coloring contains color_option[0] %}
@@ -37,8 +37,8 @@ categories:
 							</div>
 					</div>
 					<div class="form-group">
-						<label class="col-xs-4 control-label">Or</label>
-						<div class="col-xs-8 controls">
+						<label class="col-xs-5 control-label">Or</label>
+						<div class="col-xs-7 controls">
 							<input id="gt-color" type="search" placeholder= "{{ page.gtplaceholder }}"  class="form-control">
 							<input type="checkbox" id="branchlabels"> branch labels
 						</div>
@@ -49,8 +49,8 @@ categories:
 				{% for res in site.data.restrictions_zika %}
 				<form class="form-horizontal form-small">
 					<div class="form-group">
-						<label class="col-xs-4 control-label">{{res.label}}</label>
-						<div class="col-xs-8 controls">
+						<label class="col-xs-5 control-label">{{res.label}}</label>
+						<div class="col-xs-7 controls">
 							<select id="{{res.id}}" class="form-control">
 								{% for reg in res.fields %}
 								<option value="{{ reg[0] }}">{{reg[1] }}</option>
@@ -132,6 +132,7 @@ categories:
 			<li><a href="http://wwwnc.cdc.gov/eid/article/22/5/16-0065_article">Lanciotti et al</a></li>
 			<li><a href="http://www.ncbi.nlm.nih.gov/nuccore/KU509998">Lednicky et al</a></li>
 			<li><a href="http://www.ncbi.nlm.nih.gov/nuccore/KX056898">Li et al</a></li>
+			<li><a href="https://github.com/zibraproject/zibraproject.github.io/blob/master/data/consensus/ECU_ZIBRA.fasta">Marquez et al</a></li>
 			<li><a href="http://www.nejm.org/doi/full/10.1056/NEJMoa1600651">Mlakar et al</a></li>
 			<li><a href="http://biorxiv.org/content/early/2016/04/24/049916">Naccache et al</a></li>
 			<li><a href="http://www.ncbi.nlm.nih.gov/nuccore/KX447512">Nougairede et al</a></li>
