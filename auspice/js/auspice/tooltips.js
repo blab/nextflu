@@ -130,10 +130,10 @@ var linkTooltip = d3.tip()
 		}
 		string += "<div class=\"smallspacer\"></div>";
 		string += "<div class=\"smallnote\">";
+		var ncount = d.muts.length;
+		if (ncount) {string += "<b>Mutations:</b><ul>";}
 		if ((typeof d.aa_muts !="undefined")&&(mutType=='aa'||mutType=='both')){
-			var ncount = 0;
 			for (tmp_gene in d.aa_muts) {ncount+=d.aa_muts[tmp_gene].length;}
-			if (ncount) {string += "<b>Mutations:</b><ul>";}
 			for (tmp_gene in d.aa_muts){
 				if (d.aa_muts[tmp_gene].length){
 					string+="<li>"+tmp_gene+":</b> "+d.aa_muts[tmp_gene].join(', ') + "</li>";
@@ -143,7 +143,7 @@ var linkTooltip = d3.tip()
 		if ((typeof d.muts !="undefined")&&(mutType=='nuc'||mutType=='both')&&(d.muts.length)){
 			var nmuts = d.muts.length;
 			var tmp_muts = d.muts.slice(0,Math.min(10, nmuts))
-			string += "<li>"+tmp_muts.join(', ');
+			string += "<li>nuc: "+tmp_muts.join(', ');
 			if (nmuts>10) {string+=' + '+ (nmuts-10) + ' more';}
 			string += "</li>";
 		}
