@@ -168,12 +168,11 @@ class H3N2_clean(virus_clean):
 	def clean_outliers(self):
 		"""Remove single outlying viruses"""
 		new_viruses = []
-		outlier_strains = ["A/Sari/388/2006", "A/SaoPaulo/36178/2015", "A/Pennsylvania/40/2010", "A/Pennsylvania/14/2010",
-			"A/Pennsylvania/09/2011", "A/OSAKA/31/2005", "A/Ohio/34/2012", "A/Kenya/170/2011", "A/Kenya/168/2011",
-			"A/Indiana/21/2013", "A/Indiana/13/2012", "A/Indiana/11/2013", "A/Indiana/08/2012", "A/Indiana/06/2013",
-			"A/India/6352/2012", "A/HuNan/01/2014", "A/Helsinki/942/2013", "A/Guam/AF2771/2011", "A/Chile/8266/2003",
-			"A/Busan/15453/2009", "A/Nepal/142/2011", "A/Kenya/155/2011", "A/Guam/AF2771/2011", "A/Michigan/82/2016",
-			"A/Ohio/27/2016", "A/Ohio/28/2016", "A/Michigan/83/2016", "A/Michigan/84/2016", "A/Jiangsu-Tianning/1707/2013"]
+		outlier_strains = ["A/Chile/8266/2003", "A/OSAKA/31/2005", "A/Sari/388/2006", "A/Busan/15453/2009", "A/Pennsylvania/40/2010", "A/Pennsylvania/14/2010",
+			"A/Pennsylvania/09/2011", "A/Kenya/170/2011", "A/Kenya/168/2011", "A/Guam/AF2771/2011", "A/Nepal/142/2011", "A/Kenya/155/2011", "A/Guam/AF2771/2011",
+			"A/Ohio/34/2012", "A/Indiana/13/2012", "A/Indiana/08/2012", "A/India/6352/2012", "A/Indiana/21/2013", "A/Indiana/11/2013", "A/Indiana/06/2013",
+			"A/Helsinki/942/2013", "A/Jiangsu-Tianning/1707/2013", "A/HuNan/01/2014", "A/Jiangsu-Chongchuan/12179/2014", "A/SaoPaulo/3-34891/2014", "A/Ohio/2/2014",
+			"A/SaoPaulo/36178/2015", "A/SaoPaulo/61282/2015", "A/Michigan/82/2016", "A/Ohio/27/2016", "A/Ohio/28/2016", "A/Michigan/83/2016", "A/Michigan/84/2016"]
 		for v in self.viruses:
 			if v.strain in outlier_strains:
 				if self.verbose > 1:
