@@ -27,7 +27,7 @@ region_codes = {'EU':['europe'], 'AS':['china', 'japan_korea','southeast_asia'],
 
 if virus=='H3N2': ########## H3N2
     clades = ['3c2.a', '3c3.a', '3c3.b']
-    mutations = ['HA1:142K', 'HA1:197K', 'HA1:197R', 'HA1:171K']
+    mutations = ['HA1:142K', 'HA1:197K', 'HA1:171K']
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
 elif virus=='H1N1pdm': ########## H1N1pdm
