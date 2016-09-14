@@ -172,7 +172,8 @@ class H3N2_clean(virus_clean):
 			"A/Pennsylvania/09/2011", "A/Kenya/170/2011", "A/Kenya/168/2011", "A/Guam/AF2771/2011", "A/Nepal/142/2011", "A/Kenya/155/2011", "A/Guam/AF2771/2011",
 			"A/Ohio/34/2012", "A/Indiana/13/2012", "A/Indiana/08/2012", "A/India/6352/2012", "A/Indiana/21/2013", "A/Indiana/11/2013", "A/Indiana/06/2013",
 			"A/Helsinki/942/2013", "A/Jiangsu-Tianning/1707/2013", "A/HuNan/01/2014", "A/Jiangsu-Chongchuan/12179/2014", "A/SaoPaulo/3-34891/2014", "A/Ohio/2/2014",
-			"A/SaoPaulo/36178/2015", "A/SaoPaulo/61282/2015", "A/Michigan/82/2016", "A/Ohio/27/2016", "A/Ohio/28/2016", "A/Michigan/83/2016", "A/Michigan/84/2016"]
+			"A/SaoPaulo/36178/2015", "A/SaoPaulo/61282/2015", "A/NewJersey/53/2015", "A/Michigan/82/2016", "A/Ohio/27/2016", "A/Ohio/28/2016", "A/Michigan/83/2016",
+			"A/Michigan/84/2016", "A/Zhejiang-Wuxin/1300/2016"]
 		for v in self.viruses:
 			if v.strain in outlier_strains:
 				if self.verbose > 1:
