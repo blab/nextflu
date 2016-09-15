@@ -21,7 +21,7 @@ report = 'sep-2016'
 freqs = json.load(open('../data/'+virus+'_'+resolution+'_frequencies.json'))
 counts = json.load(open('../data/'+virus+'_'+resolution+'_meta.json'))['virus_stats']
 region_names = json.load(open('../data/'+virus+'_'+resolution+'_meta.json'))['regions']
-region_codes = {'EU':['europe'], 'AS':['china', 'japan_korea','southeast_asia'],
+region_codes = {'EU':['europe'], 'AS':['china', 'south_asia', 'japan_korea','southeast_asia'],
                 'NA':["north_america"], 'OC':["oceania"]}
 
 
@@ -51,7 +51,7 @@ offset = datetime(2000,1,1).toordinal()
 pivots = [offset+(x-2000)*365.25 for x in  freqs['clades']['global']['pivots']]
 pivots.pop()
 regions = ['global', 'NA', 'AS', 'EU', 'OC']
-region_label = {'global': 'Global', 'NA': 'N America', 'AS': 'E Asia', 'EU': 'Europe', 'OC': 'Oceania'}
+region_label = {'global': 'Global', 'NA': 'N America', 'AS': 'Asia', 'EU': 'Europe', 'OC': 'Oceania'}
 cols = sns.color_palette(n_colors=len(regions))
 fs=12
 
