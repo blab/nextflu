@@ -129,23 +129,25 @@ class BVic_clean(virus_clean):
 		self.viruses = MultipleSeqAlignment(new_viruses)
 		return new_viruses
 
-	def clean_outlier_strains(self):
+	def clean_outliers(self):
 		"""Remove single outlying viruses"""
-		remove_viruses = []
-		outlier_strains = ["B/Bangkok/SI17/2012", "B/Bangkok/SI58/2012", "B/Kol/2024/2008", "B/Kolkata/2024/2008"]
-		for outlier_strain in outlier_strains:
-			for v in self.viruses:
-				if (v.strain == outlier_strain):
-					remove_viruses.append(v)
-					if self.verbose > 1:
-						print "\tremoving", v.strain
-		self.viruses = MultipleSeqAlignment([v for v in self.viruses if v not in remove_viruses])
+		new_viruses = []
+		outlier_strains = ["B/Kol/2024/2008", "B/Kolkata/2024/2008", "B/Brisbine/33/2008", "B/Stockholm/7/2011",
+			"B/Bangkok/SI17/2012", "B/Bangkok/SI58/2012", "B/Togo/LNG/419/2013", "B/Netherlands/76/2014",
+			"B/Brisbane/14/2016"]
+		for v in self.viruses:
+			if v.strain in outlier_strains:
+				if self.verbose > 1:
+					print "\tremoving", v.strain
+			else:
+				new_viruses.append(v)
+		self.viruses = MultipleSeqAlignment(new_viruses)
 
 	def clean(self):
 		self.clean_generic()
 		self.clean_outbreaks()
 		print "Number of viruses after outbreak filtering:",len(self.viruses)
-		self.clean_outlier_strains()
+		self.clean_outliers()
 		print "Number of viruses after outlier filtering:",len(self.viruses)
 
 class BVic_process(process, BVic_filter, BVic_clean, BVic_refine, HI_tree):
