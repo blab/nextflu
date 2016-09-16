@@ -121,11 +121,12 @@ class H1N1pdm_clean(virus_clean):
 	def clean_outliers(self):
 		"""Remove single outlying viruses"""
 		new_viruses = []
-		outlier_strains = ["A/California/07/2009NYMC-X18113/198", "A/Christchurch/16/2010NIB-74xp13/202",
+		outlier_strains = ["A/Wisconsin/87/2005", "A/Ohio/2/2007", "A/Illinois/9/2007", "A/Iowa/2/2009",
+			"A/California/07/2009NYMC-X18113/198", "A/Christchurch/16/2010NIB-74xp13/202",
 			"A/Asturias/RR6898/2010", "A/Tomsk/273-MA1/2010", "A/Wisconsin/28/2011", "A/Kenya/264/2012",
-			"A/RioGrandedoNorte/117490/2012", "A/Poland/16/2013", "A/Hungary/02/2013", "A/Hungary/16/2013",
-			"A/Arkansas/14/2013", "A/Arkansas/15/2013", "A/Brest/1161/2014", "A/India/Pun1418633/2014",
-			"A/Iowa/39/2015", "A/Minnesota/46/2015", "A/Bari/166/2016", "A/Bari/167/2016"]
+			"A/SriLanka/11/2012", "A/RioGrandedoNorte/117490/2012", "A/Poland/16/2013", "A/Hungary/02/2013",
+			"A/Hungary/16/2013", "A/Arkansas/14/2013", "A/Arkansas/15/2013", "A/Brest/1161/2014",
+			"A/India/Pun1418633/2014", "A/Iowa/39/2015", "A/Minnesota/46/2015", "A/Bari/166/2016", "A/Bari/167/2016"]
 		for v in self.viruses:
 			if v.strain in outlier_strains:
 				if self.verbose > 1:
