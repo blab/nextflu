@@ -155,8 +155,9 @@ class BYam_clean(virus_clean):
 	def clean_outliers(self):
 		"""Remove single outlying viruses"""
 		new_viruses = []
-		outlier_strains = ["B/Nairobi/351/2005", "B/Kisumu/7/2005", "B/Riyadh/3/2010", "B/Riyadh/4/2010",
-			"B/England/581/2012", "B/Thailand/CU-B10303/2014"]
+		outlier_strains = ["B/Nairobi/351/2005", "B/Kisumu/7/2005", "B/Kolkata/N-1272/2009", "B/Kolkata/N-2047/2009",
+			"B/Kolkata/2546/2009", "B/Riyadh/3/2010", "B/Riyadh/4/2010", "B/England/581/2012",
+			"B/Thailand/CU-B10303/2014"]
 		for v in self.viruses:
 			if v.strain in outlier_strains:
 				if self.verbose > 1:
