@@ -41,7 +41,7 @@ virus_config.update({
 		'2':  [('HA1', 48,'K'), ('HA1', 108, 'A'), ('HA1', 150, 'S')],
 		'3':  [('HA1', 48,'R'), ('HA1', 108, 'P'), ('HA1', 150, 'I')],
 		'3a': [('HA1', 37,'A'), ('HA1', 298, 'E'), ('HA1', 48,'R'), ('HA1', 105, 'P'), ('HA1', 150, 'I')],
-		'172Q': [('HA1', 48,'R'), ('HA1', 108, 'P'), ('HA1', 150, 'I'), ('HA1', 116, 'K'), ('HA1', 172, 'Q')]
+		'172Q': [('HA1', 48,'R'), ('HA1', 108, 'P'), ('HA1', 150, 'I'), ('HA1', 116, 'K'), ('HA1', 298, 'E'), ('HA1', 172, 'Q')]
 	},
 	'HI_fname':'data/yam_hi_titers.tsv',
 	'html_vars': {'coloring': 'lbi, dfreq, region, date, cHI, HI_dist',
@@ -155,7 +155,8 @@ class BYam_clean(virus_clean):
 	def clean_outliers(self):
 		"""Remove single outlying viruses"""
 		new_viruses = []
-		outlier_strains = ["B/Nairobi/351/2005", "B/England/581/2012"]
+		outlier_strains = ["B/Nairobi/351/2005", "B/Kisumu/7/2005", "B/Riyadh/3/2010", "B/Riyadh/4/2010",
+			"B/England/581/2012", "B/Thailand/CU-B10303/2014"]
 		for v in self.viruses:
 			if v.strain in outlier_strains:
 				if self.verbose > 1:
