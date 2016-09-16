@@ -21,7 +21,7 @@ categories:
 
 		<!-- Discussion of sampling -->
 
-    <p>We base our primary analysis on a set of viruses collected between Sep 2014 and Aug 2016, comprising approximately 100 viruses per month where available and seeking to equilibrate sample counts geographically where possible. This equilibration attempts to collect equal samples from Africa, China, Europe, Japan/South Korea, North America, Oceania, South America, South Asia, Southeast Asia and West Asia. In the following analysis we collapse samples from China, South Asia, Southeast Asia, Japan and Korea into a single region referred to here as "Asia", resulting in Asia possessing greater sample counts than North America or Europe. The only month that significantly departs from equitable sampling is Aug 2016 with 38 viruses, primarily from Europe and North America. We subsample to 100 viruses per month and not more to keep sample counts as equitable as possible across space and time.
+    <p>We base our primary analysis on a set of viruses collected between Sep 2014 and Aug 2016, comprising approximately 100 viruses per month where available and seeking to equilibrate sample counts geographically where possible. This equilibration attempts to collect equal samples from Africa, China, Europe, Japan/South Korea, North America, Oceania, South America, South Asia, Southeast Asia and West Asia. In the following analysis we collapse samples from China, South Asia, Southeast Asia, Japan and Korea into a single region referred to here as "Asia", resulting in Asia possessing greater sample counts than North America or Europe. The only month that significantly departs from equitable sampling is Aug 2016 with 38 viruses, primarily from Europe and North America. We subsample to 100 viruses per month and not more to keep sample counts as equitable as possible across space and time. Repeating mutation and clade frequency calculations with up to 200 viruses per month and region yields similar results, see below.
 
 		{% embed_image /reports/figures/sep-2016/H3N2_counts.png 12 %}
 
@@ -182,4 +182,29 @@ categories:
 		{% embed_image /reports/figures/sep-2016/Yam_mutations.png 12 %}
 
 	</div>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="io-container title">
+            A/H3N2 -- all sequences
+        </div>
+        <div class="spacer"></div>
+    </div>
+    <div class="col-md-9">
+    <p>The clade and mutation frequencies discussed above were based on a limited sequence subsample with an equitable geographical distribution. More accurate region specific trajectories can be estimated using all sequence data available in GISAID. We repeated the clade and mutation frequency estimation using up to 200 sequences per month and region.
+
+            {% embed_image /reports/figures/sep-2016/h3n2_counts_all.png 12 %}
+
+    With this more inclusive sampling, northern hemisphere winter months tend to be dominated by North America and Europe, while other months are dominated by samples from North America, Asia, and Oceania. The global average will track the regions contributing the majority of the sequence data.
+
+            {% embed_image /reports/figures/sep-2016/h3n2_clades_all.png 12 %}
+
+    The H3N2 clades 3c3.a (159S) and 3c2.a (159Y) show broadly similar trajectories as discussed above. 3c2.a came to dominate Asia completely, while viruses outside of 3c3.a and 3c2.a continue to circulate at low levels in Oceania.
+
+            {% embed_image /reports/figures/sep-2016/h3n2_mutations_all.png 12 %}
+
+    Within 3c2.a, the mutation 171K dominates across all regions.
+
+    </div>
 </div>
