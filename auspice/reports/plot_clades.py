@@ -42,7 +42,7 @@ elif virus=='Vic':
     mut_legend = {'panel':0, 'loc':3}
 elif virus=='Yam':
     clades = ['2', '3']
-    mutations = ['HA1:172Q', 'HA1:251V']
+    mutations = ['HA1:172Q', 'HA1:251V', 'HA1:211R']
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
 
