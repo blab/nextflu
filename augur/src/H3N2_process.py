@@ -168,13 +168,16 @@ class H3N2_clean(virus_clean):
 	def clean_outliers(self):
 		"""Remove single outlying viruses"""
 		new_viruses = []
-		outlier_strains = ["A/Chile/8266/2003", "A/OSAKA/31/2005", "A/Sari/388/2006", "A/HongKong/HK2/2008",
-			"A/Indiana/8/2011", "A/HongKong/HK1/2008", "A/HongKong/HK1MA21-2/2008", "A/HongKong/HK2MA21-1/2008",
-			"A/HongKong/HK5/2008", "A/HongKong/HK5MA21-1/2008", "A/HongKong/HK5MA21-3/2008", "A/HongKong/HK6MA21-2/2008",
-			"A/HongKong/HK8/2008", "A/HongKong/HK8MA21-4/2008", "A/HongKong/HK8MA21-3/2008", "A/HongKong/HK9MA21-2/2008",
-			"A/HongKong/HK10MA21-4/2008", "A/HongKong/HK11MA21-4/2008", "A/HongKong/HKMA12/2008", "A/HongKong/HKMA12A/2008",
-			"A/HongKong/HKMA12D/2008", "A/HongKong/HKMA20B/2008", "A/Busan/15453/2009", "A/Pennsylvania/40/2010",
-			"A/Pennsylvania/14/2010", "A/Pennsylvania/09/2011", "A/Kenya/170/2011", "A/Kenya/168/2011", "A/Quebec/167936/2011"
+		outlier_strains = ["A/Chile/8266/2003", "A/OSAKA/31/2005", "A/Sari/388/2006", "A/HongKong/HK1/2008",
+			"A/HongKong/HK1MA21-1/2008", "A/HongKong/HK1MA21-2/2008", "A/HongKong/HK2/2008", "A/HongKong/HK2MA21-1/2008",
+			"A/HongKong/HK2MA21-2/2008", "A/HongKong/HK4/2008", "A/HongKong/HK5/2008", "A/HongKong/HK5MA21-1/2008",
+			"A/HongKong/HK5MA21-3/2008", "A/HongKong/HK6MA21-2/2008", "A/HongKong/HK6MA21-3/2008", "A/HongKong/HK8/2008",
+			"A/HongKong/HK8MA21-4/2008", "A/HongKong/HK8MA21-3/2008", "A/HongKong/HK9MA21-1/2008",
+			"A/HongKong/HK9MA21-2/2008", "A/HongKong/HK9MA21-3/2008", "A/HongKong/HK10/2008",
+			"A/HongKong/HK10MA21-4/2008", "A/HongKong/HK11MA21-4/2008", "A/HongKong/HKMA12/2008",
+			"A/HongKong/HKMA12A/2008", "A/HongKong/HKMA12B/2008", "A/HongKong/HK12MA21-2/2008", "A/HongKong/HKMA12D/2008",
+			"A/HongKong/HKMA20B/2008", "A/Busan/15453/2009", "A/Pennsylvania/40/2010", "A/Pennsylvania/14/2010",
+			"A/Indiana/8/2011", "A/Pennsylvania/09/2011", "A/Kenya/170/2011", "A/Kenya/168/2011", "A/Quebec/167936/2011"
 			"A/Guam/AF2771/2011", "A/Nepal/142/2011", "A/Kenya/155/2011", "A/Guam/AF2771/2011", "A/Pennsylvania/9/2011"
 			"A/Ohio/34/2012", "A/Indiana/13/2012", "A/Indiana/08/2012", "A/India/6352/2012", "A/Indiana/21/2013",
 			"A/Indiana/11/2013", "A/Indiana/06/2013", "A/Helsinki/942/2013", "A/Jiangsu-Tianning/1707/2013",
