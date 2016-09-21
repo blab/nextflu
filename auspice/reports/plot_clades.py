@@ -15,18 +15,19 @@ virus = 'H3N2'
 #virus = 'Vic'
 #virus = 'Yam'
 
-freqs = json.load(open('../data/'+virus+'_2y_frequencies.json'))
-counts = json.load(open('../data/'+virus+'_2y_meta.json'))['virus_stats']
-region_names = json.load(open('../data/'+virus+'_2y_meta.json'))['regions']
-region_codes = {'EU':['europe'], 'AS':['china', 'japan_korea','southeast_asia'],
+resolution = '2y'
+report = 'sep-2016'
+
+freqs = json.load(open('../data/'+virus+'_'+resolution+'_frequencies.json'))
+counts = json.load(open('../data/'+virus+'_'+resolution+'_meta.json'))['virus_stats']
+region_names = json.load(open('../data/'+virus+'_'+resolution+'_meta.json'))['regions']
+region_codes = {'EU':['europe'], 'AS':['china', 'south_asia', 'japan_korea','southeast_asia'],
                 'NA':["north_america"], 'OC':["oceania"]}
 
 
 if virus=='H3N2': ########## H3N2
     clades = ['3c2.a', '3c3.a', '3c3.b']
-    mutations = ['HA1:142K', 'HA1:171K']
-    #mutations = ['HA1:114T', 'HA1:142K', 'HA1:168V', 'HA1:171K']
-    #mutations = ['HA1:94H', 'HA1:114T', 'HA1:142K', 'HA1:171K']
+    mutations = ['HA1:142K', 'HA1:197K', 'HA1:171K', 'HA1:121K']
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
 elif virus=='H1N1pdm': ########## H1N1pdm
@@ -41,7 +42,7 @@ elif virus=='Vic':
     mut_legend = {'panel':0, 'loc':3}
 elif virus=='Yam':
     clades = ['2', '3']
-    mutations = ['HA1:172Q', 'HA1:251V']
+    mutations = ['HA1:172Q', 'HA1:251V', 'HA1:211R']
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
 
@@ -50,7 +51,7 @@ offset = datetime(2000,1,1).toordinal()
 pivots = [offset+(x-2000)*365.25 for x in  freqs['clades']['global']['pivots']]
 pivots.pop()
 regions = ['global', 'NA', 'AS', 'EU', 'OC']
-region_label = {'global': 'Global', 'NA': 'N America', 'AS': 'E Asia', 'EU': 'Europe', 'OC': 'Oceania'}
+region_label = {'global': 'Global', 'NA': 'N America', 'AS': 'Asia', 'EU': 'Europe', 'OC': 'Oceania'}
 cols = sns.color_palette(n_colors=len(regions))
 fs=12
 
@@ -166,4 +167,4 @@ axs[mut_legend['panel']].legend(loc=mut_legend['loc'], ncol=1, bbox_to_anchor=(1
 bottom_margin = 0.22 - 0.03*len(mutations)
 plt.subplots_adjust(left=0.12, right=0.82, top=0.97, bottom=bottom_margin)
 sns.despine()
-plt.savefig('figures/sep-2016/'+virus+'_mutations.png')
+plt.savefig('figures/'+report+'/'+virus+'_mutations.png')
