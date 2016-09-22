@@ -57,6 +57,10 @@ var countryColorScale = d3.scale.ordinal()
 	.domain(countries.map(function(d){return d[0];}))
 	.range(countries.map(function(d){return d[1];}));
 
+var divisionColorScale = d3.scale.ordinal()
+	.domain(divisions.map(function(d){return d[0];}))
+	.range(divisions.map(function(d){return d[1];}));
+
 var dateColorScale = d3.scale.linear().clamp([true])
 	.domain(dateColorDomain)
 	.range(colors[10]);
@@ -130,6 +134,10 @@ function colorByTrait() {
 	else if (colorBy == "country") {
 		colorScale = countryColorScale;
 		nodes.map(function(d) { d.coloring = d.attr.country; });
+	}
+	else if (colorBy == "division") {
+		colorScale = divisionColorScale;
+		nodes.map(function(d) { d.coloring = d.attr.division; });
 	}
 	else if (colorBy == "cHI") {
 		colorScale = cHIColorScale;
