@@ -64,7 +64,7 @@ function makeLegend(){
 	}
 
 	var count = colorScale.domain().length;
-	var stack = Math.ceil(count / 2);	
+	var stack = Math.ceil(count / 2);
 	d3.select("#legend")
 		.attr("height", stack * (legendRectSize + legendSpacing) + legendSpacing);
 
@@ -112,6 +112,7 @@ function makeLegend(){
     .attr('y', legendRectSize - legendSpacing)
     .text(function(d) {
 		var label = d.toString().replace(/([a-z])([A-Z])/g, '$1 $2').replace(/,/g, ', ').replace(/([a-z]+)_([a-z]+)/g, function(_, a, b) { return a.toTitleCase().concat(' ', b.toTitleCase()); }).replace(/^([a-z]+)$/, function(_, a) { return a.toTitleCase(); });
+		label = label.replace(/([A-Za-z]+)_([A-Za-z]+)/g, function(_, a, b) { return a.toTitleCase().concat(' ', b.toTitleCase()); }).replace(/^([a-z]+)$/, function(_, a) { return a.toTitleCase(); });
         if (colorBy == "dfreq") {
             label += "\u00D7";
         }
@@ -140,4 +141,3 @@ function removeLegend(){
 	legend.selectAll('.legend')
   .remove();
 }
-

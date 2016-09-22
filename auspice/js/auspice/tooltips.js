@@ -23,12 +23,26 @@ var virusTooltip = d3.tip()
 			string += "<div class=\"smallspacer\"></div>";
 		}
 
-		if (typeof d.attr.country != "undefined") {
+		// division / country / region
+		// known to division level
+		if (typeof d.attr.division != "undefined" && typeof d.attr.country != "undefined" && d.attr.division != d.attr.country) {
+			string += d.attr.division.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').toTitleCase();
+			string += ", ";
 			string += d.attr.country.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').toTitleCase();
 		}
-		else if (typeof d.attr.region != "undefined") {
-			string += d.attr.region.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').toTitleCase();
+
+		// division / country / region
+		// known to country level
+		else if (typeof d.attr.division != "undefined" && typeof d.attr.country != "undefined" && d.attr.division == d.attr.country) {
+			string += d.attr.country.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').toTitleCase();
 		}
+
+		// country / region
+		// known to country level
+		else if (typeof d.attr.country != "undefined") {
+			string += d.attr.country.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').toTitleCase();
+		}
+
 		if (typeof d.attr.raw_date != "undefined") {
 			string += ", " + d.attr.raw_date;
 		}
