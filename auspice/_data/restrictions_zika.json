@@ -23,7 +23,7 @@
   ["puerto_rico", "Puerto Rico"],
   ["suriname", "Suriname"],
   ["usa", "USA"],
-  ["venezuela", "Venezuela"]  
+  ["venezuela", "Venezuela"]
 ]
 },
 {
@@ -53,7 +53,6 @@
 [
   ["all", "all"],
   ["Alcantara et al", "Alcantara et al"],
-  ["Andersen et al", "Andersen et al"],
   ["Barzon et al", "Barzon et al"],
   ["Bonaldo et al", "Bonaldo et al"],
   ["Calvet et al", "Calvet et al"],
