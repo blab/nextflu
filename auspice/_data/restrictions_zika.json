@@ -22,7 +22,8 @@
   ["panama", "Panama"],
   ["puerto_rico", "Puerto Rico"],
   ["suriname", "Suriname"],
-  ["usa", "USA"]
+  ["usa", "USA"],
+  ["venezuela", "Venezuela"]
 ]
 },
 {
@@ -52,7 +53,6 @@
 [
   ["all", "all"],
   ["Alcantara et al", "Alcantara et al"],
-  ["Andersen et al", "Andersen et al"],
   ["Barzon et al", "Barzon et al"],
   ["Bonaldo et al", "Bonaldo et al"],
   ["Calvet et al", "Calvet et al"],
@@ -65,6 +65,7 @@
   ["Enfissi et al", "Enfissi et al"],
   ["Esposito et al", "Esposito et al"],
   ["Faria et al", "Faria et al"],
+  ["Grubaugh et al", "Grubaugh et al"],
   ["Kneubehl et al", "Kneubehl et al"],
   ["Lanciotti et al", "Lanciotti et al"],
   ["Lednicky et al", "Lednicky et al"],
