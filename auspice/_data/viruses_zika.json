@@ -1,7 +1,0 @@
-[{  "virus": "Zika",
-    "default": "/Zika/",
-    "name": "Zika",
-    "resolutions": [],
-    "alignment": "Zika_align.fasta",
-    "newick": "Zika_tree.newick"}
-]

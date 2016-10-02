@@ -104,7 +104,7 @@
 							</a>
 							<ul class="dropdown-menu">
 								<li class="dropdown-header">Virus</li>
-								{% for entry in site.data.viruses_zika %}
+								{% for entry in site.data.viruses_nextstrain %}
 									{% if page.virus == entry.virus %}
 									<li class="disabled">
 										<a>{{ entry.virus }}</a>
@@ -117,7 +117,7 @@
 							</ul>
 						</li>
 					</ul>
-				</div>				
+				</div>
 			</div>
 		</nav>
 
@@ -126,7 +126,7 @@
 		<div class="row hidden-xs">
 			<div class="col-md-12">
 				<div class="subtitle-container navsubtitle">
-					Real-time tracking of Zika virus evolution
+					Real-time tracking of {{ page.virus }} virus evolution
 				</div>
 			</div>
 		</div>
