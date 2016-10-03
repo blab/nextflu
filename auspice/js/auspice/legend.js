@@ -53,8 +53,8 @@ function makeLegend(){
 }
 
 function removeLegend(){
-	legend.selectAll('.legend')
-  .remove();
+	legend.selectAll('.legend').remove();
+	legend.selectAll('.map_feature').remove();
 }
 
 function make_panels(){
@@ -171,6 +171,11 @@ function patch_color(d) {
 }
 
 function make_map(){
+
+		var legend_match = function(leg, tip){
+			return tip.coloring==leg;
+		}
+
     var width = 380,
         height = 320,
         active = d3.select(null);
@@ -228,14 +233,13 @@ function match_division(map_division, tip){
 }
 
 function mouseOverMap(division){
-	console.log(division);
-    mapTooltip.show(division);
-    treeplot.selectAll(".tip")
-            .filter(function (d){ return match_division(division, d);})
-                .attr("r", function(d){return tipRadius*2;})
-                .style("fill", function (t) {
-                  return d3.rgb(tipFillColor(t)).brighter();
-                });
+  mapTooltip.show(division);
+  treeplot.selectAll(".tip")
+		.filter(function (d){ return match_division(division, d);})
+    .attr("r", function(d){return tipRadius(d)*1.7;})
+		.style("fill", function (t) {
+			return d3.rgb(tipFillColor(t)).brighter();
+		});
 	legend.selectAll('.map_feature')
 		.filter(function (m) { return patch_division_name(m) == patch_division_name(division);})
 		.style("fill", function(m) {
@@ -247,8 +251,10 @@ function mouseOutMap(division){
     mapTooltip.hide(division);
     treeplot.selectAll(".tip")
             .filter(function (d){ return match_division(division, d);})
-                .attr("r", function(d){return tipRadius;})
-                .style("fill", tipFillColor);
+                .attr("r", function(d){return tipRadius(d);})
+								.style("fill", function (t) {
+									return d3.rgb(tipFillColor(t));
+								});
 	legend.selectAll('.map_feature')
 		.filter(function (m) { return patch_division_name(m) == patch_division_name(division);})
 		.style("fill", function(m) {

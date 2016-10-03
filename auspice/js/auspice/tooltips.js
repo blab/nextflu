@@ -198,5 +198,6 @@ var mapTooltip = d3.tip()
 		  	tmp+=d.properties.NAME_1;
 		  }
 		  tmp+=', '+d.properties.ISO;
+			tmp = tmp.replace(/_/g, ' ').toTitleCase();
 		  return tmp;
 	});
