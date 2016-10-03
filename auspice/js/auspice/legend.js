@@ -172,10 +172,6 @@ function patch_color(d) {
 
 function make_map(){
 
-		var legend_match = function(leg, tip){
-			return tip.coloring==leg;
-		}
-
     var width = 380,
         height = 320,
         active = d3.select(null);
