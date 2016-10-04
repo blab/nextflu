@@ -1,5 +1,5 @@
 width = parseInt(d3.select(".entropy-container").style("width"), 10);
-height = 250;
+height = 280;
 var position = "inset";
 
 d3.json(path + file_prefix + "entropy.json", function(error, json){
@@ -22,16 +22,16 @@ d3.json(path + file_prefix + "entropy.json", function(error, json){
 	entropy = json;
 	console.log(entropy);
     for (x in entropy){
-		if (x!='nuc'){
-	        start = entropy[x]['pos'][0]; end = entropy[x]['pos'][entropy[x]['pos'].length-1];
-	        chart_data['x'+x+'anno'] = [start, 0.5*(start+end), end];
-	        chart_data[x+'anno'] = [anno_count%3, anno_count%3, anno_count%3].map(function (d) {return -0.1*(d+1);});
-	        anno_count+=1;
-	        if (ymin>chart_data[x+'anno'][0]){
-	            ymin = chart_data[x+'anno'][0];
-	        }
-	        chart_types[x+'anno'] = 'line';
-	        chart_xaxis[x+'anno'] = 'x'+x+'anno';
+			if (x!='nuc'){
+        start = entropy[x]['pos'][0]; end = entropy[x]['pos'][entropy[x]['pos'].length-1];
+        chart_data['x'+x+'anno'] = [start, 0.5*(start+end), end];
+        chart_data[x+'anno'] = [anno_count%3, anno_count%3, anno_count%3].map(function (d) {return -0.17*(d+0.65);});
+        anno_count+=1;
+        if (ymin>chart_data[x+'anno'][0]){
+            ymin = chart_data[x+'anno'][0];
+        }
+        chart_types[x+'anno'] = 'line';
+        chart_xaxis[x+'anno'] = 'x'+x+'anno';
 	    }
     }
 
@@ -53,17 +53,34 @@ d3.json(path + file_prefix + "entropy.json", function(error, json){
 			var tmp_ymax = d3.max(entropy[gene]["val"]);
 			if (tmp_ymax>ymax) {ymax=tmp_ymax;}
 		}
+		else if (gene=='nuc'){
+			chart_data[gene]=[];
+			chart_data['x'+gene]=[];
+			chart_types[gene]='bar';
+			chart_xaxis[gene]='x'+gene;
+			for (var ii=0;ii<entropy[gene]["pos"].length;ii+=1){
+				if (Math.round(10000*entropy[gene]["val"][ii])/10000>0.05){
+					chart_data[gene].push(Math.round(10000*entropy[gene]["val"][ii])/10000);
+					chart_data['x'+gene].push(entropy[gene]["pos"][ii]);
+					posToAA[entropy[gene]["pos"][ii]] = [gene, entropy[gene]["pos"][ii]]
+				}
+			}
+			var tmp_xmax = d3.max(chart_data['x'+gene]);
+			if (tmp_xmax>xmax) {xmax=tmp_xmax;}
+			var tmp_ymax = d3.max(entropy[gene]["val"]);
+			if (tmp_ymax>ymax) {ymax=tmp_ymax;}
+		}
 	}
 	var entropy_chart = c3.generate({
 		bindto: '#entropy',
 		size: {width: width-10, height: height},
 		onresize: function() {
 			width = parseInt(d3.select(".entropy-container").style("width"), 10);
-			height = 250;
+			height = 280;
 			entropy_chart.resize({height: height, width: width});
 		},
 		legend: {show: false},
-		color: {pattern: ["#AAA"]},
+		color: {pattern: ['#AAA']},
 		axis: {
 			y: {
 				label: {
@@ -112,6 +129,20 @@ d3.json(path + file_prefix + "entropy.json", function(error, json){
 		    onmouseout: function (d){
 		    	document.body.style.cursor = "default";
 		    },
+			color: function (color, d) {
+				if (typeof d.id == "undefined") {
+					return "#AAA";
+				}
+				else if (d.id.substring(d.id.length-4)=='anno') {
+					return "#AAA"
+				}
+				else if (d.id != "nuc") {
+					return "#E67C32"
+				}
+				else {
+					return "#AAA";
+				}
+			},
 			labels:{
 				format:function (v, id, i, j){
 					if ((typeof id !="undefined")&&(id.substring(id.length-4)=='anno')&&(i==1)){
