@@ -43,6 +43,7 @@
 "fields":
 [
   ["all", "all"],
+  ["broad", "Broad Viral Genomics Group"],
   ["zibra", "ZiBRA"]
 ]
 },
@@ -67,6 +68,7 @@
   ["Faria et al", "Faria et al"],
   ["Grubaugh et al", "Grubaugh et al"],
   ["Kneubehl et al", "Kneubehl et al"],
+  ["Ladner et al", "Ladner et al"],
   ["Lanciotti et al", "Lanciotti et al"],
   ["Lednicky et al", "Lednicky et al"],
   ["Li et al", "Li et al"],
