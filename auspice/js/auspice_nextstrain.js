@@ -2,6 +2,8 @@
 ---
 var date_select = true;
 {% include_relative thirdparty/d3.min.js %}
+{% include_relative thirdparty/topojson.v1.min.js %}
+{% include_relative thirdparty/d3.geo.projection.v0.min.js %}
 {% include_relative thirdparty/d3.tip.js %}
 {% include_relative thirdparty/c3.min.js %}
 {% include_relative thirdparty/JSmol.min.js %}
