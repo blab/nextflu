@@ -181,6 +181,13 @@ class HI_tree(object):
 			path = None
 		return path
 
+	def mutation_distance_between_strains(self, v1, v2):
+		path = self.get_path_no_terminals(v1, v2)
+		if path is not None:
+			return sum([len(node.mutations) for node in path])
+		else:
+			return 0
+
 	def get_mutations(self, strain1, strain2):
 		''' return amino acid mutations between viruses specified by strain names as tuples (HA1, F159S) '''
 		if strain1 in self.node_lookup and strain2 in self.node_lookup:
@@ -309,6 +316,7 @@ class HI_tree(object):
 		'''
 		tree_graph = []
 		HI_dist = []
+		mutation_dist = []
 		weights = []
 		# mark HI splits have to have been run before, assigning self.HI_split_count
 		n_params = self.HI_split_count + len(self.sera) + len(self.HI_strains)
@@ -344,6 +352,7 @@ class HI_tree(object):
 						# append model and fit value to lists tree_graph and HI_dist
 						tree_graph.append(tmp)
 						HI_dist.append(val)
+						mutation_dist.append(sum([len(node.mutations) for node in path]))
 						weights.append(1.0/(1.0 + self.serum_Kc*self.measurements_per_serum[ref]))
 				except:
 					import pdb; pdb.set_trace()
@@ -352,12 +361,16 @@ class HI_tree(object):
 		# convert to numpy arrays and save product of tree graph with its transpose for future use
 		self.weights = np.sqrt(weights)
 		self.HI_dist =  np.array(HI_dist)*self.weights
+		self.mutation_dist = np.array(mutation_dist) * self.weights
 		self.tree_graph = (np.array(tree_graph).T*self.weights).T
 		self.TgT = np.dot(self.tree_graph.T, self.tree_graph)
 		print "Found", self.tree_graph.shape, "measurements x parameters"
 
 	def fit_func(self):
 		return np.mean( (self.HI_dist - np.dot(self.tree_graph, self.params))**2 )
+
+	def fit_func_for_mutations(self):
+		return np.mean( ((self.HI_dist + self.mutation_dist) - np.dot(self.tree_graph, self.params))**2 )
 
 	def fit_l1reg(self):
 		from cvxopt import matrix, solvers
@@ -451,6 +464,86 @@ class HI_tree(object):
 		#print "rms deviation after relax=",np.sqrt(self.fit_func())
 		return self.params
 
+	def fit_epitope_reg(self):
+		from cvxopt import matrix, solvers
+		n_params = self.tree_graph.shape[1]
+		HI_sc = self.genetic_params
+		n_sera = len(self.sera)
+		n_v = len(self.HI_strains)
+
+		# set up the quadratic matrix containing the deviation term (linear xterm below)
+		# and the l2-regulatization of the avidities and potencies
+		P1 = np.zeros((n_params,n_params))
+		P1[:n_params, :n_params] = self.TgT
+		for ii in xrange(HI_sc):
+			P1[ii, ii] += flu.lam_HI
+		for ii in xrange(HI_sc, HI_sc+n_sera):
+			P1[ii,ii]+=self.lam_pot
+		for ii in xrange(HI_sc+n_sera, n_params):
+			P1[ii,ii]+=self.lam_avi
+		P = matrix(P1)
+
+		# set up cost for auxillary parameter and the linear cross-term
+		branch_mutations = []
+		for ii in xrange(HI_sc):
+			branch_mutations.append(np.mean([len(node.mutations)
+											 for node in flu.HI_split_to_branch[ii]]))
+		q1 = np.zeros(n_params)
+		q1[:n_params] = -np.dot(self.HI_dist, self.tree_graph)
+		q1[:HI_sc] += -1 * np.array(branch_mutations)
+		q = matrix(q1)
+
+		# set up linear constraint matrix to enforce positivity of the
+		# dHIs and bounding of dHI by the auxillary parameter
+		h = matrix(np.zeros(HI_sc)) 	# Gw <=h
+		G1 = np.zeros((HI_sc,n_params))
+		G1[:HI_sc, :HI_sc] = -np.eye(HI_sc)
+		G = matrix(G1)
+		W = solvers.qp(P,q,G,h)
+		self.params = np.array([x for x in W['x']])[:n_params]
+		print "rms deviation prior to relax=",np.sqrt(self.fit_func())
+		# redo the linear cost relaxing terms that seem to be relevant to avoid
+		# compression of the fit. 0.2 seems to be a good cut-off, linear tune to zero
+		#q1[n_params:] = self.lam_HI*(1-5.0*np.minimum(0.2,sol[:HI_sc]))
+		#q = matrix(q1)
+		#W = solvers.qp(P,q,G,h)
+		#sol = np.array([x for x in W['x']])[:n_params]
+		#self.params=sol
+		#print "rms deviation after relax=",np.sqrt(self.fit_func())
+		return self.params
+
+	def fit_epitope_function(self):
+		n_params = self.tree_graph.shape[1]
+		HI_sc = self.genetic_params
+		n_sera = len(self.sera)
+		n_v = len(self.HI_strains)
+		# set up the quadratic matrix containing the deviation term (linear xterm below)
+		# and the l2-regulatization of the avidities and potencies
+		P1 = np.zeros((n_params,n_params))
+		P1[:n_params, :n_params] = self.TgT
+		for ii in xrange(HI_sc, HI_sc+n_sera):
+		    P1[ii,ii]+=self.lam_pot
+		for ii in xrange(HI_sc+n_sera, n_params):
+		    P1[ii,ii]+=self.lam_avi
+		P = matrix(P1)
+		# set up cost for auxillary parameter and the linear cross-term
+		# EDIT: Add mutations between serum/virus to H.
+		q1 = np.zeros(n_params)
+		q1[:n_params] = -np.dot(self.HI_dist + self.mutation_dist, self.tree_graph)
+		q1[:HI_sc] += self.lam_HI
+		q = matrix(q1)
+		print(q1.shape)
+		# set up linear constraint matrix to enforce positivity of the
+		# dHIs and bounding of dHI by the auxillary parameter
+		h = matrix(np.zeros(HI_sc))     # Gw <=h
+		G1 = np.zeros((HI_sc,n_params))
+		G1[:HI_sc, :HI_sc] = -np.eye(HI_sc)
+		G = matrix(G1)
+		W = solvers.qp(P,q,G,h)
+		self.params = np.array([x for x in W['x']])[:n_params]
+		print "abs deviation=",fit_func_for_mutations(flu)
+		print "rms deviation=",np.sqrt(fit_func_for_mutations(flu))
+
 	def prepare_HI_map(self):
 		'''
 		normalize the HI measurements, split the data into training and test sets
@@ -524,6 +617,7 @@ class HI_tree(object):
 		if self.tree_graph is None or force_redo:
 			self.prepare_HI_map()
 
+		self.method = method
 		if method=='l1reg':  # l1 regularized fit, no constraint on sign of effect
 			self.params = self.fit_l1reg()
 		elif method=='nnls':  # non-negative least square, not regularized
@@ -532,6 +626,10 @@ class HI_tree(object):
 			self.params = self.fit_nnl2reg()
 		elif method=='nnl1reg':  # non-negative fit, branch terms L1 regularized, avidity terms L2 regularized
 			self.params = self.fit_nnl1reg()
+		elif method == "epitope_reg": # nnl1reg modified to use epitope mutations as a regularization factor
+			self.params = self.fit_epitope_reg()
+		elif method == "epitope_function": # nnl1reg modified to use epitope mutations in the objective function
+			self.params = self.fit_epitope_function()
 
 		self.fit_error = np.sqrt(self.fit_func())
 		print("method",method, "regularized by", self.lam_HI, "rms deviation=", self.fit_error)
@@ -642,7 +740,11 @@ class HI_tree(object):
 				if any([incl_ref_strains=='yes',
 						incl_ref_strains=='no' and (key[0] not in self.ref_strains),
 						incl_ref_strains=='only' and (key[0] in self.ref_strains)]):
-					self.validation[key] = (val, pred_HI)
+					if "epitope" in self.method:
+						observed_HI = val + mutation_distance_between_strains(flu, key[0], key[1])
+						self.validation[key] = (observed_HI, pred_HI)
+					else:
+						self.validation[key] = (val, pred_HI)
 
 		a = np.array(self.validation.values())
 		print "number of prediction-measurement pairs",a.shape
