@@ -1,5 +1,6 @@
 var legendRectSize = 15;
 var legendSpacing = 4;
+var map_features;
 function makeLegend(){
 
 	d3.select("#legend-title").html(function(d){
@@ -42,6 +43,21 @@ function makeLegend(){
 			return "Relative fitness";
 		}
 	});
+
+	if (colorBy == "division"){
+		make_map();
+	} else {
+		make_panels();
+	}
+
+}
+
+function removeLegend(){
+	legend.selectAll('.legend').remove();
+	legend.selectAll('.map_feature').remove();
+}
+
+function make_panels(){
 
 	// construct a dictionary that maps a legend entry to the preceding interval
 	var lower_bound = {}, upper_bound = {};
@@ -135,9 +151,109 @@ function makeLegend(){
             });
 	    });
 	return tmp_leg;
+
 }
 
-function removeLegend(){
-	legend.selectAll('.legend')
-  .remove();
+function patch_division_name(d){
+  var tmp = d.properties.NAME_2;
+  if (tmp == null){
+    tmp= d.properties.NAME_1;
+  }
+  if (tmp=='?'||tmp==null){
+    tmp = d.properties.ISO;
+    console.log('Falling back on ISO: '+ d.properties.NAME_2+ ' ' + d.properties.NAME_1 + ' ' + d.properties.ISO + ' ' +d.id);
+  }
+  return tmp.replace(' ','');
+}
+
+function patch_color(d) {
+	return divisionColorScale(patch_division_name(d));
+}
+
+function make_map(){
+
+    var width = 380,
+        height = 320,
+        active = d3.select(null);
+
+    console.log('enter map');
+    var projection = d3.geo.robinson()
+            .scale(3000)
+            .translate([width, height * 1.5])
+
+    var path = d3.geo.path()
+        .projection(projection);
+
+    var svg = d3.select("#legend");
+    svg.call(mapTooltip);
+
+    svg
+        .attr("width", width)
+        .attr("height", height);
+
+    svg.append("rect")
+        .attr("class", "map_background")
+        .attr("width", width)
+        .attr("height", height);
+
+    var g = svg.append("g")
+        .style("stroke-width", "2px");
+
+    d3.json("/data/ebola_map.json", function(error, locations) {
+        var locationData = topojson.feature(locations, locations.objects.ebov).features;
+
+				console.log(locationData);
+
+        map_features = g.selectAll(".map_feature")
+            .data(locationData)
+            .enter().append("path")
+            .style("fill", patch_color)
+            .attr("d", path)
+            .attr("class", "map_feature")
+            .on("mouseover",mouseOverMap)
+            .on("mouseout",mouseOutMap);
+
+        g.attr("transform", "translate(260,180) scale(" + 0.65 + ")");
+
+      g.append("path")
+          .datum(topojson.mesh(locations, locations.objects.ebov, function(a, b) { return a !== b; }))
+          .attr("class", "map_mesh")
+          .attr("d", path);
+
+    });
+}
+
+function match_division(map_division, tip){
+  var tmp = patch_division_name(map_division);
+  return tmp==tip.attr.division;
+}
+
+function mouseOverMap(division){
+  mapTooltip.show(division);
+  treeplot.selectAll(".tip")
+		.filter(function (d){ return match_division(division, d);})
+    .attr("r", function(d){return tipRadius(d)*1.7;})
+		.style("fill", function (t) {
+			return d3.rgb(tipFillColor(t)).brighter();
+		});
+	legend.selectAll('.map_feature')
+		.filter(function (m) { return patch_division_name(m) == patch_division_name(division);})
+		.style("fill", function(m) {
+			return d3.rgb(patch_color(division)).brighter();
+		});
+}
+
+function mouseOutMap(division){
+    mapTooltip.hide(division);
+    treeplot.selectAll(".tip")
+            .filter(function (d){ return match_division(division, d);})
+                .attr("r", function(d){return tipRadius(d);})
+								.style("fill", function (t) {
+									return d3.rgb(tipFillColor(t));
+								});
+	legend.selectAll('.map_feature')
+		.filter(function (m) { return patch_division_name(m) == patch_division_name(division);})
+		.style("fill", function(m) {
+			return d3.rgb(patch_color(division));
+		});
 }
