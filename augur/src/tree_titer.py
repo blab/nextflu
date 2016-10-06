@@ -476,7 +476,7 @@ class HI_tree(object):
 		P1 = np.zeros((n_params,n_params))
 		P1[:n_params, :n_params] = self.TgT
 		for ii in xrange(HI_sc):
-			P1[ii, ii] += flu.lam_HI
+			P1[ii, ii] += self.lam_HI
 		for ii in xrange(HI_sc, HI_sc+n_sera):
 			P1[ii,ii]+=self.lam_pot
 		for ii in xrange(HI_sc+n_sera, n_params):
@@ -487,7 +487,7 @@ class HI_tree(object):
 		branch_mutations = []
 		for ii in xrange(HI_sc):
 			branch_mutations.append(np.mean([len(node.mutations)
-											 for node in flu.HI_split_to_branch[ii]]))
+											 for node in self.HI_split_to_branch[ii]]))
 		q1 = np.zeros(n_params)
 		q1[:n_params] = -np.dot(self.HI_dist, self.tree_graph)
 		q1[:HI_sc] += -1 * np.array(branch_mutations)
@@ -541,8 +541,10 @@ class HI_tree(object):
 		G = matrix(G1)
 		W = solvers.qp(P,q,G,h)
 		self.params = np.array([x for x in W['x']])[:n_params]
-		print "abs deviation=",fit_func_for_mutations(flu)
-		print "rms deviation=",np.sqrt(fit_func_for_mutations(flu))
+		print "abs deviation=",self.fit_func_for_mutations()
+		print "rms deviation=",np.sqrt(self.fit_func_for_mutations())
+
+		return self.params
 
 	def prepare_HI_map(self):
 		'''
@@ -741,7 +743,7 @@ class HI_tree(object):
 						incl_ref_strains=='no' and (key[0] not in self.ref_strains),
 						incl_ref_strains=='only' and (key[0] in self.ref_strains)]):
 					if "epitope" in self.method:
-						observed_HI = val + mutation_distance_between_strains(flu, key[0], key[1])
+						observed_HI = val + self.mutation_distance_between_strains(key[0], key[1])
 						self.validation[key] = (observed_HI, pred_HI)
 					else:
 						self.validation[key] = (val, pred_HI)
