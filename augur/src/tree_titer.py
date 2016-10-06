@@ -743,8 +743,9 @@ class HI_tree(object):
 				if any([incl_ref_strains=='yes',
 						incl_ref_strains=='no' and (key[0] not in self.ref_strains),
 						incl_ref_strains=='only' and (key[0] in self.ref_strains)]):
-					if "epitope" in self.method:
-						observed_HI = val + self.mutation_distance_between_strains(key[0], key[1])
+					if self.method == "epitope_function":
+						mutations_val = self.mutation_distance_between_strains(key[0], key[1][0])
+						observed_HI = val + mutations_val
 						self.validation[key] = (observed_HI, pred_HI)
 					else:
 						self.validation[key] = (val, pred_HI)
