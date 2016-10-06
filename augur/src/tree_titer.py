@@ -513,6 +513,7 @@ class HI_tree(object):
 		return self.params
 
 	def fit_epitope_function(self):
+		from cvxopt import matrix, solvers
 		n_params = self.tree_graph.shape[1]
 		HI_sc = self.genetic_params
 		n_sera = len(self.sera)
