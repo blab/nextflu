@@ -633,6 +633,8 @@ class HI_tree(object):
 			self.params = self.fit_epitope_reg()
 		elif method == "epitope_function": # nnl1reg modified to use epitope mutations in the objective function
 			self.params = self.fit_epitope_function()
+		else:
+			raise Exception("Invalid method specified: %s" % method)
 
 		self.fit_error = np.sqrt(self.fit_func())
 		print("method",method, "regularized by", self.lam_HI, "rms deviation=", self.fit_error)
