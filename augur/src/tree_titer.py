@@ -489,8 +489,14 @@ class HI_tree(object):
 		# set up cost for auxillary parameter and the linear cross-term
 		branch_mutations = []
 		for ii in xrange(HI_sc):
-			branch_mutations.append(np.mean([len(node.mutations)
-											 for node in self.HI_split_to_branch[ii]]))
+			node_mutations = []
+			for node in self.HI_split_to_branch[ii]:
+				# Get the epitope mask value for each amino acid mutation in this node.
+				node_mutations.append(sum([int(self.epitope_mask[int(mutation[1:-1]) - 1])
+							   for mutation in node.mutations]))
+
+			branch_mutations.append(np.max(node_mutations))
+
 		q1 = np.zeros(n_params)
 		q1[:n_params] = -np.dot(self.HI_dist, self.tree_graph)
 		q1[:HI_sc] += -1 * self.lam_mut * np.array(branch_mutations)
