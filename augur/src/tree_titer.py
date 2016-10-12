@@ -550,6 +550,69 @@ class HI_tree(object):
 
 		return self.params
 
+	def get_subset_of_clades(self, tree, HI_measurements, training_fraction):
+		"""
+                Given a set of input measurements and a proportion of those
+		data to use for training, return two dictionaries including
+		one for training and one for testing data.
+		"""
+		number_of_measurements_to_drop = int((1 - training_fraction) * len(HI_measurements))
+		print("Searching for %i measurements to drop" % number_of_measurements_to_drop)
+		candidate_nodes_to_drop = [node for node in tree.leaf_iter()]
+		selected_nodes_to_drop = set()
+		number_of_dropped_measurements = 0
+
+		measurement_counts_by_virus = defaultdict(int)
+		for key, value in HI_measurements.iteritems():
+			measurement_counts_by_virus[key[0]] += 1
+
+		while (number_of_dropped_measurements < number_of_measurements_to_drop and
+		       len(candidate_nodes_to_drop) > 0):
+			# Select a random node to drop.
+			node_index_to_drop = random.randrange(0, len(candidate_nodes_to_drop))
+			node_to_drop = candidate_nodes_to_drop.pop(node_index_to_drop)
+
+			# Add the node's parent to the list of candidate nodes to drop.
+			if node_to_drop.parent_node is not None:
+				candidate_nodes_to_drop.append(node_to_drop.parent_node)
+
+			# Calculate the number of titer measurements associated
+			# with this node. For a leaf, this is the number of
+			# measurements for this virus. For an internal node,
+			# this is the number of measurements for this node and
+			# all of its children.
+			for node in node_to_drop.level_order_iter():
+				if node not in selected_nodes_to_drop:
+					if node.taxon is not None:
+						node_measurements = measurement_counts_by_virus[node.taxon.label]
+						if node_measurements + number_of_dropped_measurements < number_of_measurements_to_drop:
+							number_of_dropped_measurements += node_measurements
+						else:
+							# Stop traversing the tree if we will exceed the number of measurements.
+							break
+
+					selected_nodes_to_drop.add(node)
+
+		print("Found %i nodes to drop with %i measurements" % (len(selected_nodes_to_drop), number_of_dropped_measurements))
+
+		# Create a set of names for nodes to be dropped.
+		labels_for_selected_nodes_to_drop = set([node.taxon.label
+							 for node in selected_nodes_to_drop
+							 if node.taxon is not None])
+
+		# Assign measurements to training or testing groups based on
+		# whether the virus in each serum/virus pair is in a dropped
+		# clade.
+		training = {}
+		testing = {}
+		for key, value in HI_measurements.iteritems():
+			if key[0] in labels_for_selected_nodes_to_drop:
+				testing[key] = value
+			else:
+				training[key] = value
+
+		return training, testing
+
 	def prepare_HI_map(self):
 		'''
 		normalize the HI measurements, split the data into training and test sets
@@ -573,6 +636,8 @@ class HI_tree(object):
 						self.train_HI[key]=val
 					else:
 						self.test_HI[key]=val
+			elif self.subset_clades:
+				self.train_HI, self.test_HI = self.get_subset_of_clades(self.tree, self.HI_normalized, self.training_fraction)
 			else: # simply use a fraction of all measurements for testing
 				for key, val in self.HI_normalized.iteritems():
 					if np.random.uniform()>self.training_fraction:
@@ -612,13 +677,15 @@ class HI_tree(object):
 			self.make_seqgraph()
 
 	def map_HI(self, training_fraction = 1.0, method = 'nnls', lam_HI=1.0, map_to_tree = True,
-			lam_pot = 0.5, lam_avi = 3.0, cutoff_date = None, subset_strains = False, force_redo = False):
+			lam_pot = 0.5, lam_avi = 3.0, lam_mut = 1.0, cutoff_date = None, subset_strains = False, subset_clades = False, force_redo = False):
 		self.map_to_tree = map_to_tree
 		self.training_fraction = training_fraction
 		self.subset_strains=subset_strains
+		self.subset_clades=subset_clades
 		self.lam_pot = lam_pot
 		self.lam_avi = lam_avi
 		self.lam_HI = lam_HI
+		self.lam_mut = lam_mut
 		self.cutoff_date = cutoff_date
 		if self.tree_graph is None or force_redo:
 			self.prepare_HI_map()
