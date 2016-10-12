@@ -8,6 +8,9 @@ from itertools import izip
 from virus_filter import fix_name
 import pandas as pd
 from diagnostic_figures import fs, fmts, figheight
+import operator
+import random
+import sys
 
 def myopen(fname, mode='r'):
 	if fname[-2:]=='gz':
@@ -490,7 +493,7 @@ class HI_tree(object):
 											 for node in self.HI_split_to_branch[ii]]))
 		q1 = np.zeros(n_params)
 		q1[:n_params] = -np.dot(self.HI_dist, self.tree_graph)
-		q1[:HI_sc] += -1 * np.array(branch_mutations)
+		q1[:HI_sc] += -1 * self.lam_mut * np.array(branch_mutations)
 		q = matrix(q1)
 
 		# set up linear constraint matrix to enforce positivity of the
