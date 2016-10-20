@@ -374,7 +374,7 @@ class HI_tree(object):
 						# append model and fit value to lists tree_graph and HI_dist
 						tree_graph.append(tmp)
 						HI_dist.append(val)
-						mutation_dist.append(sum([len(node.mutations) for node in path]))
+						mutation_dist.append(self.mutation_distance_between_strains(test, ref[0], path))
 						weights.append(1.0/(1.0 + self.serum_Kc*self.measurements_per_serum[ref]))
 				except:
 					import pdb; pdb.set_trace()
@@ -836,8 +836,8 @@ class HI_tree(object):
 				if any([incl_ref_strains=='yes',
 						incl_ref_strains=='no' and (key[0] not in self.ref_strains),
 						incl_ref_strains=='only' and (key[0] in self.ref_strains)]):
+					mutations_val = self.mutation_distance_between_strains(key[0], key[1][0])
 					if self.method == "epitope_function":
-						mutations_val = self.mutation_distance_between_strains(key[0], key[1][0])
 						observed_HI = val + mutations_val
 						self.validation[key] = (observed_HI, pred_HI)
 					else:
