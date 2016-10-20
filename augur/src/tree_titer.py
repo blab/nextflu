@@ -184,10 +184,15 @@ class HI_tree(object):
 			path = None
 		return path
 
-	def mutation_distance_between_strains(self, v1, v2):
-		path = self.get_path_no_terminals(v1, v2)
+	def mutation_distance_between_strains(self, v1, v2, path=None):
+		if path is None:
+			path = self.get_path_no_terminals(v1, v2)
+
 		if path is not None:
-			return sum([len(node.mutations) for node in path])
+			# Find all distinct amino acid mutations in the path between the
+			# given strains.
+			mutations = [mutation for node in path for mutation in node.mutations]
+			return len(set(mutations))
 		else:
 			return 0
 
