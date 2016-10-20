@@ -191,6 +191,20 @@ class HI_tree(object):
 		else:
 			return 0
 
+	def get_epitope_mutations_by_branch(self, branch):
+		"""
+		For a given branch on the tree (based on HI titer splits), return the
+		maximum number of epitope mutations associated with the branch
+		based on the current epitope mask.
+		"""
+		node_mutations = []
+		for node in self.HI_split_to_branch[branch]:
+			# Get the epitope mask value for each amino acid mutation in this node.
+			node_mutations.append(sum([int(self.epitope_mask[int(mutation[1:-1]) - 1])
+						   for mutation in node.mutations]))
+
+		return np.max(node_mutations)
+
 	def get_mutations(self, strain1, strain2):
 		''' return amino acid mutations between viruses specified by strain names as tuples (HA1, F159S) '''
 		if strain1 in self.node_lookup and strain2 in self.node_lookup:
@@ -489,13 +503,7 @@ class HI_tree(object):
 		# set up cost for auxillary parameter and the linear cross-term
 		branch_mutations = []
 		for ii in xrange(HI_sc):
-			node_mutations = []
-			for node in self.HI_split_to_branch[ii]:
-				# Get the epitope mask value for each amino acid mutation in this node.
-				node_mutations.append(sum([int(self.epitope_mask[int(mutation[1:-1]) - 1])
-							   for mutation in node.mutations]))
-
-			branch_mutations.append(np.max(node_mutations))
+			branch_mutations.append(self.get_epitope_mutations_by_branch(ii))
 
 		q1 = np.zeros(n_params)
 		q1[:n_params] = -np.dot(self.HI_dist, self.tree_graph)
