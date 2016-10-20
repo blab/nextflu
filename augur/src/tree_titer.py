@@ -727,9 +727,11 @@ class HI_tree(object):
 		if self.map_to_tree:
 			for node in self.tree.postorder_node_iter():
 				node.dHI=0
+				node.epitope_mutations=0
 			for HI_split, branches in self.HI_split_to_branch.iteritems():
 				likely_branch = branches[np.argmax([len(b.mutations) for b in branches])]
 				likely_branch.dHI = self.params[HI_split]
+				likely_branch.epitope_mutations = self.get_epitope_mutations_by_branch(HI_split)
 				likely_branch.constraints = self.tree_graph[:,HI_split].sum()
 
 			# integrate the tree model HI change dHI into a cumulative antigentic evolution score cHI
