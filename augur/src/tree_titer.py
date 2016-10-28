@@ -196,6 +196,40 @@ class HI_tree(object):
 		else:
 			return 0
 
+	def convert_aa_mutations_to_genomic_coordinates(self, node):
+		"""Convert amino acid mutation coordinates for a given node into genomic
+		coordinates.
+
+		Returns a list of mutation tuples where each tuple contains the
+		ancestral amino acid, the genomic coordinate of the mutation,
+		and the derived amino acid.
+		"""
+		genomic_mutations = []
+
+		if len(node.mutations) > 0:
+			protein_lengths = {protein: len(sequence) for protein, sequence in node.aa_seq.iteritems()}
+			for protein, mutation_string in node.aa_muts.iteritems():
+				if protein == "HA1":
+					offset = protein_lengths["SigPep"]
+				elif protein == "HA2":
+					offset = protein_lengths["SigPep"] + protein_lengths["HA1"]
+				else:
+					offset = 0
+
+				logger.debug("Offset mutations by %i for protein %s", offset, protein)
+				mutations = [mutation for mutation in mutation_string.split(",") if mutation != ""]
+
+				# Mutations are in the format of "A100D" where the first
+				# character is the ancestral amino acid, the last
+				# character is the derived, and the remaining characters
+				# are the position of the mutation in the protein
+				# sequence.
+				for mutation in mutations:
+					aa_coordinate = int(mutation[1:-1])
+					genomic_mutations.append((mutation[0], aa_coordinate + offset, mutation[-1]))
+
+		return genomic_mutations
+
 	def get_epitope_mutations_by_branch(self, branch):
 		"""
 		For a given branch on the tree (based on HI titer splits), return the
@@ -205,8 +239,9 @@ class HI_tree(object):
 		node_mutations = []
 		for node in self.HI_split_to_branch[branch]:
 			# Get the epitope mask value for each amino acid mutation in this node.
-			node_mutations.append(sum([int(self.epitope_mask[int(mutation[1:-1]) - 1])
-						   for mutation in node.mutations]))
+			genomic_mutations = self.convert_aa_mutations_to_genomic_coordinates(node)
+			node_mutations.append(sum([int(self.epitope_mask[mutation[1] - 1])
+						   for mutation in genomic_mutations]))
 
 		return np.max(node_mutations)
 
