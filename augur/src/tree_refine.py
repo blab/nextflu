@@ -21,7 +21,7 @@ class tree_refine(object):
 
 	def refine_generic(self, remove_outgroup=True):
 		'''
-		run through the generic refining methods, 
+		run through the generic refining methods,
 		will add strain attributes to nodes and translate the sequences -> produces aa_aln
 		'''
 		self.node_lookup = {node.taxon.label:node for node in self.tree.leaf_iter()}
@@ -36,12 +36,12 @@ class tree_refine(object):
 		self.add_nuc_mutations()
 		if self.cds is not None:
 			self.translate_all()
-		self.reduce()
+#		self.reduce()
 		self.layout()
 		self.define_trunk()
 
-		tmp_nucseqs = [SeqRecord(Seq(node.seq), id=node.strain, 
-					  annotations = {'num_date':node.num_date, 'region':node.region}) 
+		tmp_nucseqs = [SeqRecord(Seq(node.seq), id=node.strain,
+					  annotations = {'num_date':node.num_date, 'region':node.region})
 					  for node in self.tree.leaf_iter()]
 		tmp_nucseqs.sort(key = lambda x:x.annotations['num_date'])
 		self.nuc_aln = MultipleSeqAlignment(tmp_nucseqs)
@@ -113,8 +113,8 @@ class tree_refine(object):
 		self.add_aa_mutations()
 		self.aa_aln = {}
 		for anno in self.cds:
-			tmp_aaseqs = [SeqRecord(Seq(node.aa_seq[anno]), id=node.strain, 
-			              annotations = {'num_date':node.num_date, 'region':node.region}) 
+			tmp_aaseqs = [SeqRecord(Seq(node.aa_seq[anno]), id=node.strain,
+			              annotations = {'num_date':node.num_date, 'region':node.region})
 						  for node in self.tree.leaf_iter()]
 			tmp_aaseqs.sort(key = lambda x:x.annotations['num_date'])
 			self.aa_aln[anno] = MultipleSeqAlignment(tmp_aaseqs)
@@ -126,7 +126,7 @@ class tree_refine(object):
 					child.aa_muts = {}
 				for anno, parent_aa_seq in node.aa_seq.iteritems():
 					for child in node.child_nodes():
-						child.aa_muts[anno] = ','.join([anc+str(pos)+der for pos,anc, der in 
+						child.aa_muts[anno] = ','.join([anc+str(pos)+der for pos,anc, der in
 							zip(range(1,len(parent_aa_seq)+1), parent_aa_seq, child.aa_seq[anno]) if anc!=der])
 			self.tree.seed_node.aa_muts={}
 		else:
@@ -135,7 +135,7 @@ class tree_refine(object):
 	def add_nuc_mutations(self):
 		for node in self.tree.postorder_internal_node_iter():
 			for child in node.child_nodes():
-				child.nuc_muts = ','.join([anc+str(pos)+der for pos,anc, der in 
+				child.nuc_muts = ','.join([anc+str(pos)+der for pos,anc, der in
 						zip(range(1,len(node.seq)+1), node.seq, child.seq) if anc!=der])
 		self.tree.seed_node.nuc_muts=""
 
@@ -181,7 +181,7 @@ class tree_refine(object):
 			if node.num_date>most_recent_date:
 				most_recent_date=node.num_date
 		for node in self.tree.postorder_node_iter():
-			node.trunk_count=0		
+			node.trunk_count=0
 
 		# Mark ancestry of recent tips
 		number_recent = 0
