@@ -60,6 +60,7 @@ class process(virus_frequencies):
 				 min_mutation_frequency = 0.01, min_genotype_frequency = 0.1, **kwargs):
 		self.path = path
 		self.output_path = output_path
+		self.check_dirs(path, output_path)
 		self.virus_type = virus
 		self.resolution = resolution
 		if self.virus_type:
@@ -100,6 +101,13 @@ class process(virus_frequencies):
 		self.nuc_alphabet = 'ACGT-N'
 		self.aa_alphabet = 'ACDEFGHIKLMNPQRSTVWY*X'
 		virus_frequencies.__init__(self, **kwargs)
+
+	def check_dirs(self, path, output_path):
+		''' Check if path and output_path exist and are directories; create them if need be.'''
+		if not os.path.exists(output_path) or not os.path.isdir(output_path): ## Also check for input files, raise exception if not found.
+			os.makedirs(output_path)
+		if not os.path.exists(path) or not os.path.isdir(path):
+			os.makedirs(path)
 
 	def make_run_dir(self):
 		if not os.path.isdir(self.run_dir):

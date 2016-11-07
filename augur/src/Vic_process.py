@@ -133,9 +133,9 @@ class BVic_clean(virus_clean):
 		"""Remove single outlying viruses"""
 		new_viruses = []
 		outlier_strains = ["B/Kol/2024/2008", "B/Kolkata/2024/2008", "B/Brisbine/33/2008", "B/Kolkata/1373/2008",
-			"B/Kolkata/372/2010", "B/Stockholm/7/2011", "B/Bangkok/SI17/2012", "B/Bangkok/SI58/2012",
-			"B/Togo/LNG/419/2013", "B/Netherlands/76/2014", "B/NewCaledonia/119/2015", "B/Thailand/CU-B11637/2015",
-			"B/Brisbane/14/2016", "B/Sydney/6/2016", "A/Malaysia/438/2016"]
+			"B/Kolkata/372/2010", "B/Stockholm/7/2011", "B/SouthAustralia/81/2012", "B/Bangkok/SI17/2012",
+			"B/Bangkok/SI58/2012", "B/Togo/LNG/419/2013", "B/Netherlands/76/2014", "B/NewCaledonia/119/2015",
+			"B/Thailand/CU-B11637/2015", "B/Brisbane/14/2016", "B/Sydney/6/2016", "A/Malaysia/438/2016"]
 		for v in self.viruses:
 			if v.strain in outlier_strains:
 				if self.verbose > 1:
