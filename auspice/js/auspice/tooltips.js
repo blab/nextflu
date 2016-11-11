@@ -24,7 +24,10 @@ var virusTooltip = d3.tip()
 		}
 
 		if (typeof d.country != "undefined") {
-			string += d.country.replace(/([A-Z])/g, ' $1');
+			string += d.country.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').toTitleCase();
+		}
+		else if (typeof d.region != "undefined") {
+			string += d.region.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').toTitleCase();
 		}
 		if (typeof d.date != "undefined") {
 			string += ", " + d.date;
@@ -32,12 +35,21 @@ var virusTooltip = d3.tip()
 		if ((typeof d.db != "undefined") && (typeof d.accession != "undefined") && (d.db == "GISAID")) {
 			string += "<br>GISAID ID: EPI" + d.accession;
 		}
+		if ((typeof d.db != "undefined") && (typeof d.accession != "undefined") && (d.db == "Genbank")) {
+			string += "<br>Accession: " + d.accession;
+		}		
 		if (typeof d.lab != "undefined") {
 			if (d.lab != "") {
-				string += "<br>Source: " + d.lab.substring(0,25);
+				string += "<br>Source: " + d.lab.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').toTitleCase().substring(0,25);
 				if (d.lab.length>25) string += '...';
 			}
 		}
+		if (typeof d.authors != "undefined") {
+			if ((d.authors != "") && (d.authors != "?")) {
+				string += "<br>Authors: " + d.authors.substring(0,25);
+				if (d.authors.length>25) string += '...';
+			}
+		}		
 		string += "</div>";
 		// following may or may not be present
 		if ((typeof focusNode != "undefined")){
@@ -79,9 +91,6 @@ var virusTooltip = d3.tip()
 		if (typeof d.rb != "undefined") {
 			string += "Receptor binding distance: " + d.rb + "<br>";
 		}
-		if (typeof d.tol_ne != "undefined") {
-			string += "HA2 DMS tolerance: " + d.tol_ne.toFixed(1) + "<br>";
-		}		
 		if (typeof d.LBI != "undefined") {
 			string += "Local branching index: " + d.LBI.toFixed(3) + "<br>";
 		}

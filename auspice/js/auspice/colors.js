@@ -3,17 +3,17 @@
 var colors = [
 	[],
 	["#8EBC66"],
-	["#529BB5", "#E4662E"],
-	["#519AB7", "#B0BD4E", "#E3612D"],
-	["#5199B8", "#8BBB6A", "#D3B240", "#E25B2C"],
-	["#5097BA", "#79B77D", "#B2BD4D", "#DFA43B", "#E2562B"],
-	["#4F96BB", "#6EB389", "#9ABE5C", "#C9B843", "#E59738", "#E1512A"],
-	["#4E95BD", "#68AF93", "#8BBB6A", "#B3BD4D", "#D6B03F", "#E68A35", "#E04C29"],
-	["#4D94BE", "#63AC9A", "#7FB975", "#A2BE57", "#C5B945", "#DEA73B", "#E67F33", "#DF4628"],
-	["#4D92BF", "#5FA9A0", "#77B67E", "#95BD61", "#B5BD4C", "#D1B340", "#E29D39", "#E67631", "#DF4127"],
-	["#4C90C0", "#5CA7A5", "#71B486", "#8BBB6A", "#A7BE54", "#C3BA46", "#D9AD3D", "#E69437", "#E56C2F", "#DE3C26"],
-	["#4B8FC1", "#59A4A9", "#6CB28D", "#82BA71", "#9CBE5B", "#B6BD4B", "#CEB541", "#DFA53B", "#E68A35", "#E4632E", "#DD3725"],
-	["#4B8DC2", "#57A1AD", "#68AF93", "#7CB879", "#93BC63", "#ABBD52", "#C2BA46", "#D6B03F", "#E29D39", "#E68033", "#E25A2C", "#DD3124"]
+	["#4D92BF", "#E4662E"],
+	["#4B8FC1", "#AABD52", "#E3612D"],
+	["#4A8BC3", "#82BA72", "#CFB541", "#E25B2C"],
+	["#4988C5", "#6EB389", "#AABD52", "#DEA73C", "#E2562B"],
+	["#4785C7", "#64AD99", "#90BC65", "#C3BA46", "#E39A39", "#E1512A"],
+	["#4682C9", "#5CA7A4", "#7FB975", "#AABD52", "#D2B340", "#E68F36", "#E04C29"],
+	["#457FCB", "#57A1AD", "#73B584", "#96BD5F", "#BDBB49", "#DBAC3D", "#E68334", "#DF4628"],
+	["#447BCD", "#539CB4", "#6AB090", "#88BB6C", "#AABD52", "#CBB842", "#E0A23A", "#E67A32", "#DF4127"],
+	["#4377CD", "#5097BA", "#63AC9A", "#7CB879", "#9ABE5C", "#B9BC4A", "#D4B13F", "#E49938", "#E67030", "#DE3C26"],
+	["#4273CE", "#4D93BE", "#5DA8A3", "#73B584", "#8DBC68", "#AABD52", "#C6B945", "#DBAC3D", "#E69036", "#E4672E", "#DD3725"],
+	["#426FCE", "#4B8DC2", "#59A3AA", "#6BB18D", "#82BA71", "#9CBE5B", "#B7BD4B", "#CFB541", "#DFA43B", "#E68735", "#E35E2D", "#DD3124"]
 ];
 var genotypeColors = ["#60AA9E", "#D9AD3D", "#5097BA", "#E67030", "#8EBC66", "#E59637", "#AABD52", "#DF4327", "#C4B945", "#75B681"];
 
@@ -28,16 +28,12 @@ var nonepitopeColorScale = d3.scale.linear().clamp([true])
 var receptorBindingColorScale = d3.scale.linear().clamp([true])
 	.domain(rbsColorDomain)
 	.range(colors[4]);
-	
-var toleranceColorScale = d3.scale.linear().clamp([true])
-	.domain(tolColorDomain)
-	.range(colors[10]);
 
 var lbiColorScale = d3.scale.linear()
 	.domain([0.0, 0.02, 0.04, 0.07, 0.1, 0.2, 0.4, 0.7, 0.9, 1.0])
 	.range(colors[10]);
 
-var dfreqColorScale = d3.scale.linear().clamp([true])
+var dfreqColorScale = d3.scale.linear()
 	.domain(dfreqColorDomain)
 	.range(colors[10]);
 
@@ -103,7 +99,9 @@ function colorByTrait() {
 	d3.selectAll('.serum')
 		.style("visibility", serumVisibility);
 	var vis = (colorBy=='HI_dist')?'block':'none';
-	document.getElementById("HIcontrols").style.display = vis;
+	if (document.getElementById('HIcontrols') !== null) {
+		document.getElementById("HIcontrols").style.display = vis;
+	}
 
 	if (colorBy == "ep") {
 		colorScale = epitopeColorScale;
@@ -117,10 +115,6 @@ function colorByTrait() {
 		colorScale = receptorBindingColorScale;
 		nodes.map(function(d) { d.coloring = d.rb; });
 	}
-	else if (colorBy == "tol_ne") {
-		colorScale = toleranceColorScale;
-		nodes.map(function(d) { d.coloring = d.tol_ne; });
-	}	
 	else if (colorBy == "lbi") {
 		colorScale = lbiColorScale;
 		adjust_coloring_by_date();
@@ -191,6 +185,37 @@ function branchStrokeColor(d) {
 	return d3.rgb(modCol).toString();
 }
 
+function contains(arr, obj) {
+    for(var i=0; i<arr.length; i++) {
+        if (arr[i] == obj) return true;
+    }
+}
+
+function parse_gt_string(gt){
+	mutations = [];
+	gt.split(',').map( function (d) {
+		var tmp = d.split(/[\s//]/); //FIXME: make more inclusive
+		var region;
+		var positions = [];
+		for (var i=0; i<tmp.length; i++){
+			if (contains(["EU","NA","AS","OC"], tmp[i])){
+				region = tmp[i];
+			}else{
+				if (tmp[i].length>0) positions.push(tmp[i]);
+			}
+		}
+		if (typeof region == "undefined") region="global";
+		// sort if this is a multi mutation genotype
+		if (positions.length>1){
+			positions.sort(function (a,b){
+				return parseInt(a.substring(0,a.length-1)) - parseInt(b.substring(0,b.length-1));
+			});
+		}
+		mutations.push([region, positions.join('/')]);
+	});
+	return mutations;
+};
+
 function colorByGenotype() {
 	var positions_string = document.getElementById("gt-color").value.split(',');
 	var positions_list = []
@@ -221,8 +246,10 @@ function colorByGenotype() {
 	else {
 		d3.select("#coloring").each(colorByTrait);
 		gt = parse_gt_string(freqdefault);
-		make_gt_chart(gt);
-		document.getElementById("gtspec").value = freqdefault;
+		if (plot_frequencies) {
+			make_gt_chart(gt);
+			document.getElementById("gtspec").value = freqdefault;
+		}
 	}
 }
 

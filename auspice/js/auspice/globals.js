@@ -2,8 +2,6 @@ var genericDomain = [0,0.111,0.222,0.333, 0.444, 0.555, 0.666, 0.777, 0.888, 1.0
 var path = '/data/';
 var tip_labels = true;
 
-var regions = ["Africa", "SouthAmerica", "WestAsia", "Oceania", "Europe", "JapanKorea", "NorthAmerica", "SoutheastAsia", "SouthAsia", "China"]
-
 var cladeToSeq = {}
 
 if (typeof globalDate == 'undefined') {
@@ -43,22 +41,31 @@ var serumSymbol = '\uf0fe';
 var epiColorDomain = genericDomain;
 var nonEpiColorDomain = genericDomain;
 var rbsColorDomain = genericDomain;
-var tolColorDomain = genericDomain;
 var dateColorDomain = genericDomain;
 var HIColorDomain = genericDomain.map(function(d){return Math.round(100*(d*3.6))/100;});
 var dfreqColorDomain = genericDomain.map(function(d){return Math.round(100*(0.2+d*1.8))/100;});
-var fitnessColorDomain = genericDomain.map(function(d){return Math.round(100*((d-0.5)*12.0))/100;});
+var fitnessColorDomain = genericDomain.map(function(d){return Math.round(100*((d-0.5)*16.0))/100;});
 var time_step;
-
 
 d3.json(path + file_prefix + "meta.json", function(error, json) {
     if (error) return console.warn(error);
-    d3.select("#updated").text(json['updated']);
+    update_date = json['updated'];
+    d3.select("#updated")
+      .append("span")
+      .html("updated " + update_date);
     commit_id = json['commit'];
     short_id = commit_id.substring(0, 6);
-    d3.select("#commit")
+    if (commit_id !== "unknown") {
+      d3.select("#commit")
+        .append("span")
+        .html("and processed with commit ")
         .append("a")
         .attr("href", "http://github.com/blab/nextflu/commit/" + commit_id)
         .text(short_id);
+    }
 
 });
+
+String.prototype.toTitleCase = function() {
+	return this.replace(/\w+/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+}
