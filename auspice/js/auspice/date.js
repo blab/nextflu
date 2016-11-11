@@ -46,7 +46,7 @@ var dragMin = d3.behavior.drag()
 
 function calcNodeAges(tw){
 	tips.forEach(function (d) {
-		var date = new Date(d.date);
+		var date = new Date(d.date.replace(/XX/g, "01"));
 		var oneYear = 365.25*24*60*60*1000; // days*hours*minutes*seconds*milliseconds
 		var diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
 		d.diff = diffYears;
@@ -125,13 +125,13 @@ function draggedMin(d) {
 		.attr("x2", function(d) {return d.x2});
 
 	calcNodeAges(time_window);
-	treeplot.selectAll(".link")
-		.style("stroke", function(d){return "#ccc";})
+//	treeplot.selectAll(".link")
+//		.style("stroke", function(d){return "#ccc";})
 
 	treeplot.selectAll(".tip")
-		.style("visibility", tipVisibility)
-		.style("fill", "#CCC")
-		.style("stroke", "#AAA");
+		.style("visibility", tipVisibility);
+//		.style("fill", "#CCC")
+//		.style("stroke", "#AAA");
 
 	treeplot.selectAll(".vaccine")
 		.style("visibility", function(d) {
@@ -148,9 +148,11 @@ function dragend() {
 	var num_date = globalDate/1000/3600/24/365.25+1970;
 //	updateColorDomains(num_date);
 //	initHIColorDomain();
-	for (var ii=0; ii<rootNode.pivots.length-1; ii++){
-		if (rootNode.pivots[ii]<num_date && rootNode.pivots[ii+1]>=num_date){
-			freq_ii=Math.max(dfreq_dn,ii+1);
+	if (typeof rootNode.pivots != "undefined"){
+		for (var ii=0; ii<rootNode.pivots.length-1; ii++){
+			if (rootNode.pivots[ii]<num_date && rootNode.pivots[ii+1]>=num_date){
+				freq_ii=Math.max(dfreq_dn,ii+1);
+			}
 		}
 	}
 	console.log("changed frequency index to "+freq_ii+" date cut off is "+num_date);
@@ -160,7 +162,9 @@ function dragend() {
 	adjust_coloring_by_date();
 	console.log("updating frequencies");
 	adjust_freq_by_date();
-//	calcDfreq(rootNode, freq_ii);
+	if (typeof calcDfreq == 'function') {	
+		calcDfreq(rootNode, freq_ii);
+	}
 
 	if (colorBy == "genotype") {
 		colorByGenotype();
@@ -200,9 +204,17 @@ function date_init(){
 		}).map(function(d) {
 		return new Date(d.date);
 	});
-	earliestDate = new Date(d3.min(dateValues));
-	earliestDate.setDate(earliestDate.getDate() + 1);
-	globalDate = new Date(d3.max(dateValues));
+
+	var time_back = 1.0;
+	if (typeof time_window != "undefined"){
+		time_back = time_window;
+	}
+	if (typeof full_data_time_window != "undefined"){
+		time_back = full_data_time_window;
+	}
+
+	var earliestDate = new Date(globalDate);
+	earliestDate.setDate(earliestDate.getDate() - (time_back * 365.25));
 
 	dateScale = d3.time.scale()
 		.domain([earliestDate, globalDate])

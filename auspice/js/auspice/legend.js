@@ -12,9 +12,6 @@ function makeLegend(){
 		if (colorBy == "rb") {
 			return "Receptor binding mutations";
 		}
-		if (colorBy == "tol_ne") {
-			return "HA2 DMS tolerance";
-		}		
 		if (colorBy == "lbi") {
 			return "Local branching index";
 		}
@@ -34,8 +31,9 @@ function makeLegend(){
             return "log<sub>2</sub> titer distance from "+focusNode.strain;
         }
 		if (colorBy == "dfreq") {
-			var tmp_text = "Log freq. change ("+dfreq_dn+" month";
-			if (dfreq_dn>1){
+			var tmp_nmonth = Math.round(12*dfreq_dn*time_step);
+			var tmp_text = "Freq. change ("+tmp_nmonth+" month";
+			if (tmp_nmonth>1){
 				tmp_text+='s';
 			}
 			return tmp_text+')';
@@ -65,17 +63,20 @@ function makeLegend(){
 		}
 	}
 
+	var count = colorScale.domain().length;
+	var stack = Math.ceil(count / 2);	
+	d3.select("#legend")
+		.attr("height", stack * (legendRectSize + legendSpacing) + legendSpacing);
+
 	var tmp_leg = legend.selectAll(".legend")
 	.data(colorScale.domain())
 	.enter().append('g')
 	.attr('class', 'legend')
 	.attr('transform', function(d, i) {
-		var stack = 5;
-		var height = legendRectSize + legendSpacing;
 		var fromRight = Math.floor(i / stack);
 		var fromTop = i % stack;
 		var horz = fromRight * 145 + 5;
-		var vert = fromTop * height + 5;
+		var vert = fromTop * (legendRectSize + legendSpacing) + 5;
 		return 'translate(' + horz + ',' + vert + ')';
 	 });
 	tmp_leg.append('rect')
@@ -110,10 +111,10 @@ function makeLegend(){
     .attr('x', legendRectSize + legendSpacing + 5)
     .attr('y', legendRectSize - legendSpacing)
     .text(function(d) {
-        var label = d.toString().replace(/([a-z])([A-Z])/g, '$1 $2').replace(/,/g, ', ');
-//        if (colorBy == "dfreq") {
-//            label += "\u00D7";
-//        }
+		var label = d.toString().replace(/([a-z])([A-Z])/g, '$1 $2').replace(/,/g, ', ').replace(/([a-z]+)_([a-z]+)/g, function(_, a, b) { return a.toTitleCase().concat(' ', b.toTitleCase()); }).replace(/^([a-z]+)$/, function(_, a) { return a.toTitleCase(); });
+        if (colorBy == "dfreq") {
+            label += "\u00D7";
+        }
         return label;
     })
    .on('mouseover', function(leg){

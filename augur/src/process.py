@@ -14,11 +14,13 @@ parser = argparse.ArgumentParser(description='Process virus sequences, build tre
 parser.add_argument('-y', '--years_back', type = float, default=3, help='number of past years to sample sequences from')
 parser.add_argument('-v', '--viruses_per_month', type = int, default = 50, help='number of viruses sampled per month')
 parser.add_argument('-r', '--raxml_time_limit', type = float, default = 1.0, help='number of hours raxml is run')
-parser.add_argument('--lam_HI', type = float, default = 1.0, help='regularization for HI')
-parser.add_argument('--lam_avi', type = float, default = 1.0, help='regularization for avidity')
-parser.add_argument('--lam_pot', type = float, default = 0.2, help='regularization for potency')
+parser.add_argument('--lam_HI', type = float, default = 2.0, help='regularization for HI')
+parser.add_argument('--lam_avi', type = float, default = 2.0, help='regularization for avidity')
+parser.add_argument('--lam_pot', type = float, default = 0.3, help='regularization for potency')
+parser.add_argument('--min_mutation_frequency', type = float, default = 0.01, help='minimum mutation frequency to calculate trajectory')
 parser.add_argument('--interval', nargs = '+', type = float, default = None, help='interval from which to pull sequences')
 parser.add_argument('--path', type = str, default = 'data/', help='path of file dumps')
+parser.add_argument('--output_path', type = str, default = 'output/', help='path of results dumps')
 parser.add_argument('--prefix', type = str, default = '', help='prefix of file dumps including auspice')
 parser.add_argument('--test', default = False, action="store_true",  help ="don't run the pipeline")
 parser.add_argument('--start', default = 'filter', type = str,  help ="start pipeline at specified step")
@@ -32,32 +34,38 @@ parser.add_argument('--estimate_fitness_model', default = False, action="store_t
 
 virus_config = {
 	'date_format':{'fields':'%Y-%m-%d', 'reg':r'\d\d\d\d-\d\d-\d\d'},
-	'fasta_fields':{0:'strain', 1:'isolate_id', 3:'passage', 5:'date', 7:'lab', 8:"accession"},
+	# 0                  1     2         3               4      5       6        7        8                9
+	# strain             virus accession collection_date region country division location passage_category submitting_lab
+	#>A/Norway/3105/2013|flu|  EPI505249|2013-11-11|     europe|norway| norway|  norway|  cell|            national_institute_for_medical_research
+	'fasta_fields':{0:'strain', 2:'isolate_id', 3:'date', 4:'region', 5:'country', 8:'passage', 9:'lab'},
 	# frequency estimation parameters
-	'aggregate_regions': [  ("global", None), ("NA", ["NorthAmerica"]), ("EU", ["Europe"]),
-							("AS", ["China", "SoutheastAsia", "JapanKorea"]), ("OC", ["Oceania"]) ],
+	'aggregate_regions': [  ("global", None), ("NA", ["north_america"]), ("EU", ["europe"]),
+							("AS", ["china", "south_asia", "southeast_asia", "japan_korea"]), ("OC", ["oceania"]) ],
+	'frequency_stiffness':30.0,
 	'verbose':2,
 	'tol':2e-4, #tolerance for frequency optimization
 	'pc':1e-3, #pseudocount for frequencies
 
 	'extra_pivots': 12,  # number of pivot point for or after the last observations of a mutations
-	'inertia':0.7,		 # fraction of frequency change carry over in the stiffness term
-	'frequency_stiffness':10.0,
+	'inertia':0.8,		# fraction of frequency change carry over in the stiffness term
 	'n_iqd':3,     # standard deviations from clock
-	'min_mutation_frequency':0.02,
+	'min_mutation_frequency':0.01,
 	'min_genotype_frequency':0.1,
 }
 
 class process(virus_frequencies):
 	"""generic template class for processing virus sequences into trees"""
-	def __init__(self, path = 'data/', prefix = 'virus', time_interval = (2012.0, 2015.0),
+	def __init__(self, path = 'data/', output_path = 'output_', time_interval = (2012.0, 2015.0),
 	             run_dir = None, virus = None, resolution = None, date_format={'fields':'%Y-%m-%d', 'reg':r'\d\d\d\d-\d\d-\d\d'},
 				 min_mutation_frequency = 0.01, min_genotype_frequency = 0.1, **kwargs):
 		self.path = path
-		self.virus_type=virus
+		self.output_path = output_path
+		self.check_dirs(path, output_path)
+		self.virus_type = virus
 		self.resolution = resolution
-		self.prefix = prefix
-		if resolution is not None:
+		if self.virus_type:
+			self.prefix = self.virus_type+'_'
+		if resolution is not None and resolution is not '':
 			self.resolution_prefix = resolution+'_'
 		else:
 			self.resolution_prefix = ''
@@ -72,6 +80,7 @@ class process(virus_frequencies):
 		self.aa_seq_fname = 	self.path + self.prefix + self.resolution_prefix + 'aa_seq.pkl'
 		self.HI_model_fname = 	self.path + self.prefix + self.resolution_prefix + 'HI_model.pkl'
 		self.nuc_seq_fname = 	self.path + self.prefix + self.resolution_prefix + 'nuc_seq.pkl'
+		self.alignment_fname = 	self.path + self.prefix + self.resolution_prefix + 'alignment.fasta'
 		if run_dir is None:
 			import random
 			self.run_dir = '_'.join(['temp', time.strftime('%Y%m%d-%H%M%S',time.gmtime()), str(random.randint(0,1000000))])
@@ -83,11 +92,22 @@ class process(virus_frequencies):
 		self.auspice_frequency_fname = 	'../auspice/data/' + self.prefix + self.resolution_prefix + 'frequencies.json'
 		self.auspice_meta_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'meta.json'
 		self.auspice_HI_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'HI.json'
-		self.accession_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'accession_numbers.tsv'
-		self.auspice_HI_display_mutations =	 '../auspice/_data/HI_mutation_effects.json'
+		self.accession_fname = 			'../auspice/data/' + self.prefix + self.resolution_prefix + 'accession_numbers.tsv'
+		self.auspice_align_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'align.fasta'
+		self.auspice_newick_fname = 	'../auspice/data/' + self.prefix + self.resolution_prefix + 'tree.newick'
+		self.auspice_clade_frequencies_fname = '../auspice/data/' + self.prefix + self.resolution_prefix + 'clade_frequencies.tsv'
+		self.auspice_viruses_fname = '../auspice/data/' + self.prefix + self.resolution_prefix + 'viruses.tsv'
+		self.auspice_HI_display_mutations =	 '../auspice/data/HI_mutation_effects.json'
 		self.nuc_alphabet = 'ACGT-N'
 		self.aa_alphabet = 'ACDEFGHIKLMNPQRSTVWY*X'
 		virus_frequencies.__init__(self, **kwargs)
+
+	def check_dirs(self, path, output_path):
+		''' Check if path and output_path exist and are directories; create them if need be.'''
+		if not os.path.exists(output_path) or not os.path.isdir(output_path): ## Also check for input files, raise exception if not found.
+			os.makedirs(output_path)
+		if not os.path.exists(path) or not os.path.isdir(path):
+			os.makedirs(path)
 
 	def make_run_dir(self):
 		if not os.path.isdir(self.run_dir):
@@ -120,7 +140,7 @@ class process(virus_frequencies):
 				cPickle.dump(self.nuc_aln, outfile)
 		if hasattr(self, 'mutation_effects'):
 			with open(self.HI_model_fname, 'w') as outfile:
-				cPickle.dump((self.sera, self.ref_strains, self.HI_strains, self.mutation_effects, self.virus_effect, self.serum_potency), outfile)
+				cPickle.dump((self.sera, self.ref_strains, self.HI_strains, self.mutation_effects, self.virus_effect, self.serum_potency, self.node_lookup, self.autologous_titers, self.HI_normalized, self.HI_raw, self.mutation_clusters, self.mutation_counter), outfile)
 
 	def load(self):
 		import cPickle
@@ -146,7 +166,7 @@ class process(virus_frequencies):
 		if os.path.isfile(self.HI_model_fname):
 			try:
 				with open(self.HI_model_fname, 'r') as infile:
-					(self.sera, self.ref_strains, self.HI_strains, self.mutation_effects, self.virus_effect, self.serum_potency) = cPickle.load(infile)
+					(self.sera, self.ref_strains, self.HI_strains, self.mutation_effects, self.virus_effect, self.serum_potency, self.node_lookup, self.autologous_titers, self.HI_normalized, self.HI_raw, self.mutation_clusters, self.mutation_counter) = cPickle.load(infile)
 			except:
 				pass
 		try:
@@ -194,8 +214,9 @@ class process(virus_frequencies):
 			clade_present = {}
 			clade_xval = {}
 			clade_yval = {}
-			self.frequencies['clades'] = {reg:{"pivots":list(self.tree.seed_node.pivots)}
-											for reg in self.tree.seed_node.freq}
+			if hasattr(self.tree.seed_node, "freq"):
+				self.frequencies['clades'] = {reg:{"pivots":list(self.tree.seed_node.pivots)}
+												for reg in self.tree.seed_node.freq}
 
 			for clade, gt in self.clade_designations.iteritems():
 				if clade in annotations:
@@ -208,12 +229,13 @@ class process(virus_frequencies):
 						base_node = tmp_nodes[0]
 						clade_xval[clade] = base_node.xvalue
 						clade_yval[clade] = base_node.yvalue
-						for region in base_node.freq:
-							try:
-								self.frequencies["clades"][region][clade.lower()] = [round(x,3) for x in base_node.freq[region]]
-								print "added frequencies",region, clade
-							except:
-								print base_node.freq[region]
+						if hasattr(base_node, 'freq'):
+							for region in base_node.freq:
+								try:
+									self.frequencies["clades"][region][clade.lower()] = [round(x,3) for x in base_node.freq[region]]
+									print "added frequencies",region, clade
+								except:
+									print base_node.freq[region]
 					else:
 						clade_present[clade] = False
 						print "clade",clade, gt, "not in tree"
@@ -229,7 +251,7 @@ class process(virus_frequencies):
 			print "Read failed, rewriting with indents"
 			write_json(self.tree_json, self.auspice_tree_fname, indent=1)
 
-		# Include genotype frequencies
+		# Write out frequencies
 		if hasattr(self, 'frequencies'):
 			if not hasattr(self, 'aa_entropy') and not hasattr(self, 'nuc_entropy'):
 				self.determine_variable_positions()
@@ -266,8 +288,70 @@ class process(virus_frequencies):
 			meta["regions"] = self.regions
 			meta["virus_stats"] = [ [str(y)+'-'+str(m)] + [self.date_region_count[(y,m)][reg] for reg in self.regions]
 									for y,m in sorted(self.date_region_count.keys()) ]
-		write_json(meta, self.auspice_meta_fname, indent=0)
+		write_json(meta, self.auspice_meta_fname, indent=None)
 		self.export_accession_numbers()
+
+	def export_fasta_alignment(self):
+		print "Writing alignment"
+		try:
+			handle = open(self.auspice_align_fname, 'w')
+		except IOError:
+			pass
+		else:
+			for node in self.tree:
+				if node.is_leaf():
+					if hasattr(node, 'strain') and hasattr(node, 'accession') and hasattr(node, 'date'):
+						handle.write(">" + node.strain + "|" + node.accession + "|" + node.date + "|" + node.region + "\n")
+						handle.write(node.seq + "\n")
+					else:
+						print node.strain + " is missing metadata"
+			handle.close()
+
+	def export_newick_tree(self):
+		print "Writing newick tree"
+		try:
+			handle = open(self.auspice_newick_fname, 'w')
+		except IOError:
+			pass
+		else:
+			tmp_tree = self.tree
+			for node in tmp_tree:
+				if node.is_leaf():
+					if hasattr(node, 'strain') and hasattr(node, 'accession') and hasattr(node, 'date'):
+						node.taxon.label = node.strain + "|" + node.accession + "|" + node.date + "|" + node.region
+					else:
+						print node.strain + " is missing metadata"
+			newick_string = tmp_tree.as_string('newick')
+			handle.write(newick_string)
+			handle.close()
+			for node in tmp_tree:
+				if node.is_leaf():
+					if hasattr(node, 'strain'):
+						node.taxon.label = node.strain
+
+	def export_clade_frequencies(self):
+		print "Writing clade frequencies"
+		with open(self.auspice_clade_frequencies_fname, 'w') as ofile:
+			nodes = [node for node in self.tree]
+			if hasattr(nodes[0], 'pivots'):
+				pivots = nodes[0].pivots
+				string = "\t".join(map(str, pivots))
+				ofile.write(string + "\n")
+			for node in nodes:
+				if hasattr(node, 'freq'):
+					freqs = node.freq['global']
+					string = "\t".join(map(str, freqs))
+					ofile.write(string + "\n")
+		ofile.close()
+
+	def export_viruses(self):
+		print "Writing virus list"
+		with open(self.auspice_viruses_fname, 'w') as ofile:
+			ofile.write("strain\tdate\tcountry\tregion\tep\tcHI\n")
+			for node in self.tree.postorder_node_iter():
+				if node.is_leaf():
+					ofile.write( str(node.strain) + "\t" + str(node.date) + "\t" + str(node.country) + "\t" + str(node.region) + "\t" + str(node.ep) + "\t" + str(node.cHI) + "\n" )
+		ofile.close()
 
 	def htmlpath(self):
 		htmlpath = '../auspice/'
@@ -310,7 +394,8 @@ class process(virus_frequencies):
 		from io_util import write_json, read_json
 		# make a tab delimited file with the mutaton effects
 		table_effects = []
-		with open(self.htmlpath()+'HI_mutation_effects.tsv','w') as ofile:
+		HI_mutation_effects_fname = self.output_path+self.prefix+self.resolution_prefix+'HI_mutation_effects.tsv'
+		with open(HI_mutation_effects_fname, 'w') as ofile:
 			for mut, val in self.mutation_effects.iteritems():
 				mut_str = '/'.join([x[1] for x in self.mutation_clusters[mut]])
 				ofile.write(mut_str+'\t'+str(np.round(val,4))+'\t'+str(self.mutation_counter[mut])+'\n')
@@ -336,11 +421,11 @@ class process(virus_frequencies):
 		with open(self.accession_fname,'w') as ofile:
 			for n in self.tree.leaf_nodes():
 				try:
-					ofile.write('\t'.join(map(str, [n.strain, n.accession, n.lab]))+'\n')
+					ofile.write('\t'.join(map(str, [n.strain, n.accession]))+'\n')
 				except:
 					print(n.strain,"has no accession number")
 
-	def align(self, fast=False):
+	def align(self, fast=True):
 		'''
 		aligns viruses using mafft. produces temporary files and deletes those at the end
 		after this step, self.viruses is a BioPhython multiple alignment object
@@ -349,9 +434,10 @@ class process(virus_frequencies):
 		os.chdir(self.run_dir)
 		SeqIO.write([SeqRecord(Seq(v['seq']), id=v['strain']) for v in self.viruses], "temp_in.fasta", "fasta")
 		if fast:
-			os.system("mafft --anysymbol temp_in.fasta > temp_out.fasta")
+			os.system("mafft --anysymbol --op 10.0 temp_in.fasta > temp_out.fasta")
 		else:
-			os.system("mafft --anysymbol --nofft temp_in.fasta > temp_out.fasta")
+			os.system("mafft --nofft --anysymbol --op 10.0 temp_in.fasta > temp_out.fasta")
+		shutil.copy('temp_out.fasta', '../' + self.alignment_fname)
 		aln = AlignIO.read('temp_out.fasta', 'fasta')
 		self.sequence_lookup = {seq.id:seq for seq in aln}
 		# add attributes to alignment
@@ -495,4 +581,3 @@ class process(virus_frequencies):
 			self.all_clade_frequencies(gene='nuc')
 		if 'tree' in tasks:
 			self.all_tree_frequencies(threshold = 20)
-

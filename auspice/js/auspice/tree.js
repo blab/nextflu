@@ -128,7 +128,7 @@ function branchStrokeWidth(d) {
 
 function branchLabelText(d) {
 	var tmp_str='';
-	if (branch_labels){
+	if (branch_labels && mutType == 'aa'){
 		for (tmp_gene in d.aa_muts){
 			if (d.aa_muts[tmp_gene].length){
 				if (tmp_str!=''){
@@ -141,6 +141,17 @@ function branchLabelText(d) {
 			tmp_str = tmp_str.substring(0,45)+'...';
 		}
 	}
+	if (branch_labels && mutType == 'nuc'){
+		if (d.nuc_muts.length){
+			if (tmp_str!=''){
+				tmp_str+=', ';
+			}
+			tmp_str+=d.nuc_muts.replace(/,/g, ', ');
+		}
+		if (tmp_str.length>50){
+			tmp_str = tmp_str.substring(0,45)+'...';
+		}
+	}	
 	return tmp_str;
 }
 
@@ -188,7 +199,7 @@ function tree_init(){
 	calcFullTipCounts(rootNode);
 	calcBranchLength(rootNode);
 	rootNode.branch_length= 0.01;
-//	rootNode.dfreq = 0.0;
+	rootNode.dfreq = 0.0;
 	if (typeof rootNode.pivots != "undefined"){
 		time_step = rootNode.pivots[1]-rootNode.pivots[0];
 	}else{
@@ -204,7 +215,9 @@ function tree_init(){
 	calcNodeAges(time_window);
 	colorByTrait();
 	adjust_freq_by_date();
-//	calcDfreq(rootNode, freq_ii);
+	if (typeof calcDfreq == 'function') {
+		calcDfreq(rootNode, freq_ii);
+	}
 	tree_legend = makeLegend();
 	nDisplayTips = displayRoot.fullTipCount;
 }
@@ -235,7 +248,12 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	displayRoot = rootNode;
 	tips = gatherTips(rootNode, []);
 	vaccines = getVaccines(tips);
-	sera = getSera(tips);
+	if (typeof getSera == 'function') {
+		sera = getSera(tips);
+	}
+	else {
+		sera = []
+	}
 
 	initDateColorDomain();
 //	initHIColorDomain();
@@ -243,8 +261,6 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	if (typeof rootNode['ep'] != "undefined"){ initColorDomain('ep', epitopeColorScale);}
 	if (typeof rootNode['ne'] != "undefined"){ initColorDomain('ne', nonepitopeColorScale);}
 	if (typeof rootNode['rb'] != "undefined"){ initColorDomain('rb', receptorBindingColorScale);}
-	if (typeof rootNode['tol_ne'] != "undefined"){ initColorDomain('tol_ne', toleranceColorScale);}
-	if (typeof rootNode['dfreq'] != "undefined"){ initColorDomain('dfreq', dfreqColorScale);}	
 	date_init();
 	tree_init();
 
@@ -286,7 +302,6 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.text(tipLabelText);
 	}
 
-
 	var tipCircles = treeplot.selectAll(".tip")
 		.data(tips)
 		.enter()
@@ -307,6 +322,12 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 				var win = window.open(url, '_blank');
   				win.focus();
   			}
+			if ((typeof d.db != "undefined") && (d.db == "Genbank") && (typeof d.accession != "undefined")) {
+				var url = "http://www.ncbi.nlm.nih.gov/nuccore/"+d.accession;
+				console.log("opening url "+url);
+				var win = window.open(url, '_blank');
+  				win.focus();
+  			}  			
   		})
 		.on('mouseout', virusTooltip.hide);
 
@@ -351,7 +372,6 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			document.getElementById("coloring").value = "HI_dist";
 			newFocus();
 		});
-
 
 	/*
 	 * zoom into the tree upon click onto a branch
@@ -399,7 +419,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			var labels = treeplot.selectAll(".tipLabel")
 				.data(tips)
 				.each(function(d) {
-					var textWidth = tipLabelWidth(d);
+					var textWidth = 0.5*tipLabelWidth(d);
 					if (textWidth>maxTextWidth) {
 						maxTextWidth = textWidth;
 					}
