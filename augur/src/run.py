@@ -20,7 +20,7 @@ def flu_build(lineage, resolution):
 		n_viruses = 12
 		n_years = 12
 	process = 'src/' + lineage + '_process.py'
-	call = map(str, [params.bin, process, '-v', n_viruses, '-y', n_years, '--resolution', resolution, '--skip', 'genotype_frequencies HIvalidate'])
+	call = map(str, [params.bin, process, '-v', n_viruses, '-y', n_years, '--resolution', resolution, '--skip', 'genotype_frequencies fitness HIvalidate'])
 	print call
 	subprocess.call(call)
 

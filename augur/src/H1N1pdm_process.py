@@ -239,7 +239,7 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine, HI
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine',
-				'frequencies', 'HI', 'export'] + ['HIvalidate']
+				'frequencies', 'HI', 'export', 'HIvalidate']
 	from process import parser
 	params = parser.parse_args()
 
@@ -251,10 +251,12 @@ if __name__=="__main__":
 	dt= params.time_interval[1]-params.time_interval[0]
 	params.pivots_per_year = 12.0 if dt<5 else 6.0 if dt<10 else 3.0
 	steps = all_steps[all_steps.index(params.start):(all_steps.index(params.stop)+1)]
-	if params.skip is not None:
+	if params.skip is not None:					# params.skip will be a string ("genotype_frequencies HIvalidate") if called from make_all, and a list (["genotype_frequencies", "HIvalidate"]) if called directly from process
+		if type(params.skip) is str:
+			params.skip = params.skip.split()	# params.skip is definitely a list
 		for tmp_step in params.skip:
 			if tmp_step in steps:
-				print "skipping",tmp_step
+				print "skipping", tmp_step
 				steps.remove(tmp_step)
 
 

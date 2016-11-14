@@ -48,8 +48,8 @@ virus_config.update({
 	'excluded_tables': ['NIMR_Sep2012_08.csv'], #, 'nimr-sep-2010-table8', 'nimr-sep-2010-table8','NIMR_Sep2012_11.csv'],
 	'layout':'auspice',
 	'min_aamuts': 1,
-#	'predictors': ['dfreq', 'cHI']												# estimate
-	'predictors': { 'dfreq': [2.50, 2.84], 'cHI': [1.68, 0.45] }				# fix predictor: [value, std deviation]
+	'predictors': ['ep']														# estimate
+#	'predictors': { 'dfreq': [2.50, 2.84], 'cHI': [1.68, 0.45] }				# fix predictor: [value, std deviation]
 	})
 
 
@@ -414,7 +414,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, H3N2_HI, H3N2_
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine',
-				 'frequencies','HI', 'export', 'HIvalidate']
+				 'frequencies', 'HI', 'fitness', 'export', 'HIvalidate']
 
 	from process import parser
 	import matplotlib.pyplot as plt
@@ -429,10 +429,12 @@ if __name__=="__main__":
 	dt= params.time_interval[1]-params.time_interval[0]
 	params.pivots_per_year = 12.0 if dt<5 else 6.0
 	steps = all_steps[all_steps.index(params.start):(all_steps.index(params.stop)+1)]
-	if params.skip is not None:
+	if params.skip is not None:					# params.skip will be a string ("genotype_frequencies HIvalidate") if called from make_all, and a list (["genotype_frequencies", "HIvalidate"]) if called directly from process
+		if type(params.skip) is str:
+			params.skip = params.skip.split()	# params.skip is definitely a list
 		for tmp_step in params.skip:
 			if tmp_step in steps:
-				print "skipping",tmp_step
+				print "skipping", tmp_step
 				steps.remove(tmp_step)
 
 	# add all arguments to virus_config (possibly overriding)
