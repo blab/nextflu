@@ -216,7 +216,6 @@ class HI_tree(object):
 				else:
 					offset = 0
 
-				logger.debug("Offset mutations by %i for protein %s", offset, protein)
 				mutations = [mutation for mutation in mutation_string.split(",") if mutation != ""]
 
 				# Mutations are in the format of "A100D" where the first
