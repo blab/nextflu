@@ -17,6 +17,7 @@
   ["guatemala", "Guatemala"],
   ["haiti", "Haiti"],
   ["honduras", "Honduras"],
+  ["italy", "Italy"],
   ["japan", "Japan"],
   ["martinique", "Martinique"],
   ["mexico", "Mexico"],
@@ -33,11 +34,12 @@
 "fields":
 [["all", "all"],
   ["china", "China"],
+  ["europe", "Europe"],  
   ["japan_korea", "Japan/Korea"],
   ["north_america", "North America"],
   ["oceania", "Oceania"],
   ["south_america", "South America"],
-  ["southeast_asia", "Southeast Asia"]  
+  ["southeast_asia", "Southeast Asia"]
 ]
 },
 {
