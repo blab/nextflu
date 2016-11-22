@@ -1,0 +1,45 @@
+---
+title: nextstrain / dengue / denv3
+layout: auspice_dengue
+virus: Dengue
+resolution:
+coloring: region, date
+gtplaceholder: Genomic positions...
+freqdefault:
+---
+
+<script>
+var file_prefix = "dengue_3_";
+var	vaccineChoice = {};
+var vaccineStrains = Object.keys(vaccineChoice);
+var reference_viruses= {};
+var branch_labels=false;
+var restrictTo = {"region": "all"};
+var time_window = 80.0;
+var full_data_time_window = 80.0;
+var time_ticks=[1900.0, 1920.0, 1940.0, 1960.0, 1980.0, 2000.0, 2020.0];
+var dfreq_dn = 2;
+var LBItime_window = 0.5;
+var LBItau = 0.0005;
+
+var regions = [
+["africa",  		    "#5097BA"],
+["south_america",  	"#60AA9E"],
+["west_asia",  		  "#75B681"],
+["oceania",  	    	"#8EBC66"],
+["europe",  		    "#AABD52"],
+["japan_korea",  	  "#C4B945"],
+["north_america",  	"#D9AD3D"],
+["southeast_asia",  "#E59637"],
+["south_asia",  	  "#E67030"],
+["china",  			    "#DF4327"]
+];
+
+var countries = [];
+var divisions = [];
+
+var mutType = 'both';
+var default_gene = 'nuc';
+var plot_frequencies = false;
+
+</script>
