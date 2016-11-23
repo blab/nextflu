@@ -320,7 +320,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, H3N2_HI, H3N2_
 		if 'filter' in steps:
 			print "--- Virus filtering at " + time.strftime("%H:%M:%S") + " ---"
 			self.filter()
-			if self.force_include is not None and os.path.isfile(self.force_include):
+			if self.force_include is not None:
 				with open(self.force_include) as infile:
 					forced_strains = [fix_name(line.strip().split('\t')[0]).upper() for line in infile]
 			else:
