@@ -28,19 +28,19 @@ var virusTooltip = d3.tip()
 		if (typeof d.attr.division != "undefined" && typeof d.attr.country != "undefined" && d.attr.division != d.attr.country) {
 			string += d.attr.division.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').toTitleCase();
 			string += ", ";
-			string += d.attr.country.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').toTitleCase();
+			string += d.attr.country.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').toTitleCase().replace(/^Usa/, 'USA');
 		}
 
 		// division / country / region
 		// known to country level
 		else if (typeof d.attr.division != "undefined" && typeof d.attr.country != "undefined" && d.attr.division == d.attr.country) {
-			string += d.attr.country.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').toTitleCase();
+			string += d.attr.country.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').toTitleCase().replace(/^Usa/, 'USA');
 		}
 
 		// country / region
 		// known to country level
 		else if (typeof d.attr.country != "undefined") {
-			string += d.attr.country.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').toTitleCase();
+			string += d.attr.country.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').toTitleCase().replace(/^Usa/, 'USA');
 		}
 
 		if (typeof d.attr.raw_date != "undefined") {
