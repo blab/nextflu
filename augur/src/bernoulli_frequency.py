@@ -414,18 +414,12 @@ class virus_frequencies(object):
 			self.estimate_sub_frequencies(child, all_dates, tip_to_date_index, pivots=pivots,
 					threshold=threshold, region_name=region_name, time_interval=time_interval)
 
-	def estimate_tree_frequencies(self, threshold = 20, regions=None, pivots=None,
-								region_name = None, time_interval=None):
+	def assign_tips_to_nodes_by_regions(self, regions):
 		'''
-		loop over nodes of the tree and estimate frequencies of all clade above a certain size
+		Loop over all nodes, make time ordered lists of tips, restrict to the specified regions.
 		'''
-		if pivots is None: pivots=self.pivots
 		all_dates = []
-		rootnode = self.tree.seed_node
-		# loop over all nodes, make time ordered lists of tips, restrict to the specified regions
 		tip_index_region_specific = 0
-		if time_interval is None: time_interval = self.time_interval
-		if not hasattr(self.tree.seed_node, "virus_count"): self.tree.seed_node.virus_count = {}
 		for node in self.tree.postorder_node_iter():
 			tmp_tips = []
 			if node.is_leaf():
@@ -445,6 +439,19 @@ class virus_frequencies(object):
 				node.tips = np.array(node.tips[:,0], dtype=int)
 			else:
 				node.tips = np.array([], dtype=int)
+
+		return all_dates
+
+	def estimate_tree_frequencies(self, threshold = 20, regions=None, pivots=None,
+								region_name = None, time_interval=None):
+		'''
+		loop over nodes of the tree and estimate frequencies of all clade above a certain size
+		'''
+		if pivots is None: pivots=self.pivots
+		rootnode = self.tree.seed_node
+		if not hasattr(self.tree.seed_node, "virus_count"): self.tree.seed_node.virus_count = {}
+		if time_interval is None: time_interval = self.time_interval
+		all_dates = self.assign_tips_to_nodes_by_regions(regions)
 
 		# sort the dates and provide a reverse ordering as a mapping of tip indices to dates
 		all_dates = np.array(all_dates)
