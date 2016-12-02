@@ -38,7 +38,9 @@ class fitness_predictors(object):
 		if pred == 'tol':
 			self.calc_tolerance(tree, attr = 'tol')
 		if pred == 'tol_ne':
-			self.calc_tolerance(tree, epitope_mask = self.tolerance_mask, attr = 'tol_ne')			
+			self.calc_tolerance(tree, epitope_mask = self.tolerance_mask, attr = 'tol_ne')
+		if pred == 'c_ep':
+			self.calc_cumulative_epitope_distance(tree)
 		#if pred == 'dfreq':
 			# do nothing
 		#if pred == 'cHI':
@@ -249,6 +251,59 @@ class fitness_predictors(object):
 			for child in node.child_nodes():
 				tmp_LBI += child.up_polarizer
 			node.__setattr__(attr, transform(tmp_LBI))
+
+	def convert_aa_mutations_to_genomic_coordinates(self, node):
+		"""Convert amino acid mutation coordinates for a given node into genomic
+		coordinates.
+
+		Returns a list of mutation tuples where each tuple contains the
+		ancestral amino acid, the genomic coordinate of the mutation, and the
+		derived amino acid.
+		"""
+		genomic_mutations = []
+
+		if len(node.mutations) > 0:
+			protein_lengths = {protein: len(sequence) for protein, sequence in node.aa_seq.iteritems()}
+			for protein, mutation_string in node.aa_muts.iteritems():
+				if protein == "HA1":
+					offset = protein_lengths["SigPep"]
+				elif protein == "HA2":
+					offset = protein_lengths["SigPep"] + protein_lengths["HA1"]
+				else:
+					offset = 0
+
+				mutations = [mutation for mutation in mutation_string.split(",") if mutation != ""]
+
+				# Mutations are in the format of "A100D" where
+				# the first character is the ancestral amino
+				# acid, the last character is the derived, and
+				# the remaining characters are the position of
+				# the mutation in the protein sequence.
+				for mutation in mutations:
+					aa_coordinate = int(mutation[1:-1])
+					genomic_mutations.append((mutation[0], aa_coordinate + offset, mutation[-1]))
+
+		return genomic_mutations
+
+	def calc_cumulative_epitope_distance(self, tree, attr='c_ep'):
+		'''
+		calculates the cumulative distance at epitope sites on the path between any tree node to ref
+		tree   --   dendropy tree
+		attr   --   the attribute name used to save the result
+		'''
+		cumulative_mutations_by_node = {}
+		for node in tree.postorder_node_iter():
+			current_mutations = len([mutation
+						 for mutation in self.convert_aa_mutations_to_genomic_coordinates(node)
+						 if self.epitope_mask[mutation[1] - 1] == "1"])
+			cumulative_mutations = (
+				current_mutations +
+				cumulative_mutations_by_node.get(str(node.parent_node), 0)
+			)
+
+			cumulative_mutations_by_node[str(node)] = cumulative_mutations
+			setattr(node, attr, cumulative_mutations)
+
 
 def main(tree_fname = 'data/tree_refine.json'):
 
