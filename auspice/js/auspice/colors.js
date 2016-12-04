@@ -326,26 +326,28 @@ function newFocus(){
 	var seraDiv = document.getElementById("sera");
 	var htmlStr = "";
 	activeSera = {};
-	console.log(focusNode);
-	for (var serum in titer_subs_model["potency"][focusNode.clade]){
-		if (serum!="mean_potency"){
-			var serumID = serum.split("/").join("");
-			htmlStr+='<input type="checkbox" id="' + serumID + '" name="' + serum + '" checked="checked"> ' + serum +"<br>";
-			activeSera[serum]=true;
-		}
+	allSera = Object.keys(titer_subs_model["potency"][focusNode.clade]).filter( function (s)
+		{return s!="mean_potency"});
+
+	for (var i=0; i<allSera.length; i++){
+		var serum = allSera[i];
+		var serumID = serum.split("/").join("");
+		htmlStr+='<input type="checkbox" id="' + serumID + '" name="' + serum + '" checked="checked"> ' + serum +"<br>";
+		activeSera[serum]=true;
 	}
 	seraDiv.innerHTML = htmlStr;
-	console.log(seraDiv);
-	for (var serum in focusNode.potency_mut){
+	for (var i=0; i<allSera.length; i++){
+		var serum = allSera[i];
 		var serumID = serum.split("/").join("");
 		d3.select("#"+serumID)
 			.on("change", function(elem){
-					for (var tmpserum in focusNode.potency_mut){
+					for (var j=0; j<allSera.length; j++){
+						var tmpserum = allSera[j];
 						var tmpserumID = tmpserum.split("/").join("");
 						activeSera[tmpserum]=document.getElementById(tmpserumID).checked;
 					}
 					colorByHIDistance()});
-		}
+	}
 
 	colorByHIDistance();
 }
@@ -354,7 +356,6 @@ function colorByHIDistance(){
 	correctVirus = document.getElementById("virus").checked;
 	correctPotency = document.getElementById("serum").checked;
 	var HIchoices = document.getElementsByName("HImodel");
-	console.log(activeSera);
 	for(var i = 0; i < HIchoices.length; i++){
 	    if(HIchoices[i].checked){
 	        HImodel = HIchoices[i].value;
