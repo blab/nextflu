@@ -44,14 +44,37 @@ categories:
 							<input type="checkbox" id="timetree" checked="true"> timetree
 						</div>
 					</div>
+          {% if page.coloring contains 'HI' %}
+					<div class="form-group" id="HIcontrols" style="display: none">
+						<label class="col-xs-4 control-label">HI color:</label><br>
+						<div class="col-xs-8 controls">
+							<form action="" id="HImodel">
+								<input type="radio" name="HImodel" id="HImodel_measured"  checked="checked"  value="measured"> measurements<br>
+								<input type="radio" name="HImodel" id="HImodel_tree" value="tree"> tree model<br>
+							</form>
+						</div>
+						<label class="col-xs-4 control-label">Corrections:</label><br>
+						<div class="col-xs-8 controls">
+							<div class="bigspacer"></div>
+							<input type="checkbox" id="serum" value="serum" checked="checked"> serum potency<br>
+							<input type="checkbox" id="virus" value="virus"> virus avidity
+						</div>
+						<label class="col-xs-4 control-label">Sera:</label><br>
+						<div class="col-xs-8 controls">
+							<div class="bigspacer"></div>
+							<div id="sera"></div>
+						</div>
+					</div>
+					{% endif %}
+
 				</form>
 				<div class="spacer"></div>
 
 				{% for res in site.data.restrictions_dengue %}
 				<form class="form-horizontal form-small">
 					<div class="form-group">
-						<label class="col-xs-5 control-label">{{res.label}}</label>
-						<div class="col-xs-7 controls">
+						<label class="col-xs-4 control-label">{{res.label}}</label>
+						<div class="col-xs-8 controls">
 							<select id="{{res.id}}" class="form-control">
 								{% for reg in res.fields %}
 								<option value="{{ reg[0] }}">{{reg[1] }}</option>
