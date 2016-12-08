@@ -34,7 +34,7 @@
 "fields":
 [["all", "all"],
   ["china", "China"],
-  ["europe", "Europe"],  
+  ["europe", "Europe"],
   ["japan_korea", "Japan/Korea"],
   ["north_america", "North America"],
   ["oceania", "Oceania"],
@@ -44,12 +44,14 @@
 },
 {
 "label":"Consortium",
-"id":"db",
+"id":"authors",
 "fields":
 [
   ["all", "all"],
-  ["broad", "Broad Viral Genomics Group"],
-  ["zibra", "ZiBRA"]
+  ["Broad Viral Genomics Group", "Broad Viral Genomics Group"],
+  ["Grubaugh et al", "Scripps"],
+  ["Ladner et al", "USAMRIID"],
+  ["Zika in Brazil Real-time Analysis Consortium", "ZiBRA"]
 ]
 },
 {

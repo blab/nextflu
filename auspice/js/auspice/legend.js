@@ -129,10 +129,11 @@ function make_panels(){
     .text(function(d) {
 		var label = d.toString().replace(/([a-z])([A-Z])/g, '$1 $2').replace(/,/g, ', ').replace(/([a-z]+)_([a-z]+)/g, function(_, a, b) { return a.toTitleCase().concat(' ', b.toTitleCase()); }).replace(/^([a-z]+)$/, function(_, a) { return a.toTitleCase(); });
 		label = label.replace(/([A-Za-z]+)_([A-Za-z]+)/g, function(_, a, b) { return a.toTitleCase().concat(' ', b.toTitleCase()); }).replace(/^([a-z]+)$/, function(_, a) { return a.toTitleCase(); });
-        if (colorBy == "dfreq") {
-            label += "\u00D7";
-        }
-        return label;
+		label = label.replace(/^Usa/, 'USA');
+    if (colorBy == "dfreq") {
+        label += "\u00D7";
+    }
+    return label;
     })
    .on('mouseover', function(leg){
     	treeplot.selectAll(".tip")

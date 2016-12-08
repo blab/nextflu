@@ -35,6 +35,24 @@ d3.json(path + file_prefix + "entropy.json", function(error, json){
 	    }
     }
 
+	// load nuc first to hack chart ordering
+	gene='nuc';
+	chart_data[gene]=[];
+	chart_data['x'+gene]=[];
+	chart_types[gene]='bar';
+	chart_xaxis[gene]='x'+gene;
+	for (var ii=0;ii<entropy[gene]["pos"].length;ii+=1){
+		if (Math.round(10000*entropy[gene]["val"][ii])/10000>0.05){
+			chart_data[gene].push(Math.round(10000*entropy[gene]["val"][ii])/10000);
+			chart_data['x'+gene].push(entropy[gene]["pos"][ii]);
+			posToAA[entropy[gene]["pos"][ii]] = [gene, entropy[gene]["pos"][ii]]
+		}
+	}
+	var tmp_xmax = d3.max(chart_data['x'+gene]);
+	if (tmp_xmax>xmax) {xmax=tmp_xmax;}
+	var tmp_ymax = d3.max(entropy[gene]["val"]);
+	if (tmp_ymax>ymax) {ymax=tmp_ymax;}
+
 	for (gene in entropy){
 		if (gene!='nuc'){
 			chart_data[gene]=[];
@@ -53,24 +71,9 @@ d3.json(path + file_prefix + "entropy.json", function(error, json){
 			var tmp_ymax = d3.max(entropy[gene]["val"]);
 			if (tmp_ymax>ymax) {ymax=tmp_ymax;}
 		}
-		else if (gene=='nuc'){
-			chart_data[gene]=[];
-			chart_data['x'+gene]=[];
-			chart_types[gene]='bar';
-			chart_xaxis[gene]='x'+gene;
-			for (var ii=0;ii<entropy[gene]["pos"].length;ii+=1){
-				if (Math.round(10000*entropy[gene]["val"][ii])/10000>0.05){
-					chart_data[gene].push(Math.round(10000*entropy[gene]["val"][ii])/10000);
-					chart_data['x'+gene].push(entropy[gene]["pos"][ii]);
-					posToAA[entropy[gene]["pos"][ii]] = [gene, entropy[gene]["pos"][ii]]
-				}
-			}
-			var tmp_xmax = d3.max(chart_data['x'+gene]);
-			if (tmp_xmax>xmax) {xmax=tmp_xmax;}
-			var tmp_ymax = d3.max(entropy[gene]["val"]);
-			if (tmp_ymax>ymax) {ymax=tmp_ymax;}
-		}
 	}
+	console.log("chart_data");
+	console.log(chart_data);
 	var entropy_chart = c3.generate({
 		bindto: '#entropy',
 		size: {width: width-10, height: height},
@@ -113,6 +116,7 @@ d3.json(path + file_prefix + "entropy.json", function(error, json){
 			xs: chart_xaxis,
 			json: chart_data,
 			types: chart_types,
+			order: null,
 			onclick: function (d,i) {
             	gene = posToAA[d.x][0];
             	var pos = posToAA[d.x][1];
