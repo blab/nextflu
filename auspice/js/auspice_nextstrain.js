@@ -10,6 +10,7 @@ var date_select = true;
 {% include_relative thirdparty/FileSaver.js %}
 {% include_relative thirdparty/autocomplete.js %}
 {% include_relative auspice/globals.js %}
+{% include_relative auspice/HI.js %}
 {% include_relative auspice/date.js %}
 {% include_relative auspice/legend.js %}
 {% include_relative auspice/colors.js %}
