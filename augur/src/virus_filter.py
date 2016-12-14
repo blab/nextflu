@@ -102,10 +102,11 @@ class virus_filter(object):
 		'''
 		Keep only the first isolate of a strain
 		'''
+		outgroup_label = self.outgroup['strain'].upper()
 		filtered_viruses = []
 		for v in self.viruses:
 			label = v['strain'].upper()
-			if not label in self.strain_lookup:
+			if not label in self.strain_lookup and label != outgroup_label:
 				filtered_viruses.append(v)
 				self.strain_lookup[label]=v
 		self.viruses=filtered_viruses
