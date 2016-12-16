@@ -558,14 +558,7 @@ class HI_tree(object):
 		W = solvers.qp(P,q,G,h)
 		self.params = np.array([x for x in W['x']])[:n_params]
 		print "rms deviation prior to relax=",np.sqrt(self.fit_func())
-		# redo the linear cost relaxing terms that seem to be relevant to avoid
-		# compression of the fit. 0.2 seems to be a good cut-off, linear tune to zero
-		#q1[n_params:] = self.lam_HI*(1-5.0*np.minimum(0.2,sol[:HI_sc]))
-		#q = matrix(q1)
-		#W = solvers.qp(P,q,G,h)
-		#sol = np.array([x for x in W['x']])[:n_params]
-		#self.params=sol
-		#print "rms deviation after relax=",np.sqrt(self.fit_func())
+
 		return self.params
 
 	def fit_epitope_function(self):
