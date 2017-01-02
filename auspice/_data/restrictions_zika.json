@@ -49,6 +49,7 @@
 [
   ["all", "all"],
   ["Broad Viral Genomics Group", "Broad Viral Genomics Group"],
+  ["Black et al", "Fred Hutch"],
   ["Grubaugh et al", "Scripps"],
   ["Ladner et al", "USAMRIID"],
   ["Zika in Brazil Real-time Analysis Consortium", "ZiBRA"]
@@ -62,6 +63,7 @@
   ["all", "all"],
   ["Alcantara et al", "Alcantara et al"],
   ["Barzon et al", "Barzon et al"],
+  ["Black et al", "Black et al"],  
   ["Bonaldo et al", "Bonaldo et al"],
   ["Calvet et al", "Calvet et al"],
   ["Carletti et al", "Carletti et al"],
