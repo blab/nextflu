@@ -15,8 +15,8 @@ var vaccineStrains = Object.keys(vaccineChoice);
 var reference_viruses= {};
 var branch_labels=false;
 var restrictTo = {"country": "all", "region": "all", "db": "all", "authors": "all"};
-var time_window = 3.0;
-var full_data_time_window = 3.0;
+var time_window = 3.5;
+var full_data_time_window = 3.5;
 var time_ticks=[2013.0, 2013.5, 2014.0, 2014.5, 2015.0, 2015.5, 2016.0, 2016.5];
 var dfreq_dn = 2;
 var LBItime_window = 0.5;
@@ -55,10 +55,11 @@ var countries = [
 ["mexico",             "#D9AD3D"],
 ["martinique",  	     "#E0A33B"],
 ["guadeloupe",         "#E49838"],
-["puerto_rico",  	     "#E68835"],
-["dominican_republic", "#E67732"],
-["haiti",  			       "#E4632E"],
-["usa",                "#E04E2A"]
+["usvi",               "#E68835"],
+["puerto_rico",  	     "#E67732"],
+["dominican_republic", "#E4632E"],
+["haiti",  			       "#E04E2A"],
+["usa",                "#DE3926"]
 ];
 var divisions = [
 // Asia: "#462EB9", "#403DC5", "#3F4FCC", "#3F60D0", "#4271CE", "#4580CA", "#4B8DC2", "#5199B8", "#58A2AC"
@@ -91,10 +92,11 @@ var divisions = [
 ["mexico",             "#D9AD3D"],
 ["martinique",  	     "#E0A33B"],
 ["guadeloupe",         "#E49838"],
-["puerto_rico",  	     "#E68835"],
-["dominican_republic", "#E67732"],
-["haiti",  			       "#E4632E"],
-["usa",                "#E04E2A"]
+["usvi",               "#E68835"],
+["puerto_rico",  	     "#E67732"],
+["dominican_republic", "#E4632E"],
+["haiti",  			       "#E04E2A"],
+["usa",                "#DE3926"]
 ];
 var mutType = 'both';
 var default_gene = 'nuc';
