@@ -43,19 +43,6 @@
 ]
 },
 {
-"label":"Consortium",
-"id":"authors",
-"fields":
-[
-  ["all", "all"],
-  ["Broad Viral Genomics Group", "Broad Viral Genomics Group"],
-  ["Black et al", "Fred Hutch"],
-  ["Grubaugh et al", "Scripps"],
-  ["Ladner et al", "USAMRIID"],
-  ["Zika in Brazil Real-time Analysis Consortium", "ZiBRA"]
-]
-},
-{
 "label":"Authors",
 "id":"authors",
 "fields":
@@ -63,8 +50,9 @@
   ["all", "all"],
   ["Alcantara et al", "Alcantara et al"],
   ["Barzon et al", "Barzon et al"],
-  ["Black et al", "Black et al"],  
+  ["Black et al", "Black et al"],
   ["Bonaldo et al", "Bonaldo et al"],
+  ["Broad Viral Genomics Group", "Broad Viral Genomics Group"],
   ["Calvet et al", "Calvet et al"],
   ["Carletti et al", "Carletti et al"],
   ["Cunha et al", "Cunha et al"],
@@ -91,6 +79,7 @@
   ["Stalin Raj et al", "Stalin Raj et al"],
   ["Tong et al", "Tong et al"],
   ["Wu et al", "Wu et al"],
+  ["Zika in Brazil Real-time Analysis Consortium", "ZiBRA Consortium"],
   ["Zhang et al", "Zhang et al"],
   ["Zhao et al", "Zhao et al"]
 ]
