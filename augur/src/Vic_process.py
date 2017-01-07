@@ -29,7 +29,7 @@ virus_config.update({
 	# data source and sequence parsing/cleaning/processing
 	'virus':'Vic',
 	'alignment_file':'data/vic.fasta',
-	'outgroup':'B/HongKong/02/1993',
+	'outgroup':'B/HongKong/2/1993',
 	'force_include':'data/vic_hi_strains.tsv',
 	'force_include_all':False,
 	'date_spec':'year',
@@ -60,7 +60,7 @@ class BVic_filter(flu_filter):
 		self.min_length = min_length
 		self.vaccine_strains =[
 			{
-				'strain':    	'B/Shangdong/7/97',
+				'strain':    	'B/Shangdong/7/1997',
 				'isolate_id':	'EPI_ISL_1790',
 				'date':    		'1997-07-01', #(Month and day unknown)
 				'region':   	'china',
@@ -99,7 +99,7 @@ class BVic_filter(flu_filter):
 				if 'gene' in x.qualifiers and x.type=='CDS' and
 				x.qualifiers['gene'][0] in ['SigPep', 'HA1', 'HA2']}
 		self.outgroup = {
-						'strain':'B/HongKong/02/1993',
+						'strain':'B/HongKong/2/1993',
 						'region':'China',
 						'isolate_id':'EPI_ISL_6617',
 						'date':'1993-02-15', #(Month and day unknown)

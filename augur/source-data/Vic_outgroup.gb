@@ -31,10 +31,10 @@ FEATURES             Location/Qualifiers
                      /db_xref="taxon:416687"
                      /collection_date="15-Feb-1993"
                      /segment="4"
-                     /strain="Influenza B virus (B/Hong Kong/02/1993)"
+                     /strain="B/HongKong/2/1993"
                      /host="Human"
                      /country="Hong Kong: Hong Kong"
-                     /organism="Influenza B virus (B/Hong Kong/02/1993)"
+                     /organism="Influenza B virus (B/HongKong/2/1993)"
      gene            12..1769
                      /gene="HA"
      CDS             12..1769

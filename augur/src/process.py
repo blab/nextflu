@@ -289,7 +289,6 @@ class process(virus_frequencies):
 			meta["virus_stats"] = [ [str(y)+'-'+str(m)] + [self.date_region_count[(y,m)][reg] for reg in self.regions]
 									for y,m in sorted(self.date_region_count.keys()) ]
 		write_json(meta, self.auspice_meta_fname, indent=None)
-		self.export_accession_numbers()
 
 	def export_fasta_alignment(self):
 		print "Writing alignment"

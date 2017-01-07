@@ -34,7 +34,7 @@ virus_config.update({
 	# data source and sequence parsing/cleaning/processing
 	'virus':'H1N1pdm',
 	'alignment_file':'data/h1n1pdm.fasta',
-	'outgroup':'A/Swine/Indiana/P12439/00',
+	'outgroup':'A/Swine/Indiana/P12439/2000',
 	'force_include':'data/h1n1pdm_hi_strains.tsv',
 	'force_include_all':False,
 	'date_spec':'year',
@@ -75,7 +75,7 @@ class H1N1pdm_filter(flu_filter):
 		flu_filter.__init__(self, **kwargs)
 		self.min_length = min_length
 		self.vaccine_strains =[{
-			'strain':		'A/California/07/2009',
+			'strain':		'A/California/7/2009',
 			'isolate_id':	'EPI_ISL_31553',
 			'date':			'2009-04-09',
 			'lab':			'Naval Health Research Center',
@@ -98,7 +98,7 @@ class H1N1pdm_filter(flu_filter):
 				if 'gene' in x.qualifiers and x.type=='CDS' and
 				x.qualifiers['gene'][0] in ['SigPep', 'HA1', 'HA2']}
 		self.outgroup = {
-			'strain':		'A/Swine/Indiana/P12439/00',
+			'strain':		'A/Swine/Indiana/P12439/2000',
 			'db':			'IRD',
 			'accession':	'AF455680',
 			'date':			'2002-03-14',
