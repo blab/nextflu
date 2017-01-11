@@ -183,7 +183,7 @@ class H3N2_clean(virus_clean):
 			"A/HongKong/HK11MA21-1/2008", "A/HongKong/HK11MA21-3/2008", "A/HongKong/HK11MA21-4/2008",
 			"A/HongKong/HK12/2008", "A/HongKong/HK12MA21-2/2008", "A/HongKong/HKMA12/2008",
 			"A/HongKong/HKMA12A/2008", "A/HongKong/HKMA12B/2008", "A/HongKong/HKMA12D/2008",
-			"A/HongKong/HKMA12E/2008", "A/HongKong/HKMA20B/2008", "A/HongKong/HKMA20E/2008",
+			"A/HongKong/HKMA12E/2008", "A/HongKong/HKMA20B/2008", "A/HongKong/HKMA20E/2008", "A/Kansas/13/2009",
 			"A/Busan/15453/2009", "A/Pennsylvania/14/2010", "A/Pennsylvania/40/2010", "A/Guam/AF2771/2011",
 			"A/Indiana/8/2011", "A/Kenya/155/2011", "A/Kenya/168/2011", "A/Kenya/170/2011", "A/Nepal/142/2011",
 			"A/Pennsylvania/09/2011", "A/Pennsylvania/9/2011", "A/Quebec/167936/2011", "A/Quebec/170658/2011",
