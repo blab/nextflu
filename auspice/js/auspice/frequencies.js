@@ -10,7 +10,7 @@ function calcDfreq(node, freq_ii){
 	if (typeof node.children != "undefined") {
 		for (var i1=0; i1<node.children.length; i1++) {
 			var label_str = "global_clade:"+node.children[i1].clade;
-			if (frequencies[label_str] != "undefined"){
+			if (typeof frequencies !== "undefined" && frequencies[label_str] != "undefined"){
 				var tmp_freq = get_frequencies("global", "clade:"+node.children[i1].clade)
 				node.children[i1].dfreq = (tmp_freq[freq_ii] + 0.01)/(tmp_freq[freq_ii-dfreq_dn] + 0.01);
 			} else {
@@ -184,4 +184,3 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 		});
 	make_gt_chart(parse_gt_string(document.getElementById("gtspec").value));
 });
-

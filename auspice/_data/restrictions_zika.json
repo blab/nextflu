@@ -34,22 +34,12 @@
 "fields":
 [["all", "all"],
   ["china", "China"],
-  ["europe", "Europe"],  
+  ["europe", "Europe"],
   ["japan_korea", "Japan/Korea"],
   ["north_america", "North America"],
   ["oceania", "Oceania"],
   ["south_america", "South America"],
   ["southeast_asia", "Southeast Asia"]
-]
-},
-{
-"label":"Consortium",
-"id":"db",
-"fields":
-[
-  ["all", "all"],
-  ["broad", "Broad Viral Genomics Group"],
-  ["zibra", "ZiBRA"]
 ]
 },
 {
@@ -60,7 +50,9 @@
   ["all", "all"],
   ["Alcantara et al", "Alcantara et al"],
   ["Barzon et al", "Barzon et al"],
+  ["Black et al", "Black et al"],
   ["Bonaldo et al", "Bonaldo et al"],
+  ["Broad Viral Genomics Group", "Broad Viral Genomics Group"],
   ["Calvet et al", "Calvet et al"],
   ["Carletti et al", "Carletti et al"],
   ["Cunha et al", "Cunha et al"],
@@ -87,6 +79,7 @@
   ["Stalin Raj et al", "Stalin Raj et al"],
   ["Tong et al", "Tong et al"],
   ["Wu et al", "Wu et al"],
+  ["Zika in Brazil Real-time Analysis Consortium", "ZiBRA Consortium"],
   ["Zhang et al", "Zhang et al"],
   ["Zhao et al", "Zhao et al"]
 ]
