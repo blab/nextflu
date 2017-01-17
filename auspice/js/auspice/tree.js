@@ -86,7 +86,7 @@ function initColorDomain(attr, tmpCS){
 	} else {
 		for (var i=minval; i<=maxval; i+=3){ domain.push(i); }
 	}
-	var rangeIndex = domain.length
+	var rangeIndex = domain.length<10?domain.length:9;
 	tmpCS.range(colors[rangeIndex]);
 	tmpCS.domain(domain);
 }
@@ -579,7 +579,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 			.style("font-size", branchLabelSize)
 			.attr("x", function(d) {  return d.x - 9;})
 			.attr("y", function(d) {  return d.y - 6;});
-	
+
 		treeplot.selectAll(".annotation")
 			.transition().duration(dt)
 			.attr("x", function(d) {
