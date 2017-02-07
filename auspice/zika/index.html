@@ -31,6 +31,7 @@ var regions = [
 ['south_america',      '#69B091'],
 ['north_america',      '#E0A33B']
 ];
+
 var countries = [
 // Asia: "#462EB9", "#403DC5", "#3F4FCC", "#3F60D0", "#4271CE", "#4580CA", "#4B8DC2", "#5199B8", "#58A2AC"
 ["thailand",           "#462EB9"],
@@ -41,15 +42,16 @@ var countries = [
 ["china",			         "#4580CA"],
 ["japan",			         "#4B8DC2"],
 ["italy",			         "#5199B8"],
-// South America: "#60AA9F", "#69B091", "#73B584", "#7DB877", "#89BB6B", "#95BD60", "#A2BE57", "#AFBD4F"
+// South America: "#60AA9F", "#69B091", "#73B584", "#7DB877", "#89BB6B", "#95BD60", "#A2BE57"
 ["brazil",  		       "#60AA9F"],
-["ecuador",  		       "#7DB877"],
-["colombia",  		     "#89BB6B"],
-["french_guiana",  	   "#95BD60"],
-["suriname",  		     "#A2BE57"],
-["venezuela",  		     "#AFBD4F"],
-// Central America: "#BBBC49", "#C6B944", "#D0B440", "#D9AD3D", "#E0A33B", "#E49838", "#E68835", "#E67732", "#E4632E", "#E04E2A", "#DE3926"
-["panama",             "#BBBC49"],
+["ecuador",  		       "#69B091"],
+["colombia",  		     "#73B584"],
+["french_guiana",  	   "#7DB877"],
+["suriname",  		     "#89BB6B"],
+["venezuela",  		     "#95BD60"],
+// Central America: "#AFBD4F", "#BBBC49", "#C6B944", "#D0B440", "#D9AD3D", "#E0A33B", "#E49838", "#E68835", "#E67732", "#E4632E", "#E04E2A", "#DE3926"
+["panama",             "#AFBD4F"],
+["nicaragua",          "#BBBC49"],
 ["honduras",           "#C6B944"],
 ["guatemala",  		     "#D0B440"],
 ["mexico",             "#D9AD3D"],
@@ -62,43 +64,8 @@ var countries = [
 ["haiti",  			       "#E04E2A"],
 ["usa",                "#DE3926"]
 ];
-var divisions = [
-// Asia: "#462EB9", "#403DC5", "#3F4FCC", "#3F60D0", "#4271CE", "#4580CA", "#4B8DC2", "#5199B8", "#58A2AC"
-["thailand",           "#462EB9"],
-["singapore",          "#403DC5"],
-["french_polynesia",   "#3F4FCC"],
-["american_samoa",	   "#3F60D0"],
-["tonga",	             "#4271CE"],
-["china",			         "#4580CA"],
-["japan",			         "#4B8DC2"],
-["italy",			         "#5199B8"],
-// South America: "#60AA9F", "#69B091", "#73B584", "#7DB877", "#89BB6B", "#95BD60", "#A2BE57", "#AFBD4F"
-// Brazil: "#60AA9F", "#64AC99", "#68AF92", "#6CB28C", "#71B486", "#76B67F", "#7BB879"
-["brazil",  		       "#60AA9F"],
-["sao_paulo",  		     "#64AC99"],
-["bahia",  		         "#68AF92"],
-["alagoas",  		       "#6CB28C"],
-["pernambuco",  		   "#71B486"],
-["paraiba",  		       "#76B67F"],
-["rio_grande_do_norte","#7BB879"],
-["ecuador",  		       "#7DB877"],
-["colombia",  		     "#89BB6B"],
-["french_guiana",  	   "#95BD60"],
-["suriname",  		     "#A2BE57"],
-["venezuela",  		     "#AFBD4F"],
-// Central America: "#BBBC49", "#C6B944", "#D0B440", "#D9AD3D", "#E0A33B", "#E49838", "#E68835", "#E67732", "#E4632E", "#E04E2A", "#DE3926"
-["panama",             "#BBBC49"],
-["honduras",           "#C6B944"],
-["guatemala",  		     "#D0B440"],
-["mexico",             "#D9AD3D"],
-["martinique",  	     "#E0A33B"],
-["guadeloupe",         "#E49838"],
-["usvi",               "#E68835"],
-["puerto_rico",  	     "#E67732"],
-["dominican_republic", "#E4632E"],
-["haiti",  			       "#E04E2A"],
-["usa",                "#DE3926"]
-];
+
+var divisions = [];
 var mutType = 'both';
 var default_gene = 'nuc';
 var plot_frequencies = false;
