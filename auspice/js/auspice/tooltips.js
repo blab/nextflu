@@ -57,7 +57,7 @@ var virusTooltip = d3.tip()
 		}
 		if (typeof d.attr.lab != "undefined") {
 			if (d.attr.lab != "") {
-				string += "<br>Source: " + d.lab.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').toTitleCase().substring(0,25);
+				string += "<br>Source: " + d.attr.lab.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').toTitleCase().substring(0,25);
 				if (d.attr.lab.length>25) string += '...';
 			}
 		}
