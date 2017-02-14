@@ -49,11 +49,11 @@ class HI_tree(object):
 			for line in infile:
 				entries = line.strip().split()
 				test, ref_virus, serum, src_id, val = (entries[0], entries[1],entries[2],
-														entries[3], float(entries[4]))
+														entries[3], entries[4])
 				ref = (ref_virus, serum)
-				if src_id not in self.excluded_tables:
+				if src_id not in self.excluded_tables and "<" not in val and ">" not in val:
 					try:
-						measurements[(test, (ref_virus, serum))].append(val)
+						measurements[(test, (ref_virus, serum))].append(float(val))
 						strains.update([test, ref])
 						sources.add(src_id)
 					except:
