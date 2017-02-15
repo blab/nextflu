@@ -82,7 +82,7 @@
 							{% endfor %}
 						</ul>
 					</li>
-				</ul>			
+				</ul>
 				<div class="navbar-header">
 					<a class="navbar-brand" href="/">
 						<div class="navtitle">
@@ -108,7 +108,7 @@
 										<a>{{ entry.virus }}</a>
 									{% else %}
 									<li>
-										<a href="/{{ entry.virus | downcase }}/{{ page.resolution | downcase }}">{{ entry.virus }}</a>
+										<a href="/{{ entry.virus | downcase }}/{{ page.resolution | downcase }}/{{ page.date_set }}">{{ entry.virus }}</a>
 									{% endif %}
 									</li>
 								{% endfor %}
@@ -135,7 +135,37 @@
 												<a>{{ res | replace:'-',' ' }}</a>
 											{% else %}
 											<li>
-												<a href="/{{ entry.virus | downcase }}/{{ res | downcase }}">{{ res | replace:'-',' ' }}</a>
+												<a href="/{{ entry.virus | downcase }}/{{ res | downcase }}/{{ page.date_set }}">{{ res | replace:'-',' ' }}</a>
+											{% endif %}
+											</li>
+										{% endfor %}
+									{% endif %}
+								{% endfor %}
+							</ul>
+						</li>
+						{% endif %}
+						{% if page.dataset %}
+						<li class="dropdown hidden-xs"><p>/</p></li>
+						<li class="dropdown">
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+								{% if page.dataset %}
+								{{ page.dataset | replace:'_',' ' | upcase }}
+								{% else %}
+								Data set
+								{% endif %}
+								<span class="caret"></span>
+							</a>
+							<ul class="dropdown-menu">
+								<li class="dropdown-header">Data set</li>
+								{% for entry in site.data.viruses %}
+									{% if page.virus == entry.virus %}
+										{% for ds in entry.datasets %}
+											{% if page.dataset ==  ds %}
+											<li class="disabled">
+												<a>{{ ds | replace:'_',' ' |upcase }}</a>
+											{% else %}
+											<li>
+												<a href="/{{ entry.virus | downcase }}/{{ page.resolution | downcase }}/{{ ds }}">{{ ds | replace:'_',' ' | upcase }}</a>
 											{% endif %}
 											</li>
 										{% endfor %}
@@ -148,7 +178,7 @@
 				</div>
 			</div>
 		</nav>
-		
+
 
 		<div class="container">
 
