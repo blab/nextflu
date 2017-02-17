@@ -16,7 +16,9 @@ virus = 'H3N2'
 #virus = 'Yam'
 
 resolution = '2y'
-report = 'sep-2016'
+report = 'feb-2017'
+
+print "Plotting dataset " + virus + "/" + resolution + " for " + report + " report"
 
 freqs = json.load(open('../data/'+virus+'_'+resolution+'_frequencies.json'))
 counts = json.load(open('../data/'+virus+'_'+resolution+'_meta.json'))['virus_stats']
@@ -24,10 +26,9 @@ region_names = json.load(open('../data/'+virus+'_'+resolution+'_meta.json'))['re
 region_codes = {'EU':['europe'], 'AS':['china', 'south_asia', 'japan_korea','southeast_asia'],
                 'NA':["north_america"], 'OC':["oceania"]}
 
-
 if virus=='H3N2': ########## H3N2
     clades = ['3c2.a', '3c3.a', '3c3.b']
-    mutations = ['HA1:142K', 'HA1:197K', 'HA1:171K', 'HA1:121K']
+    mutations = ['HA1:171K', 'HA1:159Y', 'HA1:159S', 'HA1:131K', 'HA1:142K']
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
 elif virus=='H1N1pdm': ########## H1N1pdm
@@ -77,6 +78,7 @@ smoothed_count_by_region = {region: np.sum([smoothed_count_array[region_names.in
                             for region in regions if region!='global'}
 smoothed_count_by_region['global'] = smoothed_count_array.sum(axis=0)
 
+print "Plotting sample counts"
 fig, ax = plt.subplots(figsize=(8, 3))
 drop = 3
 tmpcounts = np.zeros(len(date_bins[drop:]))
@@ -95,7 +97,7 @@ ax.set_ylabel('Sample count')
 ax.legend(loc=3, ncol=1, bbox_to_anchor=(1.02, 0.53))
 plt.subplots_adjust(left=0.1, right=0.82, top=0.94, bottom=0.22)
 sns.despine()
-plt.savefig('figures/sep-2016/'+virus+'_counts.png')
+plt.savefig('figures/' + report + '/'+virus+'_counts.png')
 
 if len(clades):
     fig, axs = plt.subplots(len(clades), 1, sharex=True, figsize=(8, len(clades)*2))
@@ -131,7 +133,7 @@ if len(clades):
     bottom_margin = 0.22 - 0.03*len(clades)
     plt.subplots_adjust(left=0.12, right=0.82, top=0.97, bottom=bottom_margin)
     sns.despine()
-    plt.savefig('figures/sep-2016/'+virus+'_clades.png')
+    plt.savefig('figures/' + report + '/'+virus+'_clades.png')
 
 
 fig, axs = plt.subplots(len(mutations), 1, sharex=True, figsize=(8, len(mutations)*2))
