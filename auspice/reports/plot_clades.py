@@ -10,8 +10,8 @@ plt.ion()
 
 show_errorbars = True
 
-virus = 'H3N2'
-#virus = 'H1N1pdm'
+#virus = 'H3N2'
+virus = 'H1N1pdm'
 #virus = 'Vic'
 #virus = 'Yam'
 
@@ -33,7 +33,7 @@ if virus=='H3N2': ########## H3N2
     mut_legend = {'panel':0, 'loc':3}
 elif virus=='H1N1pdm': ########## H1N1pdm
     clades = ['6b.1', '6b.2']
-    mutations = ['HA1:84N','HA1:162N','HA1:152T'] #these don't add up to one in Asia, probably due to sketchy sampling.
+    mutations = ['HA1:205K', 'HA1:183P', 'HA1:166V']
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
 elif virus=='Vic':
@@ -100,6 +100,7 @@ sns.despine()
 plt.savefig('figures/' + report + '/'+virus+'_counts.png')
 
 if len(clades):
+    print "Plotting clade frequencies"
     fig, axs = plt.subplots(len(clades), 1, sharex=True, figsize=(8, len(clades)*2))
     for clade, ax in zip(clades, axs):
         for c,region in zip(cols, regions):
@@ -135,7 +136,7 @@ if len(clades):
     sns.despine()
     plt.savefig('figures/' + report + '/'+virus+'_clades.png')
 
-
+print "Plotting mutation frequencies"
 fig, axs = plt.subplots(len(mutations), 1, sharex=True, figsize=(8, len(mutations)*2))
 for mutation, ax in zip(mutations, axs):
     for c,region in zip(cols, regions):
