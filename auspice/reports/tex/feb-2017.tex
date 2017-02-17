@@ -89,7 +89,7 @@ This diversification is not reflected in serological data that shows only minor 
 Nevertheless, the highly parallel mutation patterns and the rapid rise and fall of clades suggests competitive dynamics of phenotypically distinct viruses.}
 
 We base our primary analysis on a set of viruses collected between Jan 2015 and Feb 2017 (Fig.\ \ref{H3N2_counts}).
-We analyze mutation frequency trajectories separately in different geographic regions using all available sequence data.
+We analyze mutation frequency trajectories in different geographic regions using all available sequence data for each region.
 Our phylogenetic analysis is based on a subsample of approximately 100 viruses per month where available and seeking to equilibrate sample counts geographically where possible.
 This equilibration attempts to collect equal samples from Africa, China, Europe, Japan/South Korea, North America, Oceania, South America, South Asia, Southeast Asia and West Asia.
 In the following analysis we collapse samples from China, South Asia, Southeast Asia, Japan and Korea into a single region referred to here as ``Asia'', resulting in Asia possessing greater sample counts than North America or Europe.
@@ -132,7 +132,7 @@ Within the 171K clade, a subclade bearing the 121K mutation emerged in at the be
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.9\textwidth]{../figures/feb-2017/H3N2_tree.png}
+	\includegraphics[width=0.9\textwidth]{../figures/feb-2017/h3n2_tree.png}
 	\caption{\textbf{H3N2 / 3c2.a phylogeny colored by genotype.}
 	}
 	\label{H3N2_tree}
@@ -149,7 +149,7 @@ Interestingly, we observe a large number of mutations to positively charged resi
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.95\textwidth]{../figures/feb-2017/H3N2_mutations.png}
+	\includegraphics[width=0.95\textwidth]{../figures/feb-2017/h3n2_frequencies.pdf}
 	\caption{\textbf{Frequency trajectories of 3c2.a subclades.}
 	We estimate frequencies of different clades based on sample counts and collection dates.
 	We use a Brownian motion process prior to smooth frequencies from month-to-month.
@@ -183,12 +183,12 @@ Taken together, these data provide little evidence for substantial antigenic evo
 
 The local branching index (LBI), a phylogenetic indicator of clade growth \cite{neher2014predicting}, corroborates the observations made on the basis of clade frequencies (Fig.\ \ref{H3N2_lbi}).
 Over the last 6 monthes, the 131K clade has highest LBI, while the clade 171K has highest LBI when considering sequences in all of 2016.
-Interpretation of the sequence based indices such as number of epitope or non-epitope mutations is difficult due the extensive genetic heterogeneity.
+Interpretation of the sequence based indices such as number of epitope or non-epitope mutations \cite{luksza2014predictive} is difficult due the extensive genetic heterogeneity.
 The clade 131K has accumulated the same number of epitope mutations as 171K but has fewer non-epitope mutations relative to A/Texas/50/2012.
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.9\textwidth]{../figures/feb-2017/H3N2_lbi.png}
+	\includegraphics[width=0.9\textwidth]{../figures/feb-2017/h3n2_lbi.png}
 	\caption{\textbf{H3N2 phylogeny colored by local branching index.}
 	}
 	\label{H3N2_lbi}
@@ -239,7 +239,7 @@ Within clade 6b.1 there is very little amino acid sequence variation (Fig.\ \ref
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.9\textwidth]{../figures/feb-2017/H1N1pdm_tree.png}
+	\includegraphics[width=0.9\textwidth]{../figures/feb-2017/h1n1pdm_tree.png}
 	\caption{\textbf{H1N1pdm / 6b.1 phylogeny colored by genotype.}
 	}
 	\label{H1N1pdm_tree}
@@ -251,7 +251,7 @@ Mutations 183P and 205K has been rising in Europe and North America starting in 
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.95\textwidth]{../figures/feb-2017/H1N1pdm_mutations.png}
+	\includegraphics[width=0.95\textwidth]{../figures/feb-2017/h1n1pdm_frequencies.pdf}
 	\caption{\textbf{Frequency trajectories of 6b.1 subclades.}
 	We estimate frequencies of different clades based on sample counts and collection dates.
 	We use a Brownian motion process prior to smooth frequencies from month-to-month.
@@ -289,7 +289,7 @@ There is very little HA amino acid variation within the 117V viruses with no sub
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.95\textwidth]{../figures/feb-2017/Vic_mutations.png}
+	\includegraphics[width=0.95\textwidth]{../figures/feb-2017/vic_frequencies.pdf}
 	\caption{\textbf{Frequency trajectories of B/Vic variants.}
 	We estimate frequencies of different clades based on sample counts and collection dates.
 	We use a Brownian motion process prior to smooth frequencies from month-to-month.
@@ -338,7 +338,7 @@ Within clade 3, mutations L172Q and M251V remain dominant and mutation K211R con
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.95\textwidth]{../figures/feb-2017/Yam_mutations.png}
+	\includegraphics[width=0.95\textwidth]{../figures/feb-2017/yam_frequencies.pdf}
 	\caption{\textbf{Frequency trajectories of B/Yam variants.}
 	We estimate frequencies of different clades based on sample counts and collection dates.
 	We use a Brownian motion process prior to smooth frequencies from month-to-month.
@@ -350,7 +350,7 @@ Within clade 3, mutations L172Q and M251V remain dominant and mutation K211R con
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{../figures/feb-2017/Yam_tree.png}
+	\includegraphics[width=0.8\textwidth]{../figures/feb-2017/yam_tree.png}
 	\caption{\textbf{B/Yam phylogeny colored by genotype.}
 	}
 	\label{Yam_tree}
@@ -362,7 +362,7 @@ The LBI highlights the central clade in the tree below (Fig.\ \ref{Yam_lbi}). Th
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.9\textwidth]{../figures/feb-2017/Yam_lbi.png}
+	\includegraphics[width=0.9\textwidth]{../figures/feb-2017/yam_lbi.png}
 	\caption{\textbf{B/Vic phylogeny colored by local branching index.}
 	}
 	\label{Yam_lbi}
