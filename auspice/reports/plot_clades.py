@@ -10,9 +10,9 @@ plt.ion()
 
 show_errorbars = True
 
-#virus = 'H3N2'
+virus = 'H3N2'
 #virus = 'H1N1pdm'
-virus = 'Vic'
+#virus = 'Vic'
 #virus = 'Yam'
 
 resolution = '2y'
