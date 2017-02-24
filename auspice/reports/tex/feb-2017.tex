@@ -14,7 +14,7 @@
 
 % text layout
 \usepackage{geometry}
-\geometry{textwidth=16.75cm} % 15.25cm for single-space, 16.25cm for double-space
+\geometry{textwidth=17cm} % 15.25cm for single-space, 16.25cm for double-space
 \geometry{textheight=22.5cm} % 22cm for single-space, 22.5cm for double-space
 
 % helps to keep figures from being orphaned on a page by themselves
@@ -68,7 +68,7 @@ Seasonal influenza circulation patterns and projections for 2017-2018
 \affil[1]{Vaccine and Infectious Disease Division, Fred Hutchinson Cancer Research Center, Seattle, WA, USA}
 \affil[2]{Biozentrum, University of Basel, Basel, Switzerland}
 
-\date{February 16, 2017}
+\date{February 23, 2017}
 
 \begin{document}
 
@@ -108,7 +108,7 @@ There is reasonably broad geographic sampling throughout, except Dec 2016 and Ja
 
 Of the clades that emerged from the Texas/2012 background in early 2014, only 3c2.a currently remains at globally high prevalence (Fig.\ \ref{H3N2_clades}).
 3c3.b viruses have scarcly been seen since the end of 2015.
-While the uptick of 3c3.a viruses in mid-2016 in the US has failed to carry forward to the 2016-2017 US winter season.
+The uptick of 3c3.a viruses in mid-2016 in the US has failed to carry forward to the 2016-2017 US winter season.
 Oceania still harbors 3c3.a viruses, but we fully expect these to be replaced by another clade in the coming year as Oceania is reseeded from the global reservoir.
 
 \begin{figure}[H]
@@ -125,9 +125,10 @@ Oceania still harbors 3c3.a viruses, but we fully expect these to be replaced by
 
 \pagebreak
 
-Within clade 3c2.a, a number of subclades with signature mutations at N171K, T131K/R142K, R142K, N121K/R144K, Q197K have emerged (Fig.\ \ref{H3N2_tree}).
+Within clade 3c2.a, a number of subclades have emerged (Fig.\ \ref{H3N2_tree}).
+Notable clades include N171K (clade 3c2a.1), N171K/N121K, N121K/S144K, 131K/142K and R142K/Q197K.
 Clades with R142K, N121K/R144K, Q197K arose in late 2014 or early 2015 but have not come to dominate.
-However, the 171K clade that was first observed in mid-2015 has continued to increase in frequency at a moderate rate and is now at a global frequency of approximately 60\%.
+However, the 171K clade (3c2a.1) that was first observed in mid-2015 has continued to increase in frequency at a moderate rate and is now at a global frequency of approximately 60\%.
 Within the 171K clade, a subclade bearing the 121K mutation emerged in at the beginning of 2016 and has steadily increased in frequency now making of the majority of the parent 171K clade.
 
 \begin{figure}[H]
@@ -144,12 +145,13 @@ It has been rising rapidly and has spread to Europe and North America.
 In the branch leading up to this clade, we observe a rapid succession of mutation in codon 131 from threonine to asparagine and then to lysine and the mutation R142K.
 Rapid succession of multiple mutations in the same codon suggest that these changes are adaptive.
 Interestingly, we observe a large number of mutations to positively charged residues and particularly many parallel mutations to lysine at positions 121, 131, 142, 144, 171, and 197.
+Clades N171K/N121K and T131K/R142K are on opposing genetic backgrounds so that there is competition between these clades; both cannot succeed.
 
 \pagebreak
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.95\textwidth]{../figures/feb-2017/h3n2_frequencies.pdf}
+	\includegraphics[width=0.75\textwidth]{../figures/feb-2017/h3n2_frequencies.pdf}
 	\caption{\textbf{Frequency trajectories of 3c2.a subclades.}
 	We estimate frequencies of different clades based on sample counts and collection dates.
 	We use a Brownian motion process prior to smooth frequencies from month-to-month.
@@ -185,6 +187,8 @@ The local branching index (LBI), a phylogenetic indicator of clade growth \cite{
 Over the last 6 monthes, the 131K clade has highest LBI, while the clade 171K has highest LBI when considering sequences in all of 2016.
 Interpretation of the sequence based indices such as number of epitope or non-epitope mutations \cite{luksza2014predictive} is difficult due the extensive genetic heterogeneity.
 The clade 131K has accumulated the same number of epitope mutations as 171K but has fewer non-epitope mutations relative to A/Texas/50/2012.
+
+ \textit{Given current patterns of clade growth and decline, we predict clades 171K/121K and 131K/142K to be the most successful of currently circulating clades. We expect both to increase in the coming months. Longer term projections are difficult. 171K/121K may continue to dominate, 131K/142K may displace 171K/121K or another mutation may appear that determines the eventual outcome.}
 
 \begin{figure}[H]
 	\centering
@@ -245,13 +249,15 @@ Within clade 6b.1 there is very little amino acid sequence variation (Fig.\ \ref
 	\label{H1N1pdm_tree}
 \end{figure}
 
-\pagebreak
-
 Mutations 183P and 205K has been rising in Europe and North America starting in early-mid 2016, but this rise corresponds to a small number of cases and might turn out insignificant during the next H1N1pdm dominated season (Fig.\ \ref{H1N1pdm_mutations}). The pace of increase is only moderate, suggesting a lack of strong selective pressure. Additionally, no consistent antigenic variation is observed among recently circulating H1N1pdm viruses (according to primary infection in naive animals).
+
+\textit{Given the lack of competition, we predict the continued dominance of 6b.1 viruses.}
+
+\pagebreak
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.95\textwidth]{../figures/feb-2017/h1n1pdm_frequencies.pdf}
+	\includegraphics[width=0.9\textwidth]{../figures/feb-2017/h1n1pdm_frequencies.pdf}
 	\caption{\textbf{Frequency trajectories of 6b.1 subclades.}
 	We estimate frequencies of different clades based on sample counts and collection dates.
 	We use a Brownian motion process prior to smooth frequencies from month-to-month.
@@ -286,6 +292,7 @@ As above, we base our primary analysis on a set of viruses collected between Jan
 
 We observe the continued dominance of the clade bearing mutations N129D, V146I and I117V (Fig.\ \ref{Vic_mutations}).
 There is very little HA amino acid variation within the 117V viruses with no subclades rising to appreciable frequency.
+There is deletion at AA site 162 that first appeared in mid-2016, but remains at low global frequency.
 
 \begin{figure}[H]
 	\centering
@@ -302,6 +309,8 @@ There is very little HA amino acid variation within the 117V viruses with no sub
 \pagebreak
 
 Neither the local branching index nor clade frequencies single out a particular variant within the 1A/I117V clade (Fig.\ \ref{Vic_lbi}).
+
+\textit{Given the lack of competition, we predict the continued dominance of 117V viruses.}
 
 \begin{figure}[H]
 	\centering
@@ -359,6 +368,8 @@ Within clade 3, mutations L172Q and M251V remain dominant and mutation K211R con
 \pagebreak
 
 The LBI highlights the central clade in the tree below (Fig.\ \ref{Yam_lbi}). This clade has no amino acid mutations in HA along its backbone relative to its parent clade 251V.
+
+\textit{Genetic variation within 172Q/251V viruses is beginning to develop, but given lack of credible competition, we expect 172Q/251V to continual to dominate in the coming months.}
 
 \begin{figure}[H]
 	\centering
