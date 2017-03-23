@@ -171,7 +171,7 @@ class H3N2_clean(virus_clean):
 		outlier_strains = [
 			"A/Chile/8266/2003", "A/Louisiana/4/2003", "A/Lousiana/4/2003", "A/OSAKA/31/2005",
 			"A/Sari/388/2006", "A/HongKong/HK1/2008", "A/HongKong/HK1MA21-1/2008", "A/HongKong/HK1MA21-2/2008",
-			"A/HongKong/HK1MA21-3/2008", "A/HongKong/HK2/2008", "A/HongKong/HK2MA21-1/2008",
+			"A/HongKong/HK1MA21-3/2008", "A/HongKong/HK1MA21-4/2008", "A/HongKong/HK2/2008", "A/HongKong/HK2MA21-1/2008",
 			"A/HongKong/HK2MA21-2/2008", "A/HongKong/HK2MA21-3/2008", "A/HongKong/HK4/2008",
 			"A/HongKong/HK5/2008", "A/HongKong/HK5MA21-1/2008", "A/HongKong/HK5MA21-3/2008",
 			"A/HongKong/HK6/2008", "A/HongKong/HK6MA21-2/2008", "A/HongKong/HK6MA21-3/2008",
@@ -183,7 +183,7 @@ class H3N2_clean(virus_clean):
 			"A/HongKong/HK11MA21-1/2008", "A/HongKong/HK11MA21-3/2008", "A/HongKong/HK11MA21-4/2008",
 			"A/HongKong/HK12/2008", "A/HongKong/HK12MA21-2/2008", "A/HongKong/HKMA12/2008",
 			"A/HongKong/HKMA12A/2008", "A/HongKong/HKMA12B/2008", "A/HongKong/HKMA12C/2008",
-			"A/HongKong/HKMA12D/2008", "A/HongKong/HKMA12E/2008", "A/HongKong/HKMA20B/2008",
+			"A/HongKong/HKMA12D/2008", "A/HongKong/HKMA12E/2008", "A/HongKong/HKMA20A/2008", "A/HongKong/HKMA20B/2008",
 			"A/HongKong/HKMA20E/2008", "A/Kansas/13/2009", "A/Busan/15453/2009", "A/Pennsylvania/14/2010",
 			"A/Pennsylvania/40/2010", "A/Guam/AF2771/2011", "A/Indiana/8/2011", "A/Kenya/155/2011",
 			"A/Kenya/168/2011", "A/Kenya/170/2011", "A/Nepal/142/2011", "A/Pennsylvania/09/2011",
@@ -197,7 +197,7 @@ class H3N2_clean(virus_clean):
 			"A/Michigan/84/2016", "A/Michigan/87/2016", "A/Michigan/89/2016", "A/Michigan/90/2016",
 			"A/Michigan/91/2016", "A/Michigan/93/2016", "A/Michigan/94/2016", "A/Michigan/95/2016",
 			"A/Michigan/96/2016", "A/Ohio/27/2016", "A/Ohio/28/2016", "A/Ohio/32/2016", "A/Ohio/33/2016",
-			"A/Ohio/35/2016", "A/Zhejiang-Wuxin/1300/2016"]
+			"A/Ohio/35/2016", "A/Zhejiang-Wuxin/1300/2016", "A/Catalonia/NSVH100560486/2017"]
 		for v in self.viruses:
 			if v.strain in outlier_strains:
 				if self.verbose > 1:
