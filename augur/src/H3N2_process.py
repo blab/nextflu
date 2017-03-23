@@ -169,7 +169,7 @@ class H3N2_clean(virus_clean):
 		"""Remove single outlying viruses"""
 		new_viruses = []
 		outlier_strains = [
-			"A/Chile/8266/2003", "A/Louisiana/4/2003", "A/Lousiana/4/2003", "A/OSAKA/31/2005",
+			"A/Chile/8266/2003", "A/Louisiana/4/2003", "A/Lousiana/4/2003", "A/OSAKA/31/2005", "A/Ontario/RV1273/2005",
 			"A/Sari/388/2006", "A/HongKong/HK1/2008", "A/HongKong/HK1MA21-1/2008", "A/HongKong/HK1MA21-2/2008",
 			"A/HongKong/HK1MA21-3/2008", "A/HongKong/HK1MA21-4/2008", "A/HongKong/HK2/2008", "A/HongKong/HK2MA21-1/2008",
 			"A/HongKong/HK2MA21-2/2008", "A/HongKong/HK2MA21-3/2008", "A/HongKong/HK4/2008",
