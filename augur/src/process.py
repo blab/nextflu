@@ -244,7 +244,7 @@ class process(virus_frequencies):
 								"/".join([gene+':'+str(pos)+aa for gene, pos, aa in gt]))
 							for clade, gt in self.clade_designations.iteritems()
 							if clade in annotations and clade_present[clade] == True]
-		write_json(self.tree_json, self.auspice_tree_fname, indent=None)
+		write_json(self.tree_json, self.auspice_tree_fname, indent=1)
 		try:
 			read_json(self.auspice_tree_fname)
 		except:
