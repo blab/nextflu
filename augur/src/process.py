@@ -30,6 +30,7 @@ parser.add_argument('--ATG', action="store_true", default=False, help ="include 
 parser.add_argument('--html', action="store_true", default=False, help ="regenerate HTML")
 parser.add_argument('--resolution', type = str,  help ="label for the resolution")
 parser.add_argument('--estimate_fitness_model', default = False, action="store_true", help ="estimate parameters of fitness model")
+parser.add_argument('--pretty', default = False, action = "store_true", help = "format JSONs to be human readable")
 
 
 virus_config = {
@@ -74,6 +75,9 @@ class process(virus_frequencies):
 		self.min_genotype_frequency = min_genotype_frequency
 		self.time_interval = tuple(time_interval)
 		self.kwargs = kwargs
+		self.pretty = None
+		if self.kwargs['pretty'] == True:
+			self.pretty = 1
 		self.tree_fname = 		self.path + self.prefix + self.resolution_prefix + 'tree.pkl'
 		self.virus_fname = 		self.path + self.prefix + self.resolution_prefix + 'virus.pkl'
 		self.frequency_fname = 	self.path + self.prefix + self.resolution_prefix + 'frequencies.pkl'
@@ -194,7 +198,7 @@ class process(virus_frequencies):
 		elems['root']['nuc'] = self.tree.seed_node.seq
 		for anno, aa_seq in self.tree.seed_node.aa_seq.iteritems():
 			elems['root'][anno] = aa_seq
-		write_json(elems, self.auspice_sequences_fname, indent=None)
+		write_json(elems, self.auspice_sequences_fname, indent=self.pretty)
 
 		print "Writing tree"
 		self.tree_json = dendropy_to_json(self.tree.seed_node, tree_fields)
@@ -244,12 +248,12 @@ class process(virus_frequencies):
 								"/".join([gene+':'+str(pos)+aa for gene, pos, aa in gt]))
 							for clade, gt in self.clade_designations.iteritems()
 							if clade in annotations and clade_present[clade] == True]
-		write_json(self.tree_json, self.auspice_tree_fname, indent=1)
+		write_json(self.tree_json, self.auspice_tree_fname, indent=self.pretty)
 		try:
 			read_json(self.auspice_tree_fname)
 		except:
 			print "Read failed, rewriting with indents"
-			write_json(self.tree_json, self.auspice_tree_fname, indent=1)
+			write_json(self.tree_json, self.auspice_tree_fname, indent=self.pretty)
 
 		# Write out frequencies
 		if hasattr(self, 'frequencies'):
@@ -288,7 +292,7 @@ class process(virus_frequencies):
 			meta["regions"] = self.regions
 			meta["virus_stats"] = [ [str(y)+'-'+str(m)] + [self.date_region_count[(y,m)][reg] for reg in self.regions]
 									for y,m in sorted(self.date_region_count.keys()) ]
-		write_json(meta, self.auspice_meta_fname, indent=None)
+		write_json(meta, self.auspice_meta_fname, indent=self.pretty)
 
 	def export_fasta_alignment(self):
 		print "Writing alignment"
