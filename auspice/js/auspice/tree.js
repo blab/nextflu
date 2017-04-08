@@ -583,10 +583,10 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		treeplot.selectAll(".annotation")
 			.transition().duration(dt)
 			.attr("x", function(d) {
-				return xScale(d[1]) - 10;
+				return d.x - 10;
 			})
 			.attr("y", function(d) {
-				return yScale(d[2]) - 6;
+				return d.y - 6;
 			});
 
 	}
@@ -704,20 +704,17 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.render();
 
 	// add clade labels
-	clades = rootNode["clade_annotations"];
-	if (typeof clades != "undefined"){
-		console.log(clades);
-		var clade_annotations = treeplot.selectAll('.annotation')
-			.data(clades)
-			.enter()
-			.append("text")
-			.attr("class", "annotation")
-			.style("text-anchor", "end")
-			.style("visibility", "visible")
-			.text(function (d) {
-				return d[0];
-			});
-		}
+	var clade_annotations = treeplot.selectAll('.annotation')
+		.data(nodes.filter(function(d){return typeof d.attr["clade_name"] !== "undefined";}))
+		.enter()
+		.append("text")
+		.attr("class", "annotation")
+		.style("text-anchor", "end")
+		.style("visibility", "visible")
+		.text(function (d) {
+			return d.attr.clade_name;
+		});
+
 	var xScale = d3.scale.linear()
 		.domain([d3.min(xValues), d3.max(xValues)]);
 	var yScale = d3.scale.linear()
