@@ -87,7 +87,7 @@
 										<a>{{ entry.virus }}</a>
 									{% else %}
 									<li>
-										<a href="/{{ entry.virus | downcase }}/{{ page.resolution | downcase }}/{{ page.passage | downcase }}">{{ entry.virus }}</a>
+										<a href="/{{ entry.virus | downcase }}/{{ page.resolution | downcase }}/{{ page.passage | downcase }}/{{ page.assay }}">{{ entry.virus }}</a>
 									{% endif %}
 									</li>
 								{% endfor %}
@@ -114,7 +114,7 @@
 												<a>{{ res | replace:'-',' ' }}</a>
 											{% else %}
 											<li>
-												<a href="/{{ page.virus | downcase }}/{{ res | downcase }}/{{ page.passage | downcase }}">{{ res | replace:'-',' ' }}</a>
+												<a href="/{{ page.virus | downcase }}/{{ res | downcase }}/{{ page.passage | downcase }}/{{ page.assay }}">{{ res | replace:'-',' ' }}</a>
 											{% endif %}
 											</li>
 										{% endfor %}
@@ -144,7 +144,37 @@
 												<a>{{ pas | replace:'-',' ' }}</a>
 											{% else %}
 											<li>
-												<a href="/{{ page.virus | downcase }}/{{ page.resolution }}/{{ pas | downcase }}">{{ pas | replace:'-',' ' }}</a>
+												<a href="/{{ page.virus | downcase }}/{{ page.resolution }}/{{ pas | downcase }}/{{ page.assay }}">{{ pas | replace:'-',' ' }}</a>
+											{% endif %}
+											</li>
+										{% endfor %}
+									{% endif %}
+								{% endfor %}
+							</ul>
+						</li>
+						{% endif %}
+						{% if page.virus %}
+						<li class="dropdown hidden-xs"><p>/</p></li>
+						<li class="dropdown">
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+								{% if page.assay %}
+								{{ page.assay | replace:'-',' ' |  }}
+								{% else %}
+								Assay
+								{% endif %}
+								<span class="caret"></span>
+							</a>
+							<ul class="dropdown-menu">
+								<li class="dropdown-header">Assay</li>
+								{% for entry in site.data.viruses %}
+									{% if page.virus == entry.virus %}
+										{% for as in entry.assays %}
+											{% if page.assay == as %}
+											<li class="disabled">
+												<a>{{ as | replace:'-',' ' }}</a>
+											{% else %}
+											<li>
+												<a href="/{{ page.virus | downcase }}/{{ page.resolution }}/{{ page.passage | downcase }}/{{ as | downcase }}">{{ as | replace:'-',' ' }}</a>
 											{% endif %}
 											</li>
 										{% endfor %}
