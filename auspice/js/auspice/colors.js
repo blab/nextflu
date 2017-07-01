@@ -321,7 +321,7 @@ function newFocus(){
 	seraDiv.innerHTML = htmlStr;
 	console.log(seraDiv);
 	for (var serum in focusNode.potency_mut){
-		var serumID = serum.split("/").join("");
+		var serumID = serum.split("/").join("").replace(";", " ");
 		d3.select("#"+serumID)
 			.on("change", function(elem){
 					for (var tmpserum in focusNode.potency_mut){
