@@ -321,7 +321,7 @@ function newFocus(){
 	seraDiv.innerHTML = htmlStr;
 	console.log(seraDiv);
 	for (var serum in focusNode.potency_mut){
-		var serumID = serum.split("/").join("").replace(";", " ");
+		var serumID = serum.split("/").join("").replace(/;/g, " ");
 		d3.select("#"+serumID)
 			.on("change", function(elem){
 					for (var tmpserum in focusNode.potency_mut){
@@ -395,6 +395,3 @@ d3.select("#gt-color")
 		if (typeof genotypeColoringEvent != "undefined"){clearTimeout(genotypeColoringEvent);}
 		genotypeColoringEvent = setTimeout(colorByGenotype, 200);
 	});
-
-
-
