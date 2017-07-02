@@ -227,8 +227,7 @@ class H1N1pdm_process(process, H1N1pdm_filter, H1N1pdm_clean, H1N1pdm_refine, HI
 			# exporting to json, including the H1N1pdm specific fields
 			self.export_to_auspice(tree_fields = [
 				'ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country',
-				'dHI', 'cHI', 'mean_HI_titers','HI_titers','HI_titers_raw', 'serum', 'HI_info',
-				'avidity_tree','avidity_mut', 'potency_mut', 'potency_tree', 'mean_potency_mut', 'mean_potency_tree', 'autologous_titers'],
+				'dHI', 'cHI'],
                    annotations = ['5', '6', '6b', '6c', '7', '6b.1', '6b.2'])
 			if params.html:
 				self.generate_indexHTML()
