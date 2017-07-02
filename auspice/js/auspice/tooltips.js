@@ -37,7 +37,7 @@ var virusTooltip = d3.tip()
 		}
 		if ((typeof d.db != "undefined") && (typeof d.accession != "undefined") && (d.db == "Genbank")) {
 			string += "<br>Accession: " + d.accession;
-		}		
+		}
 		if (typeof d.lab != "undefined") {
 			if (d.lab != "") {
 				string += "<br>Source: " + d.lab.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').toTitleCase().substring(0,25);
@@ -49,7 +49,7 @@ var virusTooltip = d3.tip()
 				string += "<br>Authors: " + d.authors.substring(0,25);
 				if (d.authors.length>25) string += '...';
 			}
-		}		
+		}
 		string += "</div>";
 		// following may or may not be present
 		if ((typeof focusNode != "undefined")){
@@ -94,15 +94,15 @@ var virusTooltip = d3.tip()
 		if (typeof d.LBI != "undefined") {
 			string += "Local branching index: " + d.LBI.toFixed(3) + "<br>";
 		}
-		if (typeof d.dfreq != "undefined") {
-			string += "Freq. change: " + d.dfreq.toFixed(3) + "<br>";
-		}
-		if (typeof d.fitness != "undefined") {
-			string += "Fitness: " + d.fitness.toFixed(3) + "<br>";
-		}
-		if (typeof d.pred_distance != "undefined") {
-			string += "Predicted distance: " + d.pred_distance.toFixed(3) + "<br>";
-		}				
+		// if (typeof d.dfreq != "undefined") {
+		// 	string += "Freq. change: " + d.dfreq.toFixed(3) + "<br>";
+		// }
+		// if (typeof d.fitness != "undefined") {
+		// 	string += "Fitness: " + d.fitness.toFixed(3) + "<br>";
+		// }
+		// if (typeof d.pred_distance != "undefined") {
+		// 	string += "Predicted distance: " + d.pred_distance.toFixed(3) + "<br>";
+		// }
 		string += "</div>";
 		return string;
 	});
@@ -144,7 +144,7 @@ var linkTooltip = d3.tip()
 		string += "</ul>";
 		if (typeof d.fitness != "undefined") {
 			string += "Fitness: " + d.fitness.toFixed(3) + "<br>";
-		}			
+		}
 		string += "click to zoom into clade"
 		string += "</div>";
 		return string;
