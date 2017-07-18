@@ -338,12 +338,12 @@ function newFocus(){
 	seraDiv.innerHTML = htmlStr;
 	for (var i=0; i<allSera.length; i++){
 		var serum = allSera[i];
-		var serumID = serum.split("/").join("");
+		var serumID = serum.split("/").join("").replace(';', '_');
 		d3.select("#"+serumID)
 			.on("change", function(elem){
 					for (var j=0; j<allSera.length; j++){
 						var tmpserum = allSera[j];
-						var tmpserumID = tmpserum.split("/").join("");
+						var tmpserumID = tmpserum.split("/").join("").replace(';', '_');
 						activeSera[tmpserum]=document.getElementById(tmpserumID).checked;
 					}
 					colorByHIDistance()});

@@ -61,7 +61,7 @@ function calcBranchLength(node){
 };
 
 /**
- * for each node, calculate the number of subtending tips (alive or dead) 
+ * for each node, calculate the number of subtending tips (alive or dead)
 **/
 function calcFullTipCounts(node){
 	node.fullTipCount = 0;
@@ -71,13 +71,13 @@ function calcFullTipCounts(node){
 			node.fullTipCount += node.children[i].fullTipCount;
 		}
 	}
-	else { 
+	else {
 		node.fullTipCount = 1;
 	}
 };
 
 /**
- * for each node, calculate the number of tips in the currently selected time window. 
+ * for each node, calculate the number of tips in the currently selected time window.
 **/
 function calcTipCounts(node){
 	node.tipCount = 0;
@@ -87,7 +87,7 @@ function calcTipCounts(node){
 			node.tipCount += node.children[i].tipCount;
 		}
 	}
-	else if (node.current){ 
+	else if (node.current){
 		node.tipCount = 1;
 	}
 };
@@ -101,10 +101,11 @@ function setNodeAlive(node){
 		for (var i=0, c=node.children.length; i<c; i++) {
 			setNodeAlive(node.children[i]);
 			aliveChildren = aliveChildren||node.children[i].alive
-		}   
+		}
 		node.alive = aliveChildren;
 	}else{
-		node.alive = node.current;
+//		node.alive = node.current;
+		node.alive = node.attr.num_date > LBItime_window ? true : false;
 	}
 };
 
@@ -120,7 +121,7 @@ function calcUpPolarizers(node){
 		node.up_polarizer += node.children[i].up_polarizer;
 		}
 	}
-	bl =  node.branch_length/LBItau;
+	bl = node.clock_length/LBItau;
 	node.up_polarizer *= Math.exp(-bl);
 	if (node.alive){ // only alive branches contribute anything
 		node.up_polarizer += LBItau*(1-Math.exp(-bl));
@@ -140,10 +141,10 @@ function calcDownPolarizers(node){
 			node.children[i1].down_polarizer += node.children[i2].up_polarizer;
 			}
 		}
-		// account for the attenuation over the branch_length 
-		bl =  node.children[i1].branch_length/LBItau;
+		// account for the attenuation over the branch_length
+		bl =  node.children[i1].clock_length/LBItau;
 		node.children[i1].down_polarizer *= Math.exp(-bl);
-		if (node.children[i1].alive) { //the branch contributes only when the node is alive 
+		if (node.children[i1].alive) { //the branch contributes only when the node is alive
 			node.children[i1].down_polarizer += LBItau*(1-Math.exp(-bl));
 		}
 		calcDownPolarizers(node.children[i1]);
@@ -162,6 +163,15 @@ function calcPolarizers(node){
  * allnodes is provided for easy normalization at the end
 **/
 function calcLBI(node, allnodes){
+	allnodes.forEach(function (d) {
+		if (typeof d.children != "undefined") {
+			for (var i=0; i<d.children.length; i++) {
+				d.children[i].clock_length = d.children[i].tvalue - d.tvalue;
+				console.log(d.children[i].clock_length);
+			}
+		}
+	});
+	allnodes[0].clock_length=0;
 	setNodeAlive(node);
 	calcPolarizers(node);
 	allnodes.forEach(function (d) {
