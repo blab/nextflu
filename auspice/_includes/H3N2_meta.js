@@ -115,3 +115,7 @@ reference_viruses["A/Auckland/10/1997"] = '1997-08-01';
 reference_viruses["A/Norway/466/2014"] = '2014-02-03';
 reference_viruses["A/Sydney/5/1997"] = '1997-06-01';
 reference_viruses["A/Singapore/1/1996"] = '1996-02-12';
+
+
+var countries = [];
+var divisions = [];

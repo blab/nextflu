@@ -1,5 +1,6 @@
 console.log('Enter tree.js');
 var timetree=true;
+var LBI_cutoff;
 
 var dHIScale = d3.scale.linear()
 	.domain([0, 1])
@@ -34,6 +35,7 @@ if ((typeof branch_labels != "undefined")&&(branch_labels)) {top_margin +=5;}
 function initDateColorDomain(intAttributes){
 	var numDateValues = tips.map(function(d) {return d.attr.num_date;})
 	var maxDate = d3.max(numDateValues.filter(function (d){return d!="undefined";}));
+	LBI_cutoff = maxDate - LBItime_window;
 	var time_back = 1.0;
 	if (typeof time_window != "undefined"){
 		time_back = time_window;
@@ -240,7 +242,7 @@ function addBranchLabels(){
 d3.json(path + file_prefix + "tree.json", function(error, root) {
 
 	if (error) return console.warn(error);
-
+	console.log(nodes);
 	nodes = tree.nodes(root);
 	links = tree.links(nodes);
 	var tree_legend;

@@ -26,3 +26,6 @@ var reference_viruses = {
     "A/Narita/1/2009":'2009-05-08',
     "A/HongKong/3934/2011":'2011-03-29',
     "A/HongKong/5659/2012":'2012-05-21'};
+
+var countries = [];
+var divisions = [];

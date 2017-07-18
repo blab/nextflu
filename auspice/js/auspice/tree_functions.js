@@ -105,7 +105,7 @@ function setNodeAlive(node){
 		node.alive = aliveChildren;
 	}else{
 //		node.alive = node.current;
-		node.alive = node.attr.num_date > LBItime_window ? true : false;
+		node.alive = node.attr.num_date > LBI_cutoff ? true : false;
 	}
 };
 
@@ -167,7 +167,6 @@ function calcLBI(node, allnodes){
 		if (typeof d.children != "undefined") {
 			for (var i=0; i<d.children.length; i++) {
 				d.children[i].clock_length = d.children[i].tvalue - d.tvalue;
-				console.log(d.children[i].clock_length);
 			}
 		}
 	});
