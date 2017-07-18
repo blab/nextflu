@@ -24,7 +24,7 @@ REFERENCE   2  (bases 1 to 1701)
             Linden Drive West, Madison, WI 53706, USA
 FEATURES             Location/Qualifiers
      source          1..1701
-                     /strain="A/Swine/Indiana/P12439/00"
+                     /strain="A/Swine/Indiana/P12439/2000"
                      /mol_type="genomic RNA"
                      /organism="Influenza A virus (A/Swine/Indiana/P12439/00
                      (H1N2))"

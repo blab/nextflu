@@ -30,17 +30,18 @@ parser.add_argument('--ATG', action="store_true", default=False, help ="include 
 parser.add_argument('--html', action="store_true", default=False, help ="regenerate HTML")
 parser.add_argument('--resolution', type = str,  help ="label for the resolution")
 parser.add_argument('--estimate_fitness_model', default = False, action="store_true", help ="estimate parameters of fitness model")
+parser.add_argument('--pretty', default = False, action = "store_true", help = "format JSONs to be human readable")
 
 
 virus_config = {
 	'date_format':{'fields':'%Y-%m-%d', 'reg':r'\d\d\d\d-\d\d-\d\d'},
-	# 0                  1     2         3               4      5       6        7        8                9 
+	# 0                  1     2         3               4      5       6        7        8                9
 	# strain             virus accession collection_date region country division location passage_category submitting_lab
 	#>A/Norway/3105/2013|flu|  EPI505249|2013-11-11|     europe|norway| norway|  norway|  cell|            national_institute_for_medical_research
 	'fasta_fields':{0:'strain', 2:'isolate_id', 3:'date', 4:'region', 5:'country', 8:'passage', 9:'lab'},
 	# frequency estimation parameters
 	'aggregate_regions': [  ("global", None), ("NA", ["north_america"]), ("EU", ["europe"]),
-							("AS", ["china", "southeast_asia", "japan_korea"]), ("OC", ["oceania"]) ],
+							("AS", ["china", "south_asia", "southeast_asia", "japan_korea"]), ("OC", ["oceania"]) ],
 	'frequency_stiffness':30.0,
 	'verbose':2,
 	'tol':2e-4, #tolerance for frequency optimization
@@ -59,7 +60,8 @@ class process(virus_frequencies):
 	             run_dir = None, virus = None, resolution = None, date_format={'fields':'%Y-%m-%d', 'reg':r'\d\d\d\d-\d\d-\d\d'},
 				 min_mutation_frequency = 0.01, min_genotype_frequency = 0.1, **kwargs):
 		self.path = path
-		self.output_path = output_path		
+		self.output_path = output_path
+		self.check_dirs(path, output_path)
 		self.virus_type = virus
 		self.resolution = resolution
 		if self.virus_type:
@@ -73,13 +75,16 @@ class process(virus_frequencies):
 		self.min_genotype_frequency = min_genotype_frequency
 		self.time_interval = tuple(time_interval)
 		self.kwargs = kwargs
+		self.pretty = None
+		if self.kwargs['pretty'] == True:
+			self.pretty = 1
 		self.tree_fname = 		self.path + self.prefix + self.resolution_prefix + 'tree.pkl'
 		self.virus_fname = 		self.path + self.prefix + self.resolution_prefix + 'virus.pkl'
 		self.frequency_fname = 	self.path + self.prefix + self.resolution_prefix + 'frequencies.pkl'
 		self.aa_seq_fname = 	self.path + self.prefix + self.resolution_prefix + 'aa_seq.pkl'
 		self.HI_model_fname = 	self.path + self.prefix + self.resolution_prefix + 'HI_model.pkl'
 		self.nuc_seq_fname = 	self.path + self.prefix + self.resolution_prefix + 'nuc_seq.pkl'
-		self.alignment_fname = 	self.path + self.prefix + self.resolution_prefix + 'alignment.fasta'		
+		self.alignment_fname = 	self.path + self.prefix + self.resolution_prefix + 'alignment.fasta'
 		if run_dir is None:
 			import random
 			self.run_dir = '_'.join(['temp', time.strftime('%Y%m%d-%H%M%S',time.gmtime()), str(random.randint(0,1000000))])
@@ -95,11 +100,18 @@ class process(virus_frequencies):
 		self.auspice_align_fname = 		'../auspice/data/' + self.prefix + self.resolution_prefix + 'align.fasta'
 		self.auspice_newick_fname = 	'../auspice/data/' + self.prefix + self.resolution_prefix + 'tree.newick'
 		self.auspice_clade_frequencies_fname = '../auspice/data/' + self.prefix + self.resolution_prefix + 'clade_frequencies.tsv'
-		self.auspice_viruses_fname = '../auspice/data/' + self.prefix + self.resolution_prefix + 'viruses.tsv'		
+		self.auspice_viruses_fname = '../auspice/data/' + self.prefix + self.resolution_prefix + 'viruses.tsv'
 		self.auspice_HI_display_mutations =	 '../auspice/data/HI_mutation_effects.json'
 		self.nuc_alphabet = 'ACGT-N'
 		self.aa_alphabet = 'ACDEFGHIKLMNPQRSTVWY*X'
 		virus_frequencies.__init__(self, **kwargs)
+
+	def check_dirs(self, path, output_path):
+		''' Check if path and output_path exist and are directories; create them if need be.'''
+		if not os.path.exists(output_path) or not os.path.isdir(output_path): ## Also check for input files, raise exception if not found.
+			os.makedirs(output_path)
+		if not os.path.exists(path) or not os.path.isdir(path):
+			os.makedirs(path)
 
 	def make_run_dir(self):
 		if not os.path.isdir(self.run_dir):
@@ -186,7 +198,7 @@ class process(virus_frequencies):
 		elems['root']['nuc'] = self.tree.seed_node.seq
 		for anno, aa_seq in self.tree.seed_node.aa_seq.iteritems():
 			elems['root'][anno] = aa_seq
-		write_json(elems, self.auspice_sequences_fname, indent=None)
+		write_json(elems, self.auspice_sequences_fname, indent=self.pretty)
 
 		print "Writing tree"
 		self.tree_json = dendropy_to_json(self.tree.seed_node, tree_fields)
@@ -236,12 +248,12 @@ class process(virus_frequencies):
 								"/".join([gene+':'+str(pos)+aa for gene, pos, aa in gt]))
 							for clade, gt in self.clade_designations.iteritems()
 							if clade in annotations and clade_present[clade] == True]
-		write_json(self.tree_json, self.auspice_tree_fname, indent=None)
+		write_json(self.tree_json, self.auspice_tree_fname, indent=self.pretty)
 		try:
 			read_json(self.auspice_tree_fname)
 		except:
 			print "Read failed, rewriting with indents"
-			write_json(self.tree_json, self.auspice_tree_fname, indent=1)
+			write_json(self.tree_json, self.auspice_tree_fname, indent=self.pretty)
 
 		# Write out frequencies
 		if hasattr(self, 'frequencies'):
@@ -280,11 +292,10 @@ class process(virus_frequencies):
 			meta["regions"] = self.regions
 			meta["virus_stats"] = [ [str(y)+'-'+str(m)] + [self.date_region_count[(y,m)][reg] for reg in self.regions]
 									for y,m in sorted(self.date_region_count.keys()) ]
-		write_json(meta, self.auspice_meta_fname, indent=None)
-		self.export_accession_numbers()
+		write_json(meta, self.auspice_meta_fname, indent=self.pretty)
 
 	def export_fasta_alignment(self):
-		print "Writing alignment"	
+		print "Writing alignment"
 		try:
 			handle = open(self.auspice_align_fname, 'w')
 		except IOError:
@@ -338,7 +349,7 @@ class process(virus_frequencies):
 
 	def export_viruses(self):
 		print "Writing virus list"
-		with open(self.auspice_viruses_fname, 'w') as ofile:	
+		with open(self.auspice_viruses_fname, 'w') as ofile:
 			ofile.write("strain\tdate\tcountry\tregion\tep\tcHI\n")
 			for node in self.tree.postorder_node_iter():
 				if node.is_leaf():
@@ -573,4 +584,3 @@ class process(virus_frequencies):
 			self.all_clade_frequencies(gene='nuc')
 		if 'tree' in tasks:
 			self.all_tree_frequencies(threshold = 20)
-

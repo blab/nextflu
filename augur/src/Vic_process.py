@@ -29,7 +29,7 @@ virus_config.update({
 	# data source and sequence parsing/cleaning/processing
 	'virus':'Vic',
 	'alignment_file':'data/vic.fasta',
-	'outgroup':'B/HongKong/02/1993',
+	'outgroup':'B/HongKong/2/1993',
 	'force_include':'data/vic_hi_strains.tsv',
 	'force_include_all':False,
 	'date_spec':'year',
@@ -60,7 +60,7 @@ class BVic_filter(flu_filter):
 		self.min_length = min_length
 		self.vaccine_strains =[
 			{
-				'strain':    	'B/Shangdong/7/97',
+				'strain':    	'B/Shangdong/7/1997',
 				'isolate_id':	'EPI_ISL_1790',
 				'date':    		'1997-07-01', #(Month and day unknown)
 				'region':   	'china',
@@ -99,7 +99,7 @@ class BVic_filter(flu_filter):
 				if 'gene' in x.qualifiers and x.type=='CDS' and
 				x.qualifiers['gene'][0] in ['SigPep', 'HA1', 'HA2']}
 		self.outgroup = {
-						'strain':'B/HongKong/02/1993',
+						'strain':'B/HongKong/2/1993',
 						'region':'China',
 						'isolate_id':'EPI_ISL_6617',
 						'date':'1993-02-15', #(Month and day unknown)
@@ -129,23 +129,26 @@ class BVic_clean(virus_clean):
 		self.viruses = MultipleSeqAlignment(new_viruses)
 		return new_viruses
 
-	def clean_outlier_strains(self):
+	def clean_outliers(self):
 		"""Remove single outlying viruses"""
-		remove_viruses = []
-		outlier_strains = ["B/Bangkok/SI17/2012", "B/Bangkok/SI58/2012", "B/Kol/2024/2008", "B/Kolkata/2024/2008"]
-		for outlier_strain in outlier_strains:
-			for v in self.viruses:
-				if (v.strain == outlier_strain):
-					remove_viruses.append(v)
-					if self.verbose > 1:
-						print "\tremoving", v.strain
-		self.viruses = MultipleSeqAlignment([v for v in self.viruses if v not in remove_viruses])
+		new_viruses = []
+		outlier_strains = ["B/Kol/2024/2008", "B/Kolkata/2024/2008", "B/Brisbine/33/2008", "B/Kolkata/1373/2008",
+			"B/Kolkata/372/2010", "B/Stockholm/7/2011", "B/SouthAustralia/81/2012", "B/Bangkok/SI17/2012",
+			"B/Bangkok/SI58/2012", "B/Togo/LNG/419/2013", "B/Netherlands/76/2014", "B/NewCaledonia/119/2015",
+			"B/Thailand/CU-B11637/2015", "B/Brisbane/14/2016", "B/Sydney/6/2016", "A/Malaysia/438/2016"]
+		for v in self.viruses:
+			if v.strain in outlier_strains:
+				if self.verbose > 1:
+					print "\tremoving", v.strain
+			else:
+				new_viruses.append(v)
+		self.viruses = MultipleSeqAlignment(new_viruses)
 
 	def clean(self):
 		self.clean_generic()
 		self.clean_outbreaks()
 		print "Number of viruses after outbreak filtering:",len(self.viruses)
-		self.clean_outlier_strains()
+		self.clean_outliers()
 		print "Number of viruses after outlier filtering:",len(self.viruses)
 
 class BVic_process(process, BVic_filter, BVic_clean, BVic_refine, HI_tree):
@@ -220,8 +223,7 @@ class BVic_process(process, BVic_filter, BVic_clean, BVic_refine, HI_tree):
 			# exporting to json, including the BVic specific fields
 			self.export_to_auspice(tree_fields = [
 				'ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab','db', 'country',
-				'dHI', 'cHI', 'mean_HI_titers','HI_titers','HI_titers_raw', 'serum', 'HI_info',
-				'avidity_tree','avidity_mut', 'potency_mut', 'potency_tree', 'mean_potency_mut', 'mean_potency_tree', 'autologous_titers'],
+				'dHI', 'cHI'],
 				annotations = ['1A', '1B', '117V'])
 			if params.html:
 				self.generate_indexHTML()
@@ -246,10 +248,12 @@ if __name__=="__main__":
 	dt= params.time_interval[1]-params.time_interval[0]
 	params.pivots_per_year = 12.0 if dt<5 else 6.0
 	steps = all_steps[all_steps.index(params.start):(all_steps.index(params.stop)+1)]
-	if params.skip is not None:
+	if params.skip is not None:					# params.skip will be a string ("genotype_frequencies HIvalidate") if called from make_all, and a list (["genotype_frequencies", "HIvalidate"]) if called directly from process
+		if type(params.skip) is str:
+			params.skip = params.skip.split()	# params.skip is definitely a list
 		for tmp_step in params.skip:
 			if tmp_step in steps:
-				print "skipping",tmp_step
+				print "skipping", tmp_step
 				steps.remove(tmp_step)
 
 	# add all arguments to virus_config (possibly overriding)

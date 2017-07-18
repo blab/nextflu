@@ -48,8 +48,8 @@ virus_config.update({
 	'excluded_tables': ['NIMR_Sep2012_08.csv'], #, 'nimr-sep-2010-table8', 'nimr-sep-2010-table8','NIMR_Sep2012_11.csv'],
 	'layout':'auspice',
 	'min_aamuts': 1,
-#	'predictors': ['dfreq', 'cHI']												# estimate
-	'predictors': { 'dfreq': [2.50, 2.84], 'cHI': [1.68, 0.45] }				# fix predictor: [value, std deviation]
+	'predictors': ['ep']														# estimate
+#	'predictors': { 'dfreq': [2.50, 2.84], 'cHI': [1.68, 0.45] }				# fix predictor: [value, std deviation]
 	})
 
 
@@ -168,12 +168,40 @@ class H3N2_clean(virus_clean):
 	def clean_outliers(self):
 		"""Remove single outlying viruses"""
 		new_viruses = []
-		outlier_strains = ["A/Sari/388/2006", "A/SaoPaulo/36178/2015", "A/Pennsylvania/40/2010", "A/Pennsylvania/14/2010",
-			"A/Pennsylvania/09/2011", "A/OSAKA/31/2005", "A/Ohio/34/2012", "A/Kenya/170/2011", "A/Kenya/168/2011",
-			"A/Indiana/21/2013", "A/Indiana/13/2012", "A/Indiana/11/2013", "A/Indiana/08/2012", "A/Indiana/06/2013",
-			"A/India/6352/2012", "A/HuNan/01/2014", "A/Helsinki/942/2013", "A/Guam/AF2771/2011", "A/Chile/8266/2003",
-			"A/Busan/15453/2009", "A/Nepal/142/2011", "A/Kenya/155/2011", "A/Guam/AF2771/2011", "A/Michigan/82/2016",
-			"A/Ohio/27/2016", "A/Ohio/28/2016", "A/Michigan/83/2016", "A/Michigan/84/2016", "A/Jiangsu-Tianning/1707/2013"]
+		outlier_strains = [
+			"A/Chile/8266/2003", "A/Louisiana/4/2003", "A/Lousiana/4/2003", "A/OSAKA/31/2005",
+			"A/Ontario/RV1273/2005", "A/Sari/388/2006", "A/Ontario/1252/2007", "A/HongKong/HK1/2008",
+			"A/HongKong/HK1MA21-1/2008", "A/HongKong/HK1MA21-2/2008", "A/HongKong/HK1MA21-3/2008",
+			"A/HongKong/HK1MA21-4/2008", "A/HongKong/HK2/2008", "A/HongKong/HK2MA21-1/2008",
+			"A/HongKong/HK2MA21-2/2008", "A/HongKong/HK2MA21-3/2008", "A/HongKong/HK4/2008",
+			"A/HongKong/HK5/2008", "A/HongKong/HK5MA21-1/2008", "A/HongKong/HK5MA21-3/2008",
+			"A/HongKong/HK6/2008", "A/HongKong/HK6MA21-1/2008", "A/HongKong/HK6MA21-2/2008",
+			"A/HongKong/HK6MA21-3/2008", "A/HongKong/HK7/2008", "A/HongKong/HK8/2008",
+			"A/HongKong/HK8MA21-1/2008", "A/HongKong/HK8MA21-2/2008", "A/HongKong/HK8MA21-3/2008",
+			"A/HongKong/HK8MA21-4/2008", "A/HongKong/HK9/2008", "A/HongKong/HK9MA21-1/2008",
+			"A/HongKong/HK9MA21-2/2008", "A/HongKong/HK9MA21-3/2008", "A/HongKong/HK10/2008",
+			"A/HongKong/HK10MA21-1/2008", "A/HongKong/HK10MA21-2/2008", "A/HongKong/HK10MA21-3/2008",
+			"A/HongKong/HK10MA21-4/2008", "A/HongKong/HK11/2008", "A/HongKong/HK11MA21-1/2008",
+			"A/HongKong/HK11MA21-3/2008", "A/HongKong/HK11MA21-4/2008", "A/HongKong/HK12/2008",
+			"A/HongKong/HK12MA21-2/2008", "A/HongKong/HKMA12/2008", "A/HongKong/HKMA12A/2008",
+			"A/HongKong/HKMA12B/2008", "A/HongKong/HKMA12C/2008", "A/HongKong/HKMA12D/2008",
+			"A/HongKong/HKMA12E/2008", "A/HongKong/HKMA20A/2008", "A/HongKong/HKMA20B/2008",
+			"A/HongKong/HKMA20E/2008", "A/Kansas/13/2009", "A/Busan/15453/2009", "A/Pennsylvania/14/2010",
+			"A/Pennsylvania/40/2010", "A/Guam/AF2771/2011", "A/Indiana/8/2011", "A/Kenya/155/2011",
+			"A/Kenya/168/2011", "A/Kenya/170/2011", "A/Nepal/142/2011", "A/Pennsylvania/09/2011",
+			"A/Pennsylvania/9/2011", "A/Quebec/167936/2011", "A/Quebec/170658/2011", "A/India/6352/2012",
+			"A/Indiana/08/2012", "A/Indiana/13/2012", "A/Ohio/34/2012", "A/Helsinki/942/2013",
+			"A/Indiana/06/2013", "A/Indiana/11/2013", "A/Indiana/21/2013", "A/Iowa/4/2013",
+			"A/Jiangsu-Tianning/1707/2013", "A/HuNan/01/2014", "A/Jiangsu-Chongchuan/1830/2014",
+			"A/Jiangsu-Chongchuan/12179/2014", "A/Ohio/2/2014", "A/Ohio/4319/2014", "A/SaoPaulo/3-34891/2014",
+			"A/Wisconsin/24/2014", "A/NewJersey/53/2015", "A/SaoPaulo/36178/2015", "A/SaoPaulo/61282/2015",
+			"A/SaoPaulo/65194/2015", "A/Michigan/39/2015", "A/Sydney/53/2015", "A/Michigan/82/2016",
+			"A/Michigan/83/2016", "A/Michigan/84/2016", "A/Michigan/87/2016", "A/Michigan/89/2016",
+			"A/Michigan/90/2016", "A/Michigan/91/2016", "A/Michigan/93/2016", "A/Michigan/94/2016",
+			"A/Michigan/95/2016", "A/Michigan/96/2016", "A/Ohio/27/2016", "A/Ohio/28/2016", "A/Ohio/32/2016",
+			"A/Ohio/33/2016", "A/Ohio/35/2016", "A/Zhejiang-Wuxin/1300/2016", "A/Catalonia/NSVH100560486/2017",
+			"A/Catalonia/NSVH100533399/2017", "A/Piaui/494713/2017"
+			]
 		for v in self.viruses:
 			if v.strain in outlier_strains:
 				if self.verbose > 1:
@@ -297,7 +325,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, H3N2_HI, H3N2_
 		if 'filter' in steps:
 			print "--- Virus filtering at " + time.strftime("%H:%M:%S") + " ---"
 			self.filter()
-			if self.force_include is not None and os.path.isfile(self.force_include):
+			if self.force_include is not None:
 				with open(self.force_include) as infile:
 					forced_strains = [fix_name(line.strip().split('\t')[0]).upper() for line in infile]
 			else:
@@ -361,8 +389,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, H3N2_HI, H3N2_
 			# exporting to json, including the H3N2 specific fields
 			self.export_to_auspice(tree_fields = [
 				'ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab', 'db', 'country', 'dfreq', 'fitness', 'pred_distance',
-				'dHI', 'cHI', 'mHI', 'mean_HI_titers', 'HI_titers', 'HI_titers_raw', 'serum', 'HI_info',
-				'avidity_tree', 'avidity_mut', 'potency_mut', 'potency_tree', 'mean_potency_mut', 'mean_potency_tree', 'autologous_titers'],
+				'dHI', 'cHI'],
 				   annotations = ['3c2.a', '3c3.a', '3c3.b', '171K'])
 			if params.html:
 				self.generate_indexHTML()
@@ -391,7 +418,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, H3N2_HI, H3N2_
 
 if __name__=="__main__":
 	all_steps = ['filter', 'align', 'clean', 'tree', 'ancestral', 'refine',
-				 'frequencies','HI', 'export', 'HIvalidate']
+				 'frequencies', 'HI', 'fitness', 'export', 'HIvalidate']
 
 	from process import parser
 	import matplotlib.pyplot as plt
@@ -406,10 +433,12 @@ if __name__=="__main__":
 	dt= params.time_interval[1]-params.time_interval[0]
 	params.pivots_per_year = 12.0 if dt<5 else 6.0
 	steps = all_steps[all_steps.index(params.start):(all_steps.index(params.stop)+1)]
-	if params.skip is not None:
+	if params.skip is not None:					# params.skip will be a string ("genotype_frequencies HIvalidate") if called from make_all, and a list (["genotype_frequencies", "HIvalidate"]) if called directly from process
+		if type(params.skip) is str:
+			params.skip = params.skip.split()	# params.skip is definitely a list
 		for tmp_step in params.skip:
 			if tmp_step in steps:
-				print "skipping",tmp_step
+				print "skipping", tmp_step
 				steps.remove(tmp_step)
 
 	# add all arguments to virus_config (possibly overriding)
