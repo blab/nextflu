@@ -336,9 +336,9 @@ function newFocus(){
 		activeSera[serum]=true;
 	}
 	seraDiv.innerHTML = htmlStr;
-	for (var i=0; i<allSera.length; i++){
-		var serum = allSera[i];
-		var serumID = serum.split("/").join("").replace(';', '_');
+	console.log(seraDiv);
+	for (var serum in focusNode.potency_mut){
+		var serumID = serum.split("/").join("").replace(/;/g, " ");
 		d3.select("#"+serumID)
 			.on("change", function(elem){
 					for (var j=0; j<allSera.length; j++){

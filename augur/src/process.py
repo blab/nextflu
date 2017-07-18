@@ -31,7 +31,8 @@ parser.add_argument('--html', action="store_true", default=False, help ="regener
 parser.add_argument('--resolution', type = str,  help ="label for the resolution")
 parser.add_argument('--estimate_fitness_model', default = False, action="store_true", help ="estimate parameters of fitness model")
 parser.add_argument('--pretty', default = False, action = "store_true", help = "format JSONs to be human readable")
-
+parser.add_argument('--HI_fname', type = str,  help ="file with HI titers")
+parser.add_argument('--force_include', type = str,  help ="file with subsampling weights")
 
 virus_config = {
 	'date_format':{'fields':'%Y-%m-%d', 'reg':r'\d\d\d\d-\d\d-\d\d'},
