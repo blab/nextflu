@@ -105,7 +105,7 @@ function setNodeAlive(node){
 		node.alive = aliveChildren;
 	}else{
 //		node.alive = node.current;
-		node.alive = node.attr.num_date > LBI_cutoff ? true : false;
+		node.alive = node.attr.num_date > LBI_cutoff;
 	}
 };
 
@@ -153,6 +153,7 @@ function calcDownPolarizers(node){
 };
 
 function calcPolarizers(node){
+	console.log('LBI', LBItau, LBI_cutoff);
 	calcUpPolarizers(node);
 	node.down_polarizer = 0; // set the down polarizer of the root to 0
 	calcDownPolarizers(node);

@@ -305,10 +305,12 @@ function colorByGenotypePosition (positions) {
 	if ((positions.length==1)&&(filtered_gts.length>1)){
 		var tmp_gts=[];
 		for (var ii=0; ii<filtered_gts.length; ii+=1){
+			tmp_gts.push(["NA", filtered_gts[ii]])
 			tmp_gts.push(["global", filtered_gts[ii]])
+			// tmp_gts.push(["EU", filtered_gts[ii]])
 		}
 		if (plot_frequencies) {
-		make_gt_chart(tmp_gts);
+		  make_gt_chart(tmp_gts);
 		  document.getElementById("gtspec").value = tmp_gts.map( function (d) {return d[1];}).join(', ');
 	  }
 	}
