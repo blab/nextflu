@@ -33,3 +33,6 @@ var reference_viruses = {
 "B/Estonia/55669/2011":'2011-03-14',
 "B/England/145/2008":'2008-05-01'
 };
+
+var countries = [];
+var divisions = [];

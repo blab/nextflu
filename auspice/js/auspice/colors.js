@@ -124,6 +124,10 @@ function colorByTrait() {
 		adjust_coloring_by_date();
 	}
 	else if (colorBy == "dfreq") {
+		if (freq_ii==0){
+			freq_ii=pivots.length-1;
+		}
+		calcDfreq(rootNode, freq_ii)
 		colorScale = dfreqColorScale;
 		nodes.map(function(d) { d.coloring = d.dfreq;});
 	}

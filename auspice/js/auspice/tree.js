@@ -208,7 +208,7 @@ function tree_init(){
 		time_step = 1.0/12;
 	}
 	//setting index of frequency trajectory to use for calculating frequency change
-	freq_ii = 1;
+	freq_ii = 0;
 	if (typeof pivots != "undefined") {
 		if (typeof pivots.length != "undefined") {
 			freq_ii = pivots.length - 1;
@@ -217,9 +217,6 @@ function tree_init(){
 	calcNodeAges(time_window);
 	colorByTrait();
 	adjust_freq_by_date();
-	if (typeof calcDfreq == 'function') {
-		calcDfreq(rootNode, freq_ii);
-	}
 	tree_legend = makeLegend();
 	nDisplayTips = displayRoot.fullTipCount;
 }

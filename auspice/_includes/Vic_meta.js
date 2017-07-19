@@ -42,3 +42,6 @@ var reference_viruses = {
 "B/Brisbane/33/2008":'2008-07-13',
 "B/NewCaledonia/5/2006":'2006-04-24'
 };
+
+var countries = [];
+var divisions = [];
