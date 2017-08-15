@@ -2,6 +2,7 @@ import dendropy, time
 import numpy as np
 from itertools import izip
 from scipy.stats import linregress
+import sys
 from seq_util import translate
 from io_util import read_json
 from io_util import write_json
@@ -45,7 +46,7 @@ class fitness_predictors(object):
 			# do nothing
 
 	def setup_epitope_mask(self, epitope_masks_fname = 'source-data/H3N2_epitope_masks.tsv', epitope_mask_version = 'wolf', tolerance_mask_version = 'ha1'):
-		print "setup " + epitope_mask_version + " epitope mask and " + tolerance_mask_version + " tolerance mask"
+		sys.stderr.write("setup " + epitope_mask_version + " epitope mask and " + tolerance_mask_version + " tolerance mask\n")
 		self.epitope_mask = ""
 		self.tolerance_mask = ""
 		epitope_map = {}
