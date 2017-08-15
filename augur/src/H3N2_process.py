@@ -391,7 +391,7 @@ class H3N2_process(process, H3N2_filter, H3N2_clean, H3N2_refine, H3N2_HI, H3N2_
 			# exporting to json, including the H3N2 specific fields
 			self.export_to_auspice(tree_fields = [
 				'ep', 'ne', 'rb', 'aa_muts','accession','isolate_id', 'lab', 'db', 'country', 'dfreq', 'fitness', 'pred_distance',
-				'dHI', 'cHI'],
+				'dHI', 'cHI', 'seq'],
 				   annotations = ['3c2.a', '3c3.a', '3c3.b', '171K'])
 			if params.html:
 				self.generate_indexHTML()
