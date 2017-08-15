@@ -76,6 +76,20 @@ class fitness_predictors(object):
 		return ''.join(sites)
 
 	def receptor_binding_sites(self, aa):
+		"""Returns amino acids corresponding to seven Koel et al. 2013 receptor binding
+		sites.
+
+		>>> import Bio.SeqIO
+		>>> fp = fitness_predictors()
+		>>> with open("tests/data/AAK51718.fasta", "r") as handle:
+		...     record = list(Bio.SeqIO.parse(handle, "fasta"))[0]
+		>>> aa = str(record.seq)
+		>>> rbs = fp.receptor_binding_sites(aa)
+		>>> len(rbs)
+		7
+		>>> rbs[1]
+		'T'
+		"""
 		sp = 16
 		aaa = np.fromstring(aa, 'S1')
 		receptor_binding_list = map(lambda x:x+sp-1, [145, 155, 156, 158, 159, 189, 193])
