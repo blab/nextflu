@@ -24,14 +24,14 @@ class fitness_predictors(object):
 		else:
 			self.setup_epitope_mask()
 		self.predictor_names = predictor_names
-	
+
 	def setup_predictor(self, tree, pred, timepoint):
 		if pred == 'lb':
 			self.calc_LBI(tree, tau = 0.0005, transform = lambda x:x)
 		if pred == 'ep':
 			self.calc_epitope_distance(tree)
 		if pred == 'ep_x':
-			self.calc_epitope_cross_immunity(tree, timepoint)			
+			self.calc_epitope_cross_immunity(tree, timepoint)
 		if pred == 'ne':
 			self.calc_nonepitope_distance(tree)
 		if pred == 'ne_star':
@@ -39,7 +39,7 @@ class fitness_predictors(object):
 		if pred == 'tol':
 			self.calc_tolerance(tree, attr = 'tol')
 		if pred == 'tol_ne':
-			self.calc_tolerance(tree, epitope_mask = self.tolerance_mask, attr = 'tol_ne')			
+			self.calc_tolerance(tree, epitope_mask = self.tolerance_mask, attr = 'tol_ne')
 		#if pred == 'dfreq':
 			# do nothing
 		#if pred == 'cHI':
@@ -93,7 +93,7 @@ class fitness_predictors(object):
 		sp = 16
 		aaa = np.fromstring(aa, 'S1')
 		receptor_binding_list = map(lambda x:x+sp-1, [145, 155, 156, 158, 159, 189, 193])
-		return ''.join(aaa[receptor_binding_list])	
+		return ''.join(aaa[receptor_binding_list])
 
 	def epitope_distance(self, aaA, aaB):
 		"""Return distance of sequences aaA and aaB by comparing epitope sites"""
@@ -130,12 +130,12 @@ class fitness_predictors(object):
 			if not hasattr(node, 'np_ep'):
 				if not hasattr(node, 'aa'):
 					node.aa = translate(node.seq)
-				node.np_ep = np.array(list(self.epitope_sites(node.aa)))	
+				node.np_ep = np.array(list(self.epitope_sites(node.aa)))
 		if ref == None:
 			ref = tree.seed_node
 		for node in tree.postorder_node_iter():
 			node.__setattr__(attr, self.fast_epitope_distance(node.np_ep, ref.np_ep))
-			
+
 	def calc_epitope_cross_immunity(self, tree, timepoint, window = 2.0, attr='ep_x'):
 		'''
 		calculates the distance at epitope sites to contemporaneous viruses
@@ -163,7 +163,7 @@ class fitness_predictors(object):
 				count += 1
 			if count > 0:
 				mean_distance /= float(count)
-			node.__setattr__(attr, mean_distance)	
+			node.__setattr__(attr, mean_distance)
 
 	def calc_rbs_distance(self, tree, attr='rb', ref = None):
 		'''
@@ -225,7 +225,7 @@ class fitness_predictors(object):
 					tmp_node.aa = translate(tmp_node.seq)
 				node.__setattr__(attr, self.nonepitope_distance(node.aa, tmp_node.aa))
 			else:
-				node.__setattr__(attr, np.nan)				
+				node.__setattr__(attr, np.nan)
 
 
 	def calc_LBI(self, tree, attr = 'lb', tau=0.0005, transform = lambda x:x):
