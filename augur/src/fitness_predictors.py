@@ -255,14 +255,16 @@ def main(tree_fname = 'data/tree_refine.json'):
 	print "--- Testing predictor evaluations ---"
 	tree =  json_to_dendropy(read_json(tree_fname))
 
+	fp = fitness_predictors()
+
 	print "Calculating epitope distances"
-	calc_epitope_distance(tree)
+	fp.calc_epitope_distance(tree)
 
 	print "Calculating nonepitope distances"
-	calc_nonepitope_distance(tree)
+	fp.calc_nonepitope_distance(tree)
 
-	print "Calculating LBI"
-#	calc_LBI(tree)
+#	print "Calculating LBI"
+#	fp.calc_LBI(tree)
 
 	print "Writing decorated tree"
 	out_fname = "data/tree_predictors.json"
