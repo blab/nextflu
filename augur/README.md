@@ -80,3 +80,12 @@ To run augur, you will need a GISAID account (to pull sequences) and an Amazon S
 * `S3_KEY`: Amazon S3 key
 * `S3_SECRET`: Amazon S3 secret
 * `S3_BUCKET`: Amazon S3 bucket
+
+## Tests
+
+Install [pytest](https://docs.pytest.org) and then run tests from the augur
+directory as follows.
+
+```bash
+pytest --pyargs src .
+```
