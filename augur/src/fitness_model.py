@@ -7,6 +7,7 @@ from collections import defaultdict
 from datetime import date
 from date_util import calendar_date
 from itertools import izip
+from bernoulli_frequency import get_pivots
 from fitness_predictors import fitness_predictors
 
 min_freq = 0.1
@@ -40,8 +41,22 @@ class fitness_model(object):
 		# If a time interval is provided in the kwargs, set it as an
 		# attribute. Otherwise, assume it is set by a parent or mix-in
 		# class.
-		if "time_interval" in kwargs:
+		if not hasattr(self, "time_interval") and "time_interval" in kwargs:
 			self.time_interval = kwargs["time_interval"]
+
+		# Similarly, if pivots per year are given in kwargs, assign them
+		# here.
+		if not hasattr(self, "pivots_per_year") and "pivots_per_year" in kwargs:
+			self.pivots_per_year = kwargs["pivots_per_year"]
+
+		# If pivots have not been calculated yet, calculate them here.
+		if (not hasattr(self, "pivots") and
+		    hasattr(self, "time_interval") and
+		    hasattr(self, "pivots_per_year")):
+			self.pivots = get_pivots(self.time_interval[0], self.time_interval[1], self.pivots_per_year)
+
+		if "tree" in kwargs:
+			self.tree = kwargs["tree"]
 
 		# final timepoint is end of interval and is only projected forward, not tested
 		self.timepoint_step_size = 0.5		# amount of time between timepoints chosen for fitting
