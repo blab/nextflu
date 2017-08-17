@@ -33,8 +33,8 @@ class fitness_model(object):
 			self.estimate_coefficients = False
 		else:
 			predictor_names = predictor_input
-		if "estimate_fitness_model" in self.kwargs:
-			if self.kwargs["estimate_fitness_model"]:
+		if "estimate_fitness_model" in kwargs:
+			if kwargs["estimate_fitness_model"]:
 				self.estimate_coefficients = True
 
 		self.seasons = [ (date(year=y, month = 10, day = 1), date(year = y+1, month = 4, day=1))
@@ -519,4 +519,3 @@ if __name__=="__main__":
 		fm = test(params)
 	else:
 		main(params)
-
