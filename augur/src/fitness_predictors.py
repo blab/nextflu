@@ -64,15 +64,6 @@ class fitness_predictors(object):
 	def epitope_sites(self, aa):
 		"""Returns amino acids from the given protein sequence corresponding to sites in
 		a predefined epitope mask.
-
-		>>> import Bio.SeqIO
-		>>> fp = fitness_predictors()
-		>>> with open("tests/data/AAK51718.fasta", "r") as handle:
-		...	record = list(Bio.SeqIO.parse(handle, "fasta"))[0]
-		>>> aa = str(record.seq)
-		>>> eps = fp.epitope_sites(aa)
-		>>> len(eps) == len(fp.epitope_mask.replace("0", ""))
-		True
 		"""
 		sites = []
 		for a, m in izip(aa, self.epitope_mask):
@@ -83,15 +74,6 @@ class fitness_predictors(object):
 	def nonepitope_sites(self, aa):
 		"""Returns amino acids from the given protein sequence corresponding to
 		non-epitope sites.
-
-		>>> import Bio.SeqIO
-		>>> fp = fitness_predictors()
-		>>> with open("tests/data/AAK51718.fasta", "r") as handle:
-		...	record = list(Bio.SeqIO.parse(handle, "fasta"))[0]
-		>>> aa = str(record.seq)
-		>>> non_epitope_sites = fp.nonepitope_sites(aa)
-		>>> len(non_epitope_sites) == len(fp.epitope_mask.replace("1", ""))
-		True
 		"""
 		sites = []
 		for a, m in izip(aa, self.tolerance_mask):
@@ -102,17 +84,6 @@ class fitness_predictors(object):
 	def receptor_binding_sites(self, aa):
 		"""Returns amino acids from the given protein sequence corresponding to seven
 		Koel et al. 2013 receptor binding sites.
-
-		>>> import Bio.SeqIO
-		>>> fp = fitness_predictors()
-		>>> with open("tests/data/AAK51718.fasta", "r") as handle:
-		...     record = list(Bio.SeqIO.parse(handle, "fasta"))[0]
-		>>> aa = str(record.seq)
-		>>> rbs = fp.receptor_binding_sites(aa)
-		>>> len(rbs)
-		7
-		>>> rbs[1]
-		'T'
 		"""
 		sp = 16
 		aaa = np.fromstring(aa, 'S1')
