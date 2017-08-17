@@ -37,6 +37,12 @@ class fitness_model(object):
 			if kwargs["estimate_fitness_model"]:
 				self.estimate_coefficients = True
 
+		# If a time interval is provided in the kwargs, set it as an
+		# attribute. Otherwise, assume it is set by a parent or mix-in
+		# class.
+		if "time_interval" in kwargs:
+			self.time_interval = kwargs["time_interval"]
+
 		# final timepoint is end of interval and is only projected forward, not tested
 		self.timepoint_step_size = 0.5		# amount of time between timepoints chosen for fitting
 		self.delta_time = 1.0 				# amount of time projected forward to do fitting
