@@ -78,6 +78,11 @@ class fitness_model(object):
 		self.fp = fitness_predictors(predictor_names = predictor_names, **kwargs)
 
 	def prep_nodes(self):
+		"""Assigns data from the tree to top-level fitness model attributes.
+
+		TODO: consider moving this code directly into the `predict`
+		method since it is only ever called there.
+		"""
 		self.nodes = [node for node in self.tree.postorder_node_iter()]
 		self.tips = [node for node in self.nodes if node.is_leaf()]
 		self.rootnode = self.tree.seed_node
