@@ -37,9 +37,6 @@ class fitness_model(object):
 			if kwargs["estimate_fitness_model"]:
 				self.estimate_coefficients = True
 
-		self.seasons = [ (date(year=y, month = 10, day = 1), date(year = y+1, month = 4, day=1))
-						for y in xrange(int(self.time_interval[0])+1, int(self.time_interval[1]))]
-
 		# final timepoint is end of interval and is only projected forward, not tested
 		self.timepoint_step_size = 0.5		# amount of time between timepoints chosen for fitting
 		self.delta_time = 1.0 				# amount of time projected forward to do fitting
