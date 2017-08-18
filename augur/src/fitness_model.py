@@ -7,7 +7,7 @@ from collections import defaultdict
 from datetime import date
 from date_util import calendar_date
 from itertools import izip
-from bernoulli_frequency import get_pivots
+from bernoulli_frequency import get_pivots, virus_frequencies
 from fitness_predictors import fitness_predictors
 
 min_freq = 0.1
@@ -17,7 +17,7 @@ pc=1e-2
 regularization = 1e-3
 default_predictors = ['lb', 'ep', 'ne_star']
 
-class fitness_model(object):
+class fitness_model(virus_frequencies):
 
 	def __init__(self, predictor_input = ['ep', 'lb', 'dfreq'], verbose = 0, enforce_positive_predictors = True, **kwargs):
 		'''
