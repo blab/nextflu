@@ -78,3 +78,10 @@ class TestFitnessModel(object):
 		assert hasattr(fitness_model, "nodes")
 		assert hasattr(fitness_model, "rootnode")
 		assert hasattr(fitness_model.rootnode, "pivots")
+
+	def test_calc_node_frequencies(self, fitness_model):
+		fitness_model.prep_nodes()
+		assert not hasattr(fitness_model, "freq_arrays")
+		fitness_model.calc_node_frequencies()
+		assert hasattr(fitness_model, "freq_arrays")
+		assert len(fitness_model.freq_arrays) > 0
