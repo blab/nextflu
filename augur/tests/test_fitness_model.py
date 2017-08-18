@@ -29,10 +29,12 @@ def tree():
 	leaf_b = modify_sequence_at_site(root, 14)
 
 	# Assign sequences to nodes.
-	sequences = [root, leaf_a, leaf_b]
+	sequences = (root, leaf_a, leaf_b)
+	dates = (2012.5, 2013.25, 2014.8)
 	index = 0
 	for node in tree.preorder_node_iter():
 		node.aa = sequences[index]
+		node.num_date = dates[index]
 		index += 1
 
 	return tree
