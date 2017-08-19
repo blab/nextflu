@@ -1,6 +1,8 @@
 """
 Tests for the `fitness_model` module.
 """
+import Bio.Align.AlignInfo
+import Bio.Phylo
 import Bio.SeqIO
 import dendropy
 import pytest
@@ -15,7 +17,7 @@ except ImportError:
 #
 
 @pytest.fixture
-def tree():
+def simple_tree():
 	"""Returns a tree with three sequences: a root and two direct descendents with
 	one modification each.
 	"""
@@ -40,13 +42,59 @@ def tree():
 	return tree
 
 @pytest.fixture
-def fitness_model(tree):
+def real_tree(multiple_sequence_alignment):
+	"""Returns a tree built with FastTree from a small set of nucleotide sequences
+	for H3N2.
+	"""
+	# Load the tree.
+	tree = dendropy.Tree.get_from_path("tests/data/H3N2_tree.newick", "newick")
+
+	# Make a lookup table of name to sequence.
+	sequences_by_name = dict([(alignment.name, str(alignment.seq).replace("-", ""))
+				  for alignment in multiple_sequence_alignment])
+
+	# Assign sequences to the tree.
+	for node in tree.nodes():
+		if node.taxon is not None:
+			node.seq = sequences_by_name[node.taxon.label]
+
+			# Since sequence names look like "A/Singapore/TT0495/2017",
+			# convert the last element to a floating point value for
+			# simplicity.
+			node.num_date = float(node.taxon.label.split("/")[-1])
+		else:
+			# Build a "dumb" consensus from the alignment for the
+			# ancestral node and assign an arbitrary date in the
+			# past.
+			summary = Bio.Align.AlignInfo.SummaryInfo(multiple_sequence_alignment)
+			node.seq = str(summary.dumb_consensus(threshold=0.5, ambiguous="N"))
+			node.num_date = 2014.8
+
+	return tree
+
+@pytest.fixture
+def fitness_model(simple_tree):
 	from src.fitness_model import fitness_model
 	return fitness_model(
+		predictor_input=["ep"],
 		pivots_per_year=12,
 		time_interval=(2012.0, 2015.0),
-		tree=tree
+		tree=simple_tree
 	)
+
+@pytest.fixture
+def real_fitness_model(real_tree, multiple_sequence_alignment):
+	from src.fitness_model import fitness_model
+	model = fitness_model(
+		predictor_input=["ep"],
+		pivots_per_year=12,
+		time_interval=(2014.5, 2017.5),
+		tree=real_tree
+	)
+	model.nuc_aln = multiple_sequence_alignment
+	model.nuc_alphabet = 'ACGT-N'
+	model.min_mutation_frequency = 0.01
+	return model
 
 @pytest.fixture
 def sequence():
@@ -57,6 +105,14 @@ def sequence():
 
 	aa = str(record.seq)
 	return aa
+
+@pytest.fixture
+def multiple_sequence_alignment():
+	"""Returns a multiple sequence alignment containing a small test set of H3N2
+	sequences.
+	"""
+	msa = Bio.AlignIO.read("tests/data/H3N2_alignment.fasta", "fasta")
+	return msa
 
 #
 # Utility functions
@@ -87,3 +143,46 @@ class TestFitnessModel(object):
 		fitness_model.calc_node_frequencies()
 		assert hasattr(fitness_model, "freq_arrays")
 		assert len(fitness_model.freq_arrays) > 0
+
+	def test_calc_all_predictors(self, fitness_model):
+		fitness_model.prep_nodes()
+		fitness_model.calc_node_frequencies()
+		assert not hasattr(fitness_model, "predictor_arrays")
+		fitness_model.calc_all_predictors()
+		assert hasattr(fitness_model, "predictor_arrays")
+		assert len(fitness_model.predictor_arrays) > 0
+
+	def test_standardize_predictors(self, fitness_model):
+		fitness_model.prep_nodes()
+		fitness_model.calc_node_frequencies()
+		fitness_model.calc_all_predictors()
+		assert not hasattr(fitness_model, "predictor_means")
+		fitness_model.standardize_predictors()
+		assert hasattr(fitness_model, "predictor_means")
+
+	def test_select_clades_for_fitting(self, fitness_model):
+		fitness_model.prep_nodes()
+		fitness_model.calc_node_frequencies()
+		fitness_model.calc_all_predictors()
+		fitness_model.standardize_predictors()
+		assert not hasattr(fitness_model, "fit_clades")
+		fitness_model.select_clades_for_fitting()
+		assert hasattr(fitness_model, "fit_clades")
+		assert len(fitness_model.fit_clades) > 0
+
+	def test_prep_af(self, real_fitness_model):
+		real_fitness_model.prep_nodes()
+		real_fitness_model.calc_node_frequencies()
+		real_fitness_model.calc_all_predictors()
+		real_fitness_model.standardize_predictors()
+		real_fitness_model.select_clades_for_fitting()
+		assert not hasattr(real_fitness_model, "af")
+		real_fitness_model.prep_af()
+		assert hasattr(real_fitness_model, "af")
+		assert len(real_fitness_model.af) > 0
+
+	def test_learn_parameters(self, fitness_model):
+		pass
+
+	def test_assign_fitness(self, fitness_model):
+		pass
