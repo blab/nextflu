@@ -50,7 +50,7 @@ def real_tree(multiple_sequence_alignment):
 	tree = dendropy.Tree.get_from_path("tests/data/H3N2_tree.newick", "newick")
 
 	# Make a lookup table of name to sequence.
-	sequences_by_name = dict([(alignment.name, str(alignment.seq).replace("-", ""))
+	sequences_by_name = dict([(alignment.name, str(alignment.seq))
 				  for alignment in multiple_sequence_alignment])
 
 	# Assign sequences to the tree.
@@ -111,7 +111,7 @@ def multiple_sequence_alignment():
 	"""Returns a multiple sequence alignment containing a small test set of H3N2
 	sequences.
 	"""
-	msa = Bio.AlignIO.read("tests/data/H3N2_alignment.fasta", "fasta")
+	msa = Bio.AlignIO.read("tests/data/H3N2_alignment.cleaned.fasta", "fasta")
 	return msa
 
 #
