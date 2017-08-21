@@ -181,8 +181,25 @@ class TestFitnessModel(object):
 		assert hasattr(real_fitness_model, "af")
 		assert len(real_fitness_model.af) > 0
 
-	def test_learn_parameters(self, fitness_model):
-		pass
+	def test_learn_parameters(self, real_fitness_model):
+		real_fitness_model.prep_nodes()
+		real_fitness_model.calc_node_frequencies()
+		real_fitness_model.calc_all_predictors()
+		real_fitness_model.standardize_predictors()
+		real_fitness_model.select_clades_for_fitting()
+		real_fitness_model.prep_af()
+		assert not hasattr(real_fitness_model, "last_fit")
+		real_fitness_model.learn_parameters(niter=1, fit_func="clade")
+		assert hasattr(real_fitness_model, "last_fit")
 
-	def test_assign_fitness(self, fitness_model):
-		pass
+	def test_assign_fitness(self, real_fitness_model):
+		real_fitness_model.prep_nodes()
+		real_fitness_model.calc_node_frequencies()
+		real_fitness_model.calc_all_predictors()
+		real_fitness_model.standardize_predictors()
+		real_fitness_model.select_clades_for_fitting()
+		real_fitness_model.prep_af()
+		real_fitness_model.learn_parameters(niter=1, fit_func="clade")
+		assert not any([hasattr(node, "fitness") for node in real_fitness_model.tree.nodes()])
+		real_fitness_model.assign_fitness()
+		assert all([hasattr(node, "fitness") for node in real_fitness_model.tree.nodes()])
