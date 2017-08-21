@@ -528,47 +528,6 @@ class process(virus_frequencies):
 		self.regions = sorted(regions)
 		self.region_totals = {reg:sum(val[reg] for val in self.date_region_count.values()) for reg in self.regions}
 
-	def determine_variable_positions(self):
-		'''
-		calculates nucleoties_frequencies and aa_frequencies at each position of the alignment
-		also computes consensus sequences and position at which the major allele is at less than 1-min_mutation_frequency
-		results are stored as
-		self.nuc_frequencies
-		self.aa_frequencies
-		self.variable_nuc
-		self.variable_aa
-		'''
-		aln_array = np.array(self.nuc_aln)
-		self.nuc_frequencies = np.zeros((len(self.nuc_alphabet),aln_array.shape[1]))
-		for ni,nuc in enumerate(self.nuc_alphabet):
-			self.nuc_frequencies[ni,:]=(aln_array==nuc).mean(axis=0)
-
-		self.variable_nuc = np.where(np.max(self.nuc_frequencies,axis=0)<1.0-self.min_mutation_frequency)[0]
-		self.consensus_nuc = "".join(np.fromstring(self.nuc_alphabet, 'S1')[np.argmax(self.nuc_frequencies,axis=0)])
-		self.nuc_entropy = -np.sum(self.nuc_frequencies*np.log(np.maximum(1e-10,self.nuc_frequencies)), axis=0)
-		self.variable_nuc_identities = [ [self.nuc_alphabet[ii] for ii in np.where(self.nuc_frequencies[:,pos])[0]]
-											for pos in xrange(self.nuc_frequencies.shape[1])]
-
-		if hasattr(self, 'aa_aln'):
-			self.variable_aa = {}
-			self.consensus_aa = {}
-			self.aa_entropy = {}
-			self.aa_frequencies = {}
-			self.variable_aa_identities = {}
-			for anno, aln in self.aa_aln.iteritems():
-				aln_array = np.array(aln)
-				tmp_af = np.zeros((len(self.aa_alphabet),aln_array.shape[1]))
-				for ai,aa in enumerate(self.aa_alphabet):
-					tmp_af[ai,:]=(aln_array==aa).mean(axis=0)
-
-				self.variable_aa[anno] = np.where(np.max(tmp_af,axis=0)<1.0-self.min_mutation_frequency)[0]
-				self.consensus_aa[anno] = "".join(np.fromstring(self.aa_alphabet, 'S1')[np.argmax(tmp_af,axis=0)])
-				self.aa_entropy[anno] = -np.sum(tmp_af*np.log(np.maximum(1e-10,tmp_af)), axis=0)
-				self.variable_aa_identities[anno] = [ [self.aa_alphabet[ii] for ii in np.where(tmp_af[:,pos])[0]]
-												for pos in xrange(tmp_af.shape[1])]
-				self.aa_frequencies[anno] = tmp_af
-
-
 	def estimate_frequencies(self, tasks = ['mutations','genotypes', 'clades', 'tree']):
 		if 'mutations' in tasks:
 			self.frequencies["mutations"]={reg:{} for reg, _ in self.aggregate_regions}
