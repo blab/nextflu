@@ -138,7 +138,8 @@ class H1N1pdm_clean(virus_clean):
 			"A/RioGrandedoNorte/117490/2012", "A/Poland/16/2013", "A/Hungary/02/2013", "A/Hungary/16/2013",
 			"A/Arkansas/14/2013", "A/Arkansas/15/2013", "A/Brest/1161/2014", "A/India/Pun1418633/2014",
 			"A/Minnesota/33/2014", "A/Iowa/39/2015", "A/Minnesota/46/2015", "A/Bari/166/2016",
-			"A/Bari/167/2016"]
+			"A/Bari/167/2016", "A/Ohio/9/2015"
+			]
 		for v in self.viruses:
 			if v.strain in outlier_strains:
 				if self.verbose > 1:
