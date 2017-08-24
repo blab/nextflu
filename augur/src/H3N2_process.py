@@ -202,7 +202,7 @@ class H3N2_clean(virus_clean):
 			"A/Michigan/95/2016", "A/Michigan/96/2016", "A/Ohio/27/2016", "A/Ohio/28/2016", "A/Ohio/32/2016",
 			"A/Ohio/33/2016", "A/Ohio/35/2016", "A/Zhejiang-Wuxin/1300/2016", "A/Catalonia/NSVH100560486/2017",
 			"A/Catalonia/NSVH100533399/2017", "A/Piaui/494713/2017", "A/SaoPaulo/554097/2017",
-			"A/Jiangsu-Chongchuan/12908/2015"
+			"A/Jiangsu-Chongchuan/12908/2015", "A/HongKong/HKMA20D/2008"
 			]
 		for v in self.viruses:
 			if v.strain in outlier_strains:
