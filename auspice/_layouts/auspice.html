@@ -154,6 +154,110 @@ categories:
 	</div>
 </div>
 
+<div class="spacer"></div>
+<h3>Mutations sorted by recent rise</h3>
+<div class="spacer"></div>
+<div class="row">
+	<div class="col-md-1"></div>
+	<div class="col-md-5" style="height: 500px; overflow: auto;">
+		<h4>North America</h4>
+		<table class="table table-striped">
+			<col width="25%">
+			<col width="25%">
+			<col width="25%">
+			<col width="25%">
+			<thead><tr><td>Mutation</td><td>avg freq</td><td>delta freq</td><td>delta/(avg+0.01)</td></tr></thead>
+			<tbody>
+			{% for mut in site.data.rising_mutations[page.virus][page.resolution]["NA"] %}
+			<tr>
+				<td>{{ mut[0] }}</td>
+				<td>{{ mut[1] }}</td>
+				<td>{{ mut[2] }}</td>
+				<td>{{ mut[3] }}</td>
+			</tr>
+			{% endfor %}
+		</tbody></table>
+	</div>
+	<div class="col-md-1"></div>
+	<div class="col-md-5" style="height: 500px; overflow: auto;">
+		<h4>Asia</h4>
+		<table class="table table-striped">
+			<col width="25%">
+			<col width="25%">
+			<col width="25%">
+			<col width="25%">
+			<thead><tr><td>Mutation</td><td>avg freq</td><td>delta freq</td><td>delta/(avg+0.01)</td></tr></thead>
+			<tbody>
+			{% for mut in site.data.rising_mutations[page.virus][page.resolution]['AS'] %}
+			<tr>
+				<td>{{ mut[0] }}</td>
+				<td>{{ mut[1] }}</td>
+				<td>{{ mut[2] }}</td>
+				<td>{{ mut[3] }}</td>
+			</tr>
+			{% endfor %}
+		</tbody></table>
+	</div>
+<!-- 	<div class="col-md-4" style="height: 500px; overflow: auto;">
+		<span>Europe</span>
+		<table class="table table-striped">
+			<col width="25%">
+			<col width="25%">
+			<col width="25%">
+			<col width="25%">
+			<thead><tr><td>Mutation</td><td>avg freq</td><td>delta freq</td><td>delta/avg</td></tr></thead>
+			<tbody>
+			{% for mut in site.data.rising_mutations[page.virus][page.resolution]['EU'] %}
+			<tr>
+				<td>{{ mut[0] }}</td>
+				<td>{{ mut[1] }}</td>
+				<td>{{ mut[2] }}</td>
+				<td>{{ mut[3] }}</td>
+			</tr>
+			{% endfor %}
+		</tbody></table>
+	</div>
+ --></div>
+
+
+<div class="spacer"></div>
+<h3>Parallel mutations</h3>
+<div class="spacer"></div>
+<div class="row">
+	<div class="col-md-1"></div>
+	<div class="col-md-5" style="height: 500px; overflow: auto;">
+		<h4>Positions {{ page.passage }} {{ page.assay }}</h4>
+		<table class="table table-striped">
+			<col width="40%">
+			<col width="60%">
+			<thead><tr><td>Mutation</td><td>#of parallel events</td></tr></thead>
+			<tbody>
+			{% for mut in site.data.recurring_positions[page.virus][page.resolution][page.passage][page.assay] %}
+			<tr>
+				<td>{{ mut[0] }}</td>
+				<td>{{ mut[1] }}</td>
+			</tr>
+			{% endfor %}
+		</tbody></table>
+	</div>
+	<div class="col-md-1"></div>
+	<div class="col-md-5" style="height: 500px; overflow: auto;">
+		<h4>Specific mutations</h4>
+		<table class="table table-striped">
+			<col width="40%">
+			<col width="60%">
+			<thead><tr><td>Mutation</td><td>#of parallel events</td></tr></thead>
+			<tbody>
+			{% for mut in site.data.recurring_mutations[page.virus][page.resolution][page.passage][page.assay] %}
+			<tr>
+				<td>{{ mut[0] }}</td>
+				<td>{{ mut[1] }}</td>
+			</tr>
+			{% endfor %}
+		</tbody></table>
+	</div>
+</div>
+
 <div class="row">
 	<div class="col-md-12">
 		<div class="bigspacer"></div>
