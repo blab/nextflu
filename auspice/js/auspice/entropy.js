@@ -20,7 +20,7 @@ d3.json(path + file_prefix + "entropy.json", function(error, json){
 	var xmax = 0;
 	var anno_count=0;
 	entropy = json;
-	console.log(entropy);
+	// console.log("entropy", entropy);
     for (x in entropy){
 			if (x!='nuc'){
         start = entropy[x]['pos'][0]; end = entropy[x]['pos'][entropy[x]['pos'].length-1];
@@ -35,23 +35,24 @@ d3.json(path + file_prefix + "entropy.json", function(error, json){
 	    }
     }
 
+	// commented out to not show nuc entropy in the barchart
 	// load nuc first to hack chart ordering
-	gene='nuc';
-	chart_data[gene]=[];
-	chart_data['x'+gene]=[];
-	chart_types[gene]='bar';
-	chart_xaxis[gene]='x'+gene;
-	for (var ii=0;ii<entropy[gene]["pos"].length;ii+=1){
-		if (Math.round(10000*entropy[gene]["val"][ii])/10000>0.05){
-			chart_data[gene].push(Math.round(10000*entropy[gene]["val"][ii])/10000);
-			chart_data['x'+gene].push(entropy[gene]["pos"][ii]);
-			posToAA[entropy[gene]["pos"][ii]] = [gene, entropy[gene]["pos"][ii]]
-		}
-	}
-	var tmp_xmax = d3.max(chart_data['x'+gene]);
-	if (tmp_xmax>xmax) {xmax=tmp_xmax;}
-	var tmp_ymax = d3.max(entropy[gene]["val"]);
-	if (tmp_ymax>ymax) {ymax=tmp_ymax;}
+	// gene='nuc';
+	// chart_data[gene]=[];
+	// chart_data['x'+gene]=[];
+	// chart_types[gene]='bar';
+	// chart_xaxis[gene]='x'+gene;
+	// for (var ii=0;ii<entropy[gene]["pos"].length;ii+=1){
+	// 	if (Math.round(10000*entropy[gene]["val"][ii])/10000>0.05){
+	// 		chart_data[gene].push(Math.round(10000*entropy[gene]["val"][ii])/10000);
+	// 		chart_data['x'+gene].push(entropy[gene]["pos"][ii]);
+	// 		posToAA[entropy[gene]["pos"][ii]] = [gene, entropy[gene]["pos"][ii]]
+	// 	}
+	// }
+	// var tmp_xmax = d3.max(chart_data['x'+gene]);
+	// if (tmp_xmax>xmax) {xmax=tmp_xmax;}
+	// var tmp_ymax = d3.max(entropy[gene]["val"]);
+	// if (tmp_ymax>ymax) {ymax=tmp_ymax;}
 
 	for (gene in entropy){
 		if (gene!='nuc'){
@@ -141,7 +142,7 @@ d3.json(path + file_prefix + "entropy.json", function(error, json){
 					return "#AAA"
 				}
 				else if (d.id != "nuc") {
-					return "#E67C32"
+					return "#777";
 				}
 				else {
 					return "#AAA";

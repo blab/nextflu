@@ -141,12 +141,14 @@ d3.select("#HImodel_tree")
 
 var HI_titers, titer_tree_model, titer_subs_model;
 var structure_HI_mutations;
-d3.json(path + file_prefix + "titers.json", function(error, json){
-	HI_titers = json;
-});
-d3.json(path + file_prefix + "titer_tree_model.json", function(error, json){
-	titer_tree_model = json;
-});
-d3.json(path + file_prefix + "titer_subs_model.json", function(error, json){
-	titer_subs_model = json;
-});
+if (useTiters) {
+	d3.json(path + file_prefix + "titers.json", function(error, json){
+		HI_titers = json;
+	});
+	d3.json(path + file_prefix + "titer_tree_model.json", function(error, json){
+		titer_tree_model = json;
+	});
+	d3.json(path + file_prefix + "titer_subs_model.json", function(error, json){
+		titer_subs_model = json;
+	});
+}

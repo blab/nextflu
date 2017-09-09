@@ -1,5 +1,5 @@
 console.log('Enter tree.js');
-var timetree=true;
+var timetree=false;
 
 var dHIScale = d3.scale.linear()
 	.domain([0, 1])
