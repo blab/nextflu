@@ -410,7 +410,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.attr('dominant-baseline', 'central')
 		.style('font-family', 'FontAwesome')
 		.style("fill", function (d){if (d==focusNode) {return '#FF3300';} else {return '#555555';}})
-		.style("font-size", function (d) {if (d==focusNode) {return "30px";} else {return "12px";}})
+		.style("font-size", function (d) {if (d==focusNode) {return "30px";} else {return "18px";}})
 		.text(function (d) {if (d==focusNode) {return '\uf05b';} else {return serumSymbol;}})
 		.style("visibility", serumVisibility)
 		.style("cursor", "crosshair")
@@ -632,7 +632,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	}
 
 
-	branch_labels = document.getElementById("branchlabels");
+	branch_labels = document.getElementById("branchlabels").checked;
 	addBranchLabels();
 
 	var searchEvent;

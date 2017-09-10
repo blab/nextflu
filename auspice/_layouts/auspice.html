@@ -162,11 +162,12 @@ categories:
 	<div class="col-md-5" style="height: 500px; overflow: auto;">
 		<h4>North America</h4>
 		<table class="table table-striped">
-			<col width="25%">
-			<col width="25%">
-			<col width="25%">
-			<col width="25%">
-			<thead><tr><td>Mutation</td><td>avg freq</td><td>delta freq</td><td>delta/(avg+0.01)</td></tr></thead>
+			<col width="20%">
+			<col width="20%">
+			<col width="20%">
+			<col width="20%">
+			<col width="20%">
+			<thead><tr><td>Mutation</td><td>avg freq</td><td>delta freq</td><td>delta/avg</td><td>~n</td></tr></thead>
 			<tbody>
 			{% for mut in site.data.rising_mutations[page.virus][page.resolution]["NA"] %}
 			<tr>
@@ -174,6 +175,7 @@ categories:
 				<td>{{ mut[1] }}</td>
 				<td>{{ mut[2] }}</td>
 				<td>{{ mut[3] }}</td>
+				<td>{{ mut[4] }}</td>
 			</tr>
 			{% endfor %}
 		</tbody></table>
@@ -182,11 +184,12 @@ categories:
 	<div class="col-md-5" style="height: 500px; overflow: auto;">
 		<h4>Asia</h4>
 		<table class="table table-striped">
-			<col width="25%">
-			<col width="25%">
-			<col width="25%">
-			<col width="25%">
-			<thead><tr><td>Mutation</td><td>avg freq</td><td>delta freq</td><td>delta/(avg+0.01)</td></tr></thead>
+			<col width="20%">
+			<col width="20%">
+			<col width="20%">
+			<col width="20%">
+			<col width="20%">
+			<thead><tr><td>Mutation</td><td>avg freq</td><td>delta freq</td><td>delta/avg</td><td>~n</td></tr></thead>
 			<tbody>
 			{% for mut in site.data.rising_mutations[page.virus][page.resolution]['AS'] %}
 			<tr>
@@ -194,6 +197,7 @@ categories:
 				<td>{{ mut[1] }}</td>
 				<td>{{ mut[2] }}</td>
 				<td>{{ mut[3] }}</td>
+				<td>{{ mut[4] }}</td>
 			</tr>
 			{% endfor %}
 		</tbody></table>
