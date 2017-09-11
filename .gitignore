@@ -4,7 +4,6 @@ ec2-startup.sh
 augur/data/
 augur/output/
 auspice/data/
-figures
 validation
 temp_*
 tmp
@@ -15,7 +14,7 @@ tmp
 .jekyll-metadata
 _site/
 
-# Tex # 
+# Tex #
 #######
 *.aux
 *.bbl
