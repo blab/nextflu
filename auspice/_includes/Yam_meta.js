@@ -1,11 +1,11 @@
 var	vaccineChoice = {};
-vaccineChoice['B/Beijing/184/93'] = "1998-11-01";
-vaccineChoice['B/Sichuan/379/99'] = "2001-09-25";
+vaccineChoice['B/Beijing/184/1993'] = "1998-11-01";
+vaccineChoice['B/Sichuan/379/1999'] = "2001-09-25";
 vaccineChoice['B/Shanghai/361/2002'] = "2004-09-25";
 vaccineChoice['B/Florida/4/2006'] = "2008-09-25";
-vaccineChoice['B/Wisconsin/01/2010'] = "2012-02-25";
-vaccineChoice['B/Massachusetts/02/2012'] = "2013-02-25";
-vaccineChoice['B/PHUKET/3073/2013'] = "2014-09-25";
+vaccineChoice['B/Wisconsin/1/2010'] = "2012-02-25";
+vaccineChoice['B/Massachusetts/2/2012'] = "2013-02-25";
+vaccineChoice['B/Phuket/3073/2013'] = "2014-09-25";
 var vaccineStrains = Object.keys(vaccineChoice);
 
 var restrictTo = {"region":"all"};
@@ -33,4 +33,3 @@ var reference_viruses = {
 "B/Estonia/55669/2011":'2011-03-14',
 "B/ENGLAND/145/2008":'2008-05-01'
 };
-

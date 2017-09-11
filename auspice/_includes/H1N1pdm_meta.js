@@ -1,5 +1,6 @@
 var	vaccineChoice = {};
-vaccineChoice['A/California/07/2009'] = "2009-09-25";
+vaccineChoice['A/California/7/2009'] = "2009-09-25";
+vaccineChoice['A/Michigan/45/2015'] = "2016-09-29";
 var vaccineStrains = Object.keys(vaccineChoice);
 
 var restrictTo = {"region":"all"};

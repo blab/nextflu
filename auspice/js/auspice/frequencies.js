@@ -26,17 +26,21 @@ loops over all genotypes from a certain region and sums the frequency contributi
 of the genotype matches at the specified positions
 **/
 function get_frequencies(region, gt){
+	var isAA = /^\d+[A-Z]$/.test(gt);
+	if (isAA) {
+		gt = "HA1:" + gt;
+	}
 	var freq = [];
 	for (var pi=0; pi<pivots.length; pi++){freq[freq.length]=0;}
-	console.log("searching for "+region+' ' + gt);
+	// console.log("searching for "+region+' ' + gt);
 	var label_str = region+'_'+gt
 	if (frequencies[label_str]!=undefined) {
-		console.log(gt+" found");
+		// console.log(gt+" found");
 		for (var pi=0; pi<freq.length; pi++){
 			freq[pi]+=frequencies[label_str][pi];
 		}
 	}else{
-		console.log("not found "+gt);
+		// console.log("not found "+gt);
 	}
 	return freq.map(function (d) {return Math.round(d*100)/100;});
 };
@@ -51,7 +55,7 @@ function make_gt_chart(gt){
 		var region = d[0];
 		var genotype = d[1];
 		var freq = get_frequencies(region, genotype);
-		console.log(region+' '+genotype);
+		// console.log(region+' '+genotype);
 		if (d3.max(freq)>0) {
 			var tmp_trace = genotype.toString().replace(/,/g, ', ');
 			if (region != "global") {
@@ -61,7 +65,7 @@ function make_gt_chart(gt){
 			tmp_colors[tmp_trace] = genotypeColors[i];
 		}
 	});
-	console.log(tmp_colors);
+	// console.log(tmp_colors);
 	gt_chart.load({
        	columns: tmp_data,
        	unload: true
@@ -78,7 +82,7 @@ function make_gt_chart(gt){
 
 function addClade(d) {
 	if (typeof gt_chart != "undefined"){
-		console.log(d);
+		// console.log(d);
 		var plot_data = [['x'].concat(pivots)];
 		var reg = "global";
 		var label_str = 'clade:'+d.target.clade;
