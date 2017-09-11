@@ -105,7 +105,7 @@ d3.json(path + file_prefix + "entropy.json", function(error, json){
 				tick: {
 					outer: false,
 					values: ([1,2,3,4,5,6,7,8,9]).map(function (d){
-						var dec = Math.pow(10,Math.floor(Math.log10(xmax/5)))
+						var dec = Math.pow(10,Math.floor(Math.log(xmax/5.0)/Math.log(10.0)))
 						var step = dec*Math.floor(xmax/5/dec);
 						return d*step;
 					})
