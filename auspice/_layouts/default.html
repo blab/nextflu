@@ -41,12 +41,8 @@
 	<body>
 		<nav class="navbar navbar-default navbar-static-top" role="navigation">
 			<div class="container">
+				{% if page.site != 'gisaid' %}
 				<ul class="nav navbar-nav navbar-right nav-tabs">
-					<li role="presentation">
-						<a href="http://nextstrain.org">
-							Nextstrain
-						</a>
-					</li>					
 					{% if page.categories.first == 'methods' %}
 					<li class="active" role="presentation">
 					{% else %}
@@ -88,12 +84,21 @@
 						</ul>
 					</li>
 				</ul>
+				{% endif %}
 				<div class="navbar-header">
+					{% if page.site == 'gisaid' %}
+					<a class="navbar-brand" href="/gisaid/">
+						<div class="navtitle">
+							<span class="c2">n</span><span class="c3">e</span><span class="c4">x</span><span class="c5">t</span><span class="c6">f</span><span class="c7">l</span><span class="c8">u</span>
+						</div>
+					</a>
+					{% else %}
 					<a class="navbar-brand" href="/">
 						<div class="navtitle">
 							<span class="c2">n</span><span class="c3">e</span><span class="c4">x</span><span class="c5">t</span><span class="c6">f</span><span class="c7">l</span><span class="c8">u</span>
 						</div>
 					</a>
+					{% endif %}
 					<ul class="nav navbar-nav navbar-left">
 						<li class="dropdown hidden-xs"><p>/</p></li>
 						<li class="dropdown">
@@ -113,7 +118,11 @@
 										<a>{{ entry.virus }}</a>
 									{% else %}
 									<li>
+										{% if page.site == 'gisaid' %}
+										<a href="/gisaid/{{ entry.virus | downcase }}/{{ page.resolution | downcase }}">{{ entry.virus }}</a>
+										{% else %}
 										<a href="/{{ entry.virus | downcase }}/{{ page.resolution | downcase }}">{{ entry.virus }}</a>
+										{% endif %}
 									{% endif %}
 									</li>
 								{% endfor %}
@@ -140,7 +149,11 @@
 												<a>{{ res | replace:'-',' ' }}</a>
 											{% else %}
 											<li>
+												{% if page.site == 'gisaid' %}
+												<a href="/gisaid/{{ entry.virus | downcase }}/{{ res | downcase }}">{{ res | replace:'-',' ' }}</a>
+												{% else %}
 												<a href="/{{ entry.virus | downcase }}/{{ res | downcase }}">{{ res | replace:'-',' ' }}</a>
+												{% endif %}
 											{% endif %}
 											</li>
 										{% endfor %}
