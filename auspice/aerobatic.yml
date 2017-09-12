@@ -6,4 +6,7 @@ plugins:
   - name: password-protect
     options:
       password: $SITE_PASSWORD
+  - name: redirect
+    options:
+      /: /cdc/      
   - name: webpage
