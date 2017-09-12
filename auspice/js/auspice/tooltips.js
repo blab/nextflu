@@ -118,9 +118,6 @@ var virusTooltip = d3.tip()
 		if (typeof d.dfreq != "undefined") {
 			string += "Freq. change: " + d.dfreq.toFixed(3) + "<br>";
 		}
-		if (typeof d.attr.fitness != "undefined") {
-			string += "Fitness: " + d.attr.fitness.toFixed(3) + "<br>";
-		}
 		if (typeof d.attr.pred_distance != "undefined") {
 			string += "Predicted distance: " + d.pred_distance.toFixed(3) + "<br>";
 		}

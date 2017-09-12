@@ -12,7 +12,7 @@ function calcDfreq(node, freq_ii){
 			var label_str = "global_clade:"+node.children[i1].clade;
 			if (typeof frequencies !== "undefined" && frequencies[label_str] != "undefined"){
 				var tmp_freq = get_frequencies("global", "clade:"+node.children[i1].clade)
-				node.children[i1].dfreq = (tmp_freq[freq_ii] + 0.01)/(tmp_freq[freq_ii-dfreq_dn] + 0.01);
+				node.children[i1].dfreq = (tmp_freq[freq_ii] + 0.001)/(tmp_freq[freq_ii-dfreq_dn] + 0.001);
 			} else {
 				node.children[i1].dfreq = node.dfreq;
 			}
@@ -32,15 +32,13 @@ function get_frequencies(region, gt){
 	}
 	var freq = [];
 	for (var pi=0; pi<pivots.length; pi++){freq[freq.length]=0;}
-	// console.log("searching for "+region+' ' + gt);
 	var label_str = region+'_'+gt
 	if (frequencies[label_str]!=undefined) {
-		// console.log(gt+" found");
 		for (var pi=0; pi<freq.length; pi++){
 			freq[pi]+=frequencies[label_str][pi];
 		}
 	}else{
-		// console.log("not found "+gt);
+		console.log("not found "+gt);
 	}
 	return freq.map(function (d) {return Math.round(d*100)/100;});
 };

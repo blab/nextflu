@@ -124,6 +124,10 @@ function colorByTrait() {
 		adjust_coloring_by_date();
 	}
 	else if (colorBy == "dfreq") {
+		if (freq_ii==0){
+			freq_ii=pivots.length-1;
+		}
+		calcDfreq(rootNode, freq_ii);
 		colorScale = dfreqColorScale;
 		nodes.map(function(d) { d.coloring = d.dfreq;});
 	}
@@ -336,14 +340,14 @@ function newFocus(){
 		activeSera[serum]=true;
 	}
 	seraDiv.innerHTML = htmlStr;
-	for (var i=0; i<allSera.length; i++){
-		var serum = allSera[i];
-		var serumID = serum.split("/").join("");
+	console.log(seraDiv);
+	for (var serum in focusNode.potency_mut){
+		var serumID = serum.split("/").join("").replace(/;/g, " ");
 		d3.select("#"+serumID)
 			.on("change", function(elem){
 					for (var j=0; j<allSera.length; j++){
 						var tmpserum = allSera[j];
-						var tmpserumID = tmpserum.split("/").join("");
+						var tmpserumID = tmpserum.split("/").join("").replace(';', '_');
 						activeSera[tmpserum]=document.getElementById(tmpserumID).checked;
 					}
 					colorByHIDistance()});
@@ -365,7 +369,7 @@ function colorByHIDistance(){
 
 	treeplot.selectAll(".serum")
 	.style("fill", function (d){if (d==focusNode) {return '#FF3300';} else {return '#555555';}})
-		.style("font-size", function (d) {if (d==focusNode) {return "30px";} else {return "12px";}})
+		.style("font-size", function (d) {if (d==focusNode) {return "30px";} else {return "18px";}})
 		.text(function (d) {if (d==focusNode) {return '\uf05b';} else {return serumSymbol;}});
 
 	console.log("Using HI model: "+HImodel);

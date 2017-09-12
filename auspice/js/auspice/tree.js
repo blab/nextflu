@@ -1,5 +1,6 @@
 console.log('Enter tree.js');
 var timetree=false;
+var LBI_cutoff;
 
 var dHIScale = d3.scale.linear()
 	.domain([0, 1])
@@ -34,6 +35,7 @@ if ((typeof branch_labels != "undefined")&&(branch_labels)) {top_margin +=5;}
 function initDateColorDomain(intAttributes){
 	var numDateValues = tips.map(function(d) {return d.attr.num_date;})
 	var maxDate = d3.max(numDateValues.filter(function (d){return d!="undefined";}));
+	LBI_cutoff = maxDate - LBItime_window;
 	var time_back = 1.0;
 	if (typeof time_window != "undefined"){
 		time_back = time_window;
@@ -206,7 +208,7 @@ function tree_init(){
 		time_step = 1.0/12;
 	}
 	//setting index of frequency trajectory to use for calculating frequency change
-	freq_ii = 1;
+	freq_ii = 0;
 	if (typeof pivots != "undefined") {
 		if (typeof pivots.length != "undefined") {
 			freq_ii = pivots.length - 1;
@@ -215,9 +217,6 @@ function tree_init(){
 	calcNodeAges(time_window);
 	colorByTrait();
 	adjust_freq_by_date();
-	if (typeof calcDfreq == 'function') {
-		calcDfreq(rootNode, freq_ii);
-	}
 	tree_legend = makeLegend();
 	nDisplayTips = displayRoot.fullTipCount;
 }
