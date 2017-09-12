@@ -2,6 +2,9 @@ var genericDomain = [0,0.111,0.222,0.333, 0.444, 0.555, 0.666, 0.777, 0.888, 1.0
 var path = '/data/';
 var tip_labels = true;
 
+var countries = [];
+var divisions = []; 
+
 var cladeToSeq = {}
 
 if (typeof globalDate == 'undefined') {
