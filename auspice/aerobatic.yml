@@ -1,0 +1,9 @@
+id: 23d49302-5ed5-49ca-861d-7853b1a705c0
+deploy:
+  ignore: []
+  directory: _site
+plugins:
+  - name: password-protect
+    options:
+      password: $SITE_PASSWORD
+  - name: webpage
