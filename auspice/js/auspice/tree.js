@@ -382,6 +382,31 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
   		})
 		.on('mouseout', virusTooltip.hide);
 
+	var serumWidth = 10;
+	var serumCircles = treeplot.selectAll(".serum")
+		.data(sera)
+		.enter()
+		.append("text")
+		.attr("class", "serum")
+		.attr('text-anchor', 'middle')
+		.attr('dominant-baseline', 'central')
+		.style('font-family', 'FontAwesome')
+		.style("stroke", "#fff")
+		.style("fill", function (d){if (d==focusNode) {return '#FF3300';} else {return '#333';}})
+		.style("font-size", function (d) {if (d==focusNode) {return "30px";} else {return "16px";}})
+		.text(function (d) {if (d==focusNode) {return '\uf05b';} else {return serumSymbol;}})
+		.style("visibility", serumVisibility)
+		.style("cursor", "pointer")
+		.on('mouseover', function(d) {
+			virusTooltip.show(d, this);
+		})
+		.on('mouseout', virusTooltip.hide)
+		.on('click', function (d){
+			if (colorBy == "HI_dist") {
+				focusNode = d;
+				newFocus();
+			}
+		});
 
 	var vaccineCircles = treeplot.selectAll(".vaccine")
 		.data(vaccines)
@@ -392,36 +417,19 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.attr('dominant-baseline', 'central')
 		.style("font-size", "28px")
 		.style('font-family', 'FontAwesome')
-		.style("fill", "#555555")
-		.text(function(d) { return '\uf00d'; })
-		.style("cursor", "default")
-		.on('mouseover', function(d) {
-			virusTooltip.show(d, this);
-		})
-		.on('mouseout', virusTooltip.hide);
-
-	var serumWidth = 10;
-	var serumCircles = treeplot.selectAll(".serum")
-		.data(sera)
-		.enter()
-		.append("text")
-		.attr("class", "serum")
-		.attr('text-anchor', 'middle')
-		.attr('dominant-baseline', 'central')
-		.style('font-family', 'FontAwesome')
-		.style("fill", function (d){if (d==focusNode) {return '#FF3300';} else {return '#555555';}})
-		.style("font-size", function (d) {if (d==focusNode) {return "30px";} else {return "12px";}})
-		.text(function (d) {if (d==focusNode) {return '\uf05b';} else {return serumSymbol;}})
-		.style("visibility", serumVisibility)
-		.style("cursor", "crosshair")
+		.style("stroke", "#fff")
+		.style("fill", "#555")
+		.text(function (d) {if (d==focusNode) {return '\uf05b';} else {return '\uf00d';}})
+		.style("cursor", "pointer")
 		.on('mouseover', function(d) {
 			virusTooltip.show(d, this);
 		})
 		.on('mouseout', virusTooltip.hide)
 		.on('click', function (d){
-			focusNode = d;
-			document.getElementById("coloring").value = "HI_dist";
-			newFocus();
+			if (colorBy == "HI_dist") {
+				focusNode = d;
+				newFocus();
+			}
 		});
 
 	/*

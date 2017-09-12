@@ -3,7 +3,7 @@ var path = '/data/';
 var tip_labels = true;
 
 var countries = [];
-var divisions = []; 
+var divisions = [];
 
 var cladeToSeq = {}
 
@@ -40,7 +40,7 @@ var legend = d3.select("#legend")
 
 var colorBy = document.getElementById("coloring").value;
 var colorScale;
-var serumSymbol = '\uf0fe';
+var serumSymbol = '\uf013';
 var epiColorDomain = genericDomain;
 var nonEpiColorDomain = genericDomain;
 var rbsColorDomain = genericDomain;
