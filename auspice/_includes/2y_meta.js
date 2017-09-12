@@ -1,4 +1,3 @@
-var time_window = 1.0;
 var full_data_time_window = 2.0;
 var time_ticks=[2016.0, 2016.5, 2017.0, 2017.5];
 var dfreq_dn = 2;
