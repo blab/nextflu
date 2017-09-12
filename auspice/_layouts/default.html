@@ -72,14 +72,16 @@
 						</a>
 						<ul class="dropdown-menu">
 							{% for report in site.categories.reports %}
-							{% if page.linktitle == report.linktitle %}
-							<li class="disabled" role="presentation">
-								<a>{{ report.linktitle }}</a>
-							{% else %}
-							<li role="presentation">
-								<a href="{{ report.url }}">{{ report.linktitle }}</a>
-							{% endif %}
-							</li>
+								{% unless report.draft %}
+									{% if page.linktitle == report.linktitle %}
+										<li class="disabled" role="presentation">
+											<a>{{ report.linktitle }}</a>
+										{% else %}
+										<li role="presentation">
+											<a href="{{ report.url }}">{{ report.linktitle }}</a>
+									{% endif %}
+									</li>
+								{% endunless %}
 							{% endfor %}
 						</ul>
 					</li>
