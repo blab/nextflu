@@ -20,7 +20,7 @@ drop = 5
 
 if virus=='h3n2':
     clades = ['3c2.a', '3c3.a', '3c3.b', '171K']
-    mutations = ['HA1:121K', 'HA1:92R', 'HA1:131K', 'HA1:198P', 'HA1:91N']
+    mutations = ['HA1:121K', 'HA1:92R', 'HA1:131K', 'HA1:31S','HA1:198P', 'HA1:193S']
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
 elif virus=='h1n1pdm':
