@@ -14,30 +14,35 @@ args = parser.parse_args()
 
 virus = args.lineage
 
-resolution = '3y'
 report = 'sep-2017'
-drop = 5
+drop = 1
+resolution = '2y'
 
 if virus=='h3n2':
     clades = ['3c2.a', '3c3.a', '3c3.b', '171K']
     mutations = ['HA1:121K', 'HA1:92R', 'HA1:131K', 'HA1:31S','HA1:198P', 'HA1:193S']
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
+    ymax = 500
 elif virus=='h1n1pdm':
     clades = []
-    mutations = ['HA1:162N', 'HA1:74R', 'HA1:295V', 'HA1:164T']
+    mutations = ['HA1:74R', 'HA1:295V', 'HA1:164T']
+    #mutations = ['HA1:163Q', 'HA1:162N', 'HA1:74R']
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
+    ymax = 200
 elif virus=='vic':
     clades = []
     mutations = ['HA1:163-','HA1:209N', 'HA1:175V'] # HA1:56K would be good, but it currently isn't computed -> need to lower the threshold.
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
+    ymax = 500
 elif virus=='yam':
     clades = []
     mutations = ['HA1:251V', 'HA1:211R']
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
+    ymax = 500
 
 file_addendum = '_cell_hi'
 #file_addendum = ''
@@ -58,9 +63,11 @@ region_codes = {'EU':['europe'], 'AS':['china', 'south_asia', 'japan_korea','sou
                 'NA':["north_america"], 'OC':["oceania"]}
 
 offset = datetime(2000,1,1).toordinal()
-regions = ['global', 'NA', 'AS', 'EU', 'OC']
-region_label = {'global': 'Global', 'NA': 'N America', 'AS': 'Asia', 'EU': 'Europe', 'OC': 'Oceania'}
+regions = ['NA', 'AS', 'EU', 'OC', 'global']
+region_label = {'NA': 'N America', 'AS': 'Asia', 'EU': 'Europe', 'OC': 'Oceania', 'global': 'Global'}
 cols = sns.color_palette(n_colors=len(regions))
+cols.pop(0)
+cols.append(sns.color_palette(["#3E547F"], n_colors=1)[0])
 fs=12
 
 years = YearLocator()
@@ -98,7 +105,7 @@ for c,region in zip(cols, regions):
                 label=region_label[region], color=c, clip_on=False)
         tmpcounts += np.array(counts[region][drop:])
 ax.set_xlim([pivots[drop-1], pivots[-1]])
-ax.set_ylim(0,500)
+ax.set_ylim(0,ymax)
 ax.tick_params(axis='x', which='major', labelsize=fs, pad=20)
 ax.tick_params(axis='x', which='minor', pad=7)
 ax.xaxis.set_major_locator(years)
