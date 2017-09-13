@@ -8,8 +8,8 @@ from matplotlib.dates import YearLocator, MonthLocator, DateFormatter
 #################################
 # Settings to configure
 
-#virus = 'h3n2'
-virus = 'h1n1pdm'
+virus = 'h3n2'
+#virus = 'h1n1pdm'
 #virus = 'vic'
 #virus = 'yam'
 
@@ -38,8 +38,8 @@ elif virus=='yam':
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
 
-#file_addendum = '_cell_hi'
-file_addendum = ''
+file_addendum = '_cell_hi'
+#file_addendum = ''
 file_prefix = '../data/flu_'+virus+'_ha_'+resolution+file_addendum
 
 #################################
@@ -94,7 +94,7 @@ for c,region in zip(cols, regions):
                 label=region_label[region], color=c, clip_on=False)
         tmpcounts += np.array(counts[region][drop:])
 ax.set_xlim([pivots[drop-1], pivots[-1]])
-ax.set_ylim(0,200)
+ax.set_ylim(0,500)
 ax.tick_params(axis='x', which='major', labelsize=fs, pad=20)
 ax.tick_params(axis='x', which='minor', pad=7)
 ax.xaxis.set_major_locator(years)
