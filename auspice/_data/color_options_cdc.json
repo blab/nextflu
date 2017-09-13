@@ -2,6 +2,7 @@
   ["HI_dist","HI distance from focus"],
   ["fitness","fitness"],
   ["cHI","antigenic advance"],
+  ["dfreq","frequency change"],
   ["division","division"],
   ["country","country"],
   ["region","region"],
