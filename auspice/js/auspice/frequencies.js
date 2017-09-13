@@ -40,7 +40,7 @@ function get_frequencies(region, gt){
 	}else{
 		console.log("not found "+gt);
 	}
-	return freq.map(function (d) {return Math.round(d*100)/100;});
+	return freq.map(function (d) {return Math.round(d*10000)/10000;});
 };
 
 var freqDataString = "";
