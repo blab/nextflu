@@ -30,12 +30,12 @@ elif virus=='h1n1pdm':
     mut_legend = {'panel':0, 'loc':3}
 elif virus=='vic':
     clades = []
-    mutations = ['HA1:163-','HA1:129G', 'HA1:56K', 'HA1:209N', 'HA1:175V'] # HA1:56K would be good, but it currently isn't computed -> need to lower the threshold.
+    mutations = ['HA1:163-','HA1:209N', 'HA1:175V'] # HA1:56K would be good, but it currently isn't computed -> need to lower the threshold.
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
 elif virus=='yam':
     clades = []
-    mutations = ['HA1:172Q', 'HA1:251V', 'HA1:211R']
+    mutations = ['HA1:251V', 'HA1:211R']
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
 
