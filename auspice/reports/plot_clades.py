@@ -39,10 +39,10 @@ elif virus=='vic':
     ymax = 250
 elif virus=='yam':
     clades = []
-    mutations = ['HA1:251V', 'HA1:211R']
+    mutations = ['HA1:251V', 'HA1:211R', 'HA1:76I']
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
-    ymax = 500
+    ymax = 250
 
 file_addendum = '_cell_hi'
 #file_addendum = ''
@@ -170,7 +170,7 @@ for mutation, ax in zip(mutations, axs):
             std_dev = np.sqrt(tmp_freq*(1-tmp_freq)/(smoothed_count_by_region[region]+1))
             ax.plot(pivots[drop:], tmp_freq[drop:], '-o', label = region_label[region], c=c, lw=3 if region=='global' else 1)
             if show_errorbars:
-                ax.fill_between(pivots[drop:], (tmp_freq-n_std_dev*std_dev)[drop:], (tmp_freq+n_std_dev*std_dev)[drop:], facecolor=c, linewidth=0, alpha=0.1)            
+                ax.fill_between(pivots[drop:], (tmp_freq-n_std_dev*std_dev)[drop:], (tmp_freq+n_std_dev*std_dev)[drop:], facecolor=c, linewidth=0, alpha=0.1)
     ax.set_xlim([pivots[drop-1], pivots[-1]])
     ax.set_ylim(0,1)
     ax.text(pivots[drop-1]+10, 0.88, mutation, fontsize=fs)
