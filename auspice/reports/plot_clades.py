@@ -33,10 +33,10 @@ elif virus=='h1n1pdm':
     ymax = 200
 elif virus=='vic':
     clades = []
-    mutations = ['HA1:163-','HA1:209N', 'HA1:175V'] # HA1:56K would be good, but it currently isn't computed -> need to lower the threshold.
+    mutations = ['HA1:162-', 'HA1:175V', 'HA1:209N']
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
-    ymax = 500
+    ymax = 250
 elif virus=='yam':
     clades = []
     mutations = ['HA1:251V', 'HA1:211R']
@@ -158,15 +158,19 @@ print "Plotting mutation frequencies"
 fig, axs = plt.subplots(len(mutations), 1, sharex=True, figsize=(8, len(mutations)*2))
 for mutation, ax in zip(mutations, axs):
     for c,region in zip(cols, regions):
-        try:
+        if '%s_%s'%(region, mutation) in freqs:
             tmp_freq = np.array(freqs['%s_%s'%(region, mutation)])
-            if tmp_freq is not None:
-                std_dev = np.sqrt(tmp_freq*(1-tmp_freq)/(smoothed_count_by_region[region]+1))
-                ax.plot(pivots[drop:], tmp_freq[drop:], '-o', label = region_label[region], c=c, lw=3 if region=='global' else 1)
-                if show_errorbars:
-                    ax.fill_between(pivots[drop:], (tmp_freq-n_std_dev*std_dev)[drop:], (tmp_freq+n_std_dev*std_dev)[drop:], facecolor=c, linewidth=0, alpha=0.1)
-        except:
-            print "skipping", mutation, region
+            std_dev = np.sqrt(tmp_freq*(1-tmp_freq)/(smoothed_count_by_region[region]+1))
+            ax.plot(pivots[drop:], tmp_freq[drop:], '-o', label = region_label[region], c=c, lw=3 if region=='global' else 1)
+            if show_errorbars:
+                ax.fill_between(pivots[drop:], (tmp_freq-n_std_dev*std_dev)[drop:], (tmp_freq+n_std_dev*std_dev)[drop:], facecolor=c, linewidth=0, alpha=0.1)
+        else:
+            print "no data for", mutation, region, "padding with zeros"
+            tmp_freq = np.zeros(len(pivots))
+            std_dev = np.sqrt(tmp_freq*(1-tmp_freq)/(smoothed_count_by_region[region]+1))
+            ax.plot(pivots[drop:], tmp_freq[drop:], '-o', label = region_label[region], c=c, lw=3 if region=='global' else 1)
+            if show_errorbars:
+                ax.fill_between(pivots[drop:], (tmp_freq-n_std_dev*std_dev)[drop:], (tmp_freq+n_std_dev*std_dev)[drop:], facecolor=c, linewidth=0, alpha=0.1)            
     ax.set_xlim([pivots[drop-1], pivots[-1]])
     ax.set_ylim(0,1)
     ax.text(pivots[drop-1]+10, 0.88, mutation, fontsize=fs)
