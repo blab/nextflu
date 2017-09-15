@@ -19,7 +19,7 @@ drop = 1
 resolution = '2y'
 
 if virus=='h3n2':
-    clades = ['3c2.a', '3c3.a', '171K']
+    clades = ['3c2.a', '3c3.a', '3c2.a1']
     # mutations = ['HA1:121K', 'HA1:92R', 'HA1:131K', 'HA1:31S','HA1:198P', 'HA1:193S']
     # Large subclades
     # 1. 31S, 53N, 144R, 171K, 192T, 197H, characteristic: 197H
