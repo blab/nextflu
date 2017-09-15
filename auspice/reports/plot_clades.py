@@ -100,7 +100,7 @@ smoothed_count_by_region = {region: np.convolve(np.ones(n, dtype=float)/n, c, mo
                             for region, c in counts.iteritems()}
 
 smoothed_count_by_region.update({r1:smoothed_count_by_region[r2] for r1,r2 in
-                            [['north_america', 'NA'], ['europe', 'EU'], ['asia', 'EAS'], ['oceania', 'OC']]})
+                            [['north_america', 'NA'], ['europe', 'EU'], ['asia', 'AS'], ['oceania', 'OC']]})
 
 print "Plotting sample counts"
 fig, ax = plt.subplots(figsize=(8, 3))
@@ -163,7 +163,7 @@ if len(clades):
 
 print "Plotting mutation frequencies"
 fig, axs = plt.subplots(len(mutations), 1, sharex=True, figsize=(8, len(mutations)*2))
-for mutation, ax in zip(mutations, axs):
+for ci, mutation, ax in zip(range(len(mutations)), mutations, axs):
     for c,region in zip(cols, regions):
         if '%s_%s'%(region, mutation) in freqs:
             tmp_freq = np.array(freqs['%s_%s'%(region, mutation)])
@@ -180,7 +180,7 @@ for mutation, ax in zip(mutations, axs):
                 ax.fill_between(pivots[drop:], (tmp_freq-n_std_dev*std_dev)[drop:], (tmp_freq+n_std_dev*std_dev)[drop:], facecolor=c, linewidth=0, alpha=0.1)
     ax.set_xlim([pivots[drop-1], pivots[-1]])
     ax.set_ylim(0,1)
-    ax.text(pivots[drop-1]+10, 0.88, mutation, fontsize=fs)
+    ax.text(pivots[drop-1]+10, 0.88, mutation + (", clade %d"%(ci+1) if virus=='h3n2' else ''), fontsize=fs)
     ax.set_yticklabels(['{:3.0f}%'.format(x*100) for x in [0, 0.2, 0.4, 0.6, 0.8, 1.0]])
     ax.tick_params(axis='x', which='major', labelsize=fs, pad=20)
     ax.tick_params(axis='x', which='minor', pad=7)
@@ -188,6 +188,7 @@ for mutation, ax in zip(mutations, axs):
     ax.xaxis.set_major_formatter(yearsFmt)
     ax.xaxis.set_minor_locator(months)
     ax.xaxis.set_minor_formatter(monthsFmt)
+
 fig.autofmt_xdate(bottom=0.25, rotation=0, ha='center')
 fax = fig.add_axes( [0., 0., 1, 1] )
 fax.set_axis_off()
