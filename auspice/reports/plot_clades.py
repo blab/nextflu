@@ -19,11 +19,18 @@ drop = 1
 resolution = '2y'
 
 if virus=='h3n2':
-    clades = ['3c2.a', '3c3.a', '3c3.b', '171K']
-    mutations = ['HA1:121K', 'HA1:92R', 'HA1:131K', 'HA1:31S','HA1:198P', 'HA1:193S']
+    clades = ['3c2.a', '3c3.a', '171K']
+    # mutations = ['HA1:121K', 'HA1:92R', 'HA1:131K', 'HA1:31S','HA1:198P', 'HA1:193S']
+    # Large subclades
+    # 1. 31S, 53N, 144R, 171K, 192T, 197H, characteristic: 197H
+    # 2. 121K, 144K, characteristic: 144K
+    # 3. 131K, 142K, 261Q, characteristic: 131K
+    # 4. 142R, HA2:150E, characteristic: HA2:150E ---> additional 135K
+    # 5. 92R, 311Q, characteristic: 92R ---> additional 135K
+    mutations = ['HA1:197H', 'HA1:144K', 'HA1:131K', 'HA2:150E', 'HA1:92R']
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
-    ymax = 500
+    ymax = 1000
 elif virus=='h1n1pdm':
     clades = []
     mutations = ['HA1:74R', 'HA1:295V', 'HA1:164T']
