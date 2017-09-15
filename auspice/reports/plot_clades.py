@@ -100,7 +100,7 @@ smoothed_count_by_region = {region: np.convolve(np.ones(n, dtype=float)/n, c, mo
                             for region, c in counts.iteritems()}
 
 smoothed_count_by_region.update({r1:smoothed_count_by_region[r2] for r1,r2 in
-                            [['north_america', 'NA'], ['europe', 'EU'], ['asia', 'AS'], ['oceania', 'OC']]})
+                            [['north_america', 'NA'], ['europe', 'EU'], ['asia', 'EAS'], ['oceania', 'OC']]})
 
 print "Plotting sample counts"
 fig, ax = plt.subplots(figsize=(8, 3))
@@ -129,7 +129,7 @@ if len(clades):
     print "Plotting clade frequencies"
     fig, axs = plt.subplots(len(clades), 1, sharex=True, figsize=(8, len(clades)*2))
     for clade, ax in zip(clades, axs):
-        for c,(region, r1) in zip(cols, [('global', 'global'), ('north_america', 'NA'), ('china', 'AS'), ('europe','EU'), ('oceania','OC')]):
+        for c,(region, r1) in zip(cols, [('north_america', 'NA'), ('china', 'AS'), ('europe','EU'), ('oceania','OC'), ('global', 'global')]):
             if True: #try:
                 tmp_freq = np.array(freqs['%s_%s'%(region, clade)])
                 if tmp_freq is not None:
