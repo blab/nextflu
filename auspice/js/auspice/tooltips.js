@@ -143,7 +143,7 @@ var linkTooltip = d3.tip()
 		string += "<div class=\"smallnote\">";
 		var ncount = d.muts.length;
 		if (ncount) {string += "<b>Mutations:</b><ul>";}
-		if ((typeof d.aa_muts !="undefined")&&(mutType=='aa'||mutType=='both')){
+		if ((typeof d.aa_muts !="undefined")){
 			for (tmp_gene in d.aa_muts) {ncount+=d.aa_muts[tmp_gene].length;}
 			for (tmp_gene in d.aa_muts){
 				if (d.aa_muts[tmp_gene].length){
@@ -151,7 +151,7 @@ var linkTooltip = d3.tip()
 				}
 			}
 		}
-		if ((typeof d.muts !="undefined")&&(mutType=='nuc'||mutType=='both')&&(d.muts.length)){
+		if ((typeof d.muts !="undefined") && (d.muts.length)){
 			var nmuts = d.muts.length;
 			var tmp_muts = d.muts.slice(0,Math.min(10, nmuts))
 			string += "<li>nuc: "+tmp_muts.join(', ');
