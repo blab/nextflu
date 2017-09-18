@@ -77,7 +77,9 @@ Seasonal influenza circulation patterns and projections for 2017-2018
 \emph{This is not meant as a comprehensive report, but is instead
 intended as particular observations that we've made that may be of
 relevance. Please also note that observed patterns reflect the GISAID
-database and may not be entirely representative of underlying dynamics.}
+database and may not be entirely representative of underlying dynamics.
+All analyses are based on the nextflu pipeline \cite{neher2015nextflu}
+with continual updates posted to \href{http://nextflu.org}{nextflu.org}.}
 
 \tableofcontents
 
@@ -97,7 +99,7 @@ persist into the future with no clear immediate winner.}
 
 We base our primary analysis on a set of viruses collected between Oct
 2015 and Aug 2017, comprising \textgreater{}800 viruses per month in Dec
-2016 to Mar 2017 and 100-200 viruses per month more recently, see \FIG{H3N2_counts}. We use all
+2016 to Mar 2017 and 100-200 viruses per month more recently (\FIG{H3N2_counts}). We use all
 available data when estimating frequencies of mutations and weight
 samples appropriately by regional population size and relative sampling
 intensity to arrive at a putatively unbiased global frequency estimate.
@@ -108,7 +110,7 @@ viruses.
   \centering
   \includegraphics[width=0.9\textwidth]{../figures/sep-2017/h3n2_counts.png}
   \caption{\textbf{Sample counts through time and across regions.}
-  This is a stacked bar plot, so that in all months there are at least 100 samples, in some month $>500$ sequences.
+  This is a stacked bar plot, so that in all months there are at least 100 samples and in some months there are $>500$ sequences.
   }
   \label{H3N2_counts}
 \end{figure}
@@ -117,12 +119,12 @@ viruses.
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.9\textwidth]{../figures/sep-2017/h3n2_clades.png}
-  \caption{\textbf{Dynamics of major H3N2 clades.} Clade 3c3.a continues to circulate at low frequency, while 3c3.b has not been observed for several month (not shown).}
+  \caption{\textbf{Dynamics of major H3N2 clades.} Clade 3c2.a continues to dominate, clade 3c3.a continues to circulate at low frequency, and 3c3.b has not been observed for several months (not shown).}
   \label{H3N2_clades}
 \end{figure}
 At the level of major clades, 3c2.a has continued to dominate while
 3c3.a persisted at about 20\% frequency in Oceania and North America in
-the 2016-2017 season, see \FIG{H3N2_clades}. Within 3c2.a, the clade 3c2.a1 comprising HA1
+the 2016-2017 season (\FIG{H3N2_clades}). Within 3c2.a, the clade 3c2.a1 comprising HA1
 mutation N171K and HA2 mutations I77V and G155E had risen rapidly in
 early 2016 but later stabilized at about 50\% with somewhat higher
 frequencies in Europe.
@@ -131,7 +133,7 @@ frequencies in Europe.
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.8\textwidth]{../figures/sep-2017/h3n2_tree.png}
-  \caption{\textbf{H3N2 / 3c2.a phylogeny colored by genotype.} Colors are chosen to highlight the clades 1--5. Clades are in reverse order, that is clade 5 is on top, clade 1 is at the bottom.
+  \caption{\textbf{H3N2 / 3c2.a phylogeny colored by genotype.} Colors are chosen to highlight clades 1--5. Clades are in reverse order, that is clade 5 is on top, clade 1 is at the bottom. Each of these clades is non-nested and so all compete against each other.
   }
   \label{H3N2_tree}
 \end{figure}
@@ -139,7 +141,7 @@ frequencies in Europe.
 
 We observe substantial diversification within the 3c2.a clade over the
 past year. There are 5 major subclades within 3c2.a that have reached
-appreciable frequency. These clades are characterized by the following
+appreciable frequency (\FIG{H3N2_tree}). These clades are characterized by the following
 mutations and highlighed in the phylogenetic tree in \FIG{H3N2_tree}:
 
 \begin{enumerate}
@@ -151,10 +153,10 @@ mutations and highlighed in the phylogenetic tree in \FIG{H3N2_tree}:
 \end{enumerate}
 
 All of these clades possess mutations at previously characterized
-epitope sites. We will refer to these clades as clade 1--5.
+epitope sites.
 
 All of these clades have risen in frequency and are now competing with
-one another, see \FIG{H3N2_mutations}. Clade 1 (53N, 144R, 171K, 192T, 197H) is highly derived in
+one another (\FIG{H3N2_mutations}). Clade 1 (53N, 144R, 171K, 192T, 197H) is highly derived in
 terms of sequence, but is at low frequency globally (currently less than
 1\%) despite making up the a substantial fraction of 2017 Oceania
 viruses. Clade 2 (121K, 144K) is beginning to decline in frequency and
@@ -168,6 +170,8 @@ increased to 39\% in global frequency.
   \includegraphics[width=0.95\textwidth]{../figures/sep-2017/h3n2_mutations.png}
   \caption{\textbf{Frequency trajectories of 3c2.a subclades.}
   We estimate frequencies of different clades based on sample counts and collection dates.
+  Each clade is estimated according to a characteristic mutation unique to this clade.
+  These estimates are based on all available data and global frequencies are weighted according to regional population size and relative sampling intensity .
   We use a Brownian motion process prior to smooth frequencies from month-to-month.
   Transparent bands show an estimate the 95\% confidence interval based on sample counts.
   }
@@ -180,8 +184,8 @@ increased to 39\% in global frequency.
 \begin{figure}[h!]
   \centering
   \includegraphics[width=1.0\textwidth]{../figures/sep-2017/h3n2_tree_titer_model.png}
-  \caption{\textbf{H3N2 phylogeny colored by antigenic advance.}
-  Each panel shows model estimates of antigenic divergence relative to the root of the tree, which is similar to the titer drop relative to A/HongKong/5738/2014.
+  \caption{\textbf{H3N2 phylogeny colored by antigenic advancement.}
+  Model estimates of antigenic divergence relative to the root of the tree, which is similar to the titer drop relative to A/HongKong/4801/2014 or A/Michigan/15/2014.
   Cooler color indicates greater antigenic similarity (less titer drop going from homologous to heterologous titers).
   }
   \label{H3N2_tree_titer_model}
@@ -189,17 +193,16 @@ increased to 39\% in global frequency.
 
 
 All 5 of these clades appear somewhat drifted according to antigenic
-analysis Neher et al \cite{neher2015prediction} of HI measurements provided by the Influenza Division at the US CDC, see \FIG{H3N2_tree_titer_model}.
-With antigenic differences estimated between 0.5 units and 2.0 units.
-
+analysis \cite{neher2015prediction} of HI measurements provided by the Influenza Division at the US CDC (\FIG{H3N2_tree_titer_model}).
+Antigenic differences from vaccine strain A/HongKong/4801/2014 are estimated to be between 0.5 and 2.0 antigenic units (two-fold HI dilutions).
 
 The mutation T135K has appeared independently in clades 2, 4 and 5 and is now globally at 40\% frequency.
 The most rapidly growing clade carries mutations
 N121K/K92R/H311Q/E62G/R142G/T135K. This is a subclade of clade 5 above
 with addition of 62G, 142G and 135K. The model fit to the antigenic data
 estimates that this subclade of clade 5 has drifted by 2.2 antigenic
-units, 1 of which is associated with the E62G/R142G mutations and 1.2
-with the T135K mutation (on this background), see \FIG{H3N2_135K}.
+units, 1 of which is derived from the E62G/R142G mutations and 1.2 of which is derived from
+the T135K mutation (on this background), see \FIG{H3N2_135K}.
 Note, however, that there
 is no evidence of antigenic evolution in the FRA data (one data point
 only). A small sister clade with mutation T135N (also part of clade 5)
@@ -214,25 +217,24 @@ selective origin.
   \label{H3N2_135K}
 \end{figure}
 
-Clades 1,2, and 3 are part of 3c2.a but outside of the 3c2.a1 subclade.
+Clades 1, 2 and 3 are part of 3c2.a but outside of the 3c2.a1 subclade.
+
+Clade 1 with substitutions N31S/D53N/S144R/N171K/I192T/Q197H was observed globally over the past 9 months but is now decreasing everywhere except Oceania.
+HI data and the model fit suggest a moderate (4-fold, about 2 antigenic units) titer drop relative to A/HongKong/4801/2014.
+Despite the titer drop, this clade seems to be outcompeted almost everywhere (with the exception of Oceania).
+It seems likely that this clade will die back with the ending of the Oceania influenza season.
+
 Clade 3 with T131K/R142K mutations continues to be common in China (but
 not in South Asia) with an embedded cluster of South and North American
-isolates from last summer. Subclusters within this clade have been
+isolates from last summer. Subclades within this clade have been
 expanding recently, but there is little evidence for antigenic evolution
 in the HI or FRA data. The 131K substitution is not seen outside this
 clade.
 
-Clade 1 with substitutions N31S/D53N/S144R/N171K/I192T/Q197H was
-observed globally over the past 9 month but is now decreasing everywhere
-except Oceania HI data and the model fit suggest a moderate (4-fold,
-about 2 antigenic units) titer drop relative to A/HongKong/4801/2014.
-Despite the titer drop, this calde seems to be outcompeted almost
-everywhere.
-
 The most notable subclade of 3c3.a is a clade carrying the mutation
 F193S. However, this clade along with its sister clades has been
 decreasing in recent month and it doesn't show a consistent signal of
-antigenic change. The F193D mutations is observed sporadically within
+antigenic change. The F193D mutation is observed sporadically within
 the 3c2.a clade as well.
 
 % \begin{figure}[h!]
@@ -243,11 +245,9 @@ the 3c2.a clade as well.
 %   \label{H3N2_135K}
 % \end{figure}
 
-In summary, we think that the clade most likely to increase further in
-frequency is the E62G/R142G/T135K clade. However, two other clades
-(T131K/R142K and 144K) have similar potential. The former has very
-rapidly growing subclade, the latter rose rapidly last year and has a
-slightly higher LBI than the other two.
+\textit{In summary, we think that the clade most likely to increase further in frequency is the E62G/R142G/T135K subclade within clade 5.
+However, clade 2 viruses (characterized by N121K/R144K) and clade 3 viruses (characterized by T131K/R142K/R261Q) also appear competitive, although less so than E62G/R142G/T135K viruses.
+We expect all three of these clades to contribute to the future H3N2 population.}
 
 
 \clearpage
