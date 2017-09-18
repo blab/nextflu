@@ -66,7 +66,7 @@ offset = datetime(2000,1,1).toordinal()
 pivots = [offset+(x-2000)*365.25 for x in freqs['pivots']]
 meta = json.load(open(file_prefix+'_meta.json'))
 region_names = meta['geo']['region'].keys()
-region_codes = {'EU':['europe'], 'AS':['china', 'south_asia', 'japan_korea','southeast_asia'],
+region_codes = {'EU':['europe'], 'EUAS':['china', 'south_asia', 'japan_korea','southeast_asia'],
                 'NA':["north_america"], 'OC':["oceania"]}
 
 offset = datetime(2000,1,1).toordinal()
@@ -125,20 +125,21 @@ plt.subplots_adjust(left=0.1, right=0.82, top=0.94, bottom=0.22)
 sns.despine()
 plt.savefig('figures/' + report + '/'+virus+'_counts.png')
 
+##########################################################################################
 if len(clades):
     print "Plotting clade frequencies"
     fig, axs = plt.subplots(len(clades), 1, sharex=True, figsize=(8, len(clades)*2))
     for clade, ax in zip(clades, axs):
         for c,(region, r1) in zip(cols, [('north_america', 'NA'), ('china', 'AS'), ('europe','EU'), ('oceania','OC'), ('global', 'global')]):
-            if True: #try:
+            try:
                 tmp_freq = np.array(freqs['%s_%s'%(region, clade)])
                 if tmp_freq is not None:
                     std_dev = np.sqrt(tmp_freq*(1-tmp_freq)/(smoothed_count_by_region[r1]+1))
                     ax.plot(pivots, tmp_freq,'-o', label = region_label[r1], c=c, lw=3 if region=='global' else 1)
                     if show_errorbars:
                         ax.fill_between(pivots, tmp_freq-n_std_dev*std_dev, tmp_freq+n_std_dev*std_dev, facecolor=c, linewidth=0, alpha=0.1)
-            # except:
-            #     print "skipping", clade, region
+            except:
+                print "skipping", clade, region
         ax.set_xlim([pivots[0], pivots[-1]])
         ax.set_ylim(0,1)
         ax.text(pivots[0]+5, 0.88, clade)
@@ -161,6 +162,7 @@ if len(clades):
     sns.despine()
     plt.savefig('figures/' + report + '/'+virus+'_clades.png')
 
+######################################################################################
 print "Plotting mutation frequencies"
 fig, axs = plt.subplots(len(mutations), 1, sharex=True, figsize=(8, len(mutations)*2))
 for ci, mutation, ax in zip(range(len(mutations)), mutations, axs):
@@ -180,7 +182,7 @@ for ci, mutation, ax in zip(range(len(mutations)), mutations, axs):
                 ax.fill_between(pivots[drop:], (tmp_freq-n_std_dev*std_dev)[drop:], (tmp_freq+n_std_dev*std_dev)[drop:], facecolor=c, linewidth=0, alpha=0.1)
     ax.set_xlim([pivots[drop-1], pivots[-1]])
     ax.set_ylim(0,1)
-    ax.text(pivots[drop-1]+10, 0.88, mutation + (", clade %d"%(ci+1) if virus=='h3n2' else ''), fontsize=fs)
+    ax.text(pivots[drop-1]+10, 0.88, ("clade %d"%(ci+1) if virus=='h3n2' else mutation), fontsize=fs*1.3)
     ax.set_yticklabels(['{:3.0f}%'.format(x*100) for x in [0, 0.2, 0.4, 0.6, 0.8, 1.0]])
     ax.tick_params(axis='x', which='major', labelsize=fs, pad=20)
     ax.tick_params(axis='x', which='minor', pad=7)
@@ -200,3 +202,46 @@ bottom_margin = 0.22 - 0.03*len(mutations)
 plt.subplots_adjust(left=0.12, right=0.82, top=0.97, bottom=bottom_margin)
 sns.despine()
 plt.savefig('figures/'+report+'/'+virus+'_mutations.png')
+
+
+######################################################################################
+print "Plotting mutation frequencies by region by region"
+fig, axs = plt.subplots(len(regions), 1, sharex=True, figsize=(8, len(mutations)*2))
+for region,ax in zip(regions, axs):
+    for ci,c, mutation in zip(range(len(mutations)),cols, mutations):
+        if '%s_%s'%(region, mutation) in freqs:
+            tmp_freq = np.array(freqs['%s_%s'%(region, mutation)])
+            std_dev = np.sqrt(tmp_freq*(1-tmp_freq)/(smoothed_count_by_region[region]+1))
+            ax.plot(pivots[drop:], tmp_freq[drop:], '-o', label = ("clade %d"%(ci+1) if virus=='h3n2' else mutation), c=c, lw=2)
+            if show_errorbars:
+                ax.fill_between(pivots[drop:], (tmp_freq-n_std_dev*std_dev)[drop:], (tmp_freq+n_std_dev*std_dev)[drop:], facecolor=c, linewidth=0, alpha=0.1)
+        else:
+            print "no data for", mutation, region, "padding with zeros"
+            tmp_freq = np.zeros(len(pivots))
+            std_dev = np.sqrt(tmp_freq*(1-tmp_freq)/(smoothed_count_by_region[region]+1))
+            ax.plot(pivots[drop:], tmp_freq[drop:], '-o', label = ("clade %d"%(ci+1) if virus=='h3n2' else mutation), c=c, lw=2)
+            if show_errorbars:
+                ax.fill_between(pivots[drop:], (tmp_freq-n_std_dev*std_dev)[drop:], (tmp_freq+n_std_dev*std_dev)[drop:], facecolor=c, linewidth=0, alpha=0.1)
+
+    ax.set_xlim([pivots[drop-1], pivots[-1]])
+    ax.set_ylim(0,1)
+    ax.text(pivots[drop-1]+10, 0.88, region, fontsize=fs*1.3)
+    ax.set_yticklabels(['{:3.0f}%'.format(x*100) for x in [0, 0.2, 0.4, 0.6, 0.8, 1.0]])
+    ax.tick_params(axis='x', which='major', labelsize=fs, pad=20)
+    ax.tick_params(axis='x', which='minor', pad=7)
+    ax.xaxis.set_major_locator(years)
+    ax.xaxis.set_major_formatter(yearsFmt)
+    ax.xaxis.set_minor_locator(months)
+    ax.xaxis.set_minor_formatter(monthsFmt)
+
+fig.autofmt_xdate(bottom=0.25, rotation=0, ha='center')
+fax = fig.add_axes( [0., 0., 1, 1] )
+fax.set_axis_off()
+fax.set_xlim(0, 1)
+fax.set_ylim(0, 1)
+fax.text(0.02, 0.54, "Frequency", rotation='vertical', horizontalalignment='center', verticalalignment='center', fontsize=fs*1.1)
+axs[mut_legend['panel']].legend(loc=mut_legend['loc'], ncol=1, bbox_to_anchor=(1.02, 0.2))
+bottom_margin = 0.22 - 0.03*len(mutations)
+plt.subplots_adjust(left=0.12, right=0.82, top=0.97, bottom=bottom_margin)
+sns.despine()
+plt.savefig('figures/'+report+'/'+virus+'_mutations_by_region.png')
