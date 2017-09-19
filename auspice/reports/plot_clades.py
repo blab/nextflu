@@ -23,11 +23,11 @@ if virus=='h3n2':
     # mutations = ['HA1:121K', 'HA1:92R', 'HA1:131K', 'HA1:31S','HA1:198P', 'HA1:193S']
     # Large subclades
     # 1. 31S, 53N, 144R, 171K, 192T, 197H, characteristic: 197H
-    # 2. 121K, 144K, characteristic: 144K
+    # 2. 121K, 144K, characteristic: nuc:1320T
     # 3. 131K, 142K, 261Q, characteristic: 131K
     # 4. 142R, HA2:150E, characteristic: HA2:150E ---> additional 135K
-    # 5. 92R, 311Q, characteristic: 92R ---> additional 135K
-    mutations = ['HA1:197H', 'HA1:144K', 'HA1:131K', 'HA2:150E', 'HA1:92R']
+    # 5. 92R, 311Q, characteristic: nuc:538C ---> additional 135K
+    mutations = ['HA1:197H', 'nuc:1320T', 'HA1:131K', 'HA2:150E', 'nuc:538C']
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
     ymax = 1000
@@ -182,7 +182,7 @@ for ci, mutation, ax in zip(range(len(mutations)), mutations, axs):
                 ax.fill_between(pivots[drop:], (tmp_freq-n_std_dev*std_dev)[drop:], (tmp_freq+n_std_dev*std_dev)[drop:], facecolor=c, linewidth=0, alpha=0.1)
     ax.set_xlim([pivots[drop-1], pivots[-1]])
     ax.set_ylim(0,1)
-    ax.text(pivots[drop-1]+10, 0.88, ("clade %d"%(ci+1) if virus=='h3n2' else mutation), fontsize=fs*1.3)
+    ax.text(pivots[drop-1]+10, 0.88, ("clade %d"%(ci+1) if virus=='h3n2' else mutation), fontsize=fs*1.2)
     ax.set_yticklabels(['{:3.0f}%'.format(x*100) for x in [0, 0.2, 0.4, 0.6, 0.8, 1.0]])
     ax.tick_params(axis='x', which='major', labelsize=fs, pad=20)
     ax.tick_params(axis='x', which='minor', pad=7)
