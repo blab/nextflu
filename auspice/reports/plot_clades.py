@@ -133,6 +133,8 @@ if len(clades):
         for c,(region, r1) in zip(cols, [('north_america', 'NA'), ('china', 'AS'), ('europe','EU'), ('oceania','OC'), ('global', 'global')]):
             try:
                 tmp_freq = np.array(freqs['%s_%s'%(region, clade)])
+                if clade=='3c2.a':
+                    tmp_freq -= np.array(freqs['%s_%s'%(region, '3c2.a1')])
                 if tmp_freq is not None:
                     std_dev = np.sqrt(tmp_freq*(1-tmp_freq)/(smoothed_count_by_region[r1]+1))
                     ax.plot(pivots, tmp_freq,'-o', label = region_label[r1], c=c, lw=3 if region=='global' else 1)
