@@ -132,16 +132,16 @@ frequencies in Europe.
 \clearpage
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.8\textwidth]{../figures/sep-2017/h3n2_tree.png}
-  \caption{\textbf{H3N2 / 3c2.a phylogeny colored by genotype.} Colors are chosen to highlight clades 1--5. Clades are in reverse order, that is clade 5 is on top, clade 1 is at the bottom. Each of these clades is non-nested and so all compete against each other.
+  \includegraphics[width=0.8\textwidth]{../figures/sep-2017/h3n2_tree_with_timetree.png}
+  \caption{\textbf{H3N2 / 3c2.a phylogeny colored by genotype.} Colors are chosen to highlight clades 1--5. Clades are in reverse order, that is clade 5 is on top, clade 1 is at the bottom. Each of these clades is non-nested and so all compete against each other. Also shown is a time calibrated phylogeny with equivalent coloring.
   }
-  \label{h3n2_tree}
+  \label{h3n2_tree_with_timetree}
 \end{figure}
 
 
 We observe substantial diversification within the 3c2.a clade over the
 past year. There are 5 major subclades within 3c2.a that have reached
-appreciable frequency (\FIG{h3n2_tree}). These clades are characterized by the following
+appreciable frequency (\FIG{h3n2_tree_with_timetree}). These clades are characterized by the following
 mutations and highlighed in the phylogenetic tree in \FIG{h3n2_tree}:
 
 \begin{enumerate}
@@ -156,7 +156,7 @@ All of these clades possess mutations at previously characterized
 epitope sites.
 
 All of these clades have risen in frequency and are now competing with
-one another (\FIG{h3n2_mutations}). Clade 1 (53N, 144R, 171K, 192T, 197H) is highly derived in
+one another (\FIG{h3n2_mutations}, \FIG{h3n2_mutations_by_region}). Clade 1 (53N, 144R, 171K, 192T, 197H) is highly derived in
 terms of sequence, but is at low frequency globally (currently less than
 1\%) despite making up the a substantial fraction of 2017 Oceania
 viruses. Clade 2 (121K, 144K) had a large upswing around Dec 2016, but has since declined slightly to $\sim$21\% global frequency. Clade 3 (131K, 142K,
@@ -167,7 +167,7 @@ increased to 39\% in global frequency.
 \begin{figure}[h!]
   \centering
   \includegraphics[width=0.95\textwidth]{../figures/sep-2017/h3n2_mutations.png}
-  \caption{\textbf{Frequency trajectories of 3c2.a subclades.}
+  \caption{\textbf{Frequency trajectories of 3c2.a subclades partitioned by clade then by region.}
   We estimate frequencies of different clades based on sample counts and collection dates.
   Each clade is estimated according to a characteristic mutation unique to this clade.
   These estimates are based on all available data and global frequencies are weighted according to regional population size and relative sampling intensity .
@@ -178,6 +178,18 @@ increased to 39\% in global frequency.
 \end{figure}
 
 
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.95\textwidth]{../figures/sep-2017/h3n2_mutations_by_region.png}
+  \caption{\textbf{Frequency trajectories of 3c2.a subclades partitioned by region then by clade.}
+  We estimate frequencies of different clades based on sample counts and collection dates.
+  Each clade is estimated according to a characteristic mutation unique to this clade.
+  These estimates are based on all available data and global frequencies are weighted according to regional population size and relative sampling intensity .
+  We use a Brownian motion process prior to smooth frequencies from month-to-month.
+  Transparent bands show an estimate the 95\% confidence interval based on sample counts.
+  }
+  \label{h3n2_mutations_by_region}
+\end{figure}
 
 \clearpage
 \begin{figure}[h!]
@@ -238,21 +250,20 @@ decreasing in recent month and it doesn't show a consistent signal of
 antigenic change. The F193S mutation is observed sporadically within
 the 3c2.a clade as well.
 
-Measuring clade frequency growth and decline over the previous 6 months shows that subclades within clades 3 and 5 are growing the most rapidly (\FIG{h3n2_tree_dfreq}).
-The most rapidly growing subclade is the E62G/R142G/T135K subclade within clade 5.
-This analysis is borne out in "local branching index" \cite{neher2014predicting}, which also supports this subclade as a high fitness clade.
+Additionally, an analysis of ``local branching index'' \cite{neher2014predicting} suggests that the E62G/R142G/T135K subclade within clade 5 is the most rapidly growing of circulating viruses and is thus estimated to have the highest fitness.
+With the exception of background 3c2.a1 viruses, other circulating 3c2.a are seen to have similar local branching index values.
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.8\textwidth]{../figures/sep-2017/h3n2_tree_dfreq.png}
-	\caption{\textbf{H3N2 / 3c2.a phylogeny colored by clade growth.}
-  The tree, zoomed into clade 3c2.a, is colored by change in clade frequency over the past 6 months.
+  \includegraphics[width=0.8\textwidth]{../figures/sep-2017/h3n2_tree_lbi.png}
+	\caption{\textbf{H3N2 / 3c2.a phylogeny colored by local branching index.}
+  The tree, zoomed into clade 3c2.a, is colored by local branching index.
   }
   \label{h3n2_tree_dfreq}
 \end{figure}
 
 \textit{In summary, we think that the clade most likely to increase further in frequency is the E62G/R142G/T135K subclade within clade 5.
-However, clade 2 viruses (characterized by N121K/R144K) and clade 3 viruses (characterized by T131K/R142K/R261Q) also appear competitive, although less so than E62G/R142G/T135K viruses.
+However, clade 2 viruses (characterized by N121K/R144K) and clade 3 viruses (characterized by T131K/R142K/R261Q) also appear competitive (they are present at moderate frequency, have somewhat diverged antigenic phenotypes and are increasing in frequency), although less so than E62G/R142G/T135K viruses (which are growing faster and appear more diverged in antigenic phenotype).
 We expect all three of these clades to contribute to the future H3N2 population.}
 
 
