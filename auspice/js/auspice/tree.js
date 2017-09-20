@@ -704,7 +704,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	var mc = autocomplete(document.getElementById('straininput'))
 		.keys(tips)
 		.dataField("strain")
-		.placeHolder("search strains...")
+		.placeHolder("strain name...")
 		.width(800)
 		.height(500)
 		.onSelected(highlightStrainSearch)

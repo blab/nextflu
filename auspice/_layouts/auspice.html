@@ -47,9 +47,7 @@ categories:
 					<div class="form-group">
 						<label class="col-xs-4 control-label">Or</label>
 						<div class="col-xs-8 controls">
-							<input id="gt-color" type="search" placeholder= "{{ page.gtplaceholder }}"  class="form-control">
-							<input type="checkbox" id="branchlabels"> branch labels <br>
-              <input type="checkbox" id="timetree"> timetree
+							<input id="gt-color" type="search" placeholder= "{{ page.gtplaceholder }}" class="form-control">
 						</div>
 					</div>
 					{% if page.coloring contains 'HI' %}
@@ -76,7 +74,6 @@ categories:
 					</div>
 					{% endif %}
 				</form>
-				<div class="spacer"></div>
 
 				{% for res in site.data.restrictions %}
 				<form class="form-horizontal form-small">
@@ -92,18 +89,49 @@ categories:
 					</div>
 				</form>
 				{% endfor %}
-				<div id="search"></div>
-				<div class="spacer"></div>
 
-				<div id="straininput"></div>
-				<div class="spacer"></div>
-				<textarea id="seqinput" class="form-control" placeholder="search sequences... (plain or fasta)"></textarea>
-				<div class="spacer"></div>
-				<button id="searchinputclear" class="btn btn-default">clear</button>
-				<div class="bigspacer"></div>
-				<div>
-					<button id="reset" class="btn btn-default">reset layout</button>
-				</div>
+        <form class="form-horizontal form-small">
+          <div class="form-group">
+            <label class="col-xs-4 control-label">Search</label>
+            <div class="col-xs-8 controls">
+              <div id="straininput"></div>
+              <div class="smallspacer"></div>
+              <button id="searchinputclear" type="button" class="btn btn-default">clear search</button>
+            </div>
+          </div>
+        </form>
+
+        <form class="form-horizontal form-small">
+          <div class="form-group">
+            <label class="col-xs-4 control-label">Options</label>
+            <div class="col-xs-8 controls">
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" id="branchlabels"> branch labels
+                </label>
+              </div>
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" id="timetree"> timetree
+                </label>
+              </div>
+            </div>
+          </div>
+        </form>
+
+				<!-- <textarea id="seqinput" class="form-control" placeholder="search sequences... (plain or fasta)"></textarea>
+				<div class="spacer"></div> -->
+
+        <form class="form-horizontal form-small">
+          <div class="form-group">
+            <div class="col-xs-2"></div>
+            <div class="col-xs-8 controls">
+              <button id="reset" type="button" class="btn btn-default" style="padding:8px 30px 8px 30px;">reset layout</button>
+            </div>
+            <div class="col-xs-2"></div>
+          </div>
+        </form>
+
 			</div>
 		</div>
 	</div>
