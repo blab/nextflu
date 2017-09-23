@@ -9,14 +9,19 @@ from matplotlib.dates import YearLocator, MonthLocator, DateFormatter
 #################################
 # Settings to configure
 parser = argparse.ArgumentParser()
-parser.add_argument('--lineage', default='h3n2')
+parser.add_argument('-l', '--lineage', type = str, default='h3n2', help='lineage to plot')
+parser.add_argument('-b', '--build', type = str, default = 'live', help='build to pull from, live or cdc')
 args = parser.parse_args()
 
-virus = args.lineage
-
-report = 'sep-2017'
 drop = 1
 resolution = '2y'
+
+virus = args.lineage
+file_addendum = ''
+if args.build == 'cdc':
+    file_addendum = '_cell_hi'
+input_file_prefix = '../data/flu_'+virus+'_ha_'+resolution+file_addendum
+output_file_prefix = 'figures/'
 
 if virus=='h3n2':
     clades = ['3c2.a', '3c3.a', '3c2.a1']
@@ -51,20 +56,16 @@ elif virus=='yam':
     mut_legend = {'panel':0, 'loc':3}
     ymax = 250
 
-file_addendum = '_cell_hi'
-#file_addendum = ''
-file_prefix = '../data/flu_'+virus+'_ha_'+resolution+file_addendum
-
 #################################
 # Plotting
 
-print "Plotting dataset " + virus + "/" + resolution + " for " + report + " report"
+print "Plotting dataset " + virus + "/" + resolution
 
-freqs = json.load(open(file_prefix+'_frequencies.json'))
+freqs = json.load(open(input_file_prefix+'_frequencies.json'))
 counts = freqs['counts']
 offset = datetime(2000,1,1).toordinal()
 pivots = [offset+(x-2000)*365.25 for x in freqs['pivots']]
-meta = json.load(open(file_prefix+'_meta.json'))
+meta = json.load(open(input_file_prefix+'_meta.json'))
 region_names = meta['geo']['region'].keys()
 region_codes = {'EU':['europe'], 'EUAS':['china', 'south_asia', 'japan_korea','southeast_asia'],
                 'NA':["north_america"], 'OC':["oceania"]}
@@ -123,7 +124,7 @@ ax.set_ylabel('Sample count', fontsize=fs*1.1)
 ax.legend(loc=3, ncol=1, bbox_to_anchor=(1.02, 0.53))
 plt.subplots_adjust(left=0.1, right=0.82, top=0.94, bottom=0.22)
 sns.despine()
-plt.savefig('figures/' + report + '/'+virus+'_counts.png')
+plt.savefig(output_file_prefix+virus+'_counts.png')
 
 ##########################################################################################
 if len(clades):
@@ -162,7 +163,7 @@ if len(clades):
     bottom_margin = 0.22 - 0.03*len(clades)
     plt.subplots_adjust(left=0.12, right=0.82, top=0.97, bottom=bottom_margin)
     sns.despine()
-    plt.savefig('figures/' + report + '/'+virus+'_clades.png')
+    plt.savefig(output_file_prefix+virus+'_clades.png')
 
 ######################################################################################
 print "Plotting mutation frequencies"
@@ -203,7 +204,7 @@ axs[mut_legend['panel']].legend(loc=mut_legend['loc'], ncol=1, bbox_to_anchor=(1
 bottom_margin = 0.22 - 0.03*len(mutations)
 plt.subplots_adjust(left=0.12, right=0.82, top=0.97, bottom=bottom_margin)
 sns.despine()
-plt.savefig('figures/'+report+'/'+virus+'_mutations.png')
+plt.savefig(output_file_prefix+virus+'_mutations.png')
 
 
 ######################################################################################
@@ -246,4 +247,4 @@ axs[mut_legend['panel']].legend(loc=mut_legend['loc'], ncol=1, bbox_to_anchor=(1
 bottom_margin = 0.22 - 0.03*len(mutations)
 plt.subplots_adjust(left=0.12, right=0.82, top=0.97, bottom=bottom_margin)
 sns.despine()
-plt.savefig('figures/'+report+'/'+virus+'_mutations_by_region.png')
+plt.savefig(output_file_prefix+virus+'_mutations_by_region.png')

@@ -4,6 +4,7 @@ ec2-startup.sh
 augur/data/
 augur/output/
 auspice/data/
+auspice/analysis/figures/
 validation
 temp_*
 tmp

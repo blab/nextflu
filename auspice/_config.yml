@@ -6,7 +6,7 @@ markdown: redcarpet
 highlighter: pygments
 permalink: /:categories/:title/
 
-redcarpet: 
+redcarpet:
   extensions:
    - tables
    - no_intra_emphasis
@@ -16,5 +16,7 @@ redcarpet:
 
 exclude:
   - "*.sh"
+  - "environment*"
   - "Gemfile"
   - "Gemfile.lock"
+  - "analysis/"
