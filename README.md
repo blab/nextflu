@@ -7,6 +7,7 @@ nextflu is live at [nextflu.org](https://nextflu.org).
 nextflu is designed to perform near real-time tracking of influenza virus evolution. The current version of nextflu is focused on tracking seasonal influenza evolution in humans, looking at sequences from the hemagglutinin (HA) gene. It's divided into two components:
 * _augur_, which takes a `.fasta` file of flu sequences and builds an annotated phylogeny
 * _auspice_, which displays this annotated phylogeny in an interactive web-based visualization
+
 Augur build scripts are housed at [nextstrain/augur](https://github.com/nextstrain/augur). These produce a series of JSON files that are displayed interactively on the web. Currently, the same JSONs produced by augur can be displayed with auspice v1 housed in [this repo](auspice/) or with auspice v2 housed at [nextstrain/auspice](https://github.com/nextstrain/auspice). Auspice v1 is live at [nextflu.org](https://nextflu.org) and auspice v2 is live at [nextstrain.org/flu](http://nextstrain.org/flu). Auspice v1 still provides greater functionality for influenza, but the intention is to eventually migrate to auspice v2.
 
 ## Citation
