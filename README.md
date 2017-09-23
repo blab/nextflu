@@ -1,12 +1,13 @@
 ## Live website
 
-nextflu is live at [nextflu.org](http://nextflu.org).
+nextflu is live at [nextflu.org](https://nextflu.org).
 
 ## Introduction
 
-nextflu is designed to perform near real-time tracking of influenza virus evolution. It's divided into two components: [augur](augur/), which takes a `.fasta` file of flu sequences and builds an annotated phylogeny, and [auspice](auspice/), which displays this annotated phylogeny in an interactive web-based visualization.
-
-The current version of nextflu is focused on tracking seasonal influenza H3N2 evolution in humans, looking at sequences from the hemagglutinin (HA) gene. Future versions may extend this analysis to other genes in H3N2 or other influenza subtypes. We would also like to implement formal predictive models to make nextflu a platform for forecasting evolution in addition to up-to-date tracking.
+nextflu is designed to perform near real-time tracking of influenza virus evolution. The current version of nextflu is focused on tracking seasonal influenza evolution in humans, looking at sequences from the hemagglutinin (HA) gene. It's divided into two components:
+* _augur_, which takes a `.fasta` file of flu sequences and builds an annotated phylogeny
+* _auspice_, which displays this annotated phylogeny in an interactive web-based visualization
+Augur build scripts are housed at [nextstrain/augur](https://github.com/nextstrain/augur). These produce a series of JSON files that are displayed interactively on the web. Currently, the same JSONs produced by augur can be displayed with auspice v1 housed in [this repo](auspice/) or with auspice v2 housed at [nextstrain/auspice](https://github.com/nextstrain/auspice). Auspice v1 is live at [nextflu.org](https://nextflu.org) and auspice v2 is live at [nextstrain.org/flu](http://nextstrain.org/flu). Auspice v1 still provides greater functionality for influenza, but the intention is to eventually migrate to auspice v2.
 
 ## Citation
 
@@ -16,6 +17,6 @@ Please cite nextflu as:
 
 ## License and copyright
 
-Copyright 2014-2015 Trevor Bedford and Richard Neher.
+Copyright 2014-2017 Trevor Bedford and Richard Neher.
 
 Source code to nextflu is made available under the terms of the [GNU Affero General Public License](LICENSE.txt) (AGPL). nextflu is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.

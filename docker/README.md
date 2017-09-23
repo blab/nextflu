@@ -1,9 +1,13 @@
+# Docker
+
+Previously, we had been using [Docker](https://www.docker.com/) to provide portability of the build process. Currently Nextflu is built with [augur](https://github.com/nextstrain/augur/tree/master/flu) and portability is provided through [janus](https://github.com/nextstrain/janus). Docker functionality is deprecated.
+
 # Command notes
 
 Remove all containers
 
     docker rm `docker ps --no-trunc -aq`
-    
+
 Remove all images (careful)
 
     docker rmi $(docker images -q)
@@ -25,7 +29,7 @@ From within the nextflu/augur/ directory
 Build augur docker image
 
     docker build -t trvrb/augur:latest .
-    
+
 Push image to hub
 
     docker push trvrb/augur:latest
@@ -37,7 +41,7 @@ From within the nextflu/auspice/ directory
 Build auspice docker image
 
     docker build -t trvrb/auspice:latest .
-    
+
 Push image to hub
 
     docker push trvrb/auspice:latest
@@ -57,13 +61,13 @@ Create a named data volume for auspice-data
 ## Augur
 
 From within the nextflu/augur/ directory, run a shell from within the container
-    
+
     docker run -t -i --volumes-from augur-data --volumes-from auspice-data trvrb/augur /bin/bash
 
 Run augur
 
     docker run --volumes-from augur-data --volumes-from auspice-data trvrb/augur
-    
+
 Run shell
 
     docker run -t -i --volumes-from augur-data --volumes-from auspice-data trvrb/augur /bin/bash
@@ -71,7 +75,7 @@ Run shell
 ## Auspice
 
 From within the nextflu/auspice/ directory, run a shell from within the container
-    
+
     docker run -t -i --volumes-from auspice-data -p 4000:4000 trvrb/auspice /bin/bash
 
 Run auspice
