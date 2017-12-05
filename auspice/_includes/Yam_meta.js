@@ -16,20 +16,3 @@ var genome_annotation = {'SP':[[1.2,1.2,1.2], [12,20,57]],
 var default_gene = 'HA1';
 
 var structure = "4M40.pdb";
-var reference_viruses = {
-"B/Florida/7/2004":'2004-04-01',
-"B/Brisbane/3/2007":'2007-03-09',
-"B/Serbia/1894/2011":'2011-03-08',
-"B/Valladolid/18/2008":'2008-02-18',
-"B/Novosibirsk/1/2012":'2012-02-14',
-"B/Algeria/G486/2010":'2010-06-06',
-"B/Stockholm/12/2011":'2011-02-28',
-"B/Niedersachsen/1/2010":'2010-10-18',
-"B/Utah/09/2014":'2014-05-29',
-"B/Massachusetts/02/2012":'2012-03-13',
-"B/HongKong/3577/2012":'2012-06-13',
-"B/PHUKET/3073/2013":'2013-11-21',
-"B/Florida/4/2006":'2006-11-01',
-"B/Estonia/55669/2011":'2011-03-14',
-"B/ENGLAND/145/2008":'2008-05-01'
-};
