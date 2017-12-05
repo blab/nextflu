@@ -315,17 +315,21 @@ function colorByGenotypePosition (positions) {
 	}
 }
 
+function resetFocusNode() {
+	var ntiters = 0, ntmp;
+	focusNode=sera[0];
+	for (var i=0; i<sera.length; i++){
+		ntmp = Object.keys(HI_titers[sera[i].clade]).length;
+		if (ntmp>ntiters){
+			ntiters = ntmp;
+			focusNode = sera[i];
+		}
+	}
+}
+
 function newFocus(){
 	if (typeof(focusNode)=="undefined"){
-		var ntiters = 0, ntmp;
-		focusNode=sera[0];
-		for (var i=0; i<sera.length; i++){
-			ntmp = Object.keys(HI_titers[sera[i].clade]).length;
-			if (ntmp>ntiters){
-				ntiters = ntmp;
-				focusNode = sera[i];
-			}
-		}
+		resetFocusNode();
 	}
 	// add checkboxes to include/exclude sera
 	var seraDiv = document.getElementById("sera");

@@ -392,9 +392,9 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.attr('dominant-baseline', 'central')
 		.style('font-family', 'FontAwesome')
 		.style("stroke", "#fff")
-		.style("fill", function (d){if (d==focusNode) {return '#FF3300';} else {return '#333';}})
-		.style("font-size", function (d) {if (d==focusNode) {return "30px";} else {return "16px";}})
-		.text(function (d) {if (d==focusNode) {return '\uf05b';} else {return serumSymbol;}})
+		.style("fill", '#555555')
+		.style("font-size", "18px")
+		.text(serumSymbol)
 		.style("visibility", serumVisibility)
 		.style("cursor", "pointer")
 		.on('mouseover', function(d) {
@@ -407,6 +407,8 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 				newFocus();
 			}
 		});
+	resetFocusNode();
+	newFocus();
 
 	var vaccineCircles = treeplot.selectAll(".vaccine")
 		.data(vaccines)
@@ -419,7 +421,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.style('font-family', 'FontAwesome')
 		.style("stroke", "#fff")
 		.style("fill", "#555")
-		.text(function (d) {if (d==focusNode) {return '\uf05b';} else {return '\uf00d';}})
+		.text('\uf00d')
 		.style("cursor", "pointer")
 		.on('mouseover', function(d) {
 			virusTooltip.show(d, this);
