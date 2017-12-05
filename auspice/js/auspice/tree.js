@@ -407,8 +407,11 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 				newFocus();
 			}
 		});
-	resetFocusNode();
-	newFocus();
+
+ 	if (colorBy == "HI_dist") {
+		resetFocusNode();
+		newFocus();
+	}
 
 	var vaccineCircles = treeplot.selectAll(".vaccine")
 		.data(vaccines)
