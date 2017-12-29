@@ -8,6 +8,8 @@
   ["region","region"],
   ["date","sampling date"],
   ["glyc","glycosylation"],
+  ["age","host age"],
+  ["gender","host gender"],
   ["ep", "epitope mutations"],
   ["ne","non epitope mutations"],
   ["rb","receptor binding mutations"],

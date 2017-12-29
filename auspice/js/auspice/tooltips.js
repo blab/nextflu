@@ -115,6 +115,9 @@ var virusTooltip = d3.tip()
 		if (typeof d.attr.glyc != "undefined") {
 			string += "Glycosylation sites: " + d.attr.glyc + "<br>";
 		}
+		if (typeof d.attr.age != "undefined") {
+			string += "Host age:" + d.attr.age + "<br>";
+		}
 		if (typeof d.LBI != "undefined") {
 			string += "Local branching index: " + d.LBI.toFixed(3) + "<br>";
 		}

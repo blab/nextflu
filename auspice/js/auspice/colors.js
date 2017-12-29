@@ -29,6 +29,14 @@ var glycColorScale = d3.scale.linear().clamp([true])
 	.domain(glycColorDomain)
 	.range(colors[10]);
 
+var ageColorScale = d3.scale.linear().clamp([true])
+	.domain(ageColorDomain)
+	.range(colors[10]);
+
+var genderColorScale = d3.scale.linear().clamp([true])
+	.domain(genderColorDomain)
+	.range(colors[10]);
+
 var receptorBindingColorScale = d3.scale.linear().clamp([true])
 	.domain(rbsColorDomain)
 	.range(colors[4]);
@@ -115,6 +123,14 @@ function colorByTrait() {
 	if (colorBy == "ep") {
 		colorScale = epitopeColorScale;
 		nodes.map(function(d) { d.coloring = d.attr.ep; });
+	}
+	else if (colorBy == "age") {
+		colorScale = ageColorScale;
+		nodes.map(function(d) { d.coloring = d.attr.age; });
+	}
+	else if (colorBy == "gender") {
+		colorScale = genderColorScale;
+		nodes.map(function(d) { d.coloring = d.attr.num_gender; });
 	}
 	else if (colorBy == "glyc") {
 		colorScale = glycColorScale;
