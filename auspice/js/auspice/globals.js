@@ -43,6 +43,7 @@ var colorScale;
 var serumSymbol = '\uf013';
 var epiColorDomain = genericDomain;
 var nonEpiColorDomain = genericDomain;
+var glycColorDomain = genericDomain.map(function(d){return Math.round(5+d*9);});
 var rbsColorDomain = genericDomain;
 var dateColorDomain = genericDomain;
 var HIColorDomain = genericDomain.map(function(d){return Math.round(100*(d*3.6))/100;});

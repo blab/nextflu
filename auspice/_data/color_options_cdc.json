@@ -7,6 +7,7 @@
   ["country","country"],
   ["region","region"],
   ["date","sampling date"],
+  ["glyc","glycosylation"],
   ["ep", "epitope mutations"],
   ["ne","non epitope mutations"],
   ["rb","receptor binding mutations"],

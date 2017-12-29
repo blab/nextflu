@@ -112,6 +112,9 @@ var virusTooltip = d3.tip()
 		if (typeof d.attr.rb != "undefined") {
 			string += "Receptor binding distance: " + d.attr.rb + "<br>";
 		}
+		if (typeof d.attr.glyc != "undefined") {
+			string += "Glycosylation sites: " + d.attr.glyc + "<br>";
+		}
 		if (typeof d.LBI != "undefined") {
 			string += "Local branching index: " + d.LBI.toFixed(3) + "<br>";
 		}

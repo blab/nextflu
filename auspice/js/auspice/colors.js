@@ -25,6 +25,10 @@ var nonepitopeColorScale = d3.scale.linear().clamp([true])
 	.domain(nonEpiColorDomain)
 	.range(colors[10]);
 
+var glycColorScale = d3.scale.linear().clamp([true])
+	.domain(glycColorDomain)
+	.range(colors[10]);
+
 var receptorBindingColorScale = d3.scale.linear().clamp([true])
 	.domain(rbsColorDomain)
 	.range(colors[4]);
@@ -111,6 +115,10 @@ function colorByTrait() {
 	if (colorBy == "ep") {
 		colorScale = epitopeColorScale;
 		nodes.map(function(d) { d.coloring = d.attr.ep; });
+	}
+	else if (colorBy == "glyc") {
+		colorScale = glycColorScale;
+		nodes.map(function(d) { d.coloring = d.attr.glyc; });
 	}
 	else if (colorBy == "ne") {
 		colorScale = nonepitopeColorScale;
