@@ -202,11 +202,17 @@ function colorByTrait() {
 
 function tipStrokeColor(d) {
 	var col = colorScale(d.coloring);
+	if (col=="#NaNNaNNaN"){
+		col="#AAAAAA"
+	}
 	return d3.rgb(col).toString();
 }
 
 function tipFillColor(d) {
-	var col = colorScale(d.coloring);	;
+	var col = colorScale(d.coloring);
+	if (col=="#NaNNaNNaN"){
+		col="#AAAAAA"
+	}
 	return d3.rgb(col).brighter([0.65]).toString();
 }
 
