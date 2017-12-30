@@ -9,6 +9,7 @@
   ["date","sampling date"],
   ["glyc","glycosylation"],
   ["age","host age"],
+  ["age_score","age deviation"],
   ["gender","host gender"],
   ["ep", "epitope mutations"],
   ["ne","non epitope mutations"],
