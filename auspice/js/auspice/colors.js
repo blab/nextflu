@@ -33,6 +33,10 @@ var ageColorScale = d3.scale.linear().clamp([true])
 	.domain(ageColorDomain)
 	.range(colors[10]);
 
+var ageScoreColorScale = d3.scale.linear().clamp([true])
+	.domain(ageScoreColorDomain)
+	.range(colors[10]);
+
 var genderColorScale = d3.scale.linear().clamp([true])
 	.domain(genderColorDomain)
 	.range(colors[10]);
@@ -127,6 +131,10 @@ function colorByTrait() {
 	else if (colorBy == "age") {
 		colorScale = ageColorScale;
 		nodes.map(function(d) { d.coloring = d.attr.age; });
+	}
+	else if (colorBy == "age_score") {
+		colorScale = ageScoreColorScale;
+		nodes.map(function(d) { d.coloring = d.attr.age_score; });
 	}
 	else if (colorBy == "gender") {
 		colorScale = genderColorScale;

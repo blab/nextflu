@@ -116,7 +116,7 @@ var virusTooltip = d3.tip()
 			string += "Glycosylation sites: " + d.attr.glyc + "<br>";
 		}
 		if (typeof d.attr.age != "undefined") {
-			string += "Host age:" + d.attr.age + "<br>";
+			string += "Host age: " + d.attr.age + "y<br>";
 		}
 		if (typeof d.LBI != "undefined") {
 			string += "Local branching index: " + d.LBI.toFixed(3) + "<br>";
@@ -168,6 +168,13 @@ var linkTooltip = d3.tip()
 		if (typeof d.fitness != "undefined") {
 			string += "Fitness: " + d.fitness.toFixed(3) + "<br>";
 		}
+		if (typeof d.attr.age_score != "undefined") {
+			string += "Age_stat: " + d.attr.age_score.toFixed(3) + "<br>";
+		}
+		if (typeof d.attr.age != "undefined") {
+			string += "Avg age: " + d.attr.age.toFixed(3) + "y<br>";
+		}
+
 		string += "click to zoom into clade"
 		string += "</div>";
 		return string;

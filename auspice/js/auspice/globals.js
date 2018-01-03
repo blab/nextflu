@@ -45,6 +45,7 @@ var epiColorDomain = genericDomain;
 var nonEpiColorDomain = genericDomain;
 var glycColorDomain = genericDomain.map(function(d){return Math.round(5+d*9);});
 var ageColorDomain = genericDomain.map(function(d){return Math.round(d*100);});
+var ageScoreColorDomain = genericDomain.map(function(d){return Math.round(d*500)/100;});
 var genderColorDomain = genericDomain.map(function(d){return Math.round((d-0.5)*200)/100;});
 var rbsColorDomain = genericDomain;
 var dateColorDomain = genericDomain;
