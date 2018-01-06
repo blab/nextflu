@@ -364,6 +364,9 @@ function colorByClade() {
 		}else{
 			d.coloring="unassigned";
 		}
+		if (!d.coloring){
+			d.coloring="unassigned";
+		}
 		return d.coloring;});
 
 	var unique_clades = d3.set(clades).values();
