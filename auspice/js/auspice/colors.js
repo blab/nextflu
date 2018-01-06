@@ -128,9 +128,12 @@ function colorByTrait() {
 		colorScale = epitopeColorScale;
 		nodes.map(function(d) { d.coloring = d.attr.ep; });
 	}
+	else if (colorBy == "clade") {
+		colorByClade();
+	}
 	else if (colorBy == "age") {
 		colorScale = ageColorScale;
-		nodes.map(function(d) { d.coloring = d.attr.age; });
+		nodes.map(function(d) { d.coloring = d.attr.avg_age; });
 	}
 	else if (colorBy == "age_score") {
 		colorScale = ageScoreColorScale;
@@ -271,6 +274,7 @@ function parse_gt_string(gt){
 	return mutations;
 };
 
+
 function colorByGenotype() {
 	var positions_string = document.getElementById("gt-color").value.split(',');
 	var positions_list = []
@@ -352,6 +356,42 @@ function colorByGenotypePosition (positions) {
 	  }
 	}
 }
+
+function colorByClade() {
+	var clades = nodes.map(function (d) {
+		if (d.attr.named_clades){
+			d.coloring = d.attr.named_clades.join('/');
+		}else{
+			d.coloring="unassigned";
+		}
+		return d.coloring;});
+
+	var unique_clades = d3.set(clades).values();
+	var clade_counts = {};
+	for (var i=0; i<unique_clades.length; i++){clade_counts[unique_clades[i]]=0;}
+	clades.forEach(function (d) {clade_counts[d]+=1;});
+	clade_counts["unassigned"] = -1;
+	unique_clades.sort(function (a,b){
+		var res;
+		if (clade_counts[a]>clade_counts[b]){ res=-1;}
+		else if (clade_counts[a]<clade_counts[b]){ res=1;}
+		else {res=0;}
+		return res;});
+
+	colorScale = d3.scale.ordinal()
+		.domain(unique_clades)
+		.range(genotypeColors);
+	treeplot.selectAll(".link")
+		.style("stroke", branchStrokeColor);
+	treeplot.selectAll(".tip")
+		.style("fill", tipFillColor)
+		.style("stroke", tipStrokeColor);
+	if (typeof tree_legend != undefined){
+		removeLegend();
+	}
+	tree_legend = makeLegend();
+}
+
 
 function resetFocusNode() {
 	var ntiters = 0, ntmp;
