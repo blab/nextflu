@@ -25,10 +25,6 @@ var nonepitopeColorScale = d3.scale.linear().clamp([true])
 	.domain(nonEpiColorDomain)
 	.range(colors[10]);
 
-var glycColorScale = d3.scale.linear().clamp([true])
-	.domain(glycColorDomain)
-	.range(colors[10]);
-
 var ageColorScale = d3.scale.linear().clamp([true])
 	.domain(ageColorDomain)
 	.range(colors[10]);
@@ -144,8 +140,18 @@ function colorByTrait() {
 		nodes.map(function(d) { d.coloring = d.attr.num_gender; });
 	}
 	else if (colorBy == "glyc") {
+		all_glyc = nodes.map(function(d) { d.coloring = d.attr.glyc; return d.coloring;});
+		min_glyc = d3.min(all_glyc);
+		max_glyc = d3.max(all_glyc)
+		var dom = [];
+		for (var i=min_glyc; i<max_glyc+1; i++){
+			dom.push(i);
+		}
+		var glycColorScale = d3.scale.linear().clamp([true])
+			.domain(dom)
+			.range(colors[max_glyc - min_glyc + 1]);
+
 		colorScale = glycColorScale;
-		nodes.map(function(d) { d.coloring = d.attr.glyc; });
 	}
 	else if (colorBy == "ne") {
 		colorScale = nonepitopeColorScale;
