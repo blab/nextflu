@@ -381,9 +381,17 @@ function colorByClade() {
 		else {res=0;}
 		return res;});
 
+	var cols = [];
+	for (var i=0; i<unique_clades.length; i++){
+		if (unique_clades[i]=="unassigned"){
+			cols.push("#CCCCCC");
+		}else{
+			cols.push(genotypeColors[i%genotypeColors.length]);
+		}
+	}
 	colorScale = d3.scale.ordinal()
 		.domain(unique_clades)
-		.range(genotypeColors);
+		.range(cols);
 	treeplot.selectAll(".link")
 		.style("stroke", branchStrokeColor);
 	treeplot.selectAll(".tip")
