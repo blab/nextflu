@@ -234,7 +234,7 @@ virus_to_freqdefault = {
 
 builds = ["CDC"]
 viruses = ["H3N2", "H1N1pdm", "Vic", "Yam"]
-segments = ["HA"]
+segments = ["HA", "NA"]
 resolutions = ["2y", "3y", "6y"]
 passages = ["cell", "egg"]
 assays = ["HI", "FRA"] # H3N2 only
@@ -326,9 +326,6 @@ for build in builds:
 
                     for assay in assays:
 
-                        if virus != "H3N2" and assay == "FRA":
-                            continue
-
                         apath = assay.lower()
                         if os.path.isdir(apath):
                             shutil.rmtree(apath)
@@ -336,29 +333,41 @@ for build in builds:
                         os.chdir(apath)
                         printdir()
 
-                        indexfile = open("index.html", "w")
-                        indexfile.write("---\n")
-                        indexfile.write("title: nextflu / %s / %s / %s / %s / %s / %s\n" % (build, virus, segment, resolution, passage, assay))
-                        indexfile.write("layout: auspice\n")
-                        indexfile.write("build: %s\n" % build)
-                        indexfile.write("virus: %s\n" % virus)
-                        indexfile.write("segment: %s\n" % segment)
-                        indexfile.write("resolution: %s\n" % resolution)
-                        indexfile.write("passage: %s\n" % passage)
-                        indexfile.write("assay: %s\n" % assay)
-                        indexfile.write("coloring: %s\n" % virus_to_coloring[virus])
-                        indexfile.write("gtplaceholder: HA1 positions...\n")
-                        indexfile.write("freqdefault: %s\n" % virus_to_freqdefault[virus])
-                        indexfile.write("site: cdc\n")
-                        indexfile.write("---\n")
-                        indexfile.write("\n")
-                        indexfile.write("<script>\n")
-                        indexfile.write("var file_prefix = \"flu_%s_%s_%s_%s_%s_%s_\";\n" % (build.lower(), virus.lower(), segment.lower(), resolution.lower(), passage.lower(), assay.lower()))
-                        indexfile.write("var useTiters = true;\n")
-                        indexfile.write("{%% include %s_meta.js %%}\n" % virus)
-                        indexfile.write("{%% include %s_meta.js %%}\n" % resolution)
-                        indexfile.write("</script>\n")
-                        indexfile.close()
+                        if virus != "H3N2" and assay == "FRA":
+
+                            indexfile = open("index.html", "w")
+                            indexfile.write("---\n")
+                            indexfile.write("title: nextflu / %s / %s / %s / %s / %s / %s \n" % (build, virus, segment, resolution, passage, assay))
+                            indexfile.write("layout: redirect\n")
+                            indexfile.write("rurl: /%s/%s/%s/%s/%s/hi/\n" % (bpath, vpath, spath, rpath, ppath))
+                            indexfile.write("---\n")
+                            indexfile.close()
+
+                        else:
+
+                            indexfile = open("index.html", "w")
+                            indexfile.write("---\n")
+                            indexfile.write("title: nextflu / %s / %s / %s / %s / %s / %s\n" % (build, virus, segment, resolution, passage, assay))
+                            indexfile.write("layout: auspice\n")
+                            indexfile.write("build: %s\n" % build)
+                            indexfile.write("virus: %s\n" % virus)
+                            indexfile.write("segment: %s\n" % segment)
+                            indexfile.write("resolution: %s\n" % resolution)
+                            indexfile.write("passage: %s\n" % passage)
+                            indexfile.write("assay: %s\n" % assay)
+                            indexfile.write("coloring: %s\n" % virus_to_coloring[virus])
+                            indexfile.write("gtplaceholder: HA1 positions...\n")
+                            indexfile.write("freqdefault: %s\n" % virus_to_freqdefault[virus])
+                            indexfile.write("site: cdc\n")
+                            indexfile.write("---\n")
+                            indexfile.write("\n")
+                            indexfile.write("<script>\n")
+                            indexfile.write("var file_prefix = \"flu_%s_%s_%s_%s_%s_%s_\";\n" % (build.lower(), virus.lower(), segment.lower(), resolution.lower(), passage.lower(), assay.lower()))
+                            indexfile.write("var useTiters = true;\n")
+                            indexfile.write("{%% include %s_meta.js %%}\n" % virus)
+                            indexfile.write("{%% include %s_meta.js %%}\n" % resolution)
+                            indexfile.write("</script>\n")
+                            indexfile.close()
 
                         os.chdir("..")
 
