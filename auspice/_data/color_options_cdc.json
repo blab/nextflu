@@ -1,6 +1,6 @@
 [
-  ["clade", "Clade"],
   ["HI_dist","HI distance from focus"],
+  ["clade", "clade"],  
   ["fitness","fitness"],
   ["cHI","antigenic advance"],
   ["dfreq","frequency change"],
