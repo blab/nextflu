@@ -1,19 +1,21 @@
 ---
-title: nextflu / Vic / 3y / egg / hi
+title: nextflu / CDC / Vic / NA / 3y / egg / HI
 layout: auspice
+build: CDC
 virus: Vic
+segment: NA
 resolution: 3y
 passage: egg
-assay: hi
-coloring: age, age_score, glyc,lbi, dfreq, region, date, cHI, HI_dist
+assay: HI
+coloring: age, age_score, glyc, lbi, dfreq, region, date, cHI, HI_dist
 gtplaceholder: HA1 positions...
 freqdefault: 1A, 1B, 117V, 180V
 site: cdc
 ---
 
 <script>
-var file_prefix = "flu_vic_na_3y_egg_hi_";
+var file_prefix = "flu_cdc_vic_na_3y_egg_hi_";
 var useTiters = true;
-{%include Vic_meta.js %}
-{%include 3y_meta.js %}
+{% include Vic_meta.js %}
+{% include 3y_meta.js %}
 </script>
