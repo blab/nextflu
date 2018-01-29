@@ -11,6 +11,14 @@ def printdir():
 # change working directory to base level
 os.chdir("..")
 
+indexfile = open("index.html", "w")
+indexfile.write("---\n")
+indexfile.write("title: nextflu\n")
+indexfile.write("layout: redirect\n")
+indexfile.write("rurl: /h3n2/ha/3y/\n")
+indexfile.write("---\n")
+indexfile.close()
+
 # provision live site and gisaid site
 
 virus_to_coloring = {
@@ -124,6 +132,14 @@ if os.path.isdir("gisaid"):
 os.makedirs("gisaid")
 os.chdir("gisaid")
 printdir()
+
+indexfile = open("index.html", "w")
+indexfile.write("---\n")
+indexfile.write("title: nextflu\n")
+indexfile.write("layout: redirect\n")
+indexfile.write("rurl: /gisaid/h3n2/ha/3y/\n")
+indexfile.write("---\n")
+indexfile.close()
 
 for virus in viruses:
 
