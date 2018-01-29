@@ -1,9 +1,12 @@
-import sys, os, shutil
+import sys, os, shutil, re
 
 # run this script to provision necessary directory structure and index.htmls
 # this script deletes existing /h3n2/, /cdc/, etc... directories and makes new ones
 # resulting directories are checked into git
 # run from setup/ directory
+
+def printdir():
+    print(re.sub(r'^.+auspice/', 'auspice/', os.getcwd()))
 
 # change working directory to base level
 os.chdir("..")
@@ -34,6 +37,7 @@ for virus in viruses:
         shutil.rmtree(vpath)
     os.makedirs(vpath)
     os.chdir(vpath)
+    printdir()
 
     indexfile = open("index.html", "w")
     indexfile.write("---\n")
@@ -50,6 +54,7 @@ for virus in viruses:
             shutil.rmtree(spath)
         os.makedirs(spath)
         os.chdir(spath)
+        printdir()
 
         indexfile = open("index.html", "w")
         indexfile.write("---\n")
@@ -66,6 +71,7 @@ for virus in viruses:
                 shutil.rmtree(rpath)
             os.makedirs(rpath)
             os.chdir(rpath)
+            printdir()
 
             indexfile = open("index.html", "w")
             indexfile.write("---\n")
@@ -91,6 +97,25 @@ for virus in viruses:
 
         os.chdir("..")
 
+    for resolution in resolutions:
+
+        rpath = resolution.lower()
+        if os.path.isdir(rpath):
+            shutil.rmtree(rpath)
+        os.makedirs(rpath)
+        os.chdir(rpath)
+        printdir()
+
+        indexfile = open("index.html", "w")
+        indexfile.write("---\n")
+        indexfile.write("title: nextflu / %s / %s \n" % (virus, resolution))
+        indexfile.write("layout: redirect\n")
+        indexfile.write("rurl: /%s/ha/%s/\n" % (vpath, rpath))
+        indexfile.write("---\n")
+        indexfile.close()
+
+        os.chdir("..")
+
     os.chdir("..")
 
 # provision GISAID site
@@ -98,6 +123,7 @@ if os.path.isdir("gisaid"):
     shutil.rmtree("gisaid")
 os.makedirs("gisaid")
 os.chdir("gisaid")
+printdir()
 
 for virus in viruses:
 
@@ -106,12 +132,13 @@ for virus in viruses:
         shutil.rmtree(vpath)
     os.makedirs(vpath)
     os.chdir(vpath)
+    printdir()
 
     indexfile = open("index.html", "w")
     indexfile.write("---\n")
     indexfile.write("title: nextflu / %s \n" % virus)
     indexfile.write("layout: redirect\n")
-    indexfile.write("rurl: /%s/ha/3y/\n" % vpath)
+    indexfile.write("rurl: /gisaid/%s/ha/3y/\n" % vpath)
     indexfile.write("---\n")
     indexfile.close()
 
@@ -122,12 +149,13 @@ for virus in viruses:
             shutil.rmtree(spath)
         os.makedirs(spath)
         os.chdir(spath)
+        printdir()
 
         indexfile = open("index.html", "w")
         indexfile.write("---\n")
         indexfile.write("title: nextflu / %s / %s \n" % (virus, segment))
         indexfile.write("layout: redirect\n")
-        indexfile.write("rurl: /%s/%s/3y/\n" % (vpath, spath))
+        indexfile.write("rurl: /gisaid/%s/%s/3y/\n" % (vpath, spath))
         indexfile.write("---\n")
         indexfile.close()
 
@@ -138,6 +166,7 @@ for virus in viruses:
                 shutil.rmtree(rpath)
             os.makedirs(rpath)
             os.chdir(rpath)
+            printdir()
 
             indexfile = open("index.html", "w")
             indexfile.write("---\n")
@@ -161,6 +190,25 @@ for virus in viruses:
             indexfile.close()
 
             os.chdir("..")
+
+        os.chdir("..")
+
+    for resolution in resolutions:
+
+        rpath = resolution.lower()
+        if os.path.isdir(rpath):
+            shutil.rmtree(rpath)
+        os.makedirs(rpath)
+        os.chdir(rpath)
+        printdir()
+
+        indexfile = open("index.html", "w")
+        indexfile.write("---\n")
+        indexfile.write("title: nextflu / %s / %s \n" % (virus, resolution))
+        indexfile.write("layout: redirect\n")
+        indexfile.write("rurl: /gisaid/%s/ha/%s/\n" % (vpath, rpath))
+        indexfile.write("---\n")
+        indexfile.close()
 
         os.chdir("..")
 
@@ -198,6 +246,7 @@ for build in builds:
         shutil.rmtree(bpath)
     os.makedirs(bpath)
     os.chdir(bpath)
+    printdir()
 
     indexfile = open("index.html", "w")
     indexfile.write("---\n")
@@ -214,6 +263,7 @@ for build in builds:
             shutil.rmtree(vpath)
         os.makedirs(vpath)
         os.chdir(vpath)
+        printdir()
 
         indexfile = open("index.html", "w")
         indexfile.write("---\n")
@@ -230,6 +280,7 @@ for build in builds:
                 shutil.rmtree(spath)
             os.makedirs(spath)
             os.chdir(spath)
+            printdir()
 
             indexfile = open("index.html", "w")
             indexfile.write("---\n")
@@ -246,6 +297,7 @@ for build in builds:
                     shutil.rmtree(rpath)
                 os.makedirs(rpath)
                 os.chdir(rpath)
+                printdir()
 
                 indexfile = open("index.html", "w")
                 indexfile.write("---\n")
@@ -262,6 +314,7 @@ for build in builds:
                         shutil.rmtree(ppath)
                     os.makedirs(ppath)
                     os.chdir(ppath)
+                    printdir()
 
                     indexfile = open("index.html", "w")
                     indexfile.write("---\n")
@@ -281,6 +334,7 @@ for build in builds:
                             shutil.rmtree(apath)
                         os.makedirs(apath)
                         os.chdir(apath)
+                        printdir()
 
                         indexfile = open("index.html", "w")
                         indexfile.write("---\n")
@@ -307,6 +361,66 @@ for build in builds:
                         indexfile.close()
 
                         os.chdir("..")
+
+                    os.chdir("..")
+
+                os.chdir("..")
+
+            os.chdir("..")
+
+        for resolution in resolutions:
+
+            rpath = resolution.lower()
+            if os.path.isdir(rpath):
+                shutil.rmtree(rpath)
+            os.makedirs(rpath)
+            os.chdir(rpath)
+            printdir()
+
+            indexfile = open("index.html", "w")
+            indexfile.write("---\n")
+            indexfile.write("title: nextflu / %s / %s / %s \n" % (build, virus, resolution))
+            indexfile.write("layout: redirect\n")
+            indexfile.write("rurl: /%s/%s/ha/%s/cell/hi/\n" % (bpath, vpath, rpath))
+            indexfile.write("---\n")
+            indexfile.close()
+
+            for passage in passages:
+
+                ppath = passage.lower()
+                if os.path.isdir(ppath):
+                    shutil.rmtree(ppath)
+                os.makedirs(ppath)
+                os.chdir(ppath)
+                printdir()
+
+                indexfile = open("index.html", "w")
+                indexfile.write("---\n")
+                indexfile.write("title: nextflu / %s / %s / %s / %s \n" % (build, virus, resolution, passage))
+                indexfile.write("layout: redirect\n")
+                indexfile.write("rurl: /%s/%s/ha/%s/%s/hi/\n" % (bpath, vpath, rpath, ppath))
+                indexfile.write("---\n")
+                indexfile.close()
+
+                for assay in assays:
+
+                    if virus != "H3N2" and assay == "FRA":
+                        continue
+
+                    apath = assay.lower()
+                    if os.path.isdir(apath):
+                        shutil.rmtree(apath)
+                    os.makedirs(apath)
+                    os.chdir(apath)
+                    printdir()
+
+                    indexfile = open("index.html", "w")
+                    indexfile.write("---\n")
+                    indexfile.write("title: nextflu / %s / %s / %s / %s / %s \n" % (build, virus, resolution, passage, assay))
+                    indexfile.write("layout: redirect\n")
+                    indexfile.write("rurl: /%s/%s/ha/%s/%s/%s/\n" % (bpath, vpath, rpath, ppath, apath))
+                    indexfile.write("---\n")
+                    indexfile.close()
 
                     os.chdir("..")
 
