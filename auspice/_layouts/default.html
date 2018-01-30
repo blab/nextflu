@@ -41,7 +41,7 @@
 	<body>
 		<nav class="navbar navbar-default navbar-static-top" role="navigation">
 			<div class="container">
-				{% if page.site != 'gisaid' and page.site != 'cdc' %}
+				{% if page.site != 'GISAID' and page.site != 'WHO' %}
 				<ul class="nav navbar-nav navbar-right nav-tabs">
 					{% if page.categories.first == 'methods' %}
 					<li class="active" role="presentation">
@@ -86,17 +86,17 @@
 						</ul>
 					</li>
 				</ul>
-				{% elsif page.site == 'cdc' %}
+				{% elsif page.site == 'WHO' %}
 				<p class="navbar-text navbar-right nav-tabs">CDC Version</p>
 				{% endif %}
 				<div class="navbar-header">
-					{% if page.site == 'gisaid' %}
+					{% if page.site == 'GISAID' %}
 					<a class="navbar-brand" href="/gisaid/">
 						<div class="navtitle">
 							<span class="c2">n</span><span class="c3">e</span><span class="c4">x</span><span class="c5">t</span><span class="c6">f</span><span class="c7">l</span><span class="c8">u</span>
 						</div>
 					</a>
-					{% elsif page.site == 'cdc' %}
+					{% elsif page.site == 'WHO' %}
 					<a class="navbar-brand" href="/cdc/">
 						<div class="navtitle">
 							<span class="c2">n</span><span class="c3">e</span><span class="c4">x</span><span class="c5">t</span><span class="c6">f</span><span class="c7">l</span><span class="c8">u</span>
@@ -110,7 +110,7 @@
 					</a>
 					{% endif %}
 					<ul class="nav navbar-nav navbar-left">
-						{% if page.virus and page.site != 'cdc' %}
+						{% if page.virus and page.site != 'WHO' %}
 						<li class="dropdown hidden-xs"><p>/</p></li>
 						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
@@ -129,7 +129,7 @@
 										<a>{{ entry.virus }}</a>
 									{% else %}
 									<li>
-										{% if page.site == 'gisaid' %}
+										{% if page.site == 'GISAID' %}
 										<a href="/gisaid/{{ entry.virus | downcase }}/{{ page.resolution | downcase }}">{{ entry.virus }}</a>
 										{% else %}
 										<a href="/{{ entry.virus | downcase }}/{{ page.resolution | downcase }}">{{ entry.virus }}</a>
@@ -139,7 +139,7 @@
 								{% endfor %}
 							</ul>
 						</li>
-						{% elsif page.virus and page.site == 'cdc' %}
+						{% elsif page.virus and page.site == 'WHO' %}
 						<li class="dropdown hidden-xs"><p>/</p></li>
 						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
@@ -165,7 +165,7 @@
 							</ul>
 						</li>
 						{% endif %}
-						{% if page.virus and page.site != 'cdc' %}
+						{% if page.virus and page.site != 'WHO' %}
 						<li class="dropdown hidden-xs"><p>/</p></li>
 						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
@@ -186,9 +186,9 @@
 												<a>{{ res | replace:'-',' ' }}</a>
 											{% else %}
 											<li>
-												{% if page.site == 'gisaid' %}
+												{% if page.site == 'GISAID' %}
 												<a href="/gisaid/{{ entry.virus | downcase }}/{{ res | downcase }}">{{ res | replace:'-',' ' }}</a>
-												{% elsif page.site == 'cdc' %}
+												{% elsif page.site == 'WHO' %}
 												<a href="/cdc/{{ entry.virus | downcase }}/{{ res | downcase }}">{{ res | replace:'-',' ' }}</a>
 												{% else %}
 												<a href="/{{ entry.virus | downcase }}/{{ res | downcase }}">{{ res | replace:'-',' ' }}</a>
@@ -200,7 +200,7 @@
 								{% endfor %}
 							</ul>
 						</li>
-						{% elsif page.virus and page.site == 'cdc' %}
+						{% elsif page.virus and page.site == 'WHO' %}
 						<li class="dropdown hidden-xs"><p>/</p></li>
 						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
@@ -230,7 +230,7 @@
 							</ul>
 						</li>
 						{% endif %}
-						{% if page.virus and page.site == 'cdc' %}
+						{% if page.virus and page.site == 'WHO' %}
 						<li class="dropdown hidden-xs"><p>/</p></li>
 						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
@@ -260,7 +260,7 @@
 							</ul>
 						</li>
 						{% endif %}
-						{% if page.virus and page.site == 'cdc' %}
+						{% if page.virus and page.site == 'WHO' %}
 						<li class="dropdown hidden-xs"><p>/</p></li>
 						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
