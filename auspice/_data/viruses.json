@@ -1,24 +1,93 @@
 [{
   "virus": "H3N2",
+  "site": "public",
   "default": "/H3N2/3y/",
   "name": "A/H3N2",
   "resolutions": ["2y", "3y", "6y", "12y"]
 },
 {
   "virus": "H1N1pdm",
+  "site": "public",
   "default": "/H1N1pdm/3y/",
   "name": "A/H1N1pdm",
   "resolutions": ["2y", "3y", "6y", "12y"]
 },
 {
   "virus": "Vic",
+  "site": "public",
   "default": "/Vic/3y/",
   "name": "B/Vic",
   "resolutions": ["2y", "3y", "6y", "12y"]
 },
 {
   "virus": "Yam",
+  "site": "public",
   "default": "/Yam/3y/",
   "name": "B/Yam",
   "resolutions": ["2y", "3y", "6y", "12y"]
-}]
+},
+{
+  "virus": "H3N2",
+  "site": "GISAID",
+  "default": "/H3N2/3y/",
+  "name": "A/H3N2",
+  "resolutions": ["2y", "3y", "6y", "12y"]
+},
+{
+  "virus": "H1N1pdm",
+  "site": "GISAID",
+  "default": "/H1N1pdm/3y/",
+  "name": "A/H1N1pdm",
+  "resolutions": ["2y", "3y", "6y", "12y"]
+},
+{
+  "virus": "Vic",
+  "site": "GISAID",
+  "default": "/Vic/3y/",
+  "name": "B/Vic",
+  "resolutions": ["2y", "3y", "6y", "12y"]
+},
+{
+  "virus": "Yam",
+  "site": "GISAID",
+  "default": "/Yam/3y/",
+  "name": "B/Yam",
+  "resolutions": ["2y", "3y", "6y", "12y"]
+},
+{
+  "virus": "H3N2",
+  "site": "WHO",
+  "default": "/H3N2/3y/",
+  "name": "A/H3N2",
+  "resolutions": ["2y", "3y", "6y"],
+  "passages": ["cell", "egg"],
+  "assays": ["hi", "fra"]
+},
+{
+  "virus": "H1N1pdm",
+  "site": "WHO",
+  "default": "/H1N1pdm/3y/",
+  "name": "A/H1N1pdm",
+  "resolutions": ["2y", "3y", "6y"],
+  "passages": ["cell", "egg"],
+  "assays": ["hi"]
+},
+{
+  "virus": "Vic",
+  "site": "WHO",
+  "default": "/Vic/3y/",
+  "name": "B/Vic",
+  "resolutions": ["2y", "3y", "6y"],
+  "passages": ["cell", "egg"],
+  "assays": ["hi"]
+},
+{
+  "virus": "Yam",
+  "site": "WHO",
+  "default": "/Yam/3y/",
+  "name": "B/Yam",
+  "resolutions": ["2y", "3y", "6y"],
+  "passages": ["cell", "egg"],
+  "assays": ["hi"]
+}
+]
