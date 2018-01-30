@@ -25,6 +25,18 @@ var nonepitopeColorScale = d3.scale.linear().clamp([true])
 	.domain(nonEpiColorDomain)
 	.range(colors[10]);
 
+var ageColorScale = d3.scale.linear().clamp([true])
+	.domain(ageColorDomain)
+	.range(colors[10]);
+
+var ageScoreColorScale = d3.scale.linear().clamp([true])
+	.domain(ageScoreColorDomain)
+	.range(colors[10]);
+
+var genderColorScale = d3.scale.linear().clamp([true])
+	.domain(genderColorDomain)
+	.range(colors[10]);
+
 var receptorBindingColorScale = d3.scale.linear().clamp([true])
 	.domain(rbsColorDomain)
 	.range(colors[4]);
@@ -112,6 +124,35 @@ function colorByTrait() {
 		colorScale = epitopeColorScale;
 		nodes.map(function(d) { d.coloring = d.attr.ep; });
 	}
+	else if (colorBy == "clade") {
+		colorByClade();
+	}
+	else if (colorBy == "age") {
+		colorScale = ageColorScale;
+		nodes.map(function(d) { d.coloring = d.attr.avg_age; });
+	}
+	else if (colorBy == "age_score") {
+		colorScale = ageScoreColorScale;
+		nodes.map(function(d) { d.coloring = d.attr.age_score; });
+	}
+	else if (colorBy == "gender") {
+		colorScale = genderColorScale;
+		nodes.map(function(d) { d.coloring = d.attr.num_gender; });
+	}
+	else if (colorBy == "glyc") {
+		all_glyc = nodes.map(function(d) { d.coloring = d.attr.glyc; return d.coloring;});
+		min_glyc = d3.min(all_glyc);
+		max_glyc = d3.max(all_glyc)
+		var dom = [];
+		for (var i=min_glyc; i<max_glyc+1; i++){
+			dom.push(i);
+		}
+		var glycColorScale = d3.scale.linear().clamp([true])
+			.domain(dom)
+			.range(colors[max_glyc - min_glyc + 1]);
+
+		colorScale = glycColorScale;
+	}
 	else if (colorBy == "ne") {
 		colorScale = nonepitopeColorScale;
 		nodes.map(function(d) { d.coloring = d.attr.ne; });
@@ -178,11 +219,17 @@ function colorByTrait() {
 
 function tipStrokeColor(d) {
 	var col = colorScale(d.coloring);
+	if (col=="#NaNNaNNaN"){
+		col="#AAAAAA"
+	}
 	return d3.rgb(col).toString();
 }
 
 function tipFillColor(d) {
-	var col = colorScale(d.coloring);	;
+	var col = colorScale(d.coloring);
+	if (col=="#NaNNaNNaN"){
+		col="#AAAAAA"
+	}
 	return d3.rgb(col).brighter([0.65]).toString();
 }
 
@@ -232,6 +279,7 @@ function parse_gt_string(gt){
 	});
 	return mutations;
 };
+
 
 function colorByGenotype() {
 	var positions_string = document.getElementById("gt-color").value.split(',');
@@ -314,6 +362,53 @@ function colorByGenotypePosition (positions) {
 	  }
 	}
 }
+
+function colorByClade() {
+	var clades = nodes.map(function (d) {
+		if (d.attr.named_clades){
+			d.coloring = d.attr.named_clades.join('/');
+		}else{
+			d.coloring="unassigned";
+		}
+		if (!d.coloring){
+			d.coloring="unassigned";
+		}
+		return d.coloring;});
+
+	var unique_clades = d3.set(clades).values();
+	var clade_counts = {};
+	for (var i=0; i<unique_clades.length; i++){clade_counts[unique_clades[i]]=0;}
+	clades.forEach(function (d) {clade_counts[d]+=1;});
+	clade_counts["unassigned"] = -1;
+	unique_clades.sort(function (a,b){
+		var res;
+		if (clade_counts[a]>clade_counts[b]){ res=-1;}
+		else if (clade_counts[a]<clade_counts[b]){ res=1;}
+		else {res=0;}
+		return res;});
+
+	var cols = [];
+	for (var i=0; i<unique_clades.length; i++){
+		if (unique_clades[i]=="unassigned"){
+			cols.push("#CCCCCC");
+		}else{
+			cols.push(genotypeColors[i%genotypeColors.length]);
+		}
+	}
+	colorScale = d3.scale.ordinal()
+		.domain(unique_clades)
+		.range(cols);
+	treeplot.selectAll(".link")
+		.style("stroke", branchStrokeColor);
+	treeplot.selectAll(".tip")
+		.style("fill", tipFillColor)
+		.style("stroke", tipStrokeColor);
+	if (typeof tree_legend != undefined){
+		removeLegend();
+	}
+	tree_legend = makeLegend();
+}
+
 
 function resetFocusNode() {
 	var ntiters = 0, ntmp;

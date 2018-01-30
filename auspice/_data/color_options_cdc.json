@@ -1,5 +1,6 @@
 [
   ["HI_dist","HI distance from focus"],
+  ["clade", "clade"],  
   ["fitness","fitness"],
   ["cHI","antigenic advance"],
   ["dfreq","frequency change"],
@@ -7,6 +8,10 @@
   ["country","country"],
   ["region","region"],
   ["date","sampling date"],
+  ["glyc","glycosylation"],
+  ["age","host age"],
+  ["age_score","age deviation"],
+  ["gender","host gender"],
   ["ep", "epitope mutations"],
   ["ne","non epitope mutations"],
   ["rb","receptor binding mutations"],

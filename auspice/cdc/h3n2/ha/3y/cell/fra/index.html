@@ -1,0 +1,21 @@
+---
+title: nextflu / CDC / H3N2 / HA / 3y / cell / FRA
+layout: auspice
+build: CDC
+virus: H3N2
+segment: HA
+resolution: 3y
+passage: cell
+assay: FRA
+coloring: clade, age, age_score, glyc, ep, ne, rb, lbi, dfreq, region, date, cHI, HI_dist
+gtplaceholder: HA1 positions...
+freqdefault: 3c2.a, 3c3.a, 3c2.a1
+site: WHO
+---
+
+<script>
+var file_prefix = "flu_cdc_h3n2_ha_3y_cell_fra_";
+var useTiters = true;
+{% include H3N2_meta.js %}
+{% include 3y_meta.js %}
+</script>

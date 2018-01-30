@@ -1,5 +1,6 @@
 console.log('Enter tree.js');
-var timetree=false;
+var	timetree = document.getElementById("timetree").checked;
+var	branch_labels = document.getElementById("branchlabels").checked;
 var LBI_cutoff;
 
 var dHIScale = d3.scale.linear()
@@ -232,7 +233,7 @@ function addBranchLabels(){
 		.style("font-size", branchLabelSize)
 		.style("text-anchor", "end")
 		.text(branchLabelText)
-		.style("visibility", "hidden");
+		.style("visibility", (branch_labels)?"visible":"hidden");
 }
 
 
@@ -412,6 +413,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		resetFocusNode();
 		newFocus();
 	}
+	addBranchLabels();
 
 	var vaccineCircles = treeplot.selectAll(".vaccine")
 		.data(vaccines)
@@ -645,9 +647,6 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	}
 
 
-	branch_labels = document.getElementById("branchlabels");
-	addBranchLabels();
-
 	var searchEvent;
 	function onSelect(tip) {
 		var strainName = (tip.strain).replace(/\//g, "");
@@ -716,13 +715,14 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.render();
 
 	// add clade labels
+	var clades = nodes.filter(function(d){return typeof d.attr["clade_name"] !== "undefined";});
 	var clade_annotations = treeplot.selectAll('.annotation')
-		.data(nodes.filter(function(d){return typeof d.attr["clade_name"] !== "undefined";}))
+		.data(clades)
 		.enter()
 		.append("text")
 		.attr("class", "annotation")
 		.style("text-anchor", "end")
-		.style("visibility", "visible")
+		.style("visibility",(branch_labels)?"hidden":"visible")
 		.text(function (d) {
 			return d.attr.clade_name;
 		});
@@ -733,6 +733,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.domain([d3.min(yValues), d3.max(yValues)]);
   //drawGrid();
 	resize();
+
 
 	function exportTreeSVG(){
 		var tmp = document.getElementById("treeplot-container");

@@ -72,7 +72,7 @@ function make_panels(){
 	// exact match is required for categorical qunantities such as genotypes, regions
 	// continuous variables need to fall into the interal (lower_bound[leg], leg]
 	var legend_match = function(leg, tip){
-		if ((colorBy=='lbi')||(colorBy=='date')||(colorBy=='dfreq')||(colorBy=='HI_dist')||(colorBy=='cHI')){
+		if ((colorBy=='glyc')||(colorBy=='age')||(colorBy=='lbi')||(colorBy=='date')||(colorBy=='dfreq')||(colorBy=='HI_dist')||(colorBy=='cHI')){
 			return (tip.coloring<=upper_bound[leg])&&(tip.coloring>lower_bound[leg]);
 		}else{
 			return tip.coloring==leg;

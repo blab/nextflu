@@ -1,0 +1,21 @@
+---
+title: nextflu / CDC / H3N2 / NA / 6y / cell / HI
+layout: auspice
+build: CDC
+virus: H3N2
+segment: NA
+resolution: 6y
+passage: cell
+assay: HI
+coloring: clade, age, age_score, glyc, ep, ne, rb, lbi, dfreq, region, date, cHI, HI_dist
+gtplaceholder: HA1 positions...
+freqdefault: 3c2.a, 3c3.a, 3c2.a1
+site: WHO
+---
+
+<script>
+var file_prefix = "flu_cdc_h3n2_na_6y_cell_hi_";
+var useTiters = true;
+{% include H3N2_meta.js %}
+{% include 6y_meta.js %}
+</script>

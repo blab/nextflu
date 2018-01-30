@@ -1,0 +1,21 @@
+---
+title: nextflu / CDC / H1N1pdm / NA / 6y / egg / HI
+layout: auspice
+build: CDC
+virus: H1N1pdm
+segment: NA
+resolution: 6y
+passage: egg
+assay: HI
+coloring: age, age_score, glyc, lbi, dfreq, region, date, cHI, HI_dist
+gtplaceholder: HA1 positions...
+freqdefault: 6b, 6c
+site: WHO
+---
+
+<script>
+var file_prefix = "flu_cdc_h1n1pdm_na_6y_egg_hi_";
+var useTiters = true;
+{% include H1N1pdm_meta.js %}
+{% include 6y_meta.js %}
+</script>

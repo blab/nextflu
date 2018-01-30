@@ -28,7 +28,7 @@ categories:
 							<label class="col-xs-4 control-label">Color by</label>
 							<div class="col-xs-8 controls">
 								<select id="coloring" class="form-control">
-                {% if page.site == 'cdc' %}
+                {% if page.site == 'WHO' %}
   								{% for color_option in site.data.color_options_cdc %}
   									{% if page.coloring contains color_option[0] %}
   									<option value={{color_option[0] }}>{{ color_option[1] }}</option>
@@ -56,15 +56,15 @@ categories:
 						<div class="col-xs-8 controls">
 							<form action="" id="HImodel">
 								<input type="radio" name="HImodel" id="HImodel_measured"  checked="checked"  value="measured"> measurements<br>
-								<input type="radio" name="HImodel" id="HImodel_tree" value="tree"> tree model<br>
-								<input type="radio" name="HImodel" id="HImodel_mutation" value="mutation"> substit. model
+ 								<!-- <input type="radio" name="HImodel" id="HImodel_tree" value="tree"> tree model<br> --> <!-- off in favor of subs model -->
+ 								<input type="radio" name="HImodel" id="HImodel_mutation" value="mutation"> substit. model
 							</form>
 						</div>
 						<label class="col-xs-4 control-label">Corrections:</label><br>
 						<div class="col-xs-8 controls">
 							<div class="bigspacer"></div>
 							<input type="checkbox" id="serum" value="serum" checked="checked"> serum potency<br>
-							<input type="checkbox" id="virus" value="virus" checked="checked"> virus avidity
+							<input type="checkbox" id="virus" value="virus"> virus avidity
 						</div>
 						<label class="col-xs-4 control-label">Sera:</label><br>
 						<div class="col-xs-8 controls">
@@ -107,12 +107,20 @@ categories:
             <div class="col-xs-8 controls">
               <div class="checkbox">
                 <label>
+                  {% if page.site == 'WHO' %}
+                  <input type="checkbox" id="branchlabels" checked="checked"> branch labels
+                  {% else %}
                   <input type="checkbox" id="branchlabels"> branch labels
+                  {% endif %}
                 </label>
               </div>
               <div class="checkbox">
                 <label>
+                  {% if page.site == 'WHO' %}
                   <input type="checkbox" id="timetree"> timetree
+                  {% else %}
+                  <input type="checkbox" id="timetree" checked="checked"> timetree
+                  {% endif %}
                 </label>
               </div>
             </div>

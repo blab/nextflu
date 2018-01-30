@@ -1,0 +1,21 @@
+---
+title: nextflu / CDC / Vic / HA / 2y / cell / HI
+layout: auspice
+build: CDC
+virus: Vic
+segment: HA
+resolution: 2y
+passage: cell
+assay: HI
+coloring: age, age_score, glyc, lbi, dfreq, region, date, cHI, HI_dist
+gtplaceholder: HA1 positions...
+freqdefault: 1A, 1B, 117V, 180V
+site: WHO
+---
+
+<script>
+var file_prefix = "flu_cdc_vic_ha_2y_cell_hi_";
+var useTiters = true;
+{% include Vic_meta.js %}
+{% include 2y_meta.js %}
+</script>
