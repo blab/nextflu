@@ -1,0 +1,21 @@
+---
+title: nextflu / WHO / Yam / HA / 6y / cell / HI
+layout: auspice
+build: WHO
+virus: Yam
+segment: HA
+resolution: 6y
+passage: cell
+assay: HI
+coloring: age, age_score, glyc, lbi, dfreq, region, date, cHI, HI_dist
+gtplaceholder: HA1 positions...
+freqdefault: 2, 3, 3a, 172Q
+site: WHO
+---
+
+<script>
+var file_prefix = "flu_who_yam_ha_6y_cell_hi_";
+var useTiters = true;
+{% include Yam_meta.js %}
+{% include 6y_meta.js %}
+</script>
