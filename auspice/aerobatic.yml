@@ -8,5 +8,5 @@ plugins:
       password: $SITE_PASSWORD
   - name: redirect
     options:
-      /: /cdc/      
+      /: /who/      
   - name: webpage
