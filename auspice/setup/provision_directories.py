@@ -249,7 +249,7 @@ virus_to_freqdefault = {
     "Yam": "2, 3, 3a, 172Q"
 }
 
-builds = ["CDC"]
+builds = ["CDC", "WHO", "VIDRL"]
 viruses = ["H3N2", "H1N1pdm", "Vic", "Yam"]
 segments = ["HA", "NA"]
 resolutions = ["2y", "3y", "6y"]
@@ -274,7 +274,8 @@ for build in builds:
     indexfile.close()
 
     for virus in viruses:
-
+        if build=="VIDRL" and virus in ["Vic", "Yam"]:
+            continue
         vpath = virus.lower()
         if os.path.isdir(vpath):
             shutil.rmtree(vpath)
