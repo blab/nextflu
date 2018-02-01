@@ -414,7 +414,9 @@ function resetFocusNode() {
 	var ntiters = 0, ntmp;
 	focusNode=sera[0];
 	for (var i=0; i<sera.length; i++){
-		ntmp = Object.keys(HI_titers[sera[i].clade]).length;
+		if (typeof HI_titers[sera[i].clade] != "undefined"){
+      ntmp = Object.keys(HI_titers[sera[i].clade]).length;
+    } 
 		if (ntmp>ntiters){
 			ntiters = ntmp;
 			focusNode = sera[i];
