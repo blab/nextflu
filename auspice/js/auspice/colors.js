@@ -416,7 +416,7 @@ function resetFocusNode() {
 	for (var i=0; i<sera.length; i++){
 		if (typeof HI_titers[sera[i].clade] != "undefined"){
       ntmp = Object.keys(HI_titers[sera[i].clade]).length;
-    } 
+    }
 		if (ntmp>ntiters){
 			ntiters = ntmp;
 			focusNode = sera[i];
@@ -442,8 +442,7 @@ function newFocus(){
 		activeSera[serum]=true;
 	}
 	seraDiv.innerHTML = htmlStr;
-	console.log(seraDiv);
-	for (var serum in focusNode.potency_mut){
+	for (var serum in titer_subs_model["potency"][focusNode.clade]){
 		var serumID = serum.split("/").join("").replace(/;/g, " ");
 		d3.select("#"+serumID)
 			.on("change", function(elem){
