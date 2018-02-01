@@ -61,7 +61,8 @@
   "name": "A/H3N2",
   "resolutions": ["2y", "3y", "6y"],
   "passages": ["cell", "egg"],
-  "assays": ["hi", "fra"]
+  "assays": ["hi", "fra"],
+  "segments":["ha", "na"]
 },
 {
   "virus": "H1N1pdm",
@@ -70,7 +71,8 @@
   "name": "A/H1N1pdm",
   "resolutions": ["2y", "3y", "6y"],
   "passages": ["cell", "egg"],
-  "assays": ["hi"]
+  "assays": ["hi"],
+  "segments":["ha", "na"]
 },
 {
   "virus": "Vic",
@@ -79,7 +81,8 @@
   "name": "B/Vic",
   "resolutions": ["2y", "3y", "6y"],
   "passages": ["cell", "egg"],
-  "assays": ["hi"]
+  "assays": ["hi"],
+  "segments":["ha", "na"]
 },
 {
   "virus": "Yam",
@@ -88,6 +91,7 @@
   "name": "B/Yam",
   "resolutions": ["2y", "3y", "6y"],
   "passages": ["cell", "egg"],
-  "assays": ["hi"]
+  "assays": ["hi"],
+  "segments":["ha", "na"]
 }
 ]

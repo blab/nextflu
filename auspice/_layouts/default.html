@@ -198,6 +198,53 @@
 							</ul>
 						</li>
 						{% endif %}
+
+						{% if page.site == "WHO" %}
+						<li class="dropdown hidden-xs"><p>/</p></li>
+						<li class="dropdown">
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+								{{ page.segment }}
+								<span class="caret"></span>
+							</a>
+							<ul class="dropdown-menu">
+								<li class="dropdown-header">Segment</li>
+								{% for entry in site.data.viruses %}
+									{% if page.site == entry.site %}
+									{% if page.virus == entry.virus %}
+									{% if entry.segments %}
+									{% for segment in entry.segments %}
+									{% if page.segment == segment %}
+									<li class="disabled">
+										<a>{{ segment  | upcase }}</a>
+									{% else %}
+									<li>
+										<a href="{{ prefix }}
+										{% if page.virus %}
+										/{{ page.virus | downcase }}
+										{% endif %}
+										/{{ segment | downcase }}
+										{% if page.resolution %}
+										/{{ page.resolution | downcase }}
+										{% endif %}
+										{% if page.passage %}
+										/{{ page.passage | downcase }}
+										{% endif %}
+										{% if page.assay %}
+										/{{ page.assay | downcase }}
+										{% endif %}
+										">{{ segment | upcase }}</a>
+									{% endif %}
+									</li>
+									{% endfor %}
+									{% endif %}
+									{% endif %}
+									{% endif %}
+								{% endfor %}
+							</ul>
+						</li>
+						{% endif %}
+
+
 						{% if page.resolution %}
 						<li class="dropdown hidden-xs"><p>/</p></li>
 						<li class="dropdown">
