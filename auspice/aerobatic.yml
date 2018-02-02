@@ -10,6 +10,8 @@ plugins:
           password: $PASSWORD_1
         - username: $USERNAME_2
           password: $PASSWORD_2
+        - username: $USERNAME_3
+          password: $PASSWORD_3
   - name: redirect
     options:
       /: /who/
