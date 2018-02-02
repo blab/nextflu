@@ -1,12 +1,16 @@
-id: 23d49302-5ed5-49ca-861d-7853b1a705c0
+id: f77dc491-9942-4da8-906a-c86d5092a5e8
 deploy:
   ignore: []
   directory: _site
 plugins:
   - name: password-protect
     options:
-      password: $SITE_PASSWORD
+      credentials:
+        - username: $USERNAME_1
+          password: $PASSWORD_1
+        - username: $USERNAME_2
+          password: $PASSWORD_2
   - name: redirect
     options:
-      /: /who/      
+      /: /who/
   - name: webpage

@@ -10,17 +10,17 @@ from matplotlib.dates import YearLocator, MonthLocator, DateFormatter
 # Settings to configure
 parser = argparse.ArgumentParser()
 parser.add_argument('-l', '--lineage', type = str, default='h3n2', help='lineage to plot')
-parser.add_argument('-b', '--build', type = str, default = 'live', help='build to pull from, live or cdc')
+parser.add_argument('-b', '--build', type = str, default = 'live', help='build to pull from, live or who')
 args = parser.parse_args()
 
 drop = 1
 resolution = '2y'
 
 virus = args.lineage
-file_addendum = ''
-if args.build == 'cdc':
-    file_addendum = '_cell_hi'
-input_file_prefix = '../data/flu_'+virus+'_ha_'+resolution+file_addendum
+input_file_prefix = '../data/flu_' + virus + '_ha_' + resolution
+if args.build == 'who':
+    
+    input_file_prefix = '../data/flu_who_' + virus + '_ha_' + resolution + '_cell_hi'
 output_file_prefix = 'figures/'
 
 if virus=='h3n2':
