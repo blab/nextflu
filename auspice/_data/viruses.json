@@ -57,9 +57,9 @@
 {
   "virus": "H3N2",
   "site": "WHO",
-  "default": "/H3N2/3y/",
+  "default": "/H3N2/2y/",
   "name": "A/H3N2",
-  "resolutions": ["2y", "3y", "6y"],
+  "resolutions": ["2y", "6y"],
   "passages": ["cell", "egg"],
   "assays": ["hi", "fra"],
   "segments":["ha", "na"]
@@ -67,9 +67,9 @@
 {
   "virus": "H1N1pdm",
   "site": "WHO",
-  "default": "/H1N1pdm/3y/",
+  "default": "/H1N1pdm/2y/",
   "name": "A/H1N1pdm",
-  "resolutions": ["2y", "3y", "6y"],
+  "resolutions": ["2y", "6y"],
   "passages": ["cell", "egg"],
   "assays": ["hi"],
   "segments":["ha", "na"]
@@ -77,9 +77,9 @@
 {
   "virus": "Vic",
   "site": "WHO",
-  "default": "/Vic/3y/",
+  "default": "/Vic/2y/",
   "name": "B/Vic",
-  "resolutions": ["2y", "3y", "6y"],
+  "resolutions": ["2y", "6y"],
   "passages": ["cell", "egg"],
   "assays": ["hi"],
   "segments":["ha", "na"]
@@ -87,9 +87,9 @@
 {
   "virus": "Yam",
   "site": "WHO",
-  "default": "/Yam/3y/",
+  "default": "/Yam/2y/",
   "name": "B/Yam",
-  "resolutions": ["2y", "3y", "6y"],
+  "resolutions": ["2y", "6y"],
   "passages": ["cell", "egg"],
   "assays": ["hi"],
   "segments":["ha", "na"]

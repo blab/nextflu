@@ -29,7 +29,7 @@ virus_to_coloring = {
 }
 
 virus_to_freqdefault = {
-    "H3N2": "3c2.a, 3c3.a, 3c2.a1",
+    "H3N2": "1, 2, 3, 4, 5",
     "H1N1pdm": "6b, 6c",
     "Vic": "1A, 1B, 117V, 180V",
     "Yam": "2, 3, 3a, 172Q"
@@ -243,7 +243,7 @@ virus_to_coloring = {
 }
 
 virus_to_freqdefault = {
-    "H3N2": "3c2.a, 3c3.a, 3c2.a1",
+    "H3N2": "1, 2, 3, 4, 5",
     "H1N1pdm": "6b, 6c",
     "Vic": "1A, 1B, 117V, 180V",
     "Yam": "2, 3, 3a, 172Q"
@@ -252,7 +252,7 @@ virus_to_freqdefault = {
 builds = ["CDC", "WHO", "VIDRL"]
 viruses = ["H3N2", "H1N1pdm", "Vic", "Yam"]
 segments = ["HA", "NA"]
-resolutions = ["2y", "3y", "6y"]
+resolutions = ["2y", "6y"]
 passages = ["cell", "egg"]
 assays = ["HI", "FRA"] # H3N2 only
 
@@ -269,7 +269,7 @@ for build in builds:
     indexfile.write("---\n")
     indexfile.write("title: nextflu / %s \n" % build)
     indexfile.write("layout: redirect\n")
-    indexfile.write("rurl: /%s/h3n2/ha/3y/cell/hi/\n" % bpath)
+    indexfile.write("rurl: /%s/h3n2/ha/2y/cell/hi/\n" % bpath)
     indexfile.write("---\n")
     indexfile.close()
 
@@ -287,7 +287,7 @@ for build in builds:
         indexfile.write("---\n")
         indexfile.write("title: nextflu / %s / %s \n" % (build, virus))
         indexfile.write("layout: redirect\n")
-        indexfile.write("rurl: /%s/%s/ha/3y/cell/hi/\n" % (bpath, vpath))
+        indexfile.write("rurl: /%s/%s/ha/2y/cell/hi/\n" % (bpath, vpath))
         indexfile.write("---\n")
         indexfile.close()
 
@@ -304,7 +304,7 @@ for build in builds:
             indexfile.write("---\n")
             indexfile.write("title: nextflu / %s / %s / %s \n" % (build, virus, segment))
             indexfile.write("layout: redirect\n")
-            indexfile.write("rurl: /%s/%s/%s/3y/cell/hi/\n" % (bpath, vpath, spath))
+            indexfile.write("rurl: /%s/%s/%s/2y/cell/hi/\n" % (bpath, vpath, spath))
             indexfile.write("---\n")
             indexfile.close()
 
