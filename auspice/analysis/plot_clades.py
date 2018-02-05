@@ -20,7 +20,7 @@ virus = args.lineage
 file_addendum = ''
 if args.build == 'cdc':
     file_addendum = '_cell_hi'
-input_file_prefix = '../data/flu_'+virus+'_ha_'+resolution+file_addendum
+input_file_prefix = '../data/flu_cdc_'+virus+'_ha_'+resolution+file_addendum
 output_file_prefix = 'figures/'
 
 if virus=='h3n2':
@@ -38,7 +38,7 @@ if virus=='h3n2':
     ymax = 1000
 elif virus=='h1n1pdm':
     clades = []
-    mutations = ['HA1:74R', 'HA1:295V', 'HA1:164T']
+    mutations = ['HA1:120A', 'HA1:183P', 'HA1:164T']
     #mutations = ['HA1:163Q', 'HA1:162N', 'HA1:74R']
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
@@ -52,6 +52,13 @@ elif virus=='vic':
 elif virus=='yam':
     clades = []
     mutations = ['HA1:251V', 'HA1:211R', 'HA1:76I']
+    clade_legend = {'panel':0, 'loc':3}
+    mut_legend = {'panel':0, 'loc':3}
+    ymax = 250
+elif virus=='yam_na':
+    input_file_prefix = '../data/flu_cdc_'+virus+'_'+resolution+file_addendum
+    clades = []
+    mutations = ['NA:402P', 'NA:342K', 'NA:246T', 'NA:395S']
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
     ymax = 250
