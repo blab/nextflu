@@ -19,12 +19,12 @@ resolution = '2y'
 virus = args.lineage
 input_file_prefix = '../data/flu_' + virus + '_ha_' + resolution
 if args.build == 'who':
-    
+
     input_file_prefix = '../data/flu_who_' + virus + '_ha_' + resolution + '_cell_hi'
 output_file_prefix = 'figures/'
 
 if virus=='h3n2':
-    clades = ['3c2.a', '3c3.a', '3c2.a1']
+    clades = ['3c2.a', '3c2.a1']
     # mutations = ['HA1:121K', 'HA1:92R', 'HA1:131K', 'HA1:31S','HA1:198P', 'HA1:193S']
     # Large subclades
     # 1. 31S, 53N, 144R, 171K, 192T, 197H, characteristic: 197H
@@ -33,9 +33,10 @@ if virus=='h3n2':
     # 4. 142R, HA2:150E, characteristic: HA2:150E ---> additional 135K
     # 5. 92R, 311Q, characteristic: nuc:538C ---> additional 135K
     mutations = ['HA1:197H', 'nuc:1320T', 'HA1:131K', 'HA2:150E', 'nuc:538C']
+    # mutations = ['HA1:135K', 'nuc:1320T']
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
-    ymax = 1000
+    ymax = 800
 elif virus=='h1n1pdm':
     clades = []
     mutations = ['HA1:74R', 'HA1:295V', 'HA1:164T']
@@ -163,7 +164,7 @@ if len(clades):
     bottom_margin = 0.22 - 0.03*len(clades)
     plt.subplots_adjust(left=0.12, right=0.82, top=0.97, bottom=bottom_margin)
     sns.despine()
-    plt.savefig(output_file_prefix+virus+'_clades.png')
+    plt.savefig(output_file_prefix+virus+'_freq_clades.png')
 
 ######################################################################################
 print "Plotting mutation frequencies"
@@ -204,7 +205,7 @@ axs[mut_legend['panel']].legend(loc=mut_legend['loc'], ncol=1, bbox_to_anchor=(1
 bottom_margin = 0.22 - 0.03*len(mutations)
 plt.subplots_adjust(left=0.12, right=0.82, top=0.97, bottom=bottom_margin)
 sns.despine()
-plt.savefig(output_file_prefix+virus+'_mutations.png')
+plt.savefig(output_file_prefix+virus+'_freq_mutations.png')
 
 
 ######################################################################################
@@ -247,4 +248,4 @@ axs[mut_legend['panel']].legend(loc=mut_legend['loc'], ncol=1, bbox_to_anchor=(1
 bottom_margin = 0.22 - 0.03*len(mutations)
 plt.subplots_adjust(left=0.12, right=0.82, top=0.97, bottom=bottom_margin)
 sns.despine()
-plt.savefig(output_file_prefix+virus+'_mutations_by_region.png')
+plt.savefig(output_file_prefix+virus+'_freq_mutations_by_region.png')

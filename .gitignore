@@ -5,6 +5,7 @@ augur/data/
 augur/output/
 auspice/data/
 auspice/analysis/figures/
+auspice/analysis/prediction/
 validation
 temp_*
 tmp
@@ -66,6 +67,7 @@ Thumbs.db
 # autosave #
 ############
 *~
+.ipynb_checkpoints
 
 # IDE #
 #######

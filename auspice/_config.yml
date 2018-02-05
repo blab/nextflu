@@ -19,4 +19,7 @@ exclude:
   - "environment*"
   - "Gemfile"
   - "Gemfile.lock"
+  - "Dockerfile"
   - "analysis/"
+  - "aero-deploy.tar.gz"
+  - "aero-debug.log"
