@@ -274,8 +274,6 @@ for build in builds:
     indexfile.close()
 
     for virus in viruses:
-        if build=="VIDRL" and virus in ["Vic", "Yam"]:
-            continue
         vpath = virus.lower()
         if os.path.isdir(vpath):
             shutil.rmtree(vpath)
@@ -358,6 +356,16 @@ for build in builds:
                             indexfile.write("title: nextflu / %s / %s / %s / %s / %s / %s \n" % (build, virus, segment, resolution, passage, assay))
                             indexfile.write("layout: redirect\n")
                             indexfile.write("rurl: /%s/%s/%s/%s/%s/hi/\n" % (bpath, vpath, spath, rpath, ppath))
+                            indexfile.write("---\n")
+                            indexfile.close()
+
+                        elif (virus == "Vic" or virus == "Yam") and build == "VIDRL":
+
+                            indexfile = open("index.html", "w")
+                            indexfile.write("---\n")
+                            indexfile.write("title: nextflu / %s / %s / %s / %s / %s / %s \n" % (build, virus, segment, resolution, passage, assay))
+                            indexfile.write("layout: redirect\n")
+                            indexfile.write("rurl: /who/%s/%s/%s/%s/%s/\n" % (vpath, spath, rpath, ppath, apath))
                             indexfile.write("---\n")
                             indexfile.close()
 
