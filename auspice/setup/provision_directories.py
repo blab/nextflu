@@ -249,7 +249,7 @@ virus_to_freqdefault = {
     "Yam": "2, 3, 3a, 172Q"
 }
 
-builds = ["CDC", "WHO", "VIDRL"]
+builds = ["CDC", "Crick", "VIDRL", "WHO"]
 viruses = ["H3N2", "H1N1pdm", "Vic", "Yam"]
 segments = ["HA", "NA"]
 resolutions = ["2y", "6y"]
