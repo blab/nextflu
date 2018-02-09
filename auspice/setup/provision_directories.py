@@ -36,7 +36,7 @@ virus_to_freqdefault = {
 }
 
 viruses = ["H3N2", "H1N1pdm", "Vic", "Yam"]
-segments = ["HA"]
+segments = ["HA", "NA"]
 resolutions = ["2y", "3y", "6y", "12y"]
 for virus in viruses:
 
