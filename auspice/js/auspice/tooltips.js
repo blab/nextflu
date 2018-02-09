@@ -76,12 +76,15 @@ var virusTooltip = d3.tip()
 			string += "<div class=\"smallnote\">"
 			string += '<table class="table table-condensed"><thead><tr><td>Serum</td><td>&#916log<sub>2</sub></td><td>heterol.</td><td>homol.</td></tr></thead><tbody>';
 			var tmp_titers = HI_titers[focusNode.clade][d.clade];
-			var tmp_auto_titers = HI_titers[focusNode.clade][focusNode.clade];
+			var tmp_auto_titers = HI_titers[focusNode.clade][focusNode.clade] || "nan";
 			var tmp_avi = titer_subs_model["avidity"][d.clade];
 			var tmp_pot = titer_subs_model["avidity"][d.clade];
 			if (typeof tmp_titers != "undefined"){
 				for (var tmp_serum in tmp_titers){
-					var autoHI = tmp_auto_titers[tmp_serum][1];
+					var autoHI = "nan";
+					if (tmp_auto_titers != "nan"){
+						autoHI = tmp_auto_titers[tmp_serum][1].toFixed(0);
+					}
 					var rawHI = tmp_titers[tmp_serum][1];
 					var logHI = tmp_titers[tmp_serum][0];
 					if (correctVirus){logHI-=tmp_avi;}
@@ -92,7 +95,7 @@ var virusTooltip = d3.tip()
 					}else{
 						serum_name = tmp_serum.substring(0,17)+'...';
 					}
-					string += '<tr><td>' + serum_name + '</td><td>' +  logHI.toFixed(2) + '</td><td>' + rawHI.toFixed(0)+ '</td><td>' + autoHI.toFixed(0) +"</td></tr>";
+					string += '<tr><td>' + serum_name + '</td><td>' +  logHI.toFixed(2) + '</td><td>' + rawHI.toFixed(0)+ '</td><td>' + autoHI +"</td></tr>";
 				}
 			}
 			string += '<tr><td>' + 'Tree model' + '</td><td>' +  d.HI_dist_tree.toFixed(2) + '</td><td> --- </td><td>---</td></tr>';
