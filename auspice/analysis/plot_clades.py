@@ -9,32 +9,51 @@ from matplotlib.dates import YearLocator, MonthLocator, DateFormatter
 #################################
 # Settings to configure
 parser = argparse.ArgumentParser()
-parser.add_argument('-l', '--lineage', type = str, default='h3n2', help='lineage to plot')
-parser.add_argument('-b', '--build', type = str, default = 'live', help='build to pull from, live or who')
+parser.add_argument('-b', '--build', type = str, default = 'live', help='build to pull from, live, who or cdc')
+parser.add_argument('-l', '--lineage', type = str, default='h3n2', help='lineage to plot, h3n2, h1n1pdm, vic or yam')
+parser.add_argument('-s', '--segment', type = str, default='ha', help='segment to plot, ha or na')
 args = parser.parse_args()
 
 drop = 1
 resolution = '2y'
-
 virus = args.lineage
-input_file_prefix = '../data/flu_' + virus + '_ha_' + resolution
+segment = args.segment
+
+input_file_prefix = '../data/flu_' + virus + '_' + segment + '_' + resolution
 if args.build == 'who':
-    input_file_prefix = '../data/flu_who_' + virus + '_ha_' + resolution + '_cell_hi'
+    input_file_prefix = '../data/flu_who_' + virus + '_' + segment + '_' + resolution + '_cell_hi'
+if args.build == 'cdc':
+    input_file_prefix = '../data/flu_cdc_' + virus + '_' + segment + '_' + resolution + '_cell_hi'
 output_file_prefix = 'figures/'
 
 mutation_labels = {}
 if virus=='h3n2':
-    clades = ['3c2.a', '3c2.a1']
-    # mutations = ['HA1:121K', 'HA1:92R', 'HA1:131K', 'HA1:31S','HA1:198P', 'HA1:193S']
-    # Large subclades
-    # 1. 31S, 53N, 144R, 171K, 192T, 197H, characteristic: 197H
-    # 2. 121K, 144K, characteristic: nuc:1320T
-    # 3. 131K, 142K, 261Q, characteristic: 131K
-    # 4. 142R, HA2:150E, characteristic: HA2:150E ---> additional 135K
-    # 5. 92R, 311Q, characteristic: nuc:538C ---> additional 135K
-    mutations = ['nuc:1320T', 'HA1:131K', 'nuc:1125A', 'nuc:233G','nuc:81G']
-    mutation_labels = {'HA1:197H':"3c2.a4", 'nuc:1320T':"3c2.a3", 'HA1:131K':"3c2.a2", 'nuc:1125A':"3c2.a2.a",
-                      'HA2:150E':"3c2.a1.a", 'nuc:538C':"3c2.a1.bc", 'nuc:233G':"3c2.a1.c", 'nuc:81G':"3c2.a1.b",  }
+    clades = []
+    # Base clades
+    # Clade 3c2.a1. 171K, characteristic: nuc:234G
+    # Clade 3c3.a. 159S, characteristic: nuc:636A
+    # Subclades
+    # Clade 1 / a2. 31S, 53N, 144R, 171K, 192T, 197H, characteristic: 197H
+    # Clade 2 / a3. 121K, 144K, characteristic: nuc:1320T
+    # Clade 3 / a4. 131K, 142K, 261Q, characteristic: 131K
+    # Clade 4 / a1a. 142R, HA2:150E, characteristic: HA2:150E ---> additional 135K
+    # Clade 5 / a1b. 92R, 311Q, characteristic: nuc:538C ---> additional 135K
+    mutation_labels = {
+        'nuc:234G': '3c2.a1',
+        'nuc:636A': '3c3.a',
+        'HA1:197H': "a2",
+        'nuc:1320T': "a3",
+        'nuc:1461T': "a3/135K",
+        'HA1:131K': "a4",
+        'nuc:348C': "a4/re",
+        'HA2:150E': "a1a",
+        'nuc:538C': "a1b",
+        'nuc:453T': "a1b/135N",
+        'nuc:233G': "a1b/135K"
+    }
+    # mutations = ['nuc:636A', 'nuc:234G'] # base clades
+    # mutations = ['HA1:197H', 'nuc:1320T', 'HA1:131K', 'HA2:150E', 'nuc:538C'] # major clades
+    mutations = ['nuc:1461T', 'nuc:348C', 'nuc:453T', 'nuc:233G'] # recently emerged clades
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
     ymax = 800
@@ -51,18 +70,18 @@ elif virus=='vic':
     mut_legend = {'panel':0, 'loc':3}
     ymax = 200
 elif virus=='yam':
-    clades = []
-    mutations = ['HA1:251V', 'HA1:211R', 'HA1:76I']
-    clade_legend = {'panel':0, 'loc':3}
-    mut_legend = {'panel':0, 'loc':3}
-    ymax = 250
-elif virus=='yam_na':
-    input_file_prefix = '../data/flu_who_'+virus+'_'+resolution + '_cell_hi'
-    clades = []
-    mutations = ['NA:402P', 'NA:342K', 'NA:246T', 'NA:395S']
-    clade_legend = {'panel':0, 'loc':3}
-    mut_legend = {'panel':0, 'loc':3}
-    ymax = 250
+    if segment =='ha':
+        clades = []
+        mutations = ['HA1:251V', 'HA1:211R', 'HA1:76I']
+        clade_legend = {'panel':0, 'loc':3}
+        mut_legend = {'panel':0, 'loc':3}
+        ymax = 250
+    elif segment =='na':
+        clades = []
+        mutations = ['NA:402P', 'NA:342K', 'NA:246T', 'NA:395S']
+        clade_legend = {'panel':0, 'loc':3}
+        mut_legend = {'panel':0, 'loc':3}
+        ymax = 250
 
 #################################
 # Plotting
