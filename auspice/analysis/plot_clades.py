@@ -22,6 +22,7 @@ if args.build == 'who':
     input_file_prefix = '../data/flu_who_' + virus + '_ha_' + resolution + '_cell_hi'
 output_file_prefix = 'figures/'
 
+mutation_labels = {}
 if virus=='h3n2':
     clades = ['3c2.a', '3c2.a1']
     # mutations = ['HA1:121K', 'HA1:92R', 'HA1:131K', 'HA1:31S','HA1:198P', 'HA1:193S']
@@ -31,15 +32,14 @@ if virus=='h3n2':
     # 3. 131K, 142K, 261Q, characteristic: 131K
     # 4. 142R, HA2:150E, characteristic: HA2:150E ---> additional 135K
     # 5. 92R, 311Q, characteristic: nuc:538C ---> additional 135K
-    mutations = ['HA1:197H', 'nuc:1320T', 'HA1:131K', 'HA2:150E', 'nuc:538C']
-    # mutations = ['HA1:135K', 'nuc:1320T']
+    mutations = ['nuc:1320T', 'HA1:131K', 'nuc:1125A', 'nuc:233G','nuc:81G']
+    mutation_labels = {'HA1:197H':"3c2.a4", 'nuc:1320T':"3c2.a3", 'HA1:131K':"3c2.a2", 'nuc:1125A':"3c2.a2.a",
+                      'HA2:150E':"3c2.a1.a", 'nuc:538C':"3c2.a1.bc", 'nuc:233G':"3c2.a1.c", 'nuc:81G':"3c2.a1.b",  }
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
     ymax = 800
 elif virus=='h1n1pdm':
     clades = []
-    #mutations = ['HA1:74R', 'HA1:295V', 'HA1:164T']
-    #mutations = ['HA1:163Q', 'HA1:162N', 'HA1:74R']
     mutations = ['HA1:120A', 'HA1:183P', 'HA1:164T']
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
@@ -193,7 +193,7 @@ for ci, mutation, ax in zip(range(len(mutations)), mutations, axs):
                 ax.fill_between(pivots[drop:], (tmp_freq-n_std_dev*std_dev)[drop:], (tmp_freq+n_std_dev*std_dev)[drop:], facecolor=c, linewidth=0, alpha=0.1)
     ax.set_xlim([pivots[drop-1], pivots[-1]])
     ax.set_ylim(0,1)
-    ax.text(pivots[drop-1]+10, 0.88, ("clade %d"%(ci+1) if virus=='h3n2' else mutation), fontsize=fs*1.2)
+    ax.text(pivots[drop-1]+10, 0.88, (mutation_labels[mutation] if mutation in mutation_labels else mutation), fontsize=fs*1.2)
     ax.set_yticklabels(['{:3.0f}%'.format(x*100) for x in [0, 0.2, 0.4, 0.6, 0.8, 1.0]])
     ax.tick_params(axis='x', which='major', labelsize=fs, pad=20)
     ax.tick_params(axis='x', which='minor', pad=7)
@@ -223,7 +223,8 @@ for region,ax in zip(regions, axs):
         if '%s_%s'%(region, mutation) in freqs:
             tmp_freq = np.array(freqs['%s_%s'%(region, mutation)])
             std_dev = np.sqrt(tmp_freq*(1-tmp_freq)/(smoothed_count_by_region[region]+1))
-            ax.plot(pivots[drop:], tmp_freq[drop:], '-o', label = ("clade %d"%(ci+1) if virus=='h3n2' else mutation), c=c, lw=2)
+            ax.plot(pivots[drop:], tmp_freq[drop:], '-o', c=c, lw=2,
+                label = (mutation_labels[mutation] if mutation in mutation_labels else mutation))
             if show_errorbars:
                 ax.fill_between(pivots[drop:], (tmp_freq-n_std_dev*std_dev)[drop:], (tmp_freq+n_std_dev*std_dev)[drop:], facecolor=c, linewidth=0, alpha=0.1)
         else:
