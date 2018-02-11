@@ -82,7 +82,7 @@ var virusTooltip = d3.tip()
 			if (typeof tmp_titers != "undefined"){
 				for (var tmp_serum in tmp_titers){
 					var autoHI = "nan";
-					if (tmp_auto_titers != "nan"){
+					if ((tmp_auto_titers != "nan") && (tmp_auto_titers[tmp_serum]) ){
 						autoHI = tmp_auto_titers[tmp_serum][1].toFixed(0);
 					}
 					var rawHI = tmp_titers[tmp_serum][1];
