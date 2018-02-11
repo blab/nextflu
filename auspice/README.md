@@ -4,7 +4,9 @@ Website for visualizing and interacting with phylogenies produced by the [nextst
 
 ### Build and compile
 
-Build JSONs via augur. These will be exported to `augur/flu/auspice/`. Move JSON files to `auspice/data/`. Compile site with [Jekyll](http://jekyllrb.com/) by running `jekyll build` from within the `auspice/` directory. This creates a `_site/` directory containing compiled resources.
+1. Build JSONs via augur. These will be exported to `augur/flu/auspice/`. Move JSON files to `auspice/data/`.
+2. Create index files by running `python provision_directories.py` from `auspice/`.
+3. Compile site with [Jekyll](http://jekyllrb.com/) by running `jekyll build` from within the `auspice/` directory. This creates a `_site/` directory containing compiled resources.
 
 ### Deployment
 

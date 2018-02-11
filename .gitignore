@@ -11,6 +11,18 @@ temp_*
 tmp
 *.pdf
 
+# Index files
+auspice/h3n2/
+auspice/h1n1pdm/
+auspice/vic/
+auspice/yam/
+auspice/gisaid/
+auspice/who/
+auspice/cdc/
+auspice/crick/
+auspice/niid/
+auspice/vidrl/
+
 # Jekyll #
 ##########
 .jekyll-metadata

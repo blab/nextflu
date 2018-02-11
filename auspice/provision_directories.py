@@ -8,9 +8,6 @@ import sys, os, shutil, re
 def printdir():
     print(re.sub(r'^.+auspice/', 'auspice/', os.getcwd()))
 
-# change working directory to base level
-os.chdir("..")
-
 indexfile = open("index.html", "w")
 indexfile.write("---\n")
 indexfile.write("title: nextflu\n")
@@ -249,7 +246,7 @@ virus_to_freqdefault = {
     "Yam": "2, 3, 3a, 172Q"
 }
 
-builds = ["CDC", "Crick", "VIDRL", "WHO"]
+builds = ["CDC", "Crick", "NIID", "VIDRL", "WHO"]
 viruses = ["H3N2", "H1N1pdm", "Vic", "Yam"]
 segments = ["HA", "NA"]
 resolutions = ["2y", "6y"]
