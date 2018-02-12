@@ -33,27 +33,27 @@ if virus=='h3n2':
     # Clade 3c2.a1. 171K, characteristic: nuc:234G
     # Clade 3c3.a. 159S, characteristic: nuc:636A
     # Subclades
-    # Clade 1 / a2. 31S, 53N, 144R, 171K, 192T, 197H, characteristic: 197H
-    # Clade 2 / a3. 121K, 144K, characteristic: nuc:1320T
-    # Clade 3 / a4. 131K, 142K, 261Q, characteristic: 131K
-    # Clade 4 / a1a. 142R, HA2:150E, characteristic: HA2:150E ---> additional 135K
-    # Clade 5 / a1b. 92R, 311Q, characteristic: nuc:538C ---> additional 135K
+    # Clade 1 / A4. 31S, 53N, 144R, 171K, 192T, 197H, characteristic: 197H
+    # Clade 2 / A3. 121K, 144K, characteristic: nuc:1320T
+    # Clade 3 / A2. 131K, 142K, 261Q, characteristic: 131K
+    # Clade 4 / A1a. 142R, HA2:150E, characteristic: HA2:150E ---> additional 135K
+    # Clade 5 / A1b. 92R, 311Q, characteristic: nuc:538C ---> additional 135K
     mutation_labels = {
-        'nuc:234G': '3c2.a1',
-        'nuc:636A': '3c3.a',
-        'HA1:197H': "a2",
-        'nuc:1320T': "a3",
-        'nuc:1461T': "a3/135K",
-        'HA1:131K': "a4",
-        'nuc:348C': "a4/re",
-        'HA2:150E': "a1a",
-        'nuc:538C': "a1b",
-        'nuc:453T': "a1b/135N",
-        'nuc:233G': "a1b/135K"
+        'nuc:234G': '3c2.A1',
+        'nuc:636A': '3c3.A',
+        'HA1:197H': "A4",
+        'nuc:1320T': "A3",
+        'nuc:1461T': "A3/135K",
+        'HA1:131K': "A2",
+        'nuc:1689T': "A2/re",
+        'HA2:150E': "A1a",
+        'nuc:538C': "A1b",
+        'nuc:453T': "A1b/135N",
+        'nuc:233G': "A1b/135K"
     }
     # mutations = ['nuc:636A', 'nuc:234G'] # base clades
-    # mutations = ['HA1:197H', 'nuc:1320T', 'HA1:131K', 'HA2:150E', 'nuc:538C'] # major clades
-    mutations = ['nuc:1461T', 'nuc:348C', 'nuc:453T', 'nuc:233G'] # recently emerged clades
+    # mutations = ['HA2:150E', 'nuc:538C', 'HA1:131K', 'nuc:1320T', 'HA1:197H'] # major clades
+    mutations = ['nuc:453T', 'nuc:233G', 'nuc:1689T', 'nuc:1461T'] # recently emerged clades
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
     ymax = 800
