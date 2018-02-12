@@ -437,7 +437,7 @@ function newFocus(){
 
 	for (var i=0; i<allSera.length; i++){
 		var serum = allSera[i];
-		var serumID = serum.split("/").join("");
+		var serumID = serum.split("/").join("").replace(/[;,\*\.\(\)]/g, "_");
 		htmlStr+='<input type="checkbox" id="' + serumID + '" name="' + serum + '" checked="checked"> ' + serum +"<br>";
 		activeSera[serum]=true;
 	}
