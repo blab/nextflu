@@ -26,7 +26,7 @@ virus_to_coloring = {
 }
 
 virus_to_freqdefault = {
-    "H3N2": "1, 2, 3, 4, 5",
+    "H3N2": "A1a, A1b, A2, A3, A4",
     "H1N1pdm": "6b.1, 6b.2, 164T",
     "Vic": "1A, 1B, 117V, DV",
     "Yam": "2, 3, 3a, 172Q"
@@ -240,7 +240,7 @@ virus_to_coloring = {
 }
 
 virus_to_freqdefault = {
-    "H3N2": "1, 2, 3, 4, 5",
+    "H3N2": "A1a, A1b, A2, A3, A4",
     "H1N1pdm": "6b.1, 6b.2, 164T",
     "Vic": "1A, 1B, 117V, DV",
     "Yam": "2, 3, 3a, 172Q"
