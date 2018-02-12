@@ -82,6 +82,10 @@ var fitnessColorScale = d3.scale.linear().clamp([true])
 	.domain(fitnessColorDomain)
 	.range(colors[10]);
 
+var serumMarkerSizeScale = d3.scale.sqrt().clamp([true])
+	.domain([0, 500])
+	.range([12, 26]);
+
 // "ep", "ne" and "rb" need no adjustments
 function adjust_coloring_by_date() {
 	if (colorBy == "lbi") {
@@ -468,10 +472,42 @@ function colorByHIDistance(){
 	}
 	colorBy = 'HI_dist'
 
+	var ref_to_counts = {}
+	Object.keys(HI_titers).forEach(function(ref) {
+	  var count = 0;
+	  var tempTests = HI_titers[ref];
+	  Object.keys(tempTests).forEach(function(test) {
+	    var tempSera = tempTests[test];
+	    Object.keys(tempSera).forEach(function(serum) {
+	      count += 1;
+	    });
+	  });
+	  ref_to_counts[ref] = count;
+	});
+
 	treeplot.selectAll(".serum")
-	.style("fill", function (d){if (d==focusNode) {return '#FF3300';} else {return '#555555';}})
-		.style("font-size", function (d) {if (d==focusNode) {return "30px";} else {return "18px";}})
-		.text(function (d) {if (d==focusNode) {return '\uf05b';} else {return serumSymbol;}});
+	  .style("fill", function (d) {
+	    if (d==focusNode) {
+	      return '#FF3300';
+	    } else {
+	      return '#555555';
+	    }
+	  })
+	  .style("font-size", function (d) {
+	    if (d==focusNode) {
+	      return "30px";
+	    } else {
+				var serumCount = ref_to_counts[d["clade"]];
+	      return serumMarkerSizeScale(serumCount).toString() + "px";
+	    }
+	  })
+	  .text(function (d) {
+	    if (d==focusNode) {
+	      return '\uf05b';
+	    } else {
+	      return serumSymbol;
+	    }
+	  });
 
 	console.log("Using HI model: "+HImodel);
 	console.log("Color by HI Distance from "+focusNode.strain);
