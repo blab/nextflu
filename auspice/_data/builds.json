@@ -1,14 +1,7 @@
 [
-{
-  "build": "CDC",
-},
-{
-  "build": "Crick",
-},
-{
-  "build": "VIDRL",
-},
-{
-  "build": "WHO"
-},
+{ "build": "WHO" },
+{ "build": "CDC" },
+{ "build": "Crick" },
+{ "build": "NIID" },
+{ "build": "VIDRL" },
 ]
