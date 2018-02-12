@@ -383,6 +383,30 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
   		})
 		.on('mouseout', virusTooltip.hide);
 
+	var vaccineCircles = treeplot.selectAll(".vaccine")
+		.data(vaccines)
+		.enter()
+		.append("text")
+		.attr("class", "vaccine")
+		.attr('text-anchor', 'middle')
+		.attr('dominant-baseline', 'central')
+		.style("font-size", "36px")
+		.style('font-family', 'FontAwesome')
+		.style("stroke", "#fff")
+		.style("fill", "#555")
+		.text('\uf00d')
+		.style("cursor", "pointer")
+		.on('mouseover', function(d) {
+			virusTooltip.show(d, this);
+		})
+		.on('mouseout', virusTooltip.hide)
+		.on('click', function (d){
+			if (colorBy == "HI_dist") {
+				focusNode = d;
+				newFocus();
+			}
+		});
+
 	var serumWidth = 10;
 	var serumCircles = treeplot.selectAll(".serum")
 		.data(sera)
@@ -394,7 +418,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.style('font-family', 'FontAwesome')
 		.style("stroke", "#fff")
 		.style("fill", '#555555')
-		.style("font-size", "18px")
+		.style("font-size", "28px") 
 		.text(serumSymbol)
 		.style("visibility", serumVisibility)
 		.style("cursor", "pointer")
@@ -414,30 +438,6 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		newFocus();
 	}
 	addBranchLabels();
-
-	var vaccineCircles = treeplot.selectAll(".vaccine")
-		.data(vaccines)
-		.enter()
-		.append("text")
-		.attr("class", "vaccine")
-		.attr('text-anchor', 'middle')
-		.attr('dominant-baseline', 'central')
-		.style("font-size", "28px")
-		.style('font-family', 'FontAwesome')
-		.style("stroke", "#fff")
-		.style("fill", "#555")
-		.text('\uf00d')
-		.style("cursor", "pointer")
-		.on('mouseover', function(d) {
-			virusTooltip.show(d, this);
-		})
-		.on('mouseout', virusTooltip.hide)
-		.on('click', function (d){
-			if (colorBy == "HI_dist") {
-				focusNode = d;
-				newFocus();
-			}
-		});
 
 	/*
 	 * zoom into the tree upon click onto a branch
