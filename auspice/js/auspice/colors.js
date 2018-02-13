@@ -432,6 +432,14 @@ function newFocus(){
 	if (typeof(focusNode)=="undefined"){
 		resetFocusNode();
 	}
+	// if focus reset failed and focusNode is still undefined
+	// return and color by clades as default
+	if (typeof(focusNode)=="undefined"){
+		colorBy="clade";
+		colorByTrait();
+		return
+	}
+
 	// add checkboxes to include/exclude sera
 	var seraDiv = document.getElementById("sera");
 	var htmlStr = "";
