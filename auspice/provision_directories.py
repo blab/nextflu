@@ -19,17 +19,25 @@ indexfile.close()
 # provision live site and gisaid site
 
 virus_to_coloring = {
-    "H3N2": "ep, ne, rb, lbi, dfreq, region, date, cHI",
-    "H1N1pdm": "lbi, dfreq, region, date, cHI",
-    "Vic": "lbi, dfreq, region, date, cHI",
-    "Yam": "lbi, dfreq, region, date, cHI"
+    ("H3N2", "HA"): "clade, age, age_score, glyc, ep, ne, rb, lbi, dfreq, region, date, cHI",
+    ("H1N1pdm", "HA"): "clade, age, age_score, glyc, lbi, dfreq, region, date, cHI",
+    ("Vic", "HA"): "clade, age, age_score, glyc, lbi, dfreq, region, date, cHI",
+    ("Yam", "HA"): "clade, age, age_score, glyc, lbi, dfreq, region, date, cHI",
+    ("H3N2", "NA"): "clade, age, age_score, glyc, lbi, dfreq, region, date, cHI",
+    ("H1N1pdm", "NA"): "clade, age, age_score, glyc, lbi, dfreq, region, date, cHI",
+    ("Vic", "NA"): "clade, age, age_score, glyc, lbi, dfreq, region, date, cHI",
+    ("Yam", "NA"): "clade, age, age_score, glyc, lbi, dfreq, region, date, cHI"
 }
 
 virus_to_freqdefault = {
-    "H3N2": "A1a, A1b, A2, A3, A4",
-    "H1N1pdm": "6b.1, 6b.2, 164T",
-    "Vic": "1A, 1B, 117V, DV",
-    "Yam": "2, 3, 3a, 172Q"
+    ("H3N2", "HA"): "A1a, A1b, A2, A3, A4",
+    ("H1N1pdm", "HA"): "6b.1, 6b.2, 164T",
+    ("Vic", "HA"): "1A, 1B, 117V, DV",
+    ("Yam", "HA"): "2, 3, 3a, 172Q",
+    ("H3N2", "NA"): "NA:161S, NA:329S, NA:220N",
+    ("H1N1pdm", "NA"): "NA:446D, NA:44P",
+    ("Vic", "NA"): "NA:220N, NA:371Q",
+    ("Yam", "NA"): "NA:373Q, NA:342K",
 }
 
 viruses = ["H3N2", "H1N1pdm", "Vic", "Yam"]
@@ -85,9 +93,9 @@ for virus in viruses:
             indexfile.write("virus: %s\n" % virus)
             indexfile.write("segment: %s\n" % segment)
             indexfile.write("resolution: %s\n" % resolution)
-            indexfile.write("coloring: %s\n" % virus_to_coloring[virus])
+            indexfile.write("coloring: %s\n" % virus_to_coloring[(virus,segment)])
             indexfile.write("gtplaceholder: HA1 positions...\n")
-            indexfile.write("freqdefault: %s\n" % virus_to_freqdefault[virus])
+            indexfile.write("freqdefault: %s\n" % virus_to_freqdefault[(virus,segment)])
             indexfile.write("site: public\n")
             indexfile.write("---\n")
             indexfile.write("\n")
@@ -189,9 +197,9 @@ for virus in viruses:
             indexfile.write("virus: %s\n" % virus)
             indexfile.write("segment: %s\n" % segment)
             indexfile.write("resolution: %s\n" % resolution)
-            indexfile.write("coloring: %s\n" % virus_to_coloring[virus])
+            indexfile.write("coloring: %s\n" % virus_to_coloring[(virus,segment)])
             indexfile.write("gtplaceholder: HA1 positions...\n")
-            indexfile.write("freqdefault: %s\n" % virus_to_freqdefault[virus])
+            indexfile.write("freqdefault: %s\n" % virus_to_freqdefault[(virus,segment)])
             indexfile.write("site: GISAID\n")
             indexfile.write("---\n")
             indexfile.write("\n")
@@ -231,19 +239,15 @@ for virus in viruses:
 os.chdir("..")
 
 # provision WHO sites
-
 virus_to_coloring = {
-    "H3N2": "clade, age, age_score, glyc, ep, ne, rb, lbi, dfreq, region, date, cHI, HI_dist",
-    "H1N1pdm": "age, age_score, glyc, lbi, dfreq, region, date, cHI, HI_dist",
-    "Vic": "age, age_score, glyc, lbi, dfreq, region, date, cHI, HI_dist",
-    "Yam": "age, age_score, glyc, lbi, dfreq, region, date, cHI, HI_dist"
-}
-
-virus_to_freqdefault = {
-    "H3N2": "A1a, A1b, A2, A3, A4",
-    "H1N1pdm": "6b.1, 6b.2, 164T",
-    "Vic": "1A, 1B, 117V, DV",
-    "Yam": "2, 3, 3a, 172Q"
+    ("H3N2", "HA"): "clade, age, age_score, glyc, ep, ne, rb, lbi, dfreq, region, date, cHI, HI_dist",
+    ("H1N1pdm", "HA"): "clade, age, age_score, glyc, lbi, dfreq, region, date, cHI, HI_dist",
+    ("Vic", "HA"): "clade, age, age_score, glyc, lbi, dfreq, region, date, cHI, HI_dist",
+    ("Yam", "HA"): "clade, age, age_score, glyc, lbi, dfreq, region, date, cHI, HI_dist",
+    ("H3N2", "NA"): "clade, ep, ne, rb, lbi, dfreq, region, date, cHI, HI_dist",
+    ("H1N1pdm", "NA"): "clade, age, age_score, glyc, lbi, dfreq, region, date, cHI, HI_dist",
+    ("Vic", "NA"): "clade, age, age_score, glyc, lbi, dfreq, region, date, cHI, HI_dist",
+    ("Yam", "NA"): "clade, age, age_score, glyc, lbi, dfreq, region, date, cHI, HI_dist"
 }
 
 builds = ["CDC", "Crick", "NIID", "VIDRL", "WHO"]
@@ -378,9 +382,9 @@ for build in builds:
                             indexfile.write("resolution: %s\n" % resolution)
                             indexfile.write("passage: %s\n" % passage)
                             indexfile.write("assay: %s\n" % assay)
-                            indexfile.write("coloring: %s\n" % virus_to_coloring[virus])
+                            indexfile.write("coloring: %s\n" % virus_to_coloring[(virus,segment)])
                             indexfile.write("gtplaceholder: HA1 positions...\n")
-                            indexfile.write("freqdefault: %s\n" % virus_to_freqdefault[virus])
+                            indexfile.write("freqdefault: %s\n" % virus_to_freqdefault[(virus, segment)])
                             indexfile.write("site: WHO\n")
                             indexfile.write("---\n")
                             indexfile.write("\n")

@@ -28,19 +28,11 @@ categories:
 							<label class="col-xs-4 control-label">Color by</label>
 							<div class="col-xs-8 controls">
 								<select id="coloring" class="form-control">
-                {% if page.site == 'WHO' %}
-  								{% for color_option in site.data.color_options_cdc %}
-  									{% if page.coloring contains color_option[0] %}
-  									<option value={{color_option[0] }}>{{ color_option[1] }}</option>
-  									{% endif %}
-  								{% endfor %}
-                {% else %}
                   {% for color_option in site.data.color_options %}
-  									{% if page.coloring contains color_option[0] %}
-  									<option value={{color_option[0] }}>{{ color_option[1] }}</option>
-  									{% endif %}
-  								{% endfor %}
-                {% endif %}
+                    {% if page.coloring contains color_option[0] %}
+                    <option value={{color_option[0] }}>{{ color_option[1] }}</option>
+                    {% endif %}
+                  {% endfor %}
 								</select>
 							</div>
 					</div>
