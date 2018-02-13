@@ -3,7 +3,7 @@
   "site": "public",
   "default": "/H3N2/3y/",
   "name": "A/H3N2",
-  "segments":["ha", "na"],
+  "segments":["HA", "NA"],
   "resolutions": ["2y", "3y", "6y", "12y"]
 },
 {
@@ -11,7 +11,7 @@
   "site": "public",
   "default": "/H1N1pdm/3y/",
   "name": "A/H1N1pdm",
-  "segments":["ha", "na"],
+  "segments":["HA", "NA"],
   "resolutions": ["2y", "3y", "6y", "12y"]
 },
 {
@@ -19,7 +19,7 @@
   "site": "public",
   "default": "/Vic/3y/",
   "name": "B/Vic",
-  "segments":["ha", "na"],
+  "segments":["HA", "NA"],
   "resolutions": ["2y", "3y", "6y", "12y"]
 },
 {
@@ -27,7 +27,7 @@
   "site": "public",
   "default": "/Yam/3y/",
   "name": "B/Yam",
-  "segments":["ha", "na"],
+  "segments":["HA", "NA"],
   "resolutions": ["2y", "3y", "6y", "12y"]
 },
 {
@@ -35,7 +35,7 @@
   "site": "GISAID",
   "default": "/H3N2/3y/",
   "name": "A/H3N2",
-  "segments":["ha", "na"],
+  "segments":["HA", "NA"],
   "resolutions": ["2y", "3y", "6y", "12y"]
 },
 {
@@ -43,7 +43,7 @@
   "site": "GISAID",
   "default": "/H1N1pdm/3y/",
   "name": "A/H1N1pdm",
-  "segments":["ha", "na"],
+  "segments":["HA", "NA"],
   "resolutions": ["2y", "3y", "6y", "12y"]
 },
 {
@@ -51,7 +51,7 @@
   "site": "GISAID",
   "default": "/Vic/3y/",
   "name": "B/Vic",
-  "segments":["ha", "na"],
+  "segments":["HA", "NA"],
   "resolutions": ["2y", "3y", "6y", "12y"]
 },
 {
@@ -59,7 +59,7 @@
   "site": "GISAID",
   "default": "/Yam/3y/",
   "name": "B/Yam",
-  "segments":["ha", "na"],
+  "segments":["HA", "NA"],
   "resolutions": ["2y", "3y", "6y", "12y"]
 },
 {
@@ -69,8 +69,8 @@
   "name": "A/H3N2",
   "resolutions": ["2y", "6y"],
   "passages": ["cell", "egg"],
-  "assays": ["hi", "fra"],
-  "segments":["ha"]
+  "assays": ["HI", "FRA"],
+  "segments":["HA"]
 },
 {
   "virus": "H1N1pdm",
@@ -79,8 +79,8 @@
   "name": "A/H1N1pdm",
   "resolutions": ["2y", "6y"],
   "passages": ["cell", "egg"],
-  "assays": ["hi"],
-  "segments":["ha"]
+  "assays": ["HI"],
+  "segments":["HA"]
 },
 {
   "virus": "Vic",
@@ -89,8 +89,8 @@
   "name": "B/Vic",
   "resolutions": ["2y", "6y"],
   "passages": ["cell", "egg"],
-  "assays": ["hi"],
-  "segments":["ha"]
+  "assays": ["HI"],
+  "segments":["HA"]
 },
 {
   "virus": "Yam",
@@ -99,7 +99,7 @@
   "name": "B/Yam",
   "resolutions": ["2y", "6y"],
   "passages": ["cell", "egg"],
-  "assays": ["hi"],
-  "segments":["ha"]
+  "assays": ["HI"],
+  "segments":["HA"]
 }
 ]
