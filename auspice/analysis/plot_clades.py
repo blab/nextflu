@@ -15,6 +15,7 @@ parser.add_argument('-s', '--segment', type = str, default='ha', help='segment t
 args = parser.parse_args()
 
 drop = 1
+dpi = 200
 resolution = '2y'
 virus = args.lineage
 segment = args.segment
@@ -52,8 +53,8 @@ if virus=='h3n2':
         'nuc:233G': "A1b/135K"
     }
     # mutations = ['nuc:636A', 'nuc:234G'] # base clades
-    # mutations = ['HA2:150E', 'nuc:538C', 'HA1:131K', 'nuc:1320T', 'HA1:197H'] # major clades
-    mutations = ['nuc:453T', 'nuc:233G', 'nuc:1689T', 'nuc:1461T'] # recently emerged clades
+    mutations = ['HA2:150E', 'nuc:538C', 'HA1:131K', 'nuc:1320T', 'HA1:197H'] # major clades
+    # mutations = ['nuc:453T', 'nuc:233G', 'nuc:1689T', 'nuc:1461T'] # recently emerged clades
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
     ymax = 800
@@ -151,7 +152,7 @@ ax.set_ylabel('Sample count', fontsize=fs*1.1)
 ax.legend(loc=3, ncol=1, bbox_to_anchor=(1.02, 0.53))
 plt.subplots_adjust(left=0.1, right=0.82, top=0.94, bottom=0.22)
 sns.despine()
-plt.savefig(output_file_prefix+virus+'_counts.png')
+plt.savefig(output_file_prefix+virus+'_counts.png', dpi=dpi)
 
 ##########################################################################################
 if len(clades):
@@ -190,7 +191,7 @@ if len(clades):
     bottom_margin = 0.22 - 0.03*len(clades)
     plt.subplots_adjust(left=0.12, right=0.82, top=0.97, bottom=bottom_margin)
     sns.despine()
-    plt.savefig(output_file_prefix+virus+'_freq_clades.png')
+    plt.savefig(output_file_prefix+virus+'_freq_clades.png', dpi=dpi)
 
 ######################################################################################
 print "Plotting mutation frequencies"
@@ -231,7 +232,7 @@ axs[mut_legend['panel']].legend(loc=mut_legend['loc'], ncol=1, bbox_to_anchor=(1
 bottom_margin = 0.22 - 0.03*len(mutations)
 plt.subplots_adjust(left=0.12, right=0.82, top=0.97, bottom=bottom_margin)
 sns.despine()
-plt.savefig(output_file_prefix+virus+'_freq_mutations.png')
+plt.savefig(output_file_prefix+virus+'_freq_mutations.png', dpi=dpi)
 
 
 ######################################################################################
@@ -275,4 +276,4 @@ axs[mut_legend['panel']].legend(loc=mut_legend['loc'], ncol=1, bbox_to_anchor=(1
 bottom_margin = 0.22 - 0.03*len(mutations)
 plt.subplots_adjust(left=0.12, right=0.82, top=0.97, bottom=bottom_margin)
 sns.despine()
-plt.savefig(output_file_prefix+virus+'_freq_mutations_by_region.png')
+plt.savefig(output_file_prefix+virus+'_freq_mutations_by_region.png', dpi=dpi)

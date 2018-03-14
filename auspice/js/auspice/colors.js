@@ -369,16 +369,13 @@ function colorByGenotypePosition (positions) {
 
 function colorByClade() {
 	var clades = nodes.map(function (d) {
-		if (d.attr.named_clades){
-			d.coloring = d.attr.named_clades.join('/');
-		}else{
-			d.coloring="unassigned";
+		if (d.attr.clade_membership) {
+			d.coloring = d.attr.clade_membership;
+		} else {
+			d.coloring = "unassigned";
 		}
-		if (!d.coloring){
-			d.coloring="unassigned";
-		}
-		return d.coloring;});
-
+		return d.coloring;
+	});
 	var unique_clades = d3.set(clades).values();
 	var clade_counts = {};
 	for (var i=0; i<unique_clades.length; i++){clade_counts[unique_clades[i]]=0;}

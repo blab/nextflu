@@ -1,8 +1,8 @@
 [
   ["HI_dist","HI distance from focus"],
+  ["clade", "clade"],  
   ["cHI","antigenic advance"],
   ["fitness","fitness"],
-  ["clade", "clade"],
   ["ep", "epitope mutations"],
   ["ne","non epitope mutations"],
   ["rb","receptor binding mutations"],

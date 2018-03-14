@@ -23,10 +23,10 @@ virus_to_coloring = {
     ("H1N1pdm", "HA"): "clade, age, age_score, glyc, lbi, dfreq, region, date, cHI",
     ("Vic", "HA"): "clade, age, age_score, glyc, lbi, dfreq, region, date, cHI",
     ("Yam", "HA"): "clade, age, age_score, glyc, lbi, dfreq, region, date, cHI",
-    ("H3N2", "NA"): "clade, age, age_score, glyc, lbi, dfreq, region, date, cHI",
-    ("H1N1pdm", "NA"): "clade, age, age_score, glyc, lbi, dfreq, region, date, cHI",
-    ("Vic", "NA"): "clade, age, age_score, glyc, lbi, dfreq, region, date, cHI",
-    ("Yam", "NA"): "clade, age, age_score, glyc, lbi, dfreq, region, date, cHI"
+    ("H3N2", "NA"): "clade, age, age_score, lbi, dfreq, region, date",
+    ("H1N1pdm", "NA"): "clade, age, age_score, lbi, dfreq, region, date",
+    ("Vic", "NA"): "clade, age, age_score, lbi, dfreq, region, date",
+    ("Yam", "NA"): "clade, age, age_score, lbi, dfreq, region, date"
 }
 
 virus_to_freqdefault = {
