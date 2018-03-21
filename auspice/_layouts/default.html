@@ -39,7 +39,9 @@
 	</head>
 
 	{% assign prefix = "" %}
-	{% if page.site == 'GISAID' %}
+	{% if page.site == 'deprecated' %}
+		{% assign prefix = "/deprecated" %}
+	{% elsif page.site == 'GISAID' %}
 		{% assign prefix = "/gisaid" %}
 	{% elsif page.site == 'WHO' %}
 		{% assign prefix = page.build | downcase | prepend: "/" %}
@@ -97,7 +99,13 @@
 				<p class="navbar-text navbar-right nav-tabs">WHO Version</p>
 				{% endif %}
 				<div class="navbar-header">
-					{% if page.site == 'GISAID' %}
+					{% if page.site == 'deprecated' %}
+					<a class="navbar-brand" href="/deprecated/">
+						<div class="navtitle">
+							<span class="c2">n</span><span class="c3">e</span><span class="c4">x</span><span class="c5">t</span><span class="c6">f</span><span class="c7">l</span><span class="c8">u</span>
+						</div>
+					</a>
+					{% elsif page.site == 'GISAID' %}
 					<a class="navbar-brand" href="/gisaid/">
 						<div class="navtitle">
 							<span class="c2">n</span><span class="c3">e</span><span class="c4">x</span><span class="c5">t</span><span class="c6">f</span><span class="c7">l</span><span class="c8">u</span>
@@ -110,7 +118,7 @@
 						</div>
 					</a>
 					{% else %}
-					<a class="navbar-brand" href="/">
+					<a class="navbar-brand" href="/deprecated/">
 						<div class="navtitle">
 							<span class="c2">n</span><span class="c3">e</span><span class="c4">x</span><span class="c5">t</span><span class="c6">f</span><span class="c7">l</span><span class="c8">u</span>
 						</div>

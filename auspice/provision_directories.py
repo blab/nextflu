@@ -88,23 +88,10 @@ for virus in viruses:
 
             indexfile = open("index.html", "w")
             indexfile.write("---\n")
-            indexfile.write("title: nextflu / %s / %s / %s\n" % (virus, segment, resolution))
-            indexfile.write("layout: auspice\n")
-            indexfile.write("virus: %s\n" % virus)
-            indexfile.write("segment: %s\n" % segment)
-            indexfile.write("resolution: %s\n" % resolution)
-            indexfile.write("coloring: %s\n" % virus_to_coloring[(virus,segment)])
-            indexfile.write("gtplaceholder: HA1 positions...\n")
-            indexfile.write("freqdefault: %s\n" % virus_to_freqdefault[(virus,segment)])
-            indexfile.write("site: public\n")
+            indexfile.write("title: nextflu / %s / %s / %s \n" % (virus, segment, resolution))
+            indexfile.write("layout: redirect\n")
+            indexfile.write("rurl: https://nextstrain.org/flu/%s/%s/%s/\n" % (vpath, spath, rpath))
             indexfile.write("---\n")
-            indexfile.write("\n")
-            indexfile.write("<script>\n")
-            indexfile.write("var file_prefix = \"flu_%s_%s_%s_\";\n" % (virus.lower(), segment.lower(), resolution.lower()))
-            indexfile.write("var useTiters = false;\n")
-            indexfile.write("{%% include %s_meta.js %%}\n" % virus)
-            indexfile.write("{%% include %s_meta.js %%}\n" % resolution)
-            indexfile.write("</script>\n")
             indexfile.close()
 
             os.chdir("..")
@@ -131,6 +118,93 @@ for virus in viruses:
         os.chdir("..")
 
     os.chdir("..")
+
+# provision deprecated site
+if os.path.isdir("deprecated"):
+    shutil.rmtree("deprecated")
+os.makedirs("deprecated")
+os.chdir("deprecated")
+printdir()
+
+indexfile = open("index.html", "w")
+indexfile.write("---\n")
+indexfile.write("title: nextflu\n")
+indexfile.write("layout: redirect\n")
+indexfile.write("rurl: /deprecated/h3n2/ha/3y/\n")
+indexfile.write("---\n")
+indexfile.close()
+
+for virus in viruses:
+
+    vpath = virus.lower()
+    if os.path.isdir(vpath):
+        shutil.rmtree(vpath)
+    os.makedirs(vpath)
+    os.chdir(vpath)
+    printdir()
+
+    indexfile = open("index.html", "w")
+    indexfile.write("---\n")
+    indexfile.write("title: nextflu / %s \n" % virus)
+    indexfile.write("layout: redirect\n")
+    indexfile.write("rurl: /%s/ha/3y/\n" % vpath)
+    indexfile.write("---\n")
+    indexfile.close()
+
+    for segment in segments:
+
+        spath = segment.lower()
+        if os.path.isdir(spath):
+            shutil.rmtree(spath)
+        os.makedirs(spath)
+        os.chdir(spath)
+        printdir()
+
+        indexfile = open("index.html", "w")
+        indexfile.write("---\n")
+        indexfile.write("title: nextflu / %s / %s \n" % (virus, segment))
+        indexfile.write("layout: redirect\n")
+        indexfile.write("rurl: /%s/%s/3y/\n" % (vpath, spath))
+        indexfile.write("---\n")
+        indexfile.close()
+
+        for resolution in resolutions:
+
+            rpath = resolution.lower()
+            if os.path.isdir(rpath):
+                shutil.rmtree(rpath)
+            os.makedirs(rpath)
+            os.chdir(rpath)
+            printdir()
+
+            indexfile = open("index.html", "w")
+            indexfile.write("---\n")
+            indexfile.write("title: nextflu / %s / %s / %s\n" % (virus, segment, resolution))
+            indexfile.write("layout: auspice\n")
+            indexfile.write("virus: %s\n" % virus)
+            indexfile.write("segment: %s\n" % segment)
+            indexfile.write("resolution: %s\n" % resolution)
+            indexfile.write("coloring: %s\n" % virus_to_coloring[(virus,segment)])
+            indexfile.write("gtplaceholder: HA1 positions...\n")
+            indexfile.write("freqdefault: %s\n" % virus_to_freqdefault[(virus,segment)])
+            indexfile.write("site: deprecated\n")
+            indexfile.write("---\n")
+            indexfile.write("\n")
+            indexfile.write("<script>\n")
+            indexfile.write("var file_prefix = \"flu_%s_%s_%s_\";\n" % (virus.lower(), segment.lower(), resolution.lower()))
+            indexfile.write("var useTiters = false;\n")
+            indexfile.write("{%% include %s_meta.js %%}\n" % virus)
+            indexfile.write("{%% include %s_meta.js %%}\n" % resolution)
+            indexfile.write("</script>\n")
+            indexfile.close()
+
+            os.chdir("..")
+
+        os.chdir("..")
+
+    os.chdir("..")
+
+os.chdir("..")
 
 # provision GISAID site
 if os.path.isdir("gisaid"):

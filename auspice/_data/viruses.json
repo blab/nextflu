@@ -64,6 +64,38 @@
 },
 {
   "virus": "H3N2",
+  "site": "deprecated",
+  "default": "/H3N2/3y/",
+  "name": "A/H3N2",
+  "segments":["HA", "NA"],
+  "resolutions": ["2y", "3y", "6y", "12y"]
+},
+{
+  "virus": "H1N1pdm",
+  "site": "deprecated",
+  "default": "/H1N1pdm/3y/",
+  "name": "A/H1N1pdm",
+  "segments":["HA", "NA"],
+  "resolutions": ["2y", "3y", "6y", "12y"]
+},
+{
+  "virus": "Vic",
+  "site": "deprecated",
+  "default": "/Vic/3y/",
+  "name": "B/Vic",
+  "segments":["HA", "NA"],
+  "resolutions": ["2y", "3y", "6y", "12y"]
+},
+{
+  "virus": "Yam",
+  "site": "deprecated",
+  "default": "/Yam/3y/",
+  "name": "B/Yam",
+  "segments":["HA", "NA"],
+  "resolutions": ["2y", "3y", "6y", "12y"]
+},
+{
+  "virus": "H3N2",
   "site": "WHO",
   "default": "/H3N2/2y/",
   "name": "A/H3N2",
