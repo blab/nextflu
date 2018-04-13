@@ -20,7 +20,7 @@ indexfile.close()
 
 virus_to_coloring = {
     ("H3N2", "HA"): "clade, age, age_score, glyc, ep, ne, rb, lbi, dfreq, region, date, cHI",
-    ("H1N1pdm", "HA"): "clade, age, age_score, glyc, lbi, dfreq, region, date, cHI",
+    ("H1N1pdm", "HA"): "clade, age, age_score, glyc, ep, ne, lbi, dfreq, region, date, cHI",
     ("Vic", "HA"): "clade, age, age_score, glyc, lbi, dfreq, region, date, cHI",
     ("Yam", "HA"): "clade, age, age_score, glyc, lbi, dfreq, region, date, cHI",
     ("H3N2", "NA"): "clade, age, age_score, lbi, dfreq, region, date",
