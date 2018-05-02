@@ -53,7 +53,7 @@ if virus=='h3n2':
         'nuc:233G': "A1b/135K"
     }
     # mutations = ['nuc:636A', 'nuc:234G'] # base clades
-    mutations = ['HA2:150E', 'nuc:538C', 'HA1:131K', 'nuc:1320T', 'HA1:197H'] # major clades
+    mutations = ['nuc:636A', 'HA2:150E', 'nuc:538C', 'HA1:131K', 'nuc:1320T', 'HA1:197H'] # major clades
     # mutations = ['nuc:453T', 'nuc:233G', 'nuc:1689T', 'nuc:1461T'] # recently emerged clades
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
