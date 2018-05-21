@@ -715,7 +715,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.render();
 
 	// add clade labels
-	var clades = nodes.filter(function(d){return typeof d.attr["clade_name"] !== "undefined";});
+	var clades = nodes.filter(function(d){return typeof d.attr["clade_annotation"] !== "undefined";});
 	var clade_annotations = treeplot.selectAll('.annotation')
 		.data(clades)
 		.enter()
@@ -724,7 +724,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.style("text-anchor", "end")
 		.style("visibility",(branch_labels)?"hidden":"visible")
 		.text(function (d) {
-			return d.attr.clade_name;
+			return d.attr.clade_annotation;
 		});
 
 	var xScale = d3.scale.linear()

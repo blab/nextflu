@@ -20,7 +20,7 @@ resolution = '2y'
 virus = args.lineage
 segment = args.segment
 
-input_file_prefix = '../data/flu_' + virus + '_' + segment + '_' + resolution
+input_file_prefix = '../data/flu_seasonal_' + virus + '_' + segment + '_' + resolution
 if args.build == 'who':
     input_file_prefix = '../data/flu_who_' + virus + '_' + segment + '_' + resolution + '_cell_hi'
 if args.build == 'cdc':
