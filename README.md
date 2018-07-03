@@ -1,6 +1,8 @@
-## Live website
+## Current status
 
-nextflu is live at [nextflu.org](https://nextflu.org).
+_All Nextflu development has been folded into the Nextstrain project. Python build pipine is available at [nextstrain/augur](https://github.com/nextstrain/augur) (which supercedes build pipeline in `blab/nextflu/augur`) and JavaScript visualization is available at [nextstrain/auspice](https://github.com/nextstrain/auspice) (which supercedes visualization in `blab/nextflu/auspice`)._
+
+_Live display of seasonal flu evolution is available at [nextstrain.org/flu](http://nextstrain.org/flu)._
 
 ## Introduction
 
@@ -8,7 +10,7 @@ nextflu is designed to perform near real-time tracking of influenza virus evolut
 * _augur_, which takes a `.fasta` file of flu sequences and builds an annotated phylogeny
 * _auspice_, which displays this annotated phylogeny in an interactive web-based visualization
 
-Augur build scripts are housed at [nextstrain/augur](https://github.com/nextstrain/augur). These produce a series of JSON files that are displayed interactively on the web. Currently, the same JSONs produced by augur can be displayed with auspice v1 housed in [this repo](auspice/) or with auspice v2 housed at [nextstrain/auspice](https://github.com/nextstrain/auspice). Auspice v1 is live at [nextflu.org](https://nextflu.org) and auspice v2 is live at [nextstrain.org/flu](http://nextstrain.org/flu). Auspice v1 still provides greater functionality for influenza, but the intention is to eventually migrate to auspice v2.
+Augur build scripts are housed at [nextstrain/augur](https://github.com/nextstrain/augur) and auspice visualization tool is housed at [nextstrain/auspice](https://github.com/nextstrain/auspice). Legacy v1 versions of both `augur` and `auspice` are maintained in this repository for purposes of posterity.
 
 ## Citation
 

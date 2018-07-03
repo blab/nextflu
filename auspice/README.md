@@ -1,6 +1,8 @@
 ## Auspice
 
-Website for visualizing and interacting with phylogenies produced by the [nextstrain/augur](https://github.com/nextstrain/augur) pipeline. Interactive visualization is done with [d3.js](http://d3js.org/). This is v1 of auspice and is in maintenance mode. Active development is continuing on v2 of auspice at [nextstrain/auspice](https://github.com/nextstrain/auspice).
+_Note: As of Sep 2017, this JavaScript app is deprecated in favor of [nextstrain/auspice](https://github.com/nextstrain/auspice). The code in this directory is kept in place for archival reasons._
+
+Website for visualizing and interacting with phylogenies produced augur pipeline. Interactive visualization is done with [d3.js](http://d3js.org/).
 
 ### Build and compile
 
