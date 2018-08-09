@@ -2,6 +2,7 @@ var frequencies, pivots, entropy;
 var gene = 'nuc';
 var mutType = 'aa';
 var plot_frequencies = true;
+var dfreq_cutoff = 0.01;
 
 /**
  * for each node, calculate the derivative of the frequency tranjectory. if none exists, copy parent
@@ -12,7 +13,7 @@ function calcDfreq(node, freq_ii){
 			var label_str = "global_clade:"+node.children[i1].clade;
 			if (typeof frequencies != undefined && frequencies[label_str] != undefined){
 				var tmp_freq = get_frequencies("global", "clade:"+node.children[i1].clade)
-				node.children[i1].dfreq = (tmp_freq[freq_ii] + 0.005)/(tmp_freq[freq_ii-dfreq_dn] + 0.005);
+				node.children[i1].dfreq = (tmp_freq[freq_ii] + dfreq_cutoff)/(tmp_freq[freq_ii-dfreq_dn] + dfreq_cutoff);
 			} else {
 				node.children[i1].dfreq = node.dfreq;
 			}

@@ -49,7 +49,7 @@ var genderColorDomain = genericDomain.map(function(d){return Math.round((d-0.5)*
 var rbsColorDomain = genericDomain;
 var dateColorDomain = genericDomain;
 var HIColorDomain = genericDomain.map(function(d){return Math.round(100*(d*3.6))/100;});
-var dfreqColorDomain = genericDomain.map(function(d){return Math.round(100*(0.7+d*0.6))/100;});
+var dfreqColorDomain = genericDomain.map(function(d){return Math.round(100*(0.4+d*1.6))/100;});
 var fitnessColorDomain = genericDomain.map(function(d){return Math.round(100*((d-0.5)*16.0))/100;});
 var time_step;
 
