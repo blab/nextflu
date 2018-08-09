@@ -161,13 +161,11 @@ function dragend() {
 	console.log("changed frequency index to "+freq_ii+" date cut off is "+num_date);
 	console.log("recalculating node ages");
 	calcNodeAges(time_window);
-	console.log("adjusting node colors");
-	adjust_coloring_by_date();
 	console.log("updating frequencies");
 	adjust_freq_by_date();
-	if (typeof calcDfreq == 'function') {
-		calcDfreq(rootNode, freq_ii);
-	}
+	calcDfreq(rootNode, freq_ii);
+	console.log("adjusting node colors");
+	adjust_coloring_by_date();
 
 	if (colorBy == "genotype") {
 		colorByGenotype();

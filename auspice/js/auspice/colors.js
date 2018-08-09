@@ -99,6 +99,11 @@ function adjust_coloring_by_date() {
 			d.coloring = d.num_date;
 		});
 	}
+	else if (colorBy == "dfreq") {
+		nodes.forEach(function (d) {
+			d.coloring = d.dfreq;
+		});
+	}
 }
 
 function stateAtPosition(clade, gene, pos){
@@ -205,7 +210,7 @@ function colorByTrait() {
 		colorScale = fitnessColorScale;
 		nodes.map(function(d) { d.coloring = d.attr.fitness; });
 	}
-
+	console.log('colorby', colorBy);
 	treeplot.selectAll(".link")
 		.style("stroke", branchStrokeColor);
 
