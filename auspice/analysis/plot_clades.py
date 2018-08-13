@@ -87,7 +87,7 @@ elif virus=='yam':
 #################################
 # Plotting
 
-print "Plotting dataset " + virus + "/" + resolution
+print("Plotting dataset " + virus + "/" + resolution)
 
 freqs = json.load(open(input_file_prefix+'_frequencies.json'))
 counts = freqs['counts']
@@ -122,16 +122,16 @@ bins = np.array([c[0] for c in counts])[-l:]
 date_bins = []
 date_bins=pivots
 count_array = np.array([counts[c] for c in counts])[-l:,:].T
-count_by_region = {region: sum(x) for region,x in counts.iteritems() if region!='global'}
+count_by_region = {region: sum(x) for region,x in counts.items() if region!='global'}
 smoothed_count_array = np.array([np.convolve(np.ones(n, dtype=float)/n, c, mode='same')
                         for c in count_array])
 smoothed_count_by_region = {region: np.convolve(np.ones(n, dtype=float)/n, c, mode='same')
-                            for region, c in counts.iteritems()}
+                            for region, c in counts.items()}
 
 smoothed_count_by_region.update({r1:smoothed_count_by_region[r2] for r1,r2 in
                             [['north_america', 'NA'], ['europe', 'EU'], ['asia', 'AS'], ['oceania', 'OC']]})
 
-print "Plotting sample counts"
+print("Plotting sample counts")
 fig, ax = plt.subplots(figsize=(8, 3))
 tmpcounts = np.zeros(len(date_bins[drop:]))
 plt.bar(date_bins[drop:], counts['global'][drop:], width=20, linewidth=0, label="Other", color="#bbbbbb", clip_on=False)
@@ -156,7 +156,7 @@ plt.savefig(output_file_prefix+virus+'_counts.png', dpi=dpi)
 
 ##########################################################################################
 if len(clades):
-    print "Plotting clade frequencies"
+    print("Plotting clade frequencies")
     fig, axs = plt.subplots(len(clades), 1, sharex=True, figsize=(8, len(clades)*2))
     for clade, ax in zip(clades, axs):
         for c,(region, r1) in zip(cols, [('north_america', 'NA'), ('china', 'AS'), ('europe','EU'), ('oceania','OC'), ('global', 'global')]):
@@ -170,7 +170,7 @@ if len(clades):
                     if show_errorbars:
                         ax.fill_between(pivots, tmp_freq-n_std_dev*std_dev, tmp_freq+n_std_dev*std_dev, facecolor=c, linewidth=0, alpha=0.1)
             except:
-                print "skipping", clade, region
+                print("skipping", clade, region)
         ax.set_xlim([pivots[0], pivots[-1]])
         ax.set_ylim(0,1)
         ax.text(pivots[0]+5, 0.88, clade)
@@ -194,7 +194,7 @@ if len(clades):
     plt.savefig(output_file_prefix+virus+'_freq_clades.png', dpi=dpi)
 
 ######################################################################################
-print "Plotting mutation frequencies"
+print("Plotting mutation frequencies")
 fig, axs = plt.subplots(len(mutations), 1, sharex=True, figsize=(8, len(mutations)*2))
 for ci, mutation, ax in zip(range(len(mutations)), mutations, axs):
     for c,region in zip(cols, regions):
@@ -205,7 +205,7 @@ for ci, mutation, ax in zip(range(len(mutations)), mutations, axs):
             if show_errorbars:
                 ax.fill_between(pivots[drop:], (tmp_freq-n_std_dev*std_dev)[drop:], (tmp_freq+n_std_dev*std_dev)[drop:], facecolor=c, linewidth=0, alpha=0.1)
         else:
-            print "no data for", mutation, region, "padding with zeros"
+            print("no data for", mutation, region, "padding with zeros")
             tmp_freq = np.zeros(len(pivots))
             std_dev = np.sqrt(tmp_freq*(1-tmp_freq)/(smoothed_count_by_region[region]+1))
             ax.plot(pivots[drop:], tmp_freq[drop:], '-o', label = region_label[region], c=c, lw=3 if region=='global' else 1)
@@ -236,7 +236,7 @@ plt.savefig(output_file_prefix+virus+'_freq_mutations.png', dpi=dpi)
 
 
 ######################################################################################
-print "Plotting mutation frequencies by region by region"
+print("Plotting mutation frequencies by region by region")
 fig, axs = plt.subplots(len(regions), 1, sharex=True, figsize=(8, len(mutations)*2))
 for region,ax in zip(regions, axs):
     for ci,c, mutation in zip(range(len(mutations)),cols, mutations):
@@ -248,7 +248,7 @@ for region,ax in zip(regions, axs):
             if show_errorbars:
                 ax.fill_between(pivots[drop:], (tmp_freq-n_std_dev*std_dev)[drop:], (tmp_freq+n_std_dev*std_dev)[drop:], facecolor=c, linewidth=0, alpha=0.1)
         else:
-            print "no data for", mutation, region, "padding with zeros"
+            print("no data for", mutation, region, "padding with zeros")
             tmp_freq = np.zeros(len(pivots))
             std_dev = np.sqrt(tmp_freq*(1-tmp_freq)/(smoothed_count_by_region[region]+1))
             ax.plot(pivots[drop:], tmp_freq[drop:], '-o', label = ("clade %d"%(ci+1) if virus=='h3n2' else mutation), c=c, lw=2)
