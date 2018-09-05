@@ -4,6 +4,7 @@ source "https://rubygems.org"
 gem 'jekyll', '3.1.2'
 
 # compiling less
+gem 'libv8', '3.16.14.17'
 gem 'therubyracer', '0.12.2'
 gem 'less', '2.6.0'
 
