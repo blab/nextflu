@@ -1,4 +1,7 @@
 import argparse
+import matplotlib
+# important to use a non-interactive backend, otherwise will crash on cluster
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
@@ -73,10 +76,10 @@ elif virus=='vic':
 elif virus=='yam':
     if segment =='ha':
         clades = []
-        mutations = ['HA1:251V', 'HA1:211R', 'HA1:76I']
+        mutations = ['HA1:211R', 'HA1:229N', 'HA1:232N']
         clade_legend = {'panel':0, 'loc':3}
         mut_legend = {'panel':0, 'loc':3}
-        ymax = 250
+        ymax = 500
     elif segment =='na':
         clades = []
         mutations = ['NA:402P', 'NA:342K', 'NA:246T', 'NA:395S']
@@ -101,9 +104,8 @@ region_codes = {'EU':['europe'], 'EUAS':['china', 'south_asia', 'japan_korea','s
 offset = datetime(2000,1,1).toordinal()
 regions = ['NA', 'AS', 'EU', 'OC', 'global']
 region_label = {'NA': 'N America', 'AS': 'Asia', 'EU': 'Europe', 'OC': 'Oceania', 'global': 'Global'}
-cols = sns.color_palette(n_colors=len(regions))
-cols.pop(0)
-cols.append(sns.color_palette(["#3E547F"], n_colors=1)[0])
+hex_values = ["#6AA66E", "#B65555", "#7E73AE", "#C9BA7D", "#43537C"]
+cols = sns.color_palette(hex_values)
 fs=12
 
 years = YearLocator()
