@@ -302,7 +302,7 @@ os.chdir("..")
 # provision WHO sites
 virus_to_coloring = {
     ("H3N2", "HA"): "clade, age, age_score, glyc, ep, ne, rb, lbi, dfreq, region, date, cHI, HI_dist",
-    ("H1N1pdm", "HA"): "clade, age, age_score, glyc, lbi, dfreq, region, date, cHI, HI_dist",
+    ("H1N1pdm", "HA"): "clade, age, age_score, glyc, ep, ne, lbi, dfreq, region, date, cHI, HI_dist",
     ("Vic", "HA"): "clade, age, age_score, glyc, lbi, dfreq, region, date, cHI, HI_dist",
     ("Yam", "HA"): "clade, age, age_score, glyc, lbi, dfreq, region, date, cHI, HI_dist",
     ("H3N2", "NA"): "clade, ep, ne, rb, lbi, dfreq, region, date, cHI, HI_dist",
