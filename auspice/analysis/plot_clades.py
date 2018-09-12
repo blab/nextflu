@@ -56,17 +56,17 @@ if virus=='h3n2':
         'nuc:233G': "A1b/135K"
     }
     # mutations = ['nuc:636A', 'nuc:234G'] # base clades
-    mutations = ['nuc:636A', 'HA2:150E', 'nuc:538C', 'HA1:131K', 'nuc:1320T', 'HA1:197H'] # major clades
-    # mutations = ['nuc:453T', 'nuc:233G', 'nuc:1689T', 'nuc:1461T'] # recently emerged clades
+    # mutations = ['nuc:636A', 'HA2:150E', 'nuc:538C', 'HA1:131K', 'nuc:1320T', 'HA1:197H'] # major clades
+    mutations = ['nuc:233G', 'nuc:453T', 'nuc:1689T', 'nuc:1320T', 'nuc:636A'] # major clades Sep 2018
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
     ymax = 800
 elif virus=='h1n1pdm':
     clades = []
-    mutations = ['HA1:120A', 'HA1:183P', 'HA1:164T']
+    mutations = ['HA1:164T', 'HA1:45G', 'HA1:120A', 'HA1:183P']
     clade_legend = {'panel':0, 'loc':3}
     mut_legend = {'panel':0, 'loc':3}
-    ymax = 200
+    ymax = 500
 elif virus=='vic':
     clades = []
     mutations = ['HA1:162-', 'HA1:175V', 'HA1:209N']
@@ -82,7 +82,7 @@ elif virus=='yam':
         ymax = 500
     elif segment =='na':
         clades = []
-        mutations = ['NA:402P', 'NA:342K', 'NA:246T', 'NA:395S']
+        mutations = ['NA:171M', 'NA:402P', 'NA:342K', 'NA:395S']
         clade_legend = {'panel':0, 'loc':3}
         mut_legend = {'panel':0, 'loc':3}
         ymax = 250
