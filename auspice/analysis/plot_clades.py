@@ -98,13 +98,13 @@ offset = datetime(2000,1,1).toordinal()
 pivots = [offset+(x-2000)*365.25 for x in freqs['pivots']]
 meta = json.load(open(input_file_prefix+'_meta.json'))
 region_names = meta['geo']['region'].keys()
-region_codes = {'EU':['europe'], 'EUAS':['china', 'south_asia', 'japan_korea','southeast_asia'],
-                'NA':["north_america"], 'OC':["oceania"]}
+region_codes = {'EU':['europe'], 'AS':['china', 'south_asia', 'southeast_asia'],
+                'NA':["north_america"], 'OC':["oceania"], 'SA':["south_america"], 'JK':["japan_korea"]}
 
 offset = datetime(2000,1,1).toordinal()
-regions = ['NA', 'AS', 'EU', 'OC', 'global']
-region_label = {'NA': 'N America', 'AS': 'Asia', 'EU': 'Europe', 'OC': 'Oceania', 'global': 'Global'}
-hex_values = ["#6AA66E", "#B65555", "#7E73AE", "#C9BA7D", "#43537C"]
+regions = ['NA', 'AS', 'EU', 'OC', 'SA', 'JK', 'global']
+region_label = {'NA': 'N America', 'AS': 'Asia', 'EU': 'Europe', 'OC': 'Oceania', 'SA': 'S America', 'JK': 'Japan/Korea', 'global': 'Global'}
+hex_values = ["#6AA66E", "#B65555", "#7E73AE", "#C9BA7D", "#8F7963", "#CF8FC0", "#43537C"]
 cols = sns.color_palette(hex_values)
 fs=12
 
@@ -131,12 +131,12 @@ smoothed_count_by_region = {region: np.convolve(np.ones(n, dtype=float)/n, c, mo
                             for region, c in counts.items()}
 
 smoothed_count_by_region.update({r1:smoothed_count_by_region[r2] for r1,r2 in
-                            [['north_america', 'NA'], ['europe', 'EU'], ['asia', 'AS'], ['oceania', 'OC']]})
+                            [['north_america', 'NA'], ['europe', 'EU'], ['asia', 'AS'], ['oceania', 'OC'], ['south_america', 'SA'], ['japan_korea', 'JK']]})
 
 print("Plotting sample counts")
 fig, ax = plt.subplots(figsize=(8, 3))
 tmpcounts = np.zeros(len(date_bins[drop:]))
-plt.bar(date_bins[drop:], counts['global'][drop:], width=20, linewidth=0, label="Other", color="#bbbbbb", clip_on=False)
+plt.bar(date_bins[drop:], counts['global'][drop:], width=20, linewidth=0, color="#bbbbbb", clip_on=False)
 for c,region in zip(cols, regions):
     if region!='global':
         plt.bar(date_bins[drop:], counts[region][drop:], bottom=tmpcounts, width=20, linewidth=0,
@@ -152,7 +152,7 @@ ax.xaxis.set_minor_locator(months)
 ax.xaxis.set_minor_formatter(monthsFmt)
 ax.set_ylabel('Sample count', fontsize=fs*1.1)
 ax.legend(loc=3, ncol=1, bbox_to_anchor=(1.02, 0.53))
-plt.subplots_adjust(left=0.1, right=0.82, top=0.94, bottom=0.22)
+plt.subplots_adjust(left=0.08, right=0.81, top=0.86, bottom=0.22)
 sns.despine()
 plt.savefig(output_file_prefix+virus+'_counts.png', dpi=dpi)
 
@@ -161,7 +161,7 @@ if len(clades):
     print("Plotting clade frequencies")
     fig, axs = plt.subplots(len(clades), 1, sharex=True, figsize=(8, len(clades)*2))
     for clade, ax in zip(clades, axs):
-        for c,(region, r1) in zip(cols, [('north_america', 'NA'), ('china', 'AS'), ('europe','EU'), ('oceania','OC'), ('global', 'global')]):
+        for c,(region, r1) in zip(cols, [('north_america', 'NA'), ('china', 'AS'), ('europe','EU'), ('oceania','OC'), ('south_america','SA'), ('japan_korea','JK'), ('global', 'global')]):
             try:
                 tmp_freq = np.array(freqs['%s_%s'%(region, clade)])
                 if clade=='3c2.a':
@@ -203,14 +203,14 @@ for ci, mutation, ax in zip(range(len(mutations)), mutations, axs):
         if '%s_%s'%(region, mutation) in freqs:
             tmp_freq = np.array(freqs['%s_%s'%(region, mutation)])
             std_dev = np.sqrt(tmp_freq*(1-tmp_freq)/(smoothed_count_by_region[region]+1))
-            ax.plot(pivots[drop:], tmp_freq[drop:], '-o', label = region_label[region], c=c, lw=3 if region=='global' else 1)
+            ax.plot(pivots[drop:], tmp_freq[drop:], '-o', label = region_label[region], c=c, lw=4 if region=='global' else 1, ms=8 if region=='global' else 4)
             if show_errorbars:
                 ax.fill_between(pivots[drop:], (tmp_freq-n_std_dev*std_dev)[drop:], (tmp_freq+n_std_dev*std_dev)[drop:], facecolor=c, linewidth=0, alpha=0.1)
         else:
             print("no data for", mutation, region, "padding with zeros")
             tmp_freq = np.zeros(len(pivots))
             std_dev = np.sqrt(tmp_freq*(1-tmp_freq)/(smoothed_count_by_region[region]+1))
-            ax.plot(pivots[drop:], tmp_freq[drop:], '-o', label = region_label[region], c=c, lw=3 if region=='global' else 1)
+            ax.plot(pivots[drop:], tmp_freq[drop:], '-o', label = region_label[region], c=c, lw=4 if region=='global' else 1, ms=8 if region=='global' else 4)
             if show_errorbars:
                 ax.fill_between(pivots[drop:], (tmp_freq-n_std_dev*std_dev)[drop:], (tmp_freq+n_std_dev*std_dev)[drop:], facecolor=c, linewidth=0, alpha=0.1)
     ax.set_xlim([pivots[drop-1], pivots[-1]])
@@ -232,7 +232,7 @@ fax.set_ylim(0, 1)
 fax.text(0.02, 0.54, "Frequency", rotation='vertical', horizontalalignment='center', verticalalignment='center', fontsize=fs*1.1)
 axs[mut_legend['panel']].legend(loc=mut_legend['loc'], ncol=1, bbox_to_anchor=(1.02, 0.2))
 bottom_margin = 0.22 - 0.03*len(mutations)
-plt.subplots_adjust(left=0.12, right=0.82, top=0.97, bottom=bottom_margin)
+plt.subplots_adjust(left=0.12, right=0.81, top=0.97, bottom=bottom_margin)
 sns.despine()
 plt.savefig(output_file_prefix+virus+'_freq_mutations.png', dpi=dpi)
 
