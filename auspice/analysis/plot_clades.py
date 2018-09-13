@@ -99,12 +99,12 @@ pivots = [offset+(x-2000)*365.25 for x in freqs['pivots']]
 meta = json.load(open(input_file_prefix+'_meta.json'))
 region_names = meta['geo']['region'].keys()
 region_codes = {'EU':['europe'], 'AS':['china', 'south_asia', 'southeast_asia'],
-                'NA':["north_america"], 'OC':["oceania"], 'SA':["south_america"], 'JK':["japan_korea"]}
+                'NA':["north_america"], 'OC':["oceania"], 'SA':["south_america"]}
 
 offset = datetime(2000,1,1).toordinal()
-regions = ['NA', 'AS', 'EU', 'OC', 'SA', 'JK', 'global']
-region_label = {'NA': 'N America', 'AS': 'Asia', 'EU': 'Europe', 'OC': 'Oceania', 'SA': 'S America', 'JK': 'Japan/Korea', 'global': 'Global'}
-hex_values = ["#6AA66E", "#B65555", "#7E73AE", "#C9BA7D", "#8F7963", "#CF8FC0", "#43537C"]
+regions = ['NA', 'AS', 'EU', 'OC', 'SA', 'global']
+region_label = {'NA': 'N America', 'AS': 'Asia', 'EU': 'Europe', 'OC': 'Oceania', 'SA': 'S America', 'global': 'Global'}
+hex_values = ["#6AA66E", "#B65555", "#7E73AE", "#C9BA7D", "#8F7963", "#43537C"]
 cols = sns.color_palette(hex_values)
 fs=12
 
@@ -131,7 +131,7 @@ smoothed_count_by_region = {region: np.convolve(np.ones(n, dtype=float)/n, c, mo
                             for region, c in counts.items()}
 
 smoothed_count_by_region.update({r1:smoothed_count_by_region[r2] for r1,r2 in
-                            [['north_america', 'NA'], ['europe', 'EU'], ['asia', 'AS'], ['oceania', 'OC'], ['south_america', 'SA'], ['japan_korea', 'JK']]})
+                            [['north_america', 'NA'], ['europe', 'EU'], ['asia', 'AS'], ['oceania', 'OC'], ['south_america', 'SA']]})
 
 print("Plotting sample counts")
 fig, ax = plt.subplots(figsize=(8, 3))
@@ -152,7 +152,7 @@ ax.xaxis.set_minor_locator(months)
 ax.xaxis.set_minor_formatter(monthsFmt)
 ax.set_ylabel('Sample count', fontsize=fs*1.1)
 ax.legend(loc=3, ncol=1, bbox_to_anchor=(1.02, 0.53))
-plt.subplots_adjust(left=0.08, right=0.81, top=0.86, bottom=0.22)
+plt.subplots_adjust(left=0.08, right=0.81, top=0.9, bottom=0.22)
 sns.despine()
 plt.savefig(output_file_prefix+virus+'_counts.png', dpi=dpi)
 
@@ -161,7 +161,7 @@ if len(clades):
     print("Plotting clade frequencies")
     fig, axs = plt.subplots(len(clades), 1, sharex=True, figsize=(8, len(clades)*2))
     for clade, ax in zip(clades, axs):
-        for c,(region, r1) in zip(cols, [('north_america', 'NA'), ('china', 'AS'), ('europe','EU'), ('oceania','OC'), ('south_america','SA'), ('japan_korea','JK'), ('global', 'global')]):
+        for c,(region, r1) in zip(cols, [('north_america', 'NA'), ('china', 'AS'), ('europe','EU'), ('oceania','OC'), ('south_america','SA'), ('global', 'global')]):
             try:
                 tmp_freq = np.array(freqs['%s_%s'%(region, clade)])
                 if clade=='3c2.a':
