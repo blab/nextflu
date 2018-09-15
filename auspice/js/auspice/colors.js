@@ -437,7 +437,9 @@ function newFocus(){
 	// if focus reset failed and focusNode is still undefined
 	// return and color by clades as default
 	if (typeof(focusNode)=="undefined"){
+		console.log("focus node not found")
 		colorBy="clade";
+		document.getElementById("coloring").value = "clade";
 		colorByTrait();
 		return
 	}
