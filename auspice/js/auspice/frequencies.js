@@ -10,9 +10,9 @@ var dfreq_cutoff = 0.01;
 function calcDfreq(node, freq_ii){
 	if (typeof node.children != "undefined") {
 		for (var i1=0; i1<node.children.length; i1++) {
-			var label_str = "global_clade:"+node.children[i1].clade;
+			var label_str = "global_clade:"+node.children[i1].strain;
 			if (typeof frequencies != undefined && frequencies[label_str] != undefined){
-				var tmp_freq = get_frequencies("global", "clade:"+node.children[i1].clade)
+				var tmp_freq = get_frequencies("global", "clade:"+node.children[i1].strain)
 				node.children[i1].dfreq = (tmp_freq[freq_ii] + dfreq_cutoff)/(tmp_freq[freq_ii-dfreq_dn] + dfreq_cutoff);
 			} else {
 				node.children[i1].dfreq = node.dfreq;
@@ -84,7 +84,7 @@ function addClade(d) {
 		// console.log(d);
 		var plot_data = [['x'].concat(pivots)];
 		var reg = "global";
-		var label_str = 'clade:'+d.target.clade;
+		var label_str = 'clade:'+d.target.strain;
 		if (typeof frequencies[reg+"_"+label_str] !="undefined" ){
 
 			plot_data[plot_data.length] = [reg].concat(get_frequencies(reg,label_str));

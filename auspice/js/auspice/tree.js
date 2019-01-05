@@ -724,7 +724,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		.style("text-anchor", "end")
 		.style("visibility",(branch_labels)?"hidden":"visible")
 		.text(function (d) {
-			return d.attr.clade_annotation;
+			return d.attr.strain_annotation;
 		});
 
 	var xScale = d3.scale.linear()

@@ -331,7 +331,7 @@ function colorByGenotypePosition (positions) {
 	var gts = nodes.map(function (d) {
 		var tmp = [];
 		for (var i=0; i<positions.length; i++){
-			tmp[tmp.length] = positions[i][0]+':'+(positions[i][1]+1)+stateAtPosition(d.clade, positions[i][0], positions[i][1]);
+			tmp[tmp.length] = positions[i][0]+':'+(positions[i][1]+1)+stateAtPosition(d.strain, positions[i][0], positions[i][1]);
 		}
 		d.coloring = tmp.join('/');
 		return d.coloring;});
@@ -374,8 +374,8 @@ function colorByGenotypePosition (positions) {
 
 function colorByClade() {
 	var clades = nodes.map(function (d) {
-		if (d.attr.clade_membership) {
-			d.coloring = d.attr.clade_membership;
+		if (d.attr.strain_membership) {
+			d.coloring = d.attr.strain_membership;
 		} else {
 			d.coloring = "unassigned";
 		}
@@ -420,8 +420,8 @@ function resetFocusNode() {
 	var ntiters = 0, ntmp;
 	focusNode=sera[0];
 	for (var i=0; i<sera.length; i++){
-		if (typeof HI_titers[sera[i].clade] != "undefined"){
-      ntmp = Object.keys(HI_titers[sera[i].clade]).length;
+		if (typeof HI_titers[sera[i].strain] != "undefined"){
+      ntmp = Object.keys(HI_titers[sera[i].strain]).length;
     }
 		if (ntmp>ntiters){
 			ntiters = ntmp;
@@ -448,7 +448,7 @@ function newFocus(){
 	var seraDiv = document.getElementById("sera");
 	var htmlStr = "";
 	activeSera = {};
-	allSera = Object.keys(titer_subs_model["potency"][focusNode.clade]).filter( function (s)
+	allSera = Object.keys(titer_subs_model["potency"][focusNode.strain]).filter( function (s)
 		{return s!="mean_potency"});
 
 	for (var i=0; i<allSera.length; i++){
@@ -458,7 +458,7 @@ function newFocus(){
 		activeSera[serum]=true;
 	}
 	seraDiv.innerHTML = htmlStr;
-	for (var serum in titer_subs_model["potency"][focusNode.clade]){
+	for (var serum in titer_subs_model["potency"][focusNode.strain]){
 		var serumID = serum.split("/").join("").replace(/[;,\*\.\(\)]/g, "_");
 		d3.select("#"+serumID)
 			.on("change", function(elem){

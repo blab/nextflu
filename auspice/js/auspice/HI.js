@@ -13,8 +13,8 @@ function calcHIsubclade(node){
 		calcHIsubclade(node.children[i]);
 		}
 	}else{
-		if (typeof titer_tree_model["avidity"][node.clade] != "undefined" && correctVirus==false){
-			node.HI_dist_tree+=titer_tree_model["avidity"][node.clade];
+		if (typeof titer_tree_model["avidity"][node.strain] != "undefined" && correctVirus==false){
+			node.HI_dist_tree+=titer_tree_model["avidity"][node.strain];
 		}
 	}
 };
@@ -23,7 +23,7 @@ function calcHItree(node, rootNode){
 	if (correctPotency){
 		node.HI_dist_tree = 0;
 	}else{
-		node.HI_dist_tree=titer_tree_model["potency"][node.clade].mean_potency;
+		node.HI_dist_tree=titer_tree_model["potency"][node.strain].mean_potency;
 	}
 	if (typeof node.children != "undefined") {
 		for (var i=0; i<node.children.length; i++) {
@@ -32,11 +32,11 @@ function calcHItree(node, rootNode){
 	}
 	var tmp_node = node;
 	var pnode = tmp_node.parent;
-	while (tmp_node.clade != rootNode.clade){
+	while (tmp_node.strain != rootNode.strain){
 		pnode.HI_dist_tree=tmp_node.HI_dist_tree + tmp_node.attr.dTiter;
 		if (typeof pnode.children != "undefined") {
 			for (var i=0; i<pnode.children.length; i++) {
-				if (tmp_node.clade!=pnode.children[i].clade){
+				if (tmp_node.strain!=pnode.children[i].strain){
 					calcHIsubclade(pnode.children[i]);
 				}
 			}
@@ -45,25 +45,25 @@ function calcHItree(node, rootNode){
 		pnode = tmp_node.parent;
 	}
 	if (correctVirus==false){
-		node.HI_dist_tree += titer_tree_model["avidity"][node.clade];
+		node.HI_dist_tree += titer_tree_model["avidity"][node.strain];
 	}
 };
 
 function calcHImeasured(node, rootNode){
-	console.log(node.strain+ ', mean_potency: '+titer_subs_model["potency"][node.clade].mean_potency);
+	console.log(node.strain+ ', mean_potency: '+titer_subs_model["potency"][node.strain].mean_potency);
 	console.log("correcting for virus effect: "+correctVirus);
 	console.log("correction for serum effect: "+correctPotency);
 	var tmptt;
 	for (var i=0; i<tips.length; i+=1){
 		d = tips[i];
-		if (typeof HI_titers[node.clade][d.clade] != "undefined"){
-			var tmptt = HI_titers[node.clade][d.clade];
+		if (typeof HI_titers[node.strain][d.strain] != "undefined"){
+			var tmptt = HI_titers[node.strain][d.strain];
 			var tmp_HI=0;
 			var serum_count=0;
 			for (var tmp_serum in tmptt){
 				if (activeSera[tmp_serum]){
 					if (correctPotency&&(d.strain!=focusNode.strain)){
-						tmp_HI += tmptt[tmp_serum][0]-titer_subs_model["potency"][node.clade].mean_potency
+						tmp_HI += tmptt[tmp_serum][0]-titer_subs_model["potency"][node.strain].mean_potency
 					}else{
 						tmp_HI += tmptt[tmp_serum][0];
 					}
@@ -73,7 +73,7 @@ function calcHImeasured(node, rootNode){
 			if (serum_count){
 				d.HI_dist_meas = tmp_HI/serum_count
 				if (correctVirus){
-					d.HI_dist_meas -= titer_subs_model["avidity"][d.clade];
+					d.HI_dist_meas -= titer_subs_model["avidity"][d.strain];
 				}
 			}else{
 				d.HI_dist_meas = 'NaN';
@@ -86,12 +86,12 @@ function calcHImeasured(node, rootNode){
 
 function get_mutations(node1, node2){
 	var gt1, gt2,muts=[];
-	for (var gene in cladeToSeq[node1.clade]){
+	for (var gene in cladeToSeq[node1.strain]){
 		var gene_length = cladeToSeq["root"][gene].length;
 		if (gene!='nuc'){
 			for (var pos=0; pos<gene_length; pos+=1){
-				gt1 = stateAtPosition(node1.clade, gene, pos)
-				gt2 = stateAtPosition(node2.clade, gene, pos)
+				gt1 = stateAtPosition(node1.strain, gene, pos)
+				gt2 = stateAtPosition(node2.strain, gene, pos)
 				if (gt1!=gt2){
 					muts.push(gene+':'+gt1+(pos+1)+gt2);
 				}
@@ -102,13 +102,13 @@ function get_mutations(node1, node2){
 }
 
 function calcHImutations(node){
-	console.log(node.strain+ ', mean_potency:'+titer_subs_model["potency"][node.clade].mean_potency);
+	console.log(node.strain+ ', mean_potency:'+titer_subs_model["potency"][node.strain].mean_potency);
 	nodes.map(function(d){
 		var mutations = get_mutations(node, d);
 		if (correctPotency){
 			d.HI_dist_mut=0;
 		}else{
-			d.HI_dist_mut=titer_subs_model["potency"][node.clade].mean_potency;
+			d.HI_dist_mut=titer_subs_model["potency"][node.strain].mean_potency;
 		}
 		for (var mi=0; mi<=mutations.length; mi++){
 			var mut = mutations[mi];
@@ -117,7 +117,7 @@ function calcHImutations(node){
 			}
 		}
 		if ((correctVirus==false)&&(typeof d.avidity != "undefined")){
-			d.HI_dist_mut += titer_subs_model["avidity"][d.clade];
+			d.HI_dist_mut += titer_subs_model["avidity"][d.strain];
 		}
 	});
 };
