@@ -166,7 +166,7 @@ function calcLBI(node, allnodes){
 	allnodes.forEach(function (d) {
 		if (typeof d.children != "undefined") {
 			for (var i=0; i<d.children.length; i++) {
-				d.children[i].clock_length = d.children[i].tvalue - d.tvalue;
+				d.children[i].clock_length = d.children[i].attr.num_date - d.attr.num_date;
 			}
 		}
 	});

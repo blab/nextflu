@@ -123,7 +123,7 @@ function calcHImutations(node){
 };
 
 function getSera(tree_tips){
-	return tree_tips.filter(function (d){return d.serum;})
+	return tree_tips.filter(function (d){return typeof(HI_titers[d.strain]) != "undefined";})
 }
 
 d3.select("#serum")

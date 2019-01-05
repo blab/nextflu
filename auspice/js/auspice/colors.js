@@ -374,8 +374,8 @@ function colorByGenotypePosition (positions) {
 
 function colorByClade() {
 	var clades = nodes.map(function (d) {
-		if (d.attr.strain_membership) {
-			d.coloring = d.attr.strain_membership;
+		if (d.attr.clade_membership) {
+			d.coloring = d.attr.clade_membership;
 		} else {
 			d.coloring = "unassigned";
 		}
@@ -509,7 +509,7 @@ function colorByHIDistance(){
 	    if (d==focusNode) {
 	      return "30px";
 	    } else {
-				var serumCount = ref_to_counts[d["clade"]];
+				var serumCount = ref_to_counts[d["strain"]];
 	      return serumMarkerSizeScale(serumCount).toString() + "px";
 	    }
 	  })
