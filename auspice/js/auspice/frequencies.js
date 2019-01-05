@@ -10,9 +10,8 @@ var dfreq_cutoff = 0.01;
 function calcDfreq(node, freq_ii){
 	if (typeof node.children != "undefined") {
 		for (var i1=0; i1<node.children.length; i1++) {
-			var label_str = "global_clade:"+node.children[i1].strain;
-			if (typeof frequencies != undefined && frequencies[label_str] != undefined){
-				var tmp_freq = get_frequencies("global", "clade:"+node.children[i1].strain)
+			if (typeof frequencies != undefined &&  get_frequencies_clade("global", node.children[i1].strain) != undefined){
+				var tmp_freq = get_frequencies_clade("global", node.children[i1].strain)
 				node.children[i1].dfreq = (tmp_freq[freq_ii] + dfreq_cutoff)/(tmp_freq[freq_ii-dfreq_dn] + dfreq_cutoff);
 			} else {
 				node.children[i1].dfreq = node.dfreq;
@@ -31,6 +30,9 @@ function get_frequencies(region, gt){
 	if (isAA) {
 		gt = "HA1:" + gt;
 	}
+	if (pivots==undefined){
+		pivots=frequencies["pivots"];
+	}
 	var freq = [];
 	for (var pi=0; pi<pivots.length; pi++){freq[freq.length]=0;}
 	var label_str = region+'_'+gt
@@ -43,6 +45,24 @@ function get_frequencies(region, gt){
 	}
 	return freq.map(function (d) {return Math.round(d*10000)/10000;});
 };
+
+function get_frequencies_clade(region, clade){
+	var freq = [];
+	if (pivots==undefined){
+		pivots=frequencies["pivots"];
+	}
+	for (var pi=0; pi<pivots.length; pi++){freq[freq.length]=0;}
+	if (frequencies[clade]!=undefined && frequencies[clade][region]!=undefined) {
+		for (var pi=0; pi<freq.length; pi++){
+			freq[pi]+=frequencies[clade][region][pi];
+		}
+	}else{
+		// console.log("not found "+clade+', '+region);
+		return undefined;
+	}
+	return freq.map(function (d) {return Math.round(d*10000)/10000;});
+};
+
 
 var freqDataString = "";
 function make_gt_chart(gt){
@@ -84,10 +104,10 @@ function addClade(d) {
 		// console.log(d);
 		var plot_data = [['x'].concat(pivots)];
 		var reg = "global";
-		var label_str = 'clade:'+d.target.strain;
-		if (typeof frequencies[reg+"_"+label_str] !="undefined" ){
+		freq = get_frequencies_clade(reg, d.target.strain)
+		if (typeof freq !="undefined" ){
 
-			plot_data[plot_data.length] = [reg].concat(get_frequencies(reg,label_str));
+			plot_data[plot_data.length] = [reg].concat(freq);
 		}
 		if (plot_data.length > 1) {
 			if (plot_data[1][0] == reg) {
