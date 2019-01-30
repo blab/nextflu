@@ -145,10 +145,10 @@ if (useTiters) {
 	d3.json(path + file_prefix + "titers.json", function(error, json){
 		HI_titers = json;
 	});
-	d3.json(path + file_prefix + "titer_tree_model.json", function(error, json){
+	d3.json(path + file_prefix + "titer-tree-model.json", function(error, json){
 		titer_tree_model = json;
 	});
-	d3.json(path + file_prefix + "titer_subs_model.json", function(error, json){
+	d3.json(path + file_prefix + "titer-sub-model.json", function(error, json){
 		titer_subs_model = json;
 	});
 }
