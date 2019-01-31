@@ -386,12 +386,7 @@ function colorByClade() {
 	for (var i=0; i<unique_clades.length; i++){clade_counts[unique_clades[i]]=0;}
 	clades.forEach(function (d) {clade_counts[d]+=1;});
 	clade_counts["unassigned"] = -1;
-	unique_clades.sort(function (a,b){
-		var res;
-		if (clade_counts[a]>clade_counts[b]){ res=-1;}
-		else if (clade_counts[a]<clade_counts[b]){ res=1;}
-		else {res=0;}
-		return res;});
+	unique_clades.sort(function (a,b){return a>b;});
 
 	var cols = [];
 	for (var i=0; i<unique_clades.length; i++){
