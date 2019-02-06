@@ -16,7 +16,7 @@ Augur build scripts are housed at [nextstrain/augur](https://github.com/nextstra
 
 Please cite nextflu as:
 
-[Neher RA, Bedford T. 2015. nextflu: real-time tracking of seasonal influenza virus evolution in humans. Bioinformatics DOI: 10.1093/bioinformatics/btv381.](http://dx.doi.org/10.1093/bioinformatics/btv381)
+[Neher RA, Bedford T. 2015. nextflu: real-time tracking of seasonal influenza virus evolution in humans. Bioinformatics DOI: 10.1093/bioinformatics/btv381.](https://doi.org/10.1093/bioinformatics/btv381)
 
 ## License and copyright
 
