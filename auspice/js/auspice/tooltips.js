@@ -75,10 +75,10 @@ var virusTooltip = d3.tip()
 			string += "<div class=\"smallspacer\"></div>";
 			string += "<div class=\"smallnote\">"
 			string += '<table class="table table-condensed"><thead><tr><td>Serum</td><td>&#916log<sub>2</sub></td><td>heterol.</td><td>homol.</td></tr></thead><tbody>';
-			var tmp_titers = HI_titers[focusNode.clade][d.clade];
-			var tmp_auto_titers = HI_titers[focusNode.clade][focusNode.clade] || "nan";
-			var tmp_avi = titer_subs_model["avidity"][d.clade];
-			var tmp_pot = titer_subs_model["avidity"][d.clade];
+			var tmp_titers = HI_titers[focusNode.strain][d.strain];
+			var tmp_auto_titers = HI_titers[focusNode.strain][focusNode.strain] || "nan";
+			var tmp_avi = titer_subs_model["avidity"][d.strain];
+			var tmp_pot = titer_subs_model["avidity"][d.strain];
 			if (typeof tmp_titers != "undefined"){
 				for (var tmp_serum in tmp_titers){
 					var autoHI = "nan";
@@ -88,7 +88,7 @@ var virusTooltip = d3.tip()
 					var rawHI = tmp_titers[tmp_serum][1];
 					var logHI = tmp_titers[tmp_serum][0];
 					if (correctVirus){logHI-=tmp_avi;}
-					if (correctPotency){logHI-=titer_subs_model["potency"][focusNode.clade][tmp_serum];}
+					if (correctPotency){logHI-=titer_subs_model["potency"][focusNode.strain][tmp_serum];}
 					var serum_name;
 					if (tmp_serum.length<20){
 						serum_name = tmp_serum;

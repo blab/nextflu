@@ -331,7 +331,7 @@ function colorByGenotypePosition (positions) {
 	var gts = nodes.map(function (d) {
 		var tmp = [];
 		for (var i=0; i<positions.length; i++){
-			tmp[tmp.length] = positions[i][0]+':'+(positions[i][1]+1)+stateAtPosition(d.clade, positions[i][0], positions[i][1]);
+			tmp[tmp.length] = positions[i][0]+':'+(positions[i][1]+1)+stateAtPosition(d.strain, positions[i][0], positions[i][1]);
 		}
 		d.coloring = tmp.join('/');
 		return d.coloring;});
@@ -386,12 +386,7 @@ function colorByClade() {
 	for (var i=0; i<unique_clades.length; i++){clade_counts[unique_clades[i]]=0;}
 	clades.forEach(function (d) {clade_counts[d]+=1;});
 	clade_counts["unassigned"] = -1;
-	unique_clades.sort(function (a,b){
-		var res;
-		if (clade_counts[a]>clade_counts[b]){ res=-1;}
-		else if (clade_counts[a]<clade_counts[b]){ res=1;}
-		else {res=0;}
-		return res;});
+	unique_clades.sort(function (a,b){return a>b;});
 
 	var cols = [];
 	for (var i=0; i<unique_clades.length; i++){
@@ -420,8 +415,8 @@ function resetFocusNode() {
 	var ntiters = 0, ntmp;
 	focusNode=sera[0];
 	for (var i=0; i<sera.length; i++){
-		if (typeof HI_titers[sera[i].clade] != "undefined"){
-      ntmp = Object.keys(HI_titers[sera[i].clade]).length;
+		if (typeof HI_titers[sera[i].strain] != "undefined"){
+      ntmp = Object.keys(HI_titers[sera[i].strain]).length;
     }
 		if (ntmp>ntiters){
 			ntiters = ntmp;
@@ -448,7 +443,7 @@ function newFocus(){
 	var seraDiv = document.getElementById("sera");
 	var htmlStr = "";
 	activeSera = {};
-	allSera = Object.keys(titer_subs_model["potency"][focusNode.clade]).filter( function (s)
+	allSera = Object.keys(titer_subs_model["potency"][focusNode.strain]).filter( function (s)
 		{return s!="mean_potency"});
 
 	for (var i=0; i<allSera.length; i++){
@@ -458,7 +453,7 @@ function newFocus(){
 		activeSera[serum]=true;
 	}
 	seraDiv.innerHTML = htmlStr;
-	for (var serum in titer_subs_model["potency"][focusNode.clade]){
+	for (var serum in titer_subs_model["potency"][focusNode.strain]){
 		var serumID = serum.split("/").join("").replace(/[;,\*\.\(\)]/g, "_");
 		d3.select("#"+serumID)
 			.on("change", function(elem){
@@ -509,7 +504,7 @@ function colorByHIDistance(){
 	    if (d==focusNode) {
 	      return "30px";
 	    } else {
-				var serumCount = ref_to_counts[d["clade"]];
+				var serumCount = ref_to_counts[d["strain"]];
 	      return serumMarkerSizeScale(serumCount).toString() + "px";
 	    }
 	  })

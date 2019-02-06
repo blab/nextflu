@@ -12,7 +12,7 @@ function addSequence(current_seq, current_seq_name, seqs, all_names){
         suffix=" "+(name_count+1);
     }else{suffix="";}
     all_names.push(current_seq_name);
-    seqs[current_seq_name+suffix]=current_seq;    
+    seqs[current_seq_name+suffix]=current_seq;
 }
 
 function parseSequences(){
@@ -27,7 +27,7 @@ function parseSequences(){
     for (var li=0; li<lines.length; li++){
         if (lines[li][0]=='>'){
             if (current_seq.length){
-                addSequence(current_seq, current_seq_name, seqs, seq_names);  
+                addSequence(current_seq, current_seq_name, seqs, seq_names);
             }
             current_seq_name = lines[li].substring(1,lines[li].length);
             current_seq = "";
@@ -36,7 +36,7 @@ function parseSequences(){
         }
     }
     if (current_seq.length){
-        addSequence(current_seq, current_seq_name, seqs, seq_names);  
+        addSequence(current_seq, current_seq_name, seqs, seq_names);
     }
     for (current_seq_name in seqs){
         var tmpclade = locateSequence(current_seq_name, seqs[current_seq_name]);
@@ -74,7 +74,7 @@ function locateSequence(name, seq){
 function findClosestClade(mutations){
     var bestClade=-1, bestScore=0;
     var tmpScore=0;
-    var searchClades = tips.map(function(d){return d.clade;});
+    var searchClades = tips.map(function(d){return d.strain;});
 
     for (ci=0; ci<searchClades.length; ci++){
         clade = searchClades[ci];
@@ -158,10 +158,10 @@ function alignToRoot(seq){
 // highlight clades in tree
 function markInTreeSeqSearch(clades){
     var userSeqs = nodes.filter(function(d){
-        var tmp=0; for (var clade in clades){tmp+= (d.clade==clade);} return tmp>0;});
+        var tmp=0; for (var clade in clades){tmp+= (d.strain==clade);} return tmp>0;});
 
     for (var mi=0; mi<userSeqs.length; mi++){
-        userSeqs[mi].matches = clades[userSeqs[mi].clade];
+        userSeqs[mi].matches = clades[userSeqs[mi].strain];
     }
 
     treeplot.selectAll('.seqmatch').data(userSeqs)
@@ -180,7 +180,7 @@ function markInTreeStrainSearch(tip){
     treeplot.selectAll('.strainmatch').data([tip])
         .enter()
         .append('text')
-        .attr("class", "strainmatch")        
+        .attr("class", "strainmatch")
         .text(function(d) { console.log(d.strain); return '\uf069'; })
         .on('mouseover', function(d) {
             virusTooltip.show(d, this);
@@ -198,7 +198,7 @@ function styleHighlight(){
         .style("fill", "#555555")
         .attr("x", function(d) { return d.x; })
         .attr("y", function(d) { return d.y; })
-        .style("cursor", "default"); 
+        .style("cursor", "default");
     treeplot.selectAll('.strainmatch')
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'central')
@@ -207,7 +207,7 @@ function styleHighlight(){
         .style("fill", "#555555")
         .attr("x", function(d) { return d.x; })
         .attr("y", function(d) { return d.y; })
-        .style("cursor", "default");              
+        .style("cursor", "default");
 }
 
 // callback to highlight the result of a search by strain name
@@ -225,11 +225,11 @@ var strainSearchEvent;
 d3.select('#seqinput').on('keyup', function(){
         if (typeof strainSearchEvent != "undefined"){clearTimeout(strainSearchEvent);}
         strainSearchEvent = setTimeout(parseSequences, 100);
-    }); 
+    });
 
 d3.select('#searchinputclear').on('click', function (){
     treeplot.selectAll('.seqmatch').data([]).exit().remove();
-    treeplot.selectAll('.strainmatch').data([]).exit().remove();    
+    treeplot.selectAll('.strainmatch').data([]).exit().remove();
     document.getElementById('seqinput').value = "";
     document.getElementById('bp-input').value = "";
 	virusTooltip.hide();
