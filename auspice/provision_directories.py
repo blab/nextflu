@@ -30,10 +30,10 @@ virus_to_coloring = {
 }
 
 virus_to_freqdefault = {
-    ("H3N2", "HA"): "A1a, A1b, A2, A3, A4",
-    ("H1N1pdm", "HA"): "6b.1, 6b.2, 164T",
-    ("Vic", "HA"): "1A, 1B, 117V, DV",
-    ("Yam", "HA"): "2, 3, 3a, 172Q",
+    ("H3N2", "HA"): "HA1:135T, HA1:135K, HA1:135N, HA1:135A",
+    ("H1N1pdm", "HA"): "HA1:183S, HA1:183P",
+    ("Vic", "HA"): "HA1:129D, HA1:129N, HA1:129G, HA1:129S",
+    ("Yam", "HA"): "HA1:229D, HA1:229N",
     ("H3N2", "NA"): "NA:161S, NA:329S, NA:220N",
     ("H1N1pdm", "NA"): "NA:446D, NA:44P",
     ("Vic", "NA"): "NA:220N, NA:371Q",
