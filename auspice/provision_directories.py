@@ -421,6 +421,16 @@ for build in builds:
                             indexfile.write("---\n")
                             indexfile.close()
 
+                        elif segment == "NA":
+
+                            indexfile = open("index.html", "w")
+                            indexfile.write("---\n")
+                            indexfile.write("title: nextflu / %s / %s / %s / %s / %s / %s \n" % (build, virus, segment, resolution, passage, assay))
+                            indexfile.write("layout: redirect\n")
+                            indexfile.write("rurl: /%s/%s/ha/%s/%s/%s/\n" % (bpath, vpath, rpath, ppath, apath))
+                            indexfile.write("---\n")
+                            indexfile.close()
+
                         else:
 
                             indexfile = open("index.html", "w")
