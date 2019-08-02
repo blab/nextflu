@@ -182,7 +182,15 @@ var gt_chart = c3.generate({
 	}
 });
 
-d3.json(path + file_prefix + "frequencies.json", function(error, json){
+var frequencies_url = s3.getSignedUrl('getObject', {
+    Bucket: 'nextstrain-who',
+    Key: file_prefix + "frequencies.json",
+    Expires: 60 * 5
+})
+
+console.log("frequencies_url", frequencies_url);
+
+d3.json(frequencies_url, function(error, json){
 	console.log(error, path+file_prefix+"frequencies.json");
 	frequencies = json;
 	console.log(frequencies);

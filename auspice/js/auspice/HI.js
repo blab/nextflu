@@ -142,13 +142,32 @@ d3.select("#HImodel_tree")
 var HI_titers, titer_tree_model, titer_subs_model;
 var structure_HI_mutations;
 if (useTiters) {
-	d3.json(path + file_prefix + "titers.json", function(error, json){
+
+	var titers_url = s3.getSignedUrl('getObject', {
+	    Bucket: 'nextstrain-who',
+	    Key: file_prefix + "titers.json",
+	    Expires: 60 * 5
+	})
+	d3.json(titers_url, function(error, json){
 		HI_titers = json;
 	});
-	d3.json(path + file_prefix + "titer-tree-model.json", function(error, json){
+
+	var titer_tree_model_url = s3.getSignedUrl('getObject', {
+	    Bucket: 'nextstrain-who',
+	    Key: file_prefix + "titer-tree-model.json",
+	    Expires: 60 * 5
+	})
+	d3.json(titer_tree_model_url, function(error, json){
 		titer_tree_model = json;
 	});
-	d3.json(path + file_prefix + "titer-sub-model.json", function(error, json){
+
+	var titer_sub_model_url = s3.getSignedUrl('getObject', {
+	    Bucket: 'nextstrain-who',
+	    Key: file_prefix + "titer-sub-model.json",
+	    Expires: 60 * 5
+	})
+	d3.json(titer_sub_model_url, function(error, json){
 		titer_subs_model = json;
 	});
+
 }

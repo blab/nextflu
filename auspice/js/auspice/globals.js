@@ -53,7 +53,20 @@ var dfreqColorDomain = genericDomain.map(function(d){return Math.round(100*(0.3+
 var fitnessColorDomain = genericDomain.map(function(d){return Math.round(100*((d-0.5)*16.0))/100;});
 var time_step;
 
-d3.json(path + file_prefix + "meta.json", function(error, json) {
+AWS.config.update({
+		region: 'us-east-1',
+		accessKeyId: 'XXX',
+		secretAccessKey: 'XXX'
+})
+var s3 = new AWS.S3();
+
+var meta_url = s3.getSignedUrl('getObject', {
+    Bucket: 'nextstrain-who',
+    Key: file_prefix + "meta.json",
+    Expires: 60 * 5
+})
+
+d3.json(meta_url, function(error, json) {
     if (error) return console.warn(error);
     update_date = json['updated'];
     d3.select("#updated")

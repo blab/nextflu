@@ -7,6 +7,7 @@ var date_select = true;
 {% include_relative thirdparty/JSmol.min.js %}
 {% include_relative thirdparty/FileSaver.js %}
 {% include_relative thirdparty/autocomplete.js %}
+{% include_relative thirdparty/aws-sdk.min.js %}
 {% include_relative auspice/globals.js %}
 {% include_relative auspice/HI.js %}
 {% include_relative auspice/ordinal_colormaps.js %}

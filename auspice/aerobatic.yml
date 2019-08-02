@@ -19,4 +19,12 @@ plugins:
   - name: redirect
     options:
       /: /who/
+  - name: s3-proxy
+    path: /data
+    options:
+      bucket: nextstrain-who
+      accessKeyId: $AWS_ACCESS_KEY_ID
+      secretAccessKey: $AWS_SECRET_ACCESS_KEY
+      overrideCacheControl: max-age=2592000
+      region: us-east-1
   - name: webpage

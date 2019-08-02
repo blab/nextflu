@@ -2,7 +2,15 @@ width = parseInt(d3.select(".entropy-container").style("width"), 10);
 height = 280;
 var position = "inset";
 
-d3.json(path + file_prefix + "entropy.json", function(error, json){
+var entropy_url = s3.getSignedUrl('getObject', {
+    Bucket: 'nextstrain-who',
+    Key: file_prefix + "entropy.json",
+    Expires: 60 * 5
+})
+
+console.log("entropy_url", entropy_url);
+
+d3.json(entropy_url, function(error, json){
 	console.log('Loading entropy');
 	console.log(error, path+file_prefix+"entropy.json");
 

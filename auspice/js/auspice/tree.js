@@ -236,8 +236,15 @@ function addBranchLabels(){
 		.style("visibility", (branch_labels)?"visible":"hidden");
 }
 
+var tree_url = s3.getSignedUrl('getObject', {
+    Bucket: 'nextstrain-who',
+    Key: file_prefix + "tree.json",
+    Expires: 60 * 5
+})
 
-d3.json(path + file_prefix + "tree.json", function(error, root) {
+console.log("tree_url", tree_url);
+
+d3.json(tree_url, function(error, root) {
 
 	if (error) return console.warn(error);
 
@@ -748,7 +755,13 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 
 });
 
-d3.json(path + file_prefix + "sequences.json", function(error, json) {
+var sequences_url = s3.getSignedUrl('getObject', {
+    Bucket: 'nextstrain-who',
+    Key: file_prefix + "sequences.json",
+    Expires: 60 * 5
+})
+
+d3.json(sequences_url, function(error, json) {
 	console.log('loading sequences');
 	if (error) return console.warn(error);
 	cladeToSeq=json;
