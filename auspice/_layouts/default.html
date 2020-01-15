@@ -96,7 +96,7 @@
 					</li>
 				</ul>
 				{% elsif page.site == 'WHO' %}
-				<p class="navbar-text navbar-right nav-tabs">WHO Version</p>
+				<p class="navbar-text navbar-right nav-tabs">Private site with titers display</p>
 				{% endif %}
 				<div class="navbar-header">
 					{% if page.site == 'deprecated' %}
@@ -207,7 +207,7 @@
 						</li>
 						{% endif %}
 
-						{% if page.site == "public" or page.site == "gisaid" %} <!-- temporarily remove WHO while Aerobatic issues are sorted out -->
+						{% if page.site == "public" or page.site == "gisaid" %}
 						<li class="dropdown hidden-xs"><p>/</p></li>
 						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
