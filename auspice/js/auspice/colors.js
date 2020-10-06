@@ -448,18 +448,18 @@ function newFocus(){
 
 	for (var i=0; i<allSera.length; i++){
 		var serum = allSera[i];
-		var serumID = "s" + serum.split("/").join("").replace(/[;,\+\*\.\(\)]/g, "_");
+		var serumID = "s" + serum.split("/").join("").replace(/[;,\'\+\*\.\(\)]/g, "_");
 		htmlStr+='<input type="checkbox" id="' + serumID + '" name="' + serum + '" checked="checked"> ' + serum +"<br>";
 		activeSera[serum]=true;
 	}
 	seraDiv.innerHTML = htmlStr;
 	for (var serum in titer_subs_model["potency"][focusNode.strain]){
-		var serumID = "s" + serum.split("/").join("").replace(/[;,\+\*\.\(\)]/g, "_");
+		var serumID = "s" + serum.split("/").join("").replace(/[;,\'\+\*\.\(\)]/g, "_");
 		d3.select("#"+serumID)
 			.on("change", function(elem){
 					for (var j=0; j<allSera.length; j++){
 						var tmpserum = allSera[j];
-						var tmpserumID = "s" + tmpserum.split("/").join("").replace(/[;,\+\*\.\(\)]/g, "_");
+						var tmpserumID = "s" + tmpserum.split("/").join("").replace(/[;,\'\+\*\.\(\)]/g, "_");
 						activeSera[tmpserum]=document.getElementById(tmpserumID).checked;
 					}
 					colorByHIDistance()});
