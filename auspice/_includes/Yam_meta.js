@@ -1,11 +1,12 @@
-var	vaccineChoice = {};
-vaccineChoice['B/Beijing/184/1993'] = "1998-11-01";
-vaccineChoice['B/Sichuan/379/1999'] = "2001-09-25";
-vaccineChoice['B/Shanghai/361/2002'] = "2004-09-25";
-vaccineChoice['B/Florida/4/2006'] = "2008-09-25";
-vaccineChoice['B/Wisconsin/1/2010'] = "2012-02-25";
-vaccineChoice['B/Massachusetts/2/2012'] = "2013-02-25";
-vaccineChoice['B/Phuket/3073/2013'] = "2014-09-25";
+var	vaccineChoice = {
+    "B/Beijing/184/1993": "1998-11-01",
+    "B/Sichuan/379/1999": "2001-09-25",
+    "B/Shanghai/361/2002": "2004-09-25",
+    "B/Florida/4/2006": "2008-09-25",
+    "B/Wisconsin/1/2010": "2012-02-25",
+    "B/Massachusetts/2/2012": "2013-02-25",
+    "B/Phuket/3073/2013": "2014-09-25"
+};
 var vaccineStrains = Object.keys(vaccineChoice);
 
 var restrictTo = {"region":"all"};
