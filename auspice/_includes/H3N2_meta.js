@@ -15,7 +15,8 @@ var	vaccineChoice = {
     "A/Kansas/14/2017": "2019-03-21",
     "A/SouthAustralia/34/2019": "2019-09-27",
     "A/HongKong/2671/2019-egg": "2020-02-28",
-    "A/HongKong/45/2019": "2020-02-28"
+    "A/HongKong/45/2019": "2020-02-28",
+    "A/Cambodia/e0826360/2020": "2021-02-26"
 };
 var vaccineStrains = Object.keys(vaccineChoice);
 var branch_labels=false;
