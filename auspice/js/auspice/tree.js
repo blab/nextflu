@@ -267,7 +267,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	if (timetree){
 		nodes.forEach(function(d){d.xval=d.attr['num_date']; d.yval=d.yvalue;});
 	}else{
-		nodes.forEach(function(d){d.xval=d.xvalue; d.yval=d.yvalue;});
+		nodes.forEach(function(d){d.xval=d.attr['div']; d.yval=d.yvalue;});
 	}
 
 	var xValues = nodes.map(function(d) {
@@ -668,7 +668,7 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 		if (timetree){
 			nodes.forEach(function(d){d.xval=d.attr['num_date'];});
 		} else{
-			nodes.forEach(function(d){d.xval=d.xvalue;});
+			nodes.forEach(function(d){d.xval=d.attr['div'];});
 		}
 		xValues = nodes.map(function(d) {return +d.xval;});
 		var dMin = d3.min(xValues),
