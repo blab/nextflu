@@ -1,0 +1,7 @@
+[build]
+	publish = "_site/"
+
+[[redirects]]
+	from = "/"
+	to = "/who/"
+	force = true
