@@ -12,7 +12,12 @@ Website for visualizing and interacting with phylogenies produced augur pipeline
 
 ### Deployment
 
-Website is hosted on Amazon S3. Deploy with `s3_website push` from within the `auspice/` directory. This pushes the `_site/` directory to the specified S3 bucket. S3 credentials are stored in ENV as `S3_BUCKET`, `S3_KEY` and `S3_SECRET`. Environment variables can be updated locally without fear of committing private information.
+Website is hosted on [Netlify](https://www.netlify.com/).
+Use the [Netlify CLI](https://docs.netlify.com/cli/get-started/) to deploy the build by running:
+```
+netlify deploy --build --prod
+```
+__NOTE__: Be sure to include the `--build` option as this runs the build command within `netlify.toml` to replace the placeholder username and passwords with the environment variables set in Netlify.
 
 ### Local development
 

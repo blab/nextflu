@@ -1,7 +1,13 @@
 [build]
 	publish = "_site/"
+	command = "sed -i.bak \"s|USER1:PASSWORD1 USER2:PASSWORD2 USER3:PASSWORD3 USER4:PASSWORD4 USER5:PASSWORD5|${USER1}:${PASSWORD1} ${USER2}:${PASSWORD2} ${USER3}:${PASSWORD3} ${USER4}:${PASSWORD4} ${USER5}:${PASSWORD5}|g\" _site/netlify.toml && rm _site/netlify.toml.bak"
 
 [[redirects]]
 	from = "/"
 	to = "/who/"
 	force = true
+
+[[headers]]
+	for = "/*"
+	[headers.values]
+		Basic-Auth = "USER1:PASSWORD1 USER2:PASSWORD2 USER3:PASSWORD3 USER4:PASSWORD4 USER5:PASSWORD5"

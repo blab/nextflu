@@ -89,3 +89,6 @@ Thumbs.db
 # cluster log #
 ###############
 *.sh.*
+
+# Local Netlify folder
+.netlify
