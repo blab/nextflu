@@ -4,6 +4,20 @@ _Note: As of Sep 2017, this JavaScript app is deprecated in favor of [nextstrain
 
 Website for visualizing and interacting with phylogenies produced augur pipeline. Interactive visualization is done with [d3.js](http://d3js.org/).
 
+### Install
+Install all dependencies by running:
+```
+sudo gem install bundler
+bundle install
+```
+__NOTE__: This will probably fail with error messages. There are often problems with installations of `libv8` and `therubyracer`. Run the following after the error messages:
+```
+sudo gem uninstall libv8
+sudo gem install therubyracer -v '0.12.2'
+sudo gem install libv8 -v '3.16.14.17' -- --with-system-v8
+bundle install
+```
+
 ### Build and compile
 
 1. Build JSONs via augur. These will be exported to `augur/flu/auspice/`. Move JSON files to `auspice/data/`.
