@@ -4,7 +4,8 @@ var	vaccineChoice = {
     "B/Malaysia/2506/2004": "2006-09-25",
     "B/Brisbane/60/2008": "2009-09-25",
     "B/Colorado/6/2017": "2018-02-22",
-    "B/Washington/2/2019": "2019-09-27"
+    "B/Washington/2/2019": "2019-09-27",
+    "B/Austria/1359417/2021": "2021-09-24"
 };
 var vaccineStrains = Object.keys(vaccineChoice);
 
