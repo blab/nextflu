@@ -425,6 +425,12 @@ function resetFocusNode() {
 	}
 }
 
+function createSerumId(serum) {
+	// Regex for replacing characters in the serum name that are not alphanumeric or underscores
+	const REPLACE_SERUM_ID_REGEX = new RegExp(/[^a-zA-Z0-9-\_]/g);
+	return "s" + serum.split("/").join("").replace(REPLACE_SERUM_ID_REGEX, "_");
+}
+
 function newFocus(){
 	if (typeof(focusNode)=="undefined"){
 		resetFocusNode();
@@ -448,18 +454,18 @@ function newFocus(){
 
 	for (var i=0; i<allSera.length; i++){
 		var serum = allSera[i];
-		var serumID = "s" + serum.split("/").join("").replace(/[;,\s\'\+\*\.\(\)]/g, "_");
+		var serumID = createSerumId(serum);
 		htmlStr+='<input type="checkbox" id="' + serumID + '" name="' + serum + '" checked="checked"> ' + serum +"<br>";
 		activeSera[serum]=true;
 	}
 	seraDiv.innerHTML = htmlStr;
 	for (var serum in titer_subs_model["potency"][focusNode.strain]){
-		var serumID = "s" + serum.split("/").join("").replace(/[;,\s\'\+\*\.\(\)]/g, "_");
+		var serumID = createSerumId(serum);
 		d3.select("#"+serumID)
 			.on("change", function(elem){
 					for (var j=0; j<allSera.length; j++){
 						var tmpserum = allSera[j];
-						var tmpserumID = "s" + tmpserum.split("/").join("").replace(/[;,\s\'\+\*\.\(\)]/g, "_");
+						var tmpserumID = createSerumId(tmpserum);
 						activeSera[tmpserum]=document.getElementById(tmpserumID).checked;
 					}
 					colorByHIDistance()});
